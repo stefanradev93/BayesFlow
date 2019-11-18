@@ -449,6 +449,28 @@ class DeepEvidentialModel(tf.keras.Model):
         m_probs    : tf.Tensor of shape (batch_size, n_models) -- the model posterior probabilities
         """
         
+        
+        # Compute evidence
+        alpha = self.evidence(x)
+
+        # Compute Dirichlet strength (alpha0) and mean (m_probs)
+        alpha0 = tf.reduce_sum(alpha, axis=1, keepdims=True)
+        m_probs = alpha / alpha0
+        return {'alpha': alpha, 'alpha0': alpha0 ,'m_probs': m_probs}
+
+    def predict(self, x):
+        """Returns the mean, variance and uncertainty of the Dirichlet distro."""
+
+        alpha = self.evidence(x)
+        alpha0 = tf.reduce_sum(alpha, axis=1, keepdims=True)
+        mean = alpha / alpha0
+        var = alpha * (alpha0 - alpha) / (alpha0 * alpha0 * (alpha0 + 1))
+        uncertainty = self.M / alpha0
+        return {'mean': mean, 'var': var, 'uncertainty': uncertainty}
+
+    def evidence(self, x):
+        """Computes the evidence vector (alpha) of the Dirichlet distro."""
+
         # Compute summary representation
         if self.inv_xdim:
             x = tf.split(x, int(x.shape[2]), axis=-1)
@@ -459,11 +481,7 @@ class DeepEvidentialModel(tf.keras.Model):
         # Compute eviddences
         evidence = self.selector(x)
         alpha = evidence + 1
-        
-        # Compute Dirichlet strength (alpha0) and mean (m_probs)
-        alpha0 = tf.reduce_sum(alpha, axis=1, keepdims=True)
-        m_probs = alpha / alpha0
-        return {'alpha': alpha, 'alpha0': alpha0 ,'m_probs': m_probs}
+        return alpha
 
     def sample(self, x, n_samples=5000, to_numpy=True):
         """
