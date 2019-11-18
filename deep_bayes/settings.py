@@ -8,10 +8,10 @@ INVARIANT_DEFAULTS = {
 
 INVARIANT_DIFFUSION = {
     'dense_inv_args'   :  dict(units=128, activation='elu'),
-    'dense_equiv_args' :  dict(units=32, activation='elu'),
-    'n_dense_inv'      :  3,
+    'dense_equiv_args' :  dict(units=64, activation='elu'),
+    'n_dense_inv'      :  2,
     'n_dense_equiv'    :  2,
-    'n_equiv'          :  4
+    'n_equiv'          :  2
 }
 
 
