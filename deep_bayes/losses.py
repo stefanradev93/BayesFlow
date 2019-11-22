@@ -228,3 +228,92 @@ def regularized_bayes_risk(m_true, alpha, alpha0, m_probs, global_step, annealin
     lamb = tf.cast(tf.minimum(max_lambda, global_step / annealing_step), dtype=tf.float32)
     loss = risk + lamb * kl
     return loss
+
+
+
+def cross_entropy(m_true, alpha, alpha0, m_probs, **args):
+    """
+    Computes the Bayes risk with respect to the cross entropy loss.
+    ----------
+
+    Arguments:
+    m_true    : tf.Tensor of shape (batch_size, num_models) -- the one hot encoded true model indices
+    alpha     : tf.Tensor of shape (batch_size, num_models) -- the model evidences 
+    alpha0    : tf.Tensor of shape (batch_size, 1) -- the Dirichlet strength 
+    m_probs   : tf.Tensor of shape (batch_size, num_models) -- the posterior model probabilities
+    ----------
+
+    Output:
+    loss : tf.Tensor of shape (,) -- a single scalar Monte-Carlo approximation of the regularized Bayes risk
+    """
+
+    cent = tf.reduce_sum(m_true * (tf.digamma(alpha0) - tf.digamma(alpha)), 1, keepdims=True)
+    cent = tf.reduce_mean(cent)
+    return cent
+
+
+def regularized_cross_entropy(m_true, alpha, alpha0, m_probs, global_step, annealing_step=1000, max_lambda=1.0):
+    """
+    Computes the Bayes risk with respect to a Dirichlet posterior and cross entropy loss (regularized via KL)
+    ----------
+
+    Arguments:
+    m_true    : tf.Tensor of shape (batch_size, num_models) -- the one hot encoded true model indices
+    alpha     : tf.Tensor of shape (batch_size, num_models) -- the model evidences 
+    alpha0    : tf.Tensor of shape (batch_size, 1) -- the Dirichlet strength 
+    m_probs   : tf.Tensor of shape (batch_size, num_models) -- the posterior model probabilities
+    ----------
+
+    Output:
+    loss : tf.Tensor of shape (,) -- a single scalar Monte-Carlo approximation of the regularized Bayes risk
+    """
+
+    cent = cross_entropy(m_true, alpha, alpha0, m_probs)
+    kl = kullback_leibler_dirichlet(m_true, alpha)
+    lamb = tf.cast(tf.minimum(max_lambda, global_step / annealing_step), dtype=tf.float32)
+    loss = cent + lamb * kl
+    return loss
+
+
+def multinomial_likelihood(m_true, alpha, alpha0, m_probs):
+    """
+    Computes the type II likelihood with a Dirichlet prior.
+    ----------
+
+    Arguments:
+    m_true    : tf.Tensor of shape (batch_size, num_models) -- the one hot encoded true model indices
+    alpha     : tf.Tensor of shape (batch_size, num_models) -- the model evidences 
+    alpha0    : tf.Tensor of shape (batch_size, 1) -- the Dirichlet strength 
+    m_probs   : tf.Tensor of shape (batch_size, num_models) -- the posterior model probabilities
+    ----------
+
+    Output:
+    ll : tf.Tensor of shape (,) -- a single scalar Monte-Carlo approximation of the type II ML
+    """
+
+    ll = tf.reduce_sum(m_true * (tf.log(alpha0) - tf.log(alpha)), 1, keepdims=True)
+    ll = tf.reduce_mean(ll)
+    return ll
+
+
+def regularized_multinomial_likelihood(m_true, alpha, alpha0, m_probs, global_step, annealing_step=1000, max_lambda=1.0):
+    """
+    Computes the type II likelihood with a Dirichlet prior.
+    ----------
+
+    Arguments:
+    m_true    : tf.Tensor of shape (batch_size, num_models) -- the one hot encoded true model indices
+    alpha     : tf.Tensor of shape (batch_size, num_models) -- the model evidences 
+    alpha0    : tf.Tensor of shape (batch_size, 1) -- the Dirichlet strength 
+    m_probs   : tf.Tensor of shape (batch_size, num_models) -- the posterior model probabilities
+    ----------
+
+    Output:
+    loss : tf.Tensor of shape (,) -- a single scalar Monte-Carlo approximation of the type II ML
+    """
+
+    ll = multinomial_likelihood(m_true, alpha, alpha0, m_probs)
+    kl = kullback_leibler_dirichlet(m_true, alpha)
+    lamb = tf.cast(tf.minimum(max_lambda, global_step / annealing_step), dtype=tf.float32)
+    loss = ll + lamb * kl
+    return loss

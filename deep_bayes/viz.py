@@ -456,7 +456,7 @@ def plot_dirichlet_samples(model, x_test, m_test, model_names, n_samples=5000,
         f.savefig("figures/{}_dirichlet.png".format(filename), dpi=600)
 
 
-def plot_confusion_matrix(model, x_test, m_test, model_names, normalize=False, title=None, cmap=plt.cm.Blues):
+def plot_confusion_matrix(model, x_test, m_test, model_names, normalize=False, title=None, cmap=plt.cm.Blues, figsize=(14, 8)):
     """
     A function to print and plots the confusion matrix. Normalization can be applied by setting `normalize=True`.
     """
@@ -477,7 +477,7 @@ def plot_confusion_matrix(model, x_test, m_test, model_names, normalize=False, t
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
     ax.figure.colorbar(im, ax=ax)
     # We want to show all ticks...
