@@ -423,12 +423,11 @@ class DeepEvidentialModel(tf.keras.Model):
         super(DeepEvidentialModel, self).__init__()
         
         self.inv_net = InvariantNetwork(meta)
-        self.selector = tf.keras.Sequential([
+        self.dense = tf.keras.Sequential([
             tf.keras.layers.Dense(**meta['dense_inv_args']),
-            tf.keras.layers.Dense(**meta['dense_inv_args']),
-            tf.keras.layers.Dense(n_models, activation='relu')
+            tf.keras.layers.Dense(**meta['dense_inv_args'])
         ])
-            
+        self.evidence_layer = tf.keras.layers.Dense(n_models, activation='relu')
         self.M = n_models
         self.inv_xdim = inv_xdim
         
@@ -458,6 +457,19 @@ class DeepEvidentialModel(tf.keras.Model):
         m_probs = alpha / alpha0
         return {'alpha': alpha, 'alpha0': alpha0 ,'m_probs': m_probs}
 
+    def compute_summary(self, x):
+        """Returns the final representation before the evidence layer."""
+
+        # Compute summary representation
+        if self.inv_xdim:
+            x = tf.split(x, int(x.shape[2]), axis=-1)
+            x = tf.concat([self.inv_net(x_dim) for x_dim in x], axis=-1)
+        else:
+            x = self.inv_net(x)
+        # Combine summary
+        x = self.dense(x)
+        return x
+
     def predict(self, x):
         """Returns the mean, variance and uncertainty of the Dirichlet distro."""
 
@@ -471,15 +483,11 @@ class DeepEvidentialModel(tf.keras.Model):
     def evidence(self, x):
         """Computes the evidence vector (alpha) of the Dirichlet distro."""
 
-        # Compute summary representation
-        if self.inv_xdim:
-            x = tf.split(x, int(x.shape[2]), axis=-1)
-            x = tf.concat([self.inv_net(x_dim) for x_dim in x], axis=-1)
-        else:
-            x = self.inv_net(x)
-
+        # Summarize into fixed size
+        x = self.compute_summary(x)
+        
         # Compute eviddences
-        evidence = self.selector(x)
+        evidence = self.evidence_layer(x)
         alpha = evidence + 1
         return alpha
 
