@@ -1,0 +1,160 @@
+# Data Generation SA+E
+#========================================================================
+
+DataGeneration<-function(N,K,pNE,rNE,run){
+  # N: number of examinees
+  # K: number of items
+  # pNE: prectentage disengaged responses
+  # rNE: ratio disengaged responses
+  # run: repetition
+  
+  # person variables
+  #-------------------------------------------------------------
+  # variance
+  varEn <- 3.5  # engagement
+  varA<- 1 # ability
+  varSp <- .05  # speed
+  
+  # correlation
+  corEnAb <-.55 # correlation engagement ability
+  corEnSp <--.20 # correlation engagement speed
+  corAbSp <--.40 # correlation speed ability
+  
+  # mean person parameters
+  muP <- c(0,0,0)
+  
+  varP <- c(varEn, varA, varSp)
+  corrP <- matrix(c(1, corEnAb, corEnSp,
+                    corEnAb, 1, corAbSp,
+                    corEnSp, corAbSp, 1),
+                  nrow=3, ncol=3, byrow=TRUE)
+  
+  # person variance-covariance matrix
+  SigmaP <- sqrt(varP)%*%t(sqrt(varP))*corrP
+  PersonPars<-mvrnorm(N, muP, SigmaP, empirical = TRUE)
+  
+  # item variables
+  #-------------------------------------------------------------
+  # engagement difficulties
+  if(pNE=="low"){ # 5%
+    ItemPars<-sample(rep(c(-4.5,-4,-3.5,-3,-2.5),K/5), size=K, replace=FALSE)
+  }
+  if(pNE=="med"){ # 10%
+    ItemPars<-sample(rep(c(-3.75,-3.25,-2.75,-2.25,-1.75),K/5), size=K, replace=FALSE)
+  }
+  if(pNE=="high"){ # 20 %
+    ItemPars<-sample(rep(c(-2.75,-2.25,-1.75,-1.25, -.75),K/5), size=K, replace=FALSE)
+  }
+  
+  # difficulties
+  ItemPars<-cbind(ItemPars, sample(rep(c(-1,-0.5,0,0.5,1),K/5), size=K, replace=FALSE))
+  
+  # time intensities
+  ItemPars<-cbind(ItemPars, sample(rep(c(3.25,3.5,3.75,4.00,4.25),K/5), size=K, replace=FALSE))
+  
+  # generate engagement idicators
+  #--------------------------------------------------------------
+  pDelta<-matrix(NA, nrow= N, ncol=K) 
+  rand<-matrix(NA, nrow= N, ncol=K)
+  
+  for (j in 1:K){                            
+    pDelta[,j]<-exp(PersonPars[,1]-ItemPars[j,1])/(1+exp(PersonPars[,1]-ItemPars[j,1]))
+    rand[,j] <- runif(N, min=0, max=1)          
+  }
+  Delta <- ifelse((pDelta-rand)>=0, 1, 0)
+  
+  # generate response indicators
+  #------------------------------------------------------
+  pCorr<-matrix(NA, nrow=N, ncol=K)
+  
+  # propability correct disengaged response set to .25
+  for(i in 1:N){
+    for(j in 1:K){
+      pCorr[i,j]<-exp(PersonPars[i,2]-ItemPars[j,2])/(1+exp(PersonPars[i,2]-ItemPars[j,2]))*(Delta[i,j])+.25*(1-Delta[i,j])
+    }
+  }
+  
+  rand<-matrix(NA, nrow= N, ncol=K)
+  for (j in 1:K){                            
+    pDelta[,j]<-exp(PersonPars[,1]-ItemPars[j,1])/(1+exp(PersonPars[,1]-ItemPars[j,1]))
+    rand[,j] <- runif(N, min=0, max=1)          
+  }
+  
+  U <- ifelse((pCorr-rand)>=0, 1, 0)
+  
+  # generate response times
+  #-----------------------------------------------------------
+  alpha <- sqrt(0.15)
+  
+  # common mean and variance of disengaged RTs
+  muC<-3
+  sigmaC<-sqrt(1.95)
+  
+  lnT<-matrix(NA, nrow= N, ncol=K)
+  for(j in 1:K){
+    lnT[,j] <- (ItemPars[j,3] - PersonPars[,3] + rnorm(n=N, mean=0, sd=alpha))*(Delta[,j])+rnorm(n=N, mean=muC, sd=sigmaC)*(1-Delta[,j])
+  }
+  
+  # generate item omissions
+  #---------------------------------------------------------------
+  if(rNE=="low"){ # 1/10
+    int<--3
+  }
+  if(rNE=="med"){ # 50%
+    int<-0
+  }
+  if(rNE=="high"){ # 90%
+    int<-3
+  }
+  
+  # probabilty of engaged omission fixed to 0
+  logitReg<-1/(1+exp(-(int-1*PersonPars[,2]-10*PersonPars[,3])))
+  pD<-matrix(NA, nrow=N, ncol=K)
+  for(i in 1:N){
+    for(j in 1:K){
+      pD[i,j]<-0.00*(Delta[i,j])+logitReg[i]*(1-Delta[i,j])
+      rand[i,j] <- runif(1, min=0, max=1)  
+    }
+  }
+  
+  D <- ifelse((pD-rand)>=0, 1, 0)
+  
+  #====================================================================
+  # Long Format
+  # Responses
+  wide <- as.data.frame(U)
+  wide$id <- 1:nrow(wide) # Attach a person ID number to each row.
+  longU <- melt(wide, id.vars = "id", variable.name = "item", value.name = "response")
+  longU$variable<-as.numeric(longU$variable)
+  
+  # Response times
+  wideRT <- as.data.frame(lnT)
+  wideRT$id <- 1:nrow(wideRT) # Attach a person ID number to each row.
+  longRT <- melt(wideRT, id.vars = "id", variable.name = "item", value.name = "RT")
+  longRT$variable<-as.numeric(longRT$variable)
+  
+  # Missing indicators
+  wideD <- as.data.frame(D)
+  wideD$id <- 1:nrow(wideD) # Attach a person ID number to each row.
+  longD <- melt(wideD, id.vars = "id", variable.name = "item", value.name = "D")
+  longD$variable<-as.numeric(longD$variable)
+  
+  SAO_long <- list(
+    K  = K, # number of items
+    N  = N, # number of examinees
+    Ntot  = nrow(longU), # number of observed data points
+    jj = longU$variable, # item ids
+    ii = longU$id, # examinee ids
+    y  = longU$value, # responses long format
+    logt = longRT$value, # response times long format
+    d = longD$value, # missingness indicators
+    Zero=c(0,0,0), # zero means person parameter
+    D=3) 
+  
+  # create folder and save generated data
+  #if (!file.exists(paste(getwd(),'/N=',N,'/K=',K,'/pNE=',pNE,'/rNE=',rNE, sep=''),recursive=TRUE)) {
+  #  dir.create(paste(getwd(),'/N=',N,'/K=',K,'/pNE=',pNE,'/rNE=',rNE, sep=''),recursive=TRUE)
+  #}  
+  #save(PersonPars,ItemPars,SAO_long, file=paste(getwd(),'/N=',N,'/K=',K,'/pNE=',pNE,'/rNE=',rNE,'/DatLRSAO', run,'.RData', sep=''))
+  
+}
