@@ -230,6 +230,26 @@ def regularized_bayes_risk(m_true, alpha, alpha0, m_probs, global_step, annealin
     return loss
 
 
+def log_loss(m_true, alpha, alpha0, m_probs):
+    """
+    Computes the logloss given output probs and true model indices m_true.
+    ----------
+
+    Arguments:
+    m_true    : tf.Tensor of shape (batch_size, num_models) -- the one hot encoded true model indices
+    alpha     : tf.Tensor of shape (batch_size, num_models) -- the model evidences 
+    alpha0    : tf.Tensor of shape (batch_size, 1) -- the Dirichlet strength 
+    m_probs   : tf.Tensor of shape (batch_size, num_models) -- the posterior model probabilities
+    ----------
+
+    Output:
+    loss : tf.Tensor of shape (,) -- a single scalar Monte-Carlo approximation of the regularized Bayes risk
+    """
+    
+    m_probs = tf.clip_by_value(m_probs, 1e-15, 1 - 1e-15)
+    return -tf.reduce_mean(tf.reduce_sum(m_true * tf.log(m_probs), axis=1))
+
+
 
 def cross_entropy(m_true, alpha, alpha0, m_probs, **args):
     """
