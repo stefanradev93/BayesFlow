@@ -20,11 +20,11 @@ class Permutation(tf.keras.Model):
         permutation_vec = np.random.permutation(input_dim)
         inv_permutation_vec = np.argsort(permutation_vec)
         self.permutation = tf.Variable(initial_value=permutation_vec,
-                                       trainable=False, 
+                                       trainable=False,
                                        dtype=tf.int32,
                                        name='permutation')
         self.inv_permutation = tf.Variable(initial_value=inv_permutation_vec,
-                                           trainable=False, 
+                                           trainable=False,
                                            dtype=tf.int32,
                                            name='inv_permutation')
 
@@ -197,7 +197,7 @@ class BayesFlow(tf.keras.Model):
         """
 
         super(BayesFlow, self).__init__()
-        
+
         self.cINNs = [ConditionalInvertibleBlock(meta, theta_dim, alpha=alpha, permute=permute) for _ in range(n_blocks)]
         self.summary_net = summary_net
         self.theta_dim = theta_dim
@@ -251,7 +251,7 @@ class BayesFlow(tf.keras.Model):
         """
         Samples from the inverse model given a single instance y or a batch of instances.
         ----------
-        
+
         Arguments:
         x         : tf.Tensor of shape (batch_size, summary_dim) -- the conditioning data of interest
         n_samples : int -- number of samples to obtain from the approximate posterior
@@ -293,15 +293,15 @@ class InvariantModule(tf.keras.Model):
         Arguments:
         meta : dict -- a dictionary with hyperparameter name - values
         """
-        
+
         super(InvariantModule, self).__init__()
-        
+
 
         self.module = tf.keras.Sequential([
             tf.keras.layers.Dense(**meta['dense_inv_args'])
             for _ in range(meta['n_dense_inv'])
         ])
-            
+
         self.post_pooling_dense = tf.keras.Sequential([
             tf.keras.layers.Dense(**meta['dense_inv_args'])
             for _ in range(meta['n_dense_inv'])
@@ -313,7 +313,7 @@ class InvariantModule(tf.keras.Model):
         ----------
 
         Arguments:
-        x : tf.Tensor of shape (batch_size, n, m) - the input where n is the 'time' or 'samples' dimensions 
+        x : tf.Tensor of shape (batch_size, n, m) - the input where n is the 'time' or 'samples' dimensions
             over which pooling is performed and m is the input dimensionality
         ----------
 
@@ -322,10 +322,13 @@ class InvariantModule(tf.keras.Model):
         """
 
         x = self.module(x)
-        x = tf.reduce_mean(x, axis=1)
+        x_max = tf.reduce_max(x, axis=1)
+        x_mean = tf.reduce_mean(x, axis=1)
+        x_min = tf.reduce_min(x, axis=1)
+        x = tf.concat((x_max, x_mean, x_min), axis=-1)
         out = self.post_pooling_dense(x)
         return out
-    
+
 
 class EquivariantModule(tf.keras.Model):
     """Implements an equivariant nn module as proposed by Bloem-Reddy and Teh (2019)."""
@@ -340,23 +343,23 @@ class EquivariantModule(tf.keras.Model):
         Arguments:
         meta : dict -- a dictionary with hyperparameter name - values
         """
-        
+
         super(EquivariantModule, self).__init__()
-        
+
         self.module = tf.keras.Sequential([
             tf.keras.layers.Dense(**meta['dense_equiv_args'])
             for _ in range(meta['n_dense_equiv'])
         ])
-        
+
         self.invariant_module = InvariantModule(meta)
-        
+
     def call(self, x):
         """
         Transofrms the input into an equivariant representation.
         ----------
 
         Arguments:
-        x : tf.Tensor of shape (batch_size, n, m) - the input where n is the 'time' or 'samples' dimensions 
+        x : tf.Tensor of shape (batch_size, n, m) - the input where n is the 'time' or 'samples' dimensions
             over which pooling is performed and m is the input dimensionality
         ----------
 
@@ -369,42 +372,42 @@ class EquivariantModule(tf.keras.Model):
         x = tf.concat((x_inv, x), axis=-1)
         out = self.module(x)
         return out
-    
+
 
 class InvariantNetwork(tf.keras.Model):
     """
-    Implements a network which parameterizes a 
+    Implements a network which parameterizes a
     permutationally invariant function according to Bloem-Reddy and Teh (2019).
     """
 
     def __init__(self, meta):
         """
-        Creates a permutationally invariant network 
+        Creates a permutationally invariant network
         consisting of two equivariant modules and one invariant module.
         ----------
 
         Arguments:
         meta : dict -- hyperparameter settings for the equivariant and invariant modules
         """
-        
+
         super(InvariantNetwork, self).__init__()
-        
+
         self.equiv = tf.keras.Sequential([
             EquivariantModule(meta)
             for _ in range(meta['n_equiv'])
         ])
         self.inv = InvariantModule(meta)
-        
-        
+
+
     def call(self, x, **kwargs):
         """
-        Transofrms the input into a permutationally invariant 
-        representation by first passing it through multiple equivariant 
+        Transofrms the input into a permutationally invariant
+        representation by first passing it through multiple equivariant
         modules in order to increase representational power.
         ----------
 
         Arguments:
-        x : tf.Tensor of shape (batch_size, n, m) - the input where n is the 'time' or 
+        x : tf.Tensor of shape (batch_size, n, m) - the input where n is the 'time' or
         'samples' dimensions over which pooling is performed and m is the input dimensionality
         ----------
 
@@ -421,7 +424,7 @@ class DeepEvidentialModel(tf.keras.Model):
 
     def __init__(self, meta, n_models=3, inv_xdim=True):
         super(DeepEvidentialModel, self).__init__()
-        
+
         self.inv_net = InvariantNetwork(meta)
         self.dense = tf.keras.Sequential([
             tf.keras.layers.Dense(**meta['dense_inv_args']),
@@ -430,14 +433,14 @@ class DeepEvidentialModel(tf.keras.Model):
         self.evidence_layer = tf.keras.layers.Dense(n_models, activation='relu')
         self.M = n_models
         self.inv_xdim = inv_xdim
-        
+
     def call(self, x):
         """
         Computes evidences for model selection given a batch of data.
         ----------
 
         Arguments:
-        x            : tf.Tensor of shape (batch_size, n, m) -- the input where n is the 'time' or 'samples' dimensions 
+        x            : tf.Tensor of shape (batch_size, n, m) -- the input where n is the 'time' or 'samples' dimensions
                         over which pooling is performed and m is the input dimensionality
         return_probs : bool - a flag to indicate whether probabilities are returned or not
         ----------
@@ -447,8 +450,8 @@ class DeepEvidentialModel(tf.keras.Model):
         alpha0     : tf.Tensor of shape (batch_size, 1) -- the Dirichlet strength
         m_probs    : tf.Tensor of shape (batch_size, n_models) -- the model posterior probabilities
         """
-        
-        
+
+
         # Compute evidence
         alpha = self.evidence(x)
 
@@ -485,7 +488,7 @@ class DeepEvidentialModel(tf.keras.Model):
 
         # Summarize into fixed size
         x = self.compute_summary(x)
-        
+
         # Compute eviddences
         evidence = self.evidence_layer(x)
         alpha = evidence + 1
