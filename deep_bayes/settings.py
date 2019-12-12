@@ -22,6 +22,15 @@ INVARIANT_MEMORY = {
     'n_equiv'          :  2
 }
 
+RECURRENT_ECOLOGY = {
+    'dense_inv_args'   :  dict(units=64, activation='elu'),
+    'dense_equiv_args' :  dict(units=32, activation='elu'),
+    'n_dense_inv'      :  2,
+    'n_dense_equiv'    :  2,
+    'n_equiv'          :  2
+}
+
+
 
 INVERTIBLE_DEFAULTS = {
     'n_units': [64, 64, 64],

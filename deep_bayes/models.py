@@ -322,6 +322,7 @@ class InvariantModule(tf.keras.Model):
         """
 
         x = self.module(x)
+        # Compute multiple poolings
         x_max = tf.reduce_max(x, axis=1)
         x_mean = tf.reduce_mean(x, axis=1)
         x_min = tf.reduce_min(x, axis=1)
@@ -420,21 +421,73 @@ class InvariantNetwork(tf.keras.Model):
         return out
 
 
+class RecurrentNetwork(tf.keras.Model):
+    """
+    Implements an LSTM summary network
+    """
+
+    def __init__(self, meta):
+        """
+        Creates a permutationally invariant network
+        consisting of two equivariant modules and one invariant module.
+        ----------
+
+        Arguments:
+        meta : dict -- hyperparameter settings for the equivariant and invariant modules
+        """
+
+        super(RecurrentNetwork, self).__init__()
+
+        if meta['batch_norm']:
+            self.bn = tf.keras.layers.BatchNormalization()
+        else:
+            self.bn = None
+        self.lstm = tf.keras.layers.CuDNNLSTM(meta['units'])
+
+
+    def call(self, x, training=True, **kwargs):
+        """
+        Transofrms a sequence input into a fixed-size vector-representation.
+        ----------
+
+        Arguments:
+        x : tf.Tensor of shape (batch_size, n, m) - the input where n is the 'time' or
+        'samples' dimensions over which pooling is performed and m is the input dimensionality
+        ----------
+
+        Returns:
+        out : tf.Tensor of shape (batch_size, h_dim) -- the fixed size representation of th einput
+        """
+
+        out = self.lstm(x)
+        if self.bn is not None:
+            out = self.bn(training=training)
+        return out
+
+
 class DeepEvidentialModel(tf.keras.Model):
 
-    def __init__(self, meta, n_models=3, inv_xdim=True):
+    def __init__(self, meta, n_models=3, net='invariant', inv_xdim=True):
         super(DeepEvidentialModel, self).__init__()
 
-        self.inv_net = InvariantNetwork(meta)
+        # A network to learn summary
+        if net == 'invariant':
+            self.net = InvariantNetwork(meta)
+        elif net == 'recurrent':
+            self.net = RecurrentNetwork(meta)
+
+        # A network to increase representation power (post-pooling)
         self.dense = tf.keras.Sequential([
             tf.keras.layers.Dense(**meta['dense_inv_args']),
             tf.keras.layers.Dense(**meta['dense_inv_args'])
         ])
+
+        # The layer to output model evidences
         self.evidence_layer = tf.keras.layers.Dense(n_models, activation='relu')
         self.M = n_models
         self.inv_xdim = inv_xdim
 
-    def call(self, x):
+    def call(self, x, training=True):
         """
         Computes evidences for model selection given a batch of data.
         ----------
@@ -442,7 +495,7 @@ class DeepEvidentialModel(tf.keras.Model):
         Arguments:
         x            : tf.Tensor of shape (batch_size, n, m) -- the input where n is the 'time' or 'samples' dimensions
                         over which pooling is performed and m is the input dimensionality
-        return_probs : bool - a flag to indicate whether probabilities are returned or not
+        training     : bool -- a flag used for batch norm (if batch norm is used)
         ----------
 
         Returns:
@@ -453,48 +506,48 @@ class DeepEvidentialModel(tf.keras.Model):
 
 
         # Compute evidence
-        alpha = self.evidence(x)
+        alpha = self.evidence(x, training=training)
 
         # Compute Dirichlet strength (alpha0) and mean (m_probs)
         alpha0 = tf.reduce_sum(alpha, axis=1, keepdims=True)
         m_probs = alpha / alpha0
         return {'alpha': alpha, 'alpha0': alpha0 ,'m_probs': m_probs}
 
-    def compute_summary(self, x):
+    def compute_summary(self, x, training=True):
         """Returns the final representation before the evidence layer."""
 
         # Compute summary representation
         if self.inv_xdim:
             x = tf.split(x, int(x.shape[2]), axis=-1)
-            x = tf.concat([self.inv_net(x_dim) for x_dim in x], axis=-1)
+            x = tf.concat([self.net(x_dim, training=training) for x_dim in x], axis=-1)
         else:
-            x = self.inv_net(x)
+            x = self.net(x, training=training)
         # Combine summary
         x = self.dense(x)
         return x
 
-    def predict(self, x):
+    def predict(self, x, training=False):
         """Returns the mean, variance and uncertainty of the Dirichlet distro."""
 
-        alpha = self.evidence(x)
+        alpha = self.evidence(x, training=training)
         alpha0 = tf.reduce_sum(alpha, axis=1, keepdims=True)
         mean = alpha / alpha0
         var = alpha * (alpha0 - alpha) / (alpha0 * alpha0 * (alpha0 + 1))
         uncertainty = self.M / alpha0
         return {'mean': mean, 'var': var, 'uncertainty': uncertainty}
 
-    def evidence(self, x):
+    def evidence(self, x, training=True):
         """Computes the evidence vector (alpha) of the Dirichlet distro."""
 
         # Summarize into fixed size
-        x = self.compute_summary(x)
+        x = self.compute_summary(x, training=training)
 
         # Compute eviddences
         evidence = self.evidence_layer(x)
         alpha = evidence + 1
         return alpha
 
-    def sample(self, x, n_samples=5000, to_numpy=True):
+    def sample(self, x, n_samples=5000, to_numpy=True, training=False):
         """
         Samples posterior model probabilities from the second-order Dirichlet distro.
         ----------
@@ -503,6 +556,7 @@ class DeepEvidentialModel(tf.keras.Model):
         x         : tf.Tensor of shape (batch_size, n_points, n_features) -- the observed data
         n_samples : int -- number of samples to obtain from the approximate posterior (default 5000)
         to_numpy  : bool -- flag indicating whether to return the samples as a np.array or a tf.Tensor
+        training  : bool -- a flag used for batch norm (if batch norm is used)
         ----------
 
         Returns:
@@ -510,7 +564,7 @@ class DeepEvidentialModel(tf.keras.Model):
         """
 
         # Compute evidential values
-        ev = self(x)
+        ev = self(x, training=training)
         alpha = ev['alpha'].numpy()
         N = alpha.shape[0]
 
