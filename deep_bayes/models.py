@@ -437,6 +437,14 @@ class SequenceNetwork(tf.keras.Model):
 
         super(SequenceNetwork, self).__init__()
         self.lstm = tf.keras.layers.CuDNNLSTM(meta['lstm_units'])
+        self.conv = tf.keras.Sequential([
+            tf.keras.layers.Conv1D(32, kernel_size=5, strides=1, activation='relu'),
+            tf.keras.layers.Conv1D(64, kernel_size=3, strides=1, activation='relu'),
+            tf.keras.layers.Conv1D(64, kernel_size=3, strides=1, activation='relu'),
+            tf.keras.layers.Conv1D(128, kernel_size=2, strides=1, activation='relu'),
+            tf.keras.layers.Conv1D(128, kernel_size=2, strides=1, activation='relu'),
+            tf.keras.layers.GlobalAveragePooling1D()
+        ])
 
 
     def call(self, x, **kwargs):
@@ -455,7 +463,9 @@ class SequenceNetwork(tf.keras.Model):
 
 
         out_lstm = self.lstm(x)
-        return out_lstm
+        out_conv = self.conv(x)
+        out = tf.concat([out_lstm, out_conv], axis=-1)
+        return out
 
 
 class DeepEvidentialModel(tf.keras.Model):
