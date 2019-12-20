@@ -250,6 +250,27 @@ def log_loss(m_true, alpha, alpha0, m_probs):
     return -tf.reduce_mean(tf.reduce_sum(m_true * tf.log(m_probs), axis=1))
 
 
+def brier_score(m_true, alpha, alpha0, m_probs):
+    """
+    Computes the Brier score given output probs and true model indices.
+    ----------
+
+    Arguments:
+    m_true    : tf.Tensor of shape (batch_size, num_models) -- the one hot encoded true model indices
+    alpha     : tf.Tensor of shape (batch_size, num_models) -- the model evidences 
+    alpha0    : tf.Tensor of shape (batch_size, 1) -- the Dirichlet strength 
+    m_probs   : tf.Tensor of shape (batch_size, num_models) -- the posterior model probabilities
+    ----------
+
+    Output:
+    loss : tf.Tensor of shape (,) -- a single scalar Monte-Carlo approximation of the regularized Bayes risk
+    """
+    
+    score = 1 + tf.reduce_sum(m_probs**2, axis=-1) - 2 * tf.reduce_sum(m_true * m_probs, axis=-1)
+    m_score = tf.reduce_mean(score)
+    return m_score
+
+
 
 def cross_entropy(m_true, alpha, alpha0, m_probs, **args):
     """
