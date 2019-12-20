@@ -1,8 +1,11 @@
 INVARIANT_DEFAULTS = {
+    'net_type'         :  "invariant",
     'dense_inv_args'   :  dict(units=64, activation='elu'),
     'dense_equiv_args' :  dict(units=32, activation='elu'),
-    'n_dense_inv'      :  3,
-    'n_dense_equiv'    :  3,
+    'dense_post_args'  :  dict(units=64, activation='elu'),
+    'n_dense_inv'      :  2,
+    'n_dense_equiv'    :  2,
+    'n_dense_post'     :  2,
     'n_equiv'          :  2
 }
 
@@ -22,14 +25,20 @@ INVARIANT_MEMORY = {
     'n_equiv'          :  2
 }
 
-RECURRENT_ECOLOGY = {
-    'dense_inv_args'   :  dict(units=64, activation='elu'),
-    'dense_equiv_args' :  dict(units=32, activation='elu'),
-    'n_dense_inv'      :  2,
-    'n_dense_equiv'    :  2,
-    'n_equiv'          :  2
+SEQUENCE_ECOLOGY = {
+    'net_type'         :  "sequence",
+    'lstm_units'       :  64,
+    'dense_post_args'  :  dict(units=64, activation='elu'),
+    'n_dense_post'     :  4,
+    'batch_norm'       :  False
 }
 
+SEQUENCE_TUMOR = {
+    'net_type'         :  "sequence",
+    'lstm_units'       :  64,
+    'dense_post_args'  :  dict(units=64, activation='elu'),
+    'n_dense_post'     :  4
+}
 
 
 INVERTIBLE_DEFAULTS = {
