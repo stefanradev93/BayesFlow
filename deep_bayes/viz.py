@@ -456,13 +456,12 @@ def plot_dirichlet_samples(model, x_test, m_test, model_names, n_samples=5000,
         f.savefig("figures/{}_dirichlet.png".format(filename), dpi=600)
 
 
-def plot_confusion_matrix(model, x_test, m_test, model_names, normalize=False, title=None, cmap=plt.cm.Blues, figsize=(14, 8)):
+def plot_confusion_matrix(m_hat, x_test, m_test, model_names, normalize=False, title=None, cmap=plt.cm.Blues, figsize=(14, 8)):
     """
     A function to print and plots the confusion matrix. Normalization can be applied by setting `normalize=True`.
     """
 
-    # Predict
-    m_hat = np.argmax(model(x_test)['m_probs'].numpy(), axis=1).astype(np.int32)
+    # Take argmax of test
     m_test = np.argmax(m_test.numpy(), axis=1).astype(np.int32)
 
     if not title:
