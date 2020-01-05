@@ -230,6 +230,28 @@ def regularized_bayes_risk(m_true, alpha, alpha0, m_probs, global_step, annealin
     return loss
 
 
+def heteroscedastic_loglik(x, m_true):
+    """
+    Computes the E[p] w.r.t. a Gaussian N(x_mean, x_var).
+    ----------
+
+    Arguments:
+    x         : tf.Tensor of shape (batch_size, num_models) -- the noisy logits
+    m_true    : tf.Tensor of shape (batch_size, num_models) -- the one hot encoded true model indices
+    
+    ----------
+
+    Output:
+    ll : tf.Tensor of shape (,) -- a single scalar Monte-Carlo approximation of the heteroscedastic loss
+    """
+    
+    ll = tf.log(tf.reduce_mean(tf.exp(x - tf.log(tf.reduce_sum(tf.exp(x), axis=-1, keepdims=True))), axis=1))
+    ll = tf.boolean_mask(ll, m_true)
+    ll = tf.reduce_mean(ll)
+    return ll
+    
+
+
 def log_loss(m_true, alpha, alpha0, m_probs):
     """
     Computes the logloss given output probs and true model indices m_true.
