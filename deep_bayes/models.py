@@ -577,3 +577,127 @@ class DeepEvidentialModel(tf.keras.Model):
         if not to_numpy:
              pm_samples = tf.convert_to_tensor(pm_samples, dtype=tf.float32)
         return pm_samples
+
+
+class InfoVAE(tf.keras.Model):
+    """
+    Implements an information maximizing variational autoencoder for model selection
+    according to Zhao, Song, & Ermon (2018) 
+    """
+    
+    def __init__(self, meta):
+        super(InfoVAE, self).__init__()
+        # Store dimensionality of the z_dim
+        self.z_dim = meta['z_dim']
+        self.M = meta['n_models']
+        
+        # Summary network
+        if meta['summary_type'] == 'invariant':
+            self.summary_net = InvariantNetwork(meta['summary_meta'])
+        elif meta['summary_type']  == 'sequence':
+            self.summary_net = SequenceNetwork(meta['summary_meta'])
+        elif meta['summary_type'] is None:
+            self.summary_net = None
+        else:
+            raise NotImplementedError('net_type should be either of type "invariant" or "sequence"')
+        
+        
+        # Encoder network
+        self.encoder = tf.keras.Sequential([
+            tf.keras.layers.Dense(**meta['encoder_dense_args'])
+            for _ in range(meta['n_dense_encoder'])
+        ])
+        
+        # Encoder output to z
+        self.z_mapper = tf.keras.layers.Dense(meta['z_dim'] * 2)
+        
+        # Decoder network
+        self.decoder = tf.keras.Sequential([
+            tf.keras.layers.Dense(**meta['decoder_dense_args'])
+            for _ in range(meta['n_dense_decoder'])
+        ])
+
+        # Logits layers, i.e., fully connected with linear activation
+        self.logits_layer = tf.keras.layers.Dense(meta['n_models'])
+        
+    def encode(self, x, m):
+        """Encodes m given x into a latent mean and var."""
+        
+        x = tf.concat([x, m], axis=-1)
+        x = self.encoder(x)
+        x = self.z_mapper(x)
+        z_mean, z_logvar = tf.split(x, 2, axis=-1)
+        return z_mean, z_logvar
+    
+    def decode(self, x, z, return_probs=False):
+        """Decodes m from z given x."""
+
+        z_x = tf.concat([x, z], axis=-1)
+        m_rec = self.decoder(z_x)
+        m_rec = self.logits_layer(m_rec)
+        if return_probs:
+            m_rec = tf.nn.softmax(m_rec, axis=-1)
+        return m_rec
+    
+    def call(self, x, m, return_probs=True):
+        """
+        Computes a summary of h(y), concatenates x and h(y) and passes them through encoder and decoder.
+        ----------
+        
+        Arguments:
+        x : tf.Tensor of shape (batch_size, n_obs, inp_dim)  -- the simulated batch of data
+        m : tf.Tensor of shape (batch_size, num_models)      -- the one-hot encoded model indices
+        return_probs : bool -- a flag ondicating whether to return logits or probabilities (softmax)
+        
+        ----------
+        
+        Output:
+        z_mean   : tf.Tensor of shape (batch_size, z_dim) -- the means of the latent Gaussian distribution
+        z_logvar : tf.Tensor of shape (batch_size, z_dim) -- the logvars of the latent Gaussian distribution
+        """
+        
+        # Compute summary, if summary net has been given
+        if self.summary_net is not None:
+            x = self.summary_net(x)
+        
+        # Encode m|x
+        z_mean, z_logvar = self.encode(x, m)
+        
+        # Sample latent
+        eps = tf.random_normal(shape=z_mean.shape)
+        z = z_mean + eps * tf.exp(z_logvar * 0.5)
+        
+        # Decode m
+        m_rec = self.decode(x, z, return_probs=return_probs)
+        
+        return z, m_rec
+    
+    def sample(self, x, n_samples, to_numpy=False):
+        """
+        Samples from the decoder given a single instance y or a batch of instances.
+        ----------
+        
+        Arguments:
+        x         : tf.Tensor of shape (batch_size, n_points) -- the conditional data of interest
+        n_samples : int -- number of samples to obtain from the approximate model posterior
+        to_numpy  : bool -- flag indicating whether to return the samples as a np.array or a tf.Tensor
+        ----------
+
+        Returns:
+        m_samples : 3D tf.Tensor or np.array of shape (n_samples, n_batch, n_models)
+        """
+        
+        # Compute summary, if summary network given
+        if self.summary_net is not None:
+            x = self.summary_net(x)
+        
+        # Sample from unit Gaussian
+        z = tf.random_normal(shape=(x.shape[0], n_samples, self.z_dim))
+        
+        # Decode samples
+        x = tf.stack([x] * n_samples, axis=1)
+        m_samples = self.decode(x, z, return_probs=True)
+        m_samples = tf.transpose(m_samples, [1, 0, 2])
+        if to_numpy:
+            return m_samples.numpy()
+        return m_samples
