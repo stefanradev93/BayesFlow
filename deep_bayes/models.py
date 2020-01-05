@@ -587,7 +587,8 @@ class InfoVAE(tf.keras.Model):
     
     def __init__(self, meta):
         super(InfoVAE, self).__init__()
-        # Store dimensionality of the z_dim
+
+        # Dimensions of latent space and number of models
         self.z_dim = meta['z_dim']
         self.M = meta['n_models']
         
@@ -698,6 +699,106 @@ class InfoVAE(tf.keras.Model):
         x = tf.stack([x] * n_samples, axis=1)
         m_samples = self.decode(x, z, return_probs=True)
         m_samples = tf.transpose(m_samples, [1, 0, 2])
+        if to_numpy:
+            return m_samples.numpy()
+        return m_samples
+
+
+class HeteroscedasticDropOutModel(tf.keras.Model):
+    """
+    Implements a heteroscedastic classification model according to Kendal and Gal (2017).
+    """
+    def __init__(self, meta):
+        super(HeteroscedasticDropOutModel, self).__init__()
+        
+        # Number of models and number of dropout samples
+        self.M = meta['n_models']
+        self.T = meta['dropout_samples']
+        
+        # Summary network
+        if meta['summary_type'] == 'invariant':
+            self.summary_net = InvariantNetwork(meta['summary_meta'])
+        elif meta['summary_type']  == 'sequence':
+            self.summary_net = SequenceNetwork(meta['summary_meta'])
+        elif meta['summary_type'] is None:
+            self.summary_net = None
+        else:
+            raise NotImplementedError('net_type should be either of type "invariant" or "sequence"')
+        
+        # A network to increase representation power (post-pooling)
+        dense_layers = []
+        for _ in range(meta['n_dense_post']):
+            dense_layers.append(tf.keras.layers.Dense(**meta['dense_post_args']))
+            dense_layers.append(tf.keras.layers.Dropout(meta['dropout_rate']))
+        self.dense_net = tf.keras.Sequential(dense_layers)
+           
+        # Logits layers, i.e., fully connected with linear activation
+        self.logits_layer = tf.keras.layers.Dense(meta['n_models'] * 2)
+        
+    def call(self, x, return_probs=False):
+        """
+        Computes a summary h(x) and passes it through a feed-forward network.
+        ----------
+        
+        Arguments:
+        x : tf.Tensor of shape (batch_size, n_obs, inp_dim)  -- the simulated batch of data
+        return_probs : bool -- a flag ondicating whether to return logits or probabilities (softmax)
+        
+        ----------
+        
+        Output:
+        m_hat tf.Tensor of shape (batch_size, dropout_samples, n_models) -- the MC logits samples
+        """
+        
+        # Compute summary, if summary net has been given
+        if self.summary_net is not None:
+            x = self.summary_net(x)
+            
+        
+        # Obtain logits
+        x_l = self.dense_net(x, training=True)
+        logits = self.logits_layer(x_l)
+        logits = tf.expand_dims(logits, axis=1)
+
+        # Corrupt logits with Gaussian noise
+        logits_mean, logits_logvar = tf.split(logits, 2, axis=-1)
+        eps = tf.random_normal(shape=(logits_mean.shape[0], self.T, logits_mean.shape[2]))
+        m_hat = logits_mean + eps * tf.exp(logits_logvar * 0.5)
+        return m_hat
+
+
+    def sample(self, x, n_samples, to_numpy=False):
+        """
+        Samples from the decoder given a single instance y or a batch of instances.
+        ----------
+        
+        Arguments:
+        x         : tf.Tensor of shape (batch_size, n_points) -- the conditional data of interest
+        n_samples : int -- number of samples to obtain from the approximate model posterior
+        to_numpy  : bool -- flag indicating whether to return the samples as a np.array or a tf.Tensor
+        ----------
+
+        Returns:
+        m_samples : 3D tf.Tensor or np.array of shape (n_samples, n_batch, n_models)
+        """
+        
+        # Compute summary, if summary net has been given
+        if self.summary_net is not None:
+            x = self.summary_net(x)
+            
+        
+        # Obtain logits
+        x_l = self.dense_net(x, training=True)
+        logits = self.logits_layer(x_l)
+        logits = tf.expand_dims(logits, axis=1)
+
+        # Sample logits
+        logits_mean, logits_logvar = tf.split(logits, 2, axis=-1)
+        eps = tf.random_normal(shape=(logits_mean.shape[0], n_samples, logits_mean.shape[2]))
+        m_samples = logits_mean + eps * tf.exp(logits_logvar * 0.5)
+        m_samples = tf.nn.softmax(m_samples, axis=-1)
+        m_samples = tf.transpose(m_samples, [1, 0, 2])
+
         if to_numpy:
             return m_samples.numpy()
         return m_samples
