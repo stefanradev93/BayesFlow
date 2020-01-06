@@ -470,7 +470,7 @@ class SequenceNetwork(tf.keras.Model):
 
 class DeepEvidentialModel(tf.keras.Model):
 
-    def __init__(self, meta, n_models=3, inv_xdim=False):
+    def __init__(self, meta, inv_xdim=False):
         super(DeepEvidentialModel, self).__init__()
 
         # A network to learn summary
@@ -488,8 +488,8 @@ class DeepEvidentialModel(tf.keras.Model):
         ])
 
         # The layer to output model evidences
-        self.evidence_layer = tf.keras.layers.Dense(n_models, activation='relu')
-        self.M = n_models
+        self.evidence_layer = tf.keras.layers.Dense(meta['n_models'], activation='relu')
+        self.M = meta['n_models']
         self.inv_xdim = inv_xdim
 
     def call(self, x):
