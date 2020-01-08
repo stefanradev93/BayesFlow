@@ -419,8 +419,8 @@ def plot_sbc(model, n_samples, X_test, theta_test, param_names, bins=None,
         f.savefig("figures/{}_{}n_sbc.png".format(filename, X_test.shape[1]), dpi=600)
 
 
-def plot_dirichlet_samples(model, x_test, m_test, model_names, n_samples=5000, 
-                           figsize=(15, 9), fontsize=9, show=True, filename=None):
+def plot_model_samples(model, x_test, m_test, model_names, n_samples=5000, 
+                       figsize=(15, 9), fontsize=9, show=True, filename=None):
     """
     Plots model probabilities. Best viewed when x_test and m_test contain 36 test datasets.
     """

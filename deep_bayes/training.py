@@ -171,7 +171,6 @@ def train_online_dropout(model, optimizer, data_gen, iterations, batch_size, p_b
                          clip_value=5., clip_method='global_norm', global_step=None, n_smooth=100):
     """
     Performs a number of training iterations with heteroscedastic dropout.
-
     ----------
 
     Arguments:
@@ -211,6 +210,70 @@ def train_online_dropout(model, optimizer, data_gen, iterations, batch_size, p_b
         
             # Compute losses
             total_loss = heteroscedastic_loglik(m_hat, batch['m'])
+
+        # One step backprop
+        gradients = tape.gradient(total_loss, model.trainable_variables)
+        if clip_value is not None:
+            gradients = clip_gradients(gradients, clip_value, clip_method)
+        apply_gradients(optimizer, gradients, model.trainable_variables, global_step)  
+
+        # Store losses
+        losses['total'].append(total_loss)
+        
+        running_loss = total_loss if it < n_smooth else np.mean(losses['total'][-n_smooth:])
+
+        # Update progress bar
+        if p_bar is not None:
+            p_bar.set_postfix_str("Iteration: {0},Loss: {1:.3f},Running Loss: {2:.3f}"
+            .format(it, total_loss, running_loss))
+            p_bar.update(1)
+    return losses
+
+
+def train_online_softmax(model, optimizer, data_gen, iterations, batch_size, p_bar=None,
+                         clip_value=5., clip_method='global_norm', global_step=None, n_smooth=100):
+    """
+    Performs a number of training iterations with a softmax network.
+
+    ----------
+
+    Arguments:
+    model           : tf.keras.Model -- a neural network model implementing a __call__() method
+    optimizer       : tf.train.Optimizer -- the optimizer used for backprop
+    data_gen        : callable -- a function providing batches of data
+    iterations      : int -- the number of training loops to perform
+    batch_size      : int -- the batch_size used for training
+    ----------
+
+    Keyword Arguments:
+    p_bar           : ProgressBar or None -- an instance for tracking the training progress
+    clip_value      : float       -- the value used for clipping the gradients
+    clip_method     : str         -- the method used for clipping (default 'global_norm')
+    global_step     : tf.Variavle -- a scalar tensor tracking the number of steps and used for learning rate decay  
+    ----------
+
+    Returns:
+    losses : a dictionary with regularization and loss evaluations at each training iteration
+    """
+    
+    # Prepare a dict for storing losses
+    losses = {
+        'total': [],
+    }
+
+    # Run training loop
+    for it in range(1, iterations+1):
+
+        with tf.GradientTape() as tape:
+
+            # Generate inputs for the network
+            batch = data_gen(batch_size)
+
+            # Forward pass 
+            m_hat = model(batch['x'])
+        
+            # Compute losses
+            total_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=m_hat, labels=batch['m']))
 
         # One step backprop
         gradients = tape.gradient(total_loss, model.trainable_variables)
