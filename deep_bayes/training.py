@@ -11,7 +11,7 @@ from collections.abc import Iterable
 
 import tensorflow as tf
 import numpy as np
-from deep_bayes.losses import maximum_mean_discrepancy, heteroscedastic_loglik
+from deep_bayes.losses import maximum_mean_discrepancy, heteroscedastic_loglik, kullback_leibler_gaussian
 
 from .utils import clip_gradients, apply_gradients
 
@@ -94,8 +94,9 @@ def train_online(model, optimizer, data_gen, loss_fun, iterations, batch_size, p
     return losses
 
 
-def train_online_vae(model, optimizer, data_gen, iterations, batch_size, p_bar=None,
-                     clip_value=5., clip_method='global_norm', global_step=None, n_smooth=100):
+def train_online_vae(model, optimizer, data_gen, iterations, batch_size, p_bar=None, regularization='kl',
+                     regularization_weight=1.0, clip_value=5., clip_method='global_norm', 
+                     global_step=None, n_smooth=100):
     """
     Performs a number of training iterations with an information maximizing VAE.
 
@@ -123,7 +124,7 @@ def train_online_vae(model, optimizer, data_gen, iterations, batch_size, p_bar=N
     # Prepare a dict for storing losses
     losses = {
         'cent': [],
-        'mmd': [],
+        'regularization': [],
         'total': []
     }
 
@@ -136,15 +137,18 @@ def train_online_vae(model, optimizer, data_gen, iterations, batch_size, p_bar=N
             batch = data_gen(batch_size)
 
             # Forward pass 
-            z_hat, m_hat = model(batch['x'], batch['m'])
+            out = model(batch['x'], batch['m'])
 
-            # Sample from unit Gaussian
-            z_true = tf.random_normal(shape=z_hat.shape)
-        
             # Compute losses
-            cent = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=batch['m'], logits=m_hat))
-            mmd = maximum_mean_discrepancy(z_hat, z_true)
-            total_loss = cent + mmd
+            cent = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=batch['m'], logits=out['m_logits']))
+
+            if regularization == 'MMD':
+                # Sample from unit Gaussian
+                z_true = tf.random_normal(shape=out['z_samples'].shape)
+                reg = maximum_mean_discrepancy(out['z_samples'], z_true, weight=regularization_weight)
+            elif regularization == 'KL':
+                reg = kullback_leibler_gaussian(out['z_mean'], out['z_logvar'], beta=regularization_weight)
+            total_loss = cent + reg
 
         # One step backprop
         gradients = tape.gradient(total_loss, model.trainable_variables)
@@ -153,7 +157,7 @@ def train_online_vae(model, optimizer, data_gen, iterations, batch_size, p_bar=N
         apply_gradients(optimizer, gradients, model.trainable_variables, global_step)  
 
         # Store losses
-        losses['mmd'].append(mmd)
+        losses['regularization'].append(reg)
         losses['cent'].append(cent)
         losses['total'].append(total_loss)
         
@@ -161,8 +165,8 @@ def train_online_vae(model, optimizer, data_gen, iterations, batch_size, p_bar=N
 
         # Update progress bar
         if p_bar is not None:
-            p_bar.set_postfix_str("Iteration: {0},Loss: {1:.3f},Running Loss: {2:.3f},Cross-Entropy: {3:.3f},MMD: {4:.3f}"
-            .format(it, total_loss, running_loss, cent.numpy(), mmd.numpy()))
+            p_bar.set_postfix_str("Iteration: {0},Loss: {1:.3f},Running Loss: {2:.3f},Cross-Entropy: {3:.3f},{4}: {5:.3f}"
+            .format(it, total_loss, running_loss, cent.numpy(), regularization, reg.numpy()))
             p_bar.update(1)
     return losses
 

@@ -579,15 +579,11 @@ class DeepEvidentialModel(tf.keras.Model):
         return pm_samples
 
 
-class InfoVAE(tf.keras.Model):
-    """
-    Implements an information maximizing variational autoencoder for model selection
-    according to Zhao, Song, & Ermon (2018) 
-    """
+class VAE(tf.keras.Model):
     
     def __init__(self, meta):
-        super(InfoVAE, self).__init__()
-
+        super(VAE, self).__init__()
+        
         # Dimensions of latent space and number of models
         self.z_dim = meta['z_dim']
         self.M = meta['n_models']
@@ -601,8 +597,7 @@ class InfoVAE(tf.keras.Model):
             self.summary_net = None
         else:
             raise NotImplementedError('net_type should be either of type "invariant" or "sequence"')
-        
-        
+            
         # Encoder network
         self.encoder = tf.keras.Sequential([
             tf.keras.layers.Dense(**meta['encoder_dense_args'])
@@ -611,36 +606,9 @@ class InfoVAE(tf.keras.Model):
         
         # Encoder output to z
         self.z_mapper = tf.keras.layers.Dense(meta['z_dim'] * 2)
-        
-        # Decoder network
-        self.decoder = tf.keras.Sequential([
-            tf.keras.layers.Dense(**meta['decoder_dense_args'])
-            for _ in range(meta['n_dense_decoder'])
-        ])
-
-        # Logits layers, i.e., fully connected with linear activation
         self.logits_layer = tf.keras.layers.Dense(meta['n_models'])
         
-    def encode(self, x, m):
-        """Encodes m given x into a latent mean and var."""
-        
-        x = tf.concat([x, m], axis=-1)
-        x = self.encoder(x)
-        x = self.z_mapper(x)
-        z_mean, z_logvar = tf.split(x, 2, axis=-1)
-        return z_mean, z_logvar
-    
-    def decode(self, x, z, return_probs=False):
-        """Decodes m from z given x."""
-
-        z_x = tf.concat([x, z], axis=-1)
-        m_rec = self.decoder(z_x)
-        m_rec = self.logits_layer(m_rec)
-        if return_probs:
-            m_rec = tf.nn.softmax(m_rec, axis=-1)
-        return m_rec
-    
-    def call(self, x, m, return_probs=True):
+    def call(self, x, return_prob=False):
         """
         Computes a summary of h(y), concatenates x and h(y) and passes them through encoder and decoder.
         ----------
@@ -657,23 +625,29 @@ class InfoVAE(tf.keras.Model):
         z_logvar : tf.Tensor of shape (batch_size, z_dim) -- the logvars of the latent Gaussian distribution
         """
         
-        # Compute summary, if summary net has been given
+        # Summarize (get fixed-size vector)
         if self.summary_net is not None:
             x = self.summary_net(x)
+        x = self.encoder(x)
         
-        # Encode m|x
-        z_mean, z_logvar = self.encode(x, m)
+        # Get z
+        x = self.z_mapper(x)
+        z_mean, z_logvar = tf.split(x, 2, axis=-1)
         
-        # Sample latent
+        # Sample
         eps = tf.random_normal(shape=z_mean.shape)
         z = z_mean + eps * tf.exp(z_logvar * 0.5)
         
-        # Decode m
-        m_rec = self.decode(x, z, return_probs=return_probs)
-        
-        return z, m_rec
+        # Decode 
+        m_logits = self.logits_layer(z)
+        m_probs = tf.nn.softmax(m_logits, axis=1)
+        return {'z_mean': z_mean, 
+                'z_logvar': z_logvar, 
+                'z_samples': z,
+                'm_logits': m_logits, 
+                'm_probs': m_probs}
     
-    def sample(self, x, n_samples, to_numpy=False):
+    def sample(self, x, n_samples, to_numpy=True):
         """
         Samples from the decoder given a single instance y or a batch of instances.
         ----------
@@ -688,16 +662,21 @@ class InfoVAE(tf.keras.Model):
         m_samples : 3D tf.Tensor or np.array of shape (n_samples, n_batch, n_models)
         """
         
-        # Compute summary, if summary network given
+        # Summarize (get fixed-size vector)
         if self.summary_net is not None:
             x = self.summary_net(x)
+        x = self.encoder(x)
         
-        # Sample from unit Gaussian
-        z = tf.random_normal(shape=(x.shape[0], n_samples, self.z_dim))
+        # Get z
+        x = self.z_mapper(x)
+        z_mean, z_logvar = tf.split(x, 2, axis=-1)
         
-        # Decode samples
-        x = tf.stack([x] * n_samples, axis=1)
-        m_samples = self.decode(x, z, return_probs=True)
+        # Sample
+        eps = tf.random_normal(shape=(n_samples, z_mean.shape[0], z_mean.shape[1]))
+        z = z_mean + eps * tf.exp(z_logvar * 0.5)
+        z = tf.transpose(z, [1, 0, 2])
+        
+        m_samples = tf.nn.softmax(self.logits_layer(z), axis=-1)
         m_samples = tf.transpose(m_samples, [1, 0, 2])
         if to_numpy:
             return m_samples.numpy()
