@@ -754,7 +754,6 @@ class HeteroscedasticDropOutModel(tf.keras.Model):
         if self.summary_net is not None:
             x = self.summary_net(x)
             
-        
         # Obtain logits
         x_l = self.dense_net(x, training=True)
         logits = self.logits_layer(x_l)
@@ -798,6 +797,87 @@ class HeteroscedasticDropOutModel(tf.keras.Model):
         m_samples = logits_mean + eps * tf.exp(logits_logvar * 0.5)
         m_samples = tf.nn.softmax(m_samples, axis=-1)
         m_samples = tf.transpose(m_samples, [1, 0, 2])
+
+        if to_numpy:
+            return m_samples.numpy()
+        return m_samples
+
+
+class SoftmaxModel(tf.keras.Model):
+    """
+    Implements a heteroscedastic classification model according to Kendal and Gal (2017).
+    """
+    
+    def __init__(self, meta):
+        super(SoftmaxModel, self).__init__()
+        
+        # Number of models and number of dropout samples
+        self.M = meta['n_models']
+        
+        # Summary network
+        if meta['summary_type'] == 'invariant':
+            self.summary_net = InvariantNetwork(meta['summary_meta'])
+        elif meta['summary_type']  == 'sequence':
+            self.summary_net = SequenceNetwork(meta['summary_meta'])
+        elif meta['summary_type'] is None:
+            self.summary_net = None
+        else:
+            raise NotImplementedError('net_type should be either of type "invariant" or "sequence"')
+        
+        # A network to increase representation power (post-pooling)
+        dense_layers = []
+        for _ in range(meta['n_dense_post']):
+            dense_layers.append(tf.keras.layers.Dense(**meta['dense_post_args']))
+        self.dense_net = tf.keras.Sequential(dense_layers)
+           
+        # Logits layers, i.e., fully connected with linear activation
+        self.logits_layer = tf.keras.layers.Dense(meta['n_models'])
+        
+    def call(self, x, return_probs=False):
+        """
+        Computes a summary h(x) and passes it through a feed-forward network.
+        ----------
+        
+        Arguments:
+        x : tf.Tensor of shape (batch_size, n_obs, inp_dim)  -- the simulated batch of data
+        return_probs : bool -- a flag ondicating whether to return logits or probabilities (softmax)
+        
+        ----------
+        
+        Output:
+        m_hat tf.Tensor of shape (batch_size, dropout_samples, n_models) -- the MC logits samples
+        """
+        
+        # Compute summary, if summary net has been given
+        if self.summary_net is not None:
+            x = self.summary_net(x)
+            
+        # Obtain logits
+        x_l = self.dense_net(x, training=True)
+        logits = self.logits_layer(x_l)
+
+        if return_probs:
+            return tf.nn.softmax(logits, axis=-1)
+        return logits
+
+
+    def sample(self, x, n_samples=None, to_numpy=False):
+        """
+        Simply performs a forward pass through the network.
+        ----------
+        
+        Arguments:
+        x         : tf.Tensor of shape (batch_size, n_points) -- the conditional data of interest
+        n_samples : int -- number of samples to obtain from the approximate model posterior (has no effect)
+        to_numpy  : bool -- flag indicating whether to return the samples as a np.array or a tf.Tensor
+        ----------
+
+        Returns:
+        m_samples : 3D tf.Tensor or np.array of shape (n_samples, n_batch, n_models)
+        """
+        
+        # Compute summary, if summary net has been given
+        m_samples = tf.expand_dims(self(x, return_probs=True), axis=0)
 
         if to_numpy:
             return m_samples.numpy()
