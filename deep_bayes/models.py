@@ -683,16 +683,15 @@ class VAE(tf.keras.Model):
         return m_samples
 
 
-class HeteroscedasticDropOutModel(tf.keras.Model):
+class MCDropOutModel(tf.keras.Model):
     """
     Implements a heteroscedastic classification model according to Kendal and Gal (2017).
     """
     def __init__(self, meta):
-        super(HeteroscedasticDropOutModel, self).__init__()
+        super(MCDropOutModel, self).__init__()
         
         # Number of models and number of dropout samples
         self.M = meta['n_models']
-        self.T = meta['dropout_samples']
         
         # Summary network
         if meta['summary_type'] == 'invariant':
@@ -712,16 +711,15 @@ class HeteroscedasticDropOutModel(tf.keras.Model):
         self.dense_net = tf.keras.Sequential(dense_layers)
            
         # Logits layers, i.e., fully connected with linear activation
-        self.logits_layer = tf.keras.layers.Dense(meta['n_models'] * 2)
+        self.logits_layer = tf.keras.layers.Dense(meta['n_models'])
         
-    def call(self, x, return_probs=False):
+    def call(self, x):
         """
         Computes a summary h(x) and passes it through a feed-forward network.
         ----------
         
         Arguments:
         x : tf.Tensor of shape (batch_size, n_obs, inp_dim)  -- the simulated batch of data
-        return_probs : bool -- a flag ondicating whether to return logits or probabilities (softmax)
         
         ----------
         
@@ -736,13 +734,8 @@ class HeteroscedasticDropOutModel(tf.keras.Model):
         # Obtain logits
         x_l = self.dense_net(x, training=True)
         logits = self.logits_layer(x_l)
-        logits = tf.expand_dims(logits, axis=1)
-
-        # Corrupt logits with Gaussian noise
-        logits_mean, logits_logvar = tf.split(logits, 2, axis=-1)
-        eps = tf.random_normal(shape=(logits_mean.shape[0], self.T, logits_mean.shape[2]))
-        m_hat = logits_mean + eps * tf.exp(logits_logvar * 0.5)
-        return m_hat
+        m_probs = tf.nn.softmax(logits, axis=-1)
+        return {'m_logits': logits, 'm_probs': m_probs}
 
 
     def sample(self, x, n_samples, to_numpy=False):
@@ -763,18 +756,14 @@ class HeteroscedasticDropOutModel(tf.keras.Model):
         # Compute summary, if summary net has been given
         if self.summary_net is not None:
             x = self.summary_net(x)
-            
         
+        # Create representation for parallelized dropout
+        x = tf.stack([x] * n_samples, axis=1)
+
         # Obtain logits
         x_l = self.dense_net(x, training=True)
         logits = self.logits_layer(x_l)
-        logits = tf.expand_dims(logits, axis=1)
-
-        # Sample logits
-        logits_mean, logits_logvar = tf.split(logits, 2, axis=-1)
-        eps = tf.random_normal(shape=(logits_mean.shape[0], n_samples, logits_mean.shape[2]))
-        m_samples = logits_mean + eps * tf.exp(logits_logvar * 0.5)
-        m_samples = tf.nn.softmax(m_samples, axis=-1)
+        m_samples = tf.nn.softmax(logits, axis=-1)
         m_samples = tf.transpose(m_samples, [1, 0, 2])
 
         if to_numpy:

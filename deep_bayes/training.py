@@ -210,10 +210,10 @@ def train_online_dropout(model, optimizer, data_gen, iterations, batch_size, p_b
             batch = data_gen(batch_size)
 
             # Forward pass 
-            m_hat = model(batch['x'])
+            out = model(batch['x'])
         
-            # Compute losses
-            total_loss = heteroscedastic_loglik(m_hat, batch['m'])
+            # Compute loss
+            total_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=batch['m'], logits=out['m_logits']))
 
         # One step backprop
         gradients = tape.gradient(total_loss, model.trainable_variables)
