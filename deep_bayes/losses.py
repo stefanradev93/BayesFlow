@@ -252,7 +252,6 @@ def heteroscedastic_loglik(x, m_true):
     return ll
     
 
-
 def log_loss(m_true, alpha, alpha0, m_probs):
     """
     Computes the logloss given output probs and true model indices m_true.
