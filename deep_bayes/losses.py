@@ -245,8 +245,8 @@ def heteroscedastic_loglik(x, m_true):
     ll : tf.Tensor of shape (,) -- a single scalar Monte-Carlo approximation of the heteroscedastic loss
     """
     
-    logsumexp = tf.log(tf.reduce_sum(tf.exp(x), axis=-1, keepdims=True) + 1e-15)
-    ll = tf.log(tf.reduce_mean(tf.exp(x - logsumexp), axis=1) + 1e-15)
+    logsumexp = tf.log(tf.reduce_sum(tf.exp(x), axis=-1, keepdims=True) + 1e-20)
+    ll = x - logsumexp
     ll = tf.boolean_mask(ll, m_true)
     ll = tf.reduce_mean(ll)
     return ll
