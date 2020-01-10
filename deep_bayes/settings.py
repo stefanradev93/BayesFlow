@@ -54,7 +54,7 @@ SOFTMAX_DIFFUSION = {
 VAE_DIFFUSION = {
     'summary_type':  'invariant',
     'n_models': 6,
-    'z_dim': 3,
+    'z_dim': 6,
     'n_dense_encoder': 3,
     'encoder_dense_args': dict(units=128, activation='elu'),
     'summary_meta': {
