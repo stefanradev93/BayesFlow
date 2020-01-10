@@ -801,14 +801,13 @@ class SoftmaxModel(tf.keras.Model):
         # Logits layers, i.e., fully connected with linear activation
         self.logits_layer = tf.keras.layers.Dense(meta['n_models'])
         
-    def call(self, x, return_probs=False):
+    def call(self, x):
         """
         Computes a summary h(x) and passes it through a feed-forward network.
         ----------
         
         Arguments:
         x : tf.Tensor of shape (batch_size, n_obs, inp_dim)  -- the simulated batch of data
-        return_probs : bool -- a flag ondicating whether to return logits or probabilities (softmax)
         
         ----------
         
@@ -823,10 +822,8 @@ class SoftmaxModel(tf.keras.Model):
         # Obtain logits
         x_l = self.dense_net(x, training=True)
         logits = self.logits_layer(x_l)
-
-        if return_probs:
-            return tf.nn.softmax(logits, axis=-1)
-        return logits
+        m_probs = tf.nn.softmax(logits, axis=-1)
+        return {'m_logits': logits, 'm_probs': m_probs}
 
 
     def sample(self, x, n_samples=None, to_numpy=False):
@@ -845,7 +842,7 @@ class SoftmaxModel(tf.keras.Model):
         """
         
         # Compute summary, if summary net has been given
-        m_samples = tf.expand_dims(self(x, return_probs=True), axis=0)
+        m_samples = tf.expand_dims(self(x)['m_probs'], axis=0)
 
         if to_numpy:
             return m_samples.numpy()
