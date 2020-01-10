@@ -72,7 +72,6 @@ def accuracy(m_true, m_pred):
     ----------
     
     Returns:
-    
     acc  : float in [0, 1] -- the computed accuracy
     """
 
@@ -86,6 +85,77 @@ def accuracy(m_true, m_pred):
     m_pred = np.argmax(m_pred, axis=1)
     acc = accuracy_score(m_true, m_pred)
     return acc
+
+def overconfidence(m_true, m_pred, overconfidence_bound=.95):
+    """
+    Computes the overconfidence in model selection given an overconfidence bound
+    as abs(max(0, alpha_o - accuracy_o))
+
+    Arguments:
+    m_true               : np.ndarray of shape (n_test, n_models) -- the 'true' one-hot encoded model indices
+    m_pred               : np.ndarray of shape (n_test, n_models) -- the predicted model posterior probabilities
+    overconfidence_bound : float in [0, 1] -- the overconfidence bound (defaults to 0.95)
+    ----------
+    
+    Returns:
+    oc  : float in [0, alpha_o] -- the computed overconfidence metric
+    """
+
+    # Convert tf.Tensors to numpy, if passed
+    if type(m_true) is not np.ndarray:
+        m_true = m_true.numpy() 
+    if type(m_pred) is not np.ndarray:
+        m_pred = m_pred.numpy()
+    
+    pred_over_i = m_pred.max(axis=1) >= overconfidence_bound
+    pred_over = m_pred.argmax(axis=1)[pred_over_i]
+    m_over = m_true.argmax(axis=1)[pred_over_i]
+
+    accuracy_over = np.sum(pred_over == m_over) / m_over.shape[0]
+    return max(0, overconfidence_bound - accuracy_over)
+
+
+def classification_calibration(m_true, m_pred, alpha_resolution=25):
+    """
+    Estimates the calibration error of a model selection (classification) nn.
+    """
+
+    # Convert tf.Tensors to numpy, if passed
+    if type(m_true) is not np.ndarray:
+        m_true = m_true.numpy() 
+    if type(m_pred) is not np.ndarray:
+        m_pred = m_pred.numpy()
+
+    accuracies = []
+    abs_diffs = []
+
+    n_models = int(m_true.shape[1])
+    alphas = np.linspace(1/n_models, 1.0, alpha_resolution)
+
+    # Loop for each alpha
+    for i, alpha in enumerate(alphas[:-1]):
+
+        # Find bin
+        alpha_l = alphas[i]
+        alpha_h = alphas[i+1]
+
+        # Find all predictions in bin
+        preds_bin_i = (m_pred.max(axis=1) >= alpha_l) & (m_pred.max(axis=1) < alpha_h)
+        preds_bin = m_pred.argmax(axis=1)[preds_bin_i]
+        m_bin = m_true.argmax(axis=1)[preds_bin_i]
+
+        # Compute proportion correct in bin
+        accuracy_bin = np.sum(preds_bin == m_bin) / m_bin.shape[0]
+        accuracies.append(accuracy_bin)
+        abs_diffs.append(np.abs( alpha_l - accuracy_bin if accuracy_bin < alpha_l else alpha_h - accuracy_bin))
+
+    # Discard meaningless bin
+    accuracies = np.array(accuracies[1:])
+    diffs = np.array(abs_diffs[1:])
+    cal_error = np.median(diffs)
+
+    return alphas, accuracies, cal_error
+    
 
 
 def rmse(theta_samples, theta_test, normalized=True):
