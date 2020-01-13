@@ -274,10 +274,10 @@ def train_online_softmax(model, optimizer, data_gen, iterations, batch_size, p_b
             batch = data_gen(batch_size)
 
             # Forward pass 
-            m_hat = model(batch['x'])
+            out = model(batch['x'])
         
             # Compute losses
-            total_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=m_hat, labels=batch['m']))
+            total_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=out['m_logits'], labels=batch['m']))
 
         # One step backprop
         gradients = tape.gradient(total_loss, model.trainable_variables)

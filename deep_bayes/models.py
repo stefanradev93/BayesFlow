@@ -686,7 +686,7 @@ class VAE(tf.keras.Model):
             m_probs = m_probs.numpy()
             m_logits = m_logits.numpy()
 
-        return {'m_probs': m_probs, 'logits': m_logits}
+        return {'m_probs': m_probs, 'm_logits': m_logits}
 
     def sample(self, x, n_samples, to_numpy=True):
         """
