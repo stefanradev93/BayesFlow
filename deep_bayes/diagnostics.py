@@ -152,7 +152,7 @@ def classification_calibration(m_true, m_pred, alpha_resolution=25):
     # Discard meaningless bin
     accuracies = np.array(accuracies[1:])
     diffs = np.array(abs_diffs[1:])
-    cal_error = np.median(diffs)
+    cal_error = np.nanmedian(diffs)
 
     return alphas, accuracies, cal_error
     

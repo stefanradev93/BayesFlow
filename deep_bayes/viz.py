@@ -456,7 +456,7 @@ def plot_model_samples(model, x_test, m_test, model_names, n_samples=5000,
         f.savefig("figures/{}_dirichlet.png".format(filename), dpi=600)
 
 
-def plot_confusion_matrix(m_hat, x_test, m_test, model_names, normalize=False, title=None, cmap=plt.cm.Blues, figsize=(14, 8)):
+def plot_confusion_matrix(m_hat, m_test, model_names, normalize=False, title=None, cmap=plt.cm.Blues, figsize=(14, 8)):
     """
     A function to print and plots the confusion matrix. Normalization can be applied by setting `normalize=True`.
     """

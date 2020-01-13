@@ -530,7 +530,7 @@ class DeepEvidentialModel(tf.keras.Model):
         x = self.dense(x)
         return x
 
-    def predict(self, x):
+    def predict(self, x, to_numpy=True):
         """Returns the mean, variance and uncertainty of the Dirichlet distro."""
 
         alpha = self.evidence(x)
@@ -538,7 +538,13 @@ class DeepEvidentialModel(tf.keras.Model):
         mean = alpha / alpha0
         var = alpha * (alpha0 - alpha) / (alpha0 * alpha0 * (alpha0 + 1))
         uncertainty = self.M / alpha0
-        return {'mean': mean, 'var': var, 'uncertainty': uncertainty}
+
+        if to_numpy:
+            mean = mean.numpy()
+            var = var.numpy()
+            uncertainty = uncertainty.numpy()
+
+        return {'m_probs': mean, 'm_var': var, 'uncertainty': uncertainty}
 
     def evidence(self, x):
         """Computes the evidence vector (alpha) of the Dirichlet distro."""
@@ -628,9 +634,9 @@ class VAE(tf.keras.Model):
         # Summarize (get fixed-size vector)
         if self.summary_net is not None:
             x = self.summary_net(x)
+
+        # Encode into 
         x = self.encoder(x)
-        
-        # Get z
         x = self.z_mapper(x)
         z_mean, z_logvar = tf.split(x, 2, axis=-1)
         
@@ -638,7 +644,7 @@ class VAE(tf.keras.Model):
         eps = tf.random_normal(shape=z_mean.shape)
         z = z_mean + eps * tf.exp(z_logvar * 0.5)
         
-        # Decode 
+        # Probabilistic classification
         m_logits = self.logits_layer(z)
         m_probs = tf.nn.softmax(m_logits, axis=1)
         return {'z_mean': z_mean, 
@@ -646,7 +652,42 @@ class VAE(tf.keras.Model):
                 'z_samples': z,
                 'm_logits': m_logits, 
                 'm_probs': m_probs}
-    
+
+    def predict(self, x, to_numpy=True):
+        """
+        Returns approximate model posterior probabilities given a tensor dataset.
+        ----------
+        
+        Arguments:
+        x : tf.Tensor of shape (batch_size, n_obs, inp_dim)  -- the simulated batch of data
+        m : tf.Tensor of shape (batch_size, num_models)      -- the one-hot encoded model indices
+        return_probs : bool -- a flag ondicating whether to return logits or probabilities (softmax)
+        
+        ----------
+        
+        Output:
+        z_mean   : tf.Tensor of shape (batch_size, z_dim) -- the means of the latent Gaussian distribution
+        """
+
+        # Summarize (get fixed-size vector)
+        if self.summary_net is not None:
+            x = self.summary_net(x)
+
+        # Get z
+        x = self.encoder(x)
+        x = self.z_mapper(x)
+        z_mean, _ = tf.split(x, 2, axis=-1)
+
+        # Decode mean of latent distribution
+        m_logits = self.logits_layer(z_mean)
+        m_probs = tf.nn.softmax(m_logits, axis=1)
+
+        if to_numpy:
+            m_probs = m_probs.numpy()
+            m_logits = m_logits.numpy()
+
+        return {'m_probs': m_probs, 'logits': m_logits}
+
     def sample(self, x, n_samples, to_numpy=True):
         """
         Samples from the decoder given a single instance y or a batch of instances.
@@ -737,6 +778,31 @@ class MCDropOutModel(tf.keras.Model):
         m_probs = tf.nn.softmax(logits, axis=-1)
         return {'m_logits': logits, 'm_probs': m_probs}
 
+    
+    def predict(self, x, n_samples=1000, to_numpy=True):
+        """
+        Approximates model posterior probabilities given a tensor dataset.
+        """
+
+        # Compute summary, if summary net has been given
+        if self.summary_net is not None:
+            x = self.summary_net(x)
+        
+        # Create representation for parallelized dropout
+        x = tf.stack([x] * n_samples, axis=1)
+
+        # Obtain logits and probs
+        x_l = self.dense_net(x, training=True)
+        logits = self.logits_layer(x_l)
+        m_samples = tf.nn.softmax(logits, axis=-1)
+        m_probs = tf.reduce_mean(m_samples, axis=1)
+        m_logits = tf.reduce_mean(logits, axis=1)
+
+        if to_numpy:
+            m_logits = m_logits.numpy()
+            m_probs = m_probs.numpy()
+
+        return {'m_logits': m_logits, 'm_probs': m_probs}
 
     def sample(self, x, n_samples, to_numpy=False):
         """
@@ -825,6 +891,22 @@ class SoftmaxModel(tf.keras.Model):
         m_probs = tf.nn.softmax(logits, axis=-1)
         return {'m_logits': logits, 'm_probs': m_probs}
 
+    
+    def predict(self, x, to_numpy=True):
+        """
+        Approximates model probabilities given a tensor dataset.
+        ----------
+
+        Arguments:
+        x : tf.Tensor of shape (batch_size, n_obs, inp_dim)  -- the simulated batch of data
+        ----------
+        """
+
+        out = self(x)
+        if to_numpy:
+            out['m_logits'] = out['m_logits'].numpy()
+            out['m_probs'] = out['m_probs'].numpy()
+        return out
 
     def sample(self, x, n_samples=None, to_numpy=False):
         """
