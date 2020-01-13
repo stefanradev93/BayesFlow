@@ -70,9 +70,9 @@ VAE_DIFFUSION = {
 EVIDENTIAL_MEMORY = {
     'net_type'         : 'invariant',
     'n_models'         :  3,
-    'dense_inv_args'   :  dict(units=64, activation='elu'),
-    'dense_equiv_args' :  dict(units=32, activation='elu'),
-    'dense_post_args'  :  dict(units=128, activation='elu'),
+    'dense_inv_args'   :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
+    'dense_equiv_args' :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
+    'dense_post_args'  :  dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_post'     :  3,
     'n_dense_inv'      :  2,
     'n_dense_equiv'    :  2,
@@ -83,11 +83,11 @@ DROPOUT_MEMORY = {
     'summary_type'    : 'invariant',
     'dropout_rate'    : 0.1,
     'n_models'        : 3,
-    'dense_post_args' : dict(units=128, activation='elu'),
+    'dense_post_args' : dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_post'    : 3,
     'summary_meta': {
-        'dense_inv_args'   :  dict(units=64, activation='elu'),
-        'dense_equiv_args' :  dict(units=32, activation='elu'),
+        'dense_inv_args'   :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
+        'dense_equiv_args' :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
         'n_dense_inv'      :  2,
         'n_dense_equiv'    :  2,
         'n_equiv'          :  2
@@ -97,11 +97,11 @@ DROPOUT_MEMORY = {
 SOFTMAX_MEMORY = {
     'summary_type'    : 'invariant',
     'n_models'        : 3,
-    'dense_post_args' : dict(units=128, activation='elu'),
+    'dense_post_args' : dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_post'    : 3,
     'summary_meta': {
-        'dense_inv_args'   :  dict(units=64, activation='elu'),
-        'dense_equiv_args' :  dict(units=32, activation='elu'),
+        'dense_inv_args'   :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
+        'dense_equiv_args' :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
         'n_dense_inv'      :  2,
         'n_dense_equiv'    :  2,
         'n_equiv'          :  2
@@ -113,10 +113,10 @@ VAE_MEMORY = {
     'n_models': 3,
     'z_dim': 3,
     'n_dense_encoder': 3,
-    'encoder_dense_args': dict(units=64, activation='elu'),
+    'encoder_dense_args': dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
     'summary_meta': {
-        'dense_inv_args'   :  dict(units=64, activation='elu'),
-        'dense_equiv_args' :  dict(units=32, activation='elu'),
+        'dense_inv_args'   :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
+        'dense_equiv_args' :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
         'n_dense_inv'      :  2,
         'n_dense_equiv'    :  2,
         'n_equiv'          :  2
@@ -128,7 +128,7 @@ EVIDENTIAL_TUMOR = {
     'net_type'         : 'sequence',
     'lstm_units'       :  64,
     'n_models'         :  3,
-    'dense_post_args'  :  dict(units=128, activation='elu'),
+    'dense_post_args'  :  dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_post'     :  3
 }
 
@@ -136,7 +136,7 @@ DROPOUT_TUMOR = {
     'summary_type'    : 'sequence',
     'dropout_rate'    : 0.1,
     'n_models'        : 3,
-    'dense_post_args' : dict(units=128, activation='elu'),
+    'dense_post_args' : dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_post'    : 3,
     'summary_meta': {
         'lstm_units' :  64,
@@ -146,7 +146,7 @@ DROPOUT_TUMOR = {
 SOFTMAX_TUMOR = {
     'summary_type'    : 'sequence',
     'n_models'        : 3,
-    'dense_post_args' : dict(units=128, activation='elu'),
+    'dense_post_args' : dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_post'    : 3,
     'summary_meta': {
         'lstm_units' :  64,
@@ -158,7 +158,7 @@ VAE_TUMOR = {
     'n_models': 3,
     'z_dim': 3,
     'n_dense_encoder': 3,
-    'encoder_dense_args': dict(units=128, activation='elu'),
+    'encoder_dense_args': dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'summary_meta': {
         'lstm_units' :  64,
     }
@@ -169,7 +169,7 @@ EVIDENTIAL_EPI = {
     'net_type'         : 'sequence',
     'lstm_units'       :  64,
     'n_models'         :  5,
-    'dense_post_args'  :  dict(units=128, activation='elu'),
+    'dense_post_args'  :  dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_post'     :  3,
 }
 
@@ -177,7 +177,7 @@ DROPOUT_EPI = {
     'summary_type'    : 'sequence',
     'dropout_rate'    : 0.1,
     'n_models'        : 5,
-    'dense_post_args' : dict(units=128, activation='elu'),
+    'dense_post_args' : dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_post'    : 3,
     'summary_meta': {
         'lstm_units' :  64,
@@ -187,7 +187,7 @@ DROPOUT_EPI = {
 SOFTMAX_EPI= {
     'summary_type'    : 'sequence',
     'n_models'        : 5,
-    'dense_post_args' : dict(units=128, activation='elu'),
+    'dense_post_args' : dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_post'    : 3,
     'summary_meta': {
         'lstm_units' :  64,
@@ -199,7 +199,7 @@ VAE_EPI = {
     'n_models': 5,
     'z_dim': 5,
     'n_dense_encoder': 3,
-    'encoder_dense_args': dict(units=128, activation='elu'),
+    'encoder_dense_args': dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'summary_meta': {
         'lstm_units' :  64,
     }

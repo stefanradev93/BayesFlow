@@ -436,13 +436,13 @@ class SequenceNetwork(tf.keras.Model):
         """
 
         super(SequenceNetwork, self).__init__()
-        self.lstm = tf.keras.layers.CuDNNLSTM(meta['lstm_units'])
+        self.lstm = tf.keras.layers.CuDNNLSTM(meta['lstm_units'], kernel_initializer='glorot_normal')
         self.conv = tf.keras.Sequential([
-            tf.keras.layers.Conv1D(32, kernel_size=5, strides=1, activation='elu'),
-            tf.keras.layers.Conv1D(64, kernel_size=3, strides=1, activation='elu'),
-            tf.keras.layers.Conv1D(64, kernel_size=3, strides=1, activation='elu'),
-            tf.keras.layers.Conv1D(128, kernel_size=2, strides=1, activation='elu'),
-            tf.keras.layers.Conv1D(128, kernel_size=2, strides=1, activation='elu'),
+            tf.keras.layers.Conv1D(32, kernel_size=5, strides=1, activation='elu', kernel_initializer='glorot_normal'),
+            tf.keras.layers.Conv1D(64, kernel_size=3, strides=1, activation='elu', kernel_initializer='glorot_normal'),
+            tf.keras.layers.Conv1D(64, kernel_size=3, strides=1, activation='elu', kernel_initializer='glorot_normal'),
+            tf.keras.layers.Conv1D(128, kernel_size=2, strides=1, activation='elu', kernel_initializer='glorot_normal'),
+            tf.keras.layers.Conv1D(128, kernel_size=2, strides=1, activation='elu', kernel_initializer='glorot_normal'),
             tf.keras.layers.GlobalAveragePooling1D()
         ])
 
@@ -586,14 +586,14 @@ class DeepEvidentialModel(tf.keras.Model):
 
 
 class VAE(tf.keras.Model):
-    
+
     def __init__(self, meta):
         super(VAE, self).__init__()
-        
+
         # Dimensions of latent space and number of models
         self.z_dim = meta['z_dim']
         self.M = meta['n_models']
-        
+
         # Summary network
         if meta['summary_type'] == 'invariant':
             self.summary_net = InvariantNetwork(meta['summary_meta'])
@@ -603,68 +603,68 @@ class VAE(tf.keras.Model):
             self.summary_net = None
         else:
             raise NotImplementedError('net_type should be either of type "invariant" or "sequence"')
-            
+
         # Encoder network
         self.encoder = tf.keras.Sequential([
             tf.keras.layers.Dense(**meta['encoder_dense_args'])
             for _ in range(meta['n_dense_encoder'])
         ])
-        
+
         # Encoder output to z
         self.z_mapper = tf.keras.layers.Dense(meta['z_dim'] * 2)
         self.logits_layer = tf.keras.layers.Dense(meta['n_models'])
-        
+
     def call(self, x, return_prob=False):
         """
         Computes a summary of h(y), concatenates x and h(y) and passes them through encoder and decoder.
         ----------
-        
+
         Arguments:
         x : tf.Tensor of shape (batch_size, n_obs, inp_dim)  -- the simulated batch of data
         m : tf.Tensor of shape (batch_size, num_models)      -- the one-hot encoded model indices
         return_probs : bool -- a flag ondicating whether to return logits or probabilities (softmax)
-        
+
         ----------
-        
+
         Output:
         z_mean   : tf.Tensor of shape (batch_size, z_dim) -- the means of the latent Gaussian distribution
         z_logvar : tf.Tensor of shape (batch_size, z_dim) -- the logvars of the latent Gaussian distribution
         """
-        
+
         # Summarize (get fixed-size vector)
         if self.summary_net is not None:
             x = self.summary_net(x)
 
-        # Encode into 
+        # Encode into
         x = self.encoder(x)
         x = self.z_mapper(x)
         z_mean, z_logvar = tf.split(x, 2, axis=-1)
-        
+
         # Sample
         eps = tf.random_normal(shape=z_mean.shape)
         z = z_mean + eps * tf.exp(z_logvar * 0.5)
-        
+
         # Probabilistic classification
         m_logits = self.logits_layer(z)
         m_probs = tf.nn.softmax(m_logits, axis=1)
-        return {'z_mean': z_mean, 
-                'z_logvar': z_logvar, 
+        return {'z_mean': z_mean,
+                'z_logvar': z_logvar,
                 'z_samples': z,
-                'm_logits': m_logits, 
+                'm_logits': m_logits,
                 'm_probs': m_probs}
 
     def predict(self, x, to_numpy=True):
         """
         Returns approximate model posterior probabilities given a tensor dataset.
         ----------
-        
+
         Arguments:
         x : tf.Tensor of shape (batch_size, n_obs, inp_dim)  -- the simulated batch of data
         m : tf.Tensor of shape (batch_size, num_models)      -- the one-hot encoded model indices
         return_probs : bool -- a flag ondicating whether to return logits or probabilities (softmax)
-        
+
         ----------
-        
+
         Output:
         z_mean   : tf.Tensor of shape (batch_size, z_dim) -- the means of the latent Gaussian distribution
         """
@@ -692,7 +692,7 @@ class VAE(tf.keras.Model):
         """
         Samples from the decoder given a single instance y or a batch of instances.
         ----------
-        
+
         Arguments:
         x         : tf.Tensor of shape (batch_size, n_points) -- the conditional data of interest
         n_samples : int -- number of samples to obtain from the approximate model posterior
@@ -702,21 +702,21 @@ class VAE(tf.keras.Model):
         Returns:
         m_samples : 3D tf.Tensor or np.array of shape (n_samples, n_batch, n_models)
         """
-        
+
         # Summarize (get fixed-size vector)
         if self.summary_net is not None:
             x = self.summary_net(x)
         x = self.encoder(x)
-        
+
         # Get z
         x = self.z_mapper(x)
         z_mean, z_logvar = tf.split(x, 2, axis=-1)
-        
+
         # Sample
         eps = tf.random_normal(shape=(n_samples, z_mean.shape[0], z_mean.shape[1]))
         z = z_mean + eps * tf.exp(z_logvar * 0.5)
         z = tf.transpose(z, [1, 0, 2])
-        
+
         m_samples = tf.nn.softmax(self.logits_layer(z), axis=-1)
         m_samples = tf.transpose(m_samples, [1, 0, 2])
         if to_numpy:
@@ -730,10 +730,10 @@ class MCDropOutModel(tf.keras.Model):
     """
     def __init__(self, meta):
         super(MCDropOutModel, self).__init__()
-        
+
         # Number of models and number of dropout samples
         self.M = meta['n_models']
-        
+
         # Summary network
         if meta['summary_type'] == 'invariant':
             self.summary_net = InvariantNetwork(meta['summary_meta'])
@@ -743,42 +743,42 @@ class MCDropOutModel(tf.keras.Model):
             self.summary_net = None
         else:
             raise NotImplementedError('net_type should be either of type "invariant" or "sequence"')
-        
+
         # A network to increase representation power (post-pooling)
         dense_layers = []
         for _ in range(meta['n_dense_post']):
             dense_layers.append(tf.keras.layers.Dense(**meta['dense_post_args']))
             dense_layers.append(tf.keras.layers.Dropout(meta['dropout_rate']))
         self.dense_net = tf.keras.Sequential(dense_layers)
-           
+
         # Logits layers, i.e., fully connected with linear activation
         self.logits_layer = tf.keras.layers.Dense(meta['n_models'])
-        
+
     def call(self, x):
         """
         Computes a summary h(x) and passes it through a feed-forward network.
         ----------
-        
+
         Arguments:
         x : tf.Tensor of shape (batch_size, n_obs, inp_dim)  -- the simulated batch of data
-        
+
         ----------
-        
+
         Output:
         m_hat tf.Tensor of shape (batch_size, dropout_samples, n_models) -- the MC logits samples
         """
-        
+
         # Compute summary, if summary net has been given
         if self.summary_net is not None:
             x = self.summary_net(x)
-            
+
         # Obtain logits
         x_l = self.dense_net(x, training=True)
         logits = self.logits_layer(x_l)
         m_probs = tf.nn.softmax(logits, axis=-1)
         return {'m_logits': logits, 'm_probs': m_probs}
 
-    
+
     def predict(self, x, n_samples=1000, to_numpy=True):
         """
         Approximates model posterior probabilities given a tensor dataset.
@@ -787,7 +787,7 @@ class MCDropOutModel(tf.keras.Model):
         # Compute summary, if summary net has been given
         if self.summary_net is not None:
             x = self.summary_net(x)
-        
+
         # Create representation for parallelized dropout
         x = tf.stack([x] * n_samples, axis=1)
 
@@ -808,7 +808,7 @@ class MCDropOutModel(tf.keras.Model):
         """
         Samples from the decoder given a single instance y or a batch of instances.
         ----------
-        
+
         Arguments:
         x         : tf.Tensor of shape (batch_size, n_points) -- the conditional data of interest
         n_samples : int -- number of samples to obtain from the approximate model posterior
@@ -818,11 +818,11 @@ class MCDropOutModel(tf.keras.Model):
         Returns:
         m_samples : 3D tf.Tensor or np.array of shape (n_samples, n_batch, n_models)
         """
-        
+
         # Compute summary, if summary net has been given
         if self.summary_net is not None:
             x = self.summary_net(x)
-        
+
         # Create representation for parallelized dropout
         x = tf.stack([x] * n_samples, axis=1)
 
@@ -841,13 +841,13 @@ class SoftmaxModel(tf.keras.Model):
     """
     Implements a heteroscedastic classification model according to Kendal and Gal (2017).
     """
-    
+
     def __init__(self, meta):
         super(SoftmaxModel, self).__init__()
-        
+
         # Number of models and number of dropout samples
         self.M = meta['n_models']
-        
+
         # Summary network
         if meta['summary_type'] == 'invariant':
             self.summary_net = InvariantNetwork(meta['summary_meta'])
@@ -857,41 +857,41 @@ class SoftmaxModel(tf.keras.Model):
             self.summary_net = None
         else:
             raise NotImplementedError('net_type should be either of type "invariant" or "sequence"')
-        
+
         # A network to increase representation power (post-pooling)
         dense_layers = []
         for _ in range(meta['n_dense_post']):
             dense_layers.append(tf.keras.layers.Dense(**meta['dense_post_args']))
         self.dense_net = tf.keras.Sequential(dense_layers)
-           
+
         # Logits layers, i.e., fully connected with linear activation
         self.logits_layer = tf.keras.layers.Dense(meta['n_models'])
-        
+
     def call(self, x):
         """
         Computes a summary h(x) and passes it through a feed-forward network.
         ----------
-        
+
         Arguments:
         x : tf.Tensor of shape (batch_size, n_obs, inp_dim)  -- the simulated batch of data
-        
+
         ----------
-        
+
         Output:
         m_hat tf.Tensor of shape (batch_size, dropout_samples, n_models) -- the MC logits samples
         """
-        
+
         # Compute summary, if summary net has been given
         if self.summary_net is not None:
             x = self.summary_net(x)
-            
+
         # Obtain logits
         x_l = self.dense_net(x, training=True)
         logits = self.logits_layer(x_l)
         m_probs = tf.nn.softmax(logits, axis=-1)
         return {'m_logits': logits, 'm_probs': m_probs}
 
-    
+
     def predict(self, x, to_numpy=True):
         """
         Approximates model probabilities given a tensor dataset.
@@ -912,7 +912,7 @@ class SoftmaxModel(tf.keras.Model):
         """
         Simply performs a forward pass through the network.
         ----------
-        
+
         Arguments:
         x         : tf.Tensor of shape (batch_size, n_points) -- the conditional data of interest
         n_samples : int -- number of samples to obtain from the approximate model posterior (has no effect)
@@ -922,7 +922,7 @@ class SoftmaxModel(tf.keras.Model):
         Returns:
         m_samples : 3D tf.Tensor or np.array of shape (n_samples, n_batch, n_models)
         """
-        
+
         # Compute summary, if summary net has been given
         m_samples = tf.expand_dims(self(x)['m_probs'], axis=0)
 
