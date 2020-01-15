@@ -252,7 +252,7 @@ def heteroscedastic_loglik(x, m_true):
     return ll
     
 
-def log_loss(m_true, alpha, alpha0, m_probs):
+def log_loss(m_true, alpha, alpha0, m_probs, lambd=1.0):
     """
     Computes the logloss given output probs and true model indices m_true.
     ----------
@@ -262,6 +262,7 @@ def log_loss(m_true, alpha, alpha0, m_probs):
     alpha     : tf.Tensor of shape (batch_size, num_models) -- the model evidences 
     alpha0    : tf.Tensor of shape (batch_size, 1) -- the Dirichlet strength 
     m_probs   : tf.Tensor of shape (batch_size, num_models) -- the posterior model probabilities
+    lambd     : float in (0, 1) -- the weight of the KL regularization term
     ----------
 
     Output:
@@ -269,8 +270,11 @@ def log_loss(m_true, alpha, alpha0, m_probs):
     """
     
     m_probs = tf.clip_by_value(m_probs, 1e-15, 1 - 1e-15)
-    return -tf.reduce_mean(tf.reduce_sum(m_true * tf.log(m_probs), axis=1))
-
+    loss = -tf.reduce_mean(tf.reduce_sum(m_true * tf.log(m_probs), axis=1))
+    if lambd > 0:
+        kl = kullback_leibler_dirichlet(m_true, alpha)
+        loss = loss + lambd * kl
+    return loss
 
 def brier_score(m_true, alpha, alpha0, m_probs):
     """
@@ -312,6 +316,7 @@ def cross_entropy(m_true, alpha, alpha0, m_probs, **args):
 
     cent = tf.reduce_sum(m_true * (tf.digamma(alpha0) - tf.digamma(alpha)), 1, keepdims=True)
     cent = tf.reduce_mean(cent)
+    
     return cent
 
 

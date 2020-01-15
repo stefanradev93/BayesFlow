@@ -325,7 +325,8 @@ class InvariantModule(tf.keras.Model):
         # Compute multiple poolings
         x_max = tf.reduce_max(x, axis=1)
         x_mean = tf.reduce_mean(x, axis=1)
-        x = tf.concat((x_max, x_mean), axis=-1)
+        x_min = tf.reduce_min(x, axis=1)
+        x = tf.concat((x_max, x_mean, x_min), axis=-1)
         out = self.post_pooling_dense(x)
         return out
 

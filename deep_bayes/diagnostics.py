@@ -86,6 +86,7 @@ def accuracy(m_true, m_pred):
     acc = accuracy_score(m_true, m_pred)
     return acc
 
+
 def overconfidence(m_true, m_pred, overconfidence_bound=.95):
     """
     Computes the overconfidence in model selection given an overconfidence bound
@@ -115,9 +116,10 @@ def overconfidence(m_true, m_pred, overconfidence_bound=.95):
     return max(0, overconfidence_bound - accuracy_over)
 
 
-def classification_calibration(m_true, m_pred, alpha_resolution=25):
+def expected_calibration_error(m_true, m_pred, alpha_resolution=15):
     """
     Estimates the calibration error of a model selection (classification) nn.
+    Make sure that m_true are one-hot encoded classes!
     """
 
     # Convert tf.Tensors to numpy, if passed
@@ -126,37 +128,51 @@ def classification_calibration(m_true, m_pred, alpha_resolution=25):
     if type(m_pred) is not np.ndarray:
         m_pred = m_pred.numpy()
 
-    accuracies = []
-    abs_diffs = []
+    alphas = np.linspace(0, 1.0, alpha_resolution)
 
-    n_models = int(m_true.shape[1])
-    alphas = np.linspace(1/n_models, 1.0, alpha_resolution)
+    cal_errs = []
+    # One vs-many classification
+    n_models = m_true.shape[1]
 
-    # Loop for each alpha
-    for i, alpha in enumerate(alphas[:-1]):
+    for k in range(n_models):
+        
+        # Select predictions for model k
+        m_conf_k = m_pred[:, k]
+        
+        accuracies = []
+        gaps = []
+        bin_sizes = []
 
-        # Find bin
-        alpha_l = alphas[i]
-        alpha_h = alphas[i+1]
+        # Loop for each alpha
+        for i, alpha in enumerate(alphas[:-1]):
 
-        # Find all predictions in bin
-        preds_bin_i = (m_pred.max(axis=1) >= alpha_l) & (m_pred.max(axis=1) < alpha_h)
-        preds_bin = m_pred.argmax(axis=1)[preds_bin_i]
-        m_bin = m_true.argmax(axis=1)[preds_bin_i]
+            # Determine bin
+            alpha_l = alphas[i]
+            alpha_h = alphas[i+1]
 
-        # Compute proportion correct in bin
-        accuracy_bin = np.sum(preds_bin == m_bin) / m_bin.shape[0]
-        accuracies.append(accuracy_bin)
-        abs_diffs.append(np.abs( alpha_l - accuracy_bin if accuracy_bin < alpha_l else alpha_h - accuracy_bin))
+            # Find all predictions in bin
+            bin_i = (m_conf_k >= alpha_l) & (m_conf_k < alpha_h)
+            preds_bin = m_pred.argmax(axis=1)[bin_i]
+            ps_bin = m_conf_k[bin_i]
+        
 
-    # Discard meaningless bin
-    accuracies = np.array(accuracies[1:])
-    diffs = np.array(abs_diffs[1:])
-    cal_error = np.nanmedian(diffs)
+            # Compute proportion correctly classified in bin
+            accuracy_bin = np.sum(preds_bin == k) / preds_bin.shape[0]
+            conf_bin = np.nanmean(ps_bin)
 
-    return alphas, accuracies, cal_error
+            gaps.append(np.abs(accuracy_bin - conf_bin))
+            bin_sizes.append(preds_bin.shape[0])
+            accuracies.append(accuracy_bin)
+
+        # Compute calibration error
+        gaps = np.array(gaps)
+        rel_bin_sizes = np.array(bin_sizes) / m_true.shape[0]
+        # Weighted mean of gaps
+        cal_error = np.nansum(rel_bin_sizes * gaps)
+        cal_errs.append(cal_error)
+
+    return cal_errs
     
-
 
 def rmse(theta_samples, theta_test, normalized=True):
     """
