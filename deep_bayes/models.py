@@ -302,6 +302,15 @@ class InvariantModule(tf.keras.Model):
             for _ in range(meta['n_dense_inv'])
         ])
 
+        self.weights_layer = tf.keras.Sequential([
+            tf.keras.layers.Dense(**meta['dense_inv_args'])
+            for _ in range(meta['n_dense_inv'])
+        ] + 
+        [
+            tf.keras.layers.Dense(meta['dense_inv_args']['units'])
+        
+        ])
+
         self.post_pooling_dense = tf.keras.Sequential([
             tf.keras.layers.Dense(**meta['dense_inv_args'])
             for _ in range(meta['n_dense_inv'])
@@ -321,13 +330,15 @@ class InvariantModule(tf.keras.Model):
         out : tf.Tensor of shape (batch_size, h_dim) -- the pooled and invariant representation of the input
         """
 
+        # Embed
         x = self.module(x)
-        # Compute multiple poolings
-        x_max = tf.reduce_max(x, axis=1)
-        x_mean = tf.reduce_mean(x, axis=1)
-        x_min = tf.reduce_min(x, axis=1)
-        x = tf.concat((x_max, x_mean, x_min), axis=-1)
-        out = self.post_pooling_dense(x)
+        
+        # Compute weights
+        w = tf.nn.softmax(self.weights_layer(x), axis=1)
+        w_x = tf.reduce_sum(x * w, axis=1)
+
+        # Increase representational power
+        out = self.post_pooling_dense(w_x)
         return out
 
 
