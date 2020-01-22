@@ -298,7 +298,7 @@ def brier_score(m_true, alpha, alpha0, m_probs):
 
 
 
-def cross_entropy(m_true, alpha, alpha0, m_probs, **args):
+def cross_entropy(m_true, alpha, alpha0, m_probs, lambd=1.0):
     """
     Computes the Bayes risk with respect to the cross entropy loss.
     ----------
@@ -311,36 +311,17 @@ def cross_entropy(m_true, alpha, alpha0, m_probs, **args):
     ----------
 
     Output:
-    loss : tf.Tensor of shape (,) -- a single scalar Monte-Carlo approximation of the regularized Bayes risk
+    loss : tf.Tensor of shape (,) -- a single scalar Monte-Carlo approximation of the cross entropy
     """
 
-    cent = tf.reduce_sum(m_true * (tf.digamma(alpha0) - tf.digamma(alpha)), 1, keepdims=True)
-    cent = tf.reduce_mean(cent)
-    
-    return cent
-
-
-def regularized_cross_entropy(m_true, alpha, alpha0, m_probs, global_step, annealing_step=1000, max_lambda=1.0):
-    """
-    Computes the Bayes risk with respect to a Dirichlet posterior and cross entropy loss (regularized via KL)
-    ----------
-
-    Arguments:
-    m_true    : tf.Tensor of shape (batch_size, num_models) -- the one hot encoded true model indices
-    alpha     : tf.Tensor of shape (batch_size, num_models) -- the model evidences 
-    alpha0    : tf.Tensor of shape (batch_size, 1) -- the Dirichlet strength 
-    m_probs   : tf.Tensor of shape (batch_size, num_models) -- the posterior model probabilities
-    ----------
-
-    Output:
-    loss : tf.Tensor of shape (,) -- a single scalar Monte-Carlo approximation of the regularized Bayes risk
-    """
-
-    cent = cross_entropy(m_true, alpha, alpha0, m_probs)
-    kl = kullback_leibler_dirichlet(m_true, alpha)
-    lamb = tf.cast(tf.minimum(max_lambda, global_step / annealing_step), dtype=tf.float32)
-    loss = cent + lamb * kl
+    loss = tf.reduce_sum(m_true * (tf.digamma(alpha0) - tf.digamma(alpha)), 1, keepdims=True)
+    loss = tf.reduce_mean(loss)
+    if lambd > 0:
+        kl = kullback_leibler_dirichlet(m_true, alpha)
+        loss = loss + lambd * kl
     return loss
+
+
 
 
 def multinomial_likelihood(m_true, alpha, alpha0, m_probs):
