@@ -369,7 +369,7 @@ def plot_true_est_posterior_samples(theta_samples, theta_test, param_names, figs
         f.savefig("figures/{}_{}n_density.png".format(filename, X_test.shape[1]), dpi=600, bbox_inches='tight')
 
 
-def plot_sbc(model, n_samples, X_test, theta_test, param_names, bins=None,
+def plot_sbc(theta_samples, theta_test, param_names, bins=None,
             figsize=(15, 5), show=True, filename=None, font_size=12):
     """
     Plots the simulation-based posterior checking histograms as advocated by Talts et al. (2018).
@@ -394,7 +394,7 @@ def plot_sbc(model, n_samples, X_test, theta_test, param_names, bins=None,
     theta_test = theta_test.numpy()
 
     # Sample from approximate posterior
-    theta_samples = model.sample(X_test, n_samples, to_numpy=True)
+    
 
     # Compute ranks (using broadcasting)    
     ranks = np.sum(theta_samples < theta_test, axis=0)
