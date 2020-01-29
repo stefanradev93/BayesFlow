@@ -1,6 +1,19 @@
+EVIDENTIAL_BF = {
+    'net_type'         :  "invariant",
+    'n_models'         :  2,
+    'dense_inv_args'   :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
+    'dense_equiv_args' :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
+    'dense_post_args'  :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
+    'n_dense_inv'      :  2,
+    'n_dense_equiv'    :  2,
+    'n_dense_post'     :  2,
+    'n_equiv'          :  2
+}
+
+
 EVIDENTIAL_DEFAULTS = {
     'net_type'         :  "invariant",
-    'n_models'         : 3,
+    'n_models'         :  2,
     'dense_inv_args'   :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
     'dense_equiv_args' :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
     'dense_post_args'  :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
