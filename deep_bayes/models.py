@@ -303,13 +303,14 @@ class InvariantModule(tf.keras.Model):
         ])
 
         self.weights_layer = tf.keras.Sequential([
-            tf.keras.layers.Dense(**meta['dense_inv_args'])
-            for _ in range(meta['n_dense_inv'])
-        ] + 
-        [
-            tf.keras.layers.Dense(meta['dense_inv_args']['units'])
-        
-        ])
+                tf.keras.layers.Dense(**meta['dense_inv_args'])
+                for _ in range(meta['n_dense_inv'])
+            ] + 
+            [
+                tf.keras.layers.Dense(meta['dense_inv_args']['units'])
+            
+            ])
+            
 
         self.post_pooling_dense = tf.keras.Sequential([
             tf.keras.layers.Dense(**meta['dense_inv_args'])
@@ -331,12 +332,12 @@ class InvariantModule(tf.keras.Model):
         """
 
         # Embed
-        x = self.module(x)
-        
+        x_emb = self.module(x)
+
         # Compute weights
         w = tf.nn.softmax(self.weights_layer(x), axis=1)
-        w_x = tf.reduce_sum(x * w, axis=1)
-
+        w_x = tf.reduce_sum(x_emb * w, axis=1)
+    
         # Increase representational power
         out = self.post_pooling_dense(w_x)
         return out
