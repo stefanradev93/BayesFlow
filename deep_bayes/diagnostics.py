@@ -146,6 +146,7 @@ def expected_calibration_error(m_true, m_pred, n_bins=15):
         probs.append((prob_true, prob_pred))
     return cal_errs, probs
 
+
 def rmse(theta_samples, theta_test, normalized=True):
     """
     Computes the RMSE or normalized RMSE (NRMSE) between posterior means 
