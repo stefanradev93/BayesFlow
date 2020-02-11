@@ -456,7 +456,7 @@ def plot_model_samples(model, x_test, m_test, model_names, n_samples=5000,
         f.savefig("figures/{}_dirichlet.png".format(filename), dpi=600)
 
 
-def plot_confusion_matrix(m_hat, m_test, model_names, normalize=False, title=None, cmap=plt.cm.Blues, figsize=(14, 8)):
+def plot_confusion_matrix(m_hat, m_test, model_names, normalize=False, cmap=plt.cm.Blues, figsize=(14, 8), show=True):
     """
     A function to print and plots the confusion matrix. Normalization can be applied by setting `normalize=True`.
     """
@@ -464,11 +464,6 @@ def plot_confusion_matrix(m_hat, m_test, model_names, normalize=False, title=Non
     # Take argmax of test
     m_test = np.argmax(m_test.numpy(), axis=1).astype(np.int32)
 
-    if not title:
-        if normalize:
-            title = 'Normalized confusion matrix'
-        else:
-            title = 'Confusion matrix, without normalization'
 
     # Compute confusion matrix
     cm = confusion_matrix(m_test, m_hat)
@@ -483,9 +478,8 @@ def plot_confusion_matrix(m_hat, m_test, model_names, normalize=False, title=Non
     ax.set(xticks=np.arange(cm.shape[1]),
            yticks=np.arange(cm.shape[0]),
            xticklabels=model_names, yticklabels=model_names,
-           title=title,
-           ylabel='True label',
-           xlabel='Predicted label')
+           ylabel='True Model',
+           xlabel='Predicted Model')
 
     # Rotate the tick labels and set their alignment.
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
@@ -500,6 +494,9 @@ def plot_confusion_matrix(m_hat, m_test, model_names, normalize=False, title=Non
                     ha="center", va="center",
                     color="white" if cm[i, j] > thresh else "black")
     fig.tight_layout()
-    plt.show()
+
+    if show:
+        plt.show()
+    return fig
 
 
