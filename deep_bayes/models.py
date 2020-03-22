@@ -302,14 +302,17 @@ class InvariantModule(tf.keras.Model):
             for _ in range(meta['n_dense_inv'])
         ])
 
-        self.weights_layer = tf.keras.Sequential([
-                tf.keras.layers.Dense(**meta['dense_inv_args'])
-                for _ in range(meta['n_dense_inv'])
-            ] + 
-            [
-                tf.keras.layers.Dense(meta['dense_inv_args']['units'])
-            
-            ])
+        if meta['learnable_pooling']:
+            self.weights_layer = tf.keras.Sequential([
+                    tf.keras.layers.Dense(**meta['dense_inv_args'])
+                    for _ in range(meta['n_dense_inv'])
+                ] + 
+                [
+                    tf.keras.layers.Dense(meta['dense_inv_args']['units'])
+                
+                ])
+        else:
+            self.weights_layer = None
             
 
         self.post_pooling_dense = tf.keras.Sequential([
@@ -334,9 +337,12 @@ class InvariantModule(tf.keras.Model):
         # Embed
         x_emb = self.module(x)
 
-        # Compute weights
-        w = tf.nn.softmax(self.weights_layer(x), axis=1)
-        w_x = tf.reduce_sum(x_emb * w, axis=1)
+        # Compute weights if existing or perfor mean pooling
+        if self.weights_layer is not None:
+            w = tf.nn.softmax(self.weights_layer(x), axis=1)
+            w_x = tf.reduce_sum(x_emb * w, axis=1)
+        else:
+            w_x = tf.reduce_mean(x_emb, axis=1)
     
         # Increase representational power
         out = self.post_pooling_dense(w_x)
@@ -450,14 +456,16 @@ class SequenceNetwork(tf.keras.Model):
 
         super(SequenceNetwork, self).__init__()
         self.lstm = tf.keras.layers.CuDNNLSTM(meta['lstm_units'], kernel_initializer='glorot_normal')
-        self.conv = tf.keras.Sequential([
-            tf.keras.layers.Conv1D(32, kernel_size=5, strides=1, activation='elu', kernel_initializer='glorot_normal'),
-            tf.keras.layers.Conv1D(64, kernel_size=3, strides=1, activation='elu', kernel_initializer='glorot_normal'),
-            tf.keras.layers.Conv1D(64, kernel_size=3, strides=1, activation='elu', kernel_initializer='glorot_normal'),
-            tf.keras.layers.Conv1D(128, kernel_size=2, strides=1, activation='elu', kernel_initializer='glorot_normal'),
-            tf.keras.layers.Conv1D(128, kernel_size=2, strides=1, activation='elu', kernel_initializer='glorot_normal'),
-            tf.keras.layers.GlobalAveragePooling1D()
-        ])
+
+        if meta['conv_meta'] is not None:
+            self.conv = tf.keras.Sequential(
+                [
+                    tf.keras.layers.Conv1D(**d) for d in meta['conv_meta']      
+                ] + 
+                [tf.keras.layers.GlobalAveragePooling1D()]
+            )
+        else:
+            self.conv = None
 
 
     def call(self, x, **kwargs):
@@ -475,9 +483,10 @@ class SequenceNetwork(tf.keras.Model):
         """
 
 
-        out_lstm = self.lstm(x)
-        out_conv = self.conv(x)
-        out = tf.concat([out_lstm, out_conv], axis=-1)
+        out = self.lstm(x)
+        if self.conv is not None:
+            out_conv = self.conv(x)
+            out = tf.concat([out, out_conv], axis=-1)
         return out
 
 

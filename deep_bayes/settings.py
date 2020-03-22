@@ -30,10 +30,21 @@ EVIDENTIAL_DIFFUSION = {
     'dense_inv_args'   :  dict(units=128, activation='elu'),
     'dense_equiv_args' :  dict(units=64, activation='elu'),
     'dense_post_args'  :  dict(units=128, activation='elu'),
+    'learnable_pooling': True,
     'n_dense_post'     :  3,
     'n_dense_inv'      :  2,
     'n_dense_equiv'    :  2,
     'n_equiv'          :  2
+}
+
+# --- Epidemiology models --- #
+EVIDENTIAL_JUMP = {
+    'net_type'         : 'sequence',
+    'lstm_units'       :  64,
+    'conv_meta'        : None,
+    'n_models'         :  2,
+    'dense_post_args'  :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
+    'n_dense_post'     :  2,
 }
 
 DROPOUT_DIFFUSION = {
@@ -84,6 +95,7 @@ VAE_DIFFUSION = {
 EVIDENTIAL_MEMORY = {
     'net_type'         : 'invariant',
     'n_models'         :  3,
+    'learnable_pooling': False,
     'dense_inv_args'   :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
     'dense_equiv_args' :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
     'dense_post_args'  :  dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
@@ -102,6 +114,7 @@ DROPOUT_MEMORY = {
     'summary_meta': {
         'dense_inv_args'   :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
         'dense_equiv_args' :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
+        'learnable_pooling': False,
         'n_dense_inv'      :  2,
         'n_dense_equiv'    :  2,
         'n_equiv'          :  2
@@ -116,6 +129,7 @@ SOFTMAX_MEMORY = {
     'summary_meta': {
         'dense_inv_args'   :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
         'dense_equiv_args' :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
+        'learnable_pooling': False,
         'n_dense_inv'      :  2,
         'n_dense_equiv'    :  2,
         'n_equiv'          :  2
@@ -131,6 +145,7 @@ VAE_MEMORY = {
     'summary_meta': {
         'dense_inv_args'   :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
         'dense_equiv_args' :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
+        'learnable_pooling': False,
         'n_dense_inv'      :  2,
         'n_dense_equiv'    :  2,
         'n_equiv'          :  2
@@ -182,6 +197,10 @@ VAE_TUMOR = {
 EVIDENTIAL_EPI = {
     'net_type'         : 'sequence',
     'lstm_units'       :  64,
+    'conv_meta'        : [dict(filters=64, kernel_size=5, strides=1, activation='elu', kernel_initializer='glorot_normal', padding='same'),
+                          dict(filters=128, kernel_size=3, strides=1, activation='elu', kernel_initializer='glorot_normal', padding='same'),
+                          dict(filters=128, kernel_size=3, strides=1, activation='elu', kernel_initializer='glorot_normal', padding='same'),
+                          ],
     'n_models'         :  5,
     'dense_post_args'  :  dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_post'     :  3,
