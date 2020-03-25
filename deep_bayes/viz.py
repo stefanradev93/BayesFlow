@@ -275,7 +275,7 @@ def plot_true_est_posterior(model, n_samples, param_names, n_test=None, data_gen
             
             
             # Plot approximate posterior
-            sns.distplot(theta_samples[:, i, j], kde=True, hist=True, ax=axarr[i, j], 
+            sns.distplot(theta_samples[:, i, j], kde=False, hist=True, ax=axarr[i, j], 
                             label='Estimated posterior', color='#5c92e8')
             
             # Plot lines for approximate mean, analytic mean and true data-generating value
@@ -456,7 +456,7 @@ def plot_model_samples(model, x_test, m_test, model_names, n_samples=5000,
         f.savefig("figures/{}_dirichlet.png".format(filename), dpi=600)
 
 
-def plot_confusion_matrix(m_hat, m_test, model_names, normalize=False, cmap=plt.cm.Blues, figsize=(14, 8), show=True):
+def plot_confusion_matrix(m_hat, m_test, model_names, normalize=False, cmap=plt.cm.Blues, figsize=(14, 8), annotate=True, show=True):
     """
     A function to print and plots the confusion matrix. Normalization can be applied by setting `normalize=True`.
     """
@@ -486,13 +486,15 @@ def plot_confusion_matrix(m_hat, m_test, model_names, normalize=False, cmap=plt.
              rotation_mode="anchor")
 
     # Loop over data dimensions and create text annotations.
-    fmt = '.2f' if normalize else 'd'
-    thresh = cm.max() / 2.
-    for i in range(cm.shape[0]):
-        for j in range(cm.shape[1]):
-            ax.text(j, i, format(cm[i, j], fmt),
-                    ha="center", va="center",
-                    color="white" if cm[i, j] > thresh else "black")
+
+    if annotate:
+        fmt = '.2f' if normalize else 'd'
+        thresh = cm.max() / 2.
+        for i in range(cm.shape[0]):
+            for j in range(cm.shape[1]):
+                ax.text(j, i, format(cm[i, j], fmt),
+                        ha="center", va="center",
+                        color="white" if cm[i, j] > thresh else "black")
     fig.tight_layout()
 
     if show:

@@ -8,9 +8,10 @@ __version__ = '0.1'
 __author__ = 'Stefan Radev'
 
 from collections.abc import Iterable
-
+import warnings
 import tensorflow as tf
 import numpy as np
+np.seterr(all = 'raise')
 from deep_bayes.losses import maximum_mean_discrepancy, heteroscedastic_loglik, kullback_leibler_gaussian
 
 from .utils import clip_gradients, apply_gradients
@@ -52,11 +53,20 @@ def train_online(model, optimizer, data_gen, loss_fun, iterations, batch_size, p
     # Run training loop
     for it in range(1, iterations+1):
 
-        with tf.GradientTape() as tape:
 
-            # Generate inputs for the network
+        # Generate inputs for the network
+        try:
             batch = data_gen(batch_size)
+        except RuntimeError:
+            print('Runtime warning, skipping batch...')
+            p_bar.update(1)
+            continue
+        except FloatingPointError:
+            print('Floating point error, skipping batch...')
+            p_bar.update(1)
+            continue
 
+        with tf.GradientTape() as tape:
             if method == 'flow':
                 inputs = (batch['theta'], batch['x'])
             else:
