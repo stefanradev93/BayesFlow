@@ -455,7 +455,7 @@ class SequenceNetwork(tf.keras.Model):
         """
 
         super(SequenceNetwork, self).__init__()
-        self.lstm = tf.keras.layers.CuDNNLSTM(meta['lstm_units'], kernel_initializer='glorot_normal')
+        self.lstm = tf.keras.layers.CuDNNLSTM(meta['lstm_units'])
 
         if meta['conv_meta'] is not None:
             self.conv = tf.keras.Sequential(
