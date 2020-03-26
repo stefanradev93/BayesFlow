@@ -30,11 +30,11 @@ EVIDENTIAL_GAUSSIAN = {
     'n_models'         :  400,
     'learnable_pooling': True,
     'dense_inv_args'   :  dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
-    'dense_equiv_args' :  dict(units=64, activation='elu', kernel_initializer='glorot_normal'),
+    'dense_equiv_args' :  dict(units=32, activation='elu', kernel_initializer='glorot_normal'),
     'dense_post_args'  :  dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_inv'      :  2,
     'n_dense_equiv'    :  2,
-    'n_dense_post'     :  3,
+    'n_dense_post'     :  1,
     'n_equiv'          :  2
 }
 
