@@ -462,7 +462,7 @@ class SequenceNetwork(tf.keras.Model):
                 [
                     tf.keras.layers.Conv1D(**d) for d in meta['conv_meta']      
                 ] + 
-                [tf.keras.layers.GlobalAveragePooling1D()]
+                [tf.keras.layers.GlobalMaxPooling1D()]
             )
         else:
             self.conv = None
@@ -488,6 +488,7 @@ class SequenceNetwork(tf.keras.Model):
             out_conv = self.conv(x)
             out = tf.concat([out, out_conv], axis=-1)
         return out
+
 
 
 class DeepEvidentialModel(tf.keras.Model):
