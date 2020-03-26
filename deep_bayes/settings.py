@@ -259,3 +259,18 @@ INVERTIBLE_DEFAULTS = {
     'w_decay': 0.00001,
     'initializer': 'glorot_uniform'
 }
+
+
+EVIDENTIAL_HH = {
+    'net_type'         : 'sequence',
+    'lstm_units'       :  128,
+    'conv_meta'        : [dict(filters=64, kernel_size=5, strides=2, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=64, kernel_size=5, strides=3, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=3, strides=2, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=3, strides=3, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=2, strides=2, activation='elu', kernel_initializer='glorot_normal')
+                          ],
+    'n_models'         :  3,
+    'dense_post_args'  :  dict(units=256, activation='elu', kernel_initializer='glorot_normal'),
+    'n_dense_post'     :  2,
+}
