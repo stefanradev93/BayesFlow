@@ -274,7 +274,7 @@ class MultiModelTrainer:
 
         return model_indices_oh, sim_data
                       
-    def _train_step(self, model_indices, sim_data, **args):
+    def _train_step(self, model_indices, sim_data):
         """
         Performs one step of backpropagation with the given model indices and data.
         ----------
@@ -503,7 +503,7 @@ class BasicTrainer:
 
         # Make sure n_obs is fixed, otherwise not working 
         assert type(self.n_obs) is int,\
-        'Offline training currently only works with fixed n_obs. Use online learning for varibale n_obs'
+        'Offline training currently only works with fixed n_obs. Use online learning for variable n_obs or fix n_obs to an integer value.'
 
         # Convert to a data set
         n_sim = int(sim_data.shape[0])
@@ -563,7 +563,7 @@ class BasicTrainer:
 
         # Make sure n_obs is fixed, otherwise not working 
         assert type(self.n_obs) is int,\
-        'Round-based training currently only works with fixed n_obs. Use online learning for varibale n_obs'
+        'Round-based training currently only works with fixed n_obs. Use online learning for variable n_obs or fix n_obs to an integer value.'
 
         losses = dict()
         for r in range(1, rounds+1):
@@ -608,7 +608,7 @@ class BasicTrainer:
 
         # Make sure n_obs is fixed, otherwise not working 
         assert type(self.n_obs) is int,\
-        'Offline training currently only works with fixed n_obs. Use online learning for varibale n_obs'
+        'Offline training currently only works with fixed n_obs. Use online learning for variable n_obs or fix n_obs to an integer value.'
 
         # Simulate data
         print('Simulating {} data sets upfront...'.format(n_sim))
