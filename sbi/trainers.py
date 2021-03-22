@@ -49,7 +49,7 @@ class MultiModelTrainer:
         clip_value      : float -- the value used for gradient clipping when clip_method is set to 'value' or 'norm'
         """
 
-        assert len(priors) == len(simulators), 'Number of prior should equal number is simulators'
+        assert len(priors) == len(simulators), 'The number of priors should equal the number of simulators.'
 
         # Basic attributes
         self.network = network
