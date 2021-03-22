@@ -1,0 +1,13 @@
+\begin{tabular}{llll}
+\toprule
+{} &           Accuracy &        Calibration & Overconfidence \\
+\midrule
+Evidential $\lambda=0$   &  $0.919 \pm 0.004$ &  $0.078 \pm 0.010$ &          $0.0$ \\
+Evidential $\lambda=0.5$ &  $0.917 \pm 0.006$ &  $0.097 \pm 0.012$ &          $0.0$ \\
+Evidential $\lambda=1.0$ &  $0.900 \pm 0.006$ &  $0.095 \pm 0.011$ &          $0.0$ \\
+Softmax classifier       &  $0.913 \pm 0.006$ &  $0.105 \pm 0.015$ &          $0.0$ \\
+Dropout classifier       &  $0.885 \pm 0.005$ &  $0.087 \pm 0.009$ &          $0.0$ \\
+MMD-VAE classifier       &  $0.906 \pm 0.006$ &  $0.091 \pm 0.012$ &          $0.0$ \\
+VAE classifier           &  $0.924 \pm 0.005$ &  $0.096 \pm 0.012$ &          $0.0$ \\
+\bottomrule
+\end{tabular}

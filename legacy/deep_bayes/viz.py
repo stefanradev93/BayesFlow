@@ -6,7 +6,7 @@ from sklearn.metrics import r2_score
 from sklearn.metrics import confusion_matrix
 
 
-def plot_true_est_scatter(model, X_test, theta_test, n_samples, param_names, 
+def plot_true_est_scatter(model, X_test, theta_test, n_samples, param_names, aggregator=np.mean,
                           figsize=(20, 4), theta_approx_means=None, show=True, filename=None, font_size=12):
     """Plots a scatter plot with abline of the estimated posterior means vs true values."""
 

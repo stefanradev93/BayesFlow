@@ -287,3 +287,50 @@ EVIDENTIAL_HH = {
     'dense_post_args'  :  dict(units=256, activation='elu', kernel_initializer='glorot_normal'),
     'n_dense_post'     :  2,
 }
+SOFTMAX_HH = {
+    'net_type'        : 'sequence',
+    'lstm_units'       :  128,
+    'conv_meta'        : [dict(filters=64, kernel_size=5, strides=2, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=64, kernel_size=5, strides=3, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=3, strides=2, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=3, strides=3, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=2, strides=2, activation='elu', kernel_initializer='glorot_normal')
+                          ],
+    'n_models'        : 3,
+    'dense_post_args' : dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
+    'n_dense_post'    : 2,
+    'summary_meta': {
+        'lstm_units' :  64,
+    }
+}
+
+DROPOUT_HH = {
+    'net_type'        : 'sequence',
+    'lstm_units'       :  128,
+    'conv_meta'        : [dict(filters=64, kernel_size=5, strides=2, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=64, kernel_size=5, strides=3, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=3, strides=2, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=3, strides=3, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=2, strides=2, activation='elu', kernel_initializer='glorot_normal')
+                          ],
+    'n_models'        : 3,
+    'dense_post_args' : dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
+    'n_dense_post'    : 3,
+    'dropout_rate'    : 0.5
+}
+
+
+VAE_HH = {
+    'net_type':  'sequence',
+    'n_models': 3,
+    'z_dim': 5,
+    'lstm_units'       :  128,
+    'conv_meta'        : [dict(filters=64, kernel_size=5, strides=2, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=64, kernel_size=5, strides=3, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=3, strides=2, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=3, strides=3, activation='elu', kernel_initializer='glorot_normal'),
+                          dict(filters=128, kernel_size=2, strides=2, activation='elu', kernel_initializer='glorot_normal')
+                          ],
+    'n_dense_encoder': 3,
+    'encoder_dense_args': dict(units=128, activation='elu', kernel_initializer='glorot_normal'),
+}

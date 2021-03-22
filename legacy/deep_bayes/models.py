@@ -253,7 +253,7 @@ class BayesFlow(tf.keras.Model):
         ----------
 
         Arguments:
-        x         : tf.Tensor of shape (batch_size, summary_dim) -- the conditioning data of interest
+        x         : tf.Tensor of shape (batch_size, N, x_dim) -- the conditioning data of interest
         n_samples : int -- number of samples to obtain from the approximate posterior
         to_numpy  : bool -- flag indicating whether to return the samples as a np.array or a tf.Tensor
         training  : bool -- flag used to indicate that samples are drawn are training time (BatchNorm)
@@ -342,7 +342,7 @@ class InvariantModule(tf.keras.Model):
             w = tf.nn.softmax(self.weights_layer(x), axis=1)
             w_x = tf.reduce_sum(x_emb * w, axis=1)
         else:
-            w_x = tf.reduce_mean(x_emb, axis=1)
+            w_x = tf.reduce_sum(x_emb, axis=1)
     
         # Increase representational power
         out = self.post_pooling_dense(w_x)
@@ -490,7 +490,6 @@ class SequenceNetwork(tf.keras.Model):
         return out
 
 
-
 class DeepEvidentialModel(tf.keras.Model):
 
     def __init__(self, meta, inv_xdim=False):
@@ -511,7 +510,7 @@ class DeepEvidentialModel(tf.keras.Model):
         ])
 
         # The layer to output model evidences
-        self.evidence_layer = tf.keras.layers.Dense(meta['n_models'], activation='relu')
+        self.evidence_layer = tf.keras.layers.Dense(meta['n_models'], activation='softplus')
         self.M = meta['n_models']
         self.inv_xdim = inv_xdim
 
@@ -618,11 +617,11 @@ class VAE(tf.keras.Model):
         self.M = meta['n_models']
 
         # Summary network
-        if meta['summary_type'] == 'invariant':
-            self.summary_net = InvariantNetwork(meta['summary_meta'])
-        elif meta['summary_type']  == 'sequence':
-            self.summary_net = SequenceNetwork(meta['summary_meta'])
-        elif meta['summary_type'] is None:
+        if meta['net_type'] == 'invariant':
+            self.summary_net = InvariantNetwork(meta)
+        elif meta['net_type']  == 'sequence':
+            self.summary_net = SequenceNetwork(meta)
+        elif meta['net_type'] is None:
             self.summary_net = None
         else:
             raise NotImplementedError('net_type should be either of type "invariant" or "sequence"')
@@ -758,11 +757,11 @@ class MCDropOutModel(tf.keras.Model):
         self.M = meta['n_models']
 
         # Summary network
-        if meta['summary_type'] == 'invariant':
-            self.summary_net = InvariantNetwork(meta['summary_meta'])
-        elif meta['summary_type']  == 'sequence':
-            self.summary_net = SequenceNetwork(meta['summary_meta'])
-        elif meta['summary_type'] is None:
+        if meta['net_type'] == 'invariant':
+            self.summary_net = InvariantNetwork(meta)
+        elif meta['net_type']  == 'sequence':
+            self.summary_net = SequenceNetwork(meta)
+        elif meta['net_type'] is None:
             self.summary_net = None
         else:
             raise NotImplementedError('net_type should be either of type "invariant" or "sequence"')
@@ -872,11 +871,11 @@ class SoftmaxModel(tf.keras.Model):
         self.M = meta['n_models']
 
         # Summary network
-        if meta['summary_type'] == 'invariant':
-            self.summary_net = InvariantNetwork(meta['summary_meta'])
-        elif meta['summary_type']  == 'sequence':
-            self.summary_net = SequenceNetwork(meta['summary_meta'])
-        elif meta['summary_type'] is None:
+        if meta['net_type'] == 'invariant':
+            self.summary_net = InvariantNetwork(meta)
+        elif meta['net_type']  == 'sequence':
+            self.summary_net = SequenceNetwork(meta)
+        elif meta['net_type'] is None:
             self.summary_net = None
         else:
             raise NotImplementedError('net_type should be either of type "invariant" or "sequence"')
