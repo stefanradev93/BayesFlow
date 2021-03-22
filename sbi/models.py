@@ -363,7 +363,7 @@ class BayesFlow(tf.keras.Model):
                             if inverse = False
         x               :  tf.Tensor of shape (batch_size, inp_dim) -- the transformed out, if inverse = True
         """
-
+        
         if self.summary_net is not None:
             x = self.summary_net(x)
         if inverse:
