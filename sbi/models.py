@@ -141,15 +141,24 @@ class InvariantNetwork(tf.keras.Model):
         consisting of a sequence of equivariant transforms followed by an invariant transform.
         
         Args:
-        x - tf.Tensor of shape (batch_size, N, x_dim)
+        x - tf.Tensor of shape (batch_size, n_obs, data_dim)
         
         Returns:
-        out - tf.Tensor of shape (batch_size, out_dim)
+        out - tf.Tensor of shape (batch_size, out_dim + 1)
         """
         
+        # Extract n_obs and create sqrt(N) vector
+        N = int(x.shape[1])
+        N_rep = tf.math.sqrt(N * tf.ones((x.shape[0], 1)))
+
+        # Pass through series of augmented equivariant transforms
         out_equiv = self.equiv_seq(x)
+
+        # Pass through final invariant layer and concatenate with N_rep
         out_inv = self.inv(out_equiv)
-        return out_inv
+        out = tf.concat((out_inv, N_rep), axis=-1)
+
+        return out
     
     
 class Permutation(tf.keras.Model):
@@ -331,7 +340,7 @@ class BayesFlow(tf.keras.Model):
 
     def __init__(self, meta, summary_net=None):
         """
-        Creates a chain of cINN blocks and chains operations.
+        Creates a chain of cINN blocks and chains operations with an optional summary network.
         ----------
 
         Arguments:
@@ -339,7 +348,6 @@ class BayesFlow(tf.keras.Model):
                                   keras.Dense layer
         summary_net : tf.keras.Model or None -- an optinal summary network for learning the sumstats of x
         """
-
         super(BayesFlow, self).__init__()
 
         self.cINNs = [ConditionalCouplingLayer(meta) for _ in range(meta['n_coupling_layers'])]
@@ -428,6 +436,15 @@ class BayesFlow(tf.keras.Model):
 class EvidentialNetwork(tf.keras.Model):
 
     def __init__(self, meta, summary_net=None):
+        """
+        Creates an evidential network and couples it with an optional summary network.
+        ----------
+
+        Arguments:
+        meta        : list -- a list of dictionary, where each dictionary holds parameter - value pairs for a single
+                                  keras.Dense layer
+        summary_net : tf.keras.Model or None -- an optinal summary network for learning the sumstats of x
+        """
         super(EvidentialNetwork, self).__init__()
 
         self.summary_net = summary_net
@@ -442,14 +459,14 @@ class EvidentialNetwork(tf.keras.Model):
         self.evidence_layer = tf.keras.layers.Dense(meta['n_models'], activation=meta['out_activation'])
         self.J = meta['n_models']
 
-    def call(self, x):
+    def call(self, sim_data):
         """
-        Computes evidences for model selection given a batch of data.
+        Computes evidences for model comparison given a batch of data.
         ----------
 
         Arguments:
-        x            : tf.Tensor of shape (batch_size, N, K) -- the input where N is the 'time' or 'samples' dimensions
-                        over which pooling is performed and K is the intrinsic input dimensionality
+        sim_data   : tf.Tensor of shape (batch_size, n_obs, data_dim) -- the input where n_obs is the 'time' or 'samples' dimensions
+                        over which pooling is performed and data_dim is the intrinsic input dimensionality
         ----------
 
         Returns:
@@ -457,22 +474,24 @@ class EvidentialNetwork(tf.keras.Model):
         """
 
         # Compute evidence
-        return self.evidence(x)
+        return self.evidence(sim_data)
 
-    def compute_summary(self, x):
-        """Returns the final representation before the evidence layer."""
+    def compute_summary(self, sim_data):
+        """
+        Returns the final representation before the evidence layer.
+        """
 
         # Summarize obs data if summary net available
         if self.summary_net is not None:
-            x = self.summary_net(x)
-        # Pass through dense layer
-        out = self.dense(x)
-        return out
+            sim_data = self.summary_net(sim_data)
+        return sim_data
 
-    def predict(self, x, to_numpy=True):
-        """Returns the mean, variance and uncertainty of the Dirichlet distro."""
+    def predict(self, obs_data, to_numpy=True):
+        """
+        Returns the mean, variance and uncertainty implied by the estimated Dirichlet density.
+        """
 
-        alpha = self.evidence(x)
+        alpha = self.evidence(obs_data)
         alpha0 = tf.reduce_sum(alpha, axis=1, keepdims=True)
         mean = alpha / alpha0
         var = alpha * (alpha0 - alpha) / (alpha0 * alpha0 * (alpha0 + 1))
@@ -486,23 +505,28 @@ class EvidentialNetwork(tf.keras.Model):
         return {'m_probs': mean, 'm_var': var, 'uncertainty': uncertainty}
 
     def evidence(self, x):
-        """Computes the evidence vector (alpha) of the Dirichlet distro."""
+        """
+        Computes the evidence vector (alpha + 1) as derived from the estimated Dirichlet density.
+        """
 
-        # Summarize into fixed size
+        # Summarize into fixed size, if specified
         x = self.compute_summary(x)
+
+        # Pass through dense layer
+        x = self.dense(x)
 
         # Compute eviddences
         evidence = self.evidence_layer(x)
         alpha = evidence + 1
         return alpha
 
-    def sample(self, x, n_samples, to_numpy=True):
+    def sample(self, obs_data, n_samples, to_numpy=True):
         """
         Samples posterior model probabilities from the second-order Dirichlet distro.
         ----------
 
         Arguments:
-        x         : tf.Tensor of shape (batch_size, n_points, n_features) -- the observed data
+        obs_data  : tf.Tensor of shape (n_datasets, n_obs, data_dim) -- the actually observed (or simulated) data
         n_samples : int -- number of samples to obtain from the approximate posterior (default 5000)
         to_numpy  : bool -- flag indicating whether to return the samples as a np.array or a tf.Tensor
         ----------
@@ -512,12 +536,13 @@ class EvidentialNetwork(tf.keras.Model):
         """
 
         # Compute evidential values
-        alpha = self.evidence(x)
-        N = alpha.shape[0]
+        alpha = self.evidence(obs_data)
+        n_datasets = alpha.shape[0]
 
         # Sample for each dataset
-        pm_samples = np.stack([np.random.dirichlet(alpha[n, :], size=n_samples) for n in range(N)], axis=1)
+        pm_samples = np.stack([np.random.dirichlet(alpha[n, :], size=n_samples) for n in range(n_datasets)], axis=1)
 
+        # Convert to tensor, if specified
         if not to_numpy:
              pm_samples = tf.convert_to_tensor(pm_samples, dtype=tf.float32)
         return pm_samples
