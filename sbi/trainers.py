@@ -20,8 +20,8 @@ class MetaTrainer:
 
 class MultiModelTrainer:
     
-    def __init__(self, network, model_prior, priors, simulators, loss, summary_stats=None, learning_rate=0.0005, 
-                 checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
+    def __init__(self, network, model_prior, priors, simulators, n_obs, loss, summary_stats=None, optimizer=None,
+                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing multi-model forward inference and training an
         amortized neural estimator for model comparison. If a checkpoint_path is provided, the
@@ -32,10 +32,12 @@ class MultiModelTrainer:
         Arguments:
         network     : tf.keras.Model instance -- the neural network to be optimized
         model_prior : callable -- a function returning randomly sampled model indices
-        priors      : list of callables -- each element is a function returning 
-                      randomly sampled parameter vectors
-        simulator   : list of simulators -- each element is a function implementing a process model
-        loss        : callable with three arguments: (network, m_indices, x)
+        priors      : list of callables -- each element is a function returning randomly sampled parameter vectors
+        simulators  : list of callables -- each element is a function implementing a process model with two
+                      mandatory arguments: params and n_obs
+        n_obs       : int or callable -- if int, then treated as a fixed number of observations, if callable, then
+                      treated as a function for sampling N, i.e., N ~ p(N)
+        loss        : callable with three mandatory arguments: (network, m_indices, x)
         ----------
         
         Keyword arguments:
@@ -48,22 +50,29 @@ class MultiModelTrainer:
         """
 
         assert len(priors) == len(simulators), 'Number of prior should equal number is simulators'
+
+        # Basic attributes
         self.network = network
         self.model_prior = model_prior
         self.priors = priors
         self.simulators = simulators
+        self.n_obs = n_obs
         self.loss = loss
         self.summary_stats = summary_stats
         self.n_models = len(priors)
-        
-        if tf.__version__.startswith('1'):
-            self.optimizer = tf.train.AdamOptimizer(learning_rate)
-        else:
-            self.optimizer = Adam(learning_rate)
-
         self.clip_method = clip_method
         self.clip_value = clip_value
+        
+        # Optimizer settings
+        if optimizer is None:
+            if tf.__version__.startswith('1'):
+                self.optimizer = tf.train.AdamOptimizer(learning_rate)
+            else:
+                self.optimizer = Adam(learning_rate)
+        else:
+            self.optimizer = optimizer(learning_rate)
 
+        # Checkpoint settings
         if checkpoint_path is not None:
             self.checkpoint = Checkpoint(optimizer=self.optimizer, model=self.network)
             self.manager = CheckpointManager(self.checkpoint, checkpoint_path, max_to_keep=max_to_keep)
@@ -77,7 +86,7 @@ class MultiModelTrainer:
             self.manager = None
         self.checkpoint_path = checkpoint_path
         
-    def train_online(self, epochs, iterations_per_epoch, batch_size, **args):
+    def train_online(self, epochs, iterations_per_epoch, batch_size, **kwargs):
         """
         Trains the inference network(s) via online learning. Additional keyword arguments
         will be passed to the simulators.
@@ -99,18 +108,16 @@ class MultiModelTrainer:
             with tqdm(total=iterations_per_epoch, desc='Training epoch {}'.format(ep)) as p_bar:
                 for it in range(iterations_per_epoch):
 
-                    # Generate data on-the-fly
-                    model_indices, sim_data = self._forward_inference(batch_size, **args)
-                    
-                    # Summary statistics, if given
-                    if self.summary_stats is not None:
-                        sim_data = self.summary_stats(sim_data)
+                    # Generate model indices and data on-the-fly
+                    model_indices, sim_data = self._forward_inference(batch_size, **kwargs)
 
                     # One step backprop
-                    loss = self._train_step(model_indices, sim_data, **args)
+                    loss = self._train_step(model_indices, sim_data)
 
-                    # Store loss and update progress bar
+                    # Store loss into dict
                     losses[ep].append(loss)
+
+                    # Update progress bar
                     p_bar.set_postfix_str("Epoch {0},Iteration {1},Loss: {2:.3f},Running Loss: {3:.3f}"
                     .format(ep, it, loss, np.mean(losses[ep])))
                     p_bar.update(1)
@@ -120,7 +127,7 @@ class MultiModelTrainer:
                 self.manager.save()
         return losses
 
-    def train_offline(self, epochs, batch_size, model_indices, sim_data, **args):
+    def train_offline(self, epochs, batch_size, model_indices, sim_data, **kwargs):
         """
         Trains the inference network(s) via offline learning. Additional arguments are passed
         to the train step method.
@@ -137,30 +144,34 @@ class MultiModelTrainer:
         losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations
         """
 
+        n_sim = int(sim_data.shape[0])
+
         # If model_indices is 1D, perform one-hot encoding
         if len(model_indices.shape) == 1:
+            print('One-hot-encoding model indices...')
             model_indices = to_categorical(model_indices, n_classes=self.n_models)
 
+        # Compute hand-crafted summary statistics, if given
+        if self.summary_stats is not None:
+            print('Computing hand-crafted summary statistics...')
+            sim_data = self.summary_stats(sim_data)
+
         # Convert to a tensorflow data set. Assumes all data sets have the same shape
-        n_sim = int(sim_data.shape[0])
+        print('Converting {} simulations to a TensorFlow data set...'.format(n_sim))
         data_set = tf.data.Dataset.from_tensor_slices((model_indices, sim_data)).shuffle(n_sim).batch(batch_size)
 
         losses = dict()
         for ep in range(1, epochs+1):
             losses[ep] = []
-            with tqdm(total=n_sim // batch_size, desc='Training epoch {}'.format(ep)) as p_bar:
+            with tqdm(total=int(np.floor(n_sim / batch_size)), desc='Training epoch {}'.format(ep)) as p_bar:
                 # Loop through dataset
                 for bi, batch in enumerate(data_set):
 
                     # Extract params from batch
                     model_indices_b, sim_data_b = batch[0], batch[1]
 
-                    # Compute hand-crafted summary statistics, if given
-                    if self.summary_stats is not None:
-                        sim_data_b = self.summary_stats(sim_data_b)
-
                     # One step backprop
-                    loss = self._train_step(model_indices_b, sim_data_b, **args)
+                    loss = self._train_step(model_indices_b, sim_data_b)
 
                     # Store loss and update progress bar
                     losses[ep].append(loss)
@@ -173,7 +184,7 @@ class MultiModelTrainer:
                 self.manager.save()
         return losses
 
-    def train_rounds(self, epochs, rounds, sim_per_round, batch_size, **args):
+    def train_rounds(self, epochs, rounds, sim_per_round, batch_size, **kwargs):
         """
         Trains the inference network(s) via round-based learning.
         ----------
@@ -189,37 +200,35 @@ class MultiModelTrainer:
         losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations
         """
 
+        # Make sure n_obs is fixed, otherwise not working 
+        assert type(self.n_obs) is int,\
+        'Round-based training currently only works with fixed n_obs. Use online learning for varibale n_obs'
+
+        losses = dict()
         for r in range(1, rounds+1):
             
-            # Generation of data
+            # Data generation step
             if r == 1:
+                # Initial simulation
                 print('Simulating initial {} data sets...'.format(sim_per_round))
-                # Generate data on-the-fly
-                model_indices, sim_data = self._forward_inference(sim_per_round)
+                model_indices, sim_data = self._forward_inference(sim_per_round, **kwargs)
 
-                # Compute hand-crafted summary statistics, if given
-                if self.summary_stats is not None:
-                    sim_data = self.summary_stats(sim_data)
             else:
-                # Add data to previous data
+                # Further simulations
                 print('Simulating new {} data sets and appending to previous...'.format(sim_per_round))
                 print('New total number of simulated data sets: {}'.format(sim_per_round * r))
-               
-               # Generate data on-the-fly
-                model_indices_r, sim_data_r = self._forward_inference(sim_per_round, **args)
-                
-                # Compute hand-crafted summary statistics, if given
-                if self.summary_stats is not None:
-                    sim_data_r = self.summary_stats(sim_data_r)
+                model_indices_r, sim_data_r = self._forward_inference(sim_per_round, **kwargs)
 
                 # Append to previous
                 model_indices = np.concatenate((model_indices, model_indices_r), axis=0)
                 sim_data = np.concatenate((sim_data, sim_data_r), axis=0)
 
             # Train offline with generated data and model indices
-            self.train_offline(epochs, batch_size, model_indices, sim_data, **args)
+            losses_r = self.train_offline(epochs, batch_size, model_indices, sim_data)
+            losses[r] = losses_r
+        return losses
 
-    def _forward_inference(self, n_sim, **args):
+    def _forward_inference(self, n_sim, **kwargs):
         """
         Performs one step of multi-model forward inference.
         ----------
@@ -236,6 +245,12 @@ class MultiModelTrainer:
         # Sample model indices
         m_indices = self.model_prior(n_sim)
 
+        # Sample n_obs or use fixed
+        if type(self.n_obs) is int:
+            n_obs = self.n_obs
+        else:
+            n_obs = self.n_obs()
+
         # Prepare a placeholder for x
         sim_data = []
         for m_idx in m_indices:
@@ -243,8 +258,8 @@ class MultiModelTrainer:
             # Draw from model prior theta ~ p(theta | m)
             theta_m = self.priors[m_idx]()
             
-            # Generate data from x = g_m(theta, noise) <=> x ~ p(x | theta, m)
-            x_m = self.simulators[m_idx](theta_m, **args)
+            # Generate data from x_n = g_m(theta, noise) <=> x ~ p(x | theta, m)
+            x_m = self.simulators[m_idx](theta_m, n_obs, **kwargs)
             
             # Store data and params
             sim_data.append(x_m)
@@ -252,6 +267,10 @@ class MultiModelTrainer:
         # One-hot encode model indices and convert data to array
         model_indices_oh = to_categorical(m_indices.astype(np.float32), num_classes=self.n_models)
         sim_data = np.array(sim_data, dtype=np.float32)
+
+        # Compute hand-crafted summary statistics, if given
+        if self.summary_stats is not None:
+            sim_data = self.summary_stats(sim_data)
 
         return model_indices_oh, sim_data
                       
@@ -262,7 +281,7 @@ class MultiModelTrainer:
         
         Arguments:
         model_indices : np.array (np.float32) of shape (batch_size, n_models) -- array of one-hot-encoded model indices
-        sim_daya      : np.array (np.float32) of shape (batch_size, N, data_dim) -- array of simulated data sets       
+        sim_data      : np.array (np.float32) of shape (batch_size, N, data_dim) -- array of simulated data sets       
         ----------
 
         Returns:
@@ -305,6 +324,7 @@ class MultiModelTrainer:
         status = self.checkpoint.restore(self.manager.latest_checkpoint)
         return status
 
+
 class BasicTrainer:
     
     def __init__(self, network, prior, simulator, n_obs, loss, summary_stats=None, optimizer=None,
@@ -319,7 +339,7 @@ class BasicTrainer:
         Arguments:
         network     : tf.keras.Model instance -- the neural network to be optimized
         prior       : callable -- a function with a batch_size param returning randomly sampled parameter vectors
-        simulator   : callable -- a function implementing a process model taking params and N as mandatory args
+        simulator   : callable -- a function implementing a process model taking params and n_obs as mandatory args
         n_obs       : int or callable -- if int, then treated as a fixed number of observations, if callable, then
                                          treated as a function for sampling N, i.e., N ~ p(N)
         loss        : callable with three arguments: (network, m_indices, x) -- the loss function
@@ -421,7 +441,7 @@ class BasicTrainer:
             # Store after each epoch, if specified
             if self.manager is not None:
                 self.manager.save()
-            return losses
+        return losses
         
     def train_online(self, epochs, iterations_per_epoch, batch_size, **kwargs):
         """
@@ -480,6 +500,10 @@ class BasicTrainer:
         Returns:
         losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations
         """
+
+        # Make sure n_obs is fixed, otherwise not working 
+        assert type(self.n_obs) is int,\
+        'Offline training currently only works with fixed n_obs. Use online learning for varibale n_obs'
 
         # Convert to a data set
         n_sim = int(sim_data.shape[0])
@@ -561,8 +585,8 @@ class BasicTrainer:
 
             # Train offline with generated stuff
             losses_r = self.train_offline(epochs, batch_size, params, sim_data)
-
             losses[r] = losses_r
+
         return losses
 
     def simulate_and_train_offline(self, n_sim, epochs, batch_size, **kwargs):
@@ -581,6 +605,10 @@ class BasicTrainer:
         Returns:
         losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations
         """
+
+        # Make sure n_obs is fixed, otherwise not working 
+        assert type(self.n_obs) is int,\
+        'Offline training currently only works with fixed n_obs. Use online learning for varibale n_obs'
 
         # Simulate data
         print('Simulating {} data sets upfront...'.format(n_sim))
