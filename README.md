@@ -18,6 +18,8 @@ Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). Baye
 
 https://arxiv.org/abs/2003.06281
 
+A GENERAL 
+
 Currently, the following training approaches are implemented:
 1. Online training
 2. Offline training (external simulations)
@@ -25,10 +27,27 @@ Currently, the following training approaches are implemented:
 4. Experience replay
 5. Round-based training
 
+In order to ensure algorithmic alignment between the neural approximator and the computational model (simulator), we recommend the following neural architectural considerations:
+
+### Stateless (memoryless) models
+Stateless models typically generate IID observations, which imply exchangeability and induce permutation invariant posteriors. In other words, changing (permuting) the order of individual elements should not change the associated likelihood or posterior. An example BayesFlow architecture for tackling stateless models is depicted below.
+
+![Stateless](https://github.com/stefanradev93/BayesFlow/blob/master/img/Stateless_Models.png)
+
+You can read more about designing invariant networks in the excellent paper by Benjamin Bloem-Reddy and Yee Whye Teh, available at https://arxiv.org/abs/1901.06082.
+
+
+### Stateful models
+Stateful models incorporate some form of memory and are thus capable of generating observations with complex dependencies (i.e., non-IID). A prime example are dynamic models, which typically describe the evolution trajectory of a system or a process, such as an infectious disease, over time. Observations generated from such models are usually the solution of a stochastic differential equation(SDE) or time-series and thus imply a more complex probabilistic symmetry than those generated from memoryless models. An example BayesFlow architecture for tackling stateful models is depicted below.
+
+![Stateful](https://github.com/stefanradev93/BayesFlow/blob/master/img/Stateful_Models.png)
+
+We used the above architecture for modeling the early Covid-19 outbreak in Germany: https://arxiv.org/abs/2010.00300.
+
 ## Model comparison
 
 The algorithm for model comparison is based on our paper:
 
-Radev, S. T., D'Alessandro, M., Bürkner, P. C., Mertens, U. K., Voss, A., & Köthe, U. (2020). Amortized bayesian model comparison with evidential deep learning. <em>arXiv preprint arXiv:2004.10629</em>, available for free at:
+Radev, S. T., D'Alessandro, M., Mertens, U. K., Voss, A., & Köthe, U.,Bürkner, P. C. (2020). Amortized bayesian model comparison with evidential deep learning. <em>arXiv preprint arXiv:2004.10629</em>, available for free at:
 
 https://arxiv.org/abs/2004.10629
