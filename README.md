@@ -12,13 +12,11 @@ https://arxiv.org/abs/2005.03899
 
 ## Parameter estimation
 
-The algorithm for parameter estimation is based on our paper:
+The BayesFlow method incorporates a *summary network* and an *inference network* which are jointly optimized to invert a complex computational model (simulator). The summary network is responsible for learning the most informative data representations (i.e., summary statistics) in an end-to-end manner. The inference network is responsible for learning an invertible mapping between the posterior and an easy-to-sample-from latent space (e.g., Gaussian) for *any* possible observation or set of observations arising from the simulator. The BayesFlow method for amortized parameter estimation is based on our paper:
 
 Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. <em>IEEE Transactions on Neural Networks and Learning Systems</em>, available for free at:
 
 https://arxiv.org/abs/2003.06281
-
-The BayesFlow method incorporates a *summary network* and an *inference network* which are jointly optimized to invert a complex computational model (simulator). The summary network is responsible for learning the most informative data representations (i.e., summary statistics) in an end-to-end manner. The inference network is responsible for learning an invertible mapping between the posterior and an easy-to-sample-from latent space (e.g., Gaussian) for *any* possible observation or set of observations arising from the simulator.   
 
 The general workflow (training and inference phase) with BayesFlow is illustrated below.
 
