@@ -18,6 +18,8 @@ Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). Baye
 
 https://arxiv.org/abs/2003.06281
 
+The BayesFlow method incorporates a *summary network* and an *inference network* which are jointly optimized to invert a complex computational model (simulator). The summary network is responsible for learning the most informative data representations (i.e., summary statistics) in an end-to-end manner. The inference network is responsible for learning an invertible mapping between the posterior and an easy-to-sample-from latent space (e.g., Gaussian) for *any* possible observation or set of observations arising from the simulator.   
+
 The general workflow (training and inference phase) with BayesFlow is illustrated below.
 
 ![BayesFlow](https://github.com/stefanradev93/BayesFlow/blob/master/img/BayesFlow.png)
