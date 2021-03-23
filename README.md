@@ -18,7 +18,9 @@ Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). Baye
 
 https://arxiv.org/abs/2003.06281
 
-A GENERAL 
+The general workflow (training and inference phase) with BayesFlow is illustrated below.
+
+![BayesFlow](https://github.com/stefanradev93/BayesFlow/blob/master/img/BayesFlow.png)
 
 Currently, the following training approaches are implemented:
 1. Online training
