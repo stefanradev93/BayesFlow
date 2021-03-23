@@ -6,7 +6,7 @@ when working with intractable simulators whose behavior as a whole is too comple
 
 ![Overview](https://github.com/stefanradev93/BayesFlow/blob/master/img/high_level_framework.png)
 
-A short conference paper reviewing amortized inference with a focus on cognitive modeling can be found here:
+A short conference paper reviewing amortized Bayesian inference with a focus on cognitive modeling can be found here:
 
 https://arxiv.org/abs/2005.03899
 
