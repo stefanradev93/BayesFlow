@@ -46,6 +46,11 @@ Stateful models incorporate some form of memory and are thus capable of generati
 
 We used the above architecture for modeling the early Covid-19 outbreak in Germany: https://arxiv.org/abs/2010.00300.
 
+### Joint models
+Joint models present an attempt to account for different processes (e.g., neural and cognitive) within a single composite model. Thus, joint models integrate different sources and types of data and require morec omplex summary architectures. An example BayesFlow architecture for three hypothetical data sources is depicted below.
+
+![Joint](https://github.com/stefanradev93/BayesFlow/blob/master/img/Joint_Models.png)
+
 ## Model comparison
 
 The algorithm for model comparison is based on our paper:
