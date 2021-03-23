@@ -85,6 +85,8 @@ class MultiModelTrainer:
             self.checkpoint = None
             self.manager = None
         self.checkpoint_path = checkpoint_path
+
+        # TODO - make sure forward inference goes through
         
     def train_online(self, epochs, iterations_per_epoch, batch_size, **kwargs):
         """
@@ -297,7 +299,7 @@ class MultiModelTrainer:
         gradients = tape.gradient(loss, self.network.trainable_variables)
         self._apply_gradients(gradients, self.network.trainable_variables)  
         
-        return loss
+        return loss.numpy()
         
     def _apply_gradients(self, gradients, tensors):
         """

@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score, confusion_matrix
+from sklearn.calibration import calibration_curve
 import numpy as np
 import seaborn as sns
 import pandas as pd
@@ -121,18 +122,18 @@ def plot_sbc(theta_samples, theta_test, param_names, bins=25, dpi=300,
     return f
 
 
-def plot_confusion_matrix(m_hat, m_test, model_names, normalize=False, 
+def plot_confusion_matrix(m_true, m_pred, model_names, normalize=False, 
                           cmap=plt.cm.Blues, figsize=(14, 8), annotate=True, show=True):
     """
     A function to print and plots the confusion matrix. Normalization can be applied by setting `normalize=True`.
     """
 
     # Take argmax of test
-    m_test = np.argmax(m_test.numpy(), axis=1).astype(np.int32)
+    m_true = np.argmax(m_true.numpy(), axis=1).astype(np.int32)
 
 
     # Compute confusion matrix
-    cm = confusion_matrix(m_test, m_hat)
+    cm = confusion_matrix(m_true, m_pred)
 
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
@@ -166,3 +167,84 @@ def plot_confusion_matrix(m_hat, m_test, model_names, normalize=False,
     if show:
         plt.show()
     return fig
+
+def expected_calibration_error(m_true, m_pred, n_bins=15):
+    """
+    Estimates the calibration error of a model comparison neural network.
+    Make sure that m_true are one-hot encoded classes!
+    """
+
+    # Convert tf.Tensors to numpy, if passed
+    if type(m_true) is not np.ndarray:
+        m_true = m_true.numpy() 
+    if type(m_pred) is not np.ndarray:
+        m_pred = m_pred.numpy()
+    
+    # Extract number of models and prepare containers
+    n_models = m_true.shape[1]
+    cal_errs = []
+    probs = []
+
+    # Loop for each model and compute calibration errs per bin
+    for k in range(n_models):
+
+        y_true = (m_true.argmax(axis=1) == k).astype(np.float32)
+        y_prob = m_pred[:, k]
+        prob_true, prob_pred = calibration_curve(y_true, y_prob, n_bins=n_bins)
+
+        cal_err = np.mean(np.abs(prob_true - prob_pred))
+        cal_errs.append(cal_err)
+        probs.append((prob_true, prob_pred))
+
+    return np.array(cal_errs), np.array(probs)
+
+
+def plot_calibration_curves(cal_probs, cal_errs, model_names, font_size=12, figsize=(12, 4)):
+    """
+    Plots the calibration curves for a model comparison problem.
+    """
+
+    plt.rcParams['font.size'] = 12
+    n_models = len(model_names)
+
+    # Determine figure layout
+    if n_models >= 6:
+        n_col = int(np.sqrt(n_models))
+        n_row = int(np.sqrt(n_models)) + 1
+    else:
+        n_col = n_models
+        n_row = 1
+
+    # Initialize figure
+    f, axarr = plt.subplots(n_row, n_col, figsize=figsize)
+    if n_row > 1:
+        axarr = axarr.flat
+
+    # Loop through models
+    for i, ax in enumerate(axarr.flat):
+
+        # Plot calibration curve
+        ax.plot(cal_errs[i, 0, :], cal_errs[i, 1, :])
+
+        # Plot AB line
+        ax.plot(ax.get_xlim(), ax.get_xlim(), '--', color='black')
+
+        # Tweak plot
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.set_xlim([0, 1])
+        ax.set_ylim([0, 1])
+        ax.set_xlabel('Accuracy')
+        ax.set_ylabel('Confidence')
+        ax.set_xticks([0.2, 0.4, 0.6, 0.8, 1.0])
+        ax.set_yticks([0.2, 0.4, 0.6, 0.8, 1.0])
+        ax.text(0.1, 0.9, r'$\widehat{ECE}$ = {0:.3f}'.format(cal_errs[i]),
+                        horizontalalignment='left',
+                        verticalalignment='center',
+                        transform=ax.transAxes,
+                        size=12)
+
+        # Set title
+        ax.set_title(model_names[i])
+    f.tight_layout()
+    return f
