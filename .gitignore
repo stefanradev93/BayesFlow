@@ -1,6 +1,7 @@
 figures/
 sim_data/
 hierarchical/
+playground/
 __pycache__/
 .ipynb_checkpoints/
 diffusion_api.h
