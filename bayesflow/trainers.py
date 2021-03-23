@@ -18,7 +18,7 @@ class MetaTrainer:
         raise NotImplementedError('Trainer under construction')
     
 
-class MultiModelTrainer:
+class ModelComparisonTrainer:
     
     def __init__(self, network, model_prior, priors, simulators, n_obs, loss, summary_stats=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
@@ -327,9 +327,9 @@ class MultiModelTrainer:
         return status
 
 
-class BasicTrainer:
+class ParameterEstimationTrainer:
     
-    def __init__(self, network, prior, simulator, n_obs, loss, summary_stats=None, optimizer=None,
+    def __init__(self, network, prior, simulator, loss, summary_stats=None, optimizer=None,
                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing single-model forward inference and training an
@@ -340,10 +340,8 @@ class BasicTrainer:
         
         Arguments:
         network     : tf.keras.Model instance -- the neural network to be optimized
-        prior       : callable -- a function with a batch_size param returning randomly sampled parameter vectors
+        prior       : callable -- a function with a batch_size argument returning randomly sampled parameter vectors
         simulator   : callable -- a function implementing a process model taking params and n_obs as mandatory args
-        n_obs       : int or callable -- if int, then treated as a fixed number of observations, if callable, then
-                                         treated as a function for sampling N, i.e., N ~ p(N)
         loss        : callable with three arguments: (network, m_indices, x) -- the loss function
         ----------
         
@@ -361,11 +359,11 @@ class BasicTrainer:
         self.network = network
         self.prior = prior
         self.simulator = simulator
-        self.n_obs = n_obs
         self.loss = loss
         self.summary_stats = summary_stats
         self.clip_method = clip_method
         self.clip_value = clip_value
+        self.n_obs = None
         
         # Optimizer settings
         if optimizer is None:
@@ -393,7 +391,7 @@ class BasicTrainer:
         # Do some basic preliminary sanity checks
         self._check_consistency()
 
-    def train_experience_replay(self, epochs, batch_size, iterations_per_epoch, capacity, **kwargs):
+    def train_experience_replay(self, epochs, batch_size, iterations_per_epoch, capacity, n_obs, **kwargs):
         """
         Trains the inference network(s) via experience replay. 
         
@@ -405,6 +403,8 @@ class BasicTrainer:
         batch_size           : int -- number of simulations to perform at each backprop step
         iterations_per_epoch : int -- number of batch simulations to perform per epoch
         capacy               : int -- max number of batches to store in buffer
+        n_obs                : int or callable -- if int, then treated as a fixed number of observations, if callable, then
+                                         treated as a function for sampling N, i.e., N ~ p(N)
         
         ----------
 
@@ -421,9 +421,14 @@ class BasicTrainer:
             with tqdm(total=iterations_per_epoch, desc='Training epoch {}'.format(ep)) as p_bar:
 
                 for it in range(1, iterations_per_epoch+1):
-
+                    
+                    # Determine n_obs and generate data on-the-fly
+                    if type(n_obs) is int:
+                        n_obs_it = n_obs
+                    else:
+                        n_obs_it = n_obs()
                     # Simulate and add to buffer
-                    params, sim_data = self._forward_inference(batch_size, **kwargs)
+                    params, sim_data = self._forward_inference(batch_size, n_obs_it, **kwargs)
                     mem.store(params, sim_data)
 
                     # Sample from buffer
@@ -445,7 +450,7 @@ class BasicTrainer:
                 self.manager.save()
         return losses
         
-    def train_online(self, epochs, iterations_per_epoch, batch_size, **kwargs):
+    def train_online(self, epochs, iterations_per_epoch, batch_size, n_obs, **kwargs):
         """
         Trains the inference network(s) via online learning. Additional keyword arguments
         are passed to the simulators.
@@ -455,6 +460,8 @@ class BasicTrainer:
         epochs               : int -- number of epochs (and number of times a checkpoint is stored)
         iterations_per_epoch : int -- number of batch simulations to perform per epoch
         batch_size           : int -- number of simulations to perform at each backprop step
+        n_obs                : int or callable -- if int, then treated as a fixed number of observations, if callable, then
+                                         treated as a function for sampling N, i.e., N ~ p(N)
         ----------
 
         Returns:
@@ -467,8 +474,12 @@ class BasicTrainer:
             with tqdm(total=iterations_per_epoch, desc='Training epoch {}'.format(ep)) as p_bar:
                 for it in range(1, iterations_per_epoch+1):
 
-                    # Generate data on-the-fly
-                    params, sim_data = self._forward_inference(batch_size, **kwargs)
+                    # Determine n_obs and generate data on-the-fly
+                    if type(n_obs) is int:
+                        n_obs_it = n_obs
+                    else:
+                        n_obs_it = n_obs()
+                    params, sim_data = self._forward_inference(batch_size, n_obs_it, **kwargs)
 
                     # One step backprop
                     loss = self._train_step(params, sim_data)
@@ -502,10 +513,6 @@ class BasicTrainer:
         Returns:
         losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations
         """
-
-        # Make sure n_obs is fixed, otherwise not working 
-        assert type(self.n_obs) is int,\
-        'Offline training currently only works with fixed n_obs. Use online learning for variable n_obs or fix n_obs to an integer value.'
 
         # Convert to a data set
         n_sim = int(sim_data.shape[0])
@@ -545,7 +552,7 @@ class BasicTrainer:
                 self.manager.save()
         return losses
 
-    def train_rounds(self, epochs, rounds, sim_per_round, batch_size, **kwargs):
+    def train_rounds(self, epochs, rounds, sim_per_round, batch_size, n_obs, **kwargs):
         """
         Trains the inference network(s) via round-based learning. Additional arguments are
         passed to the simulator.
@@ -556,6 +563,7 @@ class BasicTrainer:
         rounds         : int -- number of rounds to perform 
         sim_per_round  : int -- number of simulations per round
         batch_size     : int -- number of simulations to perform at each backprop step
+        n_obs          : int -- number of observations for each data set
         ----------
 
         Returns:
@@ -564,7 +572,7 @@ class BasicTrainer:
         """
 
         # Make sure n_obs is fixed, otherwise not working 
-        assert type(self.n_obs) is int,\
+        assert type(n_obs) is int,\
         'Round-based training currently only works with fixed n_obs. Use online learning for variable n_obs or fix n_obs to an integer value.'
 
         losses = dict()
@@ -574,12 +582,12 @@ class BasicTrainer:
             if r == 1:
                 # Simulate initial data
                 print('Simulating initial {} data sets...'.format(sim_per_round))
-                params, sim_data = self._forward_inference(sim_per_round, **kwargs)
+                params, sim_data = self._forward_inference(sim_per_round, n_obs, **kwargs)
             else:
                 # Simulate further data
                 print('Simulating new {} data sets and appending to previous...'.format(sim_per_round))
                 print('New total number of simulated data sets: {}'.format(sim_per_round * r))
-                params_r, sim_data_r = self._forward_inference(sim_per_round, **kwargs)
+                params_r, sim_data_r = self._forward_inference(sim_per_round, n_obs, **kwargs)
 
                 # Add new simulations to previous data
                 params = np.concatenate((params, params_r), axis=0)
@@ -591,7 +599,7 @@ class BasicTrainer:
 
         return losses
 
-    def simulate_and_train_offline(self, n_sim, epochs, batch_size, **kwargs):
+    def simulate_and_train_offline(self, n_sim, epochs, batch_size, n_obs, **kwargs):
         """
         Simulates n_sim data sets and then trains the inference network(s) via offline learning. 
 
@@ -602,19 +610,20 @@ class BasicTrainer:
         n_sim          : int -- total number of simulations to perform
         epochs         : int -- number of epochs (and number of times a checkpoint is stored)
         batch_size     : int -- number of simulations to perform at each backprop step
+        n_obs          : int -- number of observations for each dataset
         ----------
 
         Returns:
         losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations
         """
 
-        # Make sure n_obs is fixed, otherwise not working 
-        assert type(self.n_obs) is int,\
+        # Make sure n_obs is fixed, otherwise not working, for now
+        assert type(n_obs) is int,\
         'Offline training currently only works with fixed n_obs. Use online learning for variable n_obs or fix n_obs to an integer value.'
 
         # Simulate data
         print('Simulating {} data sets upfront...'.format(n_sim))
-        params, sim_data = self._forward_inference(n_sim, summarize=False, **kwargs)
+        params, sim_data = self._forward_inference(n_sim, n_obs, summarize=False, **kwargs)
 
         # Train offlines
         losses = self.train_offline(epochs, batch_size, params, sim_data)
@@ -630,13 +639,15 @@ class BasicTrainer:
         status = self.checkpoint.restore(self.manager.latest_checkpoint)
         return status
 
-    def _forward_inference(self, n_sim, summarize=True, **kwargs):
+    def _forward_inference(self, n_sim, n_obs, summarize=True, **kwargs):
         """
         Performs one step of multi-model forward inference.
         ----------
         
         Arguments:
         n_sim : int -- number of simulation to perform at the given step (i.e., batch size)
+        n_obs : int or callable -- if int, then treated as a fixed number of observations, if callable, then
+                                   treated as a function for sampling N, i.e., N ~ p(N)
         ----------
 
         Kyeword arguments:
@@ -649,13 +660,7 @@ class BasicTrainer:
 
         # Sample from prior n_sim times, return shape is (batch_size, n_param)
         params = self.prior(n_sim)
-
-        # Fixed or variable-size number of observations (i.e., trial numbers or time-steps)
-        if type(self.n_obs) is int:
-            n_obs = self.n_obs
-        else:
-            n_obs = self.n_obs()
-
+        
         # Simulate data with sampled parameters and n_obs
         # Return shape is (batch_size, n_obs, data_dim)
         sim_data = self.simulator(params, n_obs, **kwargs)
@@ -714,7 +719,7 @@ class BasicTrainer:
 
         # Run forward inference with n_sim=2 and catch any exception
         try:
-            _, sim_data = self._forward_inference(2)
+            _, sim_data = self._forward_inference(2, n_obs=10)
         except Exception as err:
             raise SimulationError(repr(err))
 
@@ -726,4 +731,6 @@ class BasicTrainer:
                 raise SummaryStatsError(repr(err))
 
         # TODO: Run checks whether the network works with the data format
+
+        # TODO: Run checks that loss works with the provided network
 

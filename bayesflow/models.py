@@ -335,7 +335,7 @@ class ConditionalCouplingLayer(tf.keras.Model):
             return u
 
 
-class BayesFlow(tf.keras.Model):
+class InvertibleNetwork(tf.keras.Model):
     """Implements a chain of conditional invertible blocks for Bayesian parameter inference."""
 
     def __init__(self, meta, summary_net=None):
@@ -348,7 +348,7 @@ class BayesFlow(tf.keras.Model):
                                   keras.Dense layer
         summary_net : tf.keras.Model or None -- an optinal summary network for learning the sumstats of x
         """
-        super(BayesFlow, self).__init__()
+        super(InvertibleNetwork, self).__init__()
 
         self.cINNs = [ConditionalCouplingLayer(meta) for _ in range(meta['n_coupling_layers'])]
         self.summary_net = summary_net
@@ -402,6 +402,7 @@ class BayesFlow(tf.keras.Model):
     def sample(self, x, n_samples, to_numpy=True):
         """
         Samples from the inverse model given a single instance y or a batch of instances.
+        TODO: - generic base distribution
         ----------
 
         Arguments:
