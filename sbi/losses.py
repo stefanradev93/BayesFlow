@@ -89,7 +89,7 @@ def log_loss(network, model_indices, sim_data, lambd=1.0):
     model_probs = tf.clip_by_value(model_probs, 1e-15, 1 - 1e-15)
 
     # Actual loss + regularization (if given)
-    loss = -tf.reduce_mean(tf.reduce_sum(model_indices * tf.log(model_probs), axis=1))
+    loss = -tf.reduce_mean(tf.reduce_sum(model_indices * tf.math.log(model_probs), axis=1))
     if lambd > 0:
         kl = kl_dirichlet(model_indices, alpha)
         loss = loss + lambd * kl

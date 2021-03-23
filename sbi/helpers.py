@@ -1,7 +1,6 @@
 import tensorflow as tf
 
 
-
 def clip_gradients(gradients, clip_value=5., clip_method='norm'):
     """
     Peforms gradient clipping on a list of gradients by using either value
