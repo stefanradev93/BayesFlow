@@ -168,6 +168,7 @@ def plot_confusion_matrix(m_true, m_pred, model_names, normalize=False,
         plt.show()
     return fig
 
+
 def expected_calibration_error(m_true, m_pred, n_bins=15):
     """
     Estimates the calibration error of a model comparison neural network.
