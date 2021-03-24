@@ -203,8 +203,7 @@ class CouplingNet(tf.keras.Model):
         ----------
 
         Arguments:
-        meta  : list -- a list of dictionaries, wherein each dictionary holds parameter - value pairs for a single
-                       tf.keras.Dense layer.
+        meta  : dict -- a dictionary which holds arguments for a dense layer.
         n_out : int  -- number of outputs of the coupling net
         """
 
@@ -224,8 +223,8 @@ class CouplingNet(tf.keras.Model):
         """
         Concatenates x and y and performs a forward pass through the coupling net.
         Arguments:
-        params : tf.Tensor of shape (batch_size, inp_dim)     -- the parameters x ~ p(x|y) of interest
-        x      : tf.Tensor of shape (batch_size, summary_dim) -- the summarized conditional data of interest y = sum(y)
+        params : tf.Tensor of shape (batch_size, n_params//2) -- the split parameters theta ~ p(theta) of interest
+        x      : tf.Tensor of shape (batch_size, summary_dim) -- the summarized conditional data of interest x = sum(x)
         """
 
         inp = tf.concat((params, x), axis=-1)
