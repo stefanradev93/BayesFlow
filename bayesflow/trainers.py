@@ -339,7 +339,7 @@ class ParameterEstimationTrainer:
         ----------
         
         Arguments:
-        network     : tf.keras.Model instance -- the neural network to be optimized
+        network     : bayesflow.Amortizer instance -- the neural architecture to be optimized
         prior       : callable -- a function with a batch_size argument returning randomly sampled parameter vectors
         simulator   : callable -- a function implementing a process model taking params and n_obs as mandatory args
         loss        : callable with three arguments: (network, m_indices, x) -- the loss function
@@ -461,7 +461,7 @@ class ParameterEstimationTrainer:
         iterations_per_epoch : int -- number of batch simulations to perform per epoch
         batch_size           : int -- number of simulations to perform at each backprop step
         n_obs                : int or callable -- if int, then treated as a fixed number of observations, if callable, then
-                                         treated as a function for sampling N, i.e., N ~ p(N)
+                               treated as a function for sampling N, i.e., N ~ p(N)
         ----------
 
         Returns:
@@ -563,7 +563,7 @@ class ParameterEstimationTrainer:
         rounds         : int -- number of rounds to perform 
         sim_per_round  : int -- number of simulations per round
         batch_size     : int -- number of simulations to perform at each backprop step
-        n_obs          : int -- number of observations for each data set
+        n_obs          : int -- number of observations (fixed) for each data set
         ----------
 
         Returns:
