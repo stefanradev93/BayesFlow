@@ -12,7 +12,7 @@ A short conference paper reviewing amortized Bayesian inference with a focus on 
 
 https://arxiv.org/abs/2005.03899
 
-## Parameter Estimation
+## Parameter Estimation with BayesFlow
 
 The BayesFlow method incorporates a *summary network* and an *inference network* which are jointly optimized to invert a complex computational model (simulator). The summary network is responsible for learning the most informative data representations (i.e., summary statistics) in an end-to-end manner. The inference network is responsible for learning an invertible mapping between the posterior and an easy-to-sample-from latent space (e.g., Gaussian) for *any* possible observation or set of observations arising from the simulator. The BayesFlow method for amortized parameter estimation is based on our paper:
 
@@ -53,7 +53,7 @@ Joint models present an attempt to account for different processes (e.g., neural
 
 ![Joint](https://github.com/stefanradev93/BayesFlow/blob/master/img/Joint_Models.png)
 
-## Model Comparison
+## Model Comparison with BayesFlow
 
 The algorithm for model comparison is based on our paper:
 
