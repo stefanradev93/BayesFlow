@@ -436,7 +436,7 @@ class InvertibleNetwork(tf.keras.Model):
 
 class EvidentialNetwork(tf.keras.Model):
 
-    def __init__(self, meta, summary_net=None):
+    def __init__(self, meta):
         """
         Creates an evidential network and couples it with an optional summary network.
         ----------
@@ -444,11 +444,8 @@ class EvidentialNetwork(tf.keras.Model):
         Arguments:
         meta        : list -- a list of dictionary, where each dictionary holds parameter - value pairs for a single
                                   keras.Dense layer
-        summary_net : tf.keras.Model or None -- an optinal summary network for learning the sumstats of x
         """
         super(EvidentialNetwork, self).__init__()
-
-        self.summary_net = summary_net
 
         # A network to increase representation power (post-pooling)
         self.dense = tf.keras.Sequential([
@@ -474,18 +471,8 @@ class EvidentialNetwork(tf.keras.Model):
         alpha      : tf.Tensor of shape (batch_size, n_models) -- the model evidences
         """
 
-        # Compute evidence
+        # Compute and return evidence
         return self.evidence(sim_data)
-
-    def compute_summary(self, sim_data):
-        """
-        Returns the final representation before the evidence layer.
-        """
-
-        # Summarize obs data if summary net available
-        if self.summary_net is not None:
-            sim_data = self.summary_net(sim_data)
-        return sim_data
 
     def predict(self, obs_data, to_numpy=True):
         """
@@ -508,15 +495,16 @@ class EvidentialNetwork(tf.keras.Model):
     def evidence(self, x):
         """
         Computes the evidence vector (alpha + 1) as derived from the estimated Dirichlet density.
-        """
+        ----------
 
-        # Summarize into fixed size, if specified
-        x = self.compute_summary(x)
+        Arguments:
+        x  : tf.Tensor of shape (n_datasets, summary_dim) -- the conditional data set(s)        
+        """
 
         # Pass through dense layer
         x = self.dense(x)
 
-        # Compute eviddences
+        # Compute evidences
         evidence = self.evidence_layer(x)
         alpha = evidence + 1
         return alpha
@@ -527,7 +515,7 @@ class EvidentialNetwork(tf.keras.Model):
         ----------
 
         Arguments:
-        obs_data  : tf.Tensor of shape (n_datasets, n_obs, data_dim) -- the actually observed (or simulated) data
+        obs_data  : tf.Tensor of shape (n_datasets, summary_dim) -- the summary of the observed (or simulated) data
         n_samples : int -- number of samples to obtain from the approximate posterior (default 5000)
         to_numpy  : bool -- flag indicating whether to return the samples as a np.array or a tf.Tensor
         ----------
