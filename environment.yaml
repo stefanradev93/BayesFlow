@@ -1,0 +1,7 @@
+# run: conda env create --file environment.yml
+name: bf
+dependencies:
+  - python==3.8
+  - pip
+  - pip:
+    - -r file:requirements.txt
