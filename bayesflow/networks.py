@@ -338,9 +338,10 @@ class ConditionalCouplingLayer(tf.keras.Model):
 class InvertibleNetwork(tf.keras.Model):
     """Implements a chain of conditional invertible blocks for Bayesian parameter inference."""
 
-    def __init__(self, meta, summary_net=None):
+    def __init__(self, meta):
         """
         Creates a chain of cINN blocks and chains operations with an optional summary network.
+         TODO: - Allow for generic base distributions
         ----------
 
         Arguments:
@@ -351,7 +352,6 @@ class InvertibleNetwork(tf.keras.Model):
         super(InvertibleNetwork, self).__init__()
 
         self.cINNs = [ConditionalCouplingLayer(meta) for _ in range(meta['n_coupling_layers'])]
-        self.summary_net = summary_net
         self.z_dim = meta['n_params']
 
     def call(self, params, x, inverse=False):
@@ -372,8 +372,6 @@ class InvertibleNetwork(tf.keras.Model):
         x               :  tf.Tensor of shape (batch_size, inp_dim) -- the transformed out, if inverse = True
         """
         
-        if self.summary_net is not None:
-            x = self.summary_net(x)
         if inverse:
             return self.inverse(params, x)
         else:
@@ -402,22 +400,17 @@ class InvertibleNetwork(tf.keras.Model):
     def sample(self, x, n_samples, to_numpy=True):
         """
         Samples from the inverse model given a single instance y or a batch of instances.
-        TODO: - generic base distribution
         ----------
 
         Arguments:
-        x         : tf.Tensor of shape (batch_size, N, x_dim) -- the conditioning data of interest
+        x         : tf.Tensor of shape (n_datasets, summary_dim) -- the conditioning data set(s) of interest
         n_samples : int -- number of samples to obtain from the approximate posterior
         to_numpy  : bool -- flag indicating whether to return the samples as a np.array or a tf.Tensor
         ----------
 
         Returns:
-        theta_samples : 3D tf.Tensor or np.array of shape (n_samples, n_batch, theta_dim)
+        theta_samples : 3D tf.Tensor or np.array of shape (n_samples, n_datasets, n_params)
         """
-
-        # Summarize obs data if summary net available
-        if self.summary_net is not None:
-            x = self.summary_net(x)
 
         # In case x is a single instance
         if int(x.shape[0]) == 1:
