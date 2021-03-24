@@ -11,7 +11,6 @@ from bayesflow.exceptions import SimulationError, SummaryStatsError
 from bayesflow.buffer import MemoryReplayBuffer
 
 
-
 class MetaTrainer:
 
     def __init__(self):
