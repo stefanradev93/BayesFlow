@@ -1,7 +1,6 @@
 import tensorflow as tf
 
 
-
 class MultiModelAmortizer(tf.keras.Model):
 
     def __init__(self, evidence_net, summary_net=None):

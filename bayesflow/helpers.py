@@ -69,9 +69,8 @@ def build_meta_dict(user_dict: dict, default_setting: default_settings.MetaDictS
     mandatory_fields = default_setting.mandatory_fields
 
     # Check if all mandatory fields are provided by the user
-    # TODO output keys of missing mandatory fields
     if not all([field in user_dict.keys() for field in mandatory_fields]):
-        raise ConfigurationError(f"Not all mandatory fields provided!")
+        raise ConfigurationError(f"Not all mandatory fields provided! Need at least the following: {mandatory_fields}")
 
     # Merge the user dict into the default dict
     return merge_left_into_right(user_dict, default_dict)
