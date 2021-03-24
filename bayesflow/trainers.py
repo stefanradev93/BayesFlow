@@ -6,9 +6,9 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.train import CheckpointManager, Checkpoint
 from tensorflow.keras.utils import to_categorical
 
-from .helpers import clip_gradients
-from .exceptions import SimulationError, SummaryStatsError
-from .buffer import MemoryReplayBuffer
+from bayesflow.helpers import clip_gradients
+from bayesflow.exceptions import SimulationError, SummaryStatsError
+from bayesflow.buffer import MemoryReplayBuffer
 
 
 

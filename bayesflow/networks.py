@@ -4,6 +4,8 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 
+from bayesflow.helpers import build_meta_dict
+from bayesflow import default_settings
 
 
 class RegressionNetwork(tf.keras.Model):
@@ -129,8 +131,11 @@ class EquivariantModule(tf.keras.Model):
 
 
 class InvariantNetwork(tf.keras.Model):
-    def __init__(self, meta):
+    def __init__(self, meta={}):
         super(InvariantNetwork, self).__init__()
+
+        meta = build_meta_dict(user_dict=meta,
+                               default_setting=default_settings.DEFAULT_SETTING_INVARIANT_NET)
         
         self.equiv_seq = Sequential([EquivariantModule(meta) for _ in range(meta['n_equiv'])])
         self.inv = InvariantModule(meta)
@@ -337,7 +342,7 @@ class ConditionalCouplingLayer(tf.keras.Model):
 class InvertibleNetwork(tf.keras.Model):
     """Implements a chain of conditional invertible blocks for Bayesian parameter inference."""
 
-    def __init__(self, meta):
+    def __init__(self, meta={}):
         """
         Creates a chain of cINN blocks and chains operations with an optional summary network.
          TODO: - Allow for generic base distributions
@@ -349,6 +354,9 @@ class InvertibleNetwork(tf.keras.Model):
         summary_net : tf.keras.Model or None -- an optinal summary network for learning the sumstats of x
         """
         super(InvertibleNetwork, self).__init__()
+
+        meta = build_meta_dict(user_dict=meta,
+                               default_setting=default_settings.DEFAULT_SETTING_INVERTIBLE_NET)
 
         self.cINNs = [ConditionalCouplingLayer(meta) for _ in range(meta['n_coupling_layers'])]
         self.z_dim = meta['n_params']
