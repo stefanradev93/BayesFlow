@@ -328,7 +328,7 @@ class ModelComparisonTrainer:
 
 class ParameterEstimationTrainer:
     
-    def __init__(self, network, prior, simulator, loss, summary_stats=None, optimizer=None,
+    def __init__(self, network, generative_model, loss, summary_stats=None, optimizer=None,
                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing single-model forward inference and training an
@@ -339,8 +339,8 @@ class ParameterEstimationTrainer:
         
         Arguments:
         network     : bayesflow.Amortizer instance -- the neural architecture to be optimized
-        prior       : callable -- a function with a batch_size argument returning randomly sampled parameter vectors
-        simulator   : callable -- a function implementing a process model taking params and n_obs as mandatory args
+        generative_model: callable -- a function with a n_sim and n_obs argument returning randomly sampled
+        parameter vectors and datasets from a process model
         loss        : callable with three arguments: (network, m_indices, x) -- the loss function
         ----------
         
@@ -356,8 +356,7 @@ class ParameterEstimationTrainer:
         
         # Basic attributes
         self.network = network
-        self.prior = prior
-        self.simulator = simulator
+        self.generative_model = generative_model
         self.loss = loss
         self.summary_stats = summary_stats
         self.clip_method = clip_method
@@ -656,13 +655,11 @@ class ParameterEstimationTrainer:
         params    : np.array (np.float32) of shape (batch_size, param_dim) -- array of sampled parameters
         sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) -- array of simulated data sets
         """
-
-        # Sample from prior n_sim times, return shape is (batch_size, n_param)
-        params = self.prior(n_sim)
         
-        # Simulate data with sampled parameters and n_obs
-        # Return shape is (batch_size, n_obs, data_dim)
-        sim_data = self.simulator(params, n_obs, **kwargs)
+        # Simulate data with n_sims and n_obs
+        # Return shape of params is (batch_size, param_dim)
+        # Return shape of data is (batch_size, n_obs, data_dim)
+        params, sim_data = self.generative_model(n_sim, n_obs, **kwargs)
 
         # Compute hand-crafted summary stats, if given
         if summarize and self.summary_stats is not None:
@@ -718,7 +715,7 @@ class ParameterEstimationTrainer:
 
         # Run forward inference with n_sim=2 and catch any exception
         try:
-            _, sim_data = self._forward_inference(2, n_obs=10)
+            _, sim_data = self._forward_inference(n_sim=2, n_obs=10)
         except Exception as err:
             raise SimulationError(repr(err))
 
