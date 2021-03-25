@@ -339,8 +339,8 @@ class ParameterEstimationTrainer:
         
         Arguments:
         network     : bayesflow.Amortizer instance -- the neural architecture to be optimized
-        generative_model: callable -- a function with a n_sim and n_obs argument returning randomly sampled
-        parameter vectors and datasets from a process model
+        generative_model: callable -- a function or an object with n_sim and n_obs mandatory arguments 
+                          returning randomly sampled parameter vectors and datasets from a process model
         loss        : callable with three arguments: (network, m_indices, x) -- the loss function
         ----------
         
@@ -402,7 +402,7 @@ class ParameterEstimationTrainer:
         iterations_per_epoch : int -- number of batch simulations to perform per epoch
         capacy               : int -- max number of batches to store in buffer
         n_obs                : int or callable -- if int, then treated as a fixed number of observations, if callable, then
-                                         treated as a function for sampling N, i.e., N ~ p(N)
+                                      treated as a function for sampling N, i.e., N ~ p(N)
         
         ----------
 
