@@ -94,7 +94,6 @@ class MetaGenerativeModel(GenerativeModel):
             params[target_indices] = self.param_padding(params_)  # apply padding to params if required
             sim_data[target_indices] = sim_data_
 
-        # Convert to numpy arrays
         model_indices = tf.keras.utils.to_categorical(model_indices, self.n_models)
 
         return model_indices.astype(np.float32), params.astype(np.float32), sim_data.astype(np.float32)
