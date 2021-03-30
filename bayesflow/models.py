@@ -1,11 +1,10 @@
+import types
 from abc import abstractmethod
 
 import numpy as np
 import tensorflow as tf
 
 from bayesflow.exceptions import SimulationError, ConfigurationError
-
-import types
 
 
 class GenerativeModel(object):
@@ -163,14 +162,16 @@ class SimpleGenerativeModel(GenerativeModel):
 
         prior_args = self.prior.__code__.co_varnames  # add __call__ because arguments will be checked
         if 'n_sim' in prior_args or 'batch_size' in prior_args:
-            self.mode = 'batch'
+            self.prior_mode = 'batch'
         else:
-            self.mode = 'single'
+            self.prior_mode = 'single'
 
         if not callable(simulator):
             raise ConfigurationError("simulator must be callable!")
         self.simulator = simulator
 
+        self.simulator_mode = None
+        self._set_simulator_mode()
         self._check_consistency()
 
     def __call__(self, n_sim, n_obs, **kwargs):
@@ -188,18 +189,34 @@ class SimpleGenerativeModel(GenerativeModel):
         sim_data  : np.array (np.float32) of shape (n_sim, n_obs, data_dim) -- array of simulated data sets
 
         """
-        if self.mode == 'batch':
+        # todo: refactor with self._set_prior(prior), self._set_simulator(simulator) that replaces mode flags
+
+        if self.prior_mode == 'batch':
             params = self.prior(n_sim)
             sim_data = self.simulator(params, n_obs, **kwargs)
 
-        elif self.mode == 'single':
+        elif self.prior_mode == 'single':
             params = np.array([self.prior() for i in range(n_sim)])
-            try:
+            if self.simulator_mode == 'batch':
                 sim_data = self.simulator(params, n_obs, **kwargs)
-            except Exception as err:
+            elif self.simulator_mode == 'single':
                 sim_data = np.array([self.simulator(params[i], n_obs, **kwargs) for i in range(n_sim)])
 
         return params.astype(np.float32), sim_data.astype(np.float32)
+
+    def _set_simulator_mode(self):
+        _n_sim = 2
+        _n_obs = 3
+        if self.prior_mode == 'batch':
+            _params = self.prior(_n_sim)
+            _sim_data = self.simulator(_params, _n_obs)
+        elif self.prior_mode == 'single':
+            _params = np.array([self.prior() for i in range(_n_sim)])
+            try:
+                _sim_data = self.simulator(_params, _n_obs)
+            except Exception:
+                _sim_data = np.array([self.simulator(_params[i], _n_obs) for i in range(_n_sim)])
+                self.simulator_mode = 'single'
 
     def _check_consistency(self):
         """
