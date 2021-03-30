@@ -36,7 +36,7 @@ class GenerativeModel(object):
 
 
 class MetaGenerativeModel(GenerativeModel):
-    def __init__(self, model_prior, priors, simulators, param_transform=None):
+    def __init__(self, model_prior, priors, simulators, param_transform=None, param_padding=None):
         assert len(priors) == len(simulators), "Must provide same number of priors and simulators!"
 
         self.model_prior = model_prior
@@ -44,9 +44,17 @@ class MetaGenerativeModel(GenerativeModel):
         self.param_transform = param_transform
         self.n_models = len(self.generative_models)
 
-        self.max_param_length = None
+        self._max_param_length = None
+        self._data_dim = None
+        self._find_max_param_length_and_data_dim()
 
-        self._find_max_param_length()
+        if param_padding is not None:
+            self.param_padding = param_padding
+        else:
+            self.param_padding = lambda x: np.pad(x,
+                                                  pad_width=((0, 0), (0, self._max_param_length - x.shape[1])),
+                                                  mode='constant')
+
         self._check_consistency()
 
     def __call__(self, n_sim, n_obs, **kwargs):
@@ -64,50 +72,57 @@ class MetaGenerativeModel(GenerativeModel):
         sim_data  : np.array (np.float32) of shape (n_sim, n_obs, data_dim) -- array of simulated data sets
 
         """
+
+        # Prepare data and params placeholders
+        params = np.empty((n_sim, self._max_param_length), dtype=np.float32)
+        sim_data = np.empty((n_sim, n_obs, *self._data_dim))
+
         # Sample model indices
         model_indices = self.model_prior(n_sim, self.n_models)
 
-        # Prepare data and params placeholders
-        params = []
-        sim_data = []
+        # gather model indices and simulate datasets of same model index as batch
+        # create frequency table of model indices
+        m_idx, n = np.unique(model_indices, return_counts=True)
 
-        # todo If the user-provided simulators support batches, group the model_indices array by model indices and
-        # sample data for same models as batch. then, just sort the batch elements in the right spots of sim_data
-        # Loop for n_sim number of simulations
-        for sim_idx in range(n_sim):
-            # Simulate from model
-            params_, sim_data_ = self.generative_models[model_indices[sim_idx]](1, n_obs, **kwargs)
+        # iterate over each unique model index and create all datasets for that model index
+        for m_idx, n in zip(m_idx, n):
+            # sample batch of same models
+            params_, sim_data_ = self.generative_models[m_idx](n, n_obs, **kwargs)
 
-            # zero padding
-            params.append(np.pad(params_[0], pad_width=(0, self.max_param_length - params_.shape[1]), mode='constant'))
-            sim_data.append(sim_data_)
+            # sort data back into the batch-sized arrays
+            target_indices = np.where(model_indices == m_idx)  # find indices in batch-sized array
+            params[target_indices] = self.param_padding(params_)  # apply padding to params if required
+            sim_data[target_indices] = sim_data_
 
         # Convert to numpy arrays
         model_indices = tf.keras.utils.to_categorical(model_indices, self.n_models)
 
-        params = np.array(params)
-        sim_data = np.concatenate(sim_data, axis=0)
-
         return model_indices.astype(np.float32), params.astype(np.float32), sim_data.astype(np.float32)
 
-    def _find_max_param_length(self):
+    def _find_max_param_length_and_data_dim(self):
         # find max_param_length
         model_indices = list(range(len(self.generative_models)))
         param_lengths = []
         for m_idx in model_indices:
-            params_, _ = self.generative_models[m_idx](1, 1)
+            params_, sim_data_ = self.generative_models[m_idx](1, 1)
             param_lengths.append(params_.shape[1])
-        self.max_param_length = max(param_lengths)
+
+            # set data dim once
+            if self._data_dim is None:  # assumption: all simulators have same data dim. If not -> max search & 0-padd.
+                self._data_dim = sim_data_.shape[2:]  # dim0: n_sim, dim1: n_obs, dim2...x: data_dim
+
+        self._max_param_length = max(param_lengths)
 
     def _check_consistency(self):
         """
         Performs an internal consistency check with datasets of 10 observations each.
         """
-        _n_sim = 10
-        _n_obs = 10
+        _n_sim = 16
+        _n_obs = 20
 
         try:
             model_indices, params, sim_data = self(n_sim=_n_sim, n_obs=_n_obs)
+
             if model_indices.shape[0] != _n_sim:
                 raise SimulationError(
                     f"Model indices shape 0 = {model_indices.shape[0]} does not match n_sim = {_n_sim}")
@@ -192,7 +207,7 @@ class SimpleGenerativeModel(GenerativeModel):
         Performs an internal consistency check with 2 datasets of 100 observations each.
         """
         _n_sim = 2
-        _n_obs = 100
+        _n_obs = 20
         try:
             params, sim_data = self(n_sim=_n_sim, n_obs=_n_obs)
             if params.shape[0] != _n_sim:
