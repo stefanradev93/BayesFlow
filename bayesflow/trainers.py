@@ -19,7 +19,7 @@ class MetaTrainer:
 
 class ModelComparisonTrainer:
     
-    def __init__(self, network, model_prior, priors, simulators, n_obs, loss, summary_stats=None, optimizer=None,
+    def __init__(self, network, model_prior, priors, simulators, loss, summary_stats=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing multi-model forward inference and training an
@@ -34,8 +34,6 @@ class ModelComparisonTrainer:
         priors      : list of callables -- each element is a function returning randomly sampled parameter vectors
         simulators  : list of callables -- each element is a function implementing a process model with two
                       mandatory arguments: params and n_obs
-        n_obs       : int or callable -- if int, then treated as a fixed number of observations, if callable, then
-                      treated as a function for sampling N, i.e., N ~ p(N)
         loss        : callable with three mandatory arguments: (network, m_indices, x)
         ----------
         
@@ -55,7 +53,6 @@ class ModelComparisonTrainer:
         self.model_prior = model_prior
         self.priors = priors
         self.simulators = simulators
-        self.n_obs = n_obs
         self.loss = loss
         self.summary_stats = summary_stats
         self.n_models = len(priors)
@@ -87,7 +84,7 @@ class ModelComparisonTrainer:
 
         # TODO - make sure forward inference goes through
         
-    def train_online(self, epochs, iterations_per_epoch, batch_size, **kwargs):
+    def train_online(self, epochs, iterations_per_epoch, batch_size, n_obs, **kwargs):
         """
         Trains the inference network(s) via online learning. Additional keyword arguments
         will be passed to the simulators.
@@ -97,6 +94,8 @@ class ModelComparisonTrainer:
         epochs               : int -- number of epochs (and number of times a checkpoint is stored)
         iterations_per_epoch : int -- number of batch simulations to perform per epoch
         batch_size           : int -- number of simulations to perform at each backprop step
+        n_obs                : int or callable -- if int, then treated as a fixed number of observations, if callable, then
+                               treated as a function for sampling N, i.e., N ~ p(N)
         ----------
 
         Returns:
@@ -109,8 +108,14 @@ class ModelComparisonTrainer:
             with tqdm(total=iterations_per_epoch, desc='Training epoch {}'.format(ep)) as p_bar:
                 for it in range(iterations_per_epoch):
 
+                    # Determine n_obs for current batch
+                    if type(n_obs) is int:
+                        n_obs_it = n_obs
+                    else:
+                        n_obs_it = n_obs()
+
                     # Generate model indices and data on-the-fly
-                    model_indices, sim_data = self._forward_inference(batch_size, **kwargs)
+                    model_indices, sim_data = self._forward_inference(batch_size, n_obs_it, **kwargs)
 
                     # One step backprop
                     loss = self._train_step(model_indices, sim_data)
@@ -185,7 +190,7 @@ class ModelComparisonTrainer:
                 self.manager.save()
         return losses
 
-    def train_rounds(self, epochs, rounds, sim_per_round, batch_size, **kwargs):
+    def train_rounds(self, epochs, rounds, sim_per_round, batch_size, n_obs, **kwargs):
         """
         Trains the inference network(s) via round-based learning.
         ----------
@@ -202,7 +207,7 @@ class ModelComparisonTrainer:
         """
 
         # Make sure n_obs is fixed, otherwise not working 
-        assert type(self.n_obs) is int,\
+        assert type(n_obs) is int,\
         'Round-based training currently only works with fixed n_obs. Use online learning for varibale n_obs'
 
         losses = dict()
@@ -212,13 +217,13 @@ class ModelComparisonTrainer:
             if r == 1:
                 # Initial simulation
                 print('Simulating initial {} data sets...'.format(sim_per_round))
-                model_indices, sim_data = self._forward_inference(sim_per_round, **kwargs)
+                model_indices, sim_data = self._forward_inference(sim_per_round, n_obs, **kwargs)
 
             else:
                 # Further simulations
                 print('Simulating new {} data sets and appending to previous...'.format(sim_per_round))
                 print('New total number of simulated data sets: {}'.format(sim_per_round * r))
-                model_indices_r, sim_data_r = self._forward_inference(sim_per_round, **kwargs)
+                model_indices_r, sim_data_r = self._forward_inference(sim_per_round, n_obs, **kwargs)
 
                 # Append to previous
                 model_indices = np.concatenate((model_indices, model_indices_r), axis=0)
@@ -229,13 +234,14 @@ class ModelComparisonTrainer:
             losses[r] = losses_r
         return losses
 
-    def _forward_inference(self, n_sim, **kwargs):
+    def _forward_inference(self, n_sim, n_obs, **kwargs):
         """
         Performs one step of multi-model forward inference.
         ----------
         
         Arguments:
         n_sim : int -- number of simulation to perform at the given step (i.e., batch size)
+        n_obs : int -- number of observations to generate from each forward model
         ----------
 
         Returns:
@@ -245,12 +251,6 @@ class ModelComparisonTrainer:
 
         # Sample model indices
         m_indices = self.model_prior(n_sim)
-
-        # Sample n_obs or use fixed
-        if type(self.n_obs) is int:
-            n_obs = self.n_obs
-        else:
-            n_obs = self.n_obs()
 
         # Prepare a placeholder for x
         sim_data = []
