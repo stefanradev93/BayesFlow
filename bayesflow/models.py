@@ -156,22 +156,16 @@ class SimpleGenerativeModel(GenerativeModel):
 
         # Handle parsing arguments of CPython functions
         if isinstance(prior.__call__, types.MethodWrapperType):
-            self.prior = prior
+            prior = prior
         else:
-            self.prior = prior.__call__
-
-        prior_args = self.prior.__code__.co_varnames  # add __call__ because arguments will be checked
-        if 'n_sim' in prior_args or 'batch_size' in prior_args:
-            self.prior_mode = 'batch'
-        else:
-            self.prior_mode = 'single'
+            prior = prior.__call__
 
         if not callable(simulator):
             raise ConfigurationError("simulator must be callable!")
-        self.simulator = simulator
 
-        self.simulator_mode = None
-        self._set_simulator_mode()
+        self.prior = prior
+        self.simulator = simulator
+        self._set_prior_and_simulator()
         self._check_consistency()
 
     def __call__(self, n_sim, n_obs, **kwargs):
@@ -189,34 +183,38 @@ class SimpleGenerativeModel(GenerativeModel):
         sim_data  : np.array (np.float32) of shape (n_sim, n_obs, data_dim) -- array of simulated data sets
 
         """
-        # todo: refactor with self._set_prior(prior), self._set_simulator(simulator) that replaces mode flags
 
-        if self.prior_mode == 'batch':
-            params = self.prior(n_sim)
-            sim_data = self.simulator(params, n_obs, **kwargs)
-
-        elif self.prior_mode == 'single':
-            params = np.array([self.prior() for i in range(n_sim)])
-            if self.simulator_mode == 'batch':
-                sim_data = self.simulator(params, n_obs, **kwargs)
-            elif self.simulator_mode == 'single':
-                sim_data = np.array([self.simulator(params[i], n_obs, **kwargs) for i in range(n_sim)])
+        params = self.prior(n_sim)
+        sim_data = self.simulator(params, n_obs, **kwargs)
 
         return params.astype(np.float32), sim_data.astype(np.float32)
 
-    def _set_simulator_mode(self):
+    def _set_prior_and_simulator(self):
+        """
+        Priors and simulators can be provided with or withour batch capabilities.
+        This function checks if the
+        """
+        # maybe just do it with try/except too
+        prior_args = self.prior.__code__.co_varnames
+        if 'n_sim' in prior_args or 'batch_size' in prior_args:
+            self.prior = self.prior  # prior already produces batches.
+        else:
+            self._single_prior = self.prior
+            self.prior = lambda n_sim: np.array([self._single_prior() for _ in range(n_sim)])
+
         _n_sim = 2
         _n_obs = 200
-        if self.prior_mode == 'batch':
-            _params = self.prior(_n_sim)
+        _params = self.prior(_n_sim)
+
+        try:
             _sim_data = self.simulator(_params, _n_obs)
-        elif self.prior_mode == 'single':
-            _params = np.array([self.prior() for i in range(_n_sim)])
-            try:
-                _sim_data = self.simulator(_params, _n_obs)
-            except Exception:
-                _sim_data = np.array([self.simulator(_params[i], _n_obs) for i in range(_n_sim)])
-                self.simulator_mode = 'single'
+            self.simulator = self.simulator  # simulator already produces batches.
+        except Exception:
+            _sim_data = np.array([self.simulator(_params[i], _n_obs) for i in range(_n_sim)])
+            self._single_simulator = self.simulator
+            self.simulator = lambda params, n_obs, **kwargs:\
+                np.array([self._single_simulator(theta, n_obs, **kwargs) for theta in params])
+
 
     def _check_consistency(self):
         """
