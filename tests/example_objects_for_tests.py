@@ -257,8 +257,13 @@ def forward_model1(params, n_obs, V0=-70, I_input=3, dt=0.2):
     ####################################
     # Current (I) muA/cm2
     t_on = 10
-    t_off = I_duration + 10
-    t = np.arange(0, t_on + t_off + dt, dt)
+    t_post = 10
+    I_duration = np.round(n_obs * dt - t_on - t_post - dt, 2)
+    assert I_duration > 0, "Please provide n_obs >= 106!"
+    t_off = I_duration + t_post
+
+    t = np.arange(0, np.round(t_on + t_off + dt, 2), dt)
+
     I = np.zeros_like(t)
     I[int(np.round(t_on / dt)):int(np.round(t_off / dt))] = I_input
 
@@ -377,8 +382,13 @@ def forward_model2(params, n_obs, V0=-70, I_input=3, dt=0.2):
     ####################################
     # Current (I) muA/cm2
     t_on = 10
-    t_off = I_duration + 10
-    t = np.arange(0, t_on + t_off + dt, dt)
+    t_post = 10
+    I_duration = np.round(n_obs * dt - t_on - t_post - dt, 2)
+    assert I_duration > 0, "Please provide n_obs >= 106!"
+    t_off = I_duration + t_post
+
+    t = np.arange(0, np.round(t_on + t_off + dt, 2), dt)
+
     I = np.zeros_like(t)
     I[int(np.round(t_on / dt)):int(np.round(t_off / dt))] = I_input
 
@@ -496,8 +506,13 @@ def forward_model3(params, n_obs, V0=-70, I_input=3, dt=0.2):
     ####################################
     # Current (I) muA/cm2
     t_on = 10
-    t_off = I_duration + 10
-    t = np.arange(0, t_on + t_off + dt, dt)
+    t_post = 10
+    I_duration = np.round(n_obs * dt - t_on - t_post - dt, 2)
+    assert I_duration > 0, "Please provide n_obs >= 106!"
+    t_off = I_duration + t_post
+
+    t = np.arange(0, np.round(t_on + t_off + dt, 2), dt)
+
     I = np.zeros_like(t)
     I[int(np.round(t_on / dt)):int(np.round(t_off / dt))] = I_input
 
