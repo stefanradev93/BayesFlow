@@ -102,7 +102,7 @@ class MetaGenerativeModel(GenerativeModel):
         model_indices = list(range(len(self.generative_models)))
         param_lengths = []
         for m_idx in model_indices:
-            params_, sim_data_ = self.generative_models[m_idx](1, 1)
+            params_, sim_data_ = self.generative_models[m_idx](1, 200)
             param_lengths.append(params_.shape[1])
 
             # set data dim once
@@ -116,7 +116,7 @@ class MetaGenerativeModel(GenerativeModel):
         Performs an internal consistency check with datasets of 10 observations each.
         """
         _n_sim = 16
-        _n_obs = 20
+        _n_obs = 200
 
         try:
             model_indices, params, sim_data = self(n_sim=_n_sim, n_obs=_n_obs)
@@ -206,7 +206,7 @@ class SimpleGenerativeModel(GenerativeModel):
 
     def _set_simulator_mode(self):
         _n_sim = 2
-        _n_obs = 3
+        _n_obs = 200
         if self.prior_mode == 'batch':
             _params = self.prior(_n_sim)
             _sim_data = self.simulator(_params, _n_obs)
@@ -223,7 +223,7 @@ class SimpleGenerativeModel(GenerativeModel):
         Performs an internal consistency check with 2 datasets of 100 observations each.
         """
         _n_sim = 2
-        _n_obs = 20
+        _n_obs = 200
         try:
             params, sim_data = self(n_sim=_n_sim, n_obs=_n_obs)
             if params.shape[0] != _n_sim:

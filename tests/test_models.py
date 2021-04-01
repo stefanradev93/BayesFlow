@@ -1,8 +1,9 @@
 import unittest
+
 import numpy as np
 
-from bayesflow.models import GenerativeModel, SimpleGenerativeModel, MetaGenerativeModel
 import tests.example_objects_for_tests as ex
+from bayesflow.models import GenerativeModel, SimpleGenerativeModel, MetaGenerativeModel
 
 N_SIM = 16
 N_OBS = 20
@@ -22,12 +23,12 @@ class TestGenerativeModel(unittest.TestCase):
         generative_model = GenerativeModel(ex.model_prior, priors, simulators)
         _, _, _ = generative_model(n_sim=N_SIM, n_obs=N_OBS)
 
-    @unittest.skip("Meta-Model Optimization only works with simulator output shape (n_sim, n_obs[, *data_dims])")
+    # @unittest.skip("Meta-Model Optimization only works with simulator output shape (n_sim, n_obs[, *data_dims])")
     def test_meta_generative_model_different_param_shapes(self):
         priors = [ex.model1_params_prior, ex.model2_params_prior, ex.model3_params_prior]
         simulators = [ex.forward_model1, ex.forward_model2, ex.forward_model3]
         generative_model = MetaGenerativeModel(ex.model_prior, priors, simulators)
-        _, _, _ = generative_model(n_sim=N_SIM, n_obs=N_OBS)
+        _, _, _ = generative_model(n_sim=16, n_obs=150)
 
 
 class TestSimpleGenerativeModel(unittest.TestCase):
@@ -59,7 +60,6 @@ class TestMetaGenerativeModel(unittest.TestCase):
         model_idx, params, data = generative_model(n_sim=N_SIM, n_obs=N_OBS)
         # todo validate shapes
 
-    @unittest.skip("Meta-Model Optimization only works with simulator output shape (n_sim, n_obs[, *data_dims])")
     def test_init_different_param_shapes(self):
         priors = [ex.model1_params_prior, ex.model2_params_prior, ex.model3_params_prior]
         simulators = [ex.forward_model1, ex.forward_model2, ex.forward_model3]
@@ -67,8 +67,7 @@ class TestMetaGenerativeModel(unittest.TestCase):
 
         return generative_model
 
-    @unittest.skip("Meta-Model Optimization only works with simulator output shape (n_sim, n_obs[, *data_dims])")
     def test_simulation_different_param_shapes(self):
         generative_model = self.test_init_different_param_shapes()
-        model_idx, params, data = generative_model(n_sim=N_SIM, n_obs=N_OBS)
+        model_idx, params, data = generative_model(n_sim=16, n_obs=150)
         # todo validate shapes
