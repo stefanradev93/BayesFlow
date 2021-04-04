@@ -26,7 +26,7 @@ class GenerativeModel(object):
         return g
 
     @abstractmethod
-    def __call__(self):
+    def __call__(self, n_sim, n_obs, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
@@ -191,36 +191,50 @@ class SimpleGenerativeModel(GenerativeModel):
 
     def _set_prior_and_simulator(self):
         """
-        Priors and simulators can be provided with or withour batch capabilities.
-        This function checks if the
+        Priors and simulators can be provided with or without batch capabilities.
+        This function checks if prior and simulator are capable of batch simulation or not.
+        If not, they are wrapped to the interface:
+        params = self.prior(batch_size)
+        sim_data = self.simulator(params, n_obs)
         """
-        # maybe just do it with try/except too
-        prior_args = self.prior.__code__.co_varnames
-        if 'n_sim' in prior_args or 'batch_size' in prior_args:
+        _n_sim = 16
+        _n_obs = 200
+
+        # Wrap prior callable if necessary
+        try:
+            _params = self.prior(_n_sim)
+            assert _params.shape[0] == _n_sim
             self.prior = self.prior  # prior already produces batches.
-        else:
+
+        except Exception as err:
             self._single_prior = self.prior
             self.prior = lambda n_sim: np.array([self._single_prior() for _ in range(n_sim)])
 
-        _n_sim = 2
-        _n_obs = 200
-        _params = self.prior(_n_sim)
+            _params = self.prior(_n_sim)
+            if _params.shape[0] != _n_sim:
+                raise SimulationError(f"Prior callable could not be wrapped to batch generation!\n{repr(err)}")
 
+        # Wrap simulator callable if necessary
         try:
             _sim_data = self.simulator(_params, _n_obs)
+            assert _sim_data.shape[0] == _n_sim and _sim_data.shape[1] == _n_obs
             self.simulator = self.simulator  # simulator already produces batches.
-        except Exception:
+
+        except Exception as err:
             _sim_data = np.array([self.simulator(_params[i], _n_obs) for i in range(_n_sim)])
             self._single_simulator = self.simulator
             self.simulator = lambda params, n_obs, **kwargs:\
                 np.array([self._single_simulator(theta, n_obs, **kwargs) for theta in params])
 
+            _sim_data = self.simulator(_params, _n_obs)
+            if _sim_data.shape[0] != _n_sim or _sim_data.shape[1] != _n_obs:
+                raise SimulationError(f"Simulator callable could not be wrapped to batch generation!\n{repr(err)}")
 
     def _check_consistency(self):
         """
-        Performs an internal consistency check with 2 datasets of 100 observations each.
+        Performs an internal consistency check.
         """
-        _n_sim = 2
+        _n_sim = 16
         _n_obs = 200
         try:
             params, sim_data = self(n_sim=_n_sim, n_obs=_n_obs)
@@ -228,6 +242,8 @@ class SimpleGenerativeModel(GenerativeModel):
                 raise SimulationError(f"Parameter shape 0 = {params.shape[0]} does not match n_sim = {_n_sim}")
             if sim_data.shape[0] != _n_sim:
                 raise SimulationError(f"sim_data shape 0 = {sim_data.shape[0]} does not match n_sim = {_n_sim}")
+            if sim_data.shape[1] != _n_obs:
+                raise SimulationError(f"sim_data shape 1 = {sim_data.shape[1]} does not match n_obs = {_n_obs}")
 
         except Exception as err:
             raise SimulationError(repr(err))
