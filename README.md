@@ -12,9 +12,9 @@ A short conference paper reviewing amortized Bayesian inference with a focus on 
 
 https://arxiv.org/abs/2005.03899
 
-## Parameter Estimation with BayesFlow
+## Parameter Estimation
 
-The BayesFlow method incorporates a *summary network* and an *inference network* which are jointly optimized to invert a complex computational model (simulator). The summary network is responsible for learning the most informative data representations (i.e., summary statistics) in an end-to-end manner. The inference network is responsible for learning an invertible mapping between the posterior and an easy-to-sample-from latent space (e.g., Gaussian) for *any* possible observation or set of observations arising from the simulator. The BayesFlow method for amortized parameter estimation is based on our paper:
+The BayesFlow approach for parameter estimation incorporates a *summary network* and an *inference network* which are jointly optimized to invert a complex computational model (simulator). The summary network is responsible for learning the most informative data representations (i.e., summary statistics) in an end-to-end manner. The inference network is responsible for learning an invertible mapping between the posterior and an easy-to-sample-from latent space (e.g., Gaussian) for *any* possible observation or set of observations arising from the simulator. The BayesFlow method for amortized parameter estimation is based on our paper:
 
 Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. <em>IEEE Transactions on Neural Networks and Learning Systems</em>, available for free at:
 
@@ -40,6 +40,31 @@ Stateless models typically generate IID observations, which imply exchangeabilit
 
 You can read more about designing invariant networks in the excellent paper by Benjamin Bloem-Reddy and Yee Whye Teh, available at https://arxiv.org/abs/1901.06082.
 
+For instance, in order to tackle a memoryless model with 10 parameters, we first need to set-up the summary and inference networks:
+```python
+# Use default settings
+summary_net = InvariantNetwork()
+inference_net = InvertibleNetwork({'n_params': 10})
+# Connect summary and inference network
+amortizer = SingleModelAmortizer(inference_net, summary_net)
+```
+Next, we define a generative model which connects a *prior* (a function returning random samples from the prior distribution over parameters) with a *simulator* (a function accepting the prior samples as arguments):
+```python
+generative_model = GenerativeModel(prior, simulator)
+```
+Finally, we connect the networks with the generative model via a trainer instance:
+```python
+# Using default settings
+trainer = ParameterEstimationTrainer(
+    network=amortizer, 
+    generative_model=generative_model
+)
+```
+We are now ready to train an amortized parameter estimator via various options. For instance, to run online training, we simply call
+```python
+losses = trainer.train_online(epochs=50, iterations_per_epoch=1000, batch_size=64, n_obs=200)
+```
+which performs online training for 50 epochs of 1000 iterations (batch simulations with 64 simulations per batch). The shape of each batch is thus (64, 200, summary_dim), corresponding to 64 simulations per batch, 200 observations per simulated data set, and *summary_dim* output dimensions of the final layer of the permutation-invariant summary network. See the *Parameter_Estimation_Workflow.ipynb* notebook for a detailed walkthrough. 
 
 ### Stateful models
 Stateful models incorporate some form of memory and are thus capable of generating observations with complex dependencies (i.e., non-IID). A prime example are dynamic models, which typically describe the evolution trajectory of a system or a process, such as an infectious disease, over time. Observations generated from such models are usually the solution of a stochastic differential equation(SDE) or time-series and thus imply a more complex probabilistic symmetry than those generated from memoryless models. An example BayesFlow architecture for tackling stateful models is depicted below.
