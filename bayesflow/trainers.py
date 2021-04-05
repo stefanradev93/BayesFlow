@@ -9,6 +9,7 @@ from tensorflow.keras.utils import to_categorical
 from bayesflow.helpers import clip_gradients
 from bayesflow.exceptions import SimulationError, SummaryStatsError
 from bayesflow.buffer import MemoryReplayBuffer
+from bayesflow.losses import kl_latent_space, log_loss
 
 
 class MetaTrainer:
@@ -19,7 +20,7 @@ class MetaTrainer:
 
 class ModelComparisonTrainer:
     
-    def __init__(self, network, model_prior, priors, simulators, loss, summary_stats=None, optimizer=None,
+    def __init__(self, network, model_prior, priors, simulators, loss=None, summary_stats=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing multi-model forward inference and training an
@@ -34,7 +35,7 @@ class ModelComparisonTrainer:
         priors      : list of callables -- each element is a function returning randomly sampled parameter vectors
         simulators  : list of callables -- each element is a function implementing a process model with two
                       mandatory arguments: params and n_obs
-        loss        : callable with three mandatory arguments: (network, m_indices, x)
+        loss        : callable with three mandatory arguments: (network, m_indices, x), if None ('default'), logloss used
         ----------
         
         Keyword arguments:
@@ -53,7 +54,12 @@ class ModelComparisonTrainer:
         self.model_prior = model_prior
         self.priors = priors
         self.simulators = simulators
-        self.loss = loss
+        # Default or custom loss
+        if loss is None:
+            self.loss = log_loss
+        else:
+            self.loss = loss
+        # Optional hand-crafted summaries
         self.summary_stats = summary_stats
         self.n_models = len(priors)
         self.clip_method = clip_method
@@ -328,7 +334,7 @@ class ModelComparisonTrainer:
 
 class ParameterEstimationTrainer:
     
-    def __init__(self, network, generative_model, loss, summary_stats=None, optimizer=None,
+    def __init__(self, network, generative_model, loss=None, summary_stats=None, optimizer=None,
                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing single-model forward inference and training an
@@ -338,10 +344,11 @@ class ParameterEstimationTrainer:
         ----------
         
         Arguments:
-        network     : bayesflow.Amortizer instance -- the neural architecture to be optimized
-        generative_model: callable -- a function or an object with n_sim and n_obs mandatory arguments 
-                          returning randomly sampled parameter vectors and datasets from a process model
-        loss        : callable with three arguments: (network, m_indices, x) -- the loss function
+        network           : bayesflow.Amortizer instance -- the neural architecture to be optimized
+        generative_model  : callable -- a function or an object with n_sim and n_obs mandatory arguments 
+                            returning randomly sampled parameter vectors and datasets from a process model
+        loss              : callable with three mandatory arguments: (network, params, sim_x), if None ('default'), 
+                            kl_latent_space used
         ----------
         
         Keyword arguments:
@@ -357,7 +364,12 @@ class ParameterEstimationTrainer:
         # Basic attributes
         self.network = network
         self.generative_model = generative_model
-        self.loss = loss
+        # Default or custom loss
+        if loss is None:
+            self.loss = kl_latent_space
+        else:
+            self.loss = loss
+        # Optional hand-crafted summaries
         self.summary_stats = summary_stats
         self.clip_method = clip_method
         self.clip_value = clip_value
