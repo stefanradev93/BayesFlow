@@ -1,7 +1,9 @@
 # BayesFlow
 Welcome to the beta-version of our BayesFlow library for simulation-based Bayesian parameter estimation and model comparison!
 
-For starters, check out the walkthrough notebooks *Parameter_Estimation_Workflow.ipynb* and *Model_Comparison_Workflow.ipynb*.
+For starters, check out the walkthrough notebooks *Parameter_Estimation_Workflow.ipynb* and *Model_Comparison_Workflow.ipynb*. For short code samples, please read below!
+
+## Ceonceptual Overview
 
 A cornerstone idea of amortized Bayesian inference is to employ generative neural networks for parameter estimation, model comparison and model validation
 when working with intractable simulators whose behavior as a whole is too complex to be described analytically. The figure below presents a higher-level overview of neurally bootstrapped Bayesian inference. 
