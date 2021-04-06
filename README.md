@@ -80,7 +80,7 @@ Joint models present an attempt to account for different processes (e.g., neural
 
 ![Joint](https://github.com/stefanradev93/BayesFlow/blob/master/img/Joint_Models.png)
 
-## Model Comparison with BayesFlow
+## Model Comparison
 
 The algorithm for model comparison is based on our paper:
 
