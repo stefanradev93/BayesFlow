@@ -50,7 +50,7 @@ inference_net = InvertibleNetwork({'n_params': 10})
 # Connect summary and inference network
 amortizer = SingleModelAmortizer(inference_net, summary_net)
 ```
-Next, we define a generative model which connects a *prior* (a function returning random draws from the prior distribution over parameters) to a *simulator* (a function accepting the prior draws as arguments) and returning a simulated data set with *n_obs* (potentially multivariate) observations.
+Next, we define a generative model which connects a *prior* (a function returning random draws from the prior distribution over parameters) with a *simulator* (a function accepting the prior draws as arguments) and returning a simulated data set with *n_obs* (potentially multivariate) observations.
 ```python
 generative_model = GenerativeModel(prior, simulator)
 ```
