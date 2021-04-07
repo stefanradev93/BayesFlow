@@ -42,7 +42,7 @@ Stateless models typically generate IID observations, which imply exchangeabilit
 
 You can read more about designing invariant networks in the excellent paper by Benjamin Bloem-Reddy and Yee Whye Teh, available at https://arxiv.org/abs/1901.06082.
 
-For instance, in order to tackle a memoryless model with 10 parameters via BayesFlow, we first need to set-up the summary and inference networks:
+For instance, in order to tackle a memoryless model with 10 free parameters via BayesFlow, we first need to set-up the summary and inference networks:
 ```python
 # Use default settings
 summary_net = InvariantNetwork()
@@ -50,7 +50,7 @@ inference_net = InvertibleNetwork({'n_params': 10})
 # Connect summary and inference network
 amortizer = SingleModelAmortizer(inference_net, summary_net)
 ```
-Next, we define a generative model which connects a *prior* (a function returning random samples from the prior distribution over parameters) with a *simulator* (a function accepting the prior draws as arguments):
+Next, we define a generative model which connects a *prior* (a function returning random draws from the prior distribution over parameters) to a *simulator* (a function accepting the prior draws as arguments) and returning a simulated data set with *n_obs* (potentially multivariate) observations.
 ```python
 generative_model = GenerativeModel(prior, simulator)
 ```
