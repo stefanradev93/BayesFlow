@@ -1,5 +1,6 @@
-import tensorflow as tf
 from functools import partial
+
+import tensorflow as tf
 
 
 def mean_squared_loss(model, params, x):
@@ -16,9 +17,9 @@ def mean_squared_loss(model, params, x):
     Returns:
     loss : tf.Tensor of shape (,) -- a single scalar value representing the squared loss
     """
-    
+
     params_pred = model(x)
-    loss = tf.reduce_mean(tf.reduce_sum((params - params_pred)**2, axis=1))
+    loss = tf.reduce_mean(tf.reduce_sum((params - params_pred) ** 2, axis=1))
     return loss
 
 
@@ -36,7 +37,7 @@ def heteroscedastic_loss(model, params, x):
     Returns:
     loss : tf.Tensor of shape (,) -- a single scalar value representing thr heteroscedastic loss
     """
-    
+
     pred_mean, pred_var = model(x)
     logvar = tf.reduce_sum(0.5 * tf.math.log(pred_var), axis=-1)
     squared_error = tf.reduce_sum(0.5 * tf.math.square(params - pred_mean) / pred_var, axis=-1)
@@ -58,7 +59,7 @@ def kl_latent_space(network, params, sim_data):
     Returns:
     loss : tf.Tensor of shape (,) -- a single scalar value representing the KL loss
     """
-    
+
     z, log_det_J = network(params, sim_data)
     loss = tf.reduce_mean(0.5 * tf.square(tf.norm(z, axis=-1)) - log_det_J)
     return loss
@@ -86,7 +87,7 @@ def log_loss(network, model_indices, sim_data, lambd=1.0):
 
     # Obtain probs
     model_probs = alpha / tf.reduce_sum(alpha, axis=1, keepdims=True)
-    
+
     # Numerical stability
     model_probs = tf.clip_by_value(model_probs, 1e-15, 1 - 1e-15)
 
@@ -114,21 +115,22 @@ def kl_dirichlet(model_indices, alpha):
 
     # Extract number of models
     J = int(model_indices.shape[1])
-    
+
     # Set-up ground-truth preserving prior
     alpha = alpha * (1 - model_indices) + model_indices
     beta = tf.ones((1, J), dtype=tf.float32)
     alpha0 = tf.reduce_sum(alpha, axis=1, keepdims=True)
-    
+
     # Computation of KL
     kl = tf.reduce_sum((alpha - beta) * (tf.math.digamma(alpha) - tf.math.digamma(alpha0)), axis=1, keepdims=True) + \
-         tf.math.lgamma(alpha0) - tf.reduce_sum(tf.math.lgamma(alpha), axis=1, keepdims=True) + \
-         tf.reduce_sum(tf.math.lgamma(beta), axis=1, keepdims=True) - tf.math.lgamma(tf.reduce_sum(beta, axis=1, keepdims=True))
+        tf.math.lgamma(alpha0) - tf.reduce_sum(tf.math.lgamma(alpha), axis=1, keepdims=True) + \
+        tf.reduce_sum(tf.math.lgamma(beta), axis=1, keepdims=True) - tf.math.lgamma(
+        tf.reduce_sum(beta, axis=1, keepdims=True))
     loss = tf.reduce_mean(kl)
     return loss
 
 
-def maximum_mean_discrepancy(source_samples, target_samples, weight=1., minimum=0., **args):
+def maximum_mean_discrepancy(source_samples, target_samples, weight=1., minimum=0., **_args):
     """
     This Maximum Mean Discrepancy (MMD) loss is calculated with a number of
     different Gaussian kernels.
@@ -156,7 +158,7 @@ def maximum_mean_discrepancy(source_samples, target_samples, weight=1., minimum=
 
 def _gaussian_kernel_matrix(x, y, sigmas):
     """
-    Computes a Guassian Radial Basis Kernel between the samples of x and y.
+    Computes a Gaussian Radial Basis Kernel between the samples of x and y.
     We create a sum of multiple gaussian kernels each having a width sigma_i.
     ----------
 
@@ -170,13 +172,13 @@ def _gaussian_kernel_matrix(x, y, sigmas):
     Output:
     tf.Tensor of shape [num_samples{x}, num_samples{y}] with the RBF kernel.
     """
-
+    def norm(v):
+        return tf.reduce_sum(tf.square(v), 1)
     beta = 1. / (2. * (tf.expand_dims(sigmas, 1)))
-    norm = lambda x: tf.reduce_sum(tf.square(x), 1)
     dist = tf.transpose(norm(tf.expand_dims(x, 2) - tf.transpose(y)))
     s = tf.matmul(beta, tf.reshape(dist, (1, -1)))
     return tf.reshape(tf.reduce_sum(tf.exp(-s), 0), tf.shape(dist))
-    
+
 
 def _mmd_kernel(x, y, kernel=_gaussian_kernel_matrix):
     """
@@ -195,7 +197,7 @@ def _mmd_kernel(x, y, kernel=_gaussian_kernel_matrix):
     loss : tf.Tensor of shape (,) denoting the squared maximum mean discrepancy loss.
     """
 
-    loss = tf.reduce_mean(kernel(x, x))
-    loss += tf.reduce_mean(kernel(y, y))
-    loss -= 2 * tf.reduce_mean(kernel(x, y))
+    loss = tf.reduce_mean(kernel(x, x))  # lint error: sigmas unfilled
+    loss += tf.reduce_mean(kernel(y, y))  # lint error: sigmas unfilled
+    loss -= 2 * tf.reduce_mean(kernel(x, y))  # lint error: sigmas unfilled
     return loss
