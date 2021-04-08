@@ -1,3 +1,4 @@
+import copy
 import unittest
 
 import numpy as np
@@ -17,13 +18,25 @@ class TestParameterEstimationTrainer(unittest.TestCase):
         amortizer = SingleModelAmortizer(inference_net, summary_net)
         generative_model = GenerativeModel(ex.priors.dm_prior, ex.simulators.dm_batch_simulator)
         trainer = ParameterEstimationTrainer(amortizer, generative_model)
-        cls.generative_model = generative_model
         cls.trainer = trainer
+
+    def test_training_step(self):
+        params, sim_data = self.trainer.generative_model(64, 128)
+        _ = self.trainer.network(params, sim_data)  # initialize network layers
+        trainable_variables_before = copy.deepcopy(self.trainer.network.trainable_variables)
+
+        self.trainer._train_step(params, sim_data)
+
+        trainable_variables_after = copy.deepcopy(self.trainer.network.trainable_variables)
+
+        # assert that any weights are updated in each layer
+        for before, after in zip(trainable_variables_before, trainable_variables_after):
+            self.assertTrue(np.any(before != after))
 
     def test_offline_learning(self):
         n_sim = 5000
         n_obs = 100
-        true_params, sim_data = self.generative_model(n_sim, n_obs)
+        true_params, sim_data = self.trainer.generative_model(n_sim, n_obs)
         _losses = self.trainer.train_offline(epochs=1, batch_size=64, params=true_params, sim_data=sim_data)
 
     def test_simulate_and_train_offline(self):
