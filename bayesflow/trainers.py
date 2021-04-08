@@ -1,14 +1,13 @@
 import numpy as np
-from tqdm.notebook import tqdm
-
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
-from tensorflow.train import CheckpointManager, Checkpoint
 from tensorflow.keras.utils import to_categorical
+from tensorflow.train import CheckpointManager, Checkpoint
+from tqdm.notebook import tqdm
 
-from bayesflow.helpers import clip_gradients
-from bayesflow.exceptions import SimulationError, SummaryStatsError
 from bayesflow.buffer import MemoryReplayBuffer
+from bayesflow.exceptions import SimulationError, SummaryStatsError
+from bayesflow.helpers import clip_gradients
 from bayesflow.losses import kl_latent_space, log_loss
 
 
@@ -335,7 +334,7 @@ class ModelComparisonTrainer:
 class ParameterEstimationTrainer:
     
     def __init__(self, network, generative_model, loss=None, summary_stats=None, optimizer=None,
-                learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
+                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing single-model forward inference and training an
         amortized neural estimator for parameter estimation (BayesFlow). If a checkpoint_path is provided, the
@@ -583,7 +582,8 @@ class ParameterEstimationTrainer:
 
         # Make sure n_obs is fixed, otherwise not working 
         assert type(n_obs) is int,\
-        'Round-based training currently only works with fixed n_obs. Use online learning for variable n_obs or fix n_obs to an integer value.'
+            'Round-based training currently only works with fixed n_obs. ' \
+            'Use online learning for variable n_obs or fix n_obs to an integer value.'
 
         losses = dict()
         for r in range(1, rounds+1):
@@ -629,13 +629,14 @@ class ParameterEstimationTrainer:
 
         # Make sure n_obs is fixed, otherwise not working, for now
         assert type(n_obs) is int,\
-        'Offline training currently only works with fixed n_obs. Use online learning for variable n_obs or fix n_obs to an integer value.'
+            'Offline training currently only works with fixed n_obs. ' \
+            'Use online learning for variable n_obs or fix n_obs to an integer value.'
 
         # Simulate data
         print('Simulating {} data sets upfront...'.format(n_sim))
         params, sim_data = self._forward_inference(n_sim, n_obs, summarize=False, **kwargs)
 
-        # Train offlines
+        # Train offline
         losses = self.train_offline(epochs, batch_size, params, sim_data)
         return losses
 
