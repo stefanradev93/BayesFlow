@@ -68,6 +68,12 @@ losses = trainer.train_online(epochs=50, iterations_per_epoch=1000, batch_size=6
 ```
 which performs online training for 50 epochs of 1000 iterations (batch simulations with 64 simulations per batch). The shape of each batch is thus (64, 200, summary_dim), corresponding to 64 simulations per batch, 200 observations per simulated data set, and *summary_dim* output dimensions of the final layer of the permutation-invariant summary network. See the *Parameter_Estimation_Workflow.ipynb* notebook for a detailed walkthrough. 
 
+Posterior inference is then fast and easy:
+```python
+# Obtain 5000 samples from the posterior given obs_data
+samples = amortizer.sample(obs_data, n_samples=5000)
+```
+
 ### Stateful models
 Stateful models incorporate some form of memory and are thus capable of generating observations with complex dependencies (i.e., non-IID). A prime example are dynamic models, which typically describe the evolution trajectory of a system or a process, such as an infectious disease, over time. Observations generated from such models are usually the solution of a stochastic differential equation(SDE) or time-series and thus imply a more complex probabilistic symmetry than those generated from memoryless models. An example BayesFlow architecture for tackling stateful models is depicted below.
 
