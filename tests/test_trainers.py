@@ -5,9 +5,12 @@ import numpy as np
 
 import tests.example_objects as ex
 from bayesflow.amortizers import SingleModelAmortizer, MultiModelAmortizer
+from bayesflow.default_settings import DEFAULT_SETTING_INVARIANT_BAYES_FLOW
+from bayesflow.helpers import build_meta_dict
+from bayesflow.losses import kl_latent_space
 from bayesflow.models import GenerativeModel
 from bayesflow.networks import InvariantNetwork, InvertibleNetwork, SequenceNet, EvidentialNetwork
-from bayesflow.trainers import ParameterEstimationTrainer, ModelComparisonTrainer
+from bayesflow.trainers import ParameterEstimationTrainer, ModelComparisonTrainer, MetaTrainer
 
 
 class TestParameterEstimationTrainer(unittest.TestCase):
@@ -107,6 +110,58 @@ class TestModelComparisonTrainer(unittest.TestCase):
         n_obs = 110
         model_indices, _true_params, sim_data = self.trainer.generative_model(n_sim, n_obs)
         _losses = self.trainer.train_offline(epochs=2, batch_size=16, model_indices=model_indices, sim_data=sim_data)
+
+    def test_train_rounds(self):
+        _losses = self.trainer.train_rounds(epochs=2, rounds=3, sim_per_round=100, batch_size=16, n_obs=110)
+
+
+class TestMetaTrainer(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        D = 10
+        J = 10
+        bf_meta = build_meta_dict({'n_params': D, 'n_models': J}, DEFAULT_SETTING_INVARIANT_BAYES_FLOW)
+
+        amortizer = ex.amortizers.InvariantBayesFlow(bf_meta)
+        generative_model = GenerativeModel(
+            ex.priors.model_prior,
+            [ex.priors.TPrior(D//2, 1.0, 5.0)] * J,
+            [ex.simulators.MultivariateT(df) for df in np.arange(1, J+1, 1)]
+        )
+
+        trainer = MetaTrainer(amortizer,
+                              generative_model,
+                              loss=kl_latent_space,
+                              learning_rate=.0003
+                              )
+        cls.trainer = trainer
+
+    def test_training_step(self):
+        model_indices, params, sim_data = self.trainer.generative_model(16, 128)
+        _ = self.trainer.network(model_indices, params, sim_data)  # initialize network layers
+        trainable_variables_before = copy.deepcopy(self.trainer.network.trainable_variables)
+
+        self.trainer._train_step(model_indices, params, sim_data)
+
+        trainable_variables_after = copy.deepcopy(self.trainer.network.trainable_variables)
+
+        # assert that any weights are updated in each layer
+        for before, after in zip(trainable_variables_before, trainable_variables_after):
+            self.assertTrue(np.any(before != after))
+
+    def test_train_online_fixed_n_obs(self):
+        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=30, batch_size=16, n_obs=110)
+
+    def test_train_online_variable_n_obs(self):
+        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=30, batch_size=16,
+                                            n_obs=np.random.randint(110, 301))
+
+    def test_train_offline(self):
+        n_sim = 500
+        n_obs = 110
+        model_indices, params, sim_data = self.trainer.generative_model(n_sim, n_obs)
+        _losses = self.trainer.train_offline(epochs=2, batch_size=16,
+                                             model_indices=model_indices, params=params, sim_data=sim_data)
 
     def test_train_rounds(self):
         _losses = self.trainer.train_rounds(epochs=2, rounds=3, sim_per_round=100, batch_size=16, n_obs=110)
