@@ -1,14 +1,12 @@
 import matplotlib.pyplot as plt
-from sklearn.metrics import r2_score, confusion_matrix
-from sklearn.calibration import calibration_curve
 import numpy as np
 import seaborn as sns
-import pandas as pd
 from scipy.stats import binom
+from sklearn.calibration import calibration_curve
+from sklearn.metrics import r2_score, confusion_matrix
 
 
-
-def true_vs_estimated(theta_true, theta_est, param_names, dpi,
+def true_vs_estimated(theta_true, theta_est, param_names, dpi=300,
                       figsize=(20, 4), show=True, filename=None, font_size=12):
     """Plots a scatter plot with abline of the estimated posterior means vs true values."""
 
