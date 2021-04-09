@@ -18,6 +18,28 @@ class MetaDictSetting(Setting):
         self.mandatory_fields = mandatory_fields
 
 
+DEFAULT_SETTING_INVARIANT_BAYES_FLOW = MetaDictSetting(
+    meta_dict={
+            'n_coupling_layers': 4,
+            's_args': {
+                'n_dense_h1': 2,
+                'n_dense_h2': 3,
+                'dense_h1_args': {'units': 64, 'activation': 'relu', 'kernel_initializer': 'glorot_uniform'},
+                'dense_h2_args': {'units': 128, 'activation': 'relu', 'kernel_initializer': 'glorot_uniform'},
+            },
+            't_args': {
+                'n_dense_h1': 2,
+                'n_dense_h2': 3,
+                'dense_h1_args': {'units': 64, 'activation': 'relu', 'kernel_initializer': 'glorot_uniform'},
+                'dense_h2_args': {'units': 128, 'activation': 'relu', 'kernel_initializer': 'glorot_uniform'},
+            },
+
+            'alpha': 1.85,
+            'permute': True
+        },
+    mandatory_fields=['n_params', 'n_models']
+)
+
 DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
     meta_dict={
         'n_dense_s1': 2,
