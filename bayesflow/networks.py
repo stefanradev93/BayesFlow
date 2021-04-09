@@ -1,11 +1,10 @@
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
+from tensorflow.keras.layers import Dense, LSTM
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.optimizers import Adam
 
-from bayesflow.helpers import build_meta_dict
 from bayesflow import default_settings
+from bayesflow.helpers import build_meta_dict
 
 
 class RegressionNetwork(tf.keras.Model):
@@ -535,3 +534,32 @@ class EvidentialNetwork(tf.keras.Model):
         if not to_numpy:
              pm_samples = tf.convert_to_tensor(pm_samples, dtype=tf.float32)
         return pm_samples
+
+
+class SequenceNet(tf.keras.Model):
+
+    def __init__(self):
+        """
+        Creates a custom summary network, a combination of 1D conv and LSTM.
+        """
+        super(SequenceNet, self).__init__()
+
+        self.conv_part = tf.keras.Sequential([
+            tf.keras.layers.Conv1D(64, 3, 3, activation='elu'),
+            tf.keras.layers.Conv1D(64, 3, 3, activation='elu'),
+            tf.keras.layers.Conv1D(64, 3, 3, activation='elu'),
+            tf.keras.layers.GlobalAveragePooling1D()
+        ])
+
+        self.lstm_part = Sequential(
+            [LSTM(32, return_sequences=True),
+             LSTM(64)
+             ])
+
+    def call(self, x):
+        """Performs a forward pass."""
+
+        conv_out = self.conv_part(x)
+        lstm_out = self.lstm_part(x)
+        out = tf.concat((conv_out, lstm_out), axis=-1)
+        return out
