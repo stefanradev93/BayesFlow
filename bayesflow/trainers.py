@@ -5,15 +5,14 @@ from tensorflow.keras.utils import to_categorical
 from tqdm.notebook import tqdm
 
 from bayesflow.buffer import MemoryReplayBuffer
-from bayesflow.exceptions import SimulationError, SummaryStatsError
+from bayesflow.exceptions import SimulationError, SummaryStatsError, OperationNotSupportedError
 from bayesflow.helpers import clip_gradients
 from bayesflow.losses import kl_latent_space, log_loss
-from bayesflow.models import MetaGenerativeModel, SimpleGenerativeModel
 
 
 class MetaTrainer:
 
-    def __init__(self, network, generative_model, loss, summary_stats=None, optimizer=None,
+    def __init__(self, network, generative_model=None, loss=None, summary_stats=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing single-model forward inference and training an
@@ -42,7 +41,15 @@ class MetaTrainer:
         # Basic attributes
         self.network = network
         self.generative_model = generative_model
-        self.loss = loss
+        if self.generative_model is None:
+            print("TRAINER INITIALIZATION: No generative model provided. Only offline learning mode is available!")
+
+        # Default or custom loss
+        if loss is None:
+            self.loss = kl_latent_space
+        else:
+            self.loss = loss
+
         self.summary_stats = summary_stats
         self.clip_method = clip_method
         self.clip_value = clip_value
@@ -286,6 +293,9 @@ class MetaTrainer:
         sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) -- array of simulated data sets
         """
 
+        if self.generative_model is None:
+            raise OperationNotSupportedError("No generative model specified. Only offline learning is available!")
+
         # Simulate data with n_sims and n_obs
         # Return shape of params is (batch_size, param_dim)
         # Return shape of data is (batch_size, n_obs, data_dim)
@@ -342,7 +352,7 @@ class MetaTrainer:
 
 class ModelComparisonTrainer:
 
-    def __init__(self, network, generative_model: MetaGenerativeModel, loss=None, summary_stats=None, optimizer=None,
+    def __init__(self, network, generative_model=None, loss=None, summary_stats=None, optimizer=None, n_models=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing multi-model forward inference and training an
@@ -369,6 +379,8 @@ class ModelComparisonTrainer:
         # Basic attributes
         self.network = network
         self.generative_model = generative_model
+        if self.generative_model is None:
+            print("TRAINER INITIALIZATION: No generative model provided. Only offline learning mode is available!")
         # Default or custom loss
         if loss is None:
             self.loss = log_loss
@@ -376,7 +388,7 @@ class ModelComparisonTrainer:
             self.loss = loss
         # Optional hand-crafted summaries
         self.summary_stats = summary_stats
-        self.n_models = len(generative_model.generative_models)
+
         self.clip_method = clip_method
         self.clip_value = clip_value
 
@@ -454,7 +466,7 @@ class ModelComparisonTrainer:
                 self.manager.save()
         return losses
 
-    def train_offline(self, epochs, batch_size, model_indices, sim_data, **_kwargs):
+    def train_offline(self, epochs, batch_size, model_indices, sim_data, n_models=None, **_kwargs):
         """
         Trains the inference network(s) via offline learning. Additional arguments are passed
         to the train step method.
@@ -475,8 +487,12 @@ class ModelComparisonTrainer:
 
         # If model_indices is 1D, perform one-hot encoding
         if len(model_indices.shape) == 1:
+            if n_models is None:
+                print("No n_models provided but model indices are 1D. Assuming len(np.unique(model_indices))=n_models.")
+                n_models = len(np.unique(model_indices))
+
             print('One-hot-encoding model indices...')
-            model_indices = to_categorical(model_indices, n_classes=self.n_models)
+            model_indices = to_categorical(model_indices, num_classes=n_models)
 
         # Compute hand-crafted summary statistics, if given
         if self.summary_stats is not None:
@@ -574,6 +590,9 @@ class ModelComparisonTrainer:
                             -- array of simulated data sets
         """
 
+        if self.generative_model is None:
+            raise OperationNotSupportedError("No generative model specified. Only offline learning is available!")
+
         # Sample model indices, (params), and sim_data
         model_indices_oh, _params, sim_data = self.generative_model(n_sim, n_obs)
 
@@ -636,7 +655,7 @@ class ModelComparisonTrainer:
 
 class ParameterEstimationTrainer:
 
-    def __init__(self, network, generative_model: SimpleGenerativeModel, loss=None, summary_stats=None, optimizer=None,
+    def __init__(self, network, generative_model=None, loss=None, summary_stats=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing single-model forward inference and training an
@@ -666,6 +685,8 @@ class ParameterEstimationTrainer:
         # Basic attributes
         self.network = network
         self.generative_model = generative_model
+        if self.generative_model is None:
+            print("TRAINER INITIALIZATION: No generative model provided. Only offline learning mode is available!")
         # Default or custom loss
         if loss is None:
             self.loss = kl_latent_space
@@ -971,6 +992,9 @@ class ParameterEstimationTrainer:
         sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) -- array of simulated data sets
         """
 
+        if self.generative_model is None:
+            raise OperationNotSupportedError("No generative model specified. Only offline learning is available!")
+
         # Simulate data with n_sims and n_obs
         # Return shape of params is (batch_size, param_dim)
         # Return shape of data is (batch_size, n_obs, data_dim)
@@ -1027,6 +1051,8 @@ class ParameterEstimationTrainer:
         """
         Tests whether everything works as expected.
         """
+        if self.generative_model is None:
+            return
 
         # Run forward inference with n_sim=2 and catch any exception
         try:
