@@ -28,7 +28,7 @@ class MultiModelAmortizer(tf.keras.Model):
         ----------
 
         Returns:
-        out : the outputs of evidence_net(summary_net(x)), usually model probabilities or absoltue evidences
+        out : the outputs of evidence_net(summary_net(x)), usually model probabilities or absolute evidences
         """
 
         # Compute learnable summaries, if given
@@ -113,7 +113,7 @@ class SingleModelAmortizer(tf.keras.Model):
         ----------
 
         Returns:
-        post_samples : tf.Tensor of shape (n_samples, n_datasets, n_params) -- the sampled paramaters per data set 
+        post_samples : tf.Tensor of shape (n_samples, n_datasets, n_params) -- the sampled parameters per data set
         """
 
         # Compute learnable summaries, if given
@@ -122,7 +122,3 @@ class SingleModelAmortizer(tf.keras.Model):
 
         post_samples = self.inference_net.sample(obs_data, n_samples, **kwargs)
         return post_samples
-
-
-
-    
