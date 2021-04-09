@@ -8,6 +8,7 @@ from bayesflow.buffer import MemoryReplayBuffer
 from bayesflow.exceptions import SimulationError, SummaryStatsError
 from bayesflow.helpers import clip_gradients
 from bayesflow.losses import kl_latent_space, log_loss
+from bayesflow.models import MetaGenerativeModel, SimpleGenerativeModel
 
 
 class MetaTrainer:
@@ -18,7 +19,7 @@ class MetaTrainer:
 
 class ModelComparisonTrainer:
 
-    def __init__(self, network, model_prior, priors, simulators, loss=None, summary_stats=None, optimizer=None,
+    def __init__(self, network, generative_model: MetaGenerativeModel, loss=None, summary_stats=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing multi-model forward inference and training an
@@ -29,10 +30,7 @@ class ModelComparisonTrainer:
         
         Arguments:
         network     : tf.keras.Model instance -- the neural network to be optimized
-        model_prior : callable -- a function returning randomly sampled model indices
-        priors      : list of callables -- each element is a function returning randomly sampled parameter vectors
-        simulators  : list of callables -- each element is a function implementing a process model with two
-                      mandatory arguments: params and n_obs
+        generative_model: callable -- provides (model_indices, params, sim_data) in batch format
         loss        : callable with three mandatory arguments: (network, m_indices, x), if None ('default'), use logloss
         ----------
         
@@ -45,13 +43,9 @@ class ModelComparisonTrainer:
         clip_value      : float -- the value used for gradient clipping when clip_method is set to 'value' or 'norm'
         """
 
-        assert len(priors) == len(simulators), 'The number of priors should equal the number of simulators.'
-
         # Basic attributes
         self.network = network
-        self.model_prior = model_prior
-        self.priors = priors
-        self.simulators = simulators
+        self.generative_model = generative_model
         # Default or custom loss
         if loss is None:
             self.loss = log_loss
@@ -59,7 +53,7 @@ class ModelComparisonTrainer:
             self.loss = loss
         # Optional hand-crafted summaries
         self.summary_stats = summary_stats
-        self.n_models = len(priors)
+        self.n_models = len(generative_model.generative_models)
         self.clip_method = clip_method
         self.clip_value = clip_value
 
@@ -257,24 +251,8 @@ class ModelComparisonTrainer:
                             -- array of simulated data sets
         """
 
-        # Sample model indices
-        m_indices = self.model_prior(n_sim)
-
-        # Prepare a placeholder for x
-        sim_data = []
-        for m_idx in m_indices:
-            # Draw from model prior theta ~ p(theta | m)
-            theta_m = self.priors[m_idx]()
-
-            # Generate data from x_n = g_m(theta, noise) <=> x ~ p(x | theta, m)
-            x_m = self.simulators[m_idx](theta_m, n_obs, **kwargs)
-
-            # Store data and params
-            sim_data.append(x_m)
-
-        # One-hot encode model indices and convert data to array
-        model_indices_oh = to_categorical(m_indices.astype(np.float32), num_classes=self.n_models)
-        sim_data = np.array(sim_data, dtype=np.float32)
+        # Sample model indices, (params), and sim_data
+        model_indices_oh, _params, sim_data = self.generative_model(n_sim, n_obs)
 
         # Compute hand-crafted summary statistics, if given
         if self.summary_stats is not None:
@@ -335,7 +313,7 @@ class ModelComparisonTrainer:
 
 class ParameterEstimationTrainer:
 
-    def __init__(self, network, generative_model, loss=None, summary_stats=None, optimizer=None,
+    def __init__(self, network, generative_model: SimpleGenerativeModel, loss=None, summary_stats=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
         """
         Creates a trainer instance for performing single-model forward inference and training an
