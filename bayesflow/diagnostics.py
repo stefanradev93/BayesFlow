@@ -14,13 +14,14 @@ def true_vs_estimated(theta_true, theta_est, param_names, dpi=300,
     # Plot settings
     plt.rcParams['font.size'] = font_size
 
-    # Determine figure layout
-    if len(param_names) >= 6:
-        n_col = int(np.sqrt(len(param_names)))
-        n_row = int(np.sqrt(len(param_names))) + 1
-    else:
-        n_col = int(len(param_names))
-        n_row = 1
+    # Determine n_subplots dynamically
+    n_row = int(np.ceil(len(param_names) / 6))
+    n_col = int(np.ceil(len(param_names) / n_row))
+
+    # Initialize figure
+    f, axarr = plt.subplots(n_row, n_col, figsize=figsize)
+    if n_row > 1:
+        axarr = axarr.flat
 
     # Initialize figure
     f, axarr = plt.subplots(n_row, n_col, figsize=figsize)
