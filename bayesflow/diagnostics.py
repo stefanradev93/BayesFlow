@@ -84,10 +84,15 @@ def plot_sbc(theta_samples, theta_test, param_names, bins=25, dpi=300,
     # Plot settings
     plt.rcParams['font.size'] = font_size
     N = int(theta_test.shape[0])
-    
 
-    f, axarr = plt.subplots(2, 3, figsize=figsize)
-    axarr = axarr.flat
+    # Determine n_subplots dynamically
+    n_row = int(np.ceil(len(param_names) / 6))
+    n_col = int(np.ceil(len(param_names) / n_row))
+
+    # Initialize figure
+    f, axarr = plt.subplots(n_row, n_col, figsize=figsize)
+    if n_row > 1:
+        axarr = axarr.flat
 
     # Compute ranks (using broadcasting)    
     ranks = np.sum(theta_samples < theta_test, axis=0)
@@ -167,7 +172,7 @@ def plot_confusion_matrix(m_true, m_pred, model_names, normalize=False,
     return fig
 
 
-def expected_calibration_error(m_true, m_pred, n_bins=15):
+def plot_expected_calibration_error(m_true, m_pred, n_bins=15):
     """
     Estimates the calibration error of a model comparison neural network.
     Make sure that m_true are one-hot encoded classes!
