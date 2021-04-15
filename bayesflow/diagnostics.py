@@ -22,11 +22,6 @@ def true_vs_estimated(theta_true, theta_est, param_names, dpi=300,
     f, axarr = plt.subplots(n_row, n_col, figsize=figsize)
     if n_row > 1:
         axarr = axarr.flat
-
-    # Initialize figure
-    f, axarr = plt.subplots(n_row, n_col, figsize=figsize)
-    if n_row > 1:
-        axarr = axarr.flat
         
     # --- Plot true vs estimated posterior means on a single row --- #
     for j in range(len(param_names)):
