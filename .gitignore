@@ -3,6 +3,7 @@ experimental/checkpoints/
 sim_data/
 hierarchical/
 playground/
+simulators/
 __pycache__/
 .ipynb_checkpoints/
 diffusion_api.h
