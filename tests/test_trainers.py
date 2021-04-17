@@ -41,25 +41,25 @@ class TestParameterEstimationTrainer(unittest.TestCase):
         n_sim = 5000
         n_obs = 100
         true_params, sim_data = self.trainer.generative_model(n_sim, n_obs)
-        _losses = self.trainer.train_offline(epochs=1, batch_size=64, params=true_params, sim_data=sim_data)
+        _losses = self.trainer.train_offline(1, 64, true_params, sim_data)
 
     def test_simulate_and_train_offline(self):
-        _losses = self.trainer.simulate_and_train_offline(n_sim=500, epochs=2, batch_size=32, n_obs=100)
+        _losses = self.trainer.simulate_and_train_offline(n_sim=100, epochs=2, batch_size=32, n_obs=100)
 
     def test_train_online_fixed_n_obs(self):
-        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=100, batch_size=32, n_obs=100)
+        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=20, batch_size=32, n_obs=100)
 
     def test_train_online_variable_n_obs(self):
-        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=100, batch_size=32,
+        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=20, batch_size=32,
                                             n_obs=np.random.randint(106, 301))
 
     def test_train_rounds(self):
-        _losses = self.trainer.train_rounds(epochs=1, rounds=5, sim_per_round=200, batch_size=32, n_obs=150)
+        _losses = self.trainer.train_rounds(epochs=2, rounds=2, sim_per_round=20, batch_size=32, n_obs=150)
 
     def test_train_experience_replay(self):
         _losses = self.trainer.train_experience_replay(epochs=2,
                                                        batch_size=32,
-                                                       iterations_per_epoch=100,
+                                                       iterations_per_epoch=20,
                                                        capacity=100,
                                                        n_obs=np.random.randint(106, 301))
 
@@ -74,17 +74,17 @@ class TestParameterEstimationTrainer(unittest.TestCase):
         _losses = trainer.train_offline(2, 16, params, sim_data)
 
         with self.assertRaises(OperationNotSupportedError):
-            _losses = trainer.train_online(epochs=2, iterations_per_epoch=100, batch_size=32, n_obs=100)
+            _losses = trainer.train_online(epochs=2, iterations_per_epoch=20, batch_size=32, n_obs=100)
 
         with self.assertRaises(OperationNotSupportedError):
-            _losses = trainer.train_experience_replay(epochs=2, batch_size=32, iterations_per_epoch=100,
+            _losses = trainer.train_experience_replay(epochs=2, batch_size=32, iterations_per_epoch=20,
                                                       capacity=100, n_obs=np.random.randint(106, 301))
 
         with self.assertRaises(OperationNotSupportedError):
-            _losses = trainer.train_rounds(epochs=1, rounds=5, sim_per_round=200, batch_size=32, n_obs=150)
+            _losses = trainer.train_rounds(epochs=2, rounds=2, sim_per_round=20, batch_size=32, n_obs=150)
 
         with self.assertRaises(OperationNotSupportedError):
-            _losses = trainer.simulate_and_train_offline(n_sim=500, epochs=2, batch_size=32, n_obs=100)
+            _losses = trainer.simulate_and_train_offline(n_sim=100, epochs=2, batch_size=32, n_obs=100)
 
 
 class TestModelComparisonTrainer(unittest.TestCase):
@@ -123,20 +123,20 @@ class TestModelComparisonTrainer(unittest.TestCase):
             self.assertTrue(np.any(before != after))
 
     def test_train_online_fixed_n_obs(self):
-        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=30, batch_size=16, n_obs=110)
+        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=10, batch_size=16, n_obs=110)
 
     def test_train_online_variable_n_obs(self):
-        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=30, batch_size=16,
+        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=10, batch_size=16,
                                             n_obs=np.random.randint(110, 301))
 
     def test_train_offline(self):
         n_sim = 500
         n_obs = 110
         model_indices, _true_params, sim_data = self.trainer.generative_model(n_sim, n_obs)
-        _losses = self.trainer.train_offline(epochs=2, batch_size=16, model_indices=model_indices, sim_data=sim_data)
+        _losses = self.trainer.train_offline(2, 16, model_indices, sim_data)
 
     def test_train_rounds(self):
-        _losses = self.trainer.train_rounds(epochs=2, rounds=3, sim_per_round=100, batch_size=16, n_obs=110)
+        _losses = self.trainer.train_rounds(epochs=2, rounds=2, sim_per_round=100, batch_size=16, n_obs=110)
 
     def test_no_generative_model(self):
         summary_net = SequenceNet()
@@ -159,13 +159,11 @@ class TestModelComparisonTrainer(unittest.TestCase):
         model_indices, params, sim_data = generative_model(64, 128)
         _losses = trainer.train_offline(2, 16, model_indices, sim_data)
         _losses = trainer.train_offline(2, 16, np.random.randint(0, 3, (64,)), sim_data)  # expect message
-        _losses = trainer.train_offline(2, 16, np.random.randint(0, 3, (64,)), sim_data, n_models=3)
+        with self.assertRaises(OperationNotSupportedError):
+            _losses = trainer.train_online(epochs=2, iterations_per_epoch=20, batch_size=32, n_obs=100)
 
         with self.assertRaises(OperationNotSupportedError):
-            _losses = trainer.train_online(epochs=2, iterations_per_epoch=100, batch_size=32, n_obs=100)
-
-        with self.assertRaises(OperationNotSupportedError):
-            _losses = trainer.train_rounds(epochs=1, rounds=5, sim_per_round=200, batch_size=32, n_obs=150)
+            _losses = trainer.train_rounds(epochs=2, rounds=2, sim_per_round=50, batch_size=32, n_obs=110)
 
 
 class TestMetaTrainer(unittest.TestCase):
@@ -203,28 +201,27 @@ class TestMetaTrainer(unittest.TestCase):
             self.assertTrue(np.any(before != after))
 
     def test_train_online_fixed_n_obs(self):
-        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=30, batch_size=16, n_obs=110)
+        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=10, batch_size=16, n_obs=110)
 
     def test_train_online_variable_n_obs(self):
-        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=30, batch_size=16,
+        _losses = self.trainer.train_online(epochs=2, iterations_per_epoch=10, batch_size=16,
                                             n_obs=np.random.randint(110, 301))
 
     def test_train_offline(self):
-        n_sim = 500
+        n_sim = 100
         n_obs = 110
         model_indices, params, sim_data = self.trainer.generative_model(n_sim, n_obs)
-        _losses = self.trainer.train_offline(epochs=2, batch_size=16,
-                                             model_indices=model_indices, params=params, sim_data=sim_data)
+        _losses = self.trainer.train_offline(2, 16, model_indices, params, sim_data)
 
     def test_simulate_and_train_offline(self):
-        _losses = self.trainer.simulate_and_train_offline(n_sim=100, epochs=2, batch_size=16, n_obs=150)
+        _losses = self.trainer.simulate_and_train_offline(n_sim=50, epochs=2, batch_size=16, n_obs=150)
 
     def test_train_rounds(self):
-        _losses = self.trainer.train_rounds(epochs=2, rounds=3, sim_per_round=100, batch_size=16, n_obs=110)
+        _losses = self.trainer.train_rounds(epochs=2, rounds=2, sim_per_round=20, batch_size=16, n_obs=110)
 
     def test_no_generative_model(self):
-        D = 10
-        J = 10
+        D = 6
+        J = 6
         bf_meta = build_meta_dict({'n_params': D, 'n_models': J}, DEFAULT_SETTING_INVARIANT_BAYES_FLOW)
 
         amortizer = ex.amortizers.InvariantBayesFlow(bf_meta)
@@ -242,10 +239,10 @@ class TestMetaTrainer(unittest.TestCase):
         _losses = trainer.train_offline(2, 16, model_indices, params, sim_data)
 
         with self.assertRaises(OperationNotSupportedError):
-            _losses = trainer.train_online(epochs=2, iterations_per_epoch=100, batch_size=32, n_obs=100)
+            _losses = trainer.train_online(epochs=2, iterations_per_epoch=20, batch_size=32, n_obs=110)
 
         with self.assertRaises(OperationNotSupportedError):
-            _losses = trainer.train_rounds(epochs=1, rounds=5, sim_per_round=200, batch_size=32, n_obs=150)
+            _losses = trainer.train_rounds(epochs=1, rounds=5, sim_per_round=100, batch_size=32, n_obs=110)
 
         with self.assertRaises(OperationNotSupportedError):
-            _losses = trainer.simulate_and_train_offline(n_sim=100, epochs=2, batch_size=16, n_obs=150)
+            _losses = trainer.simulate_and_train_offline(n_sim=100, epochs=2, batch_size=16, n_obs=110)
