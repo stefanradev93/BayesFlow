@@ -8,6 +8,11 @@ class SummaryStatsError(Exception):
     pass
 
 
+class LossError(Exception):
+    """ Class for error in applying loss. """
+    pass
+
+
 class ConfigurationError(Exception):
     """Class for error in model configuration, e.g. in meta dict"""
     pass
