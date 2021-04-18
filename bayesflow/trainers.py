@@ -53,7 +53,6 @@ class MetaTrainer:
         self.summary_stats = summary_stats
         self.clip_method = clip_method
         self.clip_value = clip_value
-        self.n_obs = None
 
         # Optimizer settings
         if optimizer is None:
@@ -696,7 +695,6 @@ class ParameterEstimationTrainer:
         self.summary_stats = summary_stats
         self.clip_method = clip_method
         self.clip_value = clip_value
-        self.n_obs = None
 
         # Optimizer settings
         if optimizer is None:
@@ -1051,6 +1049,8 @@ class ParameterEstimationTrainer:
         """
         Tests whether everything works as expected.
         """
+
+        # If no generative model provided, simply return
         if self.generative_model is None:
             return
 

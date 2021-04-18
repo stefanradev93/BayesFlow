@@ -1,46 +1,16 @@
 from numba import jit, prange
+from tensorflow.keras import utils
 import ctypes
 from numba.extending import get_cython_function_address
 import numpy as np
 
 # Get a pointer to the C function levy.c
-addr_levy= get_cython_function_address("levy", "levy_trial")
+addr_levy = get_cython_function_address("levy", "levy_trial")
 functype = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.c_double, ctypes.c_double, 
                             ctypes.c_double, ctypes.c_double, ctypes.c_double,
                             ctypes.c_double, ctypes.c_double, ctypes.c_double, 
                             ctypes.c_double, ctypes.c_int)
 levy_trial = functype(addr_levy)
-
-
-def prior(batch_size):
-    """
-    Samples from the prior 'batch_size' times.
-    ----------
-    
-    Arguments:
-    batch_size : int -- the number of samples to draw from the prior
-    ----------
-    
-    Output:
-    theta : np.ndarray of shape (batch_size, theta_dim) -- the samples batch of parameters
-    """
-    
-    
-    a = np.random.gamma(2,2, size=batch_size)
-    zr = np.random.beta(5,5, size=batch_size)
-    t0 = np.random.gamma(2,2, size=batch_size)
-    alpha = 2*np.random.beta(2,1, size=batch_size)
-    v1 = np.random.normal(0,5, size=batch_size)
-    v2 = np.random.normal(0,5, size=batch_size)
-    v3 = np.random.normal(0,5, size=batch_size)
-    v4 = np.random.normal(0,5, size=batch_size)
-    
-    
-    p_samples = np.c_[
-        a, zr, t0, alpha, v1, v2, v3, v4 
-    ]
-    
-    return p_samples.astype(np.float32)
 
 
 @jit(nopython=True)
@@ -75,23 +45,30 @@ def _levy_condition(v, params, x, dt, max_steps):
                                 params[i, 3], dt, max_steps)
 
 
-def levy_simulator(params, n_trials, dt=0.001, max_steps=1e4):
+def levy_simulator(params, n_obs, dt=0.001, max_steps=1e4):
     """
-    Simulates a levy process for 4 conditions with 8 parameters (a, zr, v1, v2, v3, v4, t0, alpha).
+    Simulates a levy process for 4 conditions with 8 parameters (a, zr, t0, alpha, v1, v2, v3, v4).
     """
-    
-    n_trials_c1 = n_trials[0]
-    n_trials_c2 = n_trials[1]
-    n_trials_c3 = n_trials[2]
-    n_trials_c4 = n_trials[3]
+
+    n1 = n2 = n3 = n_obs // 4
+    n4 = n_obs - 3 * n1
 
     v1 = params[:, 4]
     v2 = params[:, 5]
     v3 = params[:, 6]
     v4 = params[:, 7]
     
-    rt_c1 = levy_condition(v1, params, n_trials_c1, dt=dt, max_steps=max_steps)
-    rt_c2 = levy_condition(v2, params, n_trials_c2, dt=dt, max_steps=max_steps)
-    rt_c3 = levy_condition(v3, params, n_trials_c3, dt=dt, max_steps=max_steps)
-    rt_c4 = levy_condition(v4, params, n_trials_c4, dt=dt, max_steps=max_steps)
-    return np.concatenate([rt_c1, rt_c2, rt_c3, rt_c4])
+    rt_c1 = levy_condition(v1, params, n1, dt=dt, max_steps=max_steps)
+    rt_c2 = levy_condition(v2, params, n2, dt=dt, max_steps=max_steps)
+    rt_c3 = levy_condition(v3, params, n3, dt=dt, max_steps=max_steps)
+    rt_c4 = levy_condition(v4, params, n4, dt=dt, max_steps=max_steps)
+
+    # Store rts
+    rts = np.concatenate([rt_c1, rt_c2, rt_c3, rt_c4], axis=1)
+
+    # Create conditions array and one-hot-encode it
+    ind = np.stack(params.shape[0] * [np.concatenate((np.zeros(n1), np.ones(n2), 2*np.ones(n3), 3*np.ones(n3)))]).astype(np.int32)
+    oh = utils.to_categorical()
+
+    sim_data = np.stack((rts, ind), axis=-1)
+    return sim_data
