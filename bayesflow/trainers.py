@@ -295,7 +295,7 @@ class BaseTrainer(ABC):
         self.optimizer.apply_gradients(zip(gradients, tensors))
 
     @abstractmethod
-    def _forward_inference(self, n_sim, n_obs, **_kwargs):
+    def _forward_inference(self, n_sim, n_obs, **kwargs):
         """
         Simulate arguments for training, e.g.:
         - (params, sim_data) for ParameterEstimationTrainer
@@ -440,7 +440,7 @@ class ModelComparisonTrainer(BaseTrainer):
         # call train_offline of superclass with one-hot encoded model_indices
         super().train_offline(epochs, batch_size, model_indices, sim_data)
 
-    def _forward_inference(self, n_sim, n_obs, **_kwargs):
+    def _forward_inference(self, n_sim, n_obs, **kwargs):
         """
         Performs one step of multi-model forward inference.
         ----------
@@ -461,7 +461,7 @@ class ModelComparisonTrainer(BaseTrainer):
             raise OperationNotSupportedError("No generative model specified. Only offline learning is available!")
 
         # Sample model indices, (params), and sim_data
-        model_indices_oh, _params, sim_data = self.generative_model(n_sim, n_obs)
+        model_indices_oh, _params, sim_data = self.generative_model(n_sim, n_obs, **kwargs)
 
         # Compute hand-crafted summary statistics, if given
         if self.summary_stats is not None:
@@ -574,6 +574,8 @@ class ParameterEstimationTrainer(BaseTrainer):
         # Return shape of params is (batch_size, param_dim)
         # Return shape of data is (batch_size, n_obs, data_dim)
         params, sim_data = self.generative_model(n_sim, n_obs, **kwargs)
+
+        # TODO - Apply transforms, if given
 
         # Compute hand-crafted summary stats, if given
         if summarize and self.summary_stats is not None:

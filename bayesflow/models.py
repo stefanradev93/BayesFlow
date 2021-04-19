@@ -56,6 +56,7 @@ class MetaGenerativeModel(GenerativeModel):
 
         self._check_consistency()
 
+
     def __call__(self, n_sim, n_obs, **kwargs):
         """
         Simulates n_sim datasets of n_obs observations from the provided simulator
