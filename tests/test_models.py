@@ -43,6 +43,35 @@ class TestSimpleGenerativeModel(unittest.TestCase):
         self.assertTrue(sim_data.shape[0] == N_SIM)
         self.assertTrue(sim_data.shape[1] == N_OBS)
 
+    def test_param_transform(self):
+        def param_transform(x):
+            return np.exp(x)
+
+        generative_model = SimpleGenerativeModel(ex.priors.dm_prior, ex.simulators.dm_batch_simulator,
+                                                 param_transform=param_transform)
+        _params, _sim_data = generative_model(n_sim=N_SIM, n_obs=N_OBS)
+
+    def test_data_transform(self):
+        def data_transform(x):
+            noise = 0.001 * np.random.random(x.shape)
+            return x + noise
+
+        generative_model = SimpleGenerativeModel(prior=ex.priors.dm_prior, simulator=ex.simulators.dm_batch_simulator,
+                                                 data_transform=data_transform)
+        _params, _sim_data = generative_model(n_sim=N_SIM, n_obs=N_OBS)
+
+    def test_param_and_data_transform(self):
+        def param_transform(x):
+            return np.exp(x)
+
+        def data_transform(x):
+            noise = 0.001 * np.random.random(x.shape)
+            return x + noise
+
+        generative_model = SimpleGenerativeModel(prior=ex.priors.dm_prior, simulator=ex.simulators.dm_batch_simulator,
+                                                 param_transform=param_transform, data_transform=data_transform)
+        _params, _sim_data = generative_model(n_sim=N_SIM, n_obs=N_OBS)
+
 
 class TestMetaGenerativeModel(unittest.TestCase):
     @classmethod
@@ -86,3 +115,65 @@ class TestMetaGenerativeModel(unittest.TestCase):
         self.assertTrue(params.shape[0] == _n_sim)
         self.assertTrue(sim_data.shape[0] == _n_sim)
         self.assertTrue(sim_data.shape[1] == _n_obs)
+
+    def test_same_param_and_data_transform(self):
+        def data_transform(x):
+            noise = 0.001 * np.random.random(x.shape)
+            return x + noise
+
+        def param_transform(x):
+            return np.exp(x)
+
+        M = 10
+        D = 8
+        prior = ex.priors.TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
+        priors = [prior] * M
+        simulators = [ex.simulators.MultivariateT(df) for df in np.arange(1, 101, M)]
+
+        _generative_model = MetaGenerativeModel(model_prior=ex.priors.model_prior, priors=priors, simulators=simulators,
+                                                param_transforms=param_transform, data_transforms=data_transform)
+
+    def test_same_param_transform(self):
+        def param_transform(x):
+            return np.exp(x)
+
+        M = 10
+        D = 8
+        prior = ex.priors.TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
+        priors = [prior] * M
+        simulators = [ex.simulators.MultivariateT(df) for df in np.arange(1, 101, M)]
+
+        _generative_model = MetaGenerativeModel(model_prior=ex.priors.model_prior, priors=priors, simulators=simulators,
+                                                param_transforms=param_transform)
+
+    def test_same_data_transform(self):
+        def data_transform(x):
+            noise = 0.001 * np.random.random(x.shape)
+            return x + noise
+
+        M = 10
+        D = 8
+        prior = ex.priors.TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
+        priors = [prior] * M
+        simulators = [ex.simulators.MultivariateT(df) for df in np.arange(1, 101, M)]
+
+        _generative_model = MetaGenerativeModel(model_prior=ex.priors.model_prior, priors=priors, simulators=simulators,
+                                                data_transforms=data_transform)
+
+    def test_individual_param_and_data_transform(self):
+        param_transforms = [lambda x: np.exp(x),
+                            None,
+                            lambda x: np.round(x, 3)]
+
+        data_transforms = [lambda x: x + np.random.random(x.shape),
+                           lambda x: np.exp(x),
+                           None]
+
+        M = 3
+        D = 4
+        prior = ex.priors.TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
+        priors = [prior] * M
+        simulators = [ex.simulators.MultivariateT(df) for df in np.round(np.linspace(1, 101, M))]
+
+        _generative_model = MetaGenerativeModel(model_prior=ex.priors.model_prior, priors=priors, simulators=simulators,
+                                                param_transforms=param_transforms, data_transforms=data_transforms)

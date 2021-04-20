@@ -16,12 +16,12 @@ class GenerativeModel(object):
             -> initialize SimpleGenerativeModel
     """
 
-    def __new__(cls, *args):
-        if any([isinstance(arg, list) for arg in args]):
+    def __new__(cls, *args, **kwargs):
+        if any([isinstance(arg, list) for arg in args]) or any([isinstance(arg, list) for arg in kwargs.values()]):
             g = object.__new__(MetaGenerativeModel)
         else:
             g = object.__new__(SimpleGenerativeModel)
-        g.__init__(*args)
+        g.__init__(*args, **kwargs)
 
         return g
 
@@ -35,13 +35,23 @@ class GenerativeModel(object):
 
 
 class MetaGenerativeModel(GenerativeModel):
-    def __init__(self, model_prior, priors, simulators, param_transform=None, param_padding=None):
+    def __init__(self, model_prior, priors, simulators,
+                 param_transforms=None, data_transforms=None, param_padding=None):
         assert len(priors) == len(simulators), "Must provide same number of priors and simulators!"
+        self.n_models = len(priors)
+
+        param_transforms = self._configure_transform(param_transforms)
+        data_transforms = self._configure_transform(data_transforms)
 
         self.model_prior = model_prior
-        self.generative_models = [GenerativeModel(prior, simulator) for prior, simulator in zip(priors, simulators)]
-        self.param_transform = param_transform
-        self.n_models = len(self.generative_models)
+
+        # initialize list of SimpleGenerativeModels
+        self.generative_models = [SimpleGenerativeModel(prior=prior,
+                                                        simulator=simulator,
+                                                        param_transform=param_transform,
+                                                        data_transform=data_transform)
+                                  for prior, simulator, param_transform, data_transform
+                                  in zip(priors, simulators, param_transforms, data_transforms)]
 
         self._max_param_length = None
         self._data_dim = None
@@ -55,7 +65,6 @@ class MetaGenerativeModel(GenerativeModel):
                                                   mode='constant')
 
         self._check_consistency()
-
 
     def __call__(self, n_sim, n_obs, **kwargs):
         """
@@ -98,6 +107,19 @@ class MetaGenerativeModel(GenerativeModel):
 
         return model_indices.astype(np.float32), params.astype(np.float32), sim_data.astype(np.float32)
 
+    def _configure_transform(self, transform):
+        if isinstance(transform, list):
+            if len(transform) == self.n_models:
+                if not all([callable(t) or t is None for t in transform]):
+                    raise ConfigurationError("Every transform in the list must be callable or None")
+                return transform
+            else:
+                raise ConfigurationError("Must provide single transform callable/None or list of length n_models")
+        else:
+            if transform is not None and not callable(transform):
+                raise ConfigurationError("Single provided transform must be callable or None!")
+            return [transform] * self.n_models
+
     def _find_max_param_length_and_data_dim(self):
         # find max_param_length
         model_indices = list(range(len(self.generative_models)))
@@ -107,7 +129,7 @@ class MetaGenerativeModel(GenerativeModel):
             param_lengths.append(params_.shape[1])
 
             # set data dim once
-            if self._data_dim is None:  # assumption: all simulators have same data dim. If not -> max search & 0-padd.
+            if self._data_dim is None:  # assumption: all simulators have same data dim. If not -> max search & 0-pad
                 self._data_dim = sim_data_.shape[2:]  # dim0: n_sim, dim1: n_obs, dim2...x: data_dim
 
         self._max_param_length = max(param_lengths)
@@ -135,7 +157,8 @@ class MetaGenerativeModel(GenerativeModel):
 
 
 class SimpleGenerativeModel(GenerativeModel):
-    def __init__(self, prior: callable, simulator: callable):
+    def __init__(self, prior: callable, simulator: callable,
+                 param_transform: callable = None, data_transform: callable = None):
         """
         Initializes a GenerativeModel instance with a prior and simulator.
         The GenerativeModel class's __call__ method is capable of returning batches even if the prior and/or simulator
@@ -166,6 +189,8 @@ class SimpleGenerativeModel(GenerativeModel):
 
         self.prior = prior
         self.simulator = simulator
+        self.param_transform = param_transform
+        self.data_transform = data_transform
         self._set_prior_and_simulator()
         self._check_consistency()
 
@@ -185,8 +210,17 @@ class SimpleGenerativeModel(GenerativeModel):
 
         """
 
+        # simulate params and data
         params = self.prior(n_sim)
         sim_data = self.simulator(params, n_obs, **kwargs)
+
+        # parameter transform if specified
+        if self.param_transform is not None:
+            params = self.param_transform(params)
+
+        # data transform if specified
+        if self.data_transform is not None:
+            sim_data = self.data_transform(sim_data)
 
         return params.astype(np.float32), sim_data.astype(np.float32)
 
@@ -199,7 +233,7 @@ class SimpleGenerativeModel(GenerativeModel):
         sim_data = self.simulator(params, n_obs)
         """
         _n_sim = 16
-        _n_obs = 200
+        _n_obs = 128
 
         # Wrap prior callable if necessary
         try:
@@ -224,7 +258,7 @@ class SimpleGenerativeModel(GenerativeModel):
         except Exception as err:
             _sim_data = np.array([self.simulator(_params[i], _n_obs) for i in range(_n_sim)])
             self._single_simulator = self.simulator
-            self.simulator = lambda params, n_obs, **kwargs:\
+            self.simulator = lambda params, n_obs, **kwargs: \
                 np.array([self._single_simulator(theta, n_obs, **kwargs) for theta in params])
 
             _sim_data = self.simulator(_params, _n_obs)
@@ -236,7 +270,7 @@ class SimpleGenerativeModel(GenerativeModel):
         Performs an internal consistency check.
         """
         _n_sim = 16
-        _n_obs = 200
+        _n_obs = 128
         try:
             params, sim_data = self(n_sim=_n_sim, n_obs=_n_obs)
             if params.shape[0] != _n_sim:
