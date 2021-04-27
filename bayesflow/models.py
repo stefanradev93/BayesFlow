@@ -108,6 +108,10 @@ class MetaGenerativeModel(GenerativeModel):
         return model_indices.astype(np.float32), params.astype(np.float32), sim_data.astype(np.float32)
 
     def _configure_transform(self, transform):
+        """
+        Prepares a transformation (either data or param) for internal use, if specified by the user.
+        """
+        
         if isinstance(transform, list):
             if len(transform) == self.n_models:
                 if not all([callable(t) or t is None for t in transform]):
