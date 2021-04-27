@@ -5,7 +5,9 @@ hierarchical/
 playground/
 checkpoints/
 simulators/
-Meta_*
+Meta_Diffusion_Model.ipynb
+BayesFlow_Levy.ipynb
+BayesFlow_Levy_Cython.ipynb
 __pycache__/
 .ipynb_checkpoints/
 diffusion_api.h
