@@ -8,7 +8,28 @@ from sklearn.metrics import r2_score, confusion_matrix
 
 def true_vs_estimated(theta_true, theta_est, param_names, dpi=300,
                       figsize=(20, 4), show=True, filename=None, font_size=12):
-    """Plots a scatter plot with abline of the estimated posterior means vs true values."""
+    """ Plots a scatter plot with abline of the estimated posterior means vs true values.
+
+    Parameters
+    ----------
+    theta_true: np.array
+        Array of true parameters.
+    theta_est: np.array
+        Array of estimated parameters.
+    param_names: list(str)
+        List of parameter names for plotting.
+    dpi: int, default:300
+        Dots per inch (dpi) for the plot.
+    figsize: tuple(int, int), default: (20,4)
+        Figure size.
+    show: boolean, default: True
+        Controls if the plot will be shown
+    filename: str, default: None
+        Filename if plot shall be saved
+    font_size: int, default: 12
+        Font size
+
+    """
 
 
     # Plot settings
@@ -73,8 +94,29 @@ def true_vs_estimated(theta_true, theta_est, param_names, dpi=300,
 
 def plot_sbc(theta_samples, theta_test, param_names, bins=25, dpi=300,
             figsize=(24, 12), interval=0.99, show=True, font_size=12):
-    """
-    Plots the simulation-based posterior checking histograms as advocated by Talts et al. (2018).
+    """ Plots the simulation-based posterior checking histograms as advocated by Talts et al. (2018).
+
+    Parameters
+    ----------
+    theta_samples: np.array
+        Array of sampled parameters
+    theta_test: np.array
+        Array of test parameters
+    param_names: list(str)
+        List of parameter names for plotting.
+    bins: int, default: 25
+        Bins for histogram plot
+    dpi: int, default: 300
+        Dots per inch (dpi) for plot
+    figsize: tuple(int, int), default: (24, 12)
+        Figure size
+    interval: float, default: 0.99
+        Interval to plot
+    show: bool, default: True
+        Controls whether the plot shall be printed
+    font_size: int, default:12
+        Font size
+
     """
 
     # Plot settings
@@ -123,8 +165,27 @@ def plot_sbc(theta_samples, theta_test, param_names, bins=25, dpi=300,
 
 def plot_confusion_matrix(m_true, m_pred, model_names, normalize=False, 
                           cmap=plt.cm.Blues, figsize=(14, 8), annotate=True, show=True):
-    """
-    A function to print and plots the confusion matrix. Normalization can be applied by setting `normalize=True`.
+    """A function to print and plots the confusion matrix. Normalization can be applied by setting `normalize=True`.
+
+    Parameters
+    ----------
+    m_true: np.array
+        Array of true model indices
+    m_pred: np.array
+        Array of predicted model indices
+    model_names: list(str)
+        List of model names for plotting
+    normalize: bool, default: False
+        Controls whether normalization shall be applied
+    cmap: matplotlib.pyplot.cm.*, default: plt.cm.Blues
+        Colormap
+    figsize: tuple(int, int), default: (14, 8)
+        Figure size
+    annotate: bool, default: True
+        Controls if the plot shall be annotated
+    show: bool, default: True
+        Controls if the plot shall be printed
+
     """
 
     # Take argmax of test
@@ -169,9 +230,20 @@ def plot_confusion_matrix(m_true, m_pred, model_names, normalize=False,
 
 
 def plot_expected_calibration_error(m_true, m_pred, n_bins=15):
-    """
-    Estimates the calibration error of a model comparison neural network.
-    Make sure that m_true are one-hot encoded classes!
+    """Estimates the calibration error of a model comparison neural network.
+
+    Important
+    ---------
+    Make sure that ``m_true`` are **one-hot encoded** classes!
+
+    Parameters
+    ----------
+    m_true: np.array or list
+        True model indices
+    m_pred: np.array or list
+        Predicted model indices
+    n_bins: int, default: 15
+        Number of bins for plot
     """
 
     # Convert tf.Tensors to numpy, if passed
@@ -200,8 +272,21 @@ def plot_expected_calibration_error(m_true, m_pred, n_bins=15):
 
 
 def plot_calibration_curves(cal_probs, cal_errs, model_names, font_size=12, figsize=(12, 4)):
-    """
-    Plots the calibration curves for a model comparison problem.
+    """Plots the calibration curves for a model comparison problem.
+
+    Parameters
+    ----------
+    cal_probs: np.array
+        Currently not used
+    cal_errs: np.array or list
+        Array of calibration curve data
+    model_names: list(str)
+        List of model names for plotting
+    font_size: int, default: 12
+        Font size
+    figsize: tuple(int, int), default: (12, 4)
+        Figure size for plot layout
+
     """
 
     plt.rcParams['font.size'] = 12

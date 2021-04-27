@@ -1,0 +1,1519 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>bayesflow package &mdash; bayesflow 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Support" href="support.html" />
+    <link rel="prev" title="Welcome to bayesflow’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bayesflow
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">bayesflow package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.amortizers">bayesflow.amortizers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.buffer">bayesflow.buffer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.default_settings">bayesflow.default_settings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.diagnostics">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.exceptions">bayesflow.exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.helpers">bayesflow.helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.losses">bayesflow.losses module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.models">bayesflow.models module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.networks">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.trainers">bayesflow.trainers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bayesflow</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>bayesflow package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/bayesflow.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="bayesflow-package">
+<h1>bayesflow package<a class="headerlink" href="#bayesflow-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bayesflow.amortizers">
+<span id="bayesflow-amortizers-module"></span><h2>bayesflow.amortizers module<a class="headerlink" href="#module-bayesflow.amortizers" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="bayesflow.amortizers.MetaAmortizer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.amortizers.</span></code><code class="sig-name descname"><span class="pre">MetaAmortizer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#MetaAmortizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.MetaAmortizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<dl class="py method">
+<dt id="bayesflow.amortizers.MetaAmortizer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inference_net</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evidence_net</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_net</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#MetaAmortizer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.MetaAmortizer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects an evidential network with a summary network as in the BayesFlow for model comparison set-up.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inference_net</strong> (<em>tf.keras.Model</em>) – An (invertible) inference network which processes the outputs of a generative model (i.e., params, sim_data)</p></li>
+<li><p><strong>evidence_net</strong> (<em>tf.keras.Model</em>) – An evidential network which processes the outputs of multiple generative models (i.e., sim_data)</p></li>
+<li><p><strong>summary_net</strong> (<em>tf.keras.Model</em><em> or </em><em>None</em><em>, </em><em>optional</em><em>, </em><em>default: None</em>) – An optional summary network</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.amortizers.MetaAmortizer.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#MetaAmortizer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.MetaAmortizer.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a forward pass through the networks.</p>
+<dl class="simple">
+<dt>model_indices<span class="classifier">tf.Tensor or np.array of shape (n_sim, n_models)</span></dt><dd><p>the true, one-hot-encoded model indices <span class="math notranslate nohighlight">\(m \sim p(m)\)</span></p>
+</dd>
+<dt>params<span class="classifier">tf.Tensor or np.array of shape (n_sim, n_params)</span></dt><dd><p>the parameters :math:`      heta sim p(    heta | m)` of interest</p>
+</dd>
+<dt>sim_data<span class="classifier">tf.Tensor or np.array of shape (n_sim, n_obs, data_dim)</span></dt><dd><p>the conditional data <cite>x</cite></p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>out_inference</strong> (<em>np.array</em>) – The output of the inference network or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no networks provided</p></li>
+<li><p><strong>out_evidence</strong> (<em>np.array</em>) – The output of the evidence network or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no networks provided</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.amortizers.MetaAmortizer.sample_from_model">
+<code class="sig-name descname"><span class="pre">sample_from_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#MetaAmortizer.sample_from_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.MetaAmortizer.sample_from_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs fast parallelized inference on a single model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.amortizers.MetaAmortizer.compare_models">
+<code class="sig-name descname"><span class="pre">compare_models</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#MetaAmortizer.compare_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.MetaAmortizer.compare_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs model comparison.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.amortizers.MultiModelAmortizer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.amortizers.</span></code><code class="sig-name descname"><span class="pre">MultiModelAmortizer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#MultiModelAmortizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.MultiModelAmortizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<p>Connects an evidential network with a summary network as in the BayesFlow for model comparison set-up.</p>
+<dl class="py method">
+<dt id="bayesflow.amortizers.MultiModelAmortizer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evidence_net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_net</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#MultiModelAmortizer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.MultiModelAmortizer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a MultiModelAmortizer for</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>evidence_net</strong> (<em>tf.keras.Model</em>) – An evidential network which processes the outputs of multiple generative models (i.e., sim_data)</p></li>
+<li><p><strong>summary_net</strong> (<em>tf.keras.Model</em><em> or </em><em>None</em><em>, </em><em>optional</em><em>, </em><em>default: None</em>) – An optional summary network</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.amortizers.MultiModelAmortizer.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#MultiModelAmortizer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.MultiModelAmortizer.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a forward pass through the summary and inference network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sim_data</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>n_obs</em><em>, </em><em>data_dim</em><em>)</em>) – The conditional data <cite>x</cite></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The outputs of <code class="docutils literal notranslate"><span class="pre">evidence_net(summary_net(x))</span></code>, usually model probabilities or absolute evidences</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.amortizers.MultiModelAmortizer.sample">
+<code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#MultiModelAmortizer.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.MultiModelAmortizer.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs inference on actually observed or simulated validation data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obs_data</strong> (<em>tf.Tensor of shape</em><em> (</em><em>n_datasets</em><em>, </em><em>n_obs</em><em>, </em><em>data_dim</em><em>)</em>) – The conditional data set(s)</p></li>
+<li><p><strong>n_samples</strong> (<em>int</em>) – The number of posterior samples to obtain from the approximate posterior</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>post_samples</strong> – The sampled model indices or evidences per dataset or model</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor of shape (n_samples, n_datasets, n_models)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.amortizers.SingleModelAmortizer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.amortizers.</span></code><code class="sig-name descname"><span class="pre">SingleModelAmortizer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#SingleModelAmortizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.SingleModelAmortizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<p>Connects an inference network for parameter estimation with an optional summary network
+as in the original BayesFlow set-up.</p>
+<dl class="py method">
+<dt id="bayesflow.amortizers.SingleModelAmortizer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inference_net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_net</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#SingleModelAmortizer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.SingleModelAmortizer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes the SingleModelAmortizer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inference_net</strong> (<em>tf.keras.Model</em>) – An (invertible) inference network which processes the outputs of a generative model (i.e., params, sim_data)</p></li>
+<li><p><strong>summary_net</strong> (<em>tf.keras.Model</em><em> or </em><em>None</em><em>, </em><em>optional</em><em>, </em><em>default: None</em>) – An optional summary network</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.amortizers.SingleModelAmortizer.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#SingleModelAmortizer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.SingleModelAmortizer.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a forward pass through the summary and inference network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>n_params</em><em>)</em>) – the parameters theta ~ p(theta | x) of interest</p></li>
+<li><p><strong>sim_data</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>n_obs</em><em>, </em><em>data_dim</em><em>)</em>) – the conditional data x</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the outputs of <code class="docutils literal notranslate"><span class="pre">inference_net(theta,</span> <span class="pre">summary_net(x))</span></code>, usually a latent variable and
+log(det(Jacobian)), that is a tuple <code class="docutils literal notranslate"><span class="pre">(z,</span> <span class="pre">log_det_J)</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>out</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.amortizers.SingleModelAmortizer.sample">
+<code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#SingleModelAmortizer.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.SingleModelAmortizer.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs inference on actually observed or simulated validation data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obs_data</strong> (<em>tf.Tensor of shape</em><em> (</em><em>n_datasets</em><em>, </em><em>n_obs</em><em>, </em><em>data_dim</em><em>)</em>) – The conditional data set(s)</p></li>
+<li><p><strong>n_samples</strong> (<em>int</em>) – The number of posterior samples to obtain from the approximate posterior</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>post_samples</strong> – the sampled parameters per data set</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor of shape (n_samples, n_datasets, n_params)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-bayesflow.buffer">
+<span id="bayesflow-buffer-module"></span><h2>bayesflow.buffer module<a class="headerlink" href="#module-bayesflow.buffer" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="bayesflow.buffer.MemoryReplayBuffer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.buffer.</span></code><code class="sig-name descname"><span class="pre">MemoryReplayBuffer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/buffer.html#MemoryReplayBuffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Implements a memory replay buffer for simulation-based inference.</p>
+<dl class="py attribute">
+<dt id="bayesflow.buffer.MemoryReplayBuffer.capacity">
+<code class="sig-name descname"><span class="pre">capacity</span></code><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer.capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of batches to store in the buffer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bayesflow.buffer.MemoryReplayBuffer.size_in_batches">
+<code class="sig-name descname"><span class="pre">size_in_batches</span></code><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer.size_in_batches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of currently stored batches</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bayesflow.buffer.MemoryReplayBuffer._buffer">
+<code class="sig-name descname"><span class="pre">_buffer</span></code><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer._buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Buffer data as a dictionary with keys <cite>‘params’, ‘sim_data’</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.buffer.MemoryReplayBuffer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/buffer.html#MemoryReplayBuffer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a memory replay buffer for simulation-based inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>capacity</strong> (<em>int</em>) – Maximum number of batches to store in buffer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.buffer.MemoryReplayBuffer.store">
+<code class="sig-name descname"><span class="pre">store</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/buffer.html#MemoryReplayBuffer.store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer.store" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores params and simulated data.</p>
+<p>If buffer is not full, stores params and data at the end, if full, overwrites params and data at current index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>object</em>) – Parameters to be stored</p></li>
+<li><p><strong>sim_data</strong> (<em>object</em>) – Simulated data to be stored</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.buffer.MemoryReplayBuffer.sample">
+<code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/buffer.html#MemoryReplayBuffer.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Samples <cite>batch_size</cite> number of parameter vectors and simulations from buffer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>params</strong> (<em>np.array(np.float32)</em>) – Array of sampled parameters of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">param_dim)</span></code></p></li>
+<li><p><strong>sim_data</strong> (<em>np.array(np.float32)</em>) – Array of simulated data sets or summary statistics thereof,
+shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">n_obs,</span> <span class="pre">data_dim)</span></code> or <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">sum_dim)</span></code></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-bayesflow.default_settings">
+<span id="bayesflow-default-settings-module"></span><h2>bayesflow.default_settings module<a class="headerlink" href="#module-bayesflow.default_settings" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="bayesflow.default_settings.Setting">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.default_settings.</span></code><code class="sig-name descname"><span class="pre">Setting</span></code><a class="reference internal" href="_modules/bayesflow/default_settings.html#Setting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.Setting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Abstract Base class for settings. It’s here to potentially extend the setting functionality in future.</p>
+<dl class="py method">
+<dt id="bayesflow.default_settings.Setting.__init__">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/default_settings.html#Setting.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.Setting.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.default_settings.MetaDictSetting">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.default_settings.</span></code><code class="sig-name descname"><span class="pre">MetaDictSetting</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mandatory_fields</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/default_settings.html#MetaDictSetting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.MetaDictSetting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bayesflow.default_settings.Setting" title="bayesflow.default_settings.Setting"><code class="xref py py-class docutils literal notranslate"><span class="pre">bayesflow.default_settings.Setting</span></code></a></p>
+<p>Implements an interface for a default meta_dict with optional mandatory fields</p>
+<dl class="py method">
+<dt id="bayesflow.default_settings.MetaDictSetting.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mandatory_fields</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/default_settings.html#MetaDictSetting.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.MetaDictSetting.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>meta_dict</strong> (<em>dict</em>) – Default dictionary.</p></li>
+<li><p><strong>mandatory_fields</strong> (<em>list</em><em>, </em><em>default:</em><em> [</em><em>]</em>) – List of keys in <cite>meta_dict</cite> that need to be provided by the user.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-bayesflow.diagnostics">
+<span id="bayesflow-diagnostics-module"></span><h2>bayesflow.diagnostics module<a class="headerlink" href="#module-bayesflow.diagnostics" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="bayesflow.diagnostics.true_vs_estimated">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></code><code class="sig-name descname"><span class="pre">true_vs_estimated</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_est</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/diagnostics.html#true_vs_estimated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.true_vs_estimated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots a scatter plot with abline of the estimated posterior means vs true values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta_true</strong> (<em>np.array</em>) – Array of true parameters.</p></li>
+<li><p><strong>theta_est</strong> (<em>np.array</em>) – Array of estimated parameters.</p></li>
+<li><p><strong>param_names</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of parameter names for plotting.</p></li>
+<li><p><strong>dpi</strong> (<em>int</em><em>, </em><em>default:300</em>) – Dots per inch (dpi) for the plot.</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>default:</em><em> (</em><em>20</em><em>,</em><em>4</em><em>)</em>) – Figure size.</p></li>
+<li><p><strong>show</strong> (<em>boolean</em><em>, </em><em>default: True</em>) – Controls if the plot will be shown</p></li>
+<li><p><strong>filename</strong> (<em>str</em><em>, </em><em>default: None</em>) – Filename if plot shall be saved</p></li>
+<li><p><strong>font_size</strong> (<em>int</em><em>, </em><em>default: 12</em>) – Font size</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.diagnostics.plot_sbc">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></code><code class="sig-name descname"><span class="pre">plot_sbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(24,</span> <span class="pre">12)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/diagnostics.html#plot_sbc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_sbc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the simulation-based posterior checking histograms as advocated by Talts et al. (2018).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta_samples</strong> (<em>np.array</em>) – Array of sampled parameters</p></li>
+<li><p><strong>theta_test</strong> (<em>np.array</em>) – Array of test parameters</p></li>
+<li><p><strong>param_names</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of parameter names for plotting.</p></li>
+<li><p><strong>bins</strong> (<em>int</em><em>, </em><em>default: 25</em>) – Bins for histogram plot</p></li>
+<li><p><strong>dpi</strong> (<em>int</em><em>, </em><em>default: 300</em>) – Dots per inch (dpi) for plot</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>default:</em><em> (</em><em>24</em><em>, </em><em>12</em><em>)</em>) – Figure size</p></li>
+<li><p><strong>interval</strong> (<em>float</em><em>, </em><em>default: 0.99</em>) – Interval to plot</p></li>
+<li><p><strong>show</strong> (<em>bool</em><em>, </em><em>default: True</em>) – Controls whether the plot shall be printed</p></li>
+<li><p><strong>font_size</strong> (<em>int</em><em>, </em><em>default:12</em>) – Font size</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.diagnostics.plot_confusion_matrix">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></code><code class="sig-name descname"><span class="pre">plot_confusion_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">m_true</span></em>, <em class="sig-param"><span class="pre">m_pred</span></em>, <em class="sig-param"><span class="pre">model_names</span></em>, <em class="sig-param"><span class="pre">normalize=False</span></em>, <em class="sig-param"><span class="pre">cmap=&lt;matplotlib.colors.LinearSegmentedColormap</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">figsize=(14</span></em>, <em class="sig-param"><span class="pre">8)</span></em>, <em class="sig-param"><span class="pre">annotate=True</span></em>, <em class="sig-param"><span class="pre">show=True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/diagnostics.html#plot_confusion_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_confusion_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function to print and plots the confusion matrix. Normalization can be applied by setting <cite>normalize=True</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m_true</strong> (<em>np.array</em>) – Array of true model indices</p></li>
+<li><p><strong>m_pred</strong> (<em>np.array</em>) – Array of predicted model indices</p></li>
+<li><p><strong>model_names</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of model names for plotting</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em><em>, </em><em>default: False</em>) – Controls whether normalization shall be applied</p></li>
+<li><p><strong>cmap</strong> (<em>matplotlib.pyplot.cm.*</em><em>, </em><em>default: plt.cm.Blues</em>) – Colormap</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>default:</em><em> (</em><em>14</em><em>, </em><em>8</em><em>)</em>) – Figure size</p></li>
+<li><p><strong>annotate</strong> (<em>bool</em><em>, </em><em>default: True</em>) – Controls if the plot shall be annotated</p></li>
+<li><p><strong>show</strong> (<em>bool</em><em>, </em><em>default: True</em>) – Controls if the plot shall be printed</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.diagnostics.plot_expected_calibration_error">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></code><code class="sig-name descname"><span class="pre">plot_expected_calibration_error</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/diagnostics.html#plot_expected_calibration_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_expected_calibration_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimates the calibration error of a model comparison neural network.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Make sure that <code class="docutils literal notranslate"><span class="pre">m_true</span></code> are <strong>one-hot encoded</strong> classes!</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m_true</strong> (<em>np.array</em><em> or </em><em>list</em>) – True model indices</p></li>
+<li><p><strong>m_pred</strong> (<em>np.array</em><em> or </em><em>list</em>) – Predicted model indices</p></li>
+<li><p><strong>n_bins</strong> (<em>int</em><em>, </em><em>default: 15</em>) – Number of bins for plot</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.diagnostics.plot_calibration_curves">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></code><code class="sig-name descname"><span class="pre">plot_calibration_curves</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cal_probs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cal_errs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">4)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/diagnostics.html#plot_calibration_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_calibration_curves" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the calibration curves for a model comparison problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cal_probs</strong> (<em>np.array</em>) – Currently not used</p></li>
+<li><p><strong>cal_errs</strong> (<em>np.array</em><em> or </em><em>list</em>) – Array of calibration curve data</p></li>
+<li><p><strong>model_names</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of model names for plotting</p></li>
+<li><p><strong>font_size</strong> (<em>int</em><em>, </em><em>default: 12</em>) – Font size</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>default:</em><em> (</em><em>12</em><em>, </em><em>4</em><em>)</em>) – Figure size for plot layout</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bayesflow.exceptions">
+<span id="bayesflow-exceptions-module"></span><h2>bayesflow.exceptions module<a class="headerlink" href="#module-bayesflow.exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="py exception">
+<dt id="bayesflow.exceptions.SimulationError">
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></code><code class="sig-name descname"><span class="pre">SimulationError</span></code><a class="reference internal" href="_modules/bayesflow/exceptions.html#SimulationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.SimulationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Class for an error in simulation.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="bayesflow.exceptions.SummaryStatsError">
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></code><code class="sig-name descname"><span class="pre">SummaryStatsError</span></code><a class="reference internal" href="_modules/bayesflow/exceptions.html#SummaryStatsError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.SummaryStatsError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Class for error in summary statistics.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="bayesflow.exceptions.LossError">
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></code><code class="sig-name descname"><span class="pre">LossError</span></code><a class="reference internal" href="_modules/bayesflow/exceptions.html#LossError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.LossError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Class for error in applying loss.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="bayesflow.exceptions.ConfigurationError">
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></code><code class="sig-name descname"><span class="pre">ConfigurationError</span></code><a class="reference internal" href="_modules/bayesflow/exceptions.html#ConfigurationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.ConfigurationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Class for error in model configuration, e.g. in meta dict</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="bayesflow.exceptions.OperationNotSupportedError">
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></code><code class="sig-name descname"><span class="pre">OperationNotSupportedError</span></code><a class="reference internal" href="_modules/bayesflow/exceptions.html#OperationNotSupportedError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.OperationNotSupportedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Class for error that occurs when an operation is demanded but not supported,
+e.g. when a trainer is initialized without generative model but the user demands it to simulate data.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bayesflow.helpers">
+<span id="bayesflow-helpers-module"></span><h2>bayesflow.helpers module<a class="headerlink" href="#module-bayesflow.helpers" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="bayesflow.helpers.clip_gradients">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.helpers.</span></code><code class="sig-name descname"><span class="pre">clip_gradients</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gradients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'norm'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/helpers.html#clip_gradients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helpers.clip_gradients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Peforms gradient clipping on a list of gradients by using either value
+clipping, norm clipping or global norm clipping. Raises ValueError if
+an unknown clipping method is specified.
+———-</p>
+<p>Arguments:
+gradients: list of tf.Tensor – the computed gradients for neural network parameter
+———-</p>
+<p>Keyword Arguments:
+clip_value: float &gt; 0 – the value used for clipping
+clip_method: str – the method used for clipping, either ‘norm’, ‘global_norm’, or ‘value’
+———-</p>
+<p>Returns:
+gradients: list – the clipped gradients</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.helpers.merge_left_into_right">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.helpers.</span></code><code class="sig-name descname"><span class="pre">merge_left_into_right</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/helpers.html#merge_left_into_right"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helpers.merge_left_into_right" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to merge nested dict left_dict into nested dict right_dict</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.helpers.build_meta_dict">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.helpers.</span></code><code class="sig-name descname"><span class="pre">build_meta_dict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_setting</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#bayesflow.default_settings.MetaDictSetting" title="bayesflow.default_settings.MetaDictSetting"><span class="pre">bayesflow.default_settings.MetaDictSetting</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">dict</span><a class="reference internal" href="_modules/bayesflow/helpers.html#build_meta_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helpers.build_meta_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a user-defined dictionary and a default dictionary.
+Firstly, scans the user_dict for violations by unspecified mandatory fields.
+Secondly, merges user dict entries into the default_dict. Considers nested dict structure.
+———-</p>
+<p>Arguments:
+user_dict: dict – the user’s dictionary
+default_setting: MetaDictSetting – the specified default setting, consisting of:</p>
+<blockquote>
+<div><p>meta_dict: dictionary with default values.
+mandatory_fields: list of str – keys that need to be specified by the user_dict</p>
+</div></blockquote>
+<p>Returns:
+merged dict</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bayesflow.losses">
+<span id="bayesflow-losses-module"></span><h2>bayesflow.losses module<a class="headerlink" href="#module-bayesflow.losses" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="bayesflow.losses.mean_squared_loss">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">mean_squared_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#mean_squared_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.mean_squared_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the heteroscedastic loss.</p>
+<p>Arguments:
+model  : tf.keras.Model instance – a neural network with a single output vector (posterior means)
+params : tf.Tensor of shape (batch_size, n_out_dim) – data-generating params, as sampled from prior
+x      : tf.Tensor of shape (batch_size, N, x_dim)  – synthetic data sets generated by the params</p>
+<p>Returns:
+loss : tf.Tensor of shape (,) – a single scalar value representing the squared loss</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.losses.heteroscedastic_loss">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">heteroscedastic_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#heteroscedastic_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.heteroscedastic_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the heteroscedastic loss.</p>
+<p>Arguments:
+model  : tf.keras.Model instance – a neural network with two outputs (predicted_mean vector, predicted var)
+params : tf.Tensor of shape (batch_size, n_out_dim) – data-generating params, as sampled from prior
+x      : tf.Tensor of shape (batch_size, N, x_dim)  – synthetic data sets generated by the params</p>
+<p>Returns:
+loss : tf.Tensor of shape (,) – a single scalar value representing thr heteroscedastic loss</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.losses.kl_latent_space">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">kl_latent_space</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#kl_latent_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.kl_latent_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+network   : tf.keras.Model – a single model amortizer
+<a href="#id1"><span class="problematic" id="id2">*</span></a>args     : Inputs to network (e.g. model_indices, params, sim_data)
+———-</p>
+<p>Returns:
+loss : tf.Tensor of shape (,) – a single scalar value representing the KL loss</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.losses.log_loss">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">log_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#log_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.log_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+network       : tf.keras.Model – an evidential network (with real outputs in [1, +inf])
+model_indices : tf.Tensor of shape (batch_size, n_models) – true model indices
+sim_data      : tf.Tensor of shape (batch_size, n_obs, data_dim) or (batch_size, summary_dim)</p>
+<blockquote>
+<div><p>– synthetic data sets generated by the params or summary statistics thereof</p>
+</div></blockquote>
+<p>Output:
+loss : tf.Tensor of shape (,) – a single scalar Monte-Carlo approximation of the regularized Bayes risk</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.losses.kl_dirichlet">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">kl_dirichlet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#kl_dirichlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.kl_dirichlet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+model_indices : tf.Tensor of shape (batch_size, n_models) – one-hot-encoded true model indices
+alpha         : tf.Tensor of shape (batch_size, n_models) – positive network outputs in [1, +inf]
+———-</p>
+<p>Output:
+kl: tf.Tensor of shape (,)  – a single scalar representing KL( Dir(alpha) | Dir(1,1,…,1) )</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.losses.maximum_mean_discrepancy">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">maximum_mean_discrepancy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#maximum_mean_discrepancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.maximum_mean_discrepancy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This Maximum Mean Discrepancy (MMD) loss is calculated with a number of
+different Gaussian kernels.
+———-</p>
+<p>Arguments:
+x : tf.Tensor of shape  [N, num_features].
+y:  tf.Tensor of shape  [M, num_features].
+weight: the weight of the MMD loss.
+———-</p>
+<p>Output:
+loss_value : tf.Tensor of shape (,) - a scalar MMD</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bayesflow.models">
+<span id="bayesflow-models-module"></span><h2>bayesflow.models module<a class="headerlink" href="#module-bayesflow.models" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="bayesflow.models.GenerativeModel">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.models.</span></code><code class="sig-name descname"><span class="pre">GenerativeModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/models.html#GenerativeModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.models.GenerativeModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class is a factory for the different internal implementations of a <cite>GenerativeModel</cite>:</p>
+<ul class="simple">
+<li><p>If priors/simulators are passed as a <code class="docutils literal notranslate"><span class="pre">list</span></code>, we are in the <strong>model comparison</strong> or <strong>meta</strong> setting.
+Then, we want to initialize a <a class="reference internal" href="#bayesflow.models.MetaGenerativeModel" title="bayesflow.models.MetaGenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetaGenerativeModel</span></code></a>.</p></li>
+<li><p>If only <strong>one</strong> prior/simulator is passed, we are in the <strong>parameter estimation</strong> setting.
+Then, we want to initialize a <a class="reference internal" href="#bayesflow.models.SimpleGenerativeModel" title="bayesflow.models.SimpleGenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleGenerativeModel</span></code></a>.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p>Initializing a <a class="reference internal" href="#bayesflow.models.SimpleGenerativeModel" title="bayesflow.models.SimpleGenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleGenerativeModel</span></code></a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">tests.example_objects</span> <span class="k">as</span> <span class="nn">ex</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GenerativeModel</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">dm_prior</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">simulators</span><span class="o">.</span><span class="n">dm_batch_simulator</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Initializing a <a class="reference internal" href="#bayesflow.models.MetaGenerativeModel" title="bayesflow.models.MetaGenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetaGenerativeModel</span></code></a> with two underlying models.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">tests.example_objects</span> <span class="k">as</span> <span class="nn">ex</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">priors</span> <span class="o">=</span> <span class="p">[</span><span class="n">ex</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">model1_params_prior</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">model2_params_prior</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simulators</span> <span class="o">=</span> <span class="p">[</span><span class="n">ex</span><span class="o">.</span><span class="n">simulators</span><span class="o">.</span><span class="n">forward_model1</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">simulators</span><span class="o">.</span><span class="n">forward_model2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GenerativeModel</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">model_prior</span><span class="p">,</span> <span class="n">priors</span><span class="p">,</span> <span class="n">simulators</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.models.MetaGenerativeModel">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.models.</span></code><code class="sig-name descname"><span class="pre">MetaGenerativeModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/models.html#MetaGenerativeModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.models.MetaGenerativeModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bayesflow.models.GenerativeModel" title="bayesflow.models.GenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">bayesflow.models.GenerativeModel</span></code></a></p>
+<p>Provides a generative model with a model prior as well as priors and simulators for each model.</p>
+<dl class="py attribute">
+<dt id="bayesflow.models.MetaGenerativeModel.n_models">
+<code class="sig-name descname"><span class="pre">n_models</span></code><a class="headerlink" href="#bayesflow.models.MetaGenerativeModel.n_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of models</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bayesflow.models.MetaGenerativeModel.model_prior">
+<code class="sig-name descname"><span class="pre">model_prior</span></code><a class="headerlink" href="#bayesflow.models.MetaGenerativeModel.model_prior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model prior for underlying models</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bayesflow.models.MetaGenerativeModel.generative_models">
+<code class="sig-name descname"><span class="pre">generative_models</span></code><a class="headerlink" href="#bayesflow.models.MetaGenerativeModel.generative_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of :class:<a href="#id3"><span class="problematic" id="id4">`</span></a>SimpleGenerativeModel`s (one for each model)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list(<a class="reference internal" href="#bayesflow.models.SimpleGenerativeModel" title="bayesflow.models.SimpleGenerativeModel">SimpleGenerativeModel</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bayesflow.models.MetaGenerativeModel.param_padding">
+<code class="sig-name descname"><span class="pre">param_padding</span></code><a class="headerlink" href="#bayesflow.models.MetaGenerativeModel.param_padding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to pad parameter matrix if models have a different number of parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>callable, default: zero-padding along axis 1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.models.MetaGenerativeModel.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulators</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_transforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_transforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/models.html#MetaGenerativeModel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.models.MetaGenerativeModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a <a class="reference internal" href="#bayesflow.models.MetaGenerativeModel" title="bayesflow.models.MetaGenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetaGenerativeModel</span></code></a> instance that wraps generative models for each underlying model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_prior</strong> (<em>callable</em>) – Model prior</p></li>
+<li><p><strong>priors</strong> (<em>list</em><em>(</em><em>callable</em><em>)</em>) – List of parameter priors</p></li>
+<li><p><strong>simulators</strong> (<em>list</em><em>(</em><em>callable</em><em>)</em>) – List of data simulators</p></li>
+<li><p><strong>param_transforms</strong> (<em>list</em><em>(</em><em>callable</em><em>)</em><em>, </em><em>optional</em><em>, </em><em>default: None</em>) – List of parameter transformation functions, e.g. clipping</p></li>
+<li><p><strong>data_transforms</strong> (<em>list</em><em>(</em><em>callable</em><em>)</em><em>, </em><em>optional</em><em>, </em><em>default: None</em>) – List of data transformation functions, e.g. logarithm</p></li>
+<li><p><strong>param_padding</strong> (<em>callable</em><em>, </em><em>optional</em><em>, </em><em>default: None</em>) – Function to pad parameter matrix if models have a different number of parameters.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.models.MetaGenerativeModel.__call__">
+<code class="sig-name descname"><span class="pre">__call__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sim</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_obs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">callable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/models.html#MetaGenerativeModel.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.models.MetaGenerativeModel.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates <cite>n_sim</cite> datasets with <cite>n_obs</cite> observations each.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_sim</strong> (<em>int</em>) – number of simulation to perform at the given step (i.e., batch size)</p></li>
+<li><p><strong>n_obs</strong> (<em>int</em><em> or </em><em>callable</em>) – <p>Number of observations for each simulated dataset.</p>
+<ul>
+<li><p>if <cite>int</cite>, then treated as a fixed number of observations,</p></li>
+<li><p>if <cite>callable</cite>, then treated as a function for sampling N, i.e., <span class="math notranslate nohighlight">\(N \sim p(N)\)</span></p></li>
+</ul>
+</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments that are passed to the simulators</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>model_indices</strong> (<em>np.array(np.float32)</em>) – One-hot encoded array of model indices of shape <code class="docutils literal notranslate"><span class="pre">(n_sim,</span> <span class="pre">self.n_models)</span></code></p></li>
+<li><p><strong>params</strong> (<em>np.array(np.float32)</em>) – Array of sampled parameters of shape <code class="docutils literal notranslate"><span class="pre">(n_sim,</span> <span class="pre">param_dim)</span></code></p></li>
+<li><p><strong>sim_data</strong> (<em>np.array(np.float32)</em>) – Array of simulated data sets of shape <code class="docutils literal notranslate"><span class="pre">(n_sim,</span> <span class="pre">n_obs[,</span> <span class="pre">data_dim])</span></code></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.models.SimpleGenerativeModel">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.models.</span></code><code class="sig-name descname"><span class="pre">SimpleGenerativeModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/models.html#SimpleGenerativeModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.models.SimpleGenerativeModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bayesflow.models.GenerativeModel" title="bayesflow.models.GenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">bayesflow.models.GenerativeModel</span></code></a></p>
+<p>Provides a <a class="reference internal" href="#bayesflow.models.SimpleGenerativeModel" title="bayesflow.models.SimpleGenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleGenerativeModel</span></code></a> instance with an underlying parameter prior and data simulator.</p>
+<dl class="py attribute">
+<dt id="bayesflow.models.SimpleGenerativeModel.prior">
+<code class="sig-name descname"><span class="pre">prior</span></code><a class="headerlink" href="#bayesflow.models.SimpleGenerativeModel.prior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates prior parameter values in batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bayesflow.models.SimpleGenerativeModel.simulator">
+<code class="sig-name descname"><span class="pre">simulator</span></code><a class="headerlink" href="#bayesflow.models.SimpleGenerativeModel.simulator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates datasets in batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bayesflow.models.SimpleGenerativeModel.param_transform">
+<code class="sig-name descname"><span class="pre">param_transform</span></code><a class="headerlink" href="#bayesflow.models.SimpleGenerativeModel.param_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform function for the parameters, i.e. clipping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>callable, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bayesflow.models.SimpleGenerativeModel.data_transform">
+<code class="sig-name descname"><span class="pre">data_transform</span></code><a class="headerlink" href="#bayesflow.models.SimpleGenerativeModel.data_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform function for the data, i.e. logarithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>callable, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.models.SimpleGenerativeModel.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulator</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_transform</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">callable</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_transform</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">callable</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/models.html#SimpleGenerativeModel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.models.SimpleGenerativeModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a <a class="reference internal" href="#bayesflow.models.SimpleGenerativeModel" title="bayesflow.models.SimpleGenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleGenerativeModel</span></code></a> that can simulate batches of parameters and data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prior</strong> (<em>callable</em>) – Parameter prior function. Can either return a single parameter set or a batch of parameter sets.</p></li>
+<li><p><strong>simulator</strong> (<em>callable</em>) – Simulates dataset(s) (single or batch) from parameter set or matrix.
+Can either work on <code class="docutils literal notranslate"><span class="pre">n_sim</span> <span class="pre">=</span> <span class="pre">1</span></code> or perform batch simulation, i.e. <code class="docutils literal notranslate"><span class="pre">n_sim</span> <span class="pre">&gt;</span> <span class="pre">1</span></code></p></li>
+<li><p><strong>param_transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – Transform function for the parameters, i.e. clipping.</p></li>
+<li><p><strong>data_transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – Transform function for the data, i.e. logarithm.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">prior</span></code> works on batches, it must meet the signature <code class="docutils literal notranslate"><span class="pre">prior(n_sim)</span></code></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">simulator</span></code> works on batches, it must meet the signature <code class="docutils literal notranslate"><span class="pre">simulator(n_sim,</span> <span class="pre">n_obs[,**kwargs])</span></code></p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.models.SimpleGenerativeModel.__call__">
+<code class="sig-name descname"><span class="pre">__call__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_obs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/models.html#SimpleGenerativeModel.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.models.SimpleGenerativeModel.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates n_sim datasets of n_obs observations from the provided simulator with parameters from the prior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_sim</strong> (<em>int</em>) – number of simulation to perform at the given step (i.e., batch size)</p></li>
+<li><p><strong>n_obs</strong> (<em>int</em><em> or </em><em>callable</em>) – <p>Number of observations for each simulated dataset.</p>
+<ul>
+<li><p>if <cite>int</cite>, then treated as a fixed number of observations,</p></li>
+<li><p>if <cite>callable</cite>, then treated as a function for sampling N, i.e., <span class="math notranslate nohighlight">\(N \sim p(N)\)</span></p></li>
+</ul>
+</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments that are passed to the simulator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>params</strong> (<em>np.array(np.float32)</em>) – Array of sampled parameters of shape <code class="docutils literal notranslate"><span class="pre">(n_sim,</span> <span class="pre">param_dim)</span></code></p></li>
+<li><p><strong>sim_data</strong> (<em>np.array(np.float32)</em>) – Array of simulated data sets of shape <code class="docutils literal notranslate"><span class="pre">(n_sim,</span> <span class="pre">n_obs[,</span> <span class="pre">data_dim])</span></code></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-bayesflow.networks">
+<span id="bayesflow-networks-module"></span><h2>bayesflow.networks module<a class="headerlink" href="#module-bayesflow.networks" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="bayesflow.networks.RegressionNetwork">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">RegressionNetwork</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#RegressionNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.RegressionNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<p>Implements a simple regression network with keras.</p>
+<dl class="py method">
+<dt id="bayesflow.networks.RegressionNetwork.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_net</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#RegressionNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.RegressionNetwork.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.RegressionNetwork.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#RegressionNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.RegressionNetwork.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the forward pass of the model.</p>
+<p>Args:
+x - tf.Tensor of shape (batch_size, sum_stats)</p>
+<p>Returns:
+out - tf.Tensor of shape (batch_size, predicted_params)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.networks.HeteroscedasticRegressionNetwork">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">HeteroscedasticRegressionNetwork</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#HeteroscedasticRegressionNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.HeteroscedasticRegressionNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<p>Implements a simple regression network with keras.</p>
+<dl class="py method">
+<dt id="bayesflow.networks.HeteroscedasticRegressionNetwork.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_net</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#HeteroscedasticRegressionNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.HeteroscedasticRegressionNetwork.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.HeteroscedasticRegressionNetwork.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#HeteroscedasticRegressionNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.HeteroscedasticRegressionNetwork.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the forward pass of the model.</p>
+<p>Args:
+x - tf.Tensor of shape (batch_size, sum_stats)</p>
+<p>Returns:
+pred_means - tf.Tensor of shape (batch_size, n_params) : predicted posterior means
+pred_vars  - tf.Tensor of shape (batch_size, n_params) : predicted posterior variances</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.networks.InvariantModule">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">InvariantModule</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<dl class="py method">
+<dt id="bayesflow.networks.InvariantModule.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantModule.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantModule.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.InvariantModule.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantModule.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantModule.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the forward pass of a learnable invariant transform.</p>
+<p>Args:
+x - tf.Tensor of shape (batch_size, N, x_dim)</p>
+<p>Returns:
+out - tf.Tensor of shape (batch_size, out_dim)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.networks.EquivariantModule">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">EquivariantModule</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EquivariantModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EquivariantModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<dl class="py method">
+<dt id="bayesflow.networks.EquivariantModule.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EquivariantModule.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EquivariantModule.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.EquivariantModule.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EquivariantModule.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EquivariantModule.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the forward pass of a learnable equivariant transform.</p>
+<p>Args:
+x - tf.Tensor of shape (batch_size, N, x_dim)</p>
+<p>Returns:
+out - tf.Tensor of shape (batch_size, N, equiv_dim)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.networks.InvariantNetwork">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">InvariantNetwork</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<dl class="py method">
+<dt id="bayesflow.networks.InvariantNetwork.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantNetwork.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.InvariantNetwork.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantNetwork.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the forward pass of a learnable deep invariant transformation
+consisting of a sequence of equivariant transforms followed by an invariant transform.</p>
+<p>Args:
+x - tf.Tensor of shape (batch_size, n_obs, data_dim)</p>
+<p>Returns:
+out - tf.Tensor of shape (batch_size, out_dim + 1)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.networks.Permutation">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">Permutation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#Permutation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.Permutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<p>Implements a permutation layer to permute the input dimensions of the cINN block.</p>
+<dl class="py method">
+<dt id="bayesflow.networks.Permutation.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#Permutation.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.Permutation.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+input_dim  : int – the dimensionality of the input to the c inv block.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.Permutation.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#Permutation.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.Permutation.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permutes the bach of an input.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.networks.CouplingNet">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">CouplingNet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#CouplingNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.CouplingNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<p>Implements a conditional version of a sequential network.</p>
+<dl class="py method">
+<dt id="bayesflow.networks.CouplingNet.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_out</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#CouplingNet.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.CouplingNet.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+meta  : dict – a dictionary which holds arguments for a dense layer.
+n_out : int  – number of outputs of the coupling net</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.CouplingNet.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#CouplingNet.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.CouplingNet.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenates x and y and performs a forward pass through the coupling net.
+Arguments:
+params : tf.Tensor of shape (batch_size, n_params//2) – the split parameters theta ~ p(theta) of interest
+x      : tf.Tensor of shape (batch_size, summary_dim) – the summarized conditional data of interest x = sum(x)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.networks.ConditionalCouplingLayer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">ConditionalCouplingLayer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#ConditionalCouplingLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.ConditionalCouplingLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<p>Implements a conditional version of the INN block.</p>
+<dl class="py method">
+<dt id="bayesflow.networks.ConditionalCouplingLayer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#ConditionalCouplingLayer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.ConditionalCouplingLayer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+meta      : list – a list of dictionaries, wherein each dictionary holds parameter - value pairs for a single</p>
+<blockquote>
+<div><p>tf.keras.Dense layer. All coupling nets are assumed to be equal.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.ConditionalCouplingLayer.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_det_J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#ConditionalCouplingLayer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.ConditionalCouplingLayer.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+theta     : tf.Tensor of shape (batch_size, theta_dim) – the parameters theta ~ p(theta|y) of interest
+x         : tf.Tensor of shape (batch_size, summary_dim) – the summarized conditional data of interest x = sum(x)
+inverse   : bool – flag indicating whether to tun the block forward or backwards
+log_det_J : bool – flag indicating whether to return the log determinant of the Jacobian matrix
+———-</p>
+<p>Returns:
+(v, log_det_J)  :  (tf.Tensor of shape (batch_size, inp_dim), tf.Tensor of shape (batch_size, )) –</p>
+<blockquote>
+<div><dl class="simple">
+<dt>the transformed input, if inverse = False, and the corresponding Jacobian of the transformation</dt><dd><p>if inverse = False</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>u               :  tf.Tensor of shape (batch_size, inp_dim) – the transformed out, if inverse = True</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.networks.InvertibleNetwork">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">InvertibleNetwork</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvertibleNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvertibleNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<p>Implements a chain of conditional invertible blocks for Bayesian parameter inference.</p>
+<dl class="py method">
+<dt id="bayesflow.networks.InvertibleNetwork.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvertibleNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvertibleNetwork.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Creates a chain of cINN blocks and chains operations with an optional summary network.</dt><dd><p>TODO: - Allow for generic base distributions</p>
+</dd>
+</dl>
+<p>Arguments:
+meta        : list – a list of dictionary, where each dictionary holds parameter - value pairs for a single</p>
+<blockquote>
+<div><p>keras.Dense layer</p>
+</div></blockquote>
+<p>summary_net : tf.keras.Model or None – an optinal summary network for learning the sumstats of x</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.InvertibleNetwork.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvertibleNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvertibleNetwork.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+params    : tf.Tensor of shape (batch_size, inp_dim) – the parameters theta ~ p(theta|x) of interest
+x         : tf.Tensor of shape (batch_size, summary_dim) – the conditional data x
+inverse   : bool – flag indicating whether to tun the chain forward or backwards
+———-</p>
+<p>Returns:
+(z, log_det_J)  :  (tf.Tensor of shape (batch_size, inp_dim), tf.Tensor of shape (batch_size, )) –</p>
+<blockquote>
+<div><dl class="simple">
+<dt>the transformed input, if inverse = False, and the corresponding Jacobian of the transformation</dt><dd><p>if inverse = False</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>x               :  tf.Tensor of shape (batch_size, inp_dim) – the transformed out, if inverse = True</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.InvertibleNetwork.forward">
+<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvertibleNetwork.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvertibleNetwork.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a forward pass though the chain.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.InvertibleNetwork.inverse">
+<code class="sig-name descname"><span class="pre">inverse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvertibleNetwork.inverse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvertibleNetwork.inverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a reverse pass through the chain.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.InvertibleNetwork.sample">
+<code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvertibleNetwork.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvertibleNetwork.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+x         : tf.Tensor of shape (n_datasets, summary_dim) – the conditioning data set(s) of interest
+n_samples : int – number of samples to obtain from the approximate posterior
+to_numpy  : bool – flag indicating whether to return the samples as a np.array or a tf.Tensor
+———-</p>
+<p>Returns:
+theta_samples : 3D tf.Tensor or np.array of shape (n_samples, n_datasets, n_params)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.networks.EvidentialNetwork">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">EvidentialNetwork</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EvidentialNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EvidentialNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<dl class="py method">
+<dt id="bayesflow.networks.EvidentialNetwork.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EvidentialNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EvidentialNetwork.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+meta        : list – a list of dictionary, where each dictionary holds parameter - value pairs for a single</p>
+<blockquote>
+<div><p>keras.Dense layer</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.EvidentialNetwork.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EvidentialNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EvidentialNetwork.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+sim_data   : tf.Tensor of shape (batch_size, n_obs, data_dim) – the input where n_obs is the ‘time’ or ‘samples’ dimensions</p>
+<blockquote>
+<div><p>over which pooling is performed and data_dim is the intrinsic input dimensionality</p>
+</div></blockquote>
+<p>Returns:
+alpha      : tf.Tensor of shape (batch_size, n_models) – the model evidences</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.EvidentialNetwork.predict">
+<code class="sig-name descname"><span class="pre">predict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EvidentialNetwork.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EvidentialNetwork.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the mean, variance and uncertainty implied by the estimated Dirichlet density.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.EvidentialNetwork.evidence">
+<code class="sig-name descname"><span class="pre">evidence</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EvidentialNetwork.evidence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EvidentialNetwork.evidence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+x  : tf.Tensor of shape (n_datasets, summary_dim) – the conditional data set(s)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.EvidentialNetwork.sample">
+<code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EvidentialNetwork.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EvidentialNetwork.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+obs_data  : tf.Tensor of shape (n_datasets, summary_dim) – the summary of the observed (or simulated) data
+n_samples : int – number of samples to obtain from the approximate posterior (default 5000)
+to_numpy  : bool – flag indicating whether to return the samples as a np.array or a tf.Tensor
+———-</p>
+<p>Returns:
+pm_samples : tf.Tensor or np.array of shape (n_samples, n_batch, n_models) – the posterior samples from the Dirichlet distro</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.networks.SequenceNet">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">SequenceNet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#SequenceNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.SequenceNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<dl class="py method">
+<dt id="bayesflow.networks.SequenceNet.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#SequenceNet.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.SequenceNet.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a custom summary network, a combination of 1D conv and LSTM.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.networks.SequenceNet.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#SequenceNet.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.SequenceNet.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a forward pass.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-bayesflow.trainers">
+<span id="bayesflow-trainers-module"></span><h2>bayesflow.trainers module<a class="headerlink" href="#module-bayesflow.trainers" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="bayesflow.trainers.BaseTrainer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.trainers.</span></code><code class="sig-name descname"><span class="pre">BaseTrainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<dl class="py method">
+<dt id="bayesflow.trainers.BaseTrainer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments:
+network         : bayesflow.Amortizer instance – the neural architecture to be optimized
+generative_model: callable – a function or an object with n_sim and n_obs mandatory arguments</p>
+<blockquote>
+<div><p>returning randomly sampled parameter vectors and datasets from a process model</p>
+</div></blockquote>
+<p>loss            : callable with three arguments: (network, m_indices, x) – the loss function
+summary_stats   : callable – optional summary statistics function
+optimizer       : None or tf.keras.optimizer.Optimizer – default Adam optimizer (equiv to None) or a custom one
+learning_rate   : float – the learning rate used for the optimizer
+checkpoint_path : string – optional folder name for storing the trained network
+max_to_keep     : int – optional number of checkpoints to keep
+clip_method     : string in (‘norm’, ‘value’, ‘global_norm’) – optional gradient clipping method
+clip_value      : float – the value used for gradient clipping when clip_method is set to ‘value’ or ‘norm’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.trainers.BaseTrainer.load_pretrained_network">
+<code class="sig-name descname"><span class="pre">load_pretrained_network</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.load_pretrained_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.load_pretrained_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.trainers.BaseTrainer.train_online">
+<code class="sig-name descname"><span class="pre">train_online</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations_per_epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_obs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.train_online"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.train_online" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains the inference network(s) via online learning. Additional keyword arguments
+are passed to the simulators.
+———-</p>
+<p>Arguments:
+epochs               : int – number of epochs (and number of times a checkpoint is stored)
+iterations_per_epoch : int – number of batch simulations to perform per epoch
+batch_size           : int – number of simulations to perform at each backprop step
+n_obs                : int or callable – if int, then treated as a fixed number of observations,</p>
+<blockquote>
+<div><p>if callable, then treated as a function for sampling N, i.e., N ~ p(N)</p>
+</div></blockquote>
+<p>Returns:
+losses : dict (ep_num : list_of_losses) – a dictionary storing the losses across epochs and iterations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.trainers.BaseTrainer.train_offline">
+<code class="sig-name descname"><span class="pre">train_offline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.train_offline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.train_offline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains the inference network(s) via offline learning. Assume params and data have already
+been simulated (i.e., forward inference).
+———-</p>
+<p>Arguments:
+epochs           : int – number of epochs (and number of times a checkpoint is stored)
+batch_size       : int – number of simulations to perform at each backprop step
+args             : respective training data, e.g. model_indices, params, sim_data for MetaTrainer
+———-</p>
+<p>Returns:
+losses : dict (ep_num : list_of_losses) – a dictionary storing the losses across epochs and iterations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.trainers.BaseTrainer.simulate_and_train_offline">
+<code class="sig-name descname"><span class="pre">simulate_and_train_offline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_obs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.simulate_and_train_offline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.simulate_and_train_offline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates n_sim data sets from _forward_inference and then trains the inference network(s) via offline learning.</p>
+<p>Arguments:
+n_sim          : int – total number of simulations to perform
+epochs         : int – number of epochs (and number of times a checkpoint is stored)
+batch_size     : int – number of simulations to perform at each backprop step
+n_obs          : int – number of observations for each dataset
+———-</p>
+<p>Returns:
+losses : dict (ep_num : list_of_losses) – a dictionary storing the losses across epochs and iterations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.trainers.BaseTrainer.train_rounds">
+<code class="sig-name descname"><span class="pre">train_rounds</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_per_round</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_obs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.train_rounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.train_rounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains the inference network(s) via round-based learning. Additional arguments are
+passed to the simulator.
+———-</p>
+<p>Arguments:
+epochs         : int – number of epochs (and number of times a checkpoint is stored)
+rounds         : int – number of rounds to perform
+sim_per_round  : int – number of simulations per round
+batch_size     : int – number of simulations to perform at each backprop step
+n_obs          : int – number of observations (fixed) for each data set
+———-</p>
+<p>Returns:
+losses : nested dict with each (ep_num : list_of_losses) – a dictionary storing the losses across rounds,</p>
+<blockquote>
+<div><p>epochs and iterations</p>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.trainers.MetaTrainer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.trainers.</span></code><code class="sig-name descname"><span class="pre">MetaTrainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'global_norm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#MetaTrainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.MetaTrainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bayesflow.trainers.BaseTrainer" title="bayesflow.trainers.BaseTrainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">bayesflow.trainers.BaseTrainer</span></code></a></p>
+<dl class="py method">
+<dt id="bayesflow.trainers.MetaTrainer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'global_norm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#MetaTrainer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.MetaTrainer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a trainer instance for performing single-model forward inference and training an
+amortized neural estimator for parameter estimation (BayesFlow). If a checkpoint_path is provided, the
+network’s weights will be stored after each training epoch. If the folder contains a
+checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.trainers.ModelComparisonTrainer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.trainers.</span></code><code class="sig-name descname"><span class="pre">ModelComparisonTrainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_models</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'global_norm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ModelComparisonTrainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ModelComparisonTrainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bayesflow.trainers.BaseTrainer" title="bayesflow.trainers.BaseTrainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">bayesflow.trainers.BaseTrainer</span></code></a></p>
+<dl class="py method">
+<dt id="bayesflow.trainers.ModelComparisonTrainer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_models</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'global_norm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ModelComparisonTrainer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ModelComparisonTrainer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a trainer instance for performing multi-model forward inference and training an
+amortized neural estimator for model comparison. If a checkpoint_path is provided, the
+network’s weights will be stored after each training epoch. If the folder contains a
+checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.trainers.ModelComparisonTrainer.train_offline">
+<code class="sig-name descname"><span class="pre">train_offline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ModelComparisonTrainer.train_offline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ModelComparisonTrainer.train_offline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles one-hot encoding if necessary and calls superclass method.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bayesflow.trainers.ParameterEstimationTrainer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.trainers.</span></code><code class="sig-name descname"><span class="pre">ParameterEstimationTrainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'global_norm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ParameterEstimationTrainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ParameterEstimationTrainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bayesflow.trainers.BaseTrainer" title="bayesflow.trainers.BaseTrainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">bayesflow.trainers.BaseTrainer</span></code></a></p>
+<dl class="py method">
+<dt id="bayesflow.trainers.ParameterEstimationTrainer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'global_norm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ParameterEstimationTrainer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ParameterEstimationTrainer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a trainer instance for performing single-model forward inference and training an
+amortized neural estimator for parameter estimation (BayesFlow). If a checkpoint_path is provided, the
+network’s weights will be stored after each training epoch. If the folder contains a
+checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bayesflow.trainers.ParameterEstimationTrainer.train_experience_replay">
+<code class="sig-name descname"><span class="pre">train_experience_replay</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations_per_epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_obs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ParameterEstimationTrainer.train_experience_replay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ParameterEstimationTrainer.train_experience_replay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains the inference network(s) via experience replay.</p>
+<p>Arguments:
+epochs               : int – number of epochs (and number of times a checkpoint is stored)
+batch_size           : int – number of simulations to perform at each backprop step
+iterations_per_epoch : int – number of batch simulations to perform per epoch
+capacity               : int – max number of batches to store in buffer
+n_obs                : int or callable – if int, then treated as a fixed number of observations,</p>
+<blockquote>
+<div><p>if callable, then treated as a function for sampling N, i.e., N ~ p(N)</p>
+</div></blockquote>
+<p>Returns:
+losses : dict (ep_num : list_of_losses) – a dictionary storing the losses across epochs and iterations</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-bayesflow">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bayesflow" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="support.html" class="btn btn-neutral float-right" title="Support" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to bayesflow’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Stefan Radev.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
