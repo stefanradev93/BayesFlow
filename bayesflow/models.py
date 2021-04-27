@@ -1,5 +1,6 @@
 import types
 from abc import abstractmethod
+from typing import Union
 
 import numpy as np
 import tensorflow as tf
@@ -35,9 +36,48 @@ class GenerativeModel(object):
 
 
 class MetaGenerativeModel(GenerativeModel):
+    """Provides a generative model with a model prior as well as priors and simulators for each model.
+
+    Attributes
+    ----------
+    n_models : int
+        Number of models
+    model_prior : callable
+        Model prior for underlying models
+    generative_models : list(SimpleGenerativeModel)
+        List of `SimpleGenerativeModel`s (one for each model)
+    param_padding : callable, default: zero-padding along axis 1
+        Function to pad parameter matrix if models have a different number of parameters.
+    """
+
     def __init__(self, model_prior, priors, simulators,
                  param_transforms=None, data_transforms=None, param_padding=None):
+        """ Initializes a `MetaGenerativeModel` instance that wraps generative models for each underlying model.
+
+        Parameters
+        ----------
+
+        model_prior : callable
+            Model prior
+
+        priors : list(callable)
+            List of parameter priors
+
+        simulators : list(callable)
+            List of data simulators
+
+        param_transforms : list(callable), optional, default: None
+            List of parameter transformation functions, e.g. clipping
+
+        data_transforms : list(callable), optional, default: None
+            List of data transformation functions, e.g. logarithm
+
+        param_padding : callable, optional, default: None
+            Function to pad parameter matrix if models have a different number of parameters.
+        """
+
         assert len(priors) == len(simulators), "Must provide same number of priors and simulators!"
+
         self.n_models = len(priors)
 
         param_transforms = self._configure_transform(param_transforms)
@@ -45,7 +85,6 @@ class MetaGenerativeModel(GenerativeModel):
 
         self.model_prior = model_prior
 
-        # initialize list of SimpleGenerativeModels
         self.generative_models = [SimpleGenerativeModel(prior=prior,
                                                         simulator=simulator,
                                                         param_transform=param_transform,
@@ -66,19 +105,26 @@ class MetaGenerativeModel(GenerativeModel):
 
         self._check_consistency()
 
-    def __call__(self, n_sim, n_obs, **kwargs):
-        """
-        Simulates n_sim datasets of n_obs observations from the provided simulator
-        ----------
+    def __call__(self, n_sim: int, n_obs: Union[int, callable], **kwargs):
+        """ Simulates `n_sim` datasets with `n_obs` observations each.
 
-        Arguments:
-        n_sim : int -- number of simulation to perform at the given step (i.e., batch size)
-        n_obs : int or callable -- if int, then treated as a fixed number of observations, if callable, then
-                                   treated as a function for sampling N, i.e., N ~ p(N)
-        ----------
-        Returns:
-        params    : np.array (np.float32) of shape (n_sim, param_dim) -- array of sampled parameters
-        sim_data  : np.array (np.float32) of shape (n_sim, n_obs, data_dim) -- array of simulated data sets
+        Arguments
+        ---------
+
+        n_sim : int
+            number of simulation to perform at the given step (i.e., batch size)
+        n_obs : int or callable
+            if int, then treated as a fixed number of observations, \n
+            if callable, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`
+        **kwargs
+            Additional keyword arguments that are passed to the simulators
+
+        Returns
+        --------
+        params : np.array(np.float32)
+            Array of sampled parameters of shape ``(n_sim, param_dim)``
+        sim_data : np.array(np.float32)
+            Array of simulated data sets of shape ``(n_sim, n_obs[, data_dim])``
 
         """
 
@@ -135,9 +181,6 @@ class MetaGenerativeModel(GenerativeModel):
         self._max_param_length = max(param_lengths)
 
     def _check_consistency(self):
-        """
-        Performs an internal consistency check with datasets of 10 observations each.
-        """
         _n_sim = 16
         _n_obs = 200
 
