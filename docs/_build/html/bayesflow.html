@@ -584,18 +584,24 @@ loss_value : tf.Tensor of shape (,) - a scalar MMD</p>
 <dt id="bayesflow.models.GenerativeModel">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.models.</span></code><code class="sig-name descname"><span class="pre">GenerativeModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/models.html#GenerativeModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.models.GenerativeModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This class is a factory for the different internal implementations of a GenerativeModel:
-- if priors/simulators are passed as a list, we are in the meta setting</p>
-<blockquote>
-<div><p>-&gt; initialize MetaGenerativeModel</p>
-</div></blockquote>
-<ul class="simple">
-<li><dl class="simple">
-<dt>if only one prior/simulator is passed, we are in the parameter estimation setting</dt><dd><p>-&gt; initialize SimpleGenerativeModel</p>
-</dd>
-</dl>
-</li>
-</ul>
+<p>This class is a factory for the different internal implementations of a <cite>GenerativeModel</cite>:</p>
+<p>If priors/simulators are passed as a <code class="docutils literal notranslate"><span class="pre">list</span></code>, we are in the <strong>model comparison</strong> or <strong>meta</strong> setting.
+Then, we want to initialize a <cite>MetaGenerativeModel</cite>.</p>
+<p>If only <strong>one</strong> prior/simulator is passed, we are in the <strong>parameter estimation</strong> setting
+Then, we want to initialize a <cite>SimpleGenerativeModel</cite>.</p>
+<p class="rubric">Examples</p>
+<p>Initializing a <a class="reference internal" href="#bayesflow.models.SimpleGenerativeModel" title="bayesflow.models.SimpleGenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleGenerativeModel</span></code></a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">tests.example_objects</span> <span class="k">as</span> <span class="nn">ex</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GenerativeModel</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">dm_prior</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">simulators</span><span class="o">.</span><span class="n">dm_batch_simulator</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Initializing a <a class="reference internal" href="#bayesflow.models.MetaGenerativeModel" title="bayesflow.models.MetaGenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetaGenerativeModel</span></code></a> with two underlying models.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">tests.example_objects</span> <span class="k">as</span> <span class="nn">ex</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">priors</span> <span class="o">=</span> <span class="p">[</span><span class="n">ex</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">model1_params_prior</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">model2_params_prior</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simulators</span> <span class="o">=</span> <span class="p">[</span><span class="n">ex</span><span class="o">.</span><span class="n">simulators</span><span class="o">.</span><span class="n">forward_model1</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">simulators</span><span class="o">.</span><span class="n">forward_model2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GenerativeModel</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">model_prior</span><span class="p">,</span> <span class="n">priors</span><span class="p">,</span> <span class="n">simulators</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py class">
@@ -681,8 +687,8 @@ loss_value : tf.Tensor of shape (,) - a scalar MMD</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>params</strong> (<em>np.array(np.float32)</em>) – Array of sampled parameters of shape <cite>(n_sim, param_dim)</cite></p></li>
-<li><p><strong>sim_data</strong> (<em>np.array(np.float32)</em>) – Array of simulated data sets of shape <cite>(n_sim, n_obs[, data_dim])</cite></p></li>
+<li><p><strong>params</strong> (<em>np.array(np.float32)</em>) – Array of sampled parameters of shape <code class="docutils literal notranslate"><span class="pre">(n_sim,</span> <span class="pre">param_dim)</span></code></p></li>
+<li><p><strong>sim_data</strong> (<em>np.array(np.float32)</em>) – Array of simulated data sets of shape <code class="docutils literal notranslate"><span class="pre">(n_sim,</span> <span class="pre">n_obs[,</span> <span class="pre">data_dim])</span></code></p></li>
 </ul>
 </p>
 </dd>
