@@ -203,7 +203,7 @@
 <dl class="simple">
 <dt>model_indices<span class="classifier">tf.Tensor or np.array of shape (n_sim, n_models)</span></dt><dd><p>the true, one-hot-encoded model indices <span class="math notranslate nohighlight">\(m \sim p(m)\)</span></p>
 </dd>
-<dt>params<span class="classifier">tf.Tensor or np.array of shape (n_sim, n_params)</span></dt><dd><p>the parameters :math:`      heta sim p(    heta | m)` of interest</p>
+<dt>params<span class="classifier">tf.Tensor or np.array of shape (n_sim, n_params)</span></dt><dd><p>the parameters <span class="math notranslate nohighlight">\(\theta \sim p(\theta | m)\)</span> of interest</p>
 </dd>
 <dt>sim_data<span class="classifier">tf.Tensor or np.array of shape (n_sim, n_obs, data_dim)</span></dt><dd><p>the conditional data <cite>x</cite></p>
 </dd>
@@ -619,43 +619,67 @@ e.g. when a trainer is initialized without generative model but the user demands
 <dl class="py function">
 <dt id="bayesflow.helpers.clip_gradients">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.helpers.</span></code><code class="sig-name descname"><span class="pre">clip_gradients</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gradients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'norm'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/helpers.html#clip_gradients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helpers.clip_gradients" title="Permalink to this definition">¶</a></dt>
-<dd><p>Peforms gradient clipping on a list of gradients by using either value
-clipping, norm clipping or global norm clipping. Raises ValueError if
-an unknown clipping method is specified.
-———-</p>
-<p>Arguments:
-gradients: list of tf.Tensor – the computed gradients for neural network parameter
-———-</p>
-<p>Keyword Arguments:
-clip_value: float &gt; 0 – the value used for clipping
-clip_method: str – the method used for clipping, either ‘norm’, ‘global_norm’, or ‘value’
-———-</p>
-<p>Returns:
-gradients: list – the clipped gradients</p>
+<dd><p>Performs gradient clipping on a list of gradients.</p>
+<p>This function clips gradients by one of the following methods:</p>
+<ul class="simple">
+<li><p>value clipping,</p></li>
+<li><p>norm clipping or</p></li>
+<li><p>global norm clipping.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gradients</strong> (<em>list</em><em>(</em><em>tf.Tensor</em><em>)</em>) – The computed gradients for neural network parameters.</p></li>
+<li><p><strong>clip_value</strong> (<em>float &gt; 0</em>) – The value used for clipping.</p></li>
+<li><p><strong>clip_method</strong> (<em>{'norm'</em><em>, </em><em>'global_norm'</em><em>, </em><em>'value'}</em>) – The method used for clipping.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>gradients</strong> – The clipped gradients</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If an unknown clipping method is specified.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="bayesflow.helpers.merge_left_into_right">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.helpers.</span></code><code class="sig-name descname"><span class="pre">merge_left_into_right</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/helpers.html#merge_left_into_right"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helpers.merge_left_into_right" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to merge nested dict left_dict into nested dict right_dict</p>
+<dd><p>Function to merge nested dict <cite>left_dict</cite> into nested dict <cite>right_dict</cite>.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="bayesflow.helpers.build_meta_dict">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.helpers.</span></code><code class="sig-name descname"><span class="pre">build_meta_dict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_setting</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#bayesflow.default_settings.MetaDictSetting" title="bayesflow.default_settings.MetaDictSetting"><span class="pre">bayesflow.default_settings.MetaDictSetting</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">dict</span><a class="reference internal" href="_modules/bayesflow/helpers.html#build_meta_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helpers.build_meta_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a user-defined dictionary and a default dictionary.
-Firstly, scans the user_dict for violations by unspecified mandatory fields.
-Secondly, merges user dict entries into the default_dict. Considers nested dict structure.
-———-</p>
-<p>Arguments:
-user_dict: dict – the user’s dictionary
-default_setting: MetaDictSetting – the specified default setting, consisting of:</p>
-<blockquote>
-<div><p>meta_dict: dictionary with default values.
-mandatory_fields: list of str – keys that need to be specified by the user_dict</p>
-</div></blockquote>
-<p>Returns:
-merged dict</p>
+<dd><p>Integrates a user-defined dictionary into a default dictionary.</p>
+<p>Takes a user-defined dictionary and a default dictionary.</p>
+<ol class="arabic simple">
+<li><p>Scan the <cite>user_dict</cite> for violations by unspecified mandatory fields.</p></li>
+<li><p>Merge <cite>user_dict</cite> entries into the <cite>default_dict</cite>. Considers nested dict structure.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user_dict</strong> (<em>dict</em>) – The user’s dictionary</p></li>
+<li><p><strong>default_setting</strong> (<a class="reference internal" href="#bayesflow.default_settings.MetaDictSetting" title="bayesflow.default_settings.MetaDictSetting"><em>MetaDictSetting</em></a>) – <p>The specified default setting with attributes:</p>
+<ul>
+<li><p><cite>meta_dict</cite>: dictionary with default values.</p></li>
+<li><p><cite>mandatory_fields</cite>: list(str) keys that need to be specified by the <cite>user_dict</cite></p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>merged_dict</strong> – Merged dictionary</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -664,76 +688,139 @@ merged dict</p>
 <dl class="py function">
 <dt id="bayesflow.losses.mean_squared_loss">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">mean_squared_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#mean_squared_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.mean_squared_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the heteroscedastic loss.</p>
-<p>Arguments:
-model  : tf.keras.Model instance – a neural network with a single output vector (posterior means)
-params : tf.Tensor of shape (batch_size, n_out_dim) – data-generating params, as sampled from prior
-x      : tf.Tensor of shape (batch_size, N, x_dim)  – synthetic data sets generated by the params</p>
-<p>Returns:
-loss : tf.Tensor of shape (,) – a single scalar value representing the squared loss</p>
+<dd><p>Computes the mean squared loss</p>
+<dl class="simple">
+<dt>model<span class="classifier">tf.keras.Model</span></dt><dd><p>A neural network with a single output vector (posterior means)</p>
+</dd>
+<dt>params<span class="classifier">tf.Tensor of shape (batch_size, n_out_dim)</span></dt><dd><p>Data-generating parameters, as sampled from prior</p>
+</dd>
+<dt>x<span class="classifier">tf.Tensor of shape (batch_size, N, x_dim)</span></dt><dd><p>Synthetic data sets generated by the parameters</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>loss</strong> – A single scalar value representing the mean squared loss, shape (,)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>tf.Tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="bayesflow.losses.heteroscedastic_loss">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">heteroscedastic_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#heteroscedastic_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.heteroscedastic_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the heteroscedastic loss.</p>
-<p>Arguments:
-model  : tf.keras.Model instance – a neural network with two outputs (predicted_mean vector, predicted var)
-params : tf.Tensor of shape (batch_size, n_out_dim) – data-generating params, as sampled from prior
-x      : tf.Tensor of shape (batch_size, N, x_dim)  – synthetic data sets generated by the params</p>
-<p>Returns:
-loss : tf.Tensor of shape (,) – a single scalar value representing thr heteroscedastic loss</p>
+<dd><p>Computes the heteroscedastic loss</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>tf.keras.Model</em>) – A neural network with a single output vector (posterior means)</p></li>
+<li><p><strong>params</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>n_out_dim</em><em>)</em>) – Data-generating parameters, as sampled from prior</p></li>
+<li><p><strong>x</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>N</em><em>, </em><em>x_dim</em><em>)</em>) – Synthetic data sets generated by the parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loss</strong> – A single scalar value representing the heteroscedastic loss, shape (,)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="bayesflow.losses.kl_latent_space">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">kl_latent_space</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#kl_latent_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.kl_latent_space" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-network   : tf.keras.Model – a single model amortizer
-<a href="#id1"><span class="problematic" id="id2">*</span></a>args     : Inputs to network (e.g. model_indices, params, sim_data)
-———-</p>
-<p>Returns:
-loss : tf.Tensor of shape (,) – a single scalar value representing the KL loss</p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>tf.keras.Model</em>) – A single model amortizer</p></li>
+<li><p><strong>*args</strong> – List of arguments as inputs to network (e.g. model_indices, params, sim_data)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loss</strong> – A single scalar value representing the KL loss, shape (,)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Parameter estimation</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">kl_latent_space</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Model comparison</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">kl_latent_space</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">model_indices</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Meta</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">kl_latent_space</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">model_indices</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt id="bayesflow.losses.log_loss">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">log_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#log_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.log_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-network       : tf.keras.Model – an evidential network (with real outputs in [1, +inf])
-model_indices : tf.Tensor of shape (batch_size, n_models) – true model indices
-sim_data      : tf.Tensor of shape (batch_size, n_obs, data_dim) or (batch_size, summary_dim)</p>
-<blockquote>
-<div><p>– synthetic data sets generated by the params or summary statistics thereof</p>
-</div></blockquote>
-<p>Output:
-loss : tf.Tensor of shape (,) – a single scalar Monte-Carlo approximation of the regularized Bayes risk</p>
+<dd><p>Computes the logloss given output probs and true model indices m_true.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>tf.keras.Model</em>) – An evidential network (with real outputs in <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">+inf]</span></code>)</p></li>
+<li><p><strong>model_indices</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>n_models</em><em>)</em>) – True model indices</p></li>
+<li><p><strong>sim_data</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>n_obs</em><em>, </em><em>data_dim</em><em>) or </em><em>(</em><em>batch_size</em><em>, </em><em>summary_dim</em><em>)</em>) – Synthetic data sets generated by the params or summary statistics thereof</p></li>
+<li><p><strong>lambd</strong> (<em>float in</em><em> [</em><em>0</em><em>, </em><em>1</em><em>]</em>) – The weight of the KL regularization term</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loss</strong> – A single scalar Monte-Carlo approximation of the regularized Bayes risk, shape (,)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="bayesflow.losses.kl_dirichlet">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">kl_dirichlet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#kl_dirichlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.kl_dirichlet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-model_indices : tf.Tensor of shape (batch_size, n_models) – one-hot-encoded true model indices
-alpha         : tf.Tensor of shape (batch_size, n_models) – positive network outputs in [1, +inf]
-———-</p>
-<p>Output:
-kl: tf.Tensor of shape (,)  – a single scalar representing KL( Dir(alpha) | Dir(1,1,…,1) )</p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_indices</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>n_models</em><em>)</em>) – one-hot-encoded true model indices</p></li>
+<li><p><strong>alpha</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>n_models</em><em>)</em>) – positive network outputs in <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">+inf]</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>kl</strong> – A single scalar representing <span class="math notranslate nohighlight">\(D_{KL}(\mathrm{Dir}(\alpha) | \mathrm{Dir}(1,1,\ldots,1) )\)</span>, shape (,)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="bayesflow.losses.maximum_mean_discrepancy">
-<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">maximum_mean_discrepancy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#maximum_mean_discrepancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.maximum_mean_discrepancy" title="Permalink to this definition">¶</a></dt>
-<dd><p>This Maximum Mean Discrepancy (MMD) loss is calculated with a number of
-different Gaussian kernels.
-———-</p>
-<p>Arguments:
-x : tf.Tensor of shape  [N, num_features].
-y:  tf.Tensor of shape  [M, num_features].
-weight: the weight of the MMD loss.
-———-</p>
-<p>Output:
-loss_value : tf.Tensor of shape (,) - a scalar MMD</p>
+<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">maximum_mean_discrepancy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#maximum_mean_discrepancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.maximum_mean_discrepancy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This Maximum Mean Discrepancy (MMD) loss is calculated with a number of different Gaussian kernels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>tf.Tensor of shape</em><em> (</em><em>N</em><em>, </em><em>num_features</em><em>)</em>) – </p></li>
+<li><p><strong>y</strong> (<em>tf.Tensor of shape</em><em>  (</em><em>M</em><em>, </em><em>num_features</em><em>)</em>) – </p></li>
+<li><p><strong>weight</strong> (<em>float</em><em>, </em><em>default: 1.0</em>) – the weight of the MMD loss.</p></li>
+<li><p><strong>minimum</strong> (<em>float</em><em>, </em><em>default: 0.0</em>) – lower loss bound</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loss_value</strong> – A scalar Maximum Mean Discrepancy, shape (,)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -795,7 +882,7 @@ Then, we want to initialize a <a class="reference internal" href="#bayesflow.mod
 <dl class="py attribute">
 <dt id="bayesflow.models.MetaGenerativeModel.generative_models">
 <code class="sig-name descname"><span class="pre">generative_models</span></code><a class="headerlink" href="#bayesflow.models.MetaGenerativeModel.generative_models" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of :class:<a href="#id3"><span class="problematic" id="id4">`</span></a>SimpleGenerativeModel`s (one for each model)</p>
+<dd><p>List of <a class="reference internal" href="#bayesflow.models.SimpleGenerativeModel" title="bayesflow.models.SimpleGenerativeModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleGenerativeModel</span></code></a> s (one for each model)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>list(<a class="reference internal" href="#bayesflow.models.SimpleGenerativeModel" title="bayesflow.models.SimpleGenerativeModel">SimpleGenerativeModel</a>)</p>
