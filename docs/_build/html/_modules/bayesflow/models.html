@@ -165,11 +165,11 @@
 <div class="viewcode-block" id="GenerativeModel"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.models.GenerativeModel">[docs]</a><span class="k">class</span> <span class="nc">GenerativeModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; This class is a factory for the different internal implementations of a `GenerativeModel`:</span>
 
-<span class="sd">    If priors/simulators are passed as a ``list``, we are in the **model comparison** or **meta** setting.</span>
-<span class="sd">    Then, we want to initialize a `MetaGenerativeModel`.</span>
+<span class="sd">    -  If priors/simulators are passed as a ``list``, we are in the **model comparison** or **meta** setting.</span>
+<span class="sd">       Then, we want to initialize a :class:`MetaGenerativeModel`.</span>
 
-<span class="sd">    If only **one** prior/simulator is passed, we are in the **parameter estimation** setting</span>
-<span class="sd">    Then, we want to initialize a `SimpleGenerativeModel`.</span>
+<span class="sd">    -  If only **one** prior/simulator is passed, we are in the **parameter estimation** setting.</span>
+<span class="sd">       Then, we want to initialize a :class:`SimpleGenerativeModel`.</span>
 
 
 <span class="sd">    Examples</span>
@@ -216,14 +216,14 @@
 <span class="sd">    model_prior : callable</span>
 <span class="sd">        Model prior for underlying models</span>
 <span class="sd">    generative_models : list(SimpleGenerativeModel)</span>
-<span class="sd">        List of `SimpleGenerativeModel`s (one for each model)</span>
+<span class="sd">        List of :class:`SimpleGenerativeModel`s (one for each model)</span>
 <span class="sd">    param_padding : callable, default: zero-padding along axis 1</span>
 <span class="sd">        Function to pad parameter matrix if models have a different number of parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MetaGenerativeModel.__init__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.models.MetaGenerativeModel.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_prior</span><span class="p">,</span> <span class="n">priors</span><span class="p">,</span> <span class="n">simulators</span><span class="p">,</span>
                  <span class="n">param_transforms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_transforms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_padding</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Initializes a `MetaGenerativeModel` instance that wraps generative models for each underlying model.</span>
+        <span class="sd">&quot;&quot;&quot; Initializes a :class:`MetaGenerativeModel` instance that wraps generative models for each underlying model.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -279,19 +279,24 @@
 <div class="viewcode-block" id="MetaGenerativeModel.__call__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.models.MetaGenerativeModel.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">callable</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Simulates `n_sim` datasets with `n_obs` observations each.</span>
 
-<span class="sd">        Arguments</span>
-<span class="sd">        ---------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 
 <span class="sd">        n_sim : int</span>
 <span class="sd">            number of simulation to perform at the given step (i.e., batch size)</span>
 <span class="sd">        n_obs : int or callable</span>
-<span class="sd">            if int, then treated as a fixed number of observations, \n</span>
-<span class="sd">            if callable, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`</span>
+<span class="sd">            Number of observations for each simulated dataset.</span>
+
+<span class="sd">            -  if `int`, then treated as a fixed number of observations, \n</span>
+<span class="sd">            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`</span>
+
 <span class="sd">        **kwargs</span>
 <span class="sd">            Additional keyword arguments that are passed to the simulators</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        --------</span>
+<span class="sd">        model_indices: np.array(np.float32)</span>
+<span class="sd">            One-hot encoded array of model indices of shape ``(n_sim, self.n_models)``</span>
 <span class="sd">        params : np.array(np.float32)</span>
 <span class="sd">            Array of sampled parameters of shape ``(n_sim, param_dim)``</span>
 <span class="sd">        sim_data : np.array(np.float32)</span>
@@ -371,22 +376,40 @@
 
 
 <div class="viewcode-block" id="SimpleGenerativeModel"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.models.SimpleGenerativeModel">[docs]</a><span class="k">class</span> <span class="nc">SimpleGenerativeModel</span><span class="p">(</span><span class="n">GenerativeModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Provides a :class:`SimpleGenerativeModel` instance with an underlying parameter prior and data simulator.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ---------</span>
+<span class="sd">    prior : callable</span>
+<span class="sd">        Simulates prior parameter values in batches.</span>
+<span class="sd">    simulator : callable</span>
+<span class="sd">        Simulates datasets in batches.</span>
+<span class="sd">    param_transform: callable, optional</span>
+<span class="sd">        Transform function for the parameters, i.e. clipping.</span>
+<span class="sd">    data_transform: callable, optional</span>
+<span class="sd">        Transform function for the data, i.e. logarithm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="SimpleGenerativeModel.__init__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.models.SimpleGenerativeModel.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prior</span><span class="p">:</span> <span class="n">callable</span><span class="p">,</span> <span class="n">simulator</span><span class="p">:</span> <span class="n">callable</span><span class="p">,</span>
                  <span class="n">param_transform</span><span class="p">:</span> <span class="n">callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">data_transform</span><span class="p">:</span> <span class="n">callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initializes a GenerativeModel instance with a prior and simulator.</span>
-<span class="sd">        The GenerativeModel class&#39;s __call__ method is capable of returning batches even if the prior and/or simulator</span>
-<span class="sd">        do not work on batches.</span>
+        <span class="sd">&quot;&quot;&quot; Initializes a :class:`SimpleGenerativeModel` that can simulate batches of parameters and data.</span>
+
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        prior: callable</span>
+<span class="sd">            Parameter prior function. Can either return a single parameter set or a batch of parameter sets.</span>
+<span class="sd">        simulator: callable</span>
+<span class="sd">            Simulates dataset(s) (single or batch) from parameter set or matrix.</span>
+<span class="sd">            Can either work on ``n_sim = 1`` or perform batch simulation, i.e. ``n_sim &gt; 1``</span>
+<span class="sd">        param_transform: callable, optional</span>
+<span class="sd">            Transform function for the parameters, i.e. clipping.</span>
+<span class="sd">        data_transform: callable, optional</span>
+<span class="sd">            Transform function for the data, i.e. logarithm.</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">        prior : callable -- provides prior parameter values.</span>
-<span class="sd">                Can either return a single parameter set (&quot;single mode&quot;) or a batch of parameter sets (&quot;batch mode&quot;)</span>
-<span class="sd">                !!! IMPORTANT: !!!</span>
-<span class="sd">                If the prior callable works on batches, it must have the signature prior(n_sim) or prior(batch_size)!</span>
-
-<span class="sd">        simulator : callable -- function that takes parameter (single or matrix) and returns dataset(s).</span>
-<span class="sd">                Can either work on n_sim = 1 or perform batch simulation, n_sim &gt; 1</span>
+<span class="sd">        Important</span>
+<span class="sd">        ---------</span>
+<span class="sd">        -  If ``prior`` works on batches, it must meet the signature ``prior(n_sim)``</span>
+<span class="sd">        -  If ``simulator`` works on batches, it must meet the signature ``simulator(n_sim, n_obs[,**kwargs])``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">prior</span><span class="p">):</span>
@@ -410,17 +433,27 @@
 
 <div class="viewcode-block" id="SimpleGenerativeModel.__call__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.models.SimpleGenerativeModel.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sim</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Simulates n_sim datasets of n_obs observations from the provided simulator with parameters from the prior</span>
-<span class="sd">        ----------</span>
+<span class="sd">        Simulates n_sim datasets of n_obs observations from the provided simulator with parameters from the prior.</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">        n_sim : int -- number of simulation to perform at the given step (i.e., batch size)</span>
-<span class="sd">        n_obs : int or callable -- if int, then treated as a fixed number of observations, if callable, then</span>
-<span class="sd">                                   treated as a function for sampling N, i.e., N ~ p(N)</span>
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        Returns:</span>
-<span class="sd">        params    : np.array (np.float32) of shape (n_sim, param_dim) -- array of sampled parameters</span>
-<span class="sd">        sim_data  : np.array (np.float32) of shape (n_sim, n_obs, data_dim) -- array of simulated data sets</span>
+<span class="sd">        n_sim : int</span>
+<span class="sd">            number of simulation to perform at the given step (i.e., batch size)</span>
+<span class="sd">        n_obs : int or callable</span>
+<span class="sd">            Number of observations for each simulated dataset.</span>
+
+<span class="sd">            -  if `int`, then treated as a fixed number of observations, \n</span>
+<span class="sd">            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`</span>
+
+<span class="sd">        **kwargs</span>
+<span class="sd">            Additional keyword arguments that are passed to the simulator</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        params : np.array(np.float32)</span>
+<span class="sd">            Array of sampled parameters of shape ``(n_sim, param_dim)``</span>
+<span class="sd">        sim_data : np.array(np.float32)</span>
+<span class="sd">            Array of simulated data sets of shape ``(n_sim, n_obs[, data_dim])``</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -439,12 +472,14 @@
         <span class="k">return</span> <span class="n">params</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">sim_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_set_prior_and_simulator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Wraps prior and simulator to support batch simulation and provide a uniform interface.</span>
+
 <span class="sd">        Priors and simulators can be provided with or without batch capabilities.</span>
 <span class="sd">        This function checks if prior and simulator are capable of batch simulation or not.</span>
-<span class="sd">        If not, they are wrapped to the interface:</span>
-<span class="sd">        params = self.prior(batch_size)</span>
-<span class="sd">        sim_data = self.simulator(params, n_obs)</span>
+
+<span class="sd">        If not, they are wrapped to fulfil the interface:</span>
+<span class="sd">        -  ``params = self.prior(batch_size)``</span>
+<span class="sd">        -  ``sim_data = self.simulator(params, n_obs)``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_n_sim</span> <span class="o">=</span> <span class="mi">16</span>
         <span class="n">_n_obs</span> <span class="o">=</span> <span class="mi">128</span>
@@ -480,8 +515,7 @@
                 <span class="k">raise</span> <span class="n">SimulationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Simulator callable could not be wrapped to batch generation!</span><span class="se">\n</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_check_consistency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Performs an internal consistency check.</span>
+        <span class="sd">&quot;&quot;&quot; Performs an internal consistency check.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_n_sim</span> <span class="o">=</span> <span class="mi">16</span>
         <span class="n">_n_obs</span> <span class="o">=</span> <span class="mi">128</span>
