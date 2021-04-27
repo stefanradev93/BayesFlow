@@ -1,5 +1,6 @@
 import types
 from abc import abstractmethod
+from typing import Union
 
 import numpy as np
 import tensorflow as tf
@@ -8,12 +9,29 @@ from bayesflow.exceptions import SimulationError, ConfigurationError
 
 
 class GenerativeModel(object):
-    """
-    This class is a factory for the different internal implementations of a GenerativeModel:
-    - if priors/simulators are passed as a list, we are in the meta setting
-            -> initialize MetaGenerativeModel
-    - if only one prior/simulator is passed, we are in the parameter estimation setting
-            -> initialize SimpleGenerativeModel
+    """ This class is a factory for the different internal implementations of a `GenerativeModel`:
+
+    -  If priors/simulators are passed as a ``list``, we are in the **model comparison** or **meta** setting.
+       Then, we want to initialize a :class:`MetaGenerativeModel`.
+
+    -  If only **one** prior/simulator is passed, we are in the **parameter estimation** setting.
+       Then, we want to initialize a :class:`SimpleGenerativeModel`.
+
+
+    Examples
+    --------
+
+    Initializing a :class:`SimpleGenerativeModel`.
+
+    >>> import tests.example_objects as ex
+    >>> g = GenerativeModel(ex.priors.dm_prior, ex.simulators.dm_batch_simulator)
+
+    Initializing a :class:`MetaGenerativeModel` with two underlying models.
+
+    >>> import tests.example_objects as ex
+    >>> priors = [ex.priors.model1_params_prior, ex.priors.model2_params_prior]
+    >>> simulators = [ex.simulators.forward_model1, ex.simulators.forward_model2]
+    >>> g = GenerativeModel(ex.priors.model_prior, priors, simulators)
     """
 
     def __new__(cls, *args, **kwargs):
@@ -35,9 +53,48 @@ class GenerativeModel(object):
 
 
 class MetaGenerativeModel(GenerativeModel):
+    """Provides a generative model with a model prior as well as priors and simulators for each model.
+
+    Attributes
+    ----------
+    n_models : int
+        Number of models
+    model_prior : callable
+        Model prior for underlying models
+    generative_models : list(SimpleGenerativeModel)
+        List of :class:`SimpleGenerativeModel`s (one for each model)
+    param_padding : callable, default: zero-padding along axis 1
+        Function to pad parameter matrix if models have a different number of parameters.
+    """
+
     def __init__(self, model_prior, priors, simulators,
                  param_transforms=None, data_transforms=None, param_padding=None):
+        """ Initializes a :class:`MetaGenerativeModel` instance that wraps generative models for each underlying model.
+
+        Parameters
+        ----------
+
+        model_prior : callable
+            Model prior
+
+        priors : list(callable)
+            List of parameter priors
+
+        simulators : list(callable)
+            List of data simulators
+
+        param_transforms : list(callable), optional, default: None
+            List of parameter transformation functions, e.g. clipping
+
+        data_transforms : list(callable), optional, default: None
+            List of data transformation functions, e.g. logarithm
+
+        param_padding : callable, optional, default: None
+            Function to pad parameter matrix if models have a different number of parameters.
+        """
+
         assert len(priors) == len(simulators), "Must provide same number of priors and simulators!"
+
         self.n_models = len(priors)
 
         param_transforms = self._configure_transform(param_transforms)
@@ -45,7 +102,6 @@ class MetaGenerativeModel(GenerativeModel):
 
         self.model_prior = model_prior
 
-        # initialize list of SimpleGenerativeModels
         self.generative_models = [SimpleGenerativeModel(prior=prior,
                                                         simulator=simulator,
                                                         param_transform=param_transform,
@@ -66,19 +122,31 @@ class MetaGenerativeModel(GenerativeModel):
 
         self._check_consistency()
 
-    def __call__(self, n_sim, n_obs, **kwargs):
-        """
-        Simulates n_sim datasets of n_obs observations from the provided simulator
+    def __call__(self, n_sim: int, n_obs: Union[int, callable], **kwargs):
+        """ Simulates `n_sim` datasets with `n_obs` observations each.
+
+        Parameters
         ----------
 
-        Arguments:
-        n_sim : int -- number of simulation to perform at the given step (i.e., batch size)
-        n_obs : int or callable -- if int, then treated as a fixed number of observations, if callable, then
-                                   treated as a function for sampling N, i.e., N ~ p(N)
-        ----------
-        Returns:
-        params    : np.array (np.float32) of shape (n_sim, param_dim) -- array of sampled parameters
-        sim_data  : np.array (np.float32) of shape (n_sim, n_obs, data_dim) -- array of simulated data sets
+        n_sim : int
+            number of simulation to perform at the given step (i.e., batch size)
+        n_obs : int or callable
+            Number of observations for each simulated dataset.
+
+            -  if `int`, then treated as a fixed number of observations, \n
+            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`
+
+        **kwargs
+            Additional keyword arguments that are passed to the simulators
+
+        Returns
+        --------
+        model_indices: np.array(np.float32)
+            One-hot encoded array of model indices of shape ``(n_sim, self.n_models)``
+        params : np.array(np.float32)
+            Array of sampled parameters of shape ``(n_sim, param_dim)``
+        sim_data : np.array(np.float32)
+            Array of simulated data sets of shape ``(n_sim, n_obs[, data_dim])``
 
         """
 
@@ -139,9 +207,6 @@ class MetaGenerativeModel(GenerativeModel):
         self._max_param_length = max(param_lengths)
 
     def _check_consistency(self):
-        """
-        Performs an internal consistency check with datasets of 10 observations each.
-        """
         _n_sim = 16
         _n_obs = 200
 
@@ -161,22 +226,40 @@ class MetaGenerativeModel(GenerativeModel):
 
 
 class SimpleGenerativeModel(GenerativeModel):
+    """ Provides a :class:`SimpleGenerativeModel` instance with an underlying parameter prior and data simulator.
+
+    Attributes
+    ---------
+    prior : callable
+        Simulates prior parameter values in batches.
+    simulator : callable
+        Simulates datasets in batches.
+    param_transform: callable, optional
+        Transform function for the parameters, i.e. clipping.
+    data_transform: callable, optional
+        Transform function for the data, i.e. logarithm.
+    """
+
     def __init__(self, prior: callable, simulator: callable,
                  param_transform: callable = None, data_transform: callable = None):
-        """
-        Initializes a GenerativeModel instance with a prior and simulator.
-        The GenerativeModel class's __call__ method is capable of returning batches even if the prior and/or simulator
-        do not work on batches.
+        """ Initializes a :class:`SimpleGenerativeModel` that can simulate batches of parameters and data.
+
+        Parameters
         ----------
+        prior: callable
+            Parameter prior function. Can either return a single parameter set or a batch of parameter sets.
+        simulator: callable
+            Simulates dataset(s) (single or batch) from parameter set or matrix.
+            Can either work on ``n_sim = 1`` or perform batch simulation, i.e. ``n_sim > 1``
+        param_transform: callable, optional
+            Transform function for the parameters, i.e. clipping.
+        data_transform: callable, optional
+            Transform function for the data, i.e. logarithm.
 
-        Arguments:
-        prior : callable -- provides prior parameter values.
-                Can either return a single parameter set ("single mode") or a batch of parameter sets ("batch mode")
-                !!! IMPORTANT: !!!
-                If the prior callable works on batches, it must have the signature prior(n_sim) or prior(batch_size)!
-
-        simulator : callable -- function that takes parameter (single or matrix) and returns dataset(s).
-                Can either work on n_sim = 1 or perform batch simulation, n_sim > 1
+        Important
+        ---------
+        -  If ``prior`` works on batches, it must meet the signature ``prior(n_sim)``
+        -  If ``simulator`` works on batches, it must meet the signature ``simulator(n_sim, n_obs[,**kwargs])``
         """
 
         if not callable(prior):
@@ -200,17 +283,27 @@ class SimpleGenerativeModel(GenerativeModel):
 
     def __call__(self, n_sim, n_obs, **kwargs):
         """
-        Simulates n_sim datasets of n_obs observations from the provided simulator with parameters from the prior
-        ----------
+        Simulates n_sim datasets of n_obs observations from the provided simulator with parameters from the prior.
 
-        Arguments:
-        n_sim : int -- number of simulation to perform at the given step (i.e., batch size)
-        n_obs : int or callable -- if int, then treated as a fixed number of observations, if callable, then
-                                   treated as a function for sampling N, i.e., N ~ p(N)
+        Parameters
         ----------
-        Returns:
-        params    : np.array (np.float32) of shape (n_sim, param_dim) -- array of sampled parameters
-        sim_data  : np.array (np.float32) of shape (n_sim, n_obs, data_dim) -- array of simulated data sets
+        n_sim : int
+            number of simulation to perform at the given step (i.e., batch size)
+        n_obs : int or callable
+            Number of observations for each simulated dataset.
+
+            -  if `int`, then treated as a fixed number of observations, \n
+            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`
+
+        **kwargs
+            Additional keyword arguments that are passed to the simulator
+
+        Returns
+        -------
+        params : np.array(np.float32)
+            Array of sampled parameters of shape ``(n_sim, param_dim)``
+        sim_data : np.array(np.float32)
+            Array of simulated data sets of shape ``(n_sim, n_obs[, data_dim])``
 
         """
 
@@ -229,12 +322,14 @@ class SimpleGenerativeModel(GenerativeModel):
         return params.astype(np.float32), sim_data.astype(np.float32)
 
     def _set_prior_and_simulator(self):
-        """
+        """ Wraps prior and simulator to support batch simulation and provide a uniform interface.
+
         Priors and simulators can be provided with or without batch capabilities.
         This function checks if prior and simulator are capable of batch simulation or not.
-        If not, they are wrapped to the interface:
-        params = self.prior(batch_size)
-        sim_data = self.simulator(params, n_obs)
+
+        If not, they are wrapped to fulfil the interface:
+        -  ``params = self.prior(batch_size)``
+        -  ``sim_data = self.simulator(params, n_obs)``
         """
         _n_sim = 16
         _n_obs = 128
@@ -270,8 +365,7 @@ class SimpleGenerativeModel(GenerativeModel):
                 raise SimulationError(f"Simulator callable could not be wrapped to batch generation!\n{repr(err)}")
 
     def _check_consistency(self):
-        """
-        Performs an internal consistency check.
+        """ Performs an internal consistency check.
         """
         _n_sim = 16
         _n_obs = 128
