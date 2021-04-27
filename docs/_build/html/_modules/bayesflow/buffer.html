@@ -154,15 +154,27 @@
   <h1>Source code for bayesflow.buffer</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
+
 <div class="viewcode-block" id="MemoryReplayBuffer"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.buffer.MemoryReplayBuffer">[docs]</a><span class="k">class</span> <span class="nc">MemoryReplayBuffer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Implements a memory replay buffer for simulation-based inference.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    capacity: int</span>
+<span class="sd">        Maximum number of batches to store in the buffer</span>
+<span class="sd">    size_in_batches: int</span>
+<span class="sd">        Number of currently stored batches</span>
+<span class="sd">    _buffer : dict</span>
+<span class="sd">        Buffer data as a dictionary with keys `&#39;params&#39;, &#39;sim_data&#39;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MemoryReplayBuffer.__init__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.buffer.MemoryReplayBuffer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates a memory replay buffer for simulation-based inference.</span>
-<span class="sd">        ----------</span>
+        <span class="sd">&quot;&quot;&quot;Creates a memory replay buffer for simulation-based inference.</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">        capacity : int -- maximum number of batches to store in buffer</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        capacity : int</span>
+<span class="sd">            Maximum number of batches to store in buffer</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">assert</span> <span class="n">capacity</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;capacity should be a positive integer in (0, inf)&#39;</span>
@@ -177,9 +189,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_full</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="MemoryReplayBuffer.store"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.buffer.MemoryReplayBuffer.store">[docs]</a>    <span class="k">def</span> <span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Stores params and simulated data. If buffer is not full, stores params and data at the end, if full,</span>
-<span class="sd">        overwrites params and data at current index.</span>
+        <span class="sd">&quot;&quot;&quot; Stores params and simulated data.</span>
+
+<span class="sd">        If buffer is not full, stores params and data at the end, if full, overwrites params and data at current index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params: object</span>
+<span class="sd">            Parameters to be stored</span>
+<span class="sd">        sim_data: object</span>
+<span class="sd">            Simulated data to be stored</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># If full, overwrite at index</span>
@@ -201,13 +220,15 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_is_full</span> <span class="o">=</span> <span class="kc">True</span></div>
             
 <div class="viewcode-block" id="MemoryReplayBuffer.sample"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.buffer.MemoryReplayBuffer.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Samples batch_size number of parameter vectors and simulations from buffer.</span>
+        <span class="sd">&quot;&quot;&quot; Samples `batch_size` number of parameter vectors and simulations from buffer.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        params    : np.array (np.float32) of shape (batch_size, param_dim) -- array of sampled parameters</span>
-<span class="sd">        sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) or (batch_size, sum_dim) </span>
-<span class="sd">                    -- array of simulated data sets or summary statistics thereof</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        params    : np.array(np.float32)</span>
+<span class="sd">            Array of sampled parameters of shape ``(batch_size, param_dim)``</span>
+<span class="sd">        sim_data  : np.array(np.float32)</span>
+<span class="sd">            Array of simulated data sets or summary statistics thereof,</span>
+<span class="sd">            shape ``(batch_size, n_obs, data_dim)`` or ``(batch_size, sum_dim)``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="n">rand_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_in_batches</span><span class="p">)</span>
@@ -216,8 +237,7 @@
         <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">sim_data</span></div>
 
     <span class="k">def</span> <span class="nf">_overwrite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Only called when the internal buffer is full. Overwrites params and sim_data at current index.</span>
+        <span class="sd">&quot;&quot;&quot;Only called when the internal buffer is full. Overwrites params and sim_data at current index.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Reset index, if at the end of buffer</span>
