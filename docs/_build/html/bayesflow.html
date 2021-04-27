@@ -361,30 +361,80 @@ log(det(Jacobian)), that is a tuple <code class="docutils literal notranslate"><
 <dt id="bayesflow.buffer.MemoryReplayBuffer">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.buffer.</span></code><code class="sig-name descname"><span class="pre">MemoryReplayBuffer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/buffer.html#MemoryReplayBuffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Implements a memory replay buffer for simulation-based inference.</p>
+<dl class="py attribute">
+<dt id="bayesflow.buffer.MemoryReplayBuffer.capacity">
+<code class="sig-name descname"><span class="pre">capacity</span></code><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer.capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of batches to store in the buffer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bayesflow.buffer.MemoryReplayBuffer.size_in_batches">
+<code class="sig-name descname"><span class="pre">size_in_batches</span></code><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer.size_in_batches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of currently stored batches</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bayesflow.buffer.MemoryReplayBuffer._buffer">
+<code class="sig-name descname"><span class="pre">_buffer</span></code><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer._buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Buffer data as a dictionary with keys <cite>‘params’, ‘sim_data’</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt id="bayesflow.buffer.MemoryReplayBuffer.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/buffer.html#MemoryReplayBuffer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-capacity : int – maximum number of batches to store in buffer</p>
+<dd><p>Creates a memory replay buffer for simulation-based inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>capacity</strong> (<em>int</em>) – Maximum number of batches to store in buffer</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.buffer.MemoryReplayBuffer.store">
 <code class="sig-name descname"><span class="pre">store</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/buffer.html#MemoryReplayBuffer.store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer.store" title="Permalink to this definition">¶</a></dt>
-<dd><p>Stores params and simulated data. If buffer is not full, stores params and data at the end, if full,
-overwrites params and data at current index.</p>
+<dd><p>Stores params and simulated data.</p>
+<p>If buffer is not full, stores params and data at the end, if full, overwrites params and data at current index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>object</em>) – Parameters to be stored</p></li>
+<li><p><strong>sim_data</strong> (<em>object</em>) – Simulated data to be stored</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.buffer.MemoryReplayBuffer.sample">
 <code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/buffer.html#MemoryReplayBuffer.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.buffer.MemoryReplayBuffer.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Samples batch_size number of parameter vectors and simulations from buffer.</p>
-<p>Returns:
-params    : np.array (np.float32) of shape (batch_size, param_dim) – array of sampled parameters
-sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) or (batch_size, sum_dim)</p>
-<blockquote>
-<div><p>– array of simulated data sets or summary statistics thereof</p>
-</div></blockquote>
+<dd><p>Samples <cite>batch_size</cite> number of parameter vectors and simulations from buffer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>params</strong> (<em>np.array(np.float32)</em>) – Array of sampled parameters of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">param_dim)</span></code></p></li>
+<li><p><strong>sim_data</strong> (<em>np.array(np.float32)</em>) – Array of simulated data sets or summary statistics thereof,
+shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">n_obs,</span> <span class="pre">data_dim)</span></code> or <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">sum_dim)</span></code></p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -399,9 +449,8 @@ sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) or (bat
 <p>Abstract Base class for settings. It’s here to potentially extend the setting functionality in future.</p>
 <dl class="py method">
 <dt id="bayesflow.default_settings.Setting.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/default_settings.html#Setting.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.Setting.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/default_settings.html#Setting.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.Setting.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -413,7 +462,14 @@ sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) or (bat
 <dl class="py method">
 <dt id="bayesflow.default_settings.MetaDictSetting.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mandatory_fields</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/default_settings.html#MetaDictSetting.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.MetaDictSetting.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>meta_dict</strong> (<em>dict</em>) – Default dictionary.</p></li>
+<li><p><strong>mandatory_fields</strong> (<em>list</em><em>, </em><em>default:</em><em> [</em><em>]</em>) – List of keys in <cite>meta_dict</cite> that need to be provided by the user.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -425,31 +481,97 @@ sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) or (bat
 <dt id="bayesflow.diagnostics.true_vs_estimated">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></code><code class="sig-name descname"><span class="pre">true_vs_estimated</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_est</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/diagnostics.html#true_vs_estimated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.true_vs_estimated" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots a scatter plot with abline of the estimated posterior means vs true values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta_true</strong> (<em>np.array</em>) – Array of true parameters.</p></li>
+<li><p><strong>theta_est</strong> (<em>np.array</em>) – Array of estimated parameters.</p></li>
+<li><p><strong>param_names</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of parameter names for plotting.</p></li>
+<li><p><strong>dpi</strong> (<em>int</em><em>, </em><em>default:300</em>) – Dots per inch (dpi) for the plot.</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>default:</em><em> (</em><em>20</em><em>,</em><em>4</em><em>)</em>) – Figure size.</p></li>
+<li><p><strong>show</strong> (<em>boolean</em><em>, </em><em>default: True</em>) – Controls if the plot will be shown</p></li>
+<li><p><strong>filename</strong> (<em>str</em><em>, </em><em>default: None</em>) – Filename if plot shall be saved</p></li>
+<li><p><strong>font_size</strong> (<em>int</em><em>, </em><em>default: 12</em>) – Font size</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="bayesflow.diagnostics.plot_sbc">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></code><code class="sig-name descname"><span class="pre">plot_sbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(24,</span> <span class="pre">12)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/diagnostics.html#plot_sbc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_sbc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the simulation-based posterior checking histograms as advocated by Talts et al. (2018).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta_samples</strong> (<em>np.array</em>) – Array of sampled parameters</p></li>
+<li><p><strong>theta_test</strong> (<em>np.array</em>) – Array of test parameters</p></li>
+<li><p><strong>param_names</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of parameter names for plotting.</p></li>
+<li><p><strong>bins</strong> (<em>int</em><em>, </em><em>default: 25</em>) – Bins for histogram plot</p></li>
+<li><p><strong>dpi</strong> (<em>int</em><em>, </em><em>default: 300</em>) – Dots per inch (dpi) for plot</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>default:</em><em> (</em><em>24</em><em>, </em><em>12</em><em>)</em>) – Figure size</p></li>
+<li><p><strong>interval</strong> (<em>float</em><em>, </em><em>default: 0.99</em>) – Interval to plot</p></li>
+<li><p><strong>show</strong> (<em>bool</em><em>, </em><em>default: True</em>) – Controls whether the plot shall be printed</p></li>
+<li><p><strong>font_size</strong> (<em>int</em><em>, </em><em>default:12</em>) – Font size</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="bayesflow.diagnostics.plot_confusion_matrix">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></code><code class="sig-name descname"><span class="pre">plot_confusion_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">m_true</span></em>, <em class="sig-param"><span class="pre">m_pred</span></em>, <em class="sig-param"><span class="pre">model_names</span></em>, <em class="sig-param"><span class="pre">normalize=False</span></em>, <em class="sig-param"><span class="pre">cmap=&lt;matplotlib.colors.LinearSegmentedColormap</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">figsize=(14</span></em>, <em class="sig-param"><span class="pre">8)</span></em>, <em class="sig-param"><span class="pre">annotate=True</span></em>, <em class="sig-param"><span class="pre">show=True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/diagnostics.html#plot_confusion_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_confusion_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>A function to print and plots the confusion matrix. Normalization can be applied by setting <cite>normalize=True</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m_true</strong> (<em>np.array</em>) – Array of true model indices</p></li>
+<li><p><strong>m_pred</strong> (<em>np.array</em>) – Array of predicted model indices</p></li>
+<li><p><strong>model_names</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of model names for plotting</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em><em>, </em><em>default: False</em>) – Controls whether normalization shall be applied</p></li>
+<li><p><strong>cmap</strong> (<em>matplotlib.pyplot.cm.*</em><em>, </em><em>default: plt.cm.Blues</em>) – Colormap</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>default:</em><em> (</em><em>14</em><em>, </em><em>8</em><em>)</em>) – Figure size</p></li>
+<li><p><strong>annotate</strong> (<em>bool</em><em>, </em><em>default: True</em>) – Controls if the plot shall be annotated</p></li>
+<li><p><strong>show</strong> (<em>bool</em><em>, </em><em>default: True</em>) – Controls if the plot shall be printed</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="bayesflow.diagnostics.plot_expected_calibration_error">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></code><code class="sig-name descname"><span class="pre">plot_expected_calibration_error</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/diagnostics.html#plot_expected_calibration_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_expected_calibration_error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Estimates the calibration error of a model comparison neural network.
-Make sure that m_true are one-hot encoded classes!</p>
+<dd><p>Estimates the calibration error of a model comparison neural network.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Make sure that <code class="docutils literal notranslate"><span class="pre">m_true</span></code> are <strong>one-hot encoded</strong> classes!</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m_true</strong> (<em>np.array</em><em> or </em><em>list</em>) – True model indices</p></li>
+<li><p><strong>m_pred</strong> (<em>np.array</em><em> or </em><em>list</em>) – Predicted model indices</p></li>
+<li><p><strong>n_bins</strong> (<em>int</em><em>, </em><em>default: 15</em>) – Number of bins for plot</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="bayesflow.diagnostics.plot_calibration_curves">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></code><code class="sig-name descname"><span class="pre">plot_calibration_curves</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cal_probs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cal_errs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">4)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/diagnostics.html#plot_calibration_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_calibration_curves" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the calibration curves for a model comparison problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cal_probs</strong> (<em>np.array</em>) – Currently not used</p></li>
+<li><p><strong>cal_errs</strong> (<em>np.array</em><em> or </em><em>list</em>) – Array of calibration curve data</p></li>
+<li><p><strong>model_names</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of model names for plotting</p></li>
+<li><p><strong>font_size</strong> (<em>int</em><em>, </em><em>default: 12</em>) – Font size</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>default:</em><em> (</em><em>12</em><em>, </em><em>4</em><em>)</em>) – Figure size for plot layout</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

@@ -1,19 +1,29 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 
 
 class Setting(ABC):
+    """Abstract Base class for settings. It's here to potentially extend the setting functionality in future.
     """
-    Abstract Base class for settings. It's here to potentially extend the setting functionality in future.
-    """
+    @abstractmethod
     def __init__(self):
+        """"""
         pass
 
 
 class MetaDictSetting(Setting):
-    """
-    Implements an interface for a default meta_dict with optional mandatory fields
+    """Implements an interface for a default meta_dict with optional mandatory fields
     """
     def __init__(self, meta_dict: dict, mandatory_fields: list = []):
+        """
+
+        Parameters
+        ----------
+        meta_dict: dict
+            Default dictionary.
+
+        mandatory_fields: list, default: []
+            List of keys in `meta_dict` that need to be provided by the user.
+        """
         self.meta_dict = meta_dict
         self.mandatory_fields = mandatory_fields
 

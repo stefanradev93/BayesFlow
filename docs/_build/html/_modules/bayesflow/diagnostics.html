@@ -162,7 +162,28 @@
 
 <div class="viewcode-block" id="true_vs_estimated"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.true_vs_estimated">[docs]</a><span class="k">def</span> <span class="nf">true_vs_estimated</span><span class="p">(</span><span class="n">theta_true</span><span class="p">,</span> <span class="n">theta_est</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
                       <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Plots a scatter plot with abline of the estimated posterior means vs true values.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Plots a scatter plot with abline of the estimated posterior means vs true values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta_true: np.array</span>
+<span class="sd">        Array of true parameters.</span>
+<span class="sd">    theta_est: np.array</span>
+<span class="sd">        Array of estimated parameters.</span>
+<span class="sd">    param_names: list(str)</span>
+<span class="sd">        List of parameter names for plotting.</span>
+<span class="sd">    dpi: int, default:300</span>
+<span class="sd">        Dots per inch (dpi) for the plot.</span>
+<span class="sd">    figsize: tuple(int, int), default: (20,4)</span>
+<span class="sd">        Figure size.</span>
+<span class="sd">    show: boolean, default: True</span>
+<span class="sd">        Controls if the plot will be shown</span>
+<span class="sd">    filename: str, default: None</span>
+<span class="sd">        Filename if plot shall be saved</span>
+<span class="sd">    font_size: int, default: 12</span>
+<span class="sd">        Font size</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
 
     <span class="c1"># Plot settings</span>
@@ -227,8 +248,29 @@
 
 <div class="viewcode-block" id="plot_sbc"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_sbc">[docs]</a><span class="k">def</span> <span class="nf">plot_sbc</span><span class="p">(</span><span class="n">theta_samples</span><span class="p">,</span> <span class="n">theta_test</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
             <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="n">interval</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plots the simulation-based posterior checking histograms as advocated by Talts et al. (2018).</span>
+    <span class="sd">&quot;&quot;&quot; Plots the simulation-based posterior checking histograms as advocated by Talts et al. (2018).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta_samples: np.array</span>
+<span class="sd">        Array of sampled parameters</span>
+<span class="sd">    theta_test: np.array</span>
+<span class="sd">        Array of test parameters</span>
+<span class="sd">    param_names: list(str)</span>
+<span class="sd">        List of parameter names for plotting.</span>
+<span class="sd">    bins: int, default: 25</span>
+<span class="sd">        Bins for histogram plot</span>
+<span class="sd">    dpi: int, default: 300</span>
+<span class="sd">        Dots per inch (dpi) for plot</span>
+<span class="sd">    figsize: tuple(int, int), default: (24, 12)</span>
+<span class="sd">        Figure size</span>
+<span class="sd">    interval: float, default: 0.99</span>
+<span class="sd">        Interval to plot</span>
+<span class="sd">    show: bool, default: True</span>
+<span class="sd">        Controls whether the plot shall be printed</span>
+<span class="sd">    font_size: int, default:12</span>
+<span class="sd">        Font size</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Plot settings</span>
@@ -277,8 +319,27 @@
 
 <div class="viewcode-block" id="plot_confusion_matrix"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_confusion_matrix">[docs]</a><span class="k">def</span> <span class="nf">plot_confusion_matrix</span><span class="p">(</span><span class="n">m_true</span><span class="p">,</span> <span class="n">m_pred</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
                           <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Blues</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A function to print and plots the confusion matrix. Normalization can be applied by setting `normalize=True`.</span>
+    <span class="sd">&quot;&quot;&quot;A function to print and plots the confusion matrix. Normalization can be applied by setting `normalize=True`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    m_true: np.array</span>
+<span class="sd">        Array of true model indices</span>
+<span class="sd">    m_pred: np.array</span>
+<span class="sd">        Array of predicted model indices</span>
+<span class="sd">    model_names: list(str)</span>
+<span class="sd">        List of model names for plotting</span>
+<span class="sd">    normalize: bool, default: False</span>
+<span class="sd">        Controls whether normalization shall be applied</span>
+<span class="sd">    cmap: matplotlib.pyplot.cm.*, default: plt.cm.Blues</span>
+<span class="sd">        Colormap</span>
+<span class="sd">    figsize: tuple(int, int), default: (14, 8)</span>
+<span class="sd">        Figure size</span>
+<span class="sd">    annotate: bool, default: True</span>
+<span class="sd">        Controls if the plot shall be annotated</span>
+<span class="sd">    show: bool, default: True</span>
+<span class="sd">        Controls if the plot shall be printed</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Take argmax of test</span>
@@ -323,9 +384,20 @@
 
 
 <div class="viewcode-block" id="plot_expected_calibration_error"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_expected_calibration_error">[docs]</a><span class="k">def</span> <span class="nf">plot_expected_calibration_error</span><span class="p">(</span><span class="n">m_true</span><span class="p">,</span> <span class="n">m_pred</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Estimates the calibration error of a model comparison neural network.</span>
-<span class="sd">    Make sure that m_true are one-hot encoded classes!</span>
+    <span class="sd">&quot;&quot;&quot;Estimates the calibration error of a model comparison neural network.</span>
+
+<span class="sd">    Important</span>
+<span class="sd">    ---------</span>
+<span class="sd">    Make sure that ``m_true`` are **one-hot encoded** classes!</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    m_true: np.array or list</span>
+<span class="sd">        True model indices</span>
+<span class="sd">    m_pred: np.array or list</span>
+<span class="sd">        Predicted model indices</span>
+<span class="sd">    n_bins: int, default: 15</span>
+<span class="sd">        Number of bins for plot</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Convert tf.Tensors to numpy, if passed</span>
@@ -354,8 +426,21 @@
 
 
 <div class="viewcode-block" id="plot_calibration_curves"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_calibration_curves">[docs]</a><span class="k">def</span> <span class="nf">plot_calibration_curves</span><span class="p">(</span><span class="n">cal_probs</span><span class="p">,</span> <span class="n">cal_errs</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">)):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plots the calibration curves for a model comparison problem.</span>
+    <span class="sd">&quot;&quot;&quot;Plots the calibration curves for a model comparison problem.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cal_probs: np.array</span>
+<span class="sd">        Currently not used</span>
+<span class="sd">    cal_errs: np.array or list</span>
+<span class="sd">        Array of calibration curve data</span>
+<span class="sd">    model_names: list(str)</span>
+<span class="sd">        List of model names for plotting</span>
+<span class="sd">    font_size: int, default: 12</span>
+<span class="sd">        Font size</span>
+<span class="sd">    figsize: tuple(int, int), default: (12, 4)</span>
+<span class="sd">        Figure size for plot layout</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">12</span>

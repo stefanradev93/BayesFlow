@@ -152,22 +152,32 @@
            <div itemprop="articleBody">
             
   <h1>Source code for bayesflow.default_settings</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 
 
 <div class="viewcode-block" id="Setting"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.default_settings.Setting">[docs]</a><span class="k">class</span> <span class="nc">Setting</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Abstract Base class for settings. It&#39;s here to potentially extend the setting functionality in future.</span>
+    <span class="sd">&quot;&quot;&quot;Abstract Base class for settings. It&#39;s here to potentially extend the setting functionality in future.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="Setting.__init__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.default_settings.Setting.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Setting.__init__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.default_settings.Setting.__init__">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
         <span class="k">pass</span></div></div>
 
 
 <div class="viewcode-block" id="MetaDictSetting"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.default_settings.MetaDictSetting">[docs]</a><span class="k">class</span> <span class="nc">MetaDictSetting</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Implements an interface for a default meta_dict with optional mandatory fields</span>
+    <span class="sd">&quot;&quot;&quot;Implements an interface for a default meta_dict with optional mandatory fields</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="MetaDictSetting.__init__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.default_settings.MetaDictSetting.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">mandatory_fields</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        meta_dict: dict</span>
+<span class="sd">            Default dictionary.</span>
+
+<span class="sd">        mandatory_fields: list, default: []</span>
+<span class="sd">            List of keys in `meta_dict` that need to be provided by the user.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">meta_dict</span> <span class="o">=</span> <span class="n">meta_dict</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mandatory_fields</span> <span class="o">=</span> <span class="n">mandatory_fields</span></div></div>
 

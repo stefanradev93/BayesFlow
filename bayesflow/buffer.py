@@ -1,14 +1,26 @@
 import numpy as np
 
+
 class MemoryReplayBuffer:
+    """Implements a memory replay buffer for simulation-based inference.
+
+    Attributes
+    ----------
+    capacity: int
+        Maximum number of batches to store in the buffer
+    size_in_batches: int
+        Number of currently stored batches
+    _buffer : dict
+        Buffer data as a dictionary with keys `'params', 'sim_data'`
+    """
 
     def __init__(self, capacity):
-        """
-        Creates a memory replay buffer for simulation-based inference.
-        ----------
+        """Creates a memory replay buffer for simulation-based inference.
 
-        Arguments:
-        capacity : int -- maximum number of batches to store in buffer
+        Parameters
+        ----------
+        capacity : int
+            Maximum number of batches to store in buffer
         """
 
         assert capacity >= 1, 'capacity should be a positive integer in (0, inf)'
@@ -23,9 +35,16 @@ class MemoryReplayBuffer:
         self._is_full = False
 
     def store(self, params, sim_data):
-        """
-        Stores params and simulated data. If buffer is not full, stores params and data at the end, if full,
-        overwrites params and data at current index.
+        """ Stores params and simulated data.
+
+        If buffer is not full, stores params and data at the end, if full, overwrites params and data at current index.
+
+        Parameters
+        ----------
+        params: object
+            Parameters to be stored
+        sim_data: object
+            Simulated data to be stored
         """
 
         # If full, overwrite at index
@@ -47,13 +66,15 @@ class MemoryReplayBuffer:
                 self._is_full = True
             
     def sample(self):
-        """
-        Samples batch_size number of parameter vectors and simulations from buffer.
+        """ Samples `batch_size` number of parameter vectors and simulations from buffer.
 
-        Returns:
-        params    : np.array (np.float32) of shape (batch_size, param_dim) -- array of sampled parameters
-        sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) or (batch_size, sum_dim) 
-                    -- array of simulated data sets or summary statistics thereof
+        Returns
+        -------
+        params    : np.array(np.float32)
+            Array of sampled parameters of shape ``(batch_size, param_dim)``
+        sim_data  : np.array(np.float32)
+            Array of simulated data sets or summary statistics thereof,
+            shape ``(batch_size, n_obs, data_dim)`` or ``(batch_size, sum_dim)``
         """
         
         rand_idx = np.random.randint(0, self.size_in_batches)
@@ -62,8 +83,7 @@ class MemoryReplayBuffer:
         return params, sim_data
 
     def _overwrite(self, params, sim_data):
-        """
-        Only called when the internal buffer is full. Overwrites params and sim_data at current index.
+        """Only called when the internal buffer is full. Overwrites params and sim_data at current index.
         """
 
         # Reset index, if at the end of buffer
