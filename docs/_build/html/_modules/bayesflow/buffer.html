@@ -1,0 +1,278 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>bayesflow.buffer &mdash; bayesflow 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> bayesflow
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../bayesflow.html">bayesflow package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">bayesflow</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>bayesflow.buffer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bayesflow.buffer</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="MemoryReplayBuffer"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.buffer.MemoryReplayBuffer">[docs]</a><span class="k">class</span> <span class="nc">MemoryReplayBuffer</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MemoryReplayBuffer.__init__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.buffer.MemoryReplayBuffer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a memory replay buffer for simulation-based inference.</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        capacity : int -- maximum number of batches to store in buffer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="n">capacity</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;capacity should be a positive integer in (0, inf)&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">capacity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">capacity</span><span class="p">,</span>
+            <span class="s1">&#39;sim_data&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">capacity</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size_in_batches</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_full</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="MemoryReplayBuffer.store"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.buffer.MemoryReplayBuffer.store">[docs]</a>    <span class="k">def</span> <span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stores params and simulated data. If buffer is not full, stores params and data at the end, if full,</span>
+<span class="sd">        overwrites params and data at current index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># If full, overwrite at index</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_full</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_overwrite</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span>
+        
+        <span class="c1"># Otherwise still capacity to append</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Add to list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">sim_data</span>
+
+            <span class="c1"># Increment index and # of batches currently stored</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">size_in_batches</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># Check whether buffer is full and set flag if thats the case</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_is_full</span> <span class="o">=</span> <span class="kc">True</span></div>
+            
+<div class="viewcode-block" id="MemoryReplayBuffer.sample"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.buffer.MemoryReplayBuffer.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Samples batch_size number of parameter vectors and simulations from buffer.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        params    : np.array (np.float32) of shape (batch_size, param_dim) -- array of sampled parameters</span>
+<span class="sd">        sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) or (batch_size, sum_dim) </span>
+<span class="sd">                    -- array of simulated data sets or summary statistics thereof</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">rand_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_in_batches</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="n">rand_idx</span><span class="p">]</span>
+        <span class="n">sim_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">][</span><span class="n">rand_idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">sim_data</span></div>
+
+    <span class="k">def</span> <span class="nf">_overwrite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Only called when the internal buffer is full. Overwrites params and sim_data at current index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Reset index, if at the end of buffer</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Overwrite params and data at index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">sim_data</span>
+
+        <span class="c1"># Increment index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">+=</span> <span class="mi">1</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Stefan Radev.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
