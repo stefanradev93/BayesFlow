@@ -9,12 +9,29 @@ from bayesflow.exceptions import SimulationError, ConfigurationError
 
 
 class GenerativeModel(object):
-    """
-    This class is a factory for the different internal implementations of a GenerativeModel:
-    - if priors/simulators are passed as a list, we are in the meta setting
-            -> initialize MetaGenerativeModel
-    - if only one prior/simulator is passed, we are in the parameter estimation setting
-            -> initialize SimpleGenerativeModel
+    """ This class is a factory for the different internal implementations of a `GenerativeModel`:
+
+    If priors/simulators are passed as a ``list``, we are in the **model comparison** or **meta** setting.
+    Then, we want to initialize a `MetaGenerativeModel`.
+
+    If only **one** prior/simulator is passed, we are in the **parameter estimation** setting
+    Then, we want to initialize a `SimpleGenerativeModel`.
+
+
+    Examples
+    --------
+
+    Initializing a :class:`SimpleGenerativeModel`.
+
+    >>> import tests.example_objects as ex
+    >>> g = GenerativeModel(ex.priors.dm_prior, ex.simulators.dm_batch_simulator)
+
+    Initializing a :class:`MetaGenerativeModel` with two underlying models.
+
+    >>> import tests.example_objects as ex
+    >>> priors = [ex.priors.model1_params_prior, ex.priors.model2_params_prior]
+    >>> simulators = [ex.simulators.forward_model1, ex.simulators.forward_model2]
+    >>> g = GenerativeModel(ex.priors.model_prior, priors, simulators)
     """
 
     def __new__(cls, *args, **kwargs):
