@@ -50,9 +50,9 @@ def heteroscedastic_loss(model, params, x):
 
 def kl_latent_space(network, *args):
     """
-    Todo
-    ----
-    Make sure that connectors know the loss structure AND network structure
+    Notes
+    -----
+    TODO: Make sure that connectors know the loss structure AND network structure
 
     Parameters
     ----------
@@ -125,7 +125,6 @@ def log_loss(network, model_indices, sim_data, lambd=1.0):
 
 def kl_dirichlet(model_indices, alpha):
     """ Computes the KL divergence between a Dirichlet distribution with parameter vector alpha and a uniform Dirichlet.
-    ----------
 
     Parameters
     ----------
