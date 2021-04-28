@@ -40,7 +40,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Support" href="support.html" />
-    <link rel="prev" title="Welcome to bayesflow’s documentation!" href="index.html" /> 
+    <link rel="prev" title="bayesflow" href="modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -87,19 +87,22 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">bayesflow package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.amortizers">bayesflow.amortizers module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.buffer">bayesflow.buffer module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.default_settings">bayesflow.default_settings module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.diagnostics">bayesflow.diagnostics module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.exceptions">bayesflow.exceptions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.helpers">bayesflow.helpers module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.losses">bayesflow.losses module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.models">bayesflow.models module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.networks">bayesflow.networks module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow.trainers">bayesflow.trainers module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bayesflow">Module contents</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">bayesflow</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">bayesflow package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-bayesflow.amortizers">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-bayesflow.buffer">bayesflow.buffer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-bayesflow.default_settings">bayesflow.default_settings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-bayesflow.diagnostics">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-bayesflow.exceptions">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-bayesflow.helpers">bayesflow.helpers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-bayesflow.losses">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-bayesflow.models">bayesflow.models module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-bayesflow.networks">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-bayesflow.trainers">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-bayesflow">Module contents</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
@@ -150,6 +153,8 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">bayesflow</a> &raquo;</li>
         
       <li>bayesflow package</li>
     
@@ -731,7 +736,9 @@ e.g. when a trainer is initialized without generative model but the user demands
 <dl class="py function">
 <dt id="bayesflow.losses.kl_latent_space">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">kl_latent_space</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#kl_latent_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.kl_latent_space" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p class="rubric">Notes</p>
+<p>TODO: Make sure that connectors know the loss structure AND network structure</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>network</strong> (<em>tf.keras.Model</em>) – A single model amortizer</p></li>
@@ -785,7 +792,8 @@ e.g. when a trainer is initialized without generative model but the user demands
 <dl class="py function">
 <dt id="bayesflow.losses.kl_dirichlet">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">kl_dirichlet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#kl_dirichlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.kl_dirichlet" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Computes the KL divergence between a Dirichlet distribution with parameter vector alpha and a uniform Dirichlet.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model_indices</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>n_models</em><em>)</em>) – one-hot-encoded true model indices</p></li>
@@ -1068,10 +1076,17 @@ Can either work on <code class="docutils literal notranslate"><span class="pre">
 <dt id="bayesflow.networks.RegressionNetwork.call">
 <code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#RegressionNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.RegressionNetwork.call" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs the forward pass of the model.</p>
-<p>Args:
-x - tf.Tensor of shape (batch_size, sum_stats)</p>
-<p>Returns:
-out - tf.Tensor of shape (batch_size, predicted_params)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>tf.Tensor</em>) – Input of shape (batch_size, sum_stats)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Output of shape (batch_size, predicted_params)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1090,11 +1105,18 @@ out - tf.Tensor of shape (batch_size, predicted_params)</p>
 <dt id="bayesflow.networks.HeteroscedasticRegressionNetwork.call">
 <code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#HeteroscedasticRegressionNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.HeteroscedasticRegressionNetwork.call" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs the forward pass of the model.</p>
-<p>Args:
-x - tf.Tensor of shape (batch_size, sum_stats)</p>
-<p>Returns:
-pred_means - tf.Tensor of shape (batch_size, n_params) : predicted posterior means
-pred_vars  - tf.Tensor of shape (batch_size, n_params) : predicted posterior variances</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>tf.Tensor</em>) – Input of shape (batch_size, sum_stats)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>pred_means</strong> (<em>tf.Tensor</em>) – Predicted posterior means, shape (batch_size, n_params)</p></li>
+<li><p><strong>pred_vars</strong> (<em>tf.Tensor</em>) – Predicted posterior variances, shape (batch_size, n_params)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1103,6 +1125,7 @@ pred_vars  - tf.Tensor of shape (batch_size, n_params) : predicted posterior var
 <dt id="bayesflow.networks.InvariantModule">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">InvariantModule</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<p>Implements an invariant module with keras.</p>
 <dl class="py method">
 <dt id="bayesflow.networks.InvariantModule.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantModule.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantModule.__init__" title="Permalink to this definition">¶</a></dt>
@@ -1112,10 +1135,17 @@ pred_vars  - tf.Tensor of shape (batch_size, n_params) : predicted posterior var
 <dt id="bayesflow.networks.InvariantModule.call">
 <code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantModule.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantModule.call" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs the forward pass of a learnable invariant transform.</p>
-<p>Args:
-x - tf.Tensor of shape (batch_size, N, x_dim)</p>
-<p>Returns:
-out - tf.Tensor of shape (batch_size, out_dim)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>tf.Tensor</em>) – Input of shape (batch_size, N, x_dim)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Output of shape (batch_size, out_dim)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1124,6 +1154,7 @@ out - tf.Tensor of shape (batch_size, out_dim)</p>
 <dt id="bayesflow.networks.EquivariantModule">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">EquivariantModule</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EquivariantModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EquivariantModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<p>Implements an equivariant module with keras.</p>
 <dl class="py method">
 <dt id="bayesflow.networks.EquivariantModule.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EquivariantModule.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EquivariantModule.__init__" title="Permalink to this definition">¶</a></dt>
@@ -1133,10 +1164,17 @@ out - tf.Tensor of shape (batch_size, out_dim)</p>
 <dt id="bayesflow.networks.EquivariantModule.call">
 <code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EquivariantModule.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EquivariantModule.call" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs the forward pass of a learnable equivariant transform.</p>
-<p>Args:
-x - tf.Tensor of shape (batch_size, N, x_dim)</p>
-<p>Returns:
-out - tf.Tensor of shape (batch_size, N, equiv_dim)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>tf.Tensor</em>) – Input of shape (batch_size, N, x_dim)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Output of shape (batch_size, N, equiv_dim)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1145,6 +1183,7 @@ out - tf.Tensor of shape (batch_size, N, equiv_dim)</p>
 <dt id="bayesflow.networks.InvariantNetwork">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">bayesflow.networks.</span></code><code class="sig-name descname"><span class="pre">InvariantNetwork</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantNetwork" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.training.Model</span></code></p>
+<p>Implements an invariant network with keras.</p>
 <dl class="py method">
 <dt id="bayesflow.networks.InvariantNetwork.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantNetwork.__init__" title="Permalink to this definition">¶</a></dt>
@@ -1153,12 +1192,19 @@ out - tf.Tensor of shape (batch_size, N, equiv_dim)</p>
 <dl class="py method">
 <dt id="bayesflow.networks.InvariantNetwork.call">
 <code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvariantNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvariantNetwork.call" title="Permalink to this definition">¶</a></dt>
-<dd><p>Performs the forward pass of a learnable deep invariant transformation
-consisting of a sequence of equivariant transforms followed by an invariant transform.</p>
-<p>Args:
-x - tf.Tensor of shape (batch_size, n_obs, data_dim)</p>
-<p>Returns:
-out - tf.Tensor of shape (batch_size, out_dim + 1)</p>
+<dd><p>Performs the forward pass of a learnable deep invariant transformation consisting of
+a sequence of equivariant transforms followed by an invariant transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>tf.Tensor</em>) – Input of shape (batch_size, n_obs, data_dim)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Output of shape (batch_size, out_dim + 1)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1171,14 +1217,32 @@ out - tf.Tensor of shape (batch_size, out_dim + 1)</p>
 <dl class="py method">
 <dt id="bayesflow.networks.Permutation.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#Permutation.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.Permutation.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-input_dim  : int – the dimensionality of the input to the c inv block.</p>
+<dd><p>Creates a permutation layer for a conditional invertible block.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input_dim</strong> (<em>int</em>) – Ihe dimensionality of the input to the c inv block.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.networks.Permutation.call">
 <code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#Permutation.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.Permutation.call" title="Permalink to this definition">¶</a></dt>
-<dd><p>Permutes the bach of an input.</p>
+<dd><p>Permutes the batch of an input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>tf.Tensor</em>) – Input to the layer.</p></li>
+<li><p><strong>inverse</strong> (<em>bool</em><em>, </em><em>default: False</em>) – Controls if the current pass is forward (<code class="docutils literal notranslate"><span class="pre">inverse=False</span></code>) or inverse (<code class="docutils literal notranslate"><span class="pre">inverse=True</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Permuted input</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1191,18 +1255,29 @@ input_dim  : int – the dimensionality of the input to the c inv block.</p>
 <dl class="py method">
 <dt id="bayesflow.networks.CouplingNet.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_out</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#CouplingNet.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.CouplingNet.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-meta  : dict – a dictionary which holds arguments for a dense layer.
-n_out : int  – number of outputs of the coupling net</p>
+<dd><p>Creates a conditional coupling net (FC neural network).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>meta</strong> (<em>dict</em>) – A dictionary which holds arguments for a dense layer.</p></li>
+<li><p><strong>n_out</strong> (<em>int</em>) – Number of outputs of the coupling net</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.networks.CouplingNet.call">
 <code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#CouplingNet.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.CouplingNet.call" title="Permalink to this definition">¶</a></dt>
-<dd><p>Concatenates x and y and performs a forward pass through the coupling net.
-Arguments:
-params : tf.Tensor of shape (batch_size, n_params//2) – the split parameters theta ~ p(theta) of interest
-x      : tf.Tensor of shape (batch_size, summary_dim) – the summarized conditional data of interest x = sum(x)</p>
+<dd><p>Concatenates x and y and performs a forward pass through the coupling net.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>tf.Tensor</em>) – The split parameters <span class="math notranslate nohighlight">\(\theta \sim p(\theta)\)</span> of interest, shape (batch_size, n_params//2)</p></li>
+<li><p><strong>x</strong> (<em>tf.Tensor</em>) – the summarized conditional data of interest <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">summary(x)</span></code>, shape (batch_size, summary_dim)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1215,31 +1290,42 @@ x      : tf.Tensor of shape (batch_size, summary_dim) – the summarized conditi
 <dl class="py method">
 <dt id="bayesflow.networks.ConditionalCouplingLayer.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#ConditionalCouplingLayer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.ConditionalCouplingLayer.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-meta      : list – a list of dictionaries, wherein each dictionary holds parameter - value pairs for a single</p>
-<blockquote>
-<div><p>tf.keras.Dense layer. All coupling nets are assumed to be equal.</p>
-</div></blockquote>
+<dd><p>Creates a conditional invertible block.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>meta</strong> (<em>list</em><em>(</em><em>dict</em><em>)</em>) – A list of dictionaries, wherein each dictionary holds parameter-value pairs for a single
+<code class="xref py py-class docutils literal notranslate"><span class="pre">tf.keras.Dense</span></code> layer. All coupling nets are assumed to be equal.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.networks.ConditionalCouplingLayer.call">
 <code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_det_J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#ConditionalCouplingLayer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.ConditionalCouplingLayer.call" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-theta     : tf.Tensor of shape (batch_size, theta_dim) – the parameters theta ~ p(theta|y) of interest
-x         : tf.Tensor of shape (batch_size, summary_dim) – the summarized conditional data of interest x = sum(x)
-inverse   : bool – flag indicating whether to tun the block forward or backwards
-log_det_J : bool – flag indicating whether to return the log determinant of the Jacobian matrix
-———-</p>
-<p>Returns:
-(v, log_det_J)  :  (tf.Tensor of shape (batch_size, inp_dim), tf.Tensor of shape (batch_size, )) –</p>
-<blockquote>
-<div><dl class="simple">
-<dt>the transformed input, if inverse = False, and the corresponding Jacobian of the transformation</dt><dd><p>if inverse = False</p>
+<dd><p>Implements both directions of a conditional invertible block.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>tf.Tensor</em>) – the parameters theta ~ p(theta|y) of interest, shape (batch_size, theta_dim) –</p></li>
+<li><p><strong>x</strong> (<em>tf.Tensor</em>) – the summarized conditional data of interest x = summary(x), shape (batch_size, summary_dim)</p></li>
+<li><p><strong>inverse</strong> (<em>bool</em><em>, </em><em>default: False</em>) – Flag indicating whether to run the block forward or backwards</p></li>
+<li><p><strong>log_det_J</strong> (<em>bool</em><em>, </em><em>default: True</em>) – Flag indicating whether to return the log determinant of the Jacobian matrix</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>(v, log_det_J)</strong> (<em>tuple(tf.Tensor, tf.Tensor)</em>) – If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
+v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )</p></li>
+<li><p><strong>u</strong> (<em>tf.Tensor</em>) – If inverse=True: The transformed out, shape (batch_size, inp_dim)</p></li>
+</ul>
+</p>
 </dd>
 </dl>
-</div></blockquote>
-<p>u               :  tf.Tensor of shape (batch_size, inp_dim) – the transformed out, if inverse = True</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">inverse=False</span></code>, the return is <code class="docutils literal notranslate"><span class="pre">(v,</span> <span class="pre">log_det_J)</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">inverse=True</span></code>, the return is <code class="docutils literal notranslate"><span class="pre">u</span></code>.</p>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -1252,35 +1338,43 @@ log_det_J : bool – flag indicating whether to return the log determinant of th
 <dl class="py method">
 <dt id="bayesflow.networks.InvertibleNetwork.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvertibleNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvertibleNetwork.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Creates a chain of cINN blocks and chains operations with an optional summary network.</dt><dd><p>TODO: - Allow for generic base distributions</p>
+<dd><p>Creates a chain of cINN blocks and chains operations with an optional summary network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>meta</strong> (<em>list</em><em>(</em><em>dict</em><em>)</em>) – A list of dictionaries, where each dictionary holds parameter-value pairs
+for a single <code class="xref py py-class docutils literal notranslate"><span class="pre">keras.Dense</span></code> layer</p>
 </dd>
 </dl>
-<p>Arguments:
-meta        : list – a list of dictionary, where each dictionary holds parameter - value pairs for a single</p>
-<blockquote>
-<div><p>keras.Dense layer</p>
-</div></blockquote>
-<p>summary_net : tf.keras.Model or None – an optinal summary network for learning the sumstats of x</p>
+<p class="rubric">Notes</p>
+<p>TODO: Allow for generic base distributions</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.networks.InvertibleNetwork.call">
 <code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvertibleNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvertibleNetwork.call" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-params    : tf.Tensor of shape (batch_size, inp_dim) – the parameters theta ~ p(theta|x) of interest
-x         : tf.Tensor of shape (batch_size, summary_dim) – the conditional data x
-inverse   : bool – flag indicating whether to tun the chain forward or backwards
-———-</p>
-<p>Returns:
-(z, log_det_J)  :  (tf.Tensor of shape (batch_size, inp_dim), tf.Tensor of shape (batch_size, )) –</p>
-<blockquote>
-<div><dl class="simple">
-<dt>the transformed input, if inverse = False, and the corresponding Jacobian of the transformation</dt><dd><p>if inverse = False</p>
+<dd><p>Performs one pass through an invertible chain (either inverse or forward).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>tf.Tensor</em>) – The parameters theta ~ p(theta|x) of interest, shape (batch_size, inp_dim)</p></li>
+<li><p><strong>x</strong> (<em>tf.Tensor</em>) – The conditional data x, shape (batch_size, summary_dim)</p></li>
+<li><p><strong>inverse</strong> (<em>bool</em><em>, </em><em>default: False</em>) – Flag indicating whether to run the chain forward or backwards</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>(v, log_det_J)</strong> (<em>tuple(tf.Tensor, tf.Tensor)</em>) – If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
+v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )</p></li>
+<li><p><strong>u</strong> (<em>tf.Tensor</em>) – If inverse=True: The transformed out, shape (batch_size, inp_dim)</p></li>
+</ul>
+</p>
 </dd>
 </dl>
-</div></blockquote>
-<p>x               :  tf.Tensor of shape (batch_size, inp_dim) – the transformed out, if inverse = True</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">inverse=False</span></code>, the return is <code class="docutils literal notranslate"><span class="pre">(v,</span> <span class="pre">log_det_J)</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">inverse=True</span></code>, the return is <code class="docutils literal notranslate"><span class="pre">u</span></code>.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1298,13 +1392,22 @@ inverse   : bool – flag indicating whether to tun the chain forward or backwar
 <dl class="py method">
 <dt id="bayesflow.networks.InvertibleNetwork.sample">
 <code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#InvertibleNetwork.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.InvertibleNetwork.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-x         : tf.Tensor of shape (n_datasets, summary_dim) – the conditioning data set(s) of interest
-n_samples : int – number of samples to obtain from the approximate posterior
-to_numpy  : bool – flag indicating whether to return the samples as a np.array or a tf.Tensor
-———-</p>
-<p>Returns:
-theta_samples : 3D tf.Tensor or np.array of shape (n_samples, n_datasets, n_params)</p>
+<dd><p>Samples from the inverse model given a single instance y or a batch of instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>tf.Tensor</em>) – The conditioning data set(s) of interest, shape (n_datasets, summary_dim)</p></li>
+<li><p><strong>n_samples</strong> (<em>int</em>) – Number of samples to obtain from the approximate posterior</p></li>
+<li><p><strong>to_numpy</strong> (<em>bool</em><em>, </em><em>default: True</em>) – Flag indicating whether to return the samples as a <cite>np.array</cite> or a <cite>tf.Tensor</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>theta_samples</strong> – Parameter samples, shape (n_samples, n_datasets, n_params)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor or np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1316,48 +1419,83 @@ theta_samples : 3D tf.Tensor or np.array of shape (n_samples, n_datasets, n_para
 <dl class="py method">
 <dt id="bayesflow.networks.EvidentialNetwork.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EvidentialNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EvidentialNetwork.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-meta        : list – a list of dictionary, where each dictionary holds parameter - value pairs for a single</p>
-<blockquote>
-<div><p>keras.Dense layer</p>
-</div></blockquote>
+<dd><p>Creates an evidential network and couples it with an optional summary network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>meta</strong> (<em>list</em><em>(</em><em>dict</em><em>)</em>) – A list of dictionaries, where each dictionary holds parameter-value pairs
+for a single <code class="xref py py-class docutils literal notranslate"><span class="pre">tf.keras.Dense</span></code> layer</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.networks.EvidentialNetwork.call">
 <code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EvidentialNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EvidentialNetwork.call" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-sim_data   : tf.Tensor of shape (batch_size, n_obs, data_dim) – the input where n_obs is the ‘time’ or ‘samples’ dimensions</p>
-<blockquote>
-<div><p>over which pooling is performed and data_dim is the intrinsic input dimensionality</p>
-</div></blockquote>
-<p>Returns:
-alpha      : tf.Tensor of shape (batch_size, n_models) – the model evidences</p>
+<dd><p>Computes evidences for model comparison given a batch of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sim_data</strong> (<em>tf.Tensor</em>) – The input where <cite>n_obs</cite> is the <code class="docutils literal notranslate"><span class="pre">time</span></code> or <code class="docutils literal notranslate"><span class="pre">samples</span></code> dimensions over which pooling is
+performed and <code class="docutils literal notranslate"><span class="pre">data_dim</span></code> is the intrinsic input dimensionality, shape (batch_size, n_obs, data_dim)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>alpha</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor of shape (batch_size, n_models) – the model evidences</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.networks.EvidentialNetwork.predict">
 <code class="sig-name descname"><span class="pre">predict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EvidentialNetwork.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EvidentialNetwork.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the mean, variance and uncertainty implied by the estimated Dirichlet density.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obs_data</strong> (<em>tf.Tensor</em>) – Observed data</p></li>
+<li><p><strong>to_numpy</strong> (<em>bool</em><em>, </em><em>default: True</em>) – Flag that controls whether the output is a np.array or tf.Tensor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Dictionary with keys {m_probs, m_var, uncertainty}</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.networks.EvidentialNetwork.evidence">
 <code class="sig-name descname"><span class="pre">evidence</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EvidentialNetwork.evidence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EvidentialNetwork.evidence" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-x  : tf.Tensor of shape (n_datasets, summary_dim) – the conditional data set(s)</p>
+<dd><p>Computes the evidence vector (alpha + 1) as derived from the estimated Dirichlet density.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>tf.Tensor</em>) – The conditional data set(s), shape (n_datasets, summary_dim)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.networks.EvidentialNetwork.sample">
 <code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/networks.html#EvidentialNetwork.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.networks.EvidentialNetwork.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-obs_data  : tf.Tensor of shape (n_datasets, summary_dim) – the summary of the observed (or simulated) data
-n_samples : int – number of samples to obtain from the approximate posterior (default 5000)
-to_numpy  : bool – flag indicating whether to return the samples as a np.array or a tf.Tensor
-———-</p>
-<p>Returns:
-pm_samples : tf.Tensor or np.array of shape (n_samples, n_batch, n_models) – the posterior samples from the Dirichlet distro</p>
+<dd><p>Samples posterior model probabilities from the second-order Dirichlet distro.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obs_data</strong> (<em>tf.Tensor</em>) – The summary of the observed (or simulated) data, shape (n_datasets, summary_dim)</p></li>
+<li><p><strong>n_samples</strong> (<em>int</em>) – Number of samples to obtain from the approximate posterior</p></li>
+<li><p><strong>to_numpy</strong> (<em>bool</em><em>, </em><em>default: True</em>) – Flag indicating whether to return the samples as a np.array or a tf.Tensor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>pm_samples</strong> – The posterior samples from the Dirichlet distribution, shape (n_samples, n_batch, n_models)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor or np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1562,7 +1700,7 @@ losses : dict (ep_num : list_of_losses) – a dictionary storing the losses acro
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="support.html" class="btn btn-neutral float-right" title="Support" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to bayesflow’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-left" title="bayesflow" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
