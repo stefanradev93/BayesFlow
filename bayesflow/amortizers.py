@@ -31,7 +31,7 @@ class MetaAmortizer(tf.keras.Model):
         model_indices  : tf.Tensor or np.array of shape (n_sim, n_models)
             the true, one-hot-encoded model indices :math:`m \sim p(m)`
         params         : tf.Tensor or np.array of shape (n_sim, n_params)
-            the parameters :math:`\theta \sim p(\theta | m)` of interest
+            the parameters :math:`\\theta \sim p(\\theta | m)` of interest
         sim_data       : tf.Tensor or np.array of shape (n_sim, n_obs, data_dim)
             the conditional data `x`
 

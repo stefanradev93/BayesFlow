@@ -62,7 +62,7 @@ class MetaGenerativeModel(GenerativeModel):
     model_prior : callable
         Model prior for underlying models
     generative_models : list(SimpleGenerativeModel)
-        List of :class:`SimpleGenerativeModel`s (one for each model)
+        List of :class:`SimpleGenerativeModel` s (one for each model)
     param_padding : callable, default: zero-padding along axis 1
         Function to pad parameter matrix if models have a different number of parameters.
     """

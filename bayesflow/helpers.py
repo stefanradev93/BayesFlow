@@ -5,23 +5,32 @@ from bayesflow.exceptions import ConfigurationError
 
 
 def clip_gradients(gradients, clip_value=5., clip_method='norm'):
-    """
-    Peforms gradient clipping on a list of gradients by using either value
-    clipping, norm clipping or global norm clipping. Raises ValueError if
-    an unknown clipping method is specified.
-    ----------
+    """ Performs gradient clipping on a list of gradients.
 
-    Arguments:
-    gradients: list of tf.Tensor -- the computed gradients for neural network parameter
-    ----------
+    This function clips gradients by one of the following methods:
 
-    Keyword Arguments:
-    clip_value: float > 0 -- the value used for clipping 
-    clip_method: str -- the method used for clipping, either 'norm', 'global_norm', or 'value'
-    ----------
+    -  value clipping,
+    -  norm clipping or
+    -  global norm clipping.
 
-    Returns:
-    gradients: list -- the clipped gradients
+    Parameters
+    ----------
+    gradients: list(tf.Tensor)
+        The computed gradients for neural network parameters.
+    clip_value: float > 0
+        The value used for clipping.
+    clip_method: {'norm', 'global_norm', 'value'}
+        The method used for clipping.
+
+    Returns
+    -------
+    gradients: list
+        The clipped gradients
+
+    Raises
+    ------
+    ValueError
+        If an unknown clipping method is specified.
     """
 
     if clip_method == 'global_norm':
@@ -36,8 +45,7 @@ def clip_gradients(gradients, clip_value=5., clip_method='norm'):
 
 
 def merge_left_into_right(left_dict, right_dict):
-    """
-    Function to merge nested dict left_dict into nested dict right_dict
+    """ Function to merge nested dict `left_dict` into nested dict `right_dict`.
     """
     for k, v in left_dict.items():
         if isinstance(v, dict):
@@ -48,21 +56,27 @@ def merge_left_into_right(left_dict, right_dict):
 
 
 def build_meta_dict(user_dict: dict, default_setting: default_settings.MetaDictSetting) -> dict:
-    """
+    """ Integrates a user-defined dictionary into a default dictionary.
+
     Takes a user-defined dictionary and a default dictionary.
-    Firstly, scans the user_dict for violations by unspecified mandatory fields.
-    Secondly, merges user dict entries into the default_dict. Considers nested dict structure.
-    ----------
 
-    Arguments:
-    user_dict: dict -- the user's dictionary
-    default_setting: MetaDictSetting -- the specified default setting, consisting of:
-                        meta_dict: dictionary with default values.
-                        mandatory_fields: list of str -- keys that need to be specified by the user_dict
-    ----------
+    #. Scan the `user_dict` for violations by unspecified mandatory fields.
+    #. Merge `user_dict` entries into the `default_dict`. Considers nested dict structure.
 
-    Returns:
-    merged dict
+    Parameters
+    ----------
+    user_dict: dict
+        The user's dictionary
+    default_setting: MetaDictSetting
+        The specified default setting with attributes:
+
+        -  `meta_dict`: dictionary with default values.
+        -  `mandatory_fields`: list(str) keys that need to be specified by the `user_dict`
+
+    Returns
+    -------
+    merged_dict: dict
+        Merged dictionary
 
     """
 
@@ -74,4 +88,5 @@ def build_meta_dict(user_dict: dict, default_setting: default_settings.MetaDictS
         raise ConfigurationError(f"Not all mandatory fields provided! Need at least the following: {mandatory_fields}")
 
     # Merge the user dict into the default dict
-    return merge_left_into_right(user_dict, default_dict)
+    merged_dict = merge_left_into_right(user_dict, default_dict)
+    return merged_dict

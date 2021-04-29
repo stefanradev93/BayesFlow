@@ -10,7 +10,7 @@ Welcome to bayesflow's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   bayesflow
+   modules
    support
 
 

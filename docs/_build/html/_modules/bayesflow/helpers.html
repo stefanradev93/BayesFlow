@@ -84,7 +84,7 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../bayesflow.html">bayesflow package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">bayesflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
 </ul>
 
@@ -159,23 +159,32 @@
 
 
 <div class="viewcode-block" id="clip_gradients"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helpers.clip_gradients">[docs]</a><span class="k">def</span> <span class="nf">clip_gradients</span><span class="p">(</span><span class="n">gradients</span><span class="p">,</span> <span class="n">clip_value</span><span class="o">=</span><span class="mf">5.</span><span class="p">,</span> <span class="n">clip_method</span><span class="o">=</span><span class="s1">&#39;norm&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Peforms gradient clipping on a list of gradients by using either value</span>
-<span class="sd">    clipping, norm clipping or global norm clipping. Raises ValueError if</span>
-<span class="sd">    an unknown clipping method is specified.</span>
-<span class="sd">    ----------</span>
+    <span class="sd">&quot;&quot;&quot; Performs gradient clipping on a list of gradients.</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">    gradients: list of tf.Tensor -- the computed gradients for neural network parameter</span>
-<span class="sd">    ----------</span>
+<span class="sd">    This function clips gradients by one of the following methods:</span>
 
-<span class="sd">    Keyword Arguments:</span>
-<span class="sd">    clip_value: float &gt; 0 -- the value used for clipping </span>
-<span class="sd">    clip_method: str -- the method used for clipping, either &#39;norm&#39;, &#39;global_norm&#39;, or &#39;value&#39;</span>
-<span class="sd">    ----------</span>
+<span class="sd">    -  value clipping,</span>
+<span class="sd">    -  norm clipping or</span>
+<span class="sd">    -  global norm clipping.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    gradients: list -- the clipped gradients</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gradients: list(tf.Tensor)</span>
+<span class="sd">        The computed gradients for neural network parameters.</span>
+<span class="sd">    clip_value: float &gt; 0</span>
+<span class="sd">        The value used for clipping.</span>
+<span class="sd">    clip_method: {&#39;norm&#39;, &#39;global_norm&#39;, &#39;value&#39;}</span>
+<span class="sd">        The method used for clipping.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gradients: list</span>
+<span class="sd">        The clipped gradients</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If an unknown clipping method is specified.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">clip_method</span> <span class="o">==</span> <span class="s1">&#39;global_norm&#39;</span><span class="p">:</span>
@@ -190,8 +199,7 @@
 
 
 <div class="viewcode-block" id="merge_left_into_right"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helpers.merge_left_into_right">[docs]</a><span class="k">def</span> <span class="nf">merge_left_into_right</span><span class="p">(</span><span class="n">left_dict</span><span class="p">,</span> <span class="n">right_dict</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Function to merge nested dict left_dict into nested dict right_dict</span>
+    <span class="sd">&quot;&quot;&quot; Function to merge nested dict `left_dict` into nested dict `right_dict`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">left_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -202,21 +210,27 @@
 
 
 <div class="viewcode-block" id="build_meta_dict"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helpers.build_meta_dict">[docs]</a><span class="k">def</span> <span class="nf">build_meta_dict</span><span class="p">(</span><span class="n">user_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">default_setting</span><span class="p">:</span> <span class="n">default_settings</span><span class="o">.</span><span class="n">MetaDictSetting</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Integrates a user-defined dictionary into a default dictionary.</span>
+
 <span class="sd">    Takes a user-defined dictionary and a default dictionary.</span>
-<span class="sd">    Firstly, scans the user_dict for violations by unspecified mandatory fields.</span>
-<span class="sd">    Secondly, merges user dict entries into the default_dict. Considers nested dict structure.</span>
-<span class="sd">    ----------</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">    user_dict: dict -- the user&#39;s dictionary</span>
-<span class="sd">    default_setting: MetaDictSetting -- the specified default setting, consisting of:</span>
-<span class="sd">                        meta_dict: dictionary with default values.</span>
-<span class="sd">                        mandatory_fields: list of str -- keys that need to be specified by the user_dict</span>
-<span class="sd">    ----------</span>
+<span class="sd">    #. Scan the `user_dict` for violations by unspecified mandatory fields.</span>
+<span class="sd">    #. Merge `user_dict` entries into the `default_dict`. Considers nested dict structure.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    merged dict</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    user_dict: dict</span>
+<span class="sd">        The user&#39;s dictionary</span>
+<span class="sd">    default_setting: MetaDictSetting</span>
+<span class="sd">        The specified default setting with attributes:</span>
+
+<span class="sd">        -  `meta_dict`: dictionary with default values.</span>
+<span class="sd">        -  `mandatory_fields`: list(str) keys that need to be specified by the `user_dict`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    merged_dict: dict</span>
+<span class="sd">        Merged dictionary</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -228,7 +242,8 @@
         <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not all mandatory fields provided! Need at least the following: </span><span class="si">{</span><span class="n">mandatory_fields</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># Merge the user dict into the default dict</span>
-    <span class="k">return</span> <span class="n">merge_left_into_right</span><span class="p">(</span><span class="n">user_dict</span><span class="p">,</span> <span class="n">default_dict</span><span class="p">)</span></div>
+    <span class="n">merged_dict</span> <span class="o">=</span> <span class="n">merge_left_into_right</span><span class="p">(</span><span class="n">user_dict</span><span class="p">,</span> <span class="n">default_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">merged_dict</span></div>
 </pre></div>
 
            </div>
