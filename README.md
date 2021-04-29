@@ -8,7 +8,7 @@ For starters, check out the walkthrough notebooks *Parameter_Estimation_Workflow
 A cornerstone idea of amortized Bayesian inference is to employ generative neural networks for parameter estimation, model comparison and model validation
 when working with intractable simulators whose behavior as a whole is too complex to be described analytically. The figure below presents a higher-level overview of neurally bootstrapped Bayesian inference. 
 
-![Overview](https://github.com/stefanradev93/BayesFlow/blob/master/img/high_level_framework.png)
+![Overview](img/high_level_framework.png)
 
 A short conference paper reviewing amortized Bayesian inference with a focus on cognitive modeling can be found here:
 
@@ -24,7 +24,7 @@ https://arxiv.org/abs/2003.06281
 
 The general workflow (training and inference phase) with BayesFlow is illustrated below.
 
-![BayesFlow](https://github.com/stefanradev93/BayesFlow/blob/master/img/BayesFlow.png)
+![BayesFlow](img/BayesFlow.png)
 
 Currently, the following training approaches are implemented:
 1. Online training
@@ -38,11 +38,11 @@ In order to ensure algorithmic alignment between the neural approximator and the
 ### Stateless (memoryless) models
 Stateless models typically generate IID observations, which imply exchangeability and induce permutation invariant posteriors. In other words, changing (permuting) the order of individual elements should not change the associated likelihood or posterior. An example BayesFlow architecture for tackling stateless models is depicted below.
 
-![Stateless](https://github.com/stefanradev93/BayesFlow/blob/master/img/Stateless_Models.png)
+![Stateless](img/Stateless_Models.png)
 
 You can read more about designing invariant networks in the excellent paper by Benjamin Bloem-Reddy and Yee Whye Teh, available at https://arxiv.org/abs/1901.06082.
 
-For instance, in order to tackle a memoryless model with 10 free parameters via BayesFlow, we first need to set-up the summary and inference networks:
+For instance, in order to tackle a memoryless model with 10 free parameters via BayesFlow, we first need to set up the summary and inference networks:
 ```python
 # Use default settings
 summary_net = InvariantNetwork()
@@ -50,7 +50,7 @@ inference_net = InvertibleNetwork({'n_params': 10})
 # Connect summary and inference network
 amortizer = SingleModelAmortizer(inference_net, summary_net)
 ```
-Next, we define a generative model which connects a *prior* (a function returning random draws from the prior distribution over parameters) with a *simulator* (a function accepting the prior draws as arguments) and returning a simulated data set with *n_obs*) potentially multivariate observations.
+Next, we define a generative model which connects a *prior* (a function returning random draws from the prior distribution over parameters) with a *simulator* (a function accepting the prior draws as arguments) and returning a simulated data set with *n_obs* potentially multivariate observations.
 ```python
 generative_model = GenerativeModel(prior, simulator)
 ```
@@ -77,14 +77,14 @@ samples = amortizer.sample(obs_data, n_samples=5000)
 ### Stateful models
 Stateful models incorporate some form of memory and are thus capable of generating observations with complex dependencies (i.e., non-IID). A prime example are dynamic models, which typically describe the evolution trajectory of a system or a process, such as an infectious disease, over time. Observations generated from such models are usually the solution of a stochastic differential equation(SDE) or time-series and thus imply a more complex probabilistic symmetry than those generated from memoryless models. An example BayesFlow architecture for tackling stateful models is depicted below.
 
-![Stateful](https://github.com/stefanradev93/BayesFlow/blob/master/img/Stateful_Models.png)
+![Stateful](img/Stateful_Models.png)
 
 We used the above architecture for modeling the early Covid-19 outbreak in Germany: https://arxiv.org/abs/2010.00300.
 
 ### Joint models
-Joint models present an attempt to account for different processes (e.g., neural and cognitive) within a single composite model. Thus, joint models integrate different sources and types of data and require morec omplex summary architectures. An example BayesFlow architecture for three hypothetical data sources is depicted below.
+Joint models present an attempt to account for different processes (e.g., neural and cognitive) within a single composite model. Thus, joint models integrate different sources and types of data and require more complex summary architectures. An example BayesFlow architecture for three hypothetical data sources is depicted below.
 
-![Joint](https://github.com/stefanradev93/BayesFlow/blob/master/img/Joint_Models.png)
+![Joint](img/Joint_Models.png)
 
 ## Model Comparison
 
