@@ -4,7 +4,8 @@ import tensorflow as tf
 class MetaAmortizer(tf.keras.Model):
 
     def __init__(self, inference_net=None, evidence_net=None, summary_net=None):
-        """ Connects an evidential network with a summary network as in the BayesFlow for model comparison set-up.
+        """ 
+        Connects an evidential network with a summary network as in the BayesFlow for model comparison set-up.
 
         Parameters
         ----------
@@ -15,9 +16,15 @@ class MetaAmortizer(tf.keras.Model):
         summary_net   : tf.keras.Model or None, optional, default: None
             An optional summary network
         """
+        super(MetaAmortizer, self).__init__()
+
+        self.inference_net = inference_net
+        self.evidence_net = evidence_net
+        self.summary_net = summary_net
 
     def call(self, model_indices, params, sim_data):
-        """ Performs a forward pass through the networks.
+        """ 
+        Performs a forward pass through the networks.
 
         Paramters
         ---------
