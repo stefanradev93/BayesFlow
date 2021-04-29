@@ -1,14 +1,17 @@
 # BayesFlow
 Welcome to the beta-version of our BayesFlow library for simulation-based Bayesian parameter estimation and model comparison!
 
-For starters, check out the walkthrough notebooks *Parameter_Estimation_Workflow.ipynb* and *Model_Comparison_Workflow.ipynb* in *docs/tutorial_notebooks*. For short code samples, please read below!
+For starters, check out the walkthrough notebooks [*Parameter_Estimation_Workflow.ipynb*](docs/tutorial_notebooks/Parameter_Estimation_Workflow.ipynb) and [*Model_Comparison_Workflow.ipynb*](docs/tutorial_notebooks/Model_Comparison_Workflow.ipynb) in [*docs/tutorial_notebooks*](docs/tutorial_notebooks/). For short code samples, please read below!
+
+## Project Documentation
+The project documentation is available at <http://bayesflow.readthedocs.io>
 
 ## Conceptual Overview
 
 A cornerstone idea of amortized Bayesian inference is to employ generative neural networks for parameter estimation, model comparison and model validation
 when working with intractable simulators whose behavior as a whole is too complex to be described analytically. The figure below presents a higher-level overview of neurally bootstrapped Bayesian inference. 
 
-![Overview](img/high_level_framework.png)
+![Overview](https://github.com/stefanradev93/BayesFlow/blob/9308cc044b28fc0d7d02714dd20dc9b206fa040b/img/high_level_framework.png?raw=true)
 
 A short conference paper reviewing amortized Bayesian inference with a focus on cognitive modeling can be found here:
 
@@ -24,7 +27,7 @@ https://arxiv.org/abs/2003.06281
 
 The general workflow (training and inference phase) with BayesFlow is illustrated below.
 
-![BayesFlow](img/BayesFlow.png)
+![BayesFlow](https://github.com/stefanradev93/BayesFlow/blob/9308cc044b28fc0d7d02714dd20dc9b206fa040b/img/BayesFlow.png?raw=true)
 
 Currently, the following training approaches are implemented:
 1. Online training
@@ -38,7 +41,7 @@ In order to ensure algorithmic alignment between the neural approximator and the
 ### Stateless (memoryless) models
 Stateless models typically generate IID observations, which imply exchangeability and induce permutation invariant posteriors. In other words, changing (permuting) the order of individual elements should not change the associated likelihood or posterior. An example BayesFlow architecture for tackling stateless models is depicted below.
 
-![Stateless](img/Stateless_Models.png)
+![Stateless](https://github.com/stefanradev93/BayesFlow/blob/9308cc044b28fc0d7d02714dd20dc9b206fa040b/img/Stateless_Models.png?raw=true)
 
 You can read more about designing invariant networks in the excellent paper by Benjamin Bloem-Reddy and Yee Whye Teh, available at https://arxiv.org/abs/1901.06082.
 
@@ -77,14 +80,14 @@ samples = amortizer.sample(obs_data, n_samples=5000)
 ### Stateful models
 Stateful models incorporate some form of memory and are thus capable of generating observations with complex dependencies (i.e., non-IID). A prime example are dynamic models, which typically describe the evolution trajectory of a system or a process, such as an infectious disease, over time. Observations generated from such models are usually the solution of a stochastic differential equation(SDE) or time-series and thus imply a more complex probabilistic symmetry than those generated from memoryless models. An example BayesFlow architecture for tackling stateful models is depicted below.
 
-![Stateful](img/Stateful_Models.png)
+![Stateful](https://github.com/stefanradev93/BayesFlow/blob/9308cc044b28fc0d7d02714dd20dc9b206fa040b/img/Stateful_Models.png?raw=true)
 
 We used the above architecture for modeling the early Covid-19 outbreak in Germany: https://arxiv.org/abs/2010.00300.
 
 ### Joint models
 Joint models present an attempt to account for different processes (e.g., neural and cognitive) within a single composite model. Thus, joint models integrate different sources and types of data and require more complex summary architectures. An example BayesFlow architecture for three hypothetical data sources is depicted below.
 
-![Joint](img/Joint_Models.png)
+![Joint](https://github.com/stefanradev93/BayesFlow/blob/9308cc044b28fc0d7d02714dd20dc9b206fa040b/img/Joint_Models.png?raw=true)
 
 ## Model Comparison
 
