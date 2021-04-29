@@ -35,6 +35,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.napoleon',
               'sphinx.ext.viewcode',
               'm2r2',
+              'nbsphinx',
               ]
 napoleon_include_special_with_doc = True  # include __special__ methods, such as __call__ with docstring
 # napoleon_include_private_with_doc = True  # include _private methods, such as _forward_inference with docstring
