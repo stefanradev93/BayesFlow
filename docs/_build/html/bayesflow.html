@@ -205,17 +205,16 @@
 <dt id="bayesflow.amortizers.MetaAmortizer.call">
 <code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/amortizers.html#MetaAmortizer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.MetaAmortizer.call" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a forward pass through the networks.</p>
-<dl class="simple">
-<dt>model_indices<span class="classifier">tf.Tensor or np.array of shape (n_sim, n_models)</span></dt><dd><p>the true, one-hot-encoded model indices <span class="math notranslate nohighlight">\(m \sim p(m)\)</span></p>
-</dd>
-<dt>params<span class="classifier">tf.Tensor or np.array of shape (n_sim, n_params)</span></dt><dd><p>the parameters <span class="math notranslate nohighlight">\(\theta \sim p(\theta | m)\)</span> of interest</p>
-</dd>
-<dt>sim_data<span class="classifier">tf.Tensor or np.array of shape (n_sim, n_obs, data_dim)</span></dt><dd><p>the conditional data <cite>x</cite></p>
-</dd>
-</dl>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_indices</strong> (<em>tf.Tensor</em><em> or </em><em>np.array of shape</em><em> (</em><em>n_sim</em><em>, </em><em>n_models</em><em>)</em>) – the true, one-hot-encoded model indices <span class="math notranslate nohighlight">\(m \sim p(m)\)</span></p></li>
+<li><p><strong>params</strong> (<em>tf.Tensor</em><em> or </em><em>np.array of shape</em><em> (</em><em>n_sim</em><em>, </em><em>n_params</em><em>)</em>) – the parameters <span class="math notranslate nohighlight">\(\theta \sim p(\theta | m)\)</span> of interest</p></li>
+<li><p><strong>sim_data</strong> (<em>tf.Tensor</em><em> or </em><em>np.array of shape</em><em> (</em><em>n_sim</em><em>, </em><em>n_obs</em><em>, </em><em>data_dim</em><em>)</em>) – the conditional data <cite>x</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>out_inference</strong> (<em>np.array</em>) – The output of the inference network or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no networks provided</p></li>
 <li><p><strong>out_evidence</strong> (<em>np.array</em>) – The output of the evidence network or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no networks provided</p></li>
 </ul>
@@ -1586,7 +1585,7 @@ are passed to the simulators.</p>
 
 <dl class="py method">
 <dt id="bayesflow.trainers.BaseTrainer.train_offline">
-<code class="sig-name descname"><span class="pre">train_offline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.train_offline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.train_offline" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">train_offline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.train_offline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.train_offline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trains the inference network(s) via offline learning. Assume params and data have already
 been simulated (i.e., forward inference).</p>
 <dl class="field-list simple">
@@ -1597,12 +1596,20 @@ been simulated (i.e., forward inference).</p>
 </ul>
 </dd>
 <dt class="field-even">Other Parameters</dt>
-<dd class="field-even"><p><strong>*args</strong> (<em>tuple</em>) – Input to the trainer, e.g. (params, sim_data) or (model_indices, params, sim_data)</p>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>*args</strong> (<em>tuple</em>) – Input to the trainer, e.g. (params, sim_data) or (model_indices, params, sim_data)</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict(arg_name, arg)</em>) – Input to the trainer, e.g. {‘params’: theta, ‘sim_data’: x}
+Note that argument names must be in {‘model_indices’, ‘params’, ‘sim_data’}</p></li>
+</ul>
 </dd>
 </dl>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The last entry of <code class="docutils literal notranslate"><span class="pre">args</span></code> must be your simulated data!</p>
+<ul class="simple">
+<li><p>If you use <cite>args</cite>, the last entry of <code class="docutils literal notranslate"><span class="pre">args</span></code> must be your simulated data!</p></li>
+<li><p>If you use <cite>kwargs</cite>, the order of the <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> inputs does not matter.
+Please use the keyword names in {‘model_indices’, ‘params’, ‘sim_data’}</p></li>
+</ul>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1613,19 +1620,35 @@ been simulated (i.e., forward inference).</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<p>Parameter estimation</p>
+<p>Parameter estimation (args)</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">true_params</span><span class="p">,</span> <span class="n">sim_data</span> <span class="o">=</span> <span class="n">simple_generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">true_params</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Model comparison</p>
+<p>Model comparison (args)</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">true_model_indices</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">sim_data</span> <span class="o">=</span> <span class="n">meta_generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">true_model_indices</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Meta</p>
+<p>Meta (args)</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">true_model_indices</span><span class="p">,</span> <span class="n">true_params</span><span class="p">,</span> <span class="n">sim_data</span> <span class="o">=</span> <span class="n">meta_generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">true_model_indices</span><span class="p">,</span> <span class="n">true_params</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Parameter estimation (keyword-args)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">true_params</span><span class="p">,</span> <span class="n">sim_data</span> <span class="o">=</span> <span class="n">simple_generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">true_params</span><span class="p">,</span> <span class="n">sim_data</span><span class="o">=</span><span class="n">sim_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Model comparison (keyword-args)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">true_model_indices</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">sim_data</span> <span class="o">=</span> <span class="n">meta_generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">model_indices</span><span class="o">=</span><span class="n">true_model_indices</span><span class="p">,</span> <span class="n">sim_data</span><span class="o">=</span><span class="n">sim_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Meta (keyword-args)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">true_model_indices</span><span class="p">,</span> <span class="n">true_params</span><span class="p">,</span> <span class="n">sim_data</span> <span class="o">=</span> <span class="n">meta_generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+<span class="gp">... </span>                      <span class="n">params</span><span class="o">=</span><span class="n">true_params</span><span class="p">,</span> <span class="n">model_indices</span><span class="o">=</span><span class="n">true_model_indices</span><span class="p">,</span> <span class="n">sim_data</span><span class="o">=</span><span class="n">sim_data</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1716,7 +1739,7 @@ a pre-trained net.</p>
 
 <dl class="py method">
 <dt id="bayesflow.trainers.ModelComparisonTrainer.train_offline">
-<code class="sig-name descname"><span class="pre">train_offline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ModelComparisonTrainer.train_offline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ModelComparisonTrainer.train_offline" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">train_offline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ModelComparisonTrainer.train_offline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ModelComparisonTrainer.train_offline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Handles one-hot encoding if necessary and calls superclass method.</p>
 <p>Trains the inference network(s) via offline learning. Assume params and data have already
 been simulated (i.e., forward inference).</p>

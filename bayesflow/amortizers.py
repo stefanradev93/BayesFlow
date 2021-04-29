@@ -26,7 +26,7 @@ class MetaAmortizer(tf.keras.Model):
         """ 
         Performs a forward pass through the networks.
 
-        Paramters
+        Parameters
         ---------
         model_indices  : tf.Tensor or np.array of shape (n_sim, n_models)
             the true, one-hot-encoded model indices :math:`m \sim p(m)`
