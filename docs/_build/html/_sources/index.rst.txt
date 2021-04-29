@@ -3,17 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to bayesflow's documentation!
+Welcome the documentation of BayesFlow!
 =====================================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Documentation content
 
-   modules
+   bayesflow
    support
 
-
+.. mdinclude:: ../README.md
 
 Indices and tables
 ==================
