@@ -1,5 +1,5 @@
 # Required
 version: 2
-
+formats: all
 conda:
   environment: environment.yaml

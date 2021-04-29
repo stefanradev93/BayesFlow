@@ -4,16 +4,17 @@
    contain the root `toctree` directive.
 
 Welcome the documentation of BayesFlow!
-=====================================
+=======================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Documentation content
+   :maxdepth: 1
 
    bayesflow
+   tutorials
    support
 
 .. mdinclude:: ../README.md
+
 
 Indices and tables
 ==================
