@@ -8,8 +8,7 @@ from bayesflow.helpers import build_meta_dict
 
 
 class RegressionNetwork(tf.keras.Model):
-    """
-    Implements a simple regression network with keras.
+    """Implements a simple regression network with keras.
     """
     
     def __init__(self, meta, summary_net=None):
@@ -21,14 +20,17 @@ class RegressionNetwork(tf.keras.Model):
         )
         
     def call(self, x):
-        """
-        Performs the forward pass of the model.
+        """Performs the forward pass of the model.
         
-        Args:
-        x - tf.Tensor of shape (batch_size, sum_stats)
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, sum_stats)
         
-        Returns:
-        out - tf.Tensor of shape (batch_size, predicted_params)
+        Returns
+        -------
+        out : tf.Tensor
+         Output of shape (batch_size, predicted_params)
         """
         
         if self.summary_net is not None:
@@ -38,8 +40,7 @@ class RegressionNetwork(tf.keras.Model):
     
     
 class HeteroscedasticRegressionNetwork(tf.keras.Model):
-    """
-    Implements a simple regression network with keras.
+    """Implements a simple regression network with keras.
     """
     
     def __init__(self, meta, summary_net=None):
@@ -51,15 +52,19 @@ class HeteroscedasticRegressionNetwork(tf.keras.Model):
         )
         
     def call(self, x):
-        """
-        Performs the forward pass of the model.
+        """ Performs the forward pass of the model.
         
-        Args:
-        x - tf.Tensor of shape (batch_size, sum_stats)
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, sum_stats)
         
-        Returns:
-        pred_means - tf.Tensor of shape (batch_size, n_params) : predicted posterior means
-        pred_vars  - tf.Tensor of shape (batch_size, n_params) : predicted posterior variances
+        Returns
+        -------
+        pred_means : tf.Tensor
+            Predicted posterior means, shape (batch_size, n_params)
+        pred_vars  : tf.Tensor
+            Predicted posterior variances, shape (batch_size, n_params)
         """
         
         if self.summary_net is not None:
@@ -72,6 +77,7 @@ class HeteroscedasticRegressionNetwork(tf.keras.Model):
     
     
 class InvariantModule(tf.keras.Model):
+    """Implements an invariant module with keras."""
     
     def __init__(self, meta):
         super(InvariantModule, self).__init__()
@@ -80,14 +86,17 @@ class InvariantModule(tf.keras.Model):
         self.s2 = Sequential([Dense(**meta['dense_s2_args']) for _ in range(meta['n_dense_s2'])])
                     
     def call(self, x):
-        """
-        Performs the forward pass of a learnable invariant transform.
+        """Performs the forward pass of a learnable invariant transform.
         
-        Args:
-        x - tf.Tensor of shape (batch_size, N, x_dim)
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, N, x_dim)
         
-        Returns:
-        out - tf.Tensor of shape (batch_size, out_dim)
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, out_dim)
         """
         
         x_reduced = tf.reduce_mean(self.s1(x), axis=1)
@@ -96,6 +105,7 @@ class InvariantModule(tf.keras.Model):
     
     
 class EquivariantModule(tf.keras.Model):
+    """Implements an equivariant module with keras."""
     
     def __init__(self, meta):
         super(EquivariantModule, self).__init__()
@@ -104,14 +114,17 @@ class EquivariantModule(tf.keras.Model):
         self.s3 = Sequential([Dense(**meta['dense_s3_args']) for _ in range(meta['n_dense_s3'])])
                     
     def call(self, x):
-        """
-        Performs the forward pass of a learnable equivariant transform.
+        """Performs the forward pass of a learnable equivariant transform.
         
-        Args:
-        x - tf.Tensor of shape (batch_size, N, x_dim)
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, N, x_dim)
         
-        Returns:
-        out - tf.Tensor of shape (batch_size, N, equiv_dim)
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, N, equiv_dim)
         """
         
         # Store N
@@ -130,6 +143,9 @@ class EquivariantModule(tf.keras.Model):
 
 
 class InvariantNetwork(tf.keras.Model):
+    """Implements an invariant network with keras.
+    """
+
     def __init__(self, meta={}):
         super(InvariantNetwork, self).__init__()
 
@@ -140,15 +156,18 @@ class InvariantNetwork(tf.keras.Model):
         self.inv = InvariantModule(meta)
     
     def call(self, x):
-        """
-        Performs the forward pass of a learnable deep invariant transformation
-        consisting of a sequence of equivariant transforms followed by an invariant transform.
+        """ Performs the forward pass of a learnable deep invariant transformation consisting of
+        a sequence of equivariant transforms followed by an invariant transform.
         
-        Args:
-        x - tf.Tensor of shape (batch_size, n_obs, data_dim)
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, n_obs, data_dim)
         
-        Returns:
-        out - tf.Tensor of shape (batch_size, out_dim + 1)
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, out_dim + 1)
         """
         
         # Extract n_obs and create sqrt(N) vector
@@ -166,15 +185,17 @@ class InvariantNetwork(tf.keras.Model):
     
     
 class Permutation(tf.keras.Model):
-    """Implements a permutation layer to permute the input dimensions of the cINN block."""
+    """Implements a permutation layer to permute the input dimensions of the cINN block.
+    """
 
     def __init__(self, input_dim):
-        """
-        Creates a permutation layer for a conditional invertible block.
-        ----------
+        """ Creates a permutation layer for a conditional invertible block.
 
-        Arguments:
-        input_dim  : int -- the dimensionality of the input to the c inv block.
+
+        Arguments
+        ---------
+        input_dim  : int
+            Ihe dimensionality of the input to the c inv block.
         """
 
         super(Permutation, self).__init__()
@@ -191,7 +212,21 @@ class Permutation(tf.keras.Model):
                                            name='inv_permutation')
 
     def call(self, x, inverse=False):
-        """Permutes the bach of an input."""
+        """ Permutes the batch of an input.
+
+        Parameters
+        ----------
+        x: tf.Tensor
+            Input to the layer.
+        inverse: bool, default: False
+            Controls if the current pass is forward (``inverse=False``) or inverse (``inverse=True``).
+
+        Returns
+        -------
+        out: tf.Tensor
+            Permuted input
+
+        """
 
         if not inverse:
             return tf.transpose(tf.gather(tf.transpose(x), self.permutation))
@@ -202,13 +237,14 @@ class CouplingNet(tf.keras.Model):
     """Implements a conditional version of a sequential network."""
 
     def __init__(self, meta, n_out):
-        """
-        Creates a conditional coupling net (FC neural network).
-        ----------
+        """Creates a conditional coupling net (FC neural network).
 
-        Arguments:
-        meta  : dict -- a dictionary which holds arguments for a dense layer.
-        n_out : int  -- number of outputs of the coupling net
+        Parameters
+        ----------
+        meta  : dict
+            A dictionary which holds arguments for a dense layer.
+        n_out : int
+            Number of outputs of the coupling net
         """
 
         super(CouplingNet, self).__init__()
@@ -224,11 +260,14 @@ class CouplingNet(tf.keras.Model):
         )
 
     def call(self, params, x):
-        """
-        Concatenates x and y and performs a forward pass through the coupling net.
-        Arguments:
-        params : tf.Tensor of shape (batch_size, n_params//2) -- the split parameters theta ~ p(theta) of interest
-        x      : tf.Tensor of shape (batch_size, summary_dim) -- the summarized conditional data of interest x = sum(x)
+        """Concatenates x and y and performs a forward pass through the coupling net.
+
+        Parameters
+        ----------
+        params : tf.Tensor
+          The split parameters :math:`\\theta \sim p(\\theta)` of interest, shape (batch_size, n_params//2)
+        x      : tf.Tensor
+            the summarized conditional data of interest ``x = summary(x)``, shape (batch_size, summary_dim)
         """
 
         inp = tf.concat((params, x), axis=-1)
@@ -240,13 +279,13 @@ class ConditionalCouplingLayer(tf.keras.Model):
     """Implements a conditional version of the INN block."""
 
     def __init__(self, meta):
-        """
-        Creates a conditional invertible block.
-        ----------
+        """Creates a conditional invertible block.
 
-        Arguments:
-        meta      : list -- a list of dictionaries, wherein each dictionary holds parameter - value pairs for a single
-                       tf.keras.Dense layer. All coupling nets are assumed to be equal.
+        Parameters
+        ----------
+        meta      : list(dict)
+            A list of dictionaries, wherein each dictionary holds parameter-value pairs for a single
+            :class:`tf.keras.Dense` layer. All coupling nets are assumed to be equal.
         """
 
         super(ConditionalCouplingLayer, self).__init__()
@@ -265,22 +304,32 @@ class ConditionalCouplingLayer(tf.keras.Model):
         self.t2 = CouplingNet(meta['t_args'], self.n_out2)
 
     def call(self, params, x, inverse=False, log_det_J=True):
-        """
-        Implements both directions of a conditional invertible block.
-        ----------
+        """Implements both directions of a conditional invertible block.
 
-        Arguments:
-        theta     : tf.Tensor of shape (batch_size, theta_dim) -- the parameters theta ~ p(theta|y) of interest
-        x         : tf.Tensor of shape (batch_size, summary_dim) -- the summarized conditional data of interest x = sum(x)
-        inverse   : bool -- flag indicating whether to tun the block forward or backwards
-        log_det_J : bool -- flag indicating whether to return the log determinant of the Jacobian matrix
+        Parameters
         ----------
+        params     : tf.Tensor
+            the parameters theta ~ p(theta|y) of interest, shape (batch_size, theta_dim) --
+        x         : tf.Tensor
+            the summarized conditional data of interest x = summary(x), shape (batch_size, summary_dim)
+        inverse   : bool, default: False
+            Flag indicating whether to run the block forward or backwards
+        log_det_J : bool, default: True
+            Flag indicating whether to return the log determinant of the Jacobian matrix
 
-        Returns:
-        (v, log_det_J)  :  (tf.Tensor of shape (batch_size, inp_dim), tf.Tensor of shape (batch_size, )) --
-                           the transformed input, if inverse = False, and the corresponding Jacobian of the transformation
-                            if inverse = False
-        u               :  tf.Tensor of shape (batch_size, inp_dim) -- the transformed out, if inverse = True
+        Returns
+        -------
+        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+            If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
+            v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
+
+        u               :  tf.Tensor
+            If inverse=True: The transformed out, shape (batch_size, inp_dim)
+
+        Important
+        ---------
+        If ``inverse=False``, the return is ``(v, log_det_J)``.\n
+        If ``inverse=True``, the return is ``u``.
         """
 
         # --- Forward pass --- #
@@ -342,15 +391,17 @@ class InvertibleNetwork(tf.keras.Model):
     """Implements a chain of conditional invertible blocks for Bayesian parameter inference."""
 
     def __init__(self, meta={}):
-        """
-        Creates a chain of cINN blocks and chains operations with an optional summary network.
-         TODO: - Allow for generic base distributions
-        ----------
+        """ Creates a chain of cINN blocks and chains operations with an optional summary network.
 
-        Arguments:
-        meta        : list -- a list of dictionary, where each dictionary holds parameter - value pairs for a single
-                                  keras.Dense layer
-        summary_net : tf.keras.Model or None -- an optinal summary network for learning the sumstats of x
+        Parameters
+        ----------
+        meta : list(dict)
+            A list of dictionaries, where each dictionary holds parameter-value pairs
+            for a single :class:`keras.Dense` layer
+
+        Notes
+        -----
+        TODO: Allow for generic base distributions
         """
         super(InvertibleNetwork, self).__init__()
 
@@ -361,21 +412,30 @@ class InvertibleNetwork(tf.keras.Model):
         self.z_dim = meta['n_params']
 
     def call(self, params, x, inverse=False):
-        """
-        Performs one pass through an invertible chain (either inverse or forward).
-        ----------
+        """Performs one pass through an invertible chain (either inverse or forward).
 
-        Arguments:
-        params    : tf.Tensor of shape (batch_size, inp_dim) -- the parameters theta ~ p(theta|x) of interest
-        x         : tf.Tensor of shape (batch_size, summary_dim) -- the conditional data x
-        inverse   : bool -- flag indicating whether to tun the chain forward or backwards
+        Parameters
         ----------
+        params    : tf.Tensor
+            The parameters theta ~ p(theta|x) of interest, shape (batch_size, inp_dim)
+        x         : tf.Tensor
+            The conditional data x, shape (batch_size, summary_dim)
+        inverse   : bool, default: False
+            Flag indicating whether to run the chain forward or backwards
 
-        Returns:
-        (z, log_det_J)  :  (tf.Tensor of shape (batch_size, inp_dim), tf.Tensor of shape (batch_size, )) --
-                           the transformed input, if inverse = False, and the corresponding Jacobian of the transformation
-                            if inverse = False
-        x               :  tf.Tensor of shape (batch_size, inp_dim) -- the transformed out, if inverse = True
+        Returns
+        -------
+        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+            If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
+            v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
+
+        u               :  tf.Tensor
+            If inverse=True: The transformed out, shape (batch_size, inp_dim)
+
+        Important
+        ---------
+        If ``inverse=False``, the return is ``(v, log_det_J)``.\n
+        If ``inverse=True``, the return is ``u``.
         """
         
         if inverse:
@@ -406,16 +466,20 @@ class InvertibleNetwork(tf.keras.Model):
     def sample(self, x, n_samples, to_numpy=True):
         """
         Samples from the inverse model given a single instance y or a batch of instances.
-        ----------
 
-        Arguments:
-        x         : tf.Tensor of shape (n_datasets, summary_dim) -- the conditioning data set(s) of interest
-        n_samples : int -- number of samples to obtain from the approximate posterior
-        to_numpy  : bool -- flag indicating whether to return the samples as a np.array or a tf.Tensor
+        Parameters
         ----------
+        x         : tf.Tensor
+            The conditioning data set(s) of interest, shape (n_datasets, summary_dim)
+        n_samples : int
+            Number of samples to obtain from the approximate posterior
+        to_numpy  : bool, default: True
+            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
 
-        Returns:
-        theta_samples : 3D tf.Tensor or np.array of shape (n_samples, n_datasets, n_params)
+        Returns
+        -------
+        theta_samples : tf.Tensor or np.array
+            Parameter samples, shape (n_samples, n_datasets, n_params)
         """
 
         # In case x is a single instance
@@ -436,14 +500,15 @@ class InvertibleNetwork(tf.keras.Model):
 class EvidentialNetwork(tf.keras.Model):
 
     def __init__(self, meta):
-        """
-        Creates an evidential network and couples it with an optional summary network.
-        ----------
+        """Creates an evidential network and couples it with an optional summary network.
 
-        Arguments:
-        meta        : list -- a list of dictionary, where each dictionary holds parameter - value pairs for a single
-                                  keras.Dense layer
+        Parameters
+        ----------
+        meta        : list(dict)
+            A list of dictionaries, where each dictionary holds parameter-value pairs
+            for a single :class:`tf.keras.Dense` layer
         """
+
         super(EvidentialNetwork, self).__init__()
 
         # A network to increase representation power (post-pooling)
@@ -457,16 +522,16 @@ class EvidentialNetwork(tf.keras.Model):
         self.J = meta['n_models']
 
     def call(self, sim_data):
-        """
-        Computes evidences for model comparison given a batch of data.
-        ----------
+        """Computes evidences for model comparison given a batch of data.
 
-        Arguments:
-        sim_data   : tf.Tensor of shape (batch_size, n_obs, data_dim) -- the input where n_obs is the 'time' or 'samples' dimensions
-                        over which pooling is performed and data_dim is the intrinsic input dimensionality
+        Parameters
         ----------
+        sim_data   : tf.Tensor
+            The input where `n_obs` is the ``time`` or ``samples`` dimensions over which pooling is
+            performed and ``data_dim`` is the intrinsic input dimensionality, shape (batch_size, n_obs, data_dim)
 
-        Returns:
+        Returns
+        -------
         alpha      : tf.Tensor of shape (batch_size, n_models) -- the model evidences
         """
 
@@ -474,8 +539,19 @@ class EvidentialNetwork(tf.keras.Model):
         return self.evidence(sim_data)
 
     def predict(self, obs_data, to_numpy=True):
-        """
-        Returns the mean, variance and uncertainty implied by the estimated Dirichlet density.
+        """Returns the mean, variance and uncertainty implied by the estimated Dirichlet density.
+
+        Parameters
+        ----------
+        obs_data: tf.Tensor
+            Observed data
+        to_numpy: bool, default: True
+            Flag that controls whether the output is a np.array or tf.Tensor
+
+        Returns
+        -------
+        out: dict
+            Dictionary with keys {m_probs, m_var, uncertainty}
         """
 
         alpha = self.evidence(obs_data)
@@ -492,12 +568,12 @@ class EvidentialNetwork(tf.keras.Model):
         return {'m_probs': mean, 'm_var': var, 'uncertainty': uncertainty}
 
     def evidence(self, x):
-        """
-        Computes the evidence vector (alpha + 1) as derived from the estimated Dirichlet density.
-        ----------
+        """Computes the evidence vector (alpha + 1) as derived from the estimated Dirichlet density.
 
-        Arguments:
-        x  : tf.Tensor of shape (n_datasets, summary_dim) -- the conditional data set(s)        
+        Parameters
+        ----------
+        x  : tf.Tensor
+            The conditional data set(s), shape (n_datasets, summary_dim)
         """
 
         # Pass through dense layer
@@ -509,18 +585,21 @@ class EvidentialNetwork(tf.keras.Model):
         return alpha
 
     def sample(self, obs_data, n_samples, to_numpy=True):
-        """
-        Samples posterior model probabilities from the second-order Dirichlet distro.
-        ----------
+        """Samples posterior model probabilities from the second-order Dirichlet distro.
 
-        Arguments:
-        obs_data  : tf.Tensor of shape (n_datasets, summary_dim) -- the summary of the observed (or simulated) data
-        n_samples : int -- number of samples to obtain from the approximate posterior (default 5000)
-        to_numpy  : bool -- flag indicating whether to return the samples as a np.array or a tf.Tensor
+        Parameters
         ----------
+        obs_data  : tf.Tensor
+            The summary of the observed (or simulated) data, shape (n_datasets, summary_dim)
+        n_samples : int
+            Number of samples to obtain from the approximate posterior
+        to_numpy  : bool, default: True
+            Flag indicating whether to return the samples as a np.array or a tf.Tensor
 
-        Returns:
-        pm_samples : tf.Tensor or np.array of shape (n_samples, n_batch, n_models) -- the posterior samples from the Dirichlet distro
+        Returns
+        -------
+        pm_samples : tf.Tensor or np.array
+            The posterior samples from the Dirichlet distribution, shape (n_samples, n_batch, n_models)
         """
 
         # Compute evidential values
@@ -539,8 +618,7 @@ class EvidentialNetwork(tf.keras.Model):
 class SequenceNet(tf.keras.Model):
 
     def __init__(self):
-        """
-        Creates a custom summary network, a combination of 1D conv and LSTM.
+        """Creates a custom summary network, a combination of 1D conv and LSTM.
         """
         super(SequenceNet, self).__init__()
 
