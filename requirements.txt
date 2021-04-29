@@ -8,4 +8,6 @@ seaborn==0.11.1
 tensorflow==2.4.1
 tqdm==4.59.0
 matplotlib==3.3.4
-
+m2r2==0.2.7
+ipykernel==5.5.0
+nbsphinx==0.8.3

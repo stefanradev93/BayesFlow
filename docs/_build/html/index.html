@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Welcome to bayesflow’s documentation! &mdash; bayesflow 0.0.1 documentation</title>
+  <title>Welcome the documentation of BayesFlow! &mdash; bayesflow 0.0.1 documentation</title>
   
 
   
@@ -32,13 +32,14 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bayesflow" href="modules.html" /> 
+    <link rel="next" title="bayesflow package" href="bayesflow.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -83,9 +84,9 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">bayesflow</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="bayesflow.html">bayesflow package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
 </ul>
 
@@ -135,7 +136,7 @@
     
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Welcome to bayesflow’s documentation!</li>
+      <li>Welcome the documentation of BayesFlow!</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -154,17 +155,121 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="welcome-to-bayesflow-s-documentation">
-<h1>Welcome to bayesflow’s documentation!<a class="headerlink" href="#welcome-to-bayesflow-s-documentation" title="Permalink to this headline">¶</a></h1>
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="welcome-the-documentation-of-bayesflow">
+<h1>Welcome the documentation of BayesFlow!<a class="headerlink" href="#welcome-the-documentation-of-bayesflow" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">bayesflow</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="bayesflow.html">bayesflow package</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="bayesflow.html">bayesflow package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
 </ul>
+</div>
+</div>
+<div class="section" id="bayesflow">
+<h1>BayesFlow<a class="headerlink" href="#bayesflow" title="Permalink to this headline">¶</a></h1>
+<p>Welcome to the beta-version of our BayesFlow library for simulation-based Bayesian parameter estimation and model comparison!</p>
+<p>For starters, check out the walkthrough notebooks <em>Parameter_Estimation_Workflow.ipynb</em> and <em>Model_Comparison_Workflow.ipynb</em>. For short code samples, please read below!</p>
+<div class="section" id="conceptual-overview">
+<h2>Conceptual Overview<a class="headerlink" href="#conceptual-overview" title="Permalink to this headline">¶</a></h2>
+<p>A cornerstone idea of amortized Bayesian inference is to employ generative neural networks for parameter estimation, model comparison and model validation
+when working with intractable simulators whose behavior as a whole is too complex to be described analytically. The figure below presents a higher-level overview of neurally bootstrapped Bayesian inference.</p>
+<a class="reference external image-reference" href="https://github.com/stefanradev93/BayesFlow/blob/master/img/high_level_framework.png"><img alt="Overview" src="https://github.com/stefanradev93/BayesFlow/blob/master/img/high_level_framework.png" /></a>
+<p>A short conference paper reviewing amortized Bayesian inference with a focus on cognitive modeling can be found here:</p>
+<p><a class="reference external" href="https://arxiv.org/abs/2005.03899">https://arxiv.org/abs/2005.03899</a></p>
+</div>
+<div class="section" id="parameter-estimation">
+<h2>Parameter Estimation<a class="headerlink" href="#parameter-estimation" title="Permalink to this headline">¶</a></h2>
+<p>The BayesFlow approach for parameter estimation incorporates a <em>summary network</em> and an <em>inference network</em> which are jointly optimized to invert a complex computational model (simulator). The summary network is responsible for learning the most informative data representations (i.e., summary statistics) in an end-to-end manner. The inference network is responsible for learning an invertible mapping between the posterior and an easy-to-sample-from latent space (e.g., Gaussian) for <em>any</em> possible observation or set of observations arising from the simulator. The BayesFlow method for amortized parameter estimation is based on our paper:</p>
+<p>Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., &amp; Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. <span class="raw-html-m2r"><em>IEEE Transactions on Neural Networks and Learning Systems</em></span>, available for free at:</p>
+<p><a class="reference external" href="https://arxiv.org/abs/2003.06281">https://arxiv.org/abs/2003.06281</a></p>
+<p>The general workflow (training and inference phase) with BayesFlow is illustrated below.</p>
+<a class="reference external image-reference" href="https://github.com/stefanradev93/BayesFlow/blob/master/img/BayesFlow.png"><img alt="BayesFlow" src="https://github.com/stefanradev93/BayesFlow/blob/master/img/BayesFlow.png" /></a>
+<p>Currently, the following training approaches are implemented:</p>
+<ol class="arabic simple">
+<li><p>Online training</p></li>
+<li><p>Offline training (external simulations)</p></li>
+<li><p>Offline training (internal simulations)</p></li>
+<li><p>Experience replay</p></li>
+<li><p>Round-based training</p></li>
+</ol>
+<p>In order to ensure algorithmic alignment between the neural approximator and the computational model (simulator), we recommend the following neural architectural considerations:</p>
+<div class="section" id="stateless-memoryless-models">
+<h3>Stateless (memoryless) models<a class="headerlink" href="#stateless-memoryless-models" title="Permalink to this headline">¶</a></h3>
+<p>Stateless models typically generate IID observations, which imply exchangeability and induce permutation invariant posteriors. In other words, changing (permuting) the order of individual elements should not change the associated likelihood or posterior. An example BayesFlow architecture for tackling stateless models is depicted below.</p>
+<a class="reference external image-reference" href="https://github.com/stefanradev93/BayesFlow/blob/master/img/Stateless_Models.png"><img alt="Stateless" src="https://github.com/stefanradev93/BayesFlow/blob/master/img/Stateless_Models.png" /></a>
+<p>You can read more about designing invariant networks in the excellent paper by Benjamin Bloem-Reddy and Yee Whye Teh, available at <a class="reference external" href="https://arxiv.org/abs/1901.06082">https://arxiv.org/abs/1901.06082</a>.</p>
+<p>For instance, in order to tackle a memoryless model with 10 free parameters via BayesFlow, we first need to set-up the summary and inference networks:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use default settings</span>
+<span class="n">summary_net</span> <span class="o">=</span> <span class="n">InvariantNetwork</span><span class="p">()</span>
+<span class="n">inference_net</span> <span class="o">=</span> <span class="n">InvertibleNetwork</span><span class="p">({</span><span class="s1">&#39;n_params&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">})</span>
+<span class="c1"># Connect summary and inference network</span>
+<span class="n">amortizer</span> <span class="o">=</span> <span class="n">SingleModelAmortizer</span><span class="p">(</span><span class="n">inference_net</span><span class="p">,</span> <span class="n">summary_net</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Next, we define a generative model which connects a <em>prior</em> (a function returning random draws from the prior distribution over parameters) with a <em>simulator</em> (a function accepting the prior draws as arguments) and returning a simulated data set with <em>n_obs</em>) potentially multivariate observations.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">generative_model</span> <span class="o">=</span> <span class="n">GenerativeModel</span><span class="p">(</span><span class="n">prior</span><span class="p">,</span> <span class="n">simulator</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, we connect the networks with the generative model via a trainer instance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using default settings</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">ParameterEstimationTrainer</span><span class="p">(</span>
+    <span class="n">network</span><span class="o">=</span><span class="n">amortizer</span><span class="p">,</span>
+    <span class="n">generative_model</span><span class="o">=</span><span class="n">generative_model</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>We are now ready to train an amortized parameter estimator via various options. For instance, to run online training, we simply call</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">losses</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which performs online training for 50 epochs of 1000 iterations (batch simulations with 64 simulations per batch). The shape of each batch is thus (64, 200, summary_dim), corresponding to 64 simulations per batch, 200 observations per simulated data set, and <em>summary_dim</em> output dimensions of the final layer of the permutation-invariant summary network. See the <em>Parameter_Estimation_Workflow.ipynb</em> notebook for a detailed walkthrough.</p>
+<p>Posterior inference is then fast and easy:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Obtain 5000 samples from the posterior given obs_data</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">amortizer</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">obs_data</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="stateful-models">
+<h3>Stateful models<a class="headerlink" href="#stateful-models" title="Permalink to this headline">¶</a></h3>
+<p>Stateful models incorporate some form of memory and are thus capable of generating observations with complex dependencies (i.e., non-IID). A prime example are dynamic models, which typically describe the evolution trajectory of a system or a process, such as an infectious disease, over time. Observations generated from such models are usually the solution of a stochastic differential equation(SDE) or time-series and thus imply a more complex probabilistic symmetry than those generated from memoryless models. An example BayesFlow architecture for tackling stateful models is depicted below.</p>
+<a class="reference external image-reference" href="https://github.com/stefanradev93/BayesFlow/blob/master/img/Stateful_Models.png"><img alt="Stateful" src="https://github.com/stefanradev93/BayesFlow/blob/master/img/Stateful_Models.png" /></a>
+<p>We used the above architecture for modeling the early Covid-19 outbreak in Germany: <a class="reference external" href="https://arxiv.org/abs/2010.00300">https://arxiv.org/abs/2010.00300</a>.</p>
+</div>
+<div class="section" id="joint-models">
+<h3>Joint models<a class="headerlink" href="#joint-models" title="Permalink to this headline">¶</a></h3>
+<p>Joint models present an attempt to account for different processes (e.g., neural and cognitive) within a single composite model. Thus, joint models integrate different sources and types of data and require morec omplex summary architectures. An example BayesFlow architecture for three hypothetical data sources is depicted below.</p>
+<a class="reference external image-reference" href="https://github.com/stefanradev93/BayesFlow/blob/master/img/Joint_Models.png"><img alt="Joint" src="https://github.com/stefanradev93/BayesFlow/blob/master/img/Joint_Models.png" /></a>
+</div>
+</div>
+<div class="section" id="model-comparison">
+<h2>Model Comparison<a class="headerlink" href="#model-comparison" title="Permalink to this headline">¶</a></h2>
+<p>The algorithm for model comparison is based on our paper:</p>
+<p>Radev, S. T., D’Alessandro, M., Mertens, U. K., Voss, A., &amp; Köthe, U.,Bürkner, P. C. (2020). Amortized bayesian model comparison with evidential deep learning. <span class="raw-html-m2r"><em>arXiv preprint arXiv:2004.10629</em></span>, available for free at:</p>
+<p><a class="reference external" href="https://arxiv.org/abs/2004.10629">https://arxiv.org/abs/2004.10629</a></p>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -182,7 +287,7 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="modules.html" class="btn btn-neutral float-right" title="bayesflow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="bayesflow.html" class="btn btn-neutral float-right" title="bayesflow package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
