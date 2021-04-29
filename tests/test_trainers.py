@@ -43,6 +43,13 @@ class TestParameterEstimationTrainer(unittest.TestCase):
         true_params, sim_data = self.trainer.generative_model(n_sim, n_obs)
         _losses = self.trainer.train_offline(1, 64, true_params, sim_data)
 
+    def test_train_offline_kw(self):
+        n_sim = 5000
+        n_obs = 100
+        true_params, sim_data = self.trainer.generative_model(n_sim, n_obs)
+        _losses = self.trainer.train_offline(epochs=1, batch_size=64, params=true_params, sim_data=sim_data)
+        _losses = self.trainer.train_offline(epochs=1, batch_size=64, sim_data=sim_data, params=true_params)
+
     def test_simulate_and_train_offline(self):
         _losses = self.trainer.simulate_and_train_offline(n_sim=100, epochs=2, batch_size=32, n_obs=100)
 
@@ -135,6 +142,16 @@ class TestModelComparisonTrainer(unittest.TestCase):
         model_indices, _true_params, sim_data = self.trainer.generative_model(n_sim, n_obs)
         _losses = self.trainer.train_offline(2, 16, model_indices, sim_data)
 
+    def test_train_offline_kw(self):
+        n_sim = 500
+        n_obs = 110
+        model_indices, _true_params, sim_data = self.trainer.generative_model(n_sim, n_obs)
+        _losses = self.trainer.train_offline(epochs=2, batch_size=16,
+                                             model_indices=model_indices, sim_data=sim_data)
+        _losses = self.trainer.train_offline(epochs=2, batch_size=16,
+                                             sim_data=sim_data, model_indices=model_indices)
+
+
     def test_train_rounds(self):
         _losses = self.trainer.train_rounds(epochs=2, rounds=2, sim_per_round=100, batch_size=16, n_obs=110)
 
@@ -212,6 +229,17 @@ class TestMetaTrainer(unittest.TestCase):
         n_obs = 110
         model_indices, params, sim_data = self.trainer.generative_model(n_sim, n_obs)
         _losses = self.trainer.train_offline(2, 16, model_indices, params, sim_data)
+
+    def test_train_offline_kw(self):
+        n_sim = 100
+        n_obs = 110
+        model_indices, params, sim_data = self.trainer.generative_model(n_sim, n_obs)
+        _losses = self.trainer.train_offline(epochs=2, batch_size=16,
+                                             params=params, sim_data=sim_data, model_indices=model_indices)
+        _losses = self.trainer.train_offline(epochs=2, batch_size=16,
+                                             model_indices=model_indices, params=params, sim_data=sim_data)
+        _losses = self.trainer.train_offline(epochs=2, batch_size=16,
+                                             sim_data=sim_data, model_indices=model_indices, params=params)
 
     def test_simulate_and_train_offline(self):
         _losses = self.trainer.simulate_and_train_offline(n_sim=50, epochs=2, batch_size=16, n_obs=150)

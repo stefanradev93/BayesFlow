@@ -299,7 +299,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">losses</span></div>
 
-<div class="viewcode-block" id="BaseTrainer.train_offline"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.BaseTrainer.train_offline">[docs]</a>    <span class="k">def</span> <span class="nf">train_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseTrainer.train_offline"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.BaseTrainer.train_offline">[docs]</a>    <span class="k">def</span> <span class="nf">train_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Trains the inference network(s) via offline learning. Assume params and data have already</span>
 <span class="sd">        been simulated (i.e., forward inference).</span>
 
@@ -314,10 +314,16 @@
 <span class="sd">        ----------------</span>
 <span class="sd">        *args : tuple</span>
 <span class="sd">            Input to the trainer, e.g. (params, sim_data) or (model_indices, params, sim_data)</span>
+<span class="sd">        **kwargs: dict(arg_name, arg)</span>
+<span class="sd">            Input to the trainer, e.g. {&#39;params&#39;: theta, &#39;sim_data&#39;: x}</span>
+<span class="sd">            Note that argument names must be in {&#39;model_indices&#39;, &#39;params&#39;, &#39;sim_data&#39;}</span>
 
 <span class="sd">        Important</span>
 <span class="sd">        ---------</span>
-<span class="sd">        The last entry of ``args`` must be your simulated data!</span>
+
+<span class="sd">        -  If you use `args`, the last entry of ``args`` must be your simulated data!</span>
+<span class="sd">        -  If you use `kwargs`, the order of the ``kwargs`` inputs does not matter.</span>
+<span class="sd">           Please use the keyword names in {&#39;model_indices&#39;, &#39;params&#39;, &#39;sim_data&#39;}</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -326,21 +332,40 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        Parameter estimation</span>
+<span class="sd">        Parameter estimation (args)</span>
 
 <span class="sd">        &gt;&gt;&gt; true_params, sim_data = simple_generative_model(n_sim=1000, n_obs=100)</span>
 <span class="sd">        &gt;&gt;&gt; trainer.train_offline(10, 32, true_params, sim_data)</span>
 
-<span class="sd">        Model comparison</span>
+<span class="sd">        Model comparison (args)</span>
 
 <span class="sd">        &gt;&gt;&gt; true_model_indices, _, sim_data = meta_generative_model(n_sim=1000, n_obs=100)</span>
 <span class="sd">        &gt;&gt;&gt; trainer.train_offline(10, 32, true_model_indices, sim_data)</span>
 
-<span class="sd">        Meta</span>
+<span class="sd">        Meta (args)</span>
 
 <span class="sd">        &gt;&gt;&gt; true_model_indices, true_params, sim_data = meta_generative_model(n_sim=1000, n_obs=100)</span>
 <span class="sd">        &gt;&gt;&gt; trainer.train_offline(10, 32, true_model_indices, true_params, sim_data)</span>
+
+<span class="sd">        Parameter estimation (keyword-args)</span>
+
+<span class="sd">        &gt;&gt;&gt; true_params, sim_data = simple_generative_model(n_sim=1000, n_obs=100)</span>
+<span class="sd">        &gt;&gt;&gt; trainer.train_offline(epochs=10, batch_size=32, params=true_params, sim_data=sim_data)</span>
+
+<span class="sd">        Model comparison (keyword-args)</span>
+
+<span class="sd">        &gt;&gt;&gt; true_model_indices, _, sim_data = meta_generative_model(n_sim=1000, n_obs=100)</span>
+<span class="sd">        &gt;&gt;&gt; trainer.train_offline(epochs=10, batch_size=32, model_indices=true_model_indices, sim_data=sim_data)</span>
+
+<span class="sd">        Meta (keyword-args)</span>
+
+<span class="sd">        &gt;&gt;&gt; true_model_indices, true_params, sim_data = meta_generative_model(n_sim=1000, n_obs=100)</span>
+<span class="sd">        &gt;&gt;&gt; trainer.train_offline(epochs=10, batch_size=32,</span>
+<span class="sd">        ...                       params=true_params, model_indices=true_model_indices, sim_data=sim_data)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># preprocess kwargs to args</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_offline_kwargs_to_args</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Convert to a data set</span>
         <span class="n">n_sim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -367,7 +392,7 @@
                     <span class="c1"># Extract arguments from batch</span>
                     <span class="n">args_b</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
 
-                    <span class="c1"># One step backprop</span>
+                    <span class="c1"># One step backpropagation</span>
                     <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_step</span><span class="p">(</span><span class="o">*</span><span class="n">args_b</span><span class="p">)</span>
 
                     <span class="c1"># Store loss and update progress bar</span>
@@ -519,6 +544,41 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
+    <span class="k">def</span> <span class="nf">_train_offline_kwargs_to_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Unifies signature of trainer.train_offline to work with *args or **kwargs</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        args: tuple</span>
+<span class="sd">            List of non-keyword arguments</span>
+<span class="sd">        kwargs: dict</span>
+<span class="sd">            List of keyword-arguments</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        args: tuple</span>
+<span class="sd">            Preprocessed tuple for train_offline</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OperationNotSupportedError</span><span class="p">(</span><span class="s2">&quot;Must provide inputs (e.g. params, sim_data)!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OperationNotSupportedError</span><span class="p">(</span><span class="s2">&quot;Please give all arguments with keyword or all arguments without keyword!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="s1">&#39;model_indices&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;model_indices&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="s1">&#39;params&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;params&#39;</span><span class="p">))</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;sim_data&#39;</span><span class="p">))</span>
+
+            <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">args</span>
+
     <span class="k">def</span> <span class="nf">_check_consistency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Tests whether everything works as expected after initialization</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -638,7 +698,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">generative_model</span><span class="p">,</span> <span class="n">_loss</span><span class="p">,</span> <span class="n">summary_stats</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span>
                          <span class="n">checkpoint_path</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="p">,</span> <span class="n">clip_method</span><span class="p">,</span> <span class="n">clip_value</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ModelComparisonTrainer.train_offline"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.ModelComparisonTrainer.train_offline">[docs]</a>    <span class="k">def</span> <span class="nf">train_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelComparisonTrainer.train_offline"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.ModelComparisonTrainer.train_offline">[docs]</a>    <span class="k">def</span> <span class="nf">train_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Handles one-hot encoding if necessary and calls superclass method.</span>
 
 <span class="sd">        Trains the inference network(s) via offline learning. Assume params and data have already</span>
@@ -665,6 +725,8 @@
 <span class="sd">        losses : dict(ep_num : list(losses))</span>
 <span class="sd">            A dictionary storing the losses across epochs and iterations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_offline_kwargs_to_args</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Handle automated one-hot encoding</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>

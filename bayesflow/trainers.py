@@ -145,7 +145,7 @@ class BaseTrainer(ABC):
                 self.manager.save()
         return losses
 
-    def train_offline(self, epochs, batch_size, *args):
+    def train_offline(self, epochs, batch_size, *args, **kwargs):
         """Trains the inference network(s) via offline learning. Assume params and data have already
         been simulated (i.e., forward inference).
 
@@ -160,10 +160,16 @@ class BaseTrainer(ABC):
         ----------------
         *args : tuple
             Input to the trainer, e.g. (params, sim_data) or (model_indices, params, sim_data)
+        **kwargs: dict(arg_name, arg)
+            Input to the trainer, e.g. {'params': theta, 'sim_data': x}
+            Note that argument names must be in {'model_indices', 'params', 'sim_data'}
 
         Important
         ---------
-        The last entry of ``args`` must be your simulated data!
+
+        -  If you use `args`, the last entry of ``args`` must be your simulated data!
+        -  If you use `kwargs`, the order of the ``kwargs`` inputs does not matter.
+           Please use the keyword names in {'model_indices', 'params', 'sim_data'}
 
         Returns
         -------
@@ -172,21 +178,40 @@ class BaseTrainer(ABC):
 
         Examples
         --------
-        Parameter estimation
+        Parameter estimation (args)
 
         >>> true_params, sim_data = simple_generative_model(n_sim=1000, n_obs=100)
         >>> trainer.train_offline(10, 32, true_params, sim_data)
 
-        Model comparison
+        Model comparison (args)
 
         >>> true_model_indices, _, sim_data = meta_generative_model(n_sim=1000, n_obs=100)
         >>> trainer.train_offline(10, 32, true_model_indices, sim_data)
 
-        Meta
+        Meta (args)
 
         >>> true_model_indices, true_params, sim_data = meta_generative_model(n_sim=1000, n_obs=100)
         >>> trainer.train_offline(10, 32, true_model_indices, true_params, sim_data)
+
+        Parameter estimation (keyword-args)
+
+        >>> true_params, sim_data = simple_generative_model(n_sim=1000, n_obs=100)
+        >>> trainer.train_offline(epochs=10, batch_size=32, params=true_params, sim_data=sim_data)
+
+        Model comparison (keyword-args)
+
+        >>> true_model_indices, _, sim_data = meta_generative_model(n_sim=1000, n_obs=100)
+        >>> trainer.train_offline(epochs=10, batch_size=32, model_indices=true_model_indices, sim_data=sim_data)
+
+        Meta (keyword-args)
+
+        >>> true_model_indices, true_params, sim_data = meta_generative_model(n_sim=1000, n_obs=100)
+        >>> trainer.train_offline(epochs=10, batch_size=32,
+        ...                       params=true_params, model_indices=true_model_indices, sim_data=sim_data)
         """
+
+        # preprocess kwargs to args
+        args = self._train_offline_kwargs_to_args(args, kwargs)
 
         # Convert to a data set
         n_sim = int(args[-1].shape[0])
@@ -213,7 +238,7 @@ class BaseTrainer(ABC):
                     # Extract arguments from batch
                     args_b = tuple(batch)
 
-                    # One step backprop
+                    # One step backpropagation
                     loss = self._train_step(*args_b)
 
                     # Store loss and update progress bar
@@ -365,6 +390,41 @@ class BaseTrainer(ABC):
         """
         raise NotImplementedError
 
+    def _train_offline_kwargs_to_args(self, args, kwargs):
+        """Unifies signature of trainer.train_offline to work with *args or **kwargs
+
+        Parameters
+        ----------
+        args: tuple
+            List of non-keyword arguments
+        kwargs: dict
+            List of keyword-arguments
+
+        Returns
+        -------
+        args: tuple
+            Preprocessed tuple for train_offline
+
+        """
+
+        if not args and not kwargs:
+            raise OperationNotSupportedError("Must provide inputs (e.g. params, sim_data)!")
+
+        if args and kwargs:
+            raise OperationNotSupportedError("Please give all arguments with keyword or all arguments without keyword!")
+
+        if not args and kwargs:
+            args = []
+            if 'model_indices' in kwargs.keys():
+                args.append(kwargs.pop('model_indices'))
+            if 'params' in kwargs.keys():
+                args.append(kwargs.pop('params'))
+            args.append(kwargs.pop('sim_data'))
+
+            args = tuple(args)
+
+        return args
+
     def _check_consistency(self):
         """Tests whether everything works as expected after initialization
         """
@@ -484,7 +544,7 @@ class ModelComparisonTrainer(BaseTrainer):
         super().__init__(network, generative_model, _loss, summary_stats, optimizer, learning_rate,
                          checkpoint_path, max_to_keep, clip_method, clip_value)
 
-    def train_offline(self, epochs, batch_size, *args):
+    def train_offline(self, epochs, batch_size, *args, **kwargs):
         """Handles one-hot encoding if necessary and calls superclass method.
 
         Trains the inference network(s) via offline learning. Assume params and data have already
@@ -511,6 +571,8 @@ class ModelComparisonTrainer(BaseTrainer):
         losses : dict(ep_num : list(losses))
             A dictionary storing the losses across epochs and iterations
         """
+
+        args = self._train_offline_kwargs_to_args(args, kwargs)
 
         # Handle automated one-hot encoding
         if len(args) == 2:
