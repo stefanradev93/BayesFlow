@@ -105,8 +105,6 @@ class BaseTrainer(ABC):
             -  if `int`, then treated as a fixed number of observations, \n
             -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`
 
-        Other Parameters
-        ----------------
         **kwargs : dict
             Passed to the simulator(s)
 
@@ -155,14 +153,16 @@ class BaseTrainer(ABC):
             Number of epochs (and number of times a checkpoint is stored)
         batch_size       : int
             Number of simulations to perform at each backpropagation step
-
-        Other Parameters
-        ----------------
         *args : tuple
             Input to the trainer, e.g. (params, sim_data) or (model_indices, params, sim_data)
         **kwargs: dict(arg_name, arg)
             Input to the trainer, e.g. {'params': theta, 'sim_data': x}
             Note that argument names must be in {'model_indices', 'params', 'sim_data'}
+
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
 
         Important
         ---------
@@ -170,11 +170,6 @@ class BaseTrainer(ABC):
         -  If you use `args`, the last entry of ``args`` must be your simulated data!
         -  If you use `kwargs`, the order of the ``kwargs`` inputs does not matter.
            Please use the keyword names in {'model_indices', 'params', 'sim_data'}
-
-        Returns
-        -------
-        losses : dict(ep_num : list(losses))
-            A dictionary storing the losses across epochs and iterations
 
         Examples
         --------
@@ -266,9 +261,6 @@ class BaseTrainer(ABC):
             Number of simulations to perform at each backprop step
         n_obs          : int
             Number of observations for each dataset
-
-        Other Parameters
-        ----------------
         **kwargs : dict
             Passed to the simulator(s)
 
@@ -306,9 +298,6 @@ class BaseTrainer(ABC):
             Number of simulations to perform at each backpropagation step
         n_obs          : int
             Number of observations (fixed) for each data set
-
-        Other Parameters
-        ----------------
         **kwargs : dict
             Passed to the simulator(s)
 
@@ -556,20 +545,23 @@ class ModelComparisonTrainer(BaseTrainer):
             Number of epochs (and number of times a checkpoint is stored)
         batch_size       : int
             Number of simulations to perform at each backpropagation step
-
-        Other Parameters
-        ----------------
         *args : tuple
             Input to the trainer: (model_indices, sim_data)
-
-        Important
-        ---------
-        The last entry of ``args`` must be your simulated data!
+        **kwargs: dict(arg_name, arg)
+            Input to the trainer, {'model_indices': m_oh, 'sim_data': x}
+            Note that argument names must be in {'model_indices', 'sim_data'}
 
         Returns
         -------
         losses : dict(ep_num : list(losses))
             A dictionary storing the losses across epochs and iterations
+
+        Important
+        ---------
+
+        -  If you use `args`, the last entry of ``args`` must be your simulated data!
+        -  If you use `kwargs`, the order of the ``kwargs`` inputs does not matter.
+           Please use the keyword names in {'model_indices', 'sim_data'}
         """
 
         args = self._train_offline_kwargs_to_args(args, kwargs)
