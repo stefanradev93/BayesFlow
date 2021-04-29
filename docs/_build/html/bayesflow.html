@@ -1528,20 +1528,23 @@ performed and <code class="docutils literal notranslate"><span class="pre">data_
 <dl class="py method">
 <dt id="bayesflow.trainers.BaseTrainer.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Arguments:
-network         : bayesflow.Amortizer instance – the neural architecture to be optimized
-generative_model: callable – a function or an object with n_sim and n_obs mandatory arguments</p>
-<blockquote>
-<div><p>returning randomly sampled parameter vectors and datasets from a process model</p>
-</div></blockquote>
-<p>loss            : callable with three arguments: (network, m_indices, x) – the loss function
-summary_stats   : callable – optional summary statistics function
-optimizer       : None or tf.keras.optimizer.Optimizer – default Adam optimizer (equiv to None) or a custom one
-learning_rate   : float – the learning rate used for the optimizer
-checkpoint_path : string – optional folder name for storing the trained network
-max_to_keep     : int – optional number of checkpoints to keep
-clip_method     : string in (‘norm’, ‘value’, ‘global_norm’) – optional gradient clipping method
-clip_value      : float – the value used for gradient clipping when clip_method is set to ‘value’ or ‘norm’</p>
+<dd><p>Base class for a trainer performing forward inference and training an amortized neural estimator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>bayesflow.amortizers.Amortizer</em>) – The neural architecture to be optimized</p></li>
+<li><p><strong>generative_model</strong> (<a class="reference internal" href="#bayesflow.models.GenerativeModel" title="bayesflow.models.GenerativeModel"><em>bayesflow.models.GenerativeModel</em></a>) – A generative model returning randomly sampled parameter vectors and datasets from a process model</p></li>
+<li><p><strong>loss</strong> (<em>callable</em>) – Loss function with three arguments: (network, m_indices, x)</p></li>
+<li><p><strong>summary_stats</strong> (<em>callable</em>) – Optional summary statistics function</p></li>
+<li><p><strong>optimizer</strong> (<em>None</em><em> or </em><em>tf.keras.optimizer.Optimizer</em>) – Optimizer for the neural network. <code class="docutils literal notranslate"><span class="pre">None</span></code> will result in <cite>tf.keras.optimizers.Adam</cite></p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) – The learning rate used for the optimizer</p></li>
+<li><p><strong>checkpoint_path</strong> (<em>string</em><em>, </em><em>optional</em>) – Optional folder name for storing the trained network</p></li>
+<li><p><strong>max_to_keep</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of checkpoints to keep</p></li>
+<li><p><strong>clip_method</strong> (<em>{'norm'</em><em>, </em><em>'value'</em><em>, </em><em>'global_norm'}</em>) – Optional gradient clipping method</p></li>
+<li><p><strong>clip_value</strong> (<em>float</em>) – The value used for gradient clipping when clip_method is in {‘value’, ‘norm’}</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1554,67 +1557,129 @@ clip_value      : float – the value used for gradient clipping when clip_metho
 <dt id="bayesflow.trainers.BaseTrainer.train_online">
 <code class="sig-name descname"><span class="pre">train_online</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations_per_epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_obs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.train_online"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.train_online" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trains the inference network(s) via online learning. Additional keyword arguments
-are passed to the simulators.
-———-</p>
-<p>Arguments:
-epochs               : int – number of epochs (and number of times a checkpoint is stored)
-iterations_per_epoch : int – number of batch simulations to perform per epoch
-batch_size           : int – number of simulations to perform at each backprop step
-n_obs                : int or callable – if int, then treated as a fixed number of observations,</p>
-<blockquote>
-<div><p>if callable, then treated as a function for sampling N, i.e., N ~ p(N)</p>
-</div></blockquote>
-<p>Returns:
-losses : dict (ep_num : list_of_losses) – a dictionary storing the losses across epochs and iterations</p>
+are passed to the simulators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epochs</strong> (<em>int -- number of epochs</em><em> (</em><em>and number of times a checkpoint is stored</em><em>)</em>) – </p></li>
+<li><p><strong>iterations_per_epoch</strong> (<em>int -- number of batch simulations to perform per epoch</em>) – </p></li>
+<li><p><strong>batch_size</strong> (<em>int -- number of simulations to perform at each backprop step</em>) – </p></li>
+<li><p><strong>n_obs</strong> (<em>int</em><em> or </em><em>callable</em>) – <p>Number of observations for each simulated dataset.</p>
+<ul>
+<li><p>if <cite>int</cite>, then treated as a fixed number of observations,</p></li>
+<li><p>if <cite>callable</cite>, then treated as a function for sampling N, i.e., <span class="math notranslate nohighlight">\(N \sim p(N)\)</span></p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><p><strong>**kwargs</strong> (<em>dict</em>) – Passed to the simulator(s)</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>losses</strong> – A dictionary storing the losses across epochs and iterations</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict(ep_num : list(losses))</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.trainers.BaseTrainer.train_offline">
 <code class="sig-name descname"><span class="pre">train_offline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.train_offline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.train_offline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trains the inference network(s) via offline learning. Assume params and data have already
-been simulated (i.e., forward inference).
-———-</p>
-<p>Arguments:
-epochs           : int – number of epochs (and number of times a checkpoint is stored)
-batch_size       : int – number of simulations to perform at each backprop step
-args             : respective training data, e.g. model_indices, params, sim_data for MetaTrainer
-———-</p>
-<p>Returns:
-losses : dict (ep_num : list_of_losses) – a dictionary storing the losses across epochs and iterations</p>
+been simulated (i.e., forward inference).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epochs</strong> (<em>int</em>) – Number of epochs (and number of times a checkpoint is stored)</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Number of simulations to perform at each backpropagation step</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><p><strong>*args</strong> (<em>tuple</em>) – Input to the trainer, e.g. (params, sim_data) or (model_indices, params, sim_data)</p>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The last entry of <code class="docutils literal notranslate"><span class="pre">args</span></code> must be your simulated data!</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>losses</strong> – A dictionary storing the losses across epochs and iterations</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict(ep_num : list(losses))</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Parameter estimation</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">true_params</span><span class="p">,</span> <span class="n">sim_data</span> <span class="o">=</span> <span class="n">simple_generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">true_params</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Model comparison</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">true_model_indices</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">sim_data</span> <span class="o">=</span> <span class="n">meta_generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">true_model_indices</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Meta</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">true_model_indices</span><span class="p">,</span> <span class="n">true_params</span><span class="p">,</span> <span class="n">sim_data</span> <span class="o">=</span> <span class="n">meta_generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">true_model_indices</span><span class="p">,</span> <span class="n">true_params</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.trainers.BaseTrainer.simulate_and_train_offline">
 <code class="sig-name descname"><span class="pre">simulate_and_train_offline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_obs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.simulate_and_train_offline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.simulate_and_train_offline" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simulates n_sim data sets from _forward_inference and then trains the inference network(s) via offline learning.</p>
-<p>Arguments:
-n_sim          : int – total number of simulations to perform
-epochs         : int – number of epochs (and number of times a checkpoint is stored)
-batch_size     : int – number of simulations to perform at each backprop step
-n_obs          : int – number of observations for each dataset
-———-</p>
-<p>Returns:
-losses : dict (ep_num : list_of_losses) – a dictionary storing the losses across epochs and iterations</p>
+<dd><p>Simulates n_sim data sets from _forward_inference and then trains the inference network(s)
+via offline learning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_sim</strong> (<em>int</em>) – Total number of simulations to perform</p></li>
+<li><p><strong>epochs</strong> (<em>int</em>) – Number of epochs (and number of times a checkpoint is stored)</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Number of simulations to perform at each backprop step</p></li>
+<li><p><strong>n_obs</strong> (<em>int</em>) – Number of observations for each dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><p><strong>**kwargs</strong> (<em>dict</em>) – Passed to the simulator(s)</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>losses</strong> – A dictionary storing the losses across epochs and iterations</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict(ep_num : list(losses))</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.trainers.BaseTrainer.train_rounds">
 <code class="sig-name descname"><span class="pre">train_rounds</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_per_round</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_obs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#BaseTrainer.train_rounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.BaseTrainer.train_rounds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Trains the inference network(s) via round-based learning. Additional arguments are
-passed to the simulator.
-———-</p>
-<p>Arguments:
-epochs         : int – number of epochs (and number of times a checkpoint is stored)
-rounds         : int – number of rounds to perform
-sim_per_round  : int – number of simulations per round
-batch_size     : int – number of simulations to perform at each backprop step
-n_obs          : int – number of observations (fixed) for each data set
-———-</p>
-<p>Returns:
-losses : nested dict with each (ep_num : list_of_losses) – a dictionary storing the losses across rounds,</p>
-<blockquote>
-<div><p>epochs and iterations</p>
-</div></blockquote>
+<dd><p>Trains the inference network(s) via round-based learning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epochs</strong> (<em>int</em>) – Number of epochs (and number of times a checkpoint is stored)</p></li>
+<li><p><strong>rounds</strong> (<em>int</em>) – Number of rounds to perform</p></li>
+<li><p><strong>sim_per_round</strong> (<em>int</em>) – Number of simulations per round</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Number of simulations to perform at each backpropagation step</p></li>
+<li><p><strong>n_obs</strong> (<em>int</em>) – Number of observations (fixed) for each data set</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><p><strong>**kwargs</strong> (<em>dict</em>) – Passed to the simulator(s)</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>losses</strong> – A dictionary storing the losses across epochs and iterations</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict(ep_num : list(losses))</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1626,10 +1691,11 @@ losses : nested dict with each (ep_num : list_of_losses) – a dictionary storin
 <dl class="py method">
 <dt id="bayesflow.trainers.MetaTrainer.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'global_norm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#MetaTrainer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.MetaTrainer.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a trainer instance for performing single-model forward inference and training an
-amortized neural estimator for parameter estimation (BayesFlow). If a checkpoint_path is provided, the
-network’s weights will be stored after each training epoch. If the folder contains a
-checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.</p>
+<dd><p>Creates a trainer instance for performing multi-model forward inference and training an
+amortized neural estimator for parameter estimation and model comparison (BayesFlow).</p>
+<p>If a checkpoint_path is provided, the network’s weights will be stored after each training epoch.
+If the folder contains a checkpoint, the trainer will try to load the weights and continue
+training with a pre-trained net.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1642,15 +1708,41 @@ checkpoint, the trainer will try to load the weights and continue training with 
 <dt id="bayesflow.trainers.ModelComparisonTrainer.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_models</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'global_norm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ModelComparisonTrainer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ModelComparisonTrainer.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a trainer instance for performing multi-model forward inference and training an
-amortized neural estimator for model comparison. If a checkpoint_path is provided, the
-network’s weights will be stored after each training epoch. If the folder contains a
-checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.</p>
+amortized neural estimator for model comparison.</p>
+<p>If a checkpoint_path is provided, the network’s weights will be stored after each training epoch.
+If the folder contains a checkpoint, the trainer will try to load the weights and continue training with
+a pre-trained net.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.trainers.ModelComparisonTrainer.train_offline">
 <code class="sig-name descname"><span class="pre">train_offline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ModelComparisonTrainer.train_offline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ModelComparisonTrainer.train_offline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Handles one-hot encoding if necessary and calls superclass method.</p>
+<p>Trains the inference network(s) via offline learning. Assume params and data have already
+been simulated (i.e., forward inference).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epochs</strong> (<em>int</em>) – Number of epochs (and number of times a checkpoint is stored)</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Number of simulations to perform at each backpropagation step</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><p><strong>*args</strong> (<em>tuple</em>) – Input to the trainer: (model_indices, sim_data)</p>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The last entry of <code class="docutils literal notranslate"><span class="pre">args</span></code> must be your simulated data!</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>losses</strong> – A dictionary storing the losses across epochs and iterations</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict(ep_num : list(losses))</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1663,26 +1755,38 @@ checkpoint, the trainer will try to load the weights and continue training with 
 <dt id="bayesflow.trainers.ParameterEstimationTrainer.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'global_norm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ParameterEstimationTrainer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ParameterEstimationTrainer.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a trainer instance for performing single-model forward inference and training an
-amortized neural estimator for parameter estimation (BayesFlow). If a checkpoint_path is provided, the
-network’s weights will be stored after each training epoch. If the folder contains a
-checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.</p>
+amortized neural estimator for parameter estimation (BayesFlow).</p>
+<p>If a checkpoint_path is provided, the network’s weights will be stored after each training epoch.
+If the folder contains a  checkpoint, the trainer will try to load the weights and continue training
+with a pre-trained net.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="bayesflow.trainers.ParameterEstimationTrainer.train_experience_replay">
 <code class="sig-name descname"><span class="pre">train_experience_replay</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations_per_epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_obs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/trainers.html#ParameterEstimationTrainer.train_experience_replay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.ParameterEstimationTrainer.train_experience_replay" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trains the inference network(s) via experience replay.</p>
-<p>Arguments:
-epochs               : int – number of epochs (and number of times a checkpoint is stored)
-batch_size           : int – number of simulations to perform at each backprop step
-iterations_per_epoch : int – number of batch simulations to perform per epoch
-capacity               : int – max number of batches to store in buffer
-n_obs                : int or callable – if int, then treated as a fixed number of observations,</p>
-<blockquote>
-<div><p>if callable, then treated as a function for sampling N, i.e., N ~ p(N)</p>
-</div></blockquote>
-<p>Returns:
-losses : dict (ep_num : list_of_losses) – a dictionary storing the losses across epochs and iterations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epochs</strong> (<em>int</em>) – Number of epochs (and number of times a checkpoint is stored)</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Number of simulations to perform at each backpropagation step</p></li>
+<li><p><strong>iterations_per_epoch</strong> (<em>int</em>) – Number of batch simulations to perform per epoch</p></li>
+<li><p><strong>capacity</strong> (<em>int</em>) – Max number of batches to store in buffer</p></li>
+<li><p><strong>n_obs</strong> (<em>int</em><em> or </em><em>callable</em>) – <p>Number of observations for each simulated dataset.</p>
+<ul>
+<li><p>if <cite>int</cite>, then treated as a fixed number of observations,</p></li>
+<li><p>if <cite>callable</cite>, then treated as a function for sampling N, i.e., <span class="math notranslate nohighlight">\(N \sim p(N)\)</span></p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>losses</strong> – A dictionary storing the losses across epochs and iterations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict(ep_num : list(losses))</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

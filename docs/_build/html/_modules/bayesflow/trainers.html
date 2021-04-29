@@ -170,23 +170,32 @@
 
 <div class="viewcode-block" id="BaseTrainer.__init__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.BaseTrainer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">generative_model</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">summary_stats</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span>
                  <span class="n">learning_rate</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="p">,</span> <span class="n">clip_method</span><span class="p">,</span> <span class="n">clip_value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Base class for a trainer performing forward inference and training an amortized neural estimator.</span>
-<span class="sd">        ----------</span>
+        <span class="sd">&quot;&quot;&quot;Base class for a trainer performing forward inference and training an amortized neural estimator.</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">        network         : bayesflow.Amortizer instance -- the neural architecture to be optimized</span>
-<span class="sd">        generative_model: callable -- a function or an object with n_sim and n_obs mandatory arguments</span>
-<span class="sd">                          returning randomly sampled parameter vectors and datasets from a process model</span>
-<span class="sd">        loss            : callable with three arguments: (network, m_indices, x) -- the loss function</span>
-<span class="sd">        summary_stats   : callable -- optional summary statistics function</span>
-<span class="sd">        optimizer       : None or tf.keras.optimizer.Optimizer -- default Adam optimizer (equiv to None) or a custom one</span>
-<span class="sd">        learning_rate   : float -- the learning rate used for the optimizer</span>
-<span class="sd">        checkpoint_path : string -- optional folder name for storing the trained network</span>
-<span class="sd">        max_to_keep     : int -- optional number of checkpoints to keep</span>
-<span class="sd">        clip_method     : string in (&#39;norm&#39;, &#39;value&#39;, &#39;global_norm&#39;) -- optional gradient clipping method</span>
-<span class="sd">        clip_value      : float -- the value used for gradient clipping when clip_method is set to &#39;value&#39; or &#39;norm&#39;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        network         : bayesflow.amortizers.Amortizer</span>
+<span class="sd">            The neural architecture to be optimized</span>
+<span class="sd">        generative_model : bayesflow.models.GenerativeModel</span>
+<span class="sd">            A generative model returning randomly sampled parameter vectors and datasets from a process model</span>
+<span class="sd">        loss            : callable</span>
+<span class="sd">            Loss function with three arguments: (network, m_indices, x)</span>
+<span class="sd">        summary_stats   : callable</span>
+<span class="sd">            Optional summary statistics function</span>
+<span class="sd">        optimizer       : None or tf.keras.optimizer.Optimizer</span>
+<span class="sd">            Optimizer for the neural network. ``None`` will result in `tf.keras.optimizers.Adam`</span>
+<span class="sd">        learning_rate   : float</span>
+<span class="sd">            The learning rate used for the optimizer</span>
+<span class="sd">        checkpoint_path : string, optional</span>
+<span class="sd">            Optional folder name for storing the trained network</span>
+<span class="sd">        max_to_keep     : int, optional</span>
+<span class="sd">            Number of checkpoints to keep</span>
+<span class="sd">        clip_method     : {&#39;norm&#39;, &#39;value&#39;, &#39;global_norm&#39;}</span>
+<span class="sd">            Optional gradient clipping method</span>
+<span class="sd">        clip_value      : float</span>
+<span class="sd">            The value used for gradient clipping when clip_method is in {&#39;value&#39;, &#39;norm&#39;}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">generative_model</span> <span class="o">=</span> <span class="n">generative_model</span>
@@ -227,8 +236,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_consistency</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseTrainer.load_pretrained_network"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.BaseTrainer.load_pretrained_network">[docs]</a>    <span class="k">def</span> <span class="nf">load_pretrained_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.</span>
+        <span class="sd">&quot;&quot;&quot;Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -237,21 +245,29 @@
         <span class="k">return</span> <span class="n">status</span></div>
 
 <div class="viewcode-block" id="BaseTrainer.train_online"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.BaseTrainer.train_online">[docs]</a>    <span class="k">def</span> <span class="nf">train_online</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Trains the inference network(s) via online learning. Additional keyword arguments</span>
+        <span class="sd">&quot;&quot;&quot;Trains the inference network(s) via online learning. Additional keyword arguments</span>
 <span class="sd">        are passed to the simulators.</span>
-<span class="sd">        ----------</span>
 
-<span class="sd">        Arguments:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        epochs               : int -- number of epochs (and number of times a checkpoint is stored)</span>
 <span class="sd">        iterations_per_epoch : int -- number of batch simulations to perform per epoch</span>
 <span class="sd">        batch_size           : int -- number of simulations to perform at each backprop step</span>
-<span class="sd">        n_obs                : int or callable -- if int, then treated as a fixed number of observations,</span>
-<span class="sd">                               if callable, then treated as a function for sampling N, i.e., N ~ p(N)</span>
-<span class="sd">        ----------</span>
+<span class="sd">        n_obs : int or callable</span>
+<span class="sd">            Number of observations for each simulated dataset.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations</span>
+<span class="sd">            -  if `int`, then treated as a fixed number of observations, \n</span>
+<span class="sd">            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`</span>
+
+<span class="sd">        Other Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Passed to the simulator(s)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        losses : dict(ep_num : list(losses))</span>
+<span class="sd">            A dictionary storing the losses across epochs and iterations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">losses</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -284,19 +300,46 @@
         <span class="k">return</span> <span class="n">losses</span></div>
 
 <div class="viewcode-block" id="BaseTrainer.train_offline"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.BaseTrainer.train_offline">[docs]</a>    <span class="k">def</span> <span class="nf">train_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Trains the inference network(s) via offline learning. Assume params and data have already</span>
+        <span class="sd">&quot;&quot;&quot;Trains the inference network(s) via offline learning. Assume params and data have already</span>
 <span class="sd">        been simulated (i.e., forward inference).</span>
-<span class="sd">        ----------</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">        epochs           : int -- number of epochs (and number of times a checkpoint is stored)</span>
-<span class="sd">        batch_size       : int -- number of simulations to perform at each backprop step</span>
-<span class="sd">        args             : respective training data, e.g. model_indices, params, sim_data for MetaTrainer</span>
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        epochs           : int</span>
+<span class="sd">            Number of epochs (and number of times a checkpoint is stored)</span>
+<span class="sd">        batch_size       : int</span>
+<span class="sd">            Number of simulations to perform at each backpropagation step</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations</span>
+<span class="sd">        Other Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        *args : tuple</span>
+<span class="sd">            Input to the trainer, e.g. (params, sim_data) or (model_indices, params, sim_data)</span>
+
+<span class="sd">        Important</span>
+<span class="sd">        ---------</span>
+<span class="sd">        The last entry of ``args`` must be your simulated data!</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        losses : dict(ep_num : list(losses))</span>
+<span class="sd">            A dictionary storing the losses across epochs and iterations</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        Parameter estimation</span>
+
+<span class="sd">        &gt;&gt;&gt; true_params, sim_data = simple_generative_model(n_sim=1000, n_obs=100)</span>
+<span class="sd">        &gt;&gt;&gt; trainer.train_offline(10, 32, true_params, sim_data)</span>
+
+<span class="sd">        Model comparison</span>
+
+<span class="sd">        &gt;&gt;&gt; true_model_indices, _, sim_data = meta_generative_model(n_sim=1000, n_obs=100)</span>
+<span class="sd">        &gt;&gt;&gt; trainer.train_offline(10, 32, true_model_indices, sim_data)</span>
+
+<span class="sd">        Meta</span>
+
+<span class="sd">        &gt;&gt;&gt; true_model_indices, true_params, sim_data = meta_generative_model(n_sim=1000, n_obs=100)</span>
+<span class="sd">        &gt;&gt;&gt; trainer.train_offline(10, 32, true_model_indices, true_params, sim_data)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Convert to a data set</span>
@@ -339,21 +382,29 @@
         <span class="k">return</span> <span class="n">losses</span></div>
 
 <div class="viewcode-block" id="BaseTrainer.simulate_and_train_offline"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.BaseTrainer.simulate_and_train_offline">[docs]</a>    <span class="k">def</span> <span class="nf">simulate_and_train_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sim</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Simulates n_sim data sets from _forward_inference and then trains the inference network(s) via offline learning.</span>
+        <span class="sd">&quot;&quot;&quot;Simulates n_sim data sets from _forward_inference and then trains the inference network(s)</span>
+<span class="sd">        via offline learning.</span>
 
-<span class="sd">        Additional keyword arguments are passed to the simulator.</span>
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        n_sim          : int</span>
+<span class="sd">            Total number of simulations to perform</span>
+<span class="sd">        epochs         : int</span>
+<span class="sd">            Number of epochs (and number of times a checkpoint is stored)</span>
+<span class="sd">        batch_size     : int</span>
+<span class="sd">            Number of simulations to perform at each backprop step</span>
+<span class="sd">        n_obs          : int</span>
+<span class="sd">            Number of observations for each dataset</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">        n_sim          : int -- total number of simulations to perform</span>
-<span class="sd">        epochs         : int -- number of epochs (and number of times a checkpoint is stored)</span>
-<span class="sd">        batch_size     : int -- number of simulations to perform at each backprop step</span>
-<span class="sd">        n_obs          : int -- number of observations for each dataset</span>
-<span class="sd">        ----------</span>
+<span class="sd">        Other Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Passed to the simulator(s)</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        losses : dict(ep_num : list(losses))</span>
+<span class="sd">            A dictionary storing the losses across epochs and iterations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Make sure n_obs is fixed, otherwise not working, for now</span>
@@ -370,22 +421,30 @@
         <span class="k">return</span> <span class="n">losses</span></div>
 
 <div class="viewcode-block" id="BaseTrainer.train_rounds"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.BaseTrainer.train_rounds">[docs]</a>    <span class="k">def</span> <span class="nf">train_rounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">rounds</span><span class="p">,</span> <span class="n">sim_per_round</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Trains the inference network(s) via round-based learning. Additional arguments are</span>
-<span class="sd">        passed to the simulator.</span>
-<span class="sd">        ----------</span>
+        <span class="sd">&quot;&quot;&quot;Trains the inference network(s) via round-based learning.</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">        epochs         : int -- number of epochs (and number of times a checkpoint is stored)</span>
-<span class="sd">        rounds         : int -- number of rounds to perform</span>
-<span class="sd">        sim_per_round  : int -- number of simulations per round</span>
-<span class="sd">        batch_size     : int -- number of simulations to perform at each backprop step</span>
-<span class="sd">        n_obs          : int -- number of observations (fixed) for each data set</span>
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        epochs         : int</span>
+<span class="sd">            Number of epochs (and number of times a checkpoint is stored)</span>
+<span class="sd">        rounds         : int</span>
+<span class="sd">            Number of rounds to perform</span>
+<span class="sd">        sim_per_round  : int</span>
+<span class="sd">            Number of simulations per round</span>
+<span class="sd">        batch_size     : int</span>
+<span class="sd">            Number of simulations to perform at each backpropagation step</span>
+<span class="sd">        n_obs          : int</span>
+<span class="sd">            Number of observations (fixed) for each data set</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        losses : nested dict with each (ep_num : list_of_losses) -- a dictionary storing the losses across rounds,</span>
-<span class="sd">                 epochs and iterations</span>
+<span class="sd">        Other Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Passed to the simulator(s)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        losses : dict(ep_num : list(losses))</span>
+<span class="sd">            A dictionary storing the losses across epochs and iterations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Make sure n_obs is fixed, otherwise not working</span>
@@ -421,8 +480,7 @@
         <span class="k">return</span> <span class="n">losses</span></div>
 
     <span class="k">def</span> <span class="nf">_train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Computes loss and applies gradients.</span>
+        <span class="sd">&quot;&quot;&quot;Computes loss and applies gradients.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
             <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
@@ -434,13 +492,14 @@
         <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_apply_gradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gradients</span><span class="p">,</span> <span class="n">tensors</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Updates each tensor in the &#39;variables&#39; list via backpropagation. Operation is performed in-place.</span>
-<span class="sd">        ----------</span>
+        <span class="sd">&quot;&quot;&quot;Updates each tensor in the &#39;variables&#39; list via backpropagation. Operation is performed in-place.</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">        gradients: list of tf.Tensor -- the list of gradients for all neural network parameter</span>
-<span class="sd">        variables: list of tf.Tensor -- the list of all neural network parameters</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        gradients: list(tf.Tensor)</span>
+<span class="sd">            The list of gradients for all neural network parameters</span>
+<span class="sd">        tensors: list(tf.Tensor)</span>
+<span class="sd">            The list of all neural network parameters</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Optional gradient clipping</span>
@@ -450,17 +509,18 @@
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">_forward_inference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sim</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Simulate arguments for training, e.g.:</span>
-<span class="sd">        - (params, sim_data) for ParameterEstimationTrainer</span>
-<span class="sd">        - (model_indices, sim_data) for ModelComparisonTrainer</span>
-<span class="sd">        - (model_indices, params, sim_data) for MetaTrainer</span>
+        <span class="sd">&quot;&quot;&quot;Simulate arguments for training (abstract method).</span>
+
+<span class="sd">        In subclasses, this method is implemented as:</span>
+
+<span class="sd">        -  (params, sim_data) for :class:&#39;ParameterEstimationTrainer&#39;</span>
+<span class="sd">        -  (model_indices, sim_data) for :class:&#39;ModelComparisonTrainer&#39;</span>
+<span class="sd">        -  (model_indices, params, sim_data) for :class:&#39;MetaTrainer&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
     <span class="k">def</span> <span class="nf">_check_consistency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Tests whether everything works as expected. TODO - Add more checks</span>
+        <span class="sd">&quot;&quot;&quot;Tests whether everything works as expected after initialization</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generative_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
@@ -490,11 +550,12 @@
 
 <div class="viewcode-block" id="MetaTrainer.__init__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.MetaTrainer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">generative_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">summary_stats</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">clip_method</span><span class="o">=</span><span class="s1">&#39;global_norm&#39;</span><span class="p">,</span> <span class="n">clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates a trainer instance for performing single-model forward inference and training an</span>
-<span class="sd">        amortized neural estimator for parameter estimation (BayesFlow). If a checkpoint_path is provided, the</span>
-<span class="sd">        network&#39;s weights will be stored after each training epoch. If the folder contains a</span>
-<span class="sd">        checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.</span>
+        <span class="sd">&quot;&quot;&quot; Creates a trainer instance for performing multi-model forward inference and training an</span>
+<span class="sd">        amortized neural estimator for parameter estimation and model comparison (BayesFlow).</span>
+
+<span class="sd">        If a checkpoint_path is provided, the network&#39;s weights will be stored after each training epoch.</span>
+<span class="sd">        If the folder contains a checkpoint, the trainer will try to load the weights and continue</span>
+<span class="sd">        training with a pre-trained net.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Default or custom loss</span>
@@ -507,23 +568,35 @@
                          <span class="n">checkpoint_path</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="p">,</span> <span class="n">clip_method</span><span class="p">,</span> <span class="n">clip_value</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_forward_inference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sim</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="n">summarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Performs one step of multi-model forward inference.</span>
+        <span class="sd">&quot;&quot;&quot;Performs one step of multi-model forward inference.</span>
+
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        n_sim : int</span>
+<span class="sd">            Number of simulations to perform at the given step (i.e., batch size)</span>
+<span class="sd">        n_obs : int or callable</span>
+<span class="sd">            Number of observations for each simulated dataset.</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">        n_sim : int -- number of simulation to perform at the given step (i.e., batch size)</span>
-<span class="sd">        n_obs : int or callable -- if int, then treated as a fixed number of observations, if callable, then</span>
-<span class="sd">                                   treated as a function for sampling N, i.e., N ~ p(N)</span>
-<span class="sd">        ----------</span>
+<span class="sd">            -  if `int`, then treated as a fixed number of observations, \n</span>
+<span class="sd">            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`</span>
 
-<span class="sd">        Keyword arguments:</span>
-<span class="sd">        summarize : bool -- whether to summarize the data if hand-crafted summaries are given</span>
+<span class="sd">        summarize : bool, default:True</span>
+<span class="sd">            Whether to summarize the data if hand-crafted summaries are given</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        model_indices: np.array (np.float32) of shape (batch_size, n_models) -- one-hot encoded model indices</span>
-<span class="sd">        params    : np.array (np.float32) of shape (batch_size, param_dim) -- array of sampled parameters</span>
-<span class="sd">        sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) -- array of simulated data sets</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        model_indices: np.array(np.float32)</span>
+<span class="sd">            One-hot encoded model indices, shape (batch_size, n_models)</span>
+<span class="sd">        params    : np.array(np.float32)</span>
+<span class="sd">            array of sampled parameters, shape (batch_size, param_dim)</span>
+<span class="sd">        sim_data  : np.array(np.float32)</span>
+<span class="sd">            array of simulated data sets, shape (batch_size, n_obs, data_dim)</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        OperationNotSupportedError</span>
+<span class="sd">            If the trainer has no generative model but `trainer._forward_inference`</span>
+<span class="sd">            is called (i.e. needs to simulate data from the generative model)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generative_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -547,11 +620,12 @@
 
 <div class="viewcode-block" id="ModelComparisonTrainer.__init__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.ModelComparisonTrainer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">generative_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">summary_stats</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_models</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">clip_method</span><span class="o">=</span><span class="s1">&#39;global_norm&#39;</span><span class="p">,</span> <span class="n">clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates a trainer instance for performing multi-model forward inference and training an</span>
-<span class="sd">        amortized neural estimator for model comparison. If a checkpoint_path is provided, the</span>
-<span class="sd">        network&#39;s weights will be stored after each training epoch. If the folder contains a </span>
-<span class="sd">        checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.</span>
+        <span class="sd">&quot;&quot;&quot;Creates a trainer instance for performing multi-model forward inference and training an</span>
+<span class="sd">        amortized neural estimator for model comparison.</span>
+
+<span class="sd">        If a checkpoint_path is provided, the network&#39;s weights will be stored after each training epoch.</span>
+<span class="sd">        If the folder contains a checkpoint, the trainer will try to load the weights and continue training with</span>
+<span class="sd">        a pre-trained net.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Default or custom loss</span>
@@ -565,8 +639,31 @@
                          <span class="n">checkpoint_path</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="p">,</span> <span class="n">clip_method</span><span class="p">,</span> <span class="n">clip_value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ModelComparisonTrainer.train_offline"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.ModelComparisonTrainer.train_offline">[docs]</a>    <span class="k">def</span> <span class="nf">train_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Handles one-hot encoding if necessary and calls superclass method.</span>
+        <span class="sd">&quot;&quot;&quot;Handles one-hot encoding if necessary and calls superclass method.</span>
+
+<span class="sd">        Trains the inference network(s) via offline learning. Assume params and data have already</span>
+<span class="sd">        been simulated (i.e., forward inference).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        epochs           : int</span>
+<span class="sd">            Number of epochs (and number of times a checkpoint is stored)</span>
+<span class="sd">        batch_size       : int</span>
+<span class="sd">            Number of simulations to perform at each backpropagation step</span>
+
+<span class="sd">        Other Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        *args : tuple</span>
+<span class="sd">            Input to the trainer: (model_indices, sim_data)</span>
+
+<span class="sd">        Important</span>
+<span class="sd">        ---------</span>
+<span class="sd">        The last entry of ``args`` must be your simulated data!</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        losses : dict(ep_num : list(losses))</span>
+<span class="sd">            A dictionary storing the losses across epochs and iterations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Handle automated one-hot encoding</span>
@@ -595,20 +692,33 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">model_indices</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_forward_inference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sim</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Performs one step of multi-model forward inference.</span>
-<span class="sd">        ----------</span>
-<span class="sd">        </span>
-<span class="sd">        Arguments:</span>
-<span class="sd">        n_sim : int -- number of simulation to perform at the given step (i.e., batch size)</span>
-<span class="sd">        n_obs : int -- number of observations to generate from each forward model</span>
-<span class="sd">        ----------</span>
+        <span class="sd">&quot;&quot;&quot;Performs one step of multi-model forward inference.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        model_indices_oh : np.array (np.float32) of shape (batch_size, n_models)</span>
-<span class="sd">                            -- array of one-hot-encoded model-indices</span>
-<span class="sd">        sim_data         : np.array (np.float32) of shape (batch_size, N, data_dim)</span>
-<span class="sd">                            -- array of simulated data sets</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_sim : int</span>
+<span class="sd">            Number of simulations to perform at the given step (i.e., batch size)</span>
+<span class="sd">        n_obs : int or callable</span>
+<span class="sd">            Number of observations for each simulated dataset.</span>
+
+<span class="sd">            -  if `int`, then treated as a fixed number of observations, \n</span>
+<span class="sd">            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`</span>
+
+<span class="sd">        summarize : bool, default:True</span>
+<span class="sd">            Whether to summarize the data if hand-crafted summaries are given</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        model_indices: np.array(np.float32)</span>
+<span class="sd">            One-hot encoded model indices, shape (batch_size, n_models)</span>
+<span class="sd">        sim_data  : np.array(np.float32)</span>
+<span class="sd">            array of simulated data sets, shape (batch_size, n_obs, data_dim)</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        OperationNotSupportedError</span>
+<span class="sd">            If the trainer has no generative model but `trainer._forward_inference`</span>
+<span class="sd">            is called (i.e. needs to simulate data from the generative model)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generative_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -628,11 +738,12 @@
 
 <div class="viewcode-block" id="ParameterEstimationTrainer.__init__"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.ParameterEstimationTrainer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">generative_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">summary_stats</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">clip_method</span><span class="o">=</span><span class="s1">&#39;global_norm&#39;</span><span class="p">,</span> <span class="n">clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates a trainer instance for performing single-model forward inference and training an</span>
-<span class="sd">        amortized neural estimator for parameter estimation (BayesFlow). If a checkpoint_path is provided, the</span>
-<span class="sd">        network&#39;s weights will be stored after each training epoch. If the folder contains a </span>
-<span class="sd">        checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.</span>
+        <span class="sd">&quot;&quot;&quot;Creates a trainer instance for performing single-model forward inference and training an</span>
+<span class="sd">        amortized neural estimator for parameter estimation (BayesFlow).</span>
+
+<span class="sd">        If a checkpoint_path is provided, the network&#39;s weights will be stored after each training epoch.</span>
+<span class="sd">        If the folder contains a  checkpoint, the trainer will try to load the weights and continue training</span>
+<span class="sd">        with a pre-trained net.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -644,24 +755,29 @@
                          <span class="n">checkpoint_path</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="p">,</span> <span class="n">clip_method</span><span class="p">,</span> <span class="n">clip_value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ParameterEstimationTrainer.train_experience_replay"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.ParameterEstimationTrainer.train_experience_replay">[docs]</a>    <span class="k">def</span> <span class="nf">train_experience_replay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="p">,</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Trains the inference network(s) via experience replay. </span>
+        <span class="sd">&quot;&quot;&quot;Trains the inference network(s) via experience replay.</span>
 <span class="sd">        </span>
-<span class="sd">        Additional keyword arguments are passed to the simulators.</span>
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        </span>
-<span class="sd">        Arguments:</span>
-<span class="sd">        epochs               : int -- number of epochs (and number of times a checkpoint is stored)</span>
-<span class="sd">        batch_size           : int -- number of simulations to perform at each backprop step</span>
-<span class="sd">        iterations_per_epoch : int -- number of batch simulations to perform per epoch</span>
-<span class="sd">        capacity               : int -- max number of batches to store in buffer</span>
-<span class="sd">        n_obs                : int or callable -- if int, then treated as a fixed number of observations,</span>
-<span class="sd">                               if callable, then treated as a function for sampling N, i.e., N ~ p(N)</span>
-<span class="sd">        </span>
-<span class="sd">        ----------</span>
+<span class="sd">        epochs               : int</span>
+<span class="sd">            Number of epochs (and number of times a checkpoint is stored)</span>
+<span class="sd">        batch_size           : int</span>
+<span class="sd">            Number of simulations to perform at each backpropagation step</span>
+<span class="sd">        iterations_per_epoch : int</span>
+<span class="sd">            Number of batch simulations to perform per epoch</span>
+<span class="sd">        capacity               : int</span>
+<span class="sd">            Max number of batches to store in buffer</span>
+<span class="sd">        n_obs : int or callable</span>
+<span class="sd">            Number of observations for each simulated dataset.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations</span>
+<span class="sd">            -  if `int`, then treated as a fixed number of observations, \n</span>
+<span class="sd">            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        losses : dict(ep_num : list(losses))</span>
+<span class="sd">            A dictionary storing the losses across epochs and iterations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Initialize losses dictionary and memory replay buffer</span>
@@ -704,21 +820,34 @@
 
     <span class="k">def</span> <span class="nf">_forward_inference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sim</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="n">summarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Performs one step of multi-model forward inference.</span>
-<span class="sd">        ----------</span>
-<span class="sd">        </span>
-<span class="sd">        Arguments:</span>
-<span class="sd">        n_sim : int -- number of simulation to perform at the given step (i.e., batch size)</span>
-<span class="sd">        n_obs : int or callable -- if int, then treated as a fixed number of observations, if callable, then</span>
-<span class="sd">                                   treated as a function for sampling N, i.e., N ~ p(N)</span>
-<span class="sd">        ----------</span>
+<span class="sd">        Performs one step of single-model forward inference.</span>
 
-<span class="sd">        Keyword arguments:</span>
-<span class="sd">        summarize : bool -- whether to summarize the data if hand-crafted summaries are given</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_sim : int</span>
+<span class="sd">            Number of simulations to perform at the given step (i.e., batch size)</span>
+<span class="sd">        n_obs : int or callable</span>
+<span class="sd">            Number of observations for each simulated dataset.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        params    : np.array (np.float32) of shape (batch_size, param_dim) -- array of sampled parameters</span>
-<span class="sd">        sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) -- array of simulated data sets</span>
+<span class="sd">            -  if `int`, then treated as a fixed number of observations, \n</span>
+<span class="sd">            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`</span>
+
+<span class="sd">        summarize : bool, default:True</span>
+<span class="sd">            Whether to summarize the data if hand-crafted summaries are given</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        params    : np.array(np.float32)</span>
+<span class="sd">            array of sampled parameters, shape (batch_size, param_dim)</span>
+<span class="sd">        sim_data  : np.array(np.float32)</span>
+<span class="sd">            array of simulated data sets, shape (batch_size, n_obs, data_dim)</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        OperationNotSupportedError</span>
+<span class="sd">            If the trainer has no generative model but `trainer._forward_inference`</span>
+<span class="sd">            is called (i.e. needs to simulate data from the generative model)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generative_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
