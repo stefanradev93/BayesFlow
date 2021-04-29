@@ -16,23 +16,32 @@ class BaseTrainer(ABC):
 
     def __init__(self, network, generative_model, loss, summary_stats, optimizer,
                  learning_rate, checkpoint_path, max_to_keep, clip_method, clip_value):
-        """
-        Base class for a trainer performing forward inference and training an amortized neural estimator.
-        ----------
+        """Base class for a trainer performing forward inference and training an amortized neural estimator.
 
-        Arguments:
-        network         : bayesflow.Amortizer instance -- the neural architecture to be optimized
-        generative_model: callable -- a function or an object with n_sim and n_obs mandatory arguments
-                          returning randomly sampled parameter vectors and datasets from a process model
-        loss            : callable with three arguments: (network, m_indices, x) -- the loss function
-        summary_stats   : callable -- optional summary statistics function
-        optimizer       : None or tf.keras.optimizer.Optimizer -- default Adam optimizer (equiv to None) or a custom one
-        learning_rate   : float -- the learning rate used for the optimizer
-        checkpoint_path : string -- optional folder name for storing the trained network
-        max_to_keep     : int -- optional number of checkpoints to keep
-        clip_method     : string in ('norm', 'value', 'global_norm') -- optional gradient clipping method
-        clip_value      : float -- the value used for gradient clipping when clip_method is set to 'value' or 'norm'
+        Parameters
+        ----------
+        network         : bayesflow.amortizers.Amortizer
+            The neural architecture to be optimized
+        generative_model : bayesflow.models.GenerativeModel
+            A generative model returning randomly sampled parameter vectors and datasets from a process model
+        loss            : callable
+            Loss function with three arguments: (network, m_indices, x)
+        summary_stats   : callable
+            Optional summary statistics function
+        optimizer       : None or tf.keras.optimizer.Optimizer
+            Optimizer for the neural network. ``None`` will result in `tf.keras.optimizers.Adam`
+        learning_rate   : float
+            The learning rate used for the optimizer
+        checkpoint_path : string, optional
+            Optional folder name for storing the trained network
+        max_to_keep     : int, optional
+            Number of checkpoints to keep
+        clip_method     : {'norm', 'value', 'global_norm'}
+            Optional gradient clipping method
+        clip_value      : float
+            The value used for gradient clipping when clip_method is in {'value', 'norm'}
         """
+
         self.network = network
 
         self.generative_model = generative_model
@@ -73,8 +82,7 @@ class BaseTrainer(ABC):
         self._check_consistency()
 
     def load_pretrained_network(self):
-        """
-        Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.
+        """Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.
         """
 
         if self.manager is None or self.checkpoint is None:
@@ -83,21 +91,29 @@ class BaseTrainer(ABC):
         return status
 
     def train_online(self, epochs, iterations_per_epoch, batch_size, n_obs, **kwargs):
-        """
-        Trains the inference network(s) via online learning. Additional keyword arguments
+        """Trains the inference network(s) via online learning. Additional keyword arguments
         are passed to the simulators.
-        ----------
 
-        Arguments:
+        Parameters
+        ----------
         epochs               : int -- number of epochs (and number of times a checkpoint is stored)
         iterations_per_epoch : int -- number of batch simulations to perform per epoch
         batch_size           : int -- number of simulations to perform at each backprop step
-        n_obs                : int or callable -- if int, then treated as a fixed number of observations,
-                               if callable, then treated as a function for sampling N, i.e., N ~ p(N)
-        ----------
+        n_obs : int or callable
+            Number of observations for each simulated dataset.
 
-        Returns:
-        losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations
+            -  if `int`, then treated as a fixed number of observations, \n
+            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`
+
+        Other Parameters
+        ----------------
+        **kwargs : dict
+            Passed to the simulator(s)
+
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
         """
 
         losses = dict()
@@ -130,19 +146,46 @@ class BaseTrainer(ABC):
         return losses
 
     def train_offline(self, epochs, batch_size, *args):
-        """
-        Trains the inference network(s) via offline learning. Assume params and data have already
+        """Trains the inference network(s) via offline learning. Assume params and data have already
         been simulated (i.e., forward inference).
-        ----------
 
-        Arguments:
-        epochs           : int -- number of epochs (and number of times a checkpoint is stored)
-        batch_size       : int -- number of simulations to perform at each backprop step
-        args             : respective training data, e.g. model_indices, params, sim_data for MetaTrainer
+        Parameters
         ----------
+        epochs           : int
+            Number of epochs (and number of times a checkpoint is stored)
+        batch_size       : int
+            Number of simulations to perform at each backpropagation step
 
-        Returns:
-        losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations
+        Other Parameters
+        ----------------
+        *args : tuple
+            Input to the trainer, e.g. (params, sim_data) or (model_indices, params, sim_data)
+
+        Important
+        ---------
+        The last entry of ``args`` must be your simulated data!
+
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
+
+        Examples
+        --------
+        Parameter estimation
+
+        >>> true_params, sim_data = simple_generative_model(n_sim=1000, n_obs=100)
+        >>> trainer.train_offline(10, 32, true_params, sim_data)
+
+        Model comparison
+
+        >>> true_model_indices, _, sim_data = meta_generative_model(n_sim=1000, n_obs=100)
+        >>> trainer.train_offline(10, 32, true_model_indices, sim_data)
+
+        Meta
+
+        >>> true_model_indices, true_params, sim_data = meta_generative_model(n_sim=1000, n_obs=100)
+        >>> trainer.train_offline(10, 32, true_model_indices, true_params, sim_data)
         """
 
         # Convert to a data set
@@ -185,21 +228,29 @@ class BaseTrainer(ABC):
         return losses
 
     def simulate_and_train_offline(self, n_sim, epochs, batch_size, n_obs, **kwargs):
-        """
-        Simulates n_sim data sets from _forward_inference and then trains the inference network(s) via offline learning.
+        """Simulates n_sim data sets from _forward_inference and then trains the inference network(s)
+        via offline learning.
 
-        Additional keyword arguments are passed to the simulator.
+        Parameters
         ----------
+        n_sim          : int
+            Total number of simulations to perform
+        epochs         : int
+            Number of epochs (and number of times a checkpoint is stored)
+        batch_size     : int
+            Number of simulations to perform at each backprop step
+        n_obs          : int
+            Number of observations for each dataset
 
-        Arguments:
-        n_sim          : int -- total number of simulations to perform
-        epochs         : int -- number of epochs (and number of times a checkpoint is stored)
-        batch_size     : int -- number of simulations to perform at each backprop step
-        n_obs          : int -- number of observations for each dataset
-        ----------
+        Other Parameters
+        ----------------
+        **kwargs : dict
+            Passed to the simulator(s)
 
-        Returns:
-        losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
         """
 
         # Make sure n_obs is fixed, otherwise not working, for now
@@ -216,22 +267,30 @@ class BaseTrainer(ABC):
         return losses
 
     def train_rounds(self, epochs, rounds, sim_per_round, batch_size, n_obs, **kwargs):
-        """
-        Trains the inference network(s) via round-based learning. Additional arguments are
-        passed to the simulator.
-        ----------
+        """Trains the inference network(s) via round-based learning.
 
-        Arguments:
-        epochs         : int -- number of epochs (and number of times a checkpoint is stored)
-        rounds         : int -- number of rounds to perform
-        sim_per_round  : int -- number of simulations per round
-        batch_size     : int -- number of simulations to perform at each backprop step
-        n_obs          : int -- number of observations (fixed) for each data set
+        Parameters
         ----------
+        epochs         : int
+            Number of epochs (and number of times a checkpoint is stored)
+        rounds         : int
+            Number of rounds to perform
+        sim_per_round  : int
+            Number of simulations per round
+        batch_size     : int
+            Number of simulations to perform at each backpropagation step
+        n_obs          : int
+            Number of observations (fixed) for each data set
 
-        Returns:
-        losses : nested dict with each (ep_num : list_of_losses) -- a dictionary storing the losses across rounds,
-                 epochs and iterations
+        Other Parameters
+        ----------------
+        **kwargs : dict
+            Passed to the simulator(s)
+
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
         """
 
         # Make sure n_obs is fixed, otherwise not working
@@ -267,8 +326,7 @@ class BaseTrainer(ABC):
         return losses
 
     def _train_step(self, *args):
-        """
-        Computes loss and applies gradients.
+        """Computes loss and applies gradients.
         """
         with tf.GradientTape() as tape:
             loss = self.loss(self.network, *args)
@@ -280,13 +338,14 @@ class BaseTrainer(ABC):
         return loss.numpy()
 
     def _apply_gradients(self, gradients, tensors):
-        """
-        Updates each tensor in the 'variables' list via backpropagation. Operation is performed in-place.
-        ----------
+        """Updates each tensor in the 'variables' list via backpropagation. Operation is performed in-place.
 
-        Arguments:
-        gradients: list of tf.Tensor -- the list of gradients for all neural network parameter
-        variables: list of tf.Tensor -- the list of all neural network parameters
+        Parameters
+        ----------
+        gradients: list(tf.Tensor)
+            The list of gradients for all neural network parameters
+        tensors: list(tf.Tensor)
+            The list of all neural network parameters
         """
 
         # Optional gradient clipping
@@ -296,17 +355,18 @@ class BaseTrainer(ABC):
 
     @abstractmethod
     def _forward_inference(self, n_sim, n_obs, **kwargs):
-        """
-        Simulate arguments for training, e.g.:
-        - (params, sim_data) for ParameterEstimationTrainer
-        - (model_indices, sim_data) for ModelComparisonTrainer
-        - (model_indices, params, sim_data) for MetaTrainer
+        """Simulate arguments for training (abstract method).
+
+        In subclasses, this method is implemented as:
+
+        -  (params, sim_data) for :class:'ParameterEstimationTrainer'
+        -  (model_indices, sim_data) for :class:'ModelComparisonTrainer'
+        -  (model_indices, params, sim_data) for :class:'MetaTrainer'
         """
         raise NotImplementedError
 
     def _check_consistency(self):
-        """
-        Tests whether everything works as expected. TODO - Add more checks
+        """Tests whether everything works as expected after initialization
         """
         if self.generative_model is None:
             return
@@ -336,11 +396,12 @@ class MetaTrainer(BaseTrainer):
 
     def __init__(self, network, generative_model=None, loss=None, summary_stats=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
-        """
-        Creates a trainer instance for performing single-model forward inference and training an
-        amortized neural estimator for parameter estimation (BayesFlow). If a checkpoint_path is provided, the
-        network's weights will be stored after each training epoch. If the folder contains a
-        checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.
+        """ Creates a trainer instance for performing multi-model forward inference and training an
+        amortized neural estimator for parameter estimation and model comparison (BayesFlow).
+
+        If a checkpoint_path is provided, the network's weights will be stored after each training epoch.
+        If the folder contains a checkpoint, the trainer will try to load the weights and continue
+        training with a pre-trained net.
         """
 
         # Default or custom loss
@@ -353,23 +414,35 @@ class MetaTrainer(BaseTrainer):
                          checkpoint_path, max_to_keep, clip_method, clip_value)
 
     def _forward_inference(self, n_sim, n_obs, summarize=True, **kwargs):
-        """
-        Performs one step of multi-model forward inference.
+        """Performs one step of multi-model forward inference.
+
+        Parameters
         ----------
+        n_sim : int
+            Number of simulations to perform at the given step (i.e., batch size)
+        n_obs : int or callable
+            Number of observations for each simulated dataset.
 
-        Arguments:
-        n_sim : int -- number of simulation to perform at the given step (i.e., batch size)
-        n_obs : int or callable -- if int, then treated as a fixed number of observations, if callable, then
-                                   treated as a function for sampling N, i.e., N ~ p(N)
-        ----------
+            -  if `int`, then treated as a fixed number of observations, \n
+            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`
 
-        Keyword arguments:
-        summarize : bool -- whether to summarize the data if hand-crafted summaries are given
+        summarize : bool, default:True
+            Whether to summarize the data if hand-crafted summaries are given
 
-        Returns:
-        model_indices: np.array (np.float32) of shape (batch_size, n_models) -- one-hot encoded model indices
-        params    : np.array (np.float32) of shape (batch_size, param_dim) -- array of sampled parameters
-        sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) -- array of simulated data sets
+        Returns
+        -------
+        model_indices: np.array(np.float32)
+            One-hot encoded model indices, shape (batch_size, n_models)
+        params    : np.array(np.float32)
+            array of sampled parameters, shape (batch_size, param_dim)
+        sim_data  : np.array(np.float32)
+            array of simulated data sets, shape (batch_size, n_obs, data_dim)
+
+        Raises
+        ------
+        OperationNotSupportedError
+            If the trainer has no generative model but `trainer._forward_inference`
+            is called (i.e. needs to simulate data from the generative model)
         """
 
         if self.generative_model is None:
@@ -393,11 +466,12 @@ class ModelComparisonTrainer(BaseTrainer):
 
     def __init__(self, network, generative_model=None, loss=None, summary_stats=None, optimizer=None, n_models=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
-        """
-        Creates a trainer instance for performing multi-model forward inference and training an
-        amortized neural estimator for model comparison. If a checkpoint_path is provided, the
-        network's weights will be stored after each training epoch. If the folder contains a 
-        checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.
+        """Creates a trainer instance for performing multi-model forward inference and training an
+        amortized neural estimator for model comparison.
+
+        If a checkpoint_path is provided, the network's weights will be stored after each training epoch.
+        If the folder contains a checkpoint, the trainer will try to load the weights and continue training with
+        a pre-trained net.
         """
 
         # Default or custom loss
@@ -411,8 +485,31 @@ class ModelComparisonTrainer(BaseTrainer):
                          checkpoint_path, max_to_keep, clip_method, clip_value)
 
     def train_offline(self, epochs, batch_size, *args):
-        """
-        Handles one-hot encoding if necessary and calls superclass method.
+        """Handles one-hot encoding if necessary and calls superclass method.
+
+        Trains the inference network(s) via offline learning. Assume params and data have already
+        been simulated (i.e., forward inference).
+
+        Parameters
+        ----------
+        epochs           : int
+            Number of epochs (and number of times a checkpoint is stored)
+        batch_size       : int
+            Number of simulations to perform at each backpropagation step
+
+        Other Parameters
+        ----------------
+        *args : tuple
+            Input to the trainer: (model_indices, sim_data)
+
+        Important
+        ---------
+        The last entry of ``args`` must be your simulated data!
+
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
         """
 
         # Handle automated one-hot encoding
@@ -441,20 +538,33 @@ class ModelComparisonTrainer(BaseTrainer):
         super().train_offline(epochs, batch_size, model_indices, sim_data)
 
     def _forward_inference(self, n_sim, n_obs, **kwargs):
-        """
-        Performs one step of multi-model forward inference.
-        ----------
-        
-        Arguments:
-        n_sim : int -- number of simulation to perform at the given step (i.e., batch size)
-        n_obs : int -- number of observations to generate from each forward model
-        ----------
+        """Performs one step of multi-model forward inference.
 
-        Returns:
-        model_indices_oh : np.array (np.float32) of shape (batch_size, n_models)
-                            -- array of one-hot-encoded model-indices
-        sim_data         : np.array (np.float32) of shape (batch_size, N, data_dim)
-                            -- array of simulated data sets
+        Parameters
+        ----------
+        n_sim : int
+            Number of simulations to perform at the given step (i.e., batch size)
+        n_obs : int or callable
+            Number of observations for each simulated dataset.
+
+            -  if `int`, then treated as a fixed number of observations, \n
+            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`
+
+        summarize : bool, default:True
+            Whether to summarize the data if hand-crafted summaries are given
+
+        Returns
+        -------
+        model_indices: np.array(np.float32)
+            One-hot encoded model indices, shape (batch_size, n_models)
+        sim_data  : np.array(np.float32)
+            array of simulated data sets, shape (batch_size, n_obs, data_dim)
+
+        Raises
+        ------
+        OperationNotSupportedError
+            If the trainer has no generative model but `trainer._forward_inference`
+            is called (i.e. needs to simulate data from the generative model)
         """
 
         if self.generative_model is None:
@@ -474,11 +584,12 @@ class ParameterEstimationTrainer(BaseTrainer):
 
     def __init__(self, network, generative_model=None, loss=None, summary_stats=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
-        """
-        Creates a trainer instance for performing single-model forward inference and training an
-        amortized neural estimator for parameter estimation (BayesFlow). If a checkpoint_path is provided, the
-        network's weights will be stored after each training epoch. If the folder contains a 
-        checkpoint, the trainer will try to load the weights and continue training with a pre-trained net.
+        """Creates a trainer instance for performing single-model forward inference and training an
+        amortized neural estimator for parameter estimation (BayesFlow).
+
+        If a checkpoint_path is provided, the network's weights will be stored after each training epoch.
+        If the folder contains a  checkpoint, the trainer will try to load the weights and continue training
+        with a pre-trained net.
         """
 
         if loss is None:
@@ -490,24 +601,29 @@ class ParameterEstimationTrainer(BaseTrainer):
                          checkpoint_path, max_to_keep, clip_method, clip_value)
 
     def train_experience_replay(self, epochs, batch_size, iterations_per_epoch, capacity, n_obs, **kwargs):
-        """
-        Trains the inference network(s) via experience replay. 
+        """Trains the inference network(s) via experience replay.
         
-        Additional keyword arguments are passed to the simulators.
+        Parameters
         ----------
-        
-        Arguments:
-        epochs               : int -- number of epochs (and number of times a checkpoint is stored)
-        batch_size           : int -- number of simulations to perform at each backprop step
-        iterations_per_epoch : int -- number of batch simulations to perform per epoch
-        capacity               : int -- max number of batches to store in buffer
-        n_obs                : int or callable -- if int, then treated as a fixed number of observations,
-                               if callable, then treated as a function for sampling N, i.e., N ~ p(N)
-        
-        ----------
+        epochs               : int
+            Number of epochs (and number of times a checkpoint is stored)
+        batch_size           : int
+            Number of simulations to perform at each backpropagation step
+        iterations_per_epoch : int
+            Number of batch simulations to perform per epoch
+        capacity               : int
+            Max number of batches to store in buffer
+        n_obs : int or callable
+            Number of observations for each simulated dataset.
 
-        Returns:
-        losses : dict (ep_num : list_of_losses) -- a dictionary storing the losses across epochs and iterations
+            -  if `int`, then treated as a fixed number of observations, \n
+            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`
+
+
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
         """
 
         # Initialize losses dictionary and memory replay buffer
@@ -550,21 +666,34 @@ class ParameterEstimationTrainer(BaseTrainer):
 
     def _forward_inference(self, n_sim, n_obs, summarize=True, **kwargs):
         """
-        Performs one step of multi-model forward inference.
-        ----------
-        
-        Arguments:
-        n_sim : int -- number of simulation to perform at the given step (i.e., batch size)
-        n_obs : int or callable -- if int, then treated as a fixed number of observations, if callable, then
-                                   treated as a function for sampling N, i.e., N ~ p(N)
-        ----------
+        Performs one step of single-model forward inference.
 
-        Keyword arguments:
-        summarize : bool -- whether to summarize the data if hand-crafted summaries are given
+        Parameters
+        ----------
+        n_sim : int
+            Number of simulations to perform at the given step (i.e., batch size)
+        n_obs : int or callable
+            Number of observations for each simulated dataset.
 
-        Returns:
-        params    : np.array (np.float32) of shape (batch_size, param_dim) -- array of sampled parameters
-        sim_data  : np.array (np.float32) of shape (batch_size, n_obs, data_dim) -- array of simulated data sets
+            -  if `int`, then treated as a fixed number of observations, \n
+            -  if `callable`, then treated as a function for sampling N, i.e., :math:`N \sim p(N)`
+
+        summarize : bool, default:True
+            Whether to summarize the data if hand-crafted summaries are given
+
+        Returns
+        -------
+        params    : np.array(np.float32)
+            array of sampled parameters, shape (batch_size, param_dim)
+        sim_data  : np.array(np.float32)
+            array of simulated data sets, shape (batch_size, n_obs, data_dim)
+
+        Raises
+        ------
+        OperationNotSupportedError
+            If the trainer has no generative model but `trainer._forward_inference`
+            is called (i.e. needs to simulate data from the generative model)
+
         """
 
         if self.generative_model is None:
