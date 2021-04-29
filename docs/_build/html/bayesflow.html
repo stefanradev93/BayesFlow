@@ -712,10 +712,10 @@ e.g. when a trainer is initialized without generative model but the user demands
 <span id="bayesflow-losses-module"></span><h2>bayesflow.losses module<a class="headerlink" href="#module-bayesflow.losses" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="bayesflow.losses.mean_squared_loss">
-<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">mean_squared_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#mean_squared_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.mean_squared_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the mean squared loss</p>
+<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">mean_squared_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#mean_squared_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.mean_squared_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the mean squared loss between true and predicted parameters.</p>
 <dl class="simple">
-<dt>model<span class="classifier">tf.keras.Model</span></dt><dd><p>A neural network with a single output vector (posterior means)</p>
+<dt>network<span class="classifier">tf.keras.Model</span></dt><dd><p>A neural network with a single output vector (posterior means)</p>
 </dd>
 <dt>params<span class="classifier">tf.Tensor of shape (batch_size, n_out_dim)</span></dt><dd><p>Data-generating parameters, as sampled from prior</p>
 </dd>
@@ -733,13 +733,34 @@ e.g. when a trainer is initialized without generative model but the user demands
 </dd></dl>
 
 <dl class="py function">
-<dt id="bayesflow.losses.heteroscedastic_loss">
-<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">heteroscedastic_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#heteroscedastic_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.heteroscedastic_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the heteroscedastic loss</p>
+<dt id="bayesflow.losses.meta_amortized_loss">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">meta_amortized_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#meta_amortized_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.meta_amortized_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the loss of a MetaAmortizer instance (KL + LogLoss)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>model</strong> (<em>tf.keras.Model</em>) – A neural network with a single output vector (posterior means)</p></li>
+<li><p><strong>network</strong> (<em>tf.keras.Model</em>) – A neural network with a single output vector (posterior means)</p></li>
+<li><p><strong>params</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>n_out_dim</em><em>)</em>) – Data-generating parameters, as sampled from prior</p></li>
+<li><p><strong>x</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>N</em><em>, </em><em>x_dim</em><em>)</em>) – Synthetic data sets generated by the parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loss</strong> – A single scalar value representing the meta amortized loss, shape (,)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bayesflow.losses.heteroscedastic_loss">
+<code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">heteroscedastic_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#heteroscedastic_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.heteroscedastic_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the heteroscedastic loss between true and predicted parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>tf.keras.Model</em>) – A neural network with a single output vector (posterior means)</p></li>
 <li><p><strong>params</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>n_out_dim</em><em>)</em>) – Data-generating parameters, as sampled from prior</p></li>
 <li><p><strong>x</strong> (<em>tf.Tensor of shape</em><em> (</em><em>batch_size</em><em>, </em><em>N</em><em>, </em><em>x_dim</em><em>)</em>) – Synthetic data sets generated by the parameters</p></li>
 </ul>
@@ -756,8 +777,8 @@ e.g. when a trainer is initialized without generative model but the user demands
 <dl class="py function">
 <dt id="bayesflow.losses.kl_latent_space">
 <code class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></code><code class="sig-name descname"><span class="pre">kl_latent_space</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bayesflow/losses.html#kl_latent_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.kl_latent_space" title="Permalink to this definition">¶</a></dt>
-<dd><p class="rubric">Notes</p>
-<p>TODO: Make sure that connectors know the loss structure AND network structure</p>
+<dd><p>Computes the Kullback-Leibler divergence (Maximum Likelihood Loss) between true and approximate
+posterior using simulated data and parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
