@@ -1,0 +1,1816 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Model Comparison Workflow"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os, sys\n",
+    "sys.path.append(os.path.abspath(os.path.join('../..')))\n",
+    "\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import pandas as pd\n",
+    "from functools import partial\n",
+    "\n",
+    "from numba import njit\n",
+    "import tensorflow as tf\n",
+    "from tensorflow.keras.layers import LSTM\n",
+    "from tensorflow.keras.models import Sequential"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from bayesflow.networks import SequenceNet, EvidentialNetwork\n",
+    "from bayesflow.trainers import ModelComparisonTrainer\n",
+    "from bayesflow.models import GenerativeModel\n",
+    "from bayesflow.amortizers import MultiModelAmortizer\n",
+    "from bayesflow.diagnostics import plot_confusion_matrix, plot_calibration_curves, expected_calibration_error"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%load_ext autoreload\n",
+    "%autoreload 2"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This notebook contains an example simulation-based model comparison workflow."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Simulator settings"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Model prior\n",
+    "Implements sampling from $p(\\mathcal{M})$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {
+    "code_folding": []
+   },
+   "outputs": [],
+   "source": [
+    "def model_prior(batch_size, n_models=3, p_vals=None):\n",
+    "    \"\"\"\n",
+    "    Samples from the models' prior batch size times and converts to one-hot.\n",
+    "    Assumes equal model priors.\n",
+    "    ----------\n",
+    "\n",
+    "    Arguments:\n",
+    "    batch_size : int  -- the number of samples to draw from the prior\n",
+    "    ----------\n",
+    "\n",
+    "    Returns:\n",
+    "    m_true : np.ndarray of shape (batch_size, theta_dim) -- the samples batch of parameters\n",
+    "    \"\"\"\n",
+    "\n",
+    "    # Equal priors, if nothign specified\n",
+    "    if p_vals is None:\n",
+    "        p_vals = [1 / n_models] * n_models\n",
+    "    m_idx = np.random.choice(n_models, size=batch_size, p=p_vals).astype(np.int32)\n",
+    "    return m_idx"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Parameter priors\n",
+    "Implements sampling from each $p(\\theta_j\\,|\\,\\mathcal{M}_j)$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "code_folding": [
+     0,
+     20,
+     41
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "def model1_params_prior(**args):\n",
+    "    \"\"\"\n",
+    "    Samples from the prior of the HH-2pars theta = (gbar_Na,gbar_K)\n",
+    "    ----------\n",
+    "    \n",
+    "    Arguments:\n",
+    "    ----------\n",
+    "    \n",
+    "    Output:\n",
+    "    theta : np.ndarray of shape (1, theta_dim) -- the samples of parameters\n",
+    "            or a dict with param key-values\n",
+    "    \"\"\"\n",
+    "    \n",
+    "    theta = [\n",
+    "         np.random.uniform(low=1.5, high=30), \n",
+    "         np.random.uniform(low=0.3, high=15)\n",
+    "    ]\n",
+    "    return np.array(theta)\n",
+    "\n",
+    "\n",
+    "def model2_params_prior(**args):\n",
+    "    \"\"\"\n",
+    "     Samples from the prior of the HH-3pars theta = (gbar_Na,gbar_K,gbar_M)\n",
+    "    ----------\n",
+    "    \n",
+    "    Arguments:\n",
+    "    ----------\n",
+    "    \n",
+    "    Output:\n",
+    "    theta : np.ndarray of shape (1, theta_dim) -- the samples of parameters\n",
+    "            or a dict with param key-values\n",
+    "    \"\"\"\n",
+    "    \n",
+    "    theta = [\n",
+    "        np.random.uniform(low=1.5, high=30), \n",
+    "        np.random.uniform(low=0.3, high=15),\n",
+    "        np.random.uniform(low=0.005, high=0.3)  \n",
+    "    ]\n",
+    "    return np.array(theta)\n",
+    "\n",
+    "\n",
+    "def model3_params_prior(**args):\n",
+    "    \"\"\"\n",
+    "    Samples from the prior of the HH-4pars theta = (gbar_l,gbar_Na,gbar_K,gbar_M)\n",
+    "    ----------\n",
+    "    \n",
+    "    Arguments:\n",
+    "    ----------\n",
+    "    \n",
+    "    Output:\n",
+    "    theta : np.ndarray of shape (1, theta_dim) -- the samples of parameters\n",
+    "            or a dict with param key-values\n",
+    "    \"\"\"\n",
+    "    \n",
+    "    theta = [\n",
+    "        np.random.uniform(low=0.01, high=0.18),\n",
+    "        np.random.uniform(low=1.5, high=30), \n",
+    "        np.random.uniform(low=0.1, high=15),\n",
+    "        np.random.uniform(low=0.005, high=0.3)\n",
+    "    ]\n",
+    "    return np.array(theta)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Simulators\n",
+    "Implements each forward model (stochastic simulator) $g_j(\\theta_j,\\xi)$. Uses $numba$ for just-in-time compilation (i.e., speed)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "code_folding": []
+   },
+   "outputs": [],
+   "source": [
+    "\n",
+    "@njit\n",
+    "def forward_model1(params, n_obs, V0=-70, I_input=3, dt=0.2):\n",
+    "    # HH-2pars\n",
+    "\n",
+    "    # pars = [gbar_Na, gbar_K]\n",
+    "    # I_input = input current in muA/cm2\n",
+    "    # I_duration = duration of current input in ms\n",
+    "    # dt = dt\n",
+    "\n",
+    "    I_duration = n_obs\n",
+    "    gbar_Na, gbar_K = params\n",
+    "\n",
+    "    # fixed parameters\n",
+    "    tau_max = 6e2  # ms\n",
+    "    Vt = -60.  # mV\n",
+    "    nois_fact = 0.1  # uA/cm2\n",
+    "    E_leak = -70.  # mV\n",
+    "    E_Na = 53  # mV\n",
+    "    E_K = -107  # mV\n",
+    "    C = 1\n",
+    "    g_l = 0.1\n",
+    "    gbar_M = 0.07\n",
+    "\n",
+    "    tstep = float(dt)\n",
+    "\n",
+    "    ####################################\n",
+    "    # Current (I) muA/cm2\n",
+    "    t_on = 10\n",
+    "    t_post = 10\n",
+    "    I_duration = np.round(n_obs * dt - t_on - t_post - dt, 2)\n",
+    "    assert I_duration > 0, \"Please provide n_obs >= 106!\"\n",
+    "    t_off = I_duration + t_post\n",
+    "\n",
+    "    t = np.arange(0, np.round(t_on + t_off + dt, 2), dt)\n",
+    "\n",
+    "    I = np.zeros_like(t)\n",
+    "    I[int(np.round(t_on / dt)):int(np.round(t_off / dt))] = I_input\n",
+    "\n",
+    "    ####################################\n",
+    "    # kinetics\n",
+    "    def efun(z):\n",
+    "        if np.abs(z) < 1e-4:\n",
+    "            return 1 - z / 2\n",
+    "        else:\n",
+    "            return z / (np.exp(z) - 1)\n",
+    "\n",
+    "    def alpha_m(x):\n",
+    "        v1 = x - Vt - 13.\n",
+    "        return 0.32 * efun(-0.25 * v1) / 0.25\n",
+    "\n",
+    "    def beta_m(x):\n",
+    "        v1 = x - Vt - 40\n",
+    "        return 0.28 * efun(0.2 * v1) / 0.2\n",
+    "\n",
+    "    def alpha_h(x):\n",
+    "        v1 = x - Vt - 17.\n",
+    "        return 0.128 * np.exp(-v1 / 18.)\n",
+    "\n",
+    "    def beta_h(x):\n",
+    "        v1 = x - Vt - 40.\n",
+    "        return 4.0 / (1 + np.exp(-0.2 * v1))\n",
+    "\n",
+    "    def alpha_n(x):\n",
+    "        v1 = x - Vt - 15.\n",
+    "        return 0.032 * efun(-0.2 * v1) / 0.2\n",
+    "\n",
+    "    def beta_n(x):\n",
+    "        v1 = x - Vt - 10.\n",
+    "        return 0.5 * np.exp(-v1 / 40)\n",
+    "\n",
+    "    # steady-states and time constants\n",
+    "    def tau_n(x):\n",
+    "        return 1 / (alpha_n(x) + beta_n(x))\n",
+    "\n",
+    "    def n_inf(x):\n",
+    "        return alpha_n(x) / (alpha_n(x) + beta_n(x))\n",
+    "\n",
+    "    def tau_m(x):\n",
+    "        return 1 / (alpha_m(x) + beta_m(x))\n",
+    "\n",
+    "    def m_inf(x):\n",
+    "        return alpha_m(x) / (alpha_m(x) + beta_m(x))\n",
+    "\n",
+    "    def tau_h(x):\n",
+    "        return 1 / (alpha_h(x) + beta_h(x))\n",
+    "\n",
+    "    def h_inf(x):\n",
+    "        return alpha_h(x) / (alpha_h(x) + beta_h(x))\n",
+    "\n",
+    "    # slow non-inactivating K+\n",
+    "    def p_inf(x):\n",
+    "        v1 = x + 35.\n",
+    "        return 1.0 / (1. + np.exp(-0.1 * v1))\n",
+    "\n",
+    "    def tau_p(x):\n",
+    "        v1 = x + 35.\n",
+    "        return tau_max / (3.3 * np.exp(0.05 * v1) + np.exp(-0.05 * v1))\n",
+    "\n",
+    "    ####################################\n",
+    "    # simulation from initial point\n",
+    "    V = np.zeros_like(t)  # voltage\n",
+    "    n = np.zeros_like(t)\n",
+    "    m = np.zeros_like(t)\n",
+    "    h = np.zeros_like(t)\n",
+    "    p = np.zeros_like(t)\n",
+    "\n",
+    "    V[0] = float(V0)\n",
+    "    n[0] = n_inf(V[0])\n",
+    "    m[0] = m_inf(V[0])\n",
+    "    h[0] = h_inf(V[0])\n",
+    "    p[0] = p_inf(V[0])\n",
+    "\n",
+    "    for i in range(1, t.shape[0]):\n",
+    "        tau_V_inv = ((m[i - 1] ** 3) * gbar_Na * h[i - 1] + (n[i - 1] ** 4) * gbar_K + g_l + gbar_M * p[i - 1]) / C\n",
+    "        V_inf = ((m[i - 1] ** 3) * gbar_Na * h[i - 1] * E_Na + (n[i - 1] ** 4) * gbar_K * E_K + g_l * E_leak + gbar_M *\n",
+    "                 p[i - 1] * E_K\n",
+    "                 + I[i - 1] + nois_fact * np.random.randn() / (tstep ** 0.5)) / (tau_V_inv * C)\n",
+    "        V[i] = V_inf + (V[i - 1] - V_inf) * np.exp(-tstep * tau_V_inv)\n",
+    "        n[i] = n_inf(V[i]) + (n[i - 1] - n_inf(V[i])) * np.exp(-tstep / tau_n(V[i]))\n",
+    "        m[i] = m_inf(V[i]) + (m[i - 1] - m_inf(V[i])) * np.exp(-tstep / tau_m(V[i]))\n",
+    "        h[i] = h_inf(V[i]) + (h[i - 1] - h_inf(V[i])) * np.exp(-tstep / tau_h(V[i]))\n",
+    "        p[i] = p_inf(V[i]) + (p[i - 1] - p_inf(V[i])) * np.exp(-tstep / tau_p(V[i]))\n",
+    "\n",
+    "    return np.expand_dims(V, -1)\n",
+    "\n",
+    "\n",
+    "@njit\n",
+    "def forward_model2(params, n_obs, V0=-70, I_input=3, dt=0.2):\n",
+    "    # HH-3pars\n",
+    "\n",
+    "    # pars = [gbar_Na, gbar_K, gbar_M]\n",
+    "    # I_input = input current in muA/cm2\n",
+    "    # I_duration = duration of current input in ms\n",
+    "    # dt = dt\n",
+    "\n",
+    "    I_duration = n_obs\n",
+    "    gbar_Na, gbar_K, gbar_M = params\n",
+    "\n",
+    "    # fixed parameters\n",
+    "    tau_max = 6e2  # ms\n",
+    "    Vt = -60.  # mV\n",
+    "    nois_fact = 0.1  # uA/cm2\n",
+    "    E_leak = -70.  # mV\n",
+    "    E_Na = 53  # mV\n",
+    "    E_K = -107  # mV\n",
+    "    C = 1\n",
+    "    g_l = 0.1\n",
+    "\n",
+    "    tstep = float(dt)\n",
+    "\n",
+    "    ####################################\n",
+    "    # Current (I) muA/cm2\n",
+    "    t_on = 10\n",
+    "    t_post = 10\n",
+    "    I_duration = np.round(n_obs * dt - t_on - t_post - dt, 2)\n",
+    "    assert I_duration > 0, \"Please provide n_obs >= 106!\"\n",
+    "    t_off = I_duration + t_post\n",
+    "\n",
+    "    t = np.arange(0, np.round(t_on + t_off + dt, 2), dt)\n",
+    "\n",
+    "    I = np.zeros_like(t)\n",
+    "    I[int(np.round(t_on / dt)):int(np.round(t_off / dt))] = I_input\n",
+    "\n",
+    "    ####################################\n",
+    "    # kinetics\n",
+    "    def efun(z):\n",
+    "        if np.abs(z) < 1e-4:\n",
+    "            return 1 - z / 2\n",
+    "        else:\n",
+    "            return z / (np.exp(z) - 1)\n",
+    "\n",
+    "    def alpha_m(x):\n",
+    "        v1 = x - Vt - 13.\n",
+    "        return 0.32 * efun(-0.25 * v1) / 0.25\n",
+    "\n",
+    "    def beta_m(x):\n",
+    "        v1 = x - Vt - 40\n",
+    "        return 0.28 * efun(0.2 * v1) / 0.2\n",
+    "\n",
+    "    def alpha_h(x):\n",
+    "        v1 = x - Vt - 17.\n",
+    "        return 0.128 * np.exp(-v1 / 18.)\n",
+    "\n",
+    "    def beta_h(x):\n",
+    "        v1 = x - Vt - 40.\n",
+    "        return 4.0 / (1 + np.exp(-0.2 * v1))\n",
+    "\n",
+    "    def alpha_n(x):\n",
+    "        v1 = x - Vt - 15.\n",
+    "        return 0.032 * efun(-0.2 * v1) / 0.2\n",
+    "\n",
+    "    def beta_n(x):\n",
+    "        v1 = x - Vt - 10.\n",
+    "        return 0.5 * np.exp(-v1 / 40)\n",
+    "\n",
+    "    # steady-states and time constants\n",
+    "    def tau_n(x):\n",
+    "        return 1 / (alpha_n(x) + beta_n(x))\n",
+    "\n",
+    "    def n_inf(x):\n",
+    "        return alpha_n(x) / (alpha_n(x) + beta_n(x))\n",
+    "\n",
+    "    def tau_m(x):\n",
+    "        return 1 / (alpha_m(x) + beta_m(x))\n",
+    "\n",
+    "    def m_inf(x):\n",
+    "        return alpha_m(x) / (alpha_m(x) + beta_m(x))\n",
+    "\n",
+    "    def tau_h(x):\n",
+    "        return 1 / (alpha_h(x) + beta_h(x))\n",
+    "\n",
+    "    def h_inf(x):\n",
+    "        return alpha_h(x) / (alpha_h(x) + beta_h(x))\n",
+    "\n",
+    "    # slow non-inactivating K+\n",
+    "    def p_inf(x):\n",
+    "        v1 = x + 35.\n",
+    "        return 1.0 / (1. + np.exp(-0.1 * v1))\n",
+    "\n",
+    "    def tau_p(x):\n",
+    "        v1 = x + 35.\n",
+    "        return tau_max / (3.3 * np.exp(0.05 * v1) + np.exp(-0.05 * v1))\n",
+    "\n",
+    "    ####################################\n",
+    "    # simulation from initial point\n",
+    "    V = np.zeros_like(t)  # voltage\n",
+    "    n = np.zeros_like(t)\n",
+    "    m = np.zeros_like(t)\n",
+    "    h = np.zeros_like(t)\n",
+    "    p = np.zeros_like(t)\n",
+    "\n",
+    "    V[0] = float(V0)\n",
+    "    n[0] = n_inf(V[0])\n",
+    "    m[0] = m_inf(V[0])\n",
+    "    h[0] = h_inf(V[0])\n",
+    "    p[0] = p_inf(V[0])\n",
+    "\n",
+    "    for i in range(1, t.shape[0]):\n",
+    "        tau_V_inv = ((m[i - 1] ** 3) * gbar_Na * h[i - 1] + (n[i - 1] ** 4) * gbar_K + g_l + gbar_M * p[i - 1]) / C\n",
+    "        V_inf = ((m[i - 1] ** 3) * gbar_Na * h[i - 1] * E_Na + (n[i - 1] ** 4) * gbar_K * E_K + g_l * E_leak + gbar_M *\n",
+    "                 p[i - 1] * E_K\n",
+    "                 + I[i - 1] + nois_fact * np.random.randn() / (tstep ** 0.5)) / (tau_V_inv * C)\n",
+    "        V[i] = V_inf + (V[i - 1] - V_inf) * np.exp(-tstep * tau_V_inv)\n",
+    "        n[i] = n_inf(V[i]) + (n[i - 1] - n_inf(V[i])) * np.exp(-tstep / tau_n(V[i]))\n",
+    "        m[i] = m_inf(V[i]) + (m[i - 1] - m_inf(V[i])) * np.exp(-tstep / tau_m(V[i]))\n",
+    "        h[i] = h_inf(V[i]) + (h[i - 1] - h_inf(V[i])) * np.exp(-tstep / tau_h(V[i]))\n",
+    "        p[i] = p_inf(V[i]) + (p[i - 1] - p_inf(V[i])) * np.exp(-tstep / tau_p(V[i]))\n",
+    "\n",
+    "    return np.expand_dims(V, -1)\n",
+    "\n",
+    "\n",
+    "@njit\n",
+    "def forward_model3(params, n_obs, V0=-70, I_input=3, dt=0.2):\n",
+    "    # HH-4pars\n",
+    "\n",
+    "    # pars = [gbar_l, gbar_Na, gbar_K, gbar_M]\n",
+    "    # I_input = input current in muA/cm2\n",
+    "    # I_duration = duration of current input in ms\n",
+    "    # dt = dt\n",
+    "\n",
+    "    I_duration = n_obs\n",
+    "    g_l, gbar_Na, gbar_K, gbar_M = params\n",
+    "\n",
+    "    # fixed parameters\n",
+    "    tau_max = 6e2  # ms\n",
+    "    Vt = -60.  # mV\n",
+    "    nois_fact = 0.1  # uA/cm2\n",
+    "    E_leak = -70.  # mV\n",
+    "    E_Na = 53  # mV\n",
+    "    E_K = -107  # mV\n",
+    "    C = 1\n",
+    "\n",
+    "    tstep = float(dt)\n",
+    "\n",
+    "    ####################################\n",
+    "    # Current (I) muA/cm2\n",
+    "    t_on = 10\n",
+    "    t_post = 10\n",
+    "    I_duration = np.round(n_obs * dt - t_on - t_post - dt, 2)\n",
+    "    assert I_duration > 0, \"Please provide n_obs >= 106!\"\n",
+    "    t_off = I_duration + t_post\n",
+    "\n",
+    "    t = np.arange(0, np.round(t_on + t_off + dt, 2), dt)\n",
+    "\n",
+    "    I = np.zeros_like(t)\n",
+    "    I[int(np.round(t_on / dt)):int(np.round(t_off / dt))] = I_input\n",
+    "\n",
+    "    ####################################\n",
+    "    # kinetics\n",
+    "    def efun(z):\n",
+    "        if np.abs(z) < 1e-4:\n",
+    "            return 1 - z / 2\n",
+    "        else:\n",
+    "            return z / (np.exp(z) - 1)\n",
+    "\n",
+    "    def alpha_m(x):\n",
+    "        v1 = x - Vt - 13.\n",
+    "        return 0.32 * efun(-0.25 * v1) / 0.25\n",
+    "\n",
+    "    def beta_m(x):\n",
+    "        v1 = x - Vt - 40\n",
+    "        return 0.28 * efun(0.2 * v1) / 0.2\n",
+    "\n",
+    "    def alpha_h(x):\n",
+    "        v1 = x - Vt - 17.\n",
+    "        return 0.128 * np.exp(-v1 / 18.)\n",
+    "\n",
+    "    def beta_h(x):\n",
+    "        v1 = x - Vt - 40.\n",
+    "        return 4.0 / (1 + np.exp(-0.2 * v1))\n",
+    "\n",
+    "    def alpha_n(x):\n",
+    "        v1 = x - Vt - 15.\n",
+    "        return 0.032 * efun(-0.2 * v1) / 0.2\n",
+    "\n",
+    "    def beta_n(x):\n",
+    "        v1 = x - Vt - 10.\n",
+    "        return 0.5 * np.exp(-v1 / 40)\n",
+    "\n",
+    "    # steady-states and time constants\n",
+    "    def tau_n(x):\n",
+    "        return 1 / (alpha_n(x) + beta_n(x))\n",
+    "\n",
+    "    def n_inf(x):\n",
+    "        return alpha_n(x) / (alpha_n(x) + beta_n(x))\n",
+    "\n",
+    "    def tau_m(x):\n",
+    "        return 1 / (alpha_m(x) + beta_m(x))\n",
+    "\n",
+    "    def m_inf(x):\n",
+    "        return alpha_m(x) / (alpha_m(x) + beta_m(x))\n",
+    "\n",
+    "    def tau_h(x):\n",
+    "        return 1 / (alpha_h(x) + beta_h(x))\n",
+    "\n",
+    "    def h_inf(x):\n",
+    "        return alpha_h(x) / (alpha_h(x) + beta_h(x))\n",
+    "\n",
+    "    # slow non-inactivating K+\n",
+    "    def p_inf(x):\n",
+    "        v1 = x + 35.\n",
+    "        return 1.0 / (1. + np.exp(-0.1 * v1))\n",
+    "\n",
+    "    def tau_p(x):\n",
+    "        v1 = x + 35.\n",
+    "        return tau_max / (3.3 * np.exp(0.05 * v1) + np.exp(-0.05 * v1))\n",
+    "\n",
+    "    ####################################\n",
+    "    # simulation from initial point\n",
+    "    V = np.zeros_like(t)  # voltage\n",
+    "    n = np.zeros_like(t)\n",
+    "    m = np.zeros_like(t)\n",
+    "    h = np.zeros_like(t)\n",
+    "    p = np.zeros_like(t)\n",
+    "\n",
+    "    V[0] = float(V0)\n",
+    "    n[0] = n_inf(V[0])\n",
+    "    m[0] = m_inf(V[0])\n",
+    "    h[0] = h_inf(V[0])\n",
+    "    p[0] = p_inf(V[0])\n",
+    "\n",
+    "    for i in range(1, t.shape[0]):\n",
+    "        tau_V_inv = ((m[i - 1] ** 3) * gbar_Na * h[i - 1] + (n[i - 1] ** 4) * gbar_K + g_l + gbar_M * p[i - 1]) / C\n",
+    "        V_inf = ((m[i - 1] ** 3) * gbar_Na * h[i - 1] * E_Na + (n[i - 1] ** 4) * gbar_K * E_K + g_l * E_leak + gbar_M *\n",
+    "                 p[i - 1] * E_K\n",
+    "                 + I[i - 1] + nois_fact * np.random.randn() / (tstep ** 0.5)) / (tau_V_inv * C)\n",
+    "        V[i] = V_inf + (V[i - 1] - V_inf) * np.exp(-tstep * tau_V_inv)\n",
+    "        n[i] = n_inf(V[i]) + (n[i - 1] - n_inf(V[i])) * np.exp(-tstep / tau_n(V[i]))\n",
+    "        m[i] = m_inf(V[i]) + (m[i - 1] - m_inf(V[i])) * np.exp(-tstep / tau_m(V[i]))\n",
+    "        h[i] = h_inf(V[i]) + (h[i - 1] - h_inf(V[i])) * np.exp(-tstep / tau_h(V[i]))\n",
+    "        p[i] = p_inf(V[i]) + (p[i - 1] - p_inf(V[i])) * np.exp(-tstep / tau_p(V[i]))\n",
+    "\n",
+    "    return np.expand_dims(V, -1)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## An example amortized model comparison"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Prior predictive checks"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Add your prior predictive checks here"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Train an amortized estimator"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "evidential_meta = {\n",
+    "    'n_models': 3,\n",
+    "    'out_activation': 'softplus',\n",
+    "    'n_dense': 3,\n",
+    "    'dense_args': {'kernel_initializer': 'glorot_uniform', 'activation': 'relu', 'units': 128}\n",
+    "}\n",
+    "evidential_net = EvidentialNetwork(evidential_meta)\n",
+    "\n",
+    "summary_net = SequenceNet()\n",
+    "\n",
+    "\n",
+    "amortizer = MultiModelAmortizer(evidential_net, summary_net)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "priors = [model1_params_prior, model2_params_prior, model3_params_prior]\n",
+    "simulators = [forward_model1, forward_model2, forward_model3]\n",
+    "generative_model = GenerativeModel(model_prior, priors, simulators)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "trainer = ModelComparisonTrainer(amortizer, generative_model)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Online training\n",
+    "Just a fast demo training."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "6d432bc393a5483c95e9643ba7f69342",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 1:   0%|          | 0/300 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "002dd790320a46869ad6393c541d3217",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 2:   0%|          | 0/300 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "1034ee8f8b63434ea3e8efe839f22a26",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 3:   0%|          | 0/300 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "06af05d7b6e5445ea1890428181fb611",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 4:   0%|          | 0/300 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "627c06d0d36146238b8da795eadb7325",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 5:   0%|          | 0/300 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "fbdcd1034ce64933b30c686e21dbfaa9",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 6:   0%|          | 0/300 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "09b9d0cb9a514b4e99476ddc0b34b020",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 7:   0%|          | 0/300 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "7d3aaf3c6b4f44f3b7716d122720b697",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 8:   0%|          | 0/300 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "af49e62e6f3e4fc7b9df0bc75232d7e7",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 9:   0%|          | 0/300 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "040dcd822a5b46a2ad1459ac32962329",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 10:   0%|          | 0/300 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "CPU times: user 14min 23s, sys: 48.9 s, total: 15min 11s\n",
+      "Wall time: 15min 2s\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "losses = trainer.train_online(epochs=10, iterations_per_epoch=300, batch_size=32, n_obs=150)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Offline training"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Converting 300 simulations to a TensorFlow data set...\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "b534ebc2b0ab46588b8eb7feedb4ba6c",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 1:   0%|          | 0/9 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "3bb12ecedaed4d6eafeb346627a1a8a3",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 2:   0%|          | 0/9 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "c55cd8f9668d40268544a56a9deab74e",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 3:   0%|          | 0/9 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "04664ec9230f4b08a3aafb8df85dba98",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 4:   0%|          | 0/9 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "0c6a1166aaa3495ca26a314650531cd6",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 5:   0%|          | 0/9 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "6226b5bfac214b2f8b657ca0d4fc38b0",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 6:   0%|          | 0/9 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "a7dcffb2671a442d86c2f850a4e1e64e",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 7:   0%|          | 0/9 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "0d134060bada40b7bc49fa5da364afc3",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 8:   0%|          | 0/9 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "c29ce2f90712483497cb90196eee8910",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 9:   0%|          | 0/9 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "85477f8f56014297b0c56eafd3523843",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 10:   0%|          | 0/9 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "CPU times: user 28.8 s, sys: 1.52 s, total: 30.3 s\n",
+      "Wall time: 29.7 s\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "n_sim = 300\n",
+    "n_obs = 150\n",
+    "model_indices, _true_params, sim_data = trainer.generative_model(n_sim, n_obs)\n",
+    "\n",
+    "losses = trainer.train_offline(epochs=10, batch_size=32, \n",
+    "                               model_indices=model_indices, sim_data=sim_data)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Round-based training"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Simulating initial 100 data sets...\n",
+      "Converting 100 simulations to a TensorFlow data set...\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "f3ef4ac8e8294ea287f98c1164a9e70f",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 1:   0%|          | 0/6 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "17c966a294c242b284211ee59f6f920b",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 2:   0%|          | 0/6 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "7e1b7130cbfd4d5eba9eb27fac372e2d",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 3:   0%|          | 0/6 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "3a2c64304a9c4a219518b78f9f0cbff4",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 4:   0%|          | 0/6 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "776f05cebb81453bb54b96041bd288d1",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 5:   0%|          | 0/6 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "d93f2f9d34ff49d7a0b64062ace59bb2",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 6:   0%|          | 0/6 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "bf03ce379a0342f985071bceddf48a1a",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 7:   0%|          | 0/6 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "638ea62c387a4c42a0efe6569c2c8eda",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 8:   0%|          | 0/6 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "533f5f8231f34071bcaa15f9db20ee6e",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 9:   0%|          | 0/6 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "e5f30f7a62aa45069b7e63b0ea8b7ece",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 10:   0%|          | 0/6 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Simulating new 100 data sets and appending to previous...\n",
+      "New total number of simulated data sets: 200\n",
+      "Converting 200 simulations to a TensorFlow data set...\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "dd77a06567e0460e9f72999571d02f27",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 1:   0%|          | 0/12 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "1d611d6875d24e9dbd2e93b467b5f614",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 2:   0%|          | 0/12 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "322f96b78dd24feaaf90ea87253d4ea0",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 3:   0%|          | 0/12 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "f120059cf1a344eda40cc528cb1bfe6d",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 4:   0%|          | 0/12 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "a031919f5f784f2e859dee4ed673c36c",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 5:   0%|          | 0/12 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "3cd56bd38981459e85b329108f92b46b",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 6:   0%|          | 0/12 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "d917a1c4dae442a4a85395ce3783f9b4",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 7:   0%|          | 0/12 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "ec4b4e0a89a4417fba080909e9ed5fb0",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 8:   0%|          | 0/12 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "584aff14293f4149a8b676a36bcae588",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 9:   0%|          | 0/12 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "ab723ecb782249a2b09c199ff1480fc0",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 10:   0%|          | 0/12 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Simulating new 100 data sets and appending to previous...\n",
+      "New total number of simulated data sets: 300\n",
+      "Converting 300 simulations to a TensorFlow data set...\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "58ca708cd3764958847ae9b1f4a344ed",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 1:   0%|          | 0/18 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "e0a1af1fb8634005a8992689fd759e8d",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 2:   0%|          | 0/18 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "3b400f45c5024c318d2a13e20df78d7b",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 3:   0%|          | 0/18 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "54a9d7437b984ba6a6f4025ff9c468d9",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 4:   0%|          | 0/18 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "7aafb5cb6b784c10bca97f40948b32f2",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 5:   0%|          | 0/18 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "31cfd680a1714010943b62264fa4e263",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 6:   0%|          | 0/18 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "89afbc6c72b545449e44a8bb1783d63a",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 7:   0%|          | 0/18 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "8bd5a854da0d458db3ef0533665a1022",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 8:   0%|          | 0/18 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "dbae851b5852483bb7c8c6533d99c8c7",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 9:   0%|          | 0/18 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "a273443a01534b3b85c352fc3a9e8221",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 10:   0%|          | 0/18 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Simulating new 100 data sets and appending to previous...\n",
+      "New total number of simulated data sets: 400\n",
+      "Converting 400 simulations to a TensorFlow data set...\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "38168885d7a84eb296f9e1080e349551",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 1:   0%|          | 0/25 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "1cd9e1b66f984162afa8471e4563ebaf",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 2:   0%|          | 0/25 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "4295fd3765764d3aba4a8cea633d1648",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 3:   0%|          | 0/25 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "dabb63c54b074b25a2150ca559ca8494",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 4:   0%|          | 0/25 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "960be7c7c8104d8bbff3be290507bdca",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 5:   0%|          | 0/25 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "1a55310b7d9d4b329100947b675bb1ac",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 6:   0%|          | 0/25 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "9499c0551410459188a6d379ce0da0f3",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 7:   0%|          | 0/25 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "c7557eef497e4f7f8ff5ac4f8153c023",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 8:   0%|          | 0/25 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "704fd4f7ec7a4394ab2e0b30ed553d89",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 9:   0%|          | 0/25 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "4e8f7edf719b4e9d8dff6e89e679f1e3",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 10:   0%|          | 0/25 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Simulating new 100 data sets and appending to previous...\n",
+      "New total number of simulated data sets: 500\n",
+      "Converting 500 simulations to a TensorFlow data set...\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "912d9646d23049d18f68cb4295a8a8a7",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 1:   0%|          | 0/31 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "00629891448f4e2a96756a0514843d79",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 2:   0%|          | 0/31 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "406c1e87d64e416d9a6bb3f36ba6a3ce",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 3:   0%|          | 0/31 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "95dbe7b9548e4ab4b4c24d37d29f76bd",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 4:   0%|          | 0/31 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "5a3fed2975554946b27f4d0b9bf37250",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 5:   0%|          | 0/31 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "ccba33b82e75416d81bdf388a1ac5edf",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 6:   0%|          | 0/31 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "068ca665f60f462b94eb0656c358566d",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 7:   0%|          | 0/31 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "7e5893a1e9074448963a8172b7f4327a",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 8:   0%|          | 0/31 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "0ece36c500424f3e95353ccab5d73f1b",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 9:   0%|          | 0/31 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "84b219d376364d2fa02c550e5582780e",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Training epoch 10:   0%|          | 0/31 [00:00<?, ?it/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "CPU times: user 4min 6s, sys: 8.47 s, total: 4min 15s\n",
+      "Wall time: 4min 13s\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "losses = trainer.train_rounds(epochs=10, rounds=5, \n",
+    "                                   sim_per_round=100, batch_size=16, n_obs=150)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Performance and calibration checks\n",
+    "Calibration"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.0"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": true,
+   "sideBar": true,
+   "skip_h1_title": false,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": true
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

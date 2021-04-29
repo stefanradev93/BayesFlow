@@ -33,7 +33,9 @@ release = '0.0.1'
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.coverage',
               'sphinx.ext.napoleon',
-              'sphinx.ext.viewcode'
+              'sphinx.ext.viewcode',
+              'm2r2',
+              'nbsphinx',
               ]
 napoleon_include_special_with_doc = True  # include __special__ methods, such as __call__ with docstring
 # napoleon_include_private_with_doc = True  # include _private methods, such as _forward_inference with docstring
@@ -45,6 +47,7 @@ autodoc_default_options = {
     'undoc-members': True,
     'exclude-members': '__weakref__'
 }
+source_suffix = [".rst", ".md"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

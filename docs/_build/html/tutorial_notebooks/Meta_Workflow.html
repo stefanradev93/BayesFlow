@@ -1,0 +1,1624 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Meta Workflow &mdash; bayesflow 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Support" href="../support.html" />
+    <link rel="prev" title="Model Comparison Workflow" href="Model_Comparison_Workflow.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> bayesflow
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../bayesflow.html">bayesflow package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Parameter_Estimation_Workflow.html">Parameter Estimation Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Model_Comparison_Workflow.html">Model Comparison Workflow</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Meta Workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Simulator-settings">Simulator settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#An-example-Bayesian-workflow-(with-BayesFlow)">An example Bayesian workflow (with BayesFlow)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Prior-predictive-checks">Prior predictive checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Train-amortized-estimator">Train amortized estimator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#D-=-10,-J-=-10">D = 10, J = 10</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Offline-training">Offline training</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#D-=-100,-J-=-10">D = 100, J = 10</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Compuational-faithfulness">Compuational faithfulness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Model-sensitivity/adequacy">Model sensitivity/adequacy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Quick-and-dirty">Quick and dirty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#A-Bayesian-eyechart">A Bayesian eyechart</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Posterior-postdictive/predictive-checks">Posterior postdictive/predictive checks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">bayesflow</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../tutorials.html">Tutorials</a> &raquo;</li>
+        
+      <li>Meta Workflow</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/tutorial_notebooks/Meta_Workflow.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Meta-Workflow">
+<h1>Meta Workflow<a class="headerlink" href="#Meta-Workflow" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;../..&#39;</span><span class="p">)))</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">njit</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">tensorflow.keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.layers</span> <span class="kn">import</span> <span class="n">Dense</span>
+
+<span class="kn">from</span> <span class="nn">bayesflow.trainers</span> <span class="kn">import</span> <span class="n">MetaTrainer</span>
+<span class="kn">from</span> <span class="nn">bayesflow.losses</span> <span class="kn">import</span> <span class="n">kl_latent_space</span>
+<span class="kn">from</span> <span class="nn">bayesflow.diagnostics</span> <span class="kn">import</span> <span class="n">true_vs_estimated</span>
+<span class="kn">from</span> <span class="nn">bayesflow.networks</span> <span class="kn">import</span> <span class="n">Permutation</span>
+<span class="kn">from</span> <span class="nn">bayesflow.models</span> <span class="kn">import</span> <span class="n">GenerativeModel</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+</pre></div>
+</div>
+</div>
+<div class="section" id="Simulator-settings">
+<h2>Simulator settings<a class="headerlink" href="#Simulator-settings" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">model_prior</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">n_models</span><span class="p">,</span> <span class="n">p_vals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Samples from the models&#39; prior batch size times and converts to one-hot.</span>
+<span class="sd">    Assumes equal model priors.</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    batch_size : int  -- the number of samples to draw from the prior</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    m_true : np.ndarray of shape (batch_size, theta_dim) -- the samples batch of parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Equal priors, if nothign specified</span>
+    <span class="k">if</span> <span class="n">p_vals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">p_vals</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="n">n_models</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_models</span>
+    <span class="n">m_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">n_models</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p_vals</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">m_idx</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">class</span> <span class="nc">TPrior</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_dim</span><span class="p">,</span> <span class="n">mu_scale</span><span class="p">,</span> <span class="n">scale_scale</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">theta_dim</span> <span class="o">=</span> <span class="n">theta_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prior_mu</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_dim</span><span class="p">),</span> <span class="n">mu_scale</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_dim</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prior_scale</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale_scale</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a sample from the prior.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">mu_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior_mu</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">batch_size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">mu_samples</span> <span class="o">=</span> <span class="n">mu_samples</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">scale_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior_scale</span><span class="o">.</span><span class="n">rvs</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_dim</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">mu_samples</span><span class="p">,</span> <span class="n">scale_samples</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">class</span> <span class="nc">MultivariateT</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+
+    <span class="k">def</span> <span class="nf">simulate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_sample</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dataset given a sample from the prior.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">D</span> <span class="o">=</span> <span class="n">p_sample</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">mu</span><span class="p">,</span> <span class="n">sd</span> <span class="o">=</span> <span class="n">p_sample</span><span class="p">[:</span><span class="n">D</span><span class="p">],</span> <span class="n">p_sample</span><span class="p">[</span><span class="n">D</span><span class="p">:]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">multivariate_t</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="n">mu</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">sd</span><span class="p">),</span> <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">n_obs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+
+    <span class="k">def</span> <span class="nf">generate_multiple_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_samples</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Generates multiple datasets through BayesianMultivariateT.generate_data() &quot;&quot;&quot;</span>
+
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">p_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">theta_dim</span> <span class="o">=</span> <span class="n">p_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="n">theta_dim</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">bi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">bi</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulate_data</span><span class="p">(</span><span class="n">p_samples</span><span class="p">[</span><span class="n">bi</span><span class="p">],</span> <span class="n">n_obs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_samples</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes instances of the class callable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_multiple_datasets</span><span class="p">(</span><span class="n">p_samples</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="An-example-Bayesian-workflow-(with-BayesFlow)">
+<h2>An example Bayesian workflow (with BayesFlow)<a class="headerlink" href="#An-example-Bayesian-workflow-(with-BayesFlow)" title="Permalink to this headline">¶</a></h2>
+<p>Towards a principled Bayesian workflow for cognitive modeling:</p>
+<p><a class="reference external" href="https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html">https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html</a></p>
+<p><a class="reference external" href="https://arxiv.org/abs/1904.12765">https://arxiv.org/abs/1904.12765</a></p>
+<div class="section" id="Prior-predictive-checks">
+<h3>Prior predictive checks<a class="headerlink" href="#Prior-predictive-checks" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">class</span> <span class="nc">InvariantCouplingNet</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implements a conditional version of a sequential network.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">n_out</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a conditional coupling net (FC neural network).</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        meta  : list -- a list of dictionaries, wherein each dictionary holds parameter - value pairs for a single</span>
+<span class="sd">                       tf.keras.Dense layer.</span>
+<span class="sd">        n_out : int  -- number of outputs of the coupling net</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">InvariantCouplingNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">h1</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">([</span><span class="n">Dense</span><span class="p">(</span><span class="o">**</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;dense_h1_args&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;n_dense_h1&#39;</span><span class="p">])])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h2</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">Dense</span><span class="p">(</span><span class="o">**</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;dense_h2_args&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;n_dense_h2&#39;</span><span class="p">])]</span> <span class="o">+</span>
+            <span class="p">[</span><span class="n">Dense</span><span class="p">(</span><span class="n">n_out</span><span class="p">)]</span>
+        <span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenates x and y and performs a forward pass through the coupling net.</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        m      : tf.Tensor of shape (batch_size, n_models) -- the one-hot-encoded model indices</span>
+<span class="sd">        params : tf.Tensor of shape (batch_size, theta_dim)  -- the parameters theta ~ p(theta) of interest</span>
+<span class="sd">        x      : tf.Tensor of shape (batch_size, n_obs, inp_dim) -- the conditional data of interest x</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">params_rep</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">params</span><span class="p">]</span> <span class="o">*</span> <span class="n">N</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">m_rep</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="n">N</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">x_params_m</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">params_rep</span><span class="p">,</span> <span class="n">m_rep</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">rep</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h1</span><span class="p">(</span><span class="n">x_params_m</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">rep_params_m</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">rep</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">m</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h2</span><span class="p">(</span><span class="n">rep_params_m</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">class</span> <span class="nc">ConditionalCouplingLayer</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implements a conditional version of the INN block.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a conditional invertible block.</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        meta      : list -- a list of dictionaries, wherein each dictionary holds parameter - value pairs for a single</span>
+<span class="sd">                       tf.keras.Dense layer. All coupling nets are assumed to be equal.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ConditionalCouplingLayer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span>
+        <span class="n">theta_dim</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;n_params&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_out1</span> <span class="o">=</span> <span class="n">theta_dim</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_out2</span> <span class="o">=</span> <span class="n">theta_dim</span> <span class="o">//</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">theta_dim</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">theta_dim</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;permute&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">permutation</span> <span class="o">=</span> <span class="n">Permutation</span><span class="p">(</span><span class="n">theta_dim</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">permutation</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">s1</span> <span class="o">=</span> <span class="n">InvariantCouplingNet</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;s_args&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_out1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t1</span> <span class="o">=</span> <span class="n">InvariantCouplingNet</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;t_args&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_out1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s2</span> <span class="o">=</span> <span class="n">InvariantCouplingNet</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;s_args&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_out2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t2</span> <span class="o">=</span> <span class="n">InvariantCouplingNet</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;t_args&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_out2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_det_J</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Implements both directions of a conditional invertible block.</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        m         : tf.Tensor of shape (batch_size, n_models) -- the one-hot-encoded model indices</span>
+<span class="sd">        theta     : tf.Tensor of shape (batch_size, theta_dim) -- the parameters theta ~ p(theta|y) of interest</span>
+<span class="sd">        x         : tf.Tensor of shape (batch_size, summary_dim) -- the summarized conditional data of interest x = sum(x)</span>
+<span class="sd">        inverse   : bool -- flag indicating whether to tun the block forward or backwards</span>
+<span class="sd">        log_det_J : bool -- flag indicating whether to return the log determinant of the Jacobian matrix</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        (v, log_det_J)  :  (tf.Tensor of shape (batch_size, inp_dim), tf.Tensor of shape (batch_size, )) --</span>
+<span class="sd">                           the transformed input, if inverse = False, and the corresponding Jacobian of the transformation</span>
+<span class="sd">                            if inverse = False</span>
+<span class="sd">        u               :  tf.Tensor of shape (batch_size, inp_dim) -- the transformed out, if inverse = True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># --- Forward pass --- #</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inverse</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+            <span class="n">u1</span><span class="p">,</span> <span class="n">u2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">n_out1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_out2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Pre-compute network outputs for v1</span>
+            <span class="n">s1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s1</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">u2</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="c1"># Clamp s1 if specified</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">s1</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">(</span><span class="n">s1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+            <span class="n">t1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t1</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">u2</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="n">v1</span> <span class="o">=</span> <span class="n">u1</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">+</span> <span class="n">t1</span>
+
+            <span class="c1"># Pre-compute network outputs for v2</span>
+            <span class="n">s2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s2</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="c1"># Clamp s2 if specified</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">s2</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">(</span><span class="n">s2</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+            <span class="n">t2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t2</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="n">v2</span> <span class="o">=</span> <span class="n">u2</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span> <span class="o">+</span> <span class="n">t2</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">log_det_J</span><span class="p">:</span>
+                <span class="c1"># log|J| = log(prod(diag(J))) -&gt; according to inv architecture</span>
+                <span class="k">return</span> <span class="n">v</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">s2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">v</span>
+
+        <span class="c1"># --- Inverse pass --- #</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">n_out1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_out2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Pre-Compute s2</span>
+            <span class="n">s2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s2</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="c1"># Clamp s2 if specified</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">s2</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">(</span><span class="n">s2</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+            <span class="n">u2</span> <span class="o">=</span> <span class="p">(</span><span class="n">v2</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">t2</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">s2</span><span class="p">)</span>
+
+            <span class="c1"># Pre-Compute s1</span>
+            <span class="n">s1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s1</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">u2</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="c1"># Clamp s1 if specified</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">s1</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">(</span><span class="n">s1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+            <span class="n">u1</span> <span class="o">=</span> <span class="p">(</span><span class="n">v1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">t1</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">u2</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">s1</span><span class="p">)</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">u1</span><span class="p">,</span> <span class="n">u2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">u</span>
+
+
+<span class="k">class</span> <span class="nc">InvariantBayesFlow</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implements a chain of conditional invertible blocks for Bayesian parameter inference.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a chain of cINN blocks and chains operations.</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        meta        : list -- a list of dictionary, where each dictionary holds parameter - value pairs for a single</span>
+<span class="sd">                                  keras.Dense layer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">InvariantBayesFlow</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cINNs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ConditionalCouplingLayer</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;n_coupling_layers&#39;</span><span class="p">])]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;n_params&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_models</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;n_models&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs one pass through an invertible chain (either inverse or forward).</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        m         : tf.Tensor of shape (batch_size, n_models) -- the one-hot-encoded model indices</span>
+<span class="sd">        params    : tf.Tensor of shape (batch_size, inp_dim) -- the parameters theta ~ p(theta|x) of interest</span>
+<span class="sd">        x         : tf.Tensor of shape (batch_size, summary_dim) -- the conditional data x</span>
+<span class="sd">        inverse   : bool -- flag indicating whether to tun the chain forward or backwards</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        (z, log_det_J)  :  (tf.Tensor of shape (batch_size, inp_dim), tf.Tensor of shape (batch_size, )) --</span>
+<span class="sd">                           the transformed input, if inverse = False, and the corresponding Jacobian of the transformation</span>
+<span class="sd">                            if inverse = False</span>
+<span class="sd">        x               :  tf.Tensor of shape (batch_size, inp_dim) -- the transformed out, if inverse = True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="k">if</span> <span class="n">inverse</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Performs a forward pass though the chain.&quot;&quot;&quot;</span>
+
+        <span class="n">z</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="n">log_det_Js</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cINN</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cINNs</span><span class="p">:</span>
+            <span class="n">z</span><span class="p">,</span> <span class="n">log_det_J</span> <span class="o">=</span> <span class="n">cINN</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="n">log_det_Js</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">log_det_J</span><span class="p">)</span>
+        <span class="c1"># Sum Jacobian determinants for all blocks to obtain total Jacobian.</span>
+        <span class="n">log_det_J</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">add_n</span><span class="p">(</span><span class="n">log_det_Js</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">z</span><span class="p">,</span> <span class="n">log_det_J</span>
+
+    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Performs a reverse pass through the chain.&quot;&quot;&quot;</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="n">z</span>
+        <span class="k">for</span> <span class="n">cINN</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cINNs</span><span class="p">):</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">cINN</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">params</span>
+
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">to_numpy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Samples from the inverse model given a single instance x.</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        x         : tf.Tensor of shape (n_obs, x_dim) -- the conditioning data of interest</span>
+<span class="sd">        m         : int - the integer model index</span>
+<span class="sd">        n_samples : int -- number of samples to obtain from the approximate posterior</span>
+<span class="sd">        to_numpy  : bool -- flag indicating whether to return the samples as a np.array or a tf.Tensor</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        theta_samples : 3D tf.Tensor or np.array of shape (n_samples, n_batch, theta_dim)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Represent model index</span>
+        <span class="n">m_oh</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">to_categorical</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_models</span><span class="p">)]</span> <span class="o">*</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Sample in parallel</span>
+        <span class="n">z_normal_samples</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">theta_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span><span class="n">m_oh</span><span class="p">,</span> <span class="n">z_normal_samples</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">x</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">to_numpy</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">theta_samples</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">theta_samples</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="Train-amortized-estimator">
+<h2>Train amortized estimator<a class="headerlink" href="#Train-amortized-estimator" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="D-=-10,-J-=-10">
+<h3>D = 10, J = 10<a class="headerlink" href="#D-=-10,-J-=-10" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">D</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">J</span> <span class="o">=</span> <span class="mi">10</span>
+
+
+<span class="n">bf_meta</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;n_coupling_layers&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s1">&#39;s_args&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;n_dense_h1&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;n_dense_h2&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;dense_h1_args&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s1">&#39;activation&#39;</span><span class="p">:</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="s1">&#39;kernel_initializer&#39;</span><span class="p">:</span> <span class="s1">&#39;glorot_uniform&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;dense_h2_args&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s1">&#39;activation&#39;</span><span class="p">:</span> <span class="s1">&#39;elu&#39;</span><span class="p">,</span> <span class="s1">&#39;kernel_initializer&#39;</span><span class="p">:</span> <span class="s1">&#39;glorot_uniform&#39;</span><span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;t_args&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;n_dense_h1&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;n_dense_h2&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;dense_h1_args&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s1">&#39;activation&#39;</span><span class="p">:</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="s1">&#39;kernel_initializer&#39;</span><span class="p">:</span> <span class="s1">&#39;glorot_uniform&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;dense_h2_args&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s1">&#39;activation&#39;</span><span class="p">:</span> <span class="s1">&#39;elu&#39;</span><span class="p">,</span> <span class="s1">&#39;kernel_initializer&#39;</span><span class="p">:</span> <span class="s1">&#39;glorot_uniform&#39;</span><span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;n_params&#39;</span><span class="p">:</span> <span class="n">D</span><span class="p">,</span>
+    <span class="s1">&#39;n_models&#39;</span><span class="p">:</span> <span class="n">J</span><span class="p">,</span>
+    <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mf">1.9</span><span class="p">,</span>
+    <span class="s1">&#39;permute&#39;</span><span class="p">:</span> <span class="kc">True</span>
+<span class="p">}</span>
+
+
+<span class="n">mu_scale</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">scale_scale</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">df</span> <span class="o">=</span> <span class="mi">10</span>
+
+
+<span class="n">prior</span> <span class="o">=</span> <span class="n">TPrior</span><span class="p">(</span><span class="n">D</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">mu_scale</span><span class="p">,</span> <span class="n">scale_scale</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">priors</span> <span class="o">=</span> <span class="p">[</span><span class="n">prior</span><span class="p">]</span> <span class="o">*</span> <span class="n">J</span>
+<span class="n">simulators</span> <span class="o">=</span> <span class="p">[</span><span class="n">MultivariateT</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">J</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="n">generative_model</span> <span class="o">=</span> <span class="n">GenerativeModel</span><span class="p">(</span><span class="n">model_prior</span><span class="p">,</span> <span class="n">priors</span><span class="p">,</span> <span class="n">simulators</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">meta_amortizer</span> <span class="o">=</span> <span class="n">InvariantBayesFlow</span><span class="p">(</span><span class="n">bf_meta</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Generate some training data</span>
+<span class="n">m_indices</span><span class="p">,</span> <span class="n">params_m</span><span class="p">,</span> <span class="n">sim_data</span> <span class="o">=</span> <span class="n">generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sim_data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+95179.49
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create a trainer instance</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">MetaTrainer</span><span class="p">(</span><span class="n">meta_amortizer</span><span class="p">,</span>
+                      <span class="n">generative_model</span><span class="p">,</span>
+                      <span class="n">checkpoint_path</span><span class="o">=</span><span class="s1">&#39;meta&#39;</span><span class="p">,</span>
+                      <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Initializing networks from scratch.
+</pre></div></div>
+</div>
+</div>
+</div>
+<div class="section" id="Offline-training">
+<h2>Offline training<a class="headerlink" href="#Offline-training" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># # %%time</span>
+<span class="c1"># losses = trainer.train_offline(10, 32, m_indices, params_m, sim_data)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Generate some training data</span>
+<span class="n">n_val</span> <span class="o">=</span> <span class="mi">250</span>
+<span class="n">m_indices_val</span><span class="p">,</span> <span class="n">params_m_val</span><span class="p">,</span> <span class="n">sim_data_val</span> <span class="o">=</span> <span class="n">generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="n">n_val</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Sample posterior for each test data set, otherwise GPU memory blows</span>
+<span class="c1"># when attempted in parallel for all test sets</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_val</span><span class="p">):</span>
+    <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meta_amortizer</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">sim_data_val</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">m_indices_val</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">argmax</span><span class="p">(),</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># param_means = samples.mean(axis=0)</span>
+<span class="n">true_vs_estimated</span><span class="p">(</span><span class="n">params_m_val</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">5</span><span class="p">],</span>
+                  <span class="n">samples</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">5</span><span class="p">],</span>
+                  <span class="p">[</span><span class="s1">&#39;mu</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorial_notebooks_Meta_Workflow_23_0.png" src="../_images/tutorial_notebooks_Meta_Workflow_23_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># param_means = samples.mean(axis=0)</span>
+<span class="n">true_vs_estimated</span><span class="p">(</span><span class="n">params_m_val</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">:],</span>
+                  <span class="n">samples</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">:],</span>
+                  <span class="p">[</span><span class="s1">&#39;sd</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorial_notebooks_Meta_Workflow_24_0.png" src="../_images/tutorial_notebooks_Meta_Workflow_24_0.png" />
+</div>
+</div>
+<div class="section" id="D-=-100,-J-=-10">
+<h3>D = 100, J = 10<a class="headerlink" href="#D-=-100,-J-=-10" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[72]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">D</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">J</span> <span class="o">=</span> <span class="mi">10</span>
+
+
+<span class="n">bf_meta</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;n_coupling_layers&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s1">&#39;s_args&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;n_dense_h1&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;n_dense_h2&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">&#39;dense_h1_args&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s1">&#39;activation&#39;</span><span class="p">:</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="s1">&#39;kernel_initializer&#39;</span><span class="p">:</span> <span class="s1">&#39;glorot_uniform&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;dense_h2_args&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span> <span class="s1">&#39;activation&#39;</span><span class="p">:</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="s1">&#39;kernel_initializer&#39;</span><span class="p">:</span> <span class="s1">&#39;glorot_uniform&#39;</span><span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;t_args&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;n_dense_h1&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;n_dense_h2&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">&#39;dense_h1_args&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s1">&#39;activation&#39;</span><span class="p">:</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="s1">&#39;kernel_initializer&#39;</span><span class="p">:</span> <span class="s1">&#39;glorot_uniform&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;dense_h2_args&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span> <span class="s1">&#39;activation&#39;</span><span class="p">:</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="s1">&#39;kernel_initializer&#39;</span><span class="p">:</span> <span class="s1">&#39;glorot_uniform&#39;</span><span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;n_params&#39;</span><span class="p">:</span> <span class="n">D</span><span class="p">,</span>
+    <span class="s1">&#39;n_models&#39;</span><span class="p">:</span> <span class="n">J</span><span class="p">,</span>
+    <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mf">1.9</span><span class="p">,</span>
+    <span class="s1">&#39;permute&#39;</span><span class="p">:</span> <span class="kc">True</span>
+<span class="p">}</span>
+
+
+<span class="n">mu_scale</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">scale_scale</span> <span class="o">=</span> <span class="mf">5.0</span>
+<span class="n">df</span> <span class="o">=</span> <span class="mi">10</span>
+
+
+<span class="n">prior</span> <span class="o">=</span> <span class="n">TPrior</span><span class="p">(</span><span class="n">D</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">mu_scale</span><span class="p">,</span> <span class="n">scale_scale</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[73]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">priors</span> <span class="o">=</span> <span class="p">[</span><span class="n">prior</span><span class="p">]</span> <span class="o">*</span> <span class="n">J</span>
+<span class="n">simulators</span> <span class="o">=</span> <span class="p">[</span><span class="n">MultivariateT</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">J</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[74]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">generative_model</span> <span class="o">=</span> <span class="n">GenerativeModel</span><span class="p">(</span><span class="n">model_prior</span><span class="p">,</span> <span class="n">priors</span><span class="p">,</span> <span class="n">simulators</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[75]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">meta_amortizer</span> <span class="o">=</span> <span class="n">InvariantBayesFlow</span><span class="p">(</span><span class="n">bf_meta</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Generate some training data</span>
+<span class="n">m_indices</span><span class="p">,</span> <span class="n">params_m</span><span class="p">,</span> <span class="n">sim_data</span> <span class="o">=</span> <span class="n">generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[76]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create a trainer instance</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">MetaTrainer</span><span class="p">(</span><span class="n">meta_amortizer</span><span class="p">,</span>
+                      <span class="n">generative_model</span><span class="p">,</span>
+                      <span class="n">loss</span><span class="o">=</span><span class="n">kl_latent_space</span><span class="p">,</span>
+                      <span class="n">checkpoint_path</span><span class="o">=</span><span class="s1">&#39;meta5&#39;</span><span class="p">,</span>
+                      <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Initializing networks from scratch.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[77]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># %%time</span>
+<span class="n">losses</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">m_indices</span><span class="p">,</span> <span class="n">params_m</span><span class="p">,</span> <span class="n">sim_data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Converting 20000 simulations to a TensorFlow data set...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "46db120a968944c5ba6e28a06edadba6", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "061e1ab74a654c399b1054667233e73c", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "56ba29136d174c988b6f03aec558e63b", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "5d28a91454fc4cdfb4dac481aff762a2", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "34210c528f07422897ae469b0315e0ee", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "7bb5e7322047405b8810939891979329", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "43bcf5fea5074488b4a485be14eae405", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "5cb8d8329fbb444883d3d0d704bace35", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b0618902a7f14ff8a0feb198af58432a", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "4ef53eef988445fdba03e828e64a13c8", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "38f51dc4137842a48c90323ac5bf4646", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "10c8ebb42a7148069675b595a95e50aa", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "4732f7adba93406fac2888a1db4b7ae5", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "7f30eaaf7f8344ffaa22e0e0af6aae2a", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a4813d87e07446179392f135c8adc789", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a12ef298adfb471fb347f939043dedbb", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-intense-fg ansi-bold">---------------------------------------------------------------------------</span>
+<span class="ansi-red-intense-fg ansi-bold">KeyboardInterrupt</span>                         Traceback (most recent call last)
+<span class="ansi-green-intense-fg ansi-bold">&lt;ipython-input-77-ba12d72aea3b&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">      1</span> <span class="ansi-red-intense-fg ansi-bold"># %%time</span>
+<span class="ansi-green-intense-fg ansi-bold">----&gt; 2</span><span class="ansi-yellow-intense-fg ansi-bold"> </span>losses <span class="ansi-yellow-intense-fg ansi-bold">=</span> trainer<span class="ansi-yellow-intense-fg ansi-bold">.</span>train_offline<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-cyan-intense-fg ansi-bold">25</span><span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-cyan-intense-fg ansi-bold">32</span><span class="ansi-yellow-intense-fg ansi-bold">,</span> m_indices<span class="ansi-yellow-intense-fg ansi-bold">,</span> params_m<span class="ansi-yellow-intense-fg ansi-bold">,</span> sim_data<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">~\Desktop\Projects\BayesFlow\experimental\trainers.py</span> in <span class="ansi-cyan-fg">train_offline</span><span class="ansi-blue-intense-fg ansi-bold">(self, epochs, batch_size, model_indices, params, sim_data)</span>
+<span class="ansi-green-fg">    157</span>
+<span class="ansi-green-fg">    158</span>                     <span class="ansi-red-intense-fg ansi-bold"># One step backprop</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 159</span><span class="ansi-yellow-intense-fg ansi-bold">                     </span>loss <span class="ansi-yellow-intense-fg ansi-bold">=</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_train_step<span class="ansi-yellow-intense-fg ansi-bold">(</span>model_indices_b<span class="ansi-yellow-intense-fg ansi-bold">,</span> params_b<span class="ansi-yellow-intense-fg ansi-bold">,</span> sim_data_b<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    160</span>
+<span class="ansi-green-fg">    161</span>                     <span class="ansi-red-intense-fg ansi-bold"># Store loss and update progress bar</span>
+
+<span class="ansi-green-intense-fg ansi-bold">~\Desktop\Projects\BayesFlow\experimental\trainers.py</span> in <span class="ansi-cyan-fg">_train_step</span><span class="ansi-blue-intense-fg ansi-bold">(self, model_indices, params, sim_data)</span>
+<span class="ansi-green-fg">    311</span>         <span class="ansi-red-intense-fg ansi-bold"># One step backprop</span>
+<span class="ansi-green-fg">    312</span>         gradients <span class="ansi-yellow-intense-fg ansi-bold">=</span> tape<span class="ansi-yellow-intense-fg ansi-bold">.</span>gradient<span class="ansi-yellow-intense-fg ansi-bold">(</span>loss<span class="ansi-yellow-intense-fg ansi-bold">,</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>network<span class="ansi-yellow-intense-fg ansi-bold">.</span>trainable_variables<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 313</span><span class="ansi-yellow-intense-fg ansi-bold">         </span>self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_apply_gradients<span class="ansi-yellow-intense-fg ansi-bold">(</span>gradients<span class="ansi-yellow-intense-fg ansi-bold">,</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>network<span class="ansi-yellow-intense-fg ansi-bold">.</span>trainable_variables<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    314</span>
+<span class="ansi-green-fg">    315</span>         <span class="ansi-green-intense-fg ansi-bold">return</span> loss<span class="ansi-yellow-intense-fg ansi-bold">.</span>numpy<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">~\Desktop\Projects\BayesFlow\experimental\trainers.py</span> in <span class="ansi-cyan-fg">_apply_gradients</span><span class="ansi-blue-intense-fg ansi-bold">(self, gradients, tensors)</span>
+<span class="ansi-green-fg">    328</span>         <span class="ansi-green-intense-fg ansi-bold">if</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>clip_value <span class="ansi-green-intense-fg ansi-bold">is</span> <span class="ansi-green-intense-fg ansi-bold">not</span> <span class="ansi-green-intense-fg ansi-bold">None</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">    329</span>             gradients <span class="ansi-yellow-intense-fg ansi-bold">=</span> clip_gradients<span class="ansi-yellow-intense-fg ansi-bold">(</span>gradients<span class="ansi-yellow-intense-fg ansi-bold">,</span> clip_value<span class="ansi-yellow-intense-fg ansi-bold">=</span>self<span class="ansi-yellow-intense-fg ansi-bold">.</span>clip_value<span class="ansi-yellow-intense-fg ansi-bold">,</span> clip_method<span class="ansi-yellow-intense-fg ansi-bold">=</span>self<span class="ansi-yellow-intense-fg ansi-bold">.</span>clip_method<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 330</span><span class="ansi-yellow-intense-fg ansi-bold">         </span>self<span class="ansi-yellow-intense-fg ansi-bold">.</span>optimizer<span class="ansi-yellow-intense-fg ansi-bold">.</span>apply_gradients<span class="ansi-yellow-intense-fg ansi-bold">(</span>zip<span class="ansi-yellow-intense-fg ansi-bold">(</span>gradients<span class="ansi-yellow-intense-fg ansi-bold">,</span> tensors<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\keras\optimizer_v2\optimizer_v2.py</span> in <span class="ansi-cyan-fg">apply_gradients</span><span class="ansi-blue-intense-fg ansi-bold">(self, grads_and_vars, name, experimental_aggregate_gradients)</span>
+<span class="ansi-green-fg">    623</span>             &#34;ParameterServerStrategy and CentralStorageStrategy&#34;)
+<span class="ansi-green-fg">    624</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 625</span><span class="ansi-yellow-intense-fg ansi-bold">       </span>apply_state <span class="ansi-yellow-intense-fg ansi-bold">=</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_prepare<span class="ansi-yellow-intense-fg ansi-bold">(</span>var_list<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    626</span>       <span class="ansi-green-intense-fg ansi-bold">if</span> experimental_aggregate_gradients<span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">    627</span>         grads_and_vars <span class="ansi-yellow-intense-fg ansi-bold">=</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_transform_unaggregated_gradients<span class="ansi-yellow-intense-fg ansi-bold">(</span>grads_and_vars<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\keras\optimizer_v2\optimizer_v2.py</span> in <span class="ansi-cyan-fg">_prepare</span><span class="ansi-blue-intense-fg ansi-bold">(self, var_list)</span>
+<span class="ansi-green-fg">    878</span>       apply_state<span class="ansi-yellow-intense-fg ansi-bold">[</span><span class="ansi-yellow-intense-fg ansi-bold">(</span>var_device<span class="ansi-yellow-intense-fg ansi-bold">,</span> var_dtype<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">]</span> <span class="ansi-yellow-intense-fg ansi-bold">=</span> <span class="ansi-yellow-intense-fg ansi-bold">{</span><span class="ansi-yellow-intense-fg ansi-bold">}</span>
+<span class="ansi-green-fg">    879</span>       <span class="ansi-green-intense-fg ansi-bold">with</span> ops<span class="ansi-yellow-intense-fg ansi-bold">.</span>device<span class="ansi-yellow-intense-fg ansi-bold">(</span>var_device<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 880</span><span class="ansi-yellow-intense-fg ansi-bold">         </span>self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_prepare_local<span class="ansi-yellow-intense-fg ansi-bold">(</span>var_device<span class="ansi-yellow-intense-fg ansi-bold">,</span> var_dtype<span class="ansi-yellow-intense-fg ansi-bold">,</span> apply_state<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    881</span>
+<span class="ansi-green-fg">    882</span>     <span class="ansi-green-intense-fg ansi-bold">return</span> apply_state
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\keras\optimizer_v2\adam.py</span> in <span class="ansi-cyan-fg">_prepare_local</span><span class="ansi-blue-intense-fg ansi-bold">(self, var_device, var_dtype, apply_state)</span>
+<span class="ansi-green-fg">    133</span>
+<span class="ansi-green-fg">    134</span>   <span class="ansi-green-intense-fg ansi-bold">def</span> _prepare_local<span class="ansi-yellow-intense-fg ansi-bold">(</span>self<span class="ansi-yellow-intense-fg ansi-bold">,</span> var_device<span class="ansi-yellow-intense-fg ansi-bold">,</span> var_dtype<span class="ansi-yellow-intense-fg ansi-bold">,</span> apply_state<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 135</span><span class="ansi-yellow-intense-fg ansi-bold">     </span>super<span class="ansi-yellow-intense-fg ansi-bold">(</span>Adam<span class="ansi-yellow-intense-fg ansi-bold">,</span> self<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">.</span>_prepare_local<span class="ansi-yellow-intense-fg ansi-bold">(</span>var_device<span class="ansi-yellow-intense-fg ansi-bold">,</span> var_dtype<span class="ansi-yellow-intense-fg ansi-bold">,</span> apply_state<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    136</span>
+<span class="ansi-green-fg">    137</span>     local_step <span class="ansi-yellow-intense-fg ansi-bold">=</span> math_ops<span class="ansi-yellow-intense-fg ansi-bold">.</span>cast<span class="ansi-yellow-intense-fg ansi-bold">(</span>self<span class="ansi-yellow-intense-fg ansi-bold">.</span>iterations <span class="ansi-yellow-intense-fg ansi-bold">+</span> <span class="ansi-cyan-intense-fg ansi-bold">1</span><span class="ansi-yellow-intense-fg ansi-bold">,</span> var_dtype<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\keras\optimizer_v2\optimizer_v2.py</span> in <span class="ansi-cyan-fg">_prepare_local</span><span class="ansi-blue-intense-fg ansi-bold">(self, var_device, var_dtype, apply_state)</span>
+<span class="ansi-green-fg">    884</span>   <span class="ansi-green-intense-fg ansi-bold">def</span> _prepare_local<span class="ansi-yellow-intense-fg ansi-bold">(</span>self<span class="ansi-yellow-intense-fg ansi-bold">,</span> var_device<span class="ansi-yellow-intense-fg ansi-bold">,</span> var_dtype<span class="ansi-yellow-intense-fg ansi-bold">,</span> apply_state<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">    885</span>     <span class="ansi-green-intense-fg ansi-bold">if</span> <span class="ansi-blue-intense-fg ansi-bold">&#34;learning_rate&#34;</span> <span class="ansi-green-intense-fg ansi-bold">in</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_hyper<span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 886</span><span class="ansi-yellow-intense-fg ansi-bold">       </span>lr_t <span class="ansi-yellow-intense-fg ansi-bold">=</span> array_ops<span class="ansi-yellow-intense-fg ansi-bold">.</span>identity<span class="ansi-yellow-intense-fg ansi-bold">(</span>self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_decayed_lr<span class="ansi-yellow-intense-fg ansi-bold">(</span>var_dtype<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    887</span>       apply_state<span class="ansi-yellow-intense-fg ansi-bold">[</span><span class="ansi-yellow-intense-fg ansi-bold">(</span>var_device<span class="ansi-yellow-intense-fg ansi-bold">,</span> var_dtype<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">]</span><span class="ansi-yellow-intense-fg ansi-bold">[</span><span class="ansi-blue-intense-fg ansi-bold">&#34;lr_t&#34;</span><span class="ansi-yellow-intense-fg ansi-bold">]</span> <span class="ansi-yellow-intense-fg ansi-bold">=</span> lr_t
+<span class="ansi-green-fg">    888</span>
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\util\dispatch.py</span> in <span class="ansi-cyan-fg">wrapper</span><span class="ansi-blue-intense-fg ansi-bold">(*args, **kwargs)</span>
+<span class="ansi-green-fg">    199</span>     <span class="ansi-blue-intense-fg ansi-bold">&#34;&#34;&#34;Call target, and fall back on dispatchers if there is a TypeError.&#34;&#34;&#34;</span>
+<span class="ansi-green-fg">    200</span>     <span class="ansi-green-intense-fg ansi-bold">try</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 201</span><span class="ansi-yellow-intense-fg ansi-bold">       </span><span class="ansi-green-intense-fg ansi-bold">return</span> target<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">*</span>args<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">**</span>kwargs<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    202</span>     <span class="ansi-green-intense-fg ansi-bold">except</span> <span class="ansi-yellow-intense-fg ansi-bold">(</span>TypeError<span class="ansi-yellow-intense-fg ansi-bold">,</span> ValueError<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">    203</span>       <span class="ansi-red-intense-fg ansi-bold"># Note: convert_to_eager_tensor currently raises a ValueError, not a</span>
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\ops\array_ops.py</span> in <span class="ansi-cyan-fg">identity</span><span class="ansi-blue-intense-fg ansi-bold">(input, name)</span>
+<span class="ansi-green-fg">    284</span>     <span class="ansi-red-intense-fg ansi-bold"># Make sure we get an input with handle data attached from resource</span>
+<span class="ansi-green-fg">    285</span>     <span class="ansi-red-intense-fg ansi-bold"># variables. Variables have correct handle data when graph building.</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 286</span><span class="ansi-yellow-intense-fg ansi-bold">     </span>input <span class="ansi-yellow-intense-fg ansi-bold">=</span> ops<span class="ansi-yellow-intense-fg ansi-bold">.</span>convert_to_tensor<span class="ansi-yellow-intense-fg ansi-bold">(</span>input<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    287</span>   ret <span class="ansi-yellow-intense-fg ansi-bold">=</span> gen_array_ops<span class="ansi-yellow-intense-fg ansi-bold">.</span>identity<span class="ansi-yellow-intense-fg ansi-bold">(</span>input<span class="ansi-yellow-intense-fg ansi-bold">,</span> name<span class="ansi-yellow-intense-fg ansi-bold">=</span>name<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    288</span>   <span class="ansi-red-intense-fg ansi-bold"># Propagate handle data for happier shape inference for resource variables.</span>
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\profiler\trace.py</span> in <span class="ansi-cyan-fg">wrapped</span><span class="ansi-blue-intense-fg ansi-bold">(*args, **kwargs)</span>
+<span class="ansi-green-fg">    161</span>         <span class="ansi-green-intense-fg ansi-bold">with</span> Trace<span class="ansi-yellow-intense-fg ansi-bold">(</span>trace_name<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">**</span>trace_kwargs<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">    162</span>           <span class="ansi-green-intense-fg ansi-bold">return</span> func<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">*</span>args<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">**</span>kwargs<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 163</span><span class="ansi-yellow-intense-fg ansi-bold">       </span><span class="ansi-green-intense-fg ansi-bold">return</span> func<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">*</span>args<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">**</span>kwargs<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    164</span>
+<span class="ansi-green-fg">    165</span>     <span class="ansi-green-intense-fg ansi-bold">return</span> wrapped
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\framework\ops.py</span> in <span class="ansi-cyan-fg">convert_to_tensor</span><span class="ansi-blue-intense-fg ansi-bold">(value, dtype, name, as_ref, preferred_dtype, dtype_hint, ctx, accepted_result_types)</span>
+<span class="ansi-green-fg">   1538</span>
+<span class="ansi-green-fg">   1539</span>     <span class="ansi-green-intense-fg ansi-bold">if</span> ret <span class="ansi-green-intense-fg ansi-bold">is</span> <span class="ansi-green-intense-fg ansi-bold">None</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">-&gt; 1540</span><span class="ansi-yellow-intense-fg ansi-bold">       </span>ret <span class="ansi-yellow-intense-fg ansi-bold">=</span> conversion_func<span class="ansi-yellow-intense-fg ansi-bold">(</span>value<span class="ansi-yellow-intense-fg ansi-bold">,</span> dtype<span class="ansi-yellow-intense-fg ansi-bold">=</span>dtype<span class="ansi-yellow-intense-fg ansi-bold">,</span> name<span class="ansi-yellow-intense-fg ansi-bold">=</span>name<span class="ansi-yellow-intense-fg ansi-bold">,</span> as_ref<span class="ansi-yellow-intense-fg ansi-bold">=</span>as_ref<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">   1541</span>
+<span class="ansi-green-fg">   1542</span>     <span class="ansi-green-intense-fg ansi-bold">if</span> ret <span class="ansi-green-intense-fg ansi-bold">is</span> NotImplemented<span class="ansi-yellow-intense-fg ansi-bold">:</span>
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\ops\resource_variable_ops.py</span> in <span class="ansi-cyan-fg">_dense_var_to_tensor</span><span class="ansi-blue-intense-fg ansi-bold">(var, dtype, name, as_ref)</span>
+<span class="ansi-green-fg">   1990</span>
+<span class="ansi-green-fg">   1991</span> <span class="ansi-green-intense-fg ansi-bold">def</span> _dense_var_to_tensor<span class="ansi-yellow-intense-fg ansi-bold">(</span>var<span class="ansi-yellow-intense-fg ansi-bold">,</span> dtype<span class="ansi-yellow-intense-fg ansi-bold">=</span><span class="ansi-green-intense-fg ansi-bold">None</span><span class="ansi-yellow-intense-fg ansi-bold">,</span> name<span class="ansi-yellow-intense-fg ansi-bold">=</span><span class="ansi-green-intense-fg ansi-bold">None</span><span class="ansi-yellow-intense-fg ansi-bold">,</span> as_ref<span class="ansi-yellow-intense-fg ansi-bold">=</span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">-&gt; 1992</span><span class="ansi-yellow-intense-fg ansi-bold">   </span><span class="ansi-green-intense-fg ansi-bold">return</span> var<span class="ansi-yellow-intense-fg ansi-bold">.</span>_dense_var_to_tensor<span class="ansi-yellow-intense-fg ansi-bold">(</span>dtype<span class="ansi-yellow-intense-fg ansi-bold">=</span>dtype<span class="ansi-yellow-intense-fg ansi-bold">,</span> name<span class="ansi-yellow-intense-fg ansi-bold">=</span>name<span class="ansi-yellow-intense-fg ansi-bold">,</span> as_ref<span class="ansi-yellow-intense-fg ansi-bold">=</span>as_ref<span class="ansi-yellow-intense-fg ansi-bold">)</span>  <span class="ansi-red-intense-fg ansi-bold"># pylint: disable=protected-access</span>
+<span class="ansi-green-fg">   1993</span>
+<span class="ansi-green-fg">   1994</span>
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\ops\resource_variable_ops.py</span> in <span class="ansi-cyan-fg">_dense_var_to_tensor</span><span class="ansi-blue-intense-fg ansi-bold">(***failed resolving arguments***)</span>
+<span class="ansi-green-fg">   1391</span>       <span class="ansi-green-intense-fg ansi-bold">return</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>read_value<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">.</span>op<span class="ansi-yellow-intense-fg ansi-bold">.</span>inputs<span class="ansi-yellow-intense-fg ansi-bold">[</span><span class="ansi-cyan-intense-fg ansi-bold">0</span><span class="ansi-yellow-intense-fg ansi-bold">]</span>
+<span class="ansi-green-fg">   1392</span>     <span class="ansi-green-intense-fg ansi-bold">else</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">-&gt; 1393</span><span class="ansi-yellow-intense-fg ansi-bold">       </span><span class="ansi-green-intense-fg ansi-bold">return</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>value<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">   1394</span>
+<span class="ansi-green-fg">   1395</span>   <span class="ansi-green-intense-fg ansi-bold">def</span> __iadd__<span class="ansi-yellow-intense-fg ansi-bold">(</span>self<span class="ansi-yellow-intense-fg ansi-bold">,</span> unused_other<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\ops\resource_variable_ops.py</span> in <span class="ansi-cyan-fg">value</span><span class="ansi-blue-intense-fg ansi-bold">(self)</span>
+<span class="ansi-green-fg">    563</span>       <span class="ansi-green-intense-fg ansi-bold">return</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_cached_value
+<span class="ansi-green-fg">    564</span>     <span class="ansi-green-intense-fg ansi-bold">with</span> ops<span class="ansi-yellow-intense-fg ansi-bold">.</span>colocate_with<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-green-intense-fg ansi-bold">None</span><span class="ansi-yellow-intense-fg ansi-bold">,</span> ignore_existing<span class="ansi-yellow-intense-fg ansi-bold">=</span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 565</span><span class="ansi-yellow-intense-fg ansi-bold">       </span><span class="ansi-green-intense-fg ansi-bold">return</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_read_variable_op<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    566</span>
+<span class="ansi-green-fg">    567</span>   <span class="ansi-green-intense-fg ansi-bold">def</span> _as_graph_element<span class="ansi-yellow-intense-fg ansi-bold">(</span>self<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\ops\resource_variable_ops.py</span> in <span class="ansi-cyan-fg">_read_variable_op</span><span class="ansi-blue-intense-fg ansi-bold">(self)</span>
+<span class="ansi-green-fg">    670</span>           result <span class="ansi-yellow-intense-fg ansi-bold">=</span> read_and_set_handle<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    671</span>     <span class="ansi-green-intense-fg ansi-bold">else</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 672</span><span class="ansi-yellow-intense-fg ansi-bold">       </span>result <span class="ansi-yellow-intense-fg ansi-bold">=</span> read_and_set_handle<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    673</span>
+<span class="ansi-green-fg">    674</span>     <span class="ansi-green-intense-fg ansi-bold">if</span> <span class="ansi-green-intense-fg ansi-bold">not</span> context<span class="ansi-yellow-intense-fg ansi-bold">.</span>executing_eagerly<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\ops\resource_variable_ops.py</span> in <span class="ansi-cyan-fg">read_and_set_handle</span><span class="ansi-blue-intense-fg ansi-bold">()</span>
+<span class="ansi-green-fg">    661</span>     <span class="ansi-green-intense-fg ansi-bold">def</span> read_and_set_handle<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">    662</span>       result = gen_resource_variable_ops.read_variable_op(
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 663</span><span class="ansi-yellow-intense-fg ansi-bold">           self._handle, self._dtype)
+</span><span class="ansi-green-fg">    664</span>       _maybe_set_handle_data<span class="ansi-yellow-intense-fg ansi-bold">(</span>self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_dtype<span class="ansi-yellow-intense-fg ansi-bold">,</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_handle<span class="ansi-yellow-intense-fg ansi-bold">,</span> result<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    665</span>       <span class="ansi-green-intense-fg ansi-bold">return</span> result
+
+<span class="ansi-green-intense-fg ansi-bold">d:\anaconda3\envs\tensorflowdev\lib\site-packages\tensorflow\python\ops\gen_resource_variable_ops.py</span> in <span class="ansi-cyan-fg">read_variable_op</span><span class="ansi-blue-intense-fg ansi-bold">(resource, dtype, name)</span>
+<span class="ansi-green-fg">    468</span>     <span class="ansi-green-intense-fg ansi-bold">try</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">    469</span>       _result = pywrap_tfe.TFE_Py_FastPathExecute(
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 470</span><span class="ansi-yellow-intense-fg ansi-bold">         _ctx, &#34;ReadVariableOp&#34;, name, resource, &#34;dtype&#34;, dtype)
+</span><span class="ansi-green-fg">    471</span>       <span class="ansi-green-intense-fg ansi-bold">return</span> _result
+<span class="ansi-green-fg">    472</span>     <span class="ansi-green-intense-fg ansi-bold">except</span> _core<span class="ansi-yellow-intense-fg ansi-bold">.</span>_NotOkStatusException <span class="ansi-green-intense-fg ansi-bold">as</span> e<span class="ansi-yellow-intense-fg ansi-bold">:</span>
+
+<span class="ansi-red-intense-fg ansi-bold">KeyboardInterrupt</span>:
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[78]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Generate some training data</span>
+<span class="n">m_indices_val</span><span class="p">,</span> <span class="n">params_m_val</span><span class="p">,</span> <span class="n">sim_data_val</span> <span class="o">=</span> <span class="n">generative_model</span><span class="p">(</span><span class="n">n_sim</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">n_obs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># Sample posterior for each test data set, otherwise GPU memory blows</span>
+<span class="c1"># when attempted in parallel for all test sets</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">250</span><span class="p">):</span>
+    <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meta_amortizer</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">sim_data_val</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">m_indices_val</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">argmax</span><span class="p">(),</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># param_means = samples.mean(axis=0)</span>
+<span class="n">true_vs_estimated</span><span class="p">(</span><span class="n">params_m_val</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">50</span><span class="p">],</span>
+                  <span class="n">samples</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">50</span><span class="p">],</span>
+                  <span class="p">[</span><span class="s1">&#39;mu</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="Compuational-faithfulness">
+<h2>Compuational faithfulness<a class="headerlink" href="#Compuational-faithfulness" title="Permalink to this headline">¶</a></h2>
+<p>(Via simulation-based calibration)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">n_sbc</span> <span class="o">=</span> <span class="mi">5000</span>
+<span class="n">n_post_samples_sbc</span> <span class="o">=</span> <span class="mi">250</span>
+<span class="n">params_sbc</span> <span class="o">=</span> <span class="n">prior</span><span class="p">(</span><span class="n">n_sbc</span><span class="p">)</span>
+<span class="n">x_sbc</span> <span class="o">=</span> <span class="n">batch_simulator</span><span class="p">(</span><span class="n">params_sbc</span><span class="p">)</span>
+<span class="n">param_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">bayes_flow</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n_post_samples_sbc</span><span class="p">)</span>
+                                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">x_sbc</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_sbc</span><span class="p">(</span><span class="n">param_samples</span><span class="p">,</span> <span class="n">params_sbc</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;v1&#39;</span><span class="p">,</span> <span class="s1">&#39;v2&#39;</span><span class="p">,</span> <span class="s1">&#39;a1&#39;</span><span class="p">,</span> <span class="s1">&#39;a2&#39;</span><span class="p">,</span> <span class="s1">&#39;ndt&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorial_notebooks_Meta_Workflow_38_0.png" src="../_images/tutorial_notebooks_Meta_Workflow_38_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Model-sensitivity/adequacy">
+<h2>Model sensitivity/adequacy<a class="headerlink" href="#Model-sensitivity/adequacy" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="Quick-and-dirty">
+<h3>Quick and dirty<a class="headerlink" href="#Quick-and-dirty" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Validate (quick and dirty)</span>
+<span class="n">true_params</span> <span class="o">=</span> <span class="n">prior</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">batch_simulator</span><span class="p">(</span><span class="n">true_params</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">param_samples</span> <span class="o">=</span> <span class="n">bayes_flow</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">param_means</span> <span class="o">=</span> <span class="n">param_samples</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">true_vs_estimated</span><span class="p">(</span><span class="n">true_params</span><span class="p">,</span> <span class="n">param_means</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;v1&#39;</span><span class="p">,</span> <span class="s1">&#39;v2&#39;</span><span class="p">,</span> <span class="s1">&#39;a1&#39;</span><span class="p">,</span> <span class="s1">&#39;a2&#39;</span><span class="p">,</span><span class="s1">&#39;ndt&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorial_notebooks_Meta_Workflow_41_0.png" src="../_images/tutorial_notebooks_Meta_Workflow_41_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="A-Bayesian-eyechart">
+<h3>A Bayesian eyechart<a class="headerlink" href="#A-Bayesian-eyechart" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Simulate</span>
+<span class="n">n_sim_s</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">n_samples_posterior</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">true_params</span> <span class="o">=</span> <span class="n">prior</span><span class="p">(</span><span class="n">n_sim_s</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">batch_simulator</span><span class="p">(</span><span class="n">true_params</span><span class="p">)</span>
+
+<span class="c1"># Sample from posterior</span>
+<span class="n">param_samples</span> <span class="o">=</span> <span class="n">bayes_flow</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n_samples_posterior</span><span class="p">)</span>
+
+<span class="c1">### Posterior z-score</span>
+<span class="c1"># Compute posterior means and stds</span>
+<span class="n">post_means</span> <span class="o">=</span> <span class="n">param_samples</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">post_stds</span> <span class="o">=</span> <span class="n">param_samples</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">post_vars</span> <span class="o">=</span> <span class="n">param_samples</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Compute posterior z score</span>
+<span class="n">post_z_score</span> <span class="o">=</span> <span class="p">(</span><span class="n">post_means</span> <span class="o">-</span> <span class="n">true_params</span><span class="p">)</span> <span class="o">/</span> <span class="n">post_stds</span>
+
+<span class="c1">### Posterior contraction, i.e., 1 - post_var / prior_var</span>
+<span class="n">prior_a</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span> <span class="c1"># lower bound of uniform prior</span>
+<span class="n">prior_b</span> <span class="o">=</span> <span class="p">(</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span> <span class="c1"># upper bound of uniform prior</span>
+
+<span class="c1"># Compute prior vars analytically</span>
+<span class="n">prior_vars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">12</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prior_a</span><span class="p">,</span> <span class="n">prior_b</span><span class="p">)])</span>
+<span class="n">post_cont</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">post_vars</span> <span class="o">/</span> <span class="n">prior_vars</span>
+
+<span class="c1"># Plotting time</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">axarr</span><span class="o">.</span><span class="n">flat</span><span class="p">)):</span>
+
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">post_cont</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">post_z_score</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#8f2727&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="o">-</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Posterior contraction&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Posterior z-score&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="Posterior-postdictive/predictive-checks">
+<h2>Posterior postdictive/predictive checks<a class="headerlink" href="#Posterior-postdictive/predictive-checks" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../support.html" class="btn btn-neutral float-right" title="Support" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Model_Comparison_Workflow.html" class="btn btn-neutral float-left" title="Model Comparison Workflow" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Stefan Radev.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
