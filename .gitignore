@@ -15,4 +15,5 @@ diffusion.cp36-win_amd64.pyd
 diffusion.c
 build
 .idea/
-/docs/_build/
+docs/_build/
+docs/.ipynb_checkpoints/
