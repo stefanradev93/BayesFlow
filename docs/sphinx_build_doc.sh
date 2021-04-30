@@ -1,0 +1,1 @@
+make buildapi && make clean && make html
