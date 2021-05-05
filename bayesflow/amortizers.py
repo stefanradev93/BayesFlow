@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow.keras.utils import to_categorical
 
 
 class MetaAmortizer(tf.keras.Model):
@@ -59,17 +60,46 @@ class MetaAmortizer(tf.keras.Model):
             out_inference = None
         return out_inference, out_evidence
 
-    def sample_from_model(self, x, m_idx, n_samples, to_numpy=True):
-        """Performs fast parallelized inference on a single model.
+    def sample_from_model(self, x_obs, model_idx, n_samples):
+        """Performs fast parallelized inference on a single model specified by model_idx).
+
+        Parameters
+        ----------
+        x_obs     : np.ndarray or tf.Tensor of shape (n_datasets, n_obs, data_dim) or (n_datasets, summary_dim) 
+            The observed (set of) dataset(s)
+        model_idx : int in (0,...n_models-1)
+            The model index which sepcified from which model the sampled are obtained.
+        n_samples : int > 1
+            The number of samples to be obtained from the posterior of the model spcified by model_idx
+
+        Returns
+        ----------
+        samples : np.ndarray of shape (n_samples, n_datasets, n_params_m) 
+            The posterior samples from the approximate posterior of the specified model.
         """
 
+        n_datasets = x_obs.shape[0]
+        model_idx_oh = to_categorical([model_idx] * n_datasets, num_classes=self.inference_net.n_models)
         raise NotImplementedError('TODO!')
 
-    def compare_models(self):
-        """Performs model comparison.
+    def compare_models(self, x_obs):
+        """Performs model comparison on an observed data set.
+
+        Parameters
+        ----------
+        x_obs : np.ndarray or tf.Tensor of shape (n_datasets, n_obs, data_dim) or (n_datasets, summary_dim) 
+            The observed (set of) dataset(s)
+
+        Returns
+        ----------
+        est_probs : np.ndarray of shape (n_datasets, n_models) 
+            The estimated posterior model probabilities (PMPs)
         """
 
-        raise NotImplementedError('TODO!')
+        if self.summary_net is not None:
+            x_obs = self.summary_net(x_obs)
+        est_probs = self.evidence_net(x_obs).numpy()
+        return est_probs
 
 
 class MultiModelAmortizer(tf.keras.Model):
@@ -77,11 +107,11 @@ class MultiModelAmortizer(tf.keras.Model):
     """
 
     def __init__(self, evidence_net, summary_net=None):
-        """Initializes a MultiModelAmortizer for
+        """Initializes a MultiModelAmortizer for amortized model comparison.
 
         Parameters
         ----------
-        evidence_net : tf.keras.Model
+        evidence_net  : tf.keras.Model
             An evidential network which processes the outputs of multiple generative models (i.e., sim_data)
         summary_net   : tf.keras.Model or None, optional, default: None
             An optional summary network
