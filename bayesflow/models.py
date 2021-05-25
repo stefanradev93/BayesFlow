@@ -68,7 +68,7 @@ class MetaGenerativeModel(GenerativeModel):
     """
 
     def __init__(self, model_prior, priors, simulators,
-                 param_transforms=None, data_transforms=None, param_padding=None):
+                 param_transforms=None, data_transforms=None, param_padding=None, skip_consistency_check=False):
         """ Initializes a :class:`MetaGenerativeModel` instance that wraps generative models for each underlying model.
 
         Parameters
@@ -105,7 +105,8 @@ class MetaGenerativeModel(GenerativeModel):
         self.generative_models = [SimpleGenerativeModel(prior=prior,
                                                         simulator=simulator,
                                                         param_transform=param_transform,
-                                                        data_transform=data_transform)
+                                                        data_transform=data_transform,
+                                                        skip_consistency_check=skip_consistency_check)
                                   for prior, simulator, param_transform, data_transform
                                   in zip(priors, simulators, param_transforms, data_transforms)]
 
@@ -119,8 +120,8 @@ class MetaGenerativeModel(GenerativeModel):
             self.param_padding = lambda x: np.pad(x,
                                                   pad_width=((0, 0), (0, self._max_param_length - x.shape[1])),
                                                   mode='constant')
-
-        self._check_consistency()
+        if not skip_consistency_check:
+            self._check_consistency()
 
     def __call__(self, n_sim: int, n_obs: Union[int, callable], **kwargs):
         """ Simulates `n_sim` datasets with `n_obs` observations each.
@@ -241,7 +242,7 @@ class SimpleGenerativeModel(GenerativeModel):
     """
 
     def __init__(self, prior: callable, simulator: callable,
-                 param_transform: callable = None, data_transform: callable = None):
+                 param_transform: callable = None, data_transform: callable = None, skip_consistency_check=False):
         """ Initializes a :class:`SimpleGenerativeModel` that can simulate batches of parameters and data.
 
         Parameters
@@ -279,7 +280,9 @@ class SimpleGenerativeModel(GenerativeModel):
         self.param_transform = param_transform
         self.data_transform = data_transform
         self._set_prior_and_simulator()
-        self._check_consistency()
+
+        if not skip_consistency_check:
+            self._check_consistency()
 
     def __call__(self, n_sim, n_obs, **kwargs):
         """
