@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import stats
 
 
 def model_prior(batch_size, n_models=3, p_vals=None):
@@ -62,4 +63,45 @@ class GaussianPrior:
 
         """
         theta = np.random.default_rng().normal(self.mu_mean, self.mu_scale, size=(n_sim, self.D))
+        return theta
+
+
+class TPrior:
+    def __init__(self, theta_dim, mu_scale, scale_scale):
+        """ Provides a prior for the parameters of a multivariate t distribution.
+
+        Parameters
+        ----------
+        theta_dim: int
+            Dimensionality of the multivariate t
+        mu_scale: float
+            Scale of the prior over the location parameter.
+        scale_scale: float
+            Scale of the prior over the scale parameter.
+        """
+
+        self.theta_dim = theta_dim
+        self.prior_mu = stats.multivariate_normal(np.zeros(self.theta_dim), mu_scale * np.eye(self.theta_dim))
+        self.prior_scale = stats.uniform(0, scale_scale)
+
+    def __call__(self, batch_size):
+        """Returns a sample from the prior.
+
+        Parameters
+        ----------
+        batch_size: int
+            Batch size for the parameter batch
+
+        Returns
+        -------
+        theta: np.array
+            Sampled parameters, shape (n_sim, D)
+
+        """
+
+        mu_samples = self.prior_mu.rvs(batch_size)
+        if batch_size == 1:
+            mu_samples = mu_samples[np.newaxis]
+        scale_samples = self.prior_scale.rvs((batch_size, self.theta_dim))
+        theta = np.c_[mu_samples, scale_samples].astype(np.float32)
         return theta

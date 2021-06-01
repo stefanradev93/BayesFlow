@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
+from scipy import stats
 
 from bayesflow.exceptions import ConfigurationError
 
@@ -120,3 +121,77 @@ class GaussianSimulator:
         sim_data = np.array(sim_data)
         sim_data = np.transpose(sim_data, (1, 0, 2))
         return sim_data
+
+
+class MultivariateTSimulator:
+    def __init__(self, df=10):
+        """
+        Provides a batch simulator for a multivariate T distribution.
+
+        Parameters
+        ----------
+        df: int, default: 10
+            Degrees of freedom for the multivariate t distribution
+        """
+        self.df = df
+
+    def simulate_data(self, p_sample, n_obs):
+        """
+        Returns a single dataset given a sample from the prior.
+
+        Parameters
+        ----------
+        p_sample: np.ndarray
+            One set of parameter samples for one multivariate t distribution
+        n_obs: int
+            Number of observations
+        """
+
+        D = p_sample.shape[0] // 2
+        mu, sd = p_sample[:D], p_sample[D:]
+        x = stats.multivariate_t(loc=mu, shape=np.diag(sd), df=self.df).rvs(n_obs)
+        return x
+
+    def generate_multiple_datasets(self, p_samples, n_obs):
+        """ Generates multiple datasets through `BayesianMultivariateT.generate_data()`
+
+        Parameters
+        ----------
+        p_samples: np.ndarray
+            <batch_size> sets of parameter samples, each for one multivariate t distribution.
+            Shape (n_sim, D)
+        n_obs: int
+            Number of observations per set of parameter samples.
+
+        Returns
+        -------
+        sim_data: np.ndarray
+            Simulated batch of data, shape (n_sim, n_obs, D//2)
+        """
+
+        batch_size = p_samples.shape[0]
+        theta_dim = p_samples.shape[1] // 2
+        sim_data = np.zeros((batch_size, n_obs, theta_dim))
+
+        for bi in range(batch_size):
+            sim_data[bi] = self.simulate_data(p_samples[bi], n_obs)
+        return sim_data.astype(np.float32)
+
+    def __call__(self, p_samples, n_obs=100):
+        """ Generates multiple datasets, calls `generate_multiple_datasets()` internally.
+
+        Parameters
+        ----------
+        p_samples: np.ndarray
+            <batch_size> sets of parameter samples, each for one multivariate t distribution.
+            Shape (n_sim, D)
+        n_obs: int, default: 100
+            Number of observations per set of parameter samples.
+
+        Returns
+        -------
+        sim_data: np.ndarray
+            Simulated batch of data, shape (n_sim, n_obs, D//2)
+        """
+
+        return self.generate_multiple_datasets(p_samples, n_obs)

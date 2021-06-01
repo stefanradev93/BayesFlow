@@ -3,6 +3,8 @@ import unittest
 import numpy as np
 
 import tests.example_objects as ex
+from bayesflow.applications.priors import model_prior, TPrior
+from bayesflow.applications.simulators import MultivariateTSimulator
 from bayesflow.models import GenerativeModel, SimpleGenerativeModel, MetaGenerativeModel
 
 N_SIM = 16
@@ -17,16 +19,16 @@ class TestGenerativeModel(unittest.TestCase):
     def test_meta_generative_model(self):
         M = 10
         D = 100
-        prior = ex.priors.TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
+        prior = TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
         priors = [prior] * M
-        simulators = [ex.simulators.MultivariateT(df) for df in np.arange(1, 101, M)]
-        generative_model = GenerativeModel(ex.priors.model_prior, priors, simulators)
+        simulators = [MultivariateTSimulator(df) for df in np.arange(1, 101, M)]
+        generative_model = GenerativeModel(model_prior, priors, simulators)
         _model_indices, _params, _sim_data = generative_model(n_sim=N_SIM, n_obs=N_OBS)
 
     def test_meta_generative_model_different_param_shapes(self):
         priors = [ex.priors.model1_params_prior, ex.priors.model2_params_prior, ex.priors.model3_params_prior]
         simulators = [ex.simulators.forward_model1, ex.simulators.forward_model2, ex.simulators.forward_model3]
-        generative_model = MetaGenerativeModel(ex.priors.model_prior, priors, simulators)
+        generative_model = MetaGenerativeModel(model_prior, priors, simulators)
         _model_indices, _params, _sim_data = generative_model(n_sim=16, n_obs=150)
 
 
@@ -78,17 +80,17 @@ class TestMetaGenerativeModel(unittest.TestCase):
     def init_same_param_shapes(cls):
         M = 10
         D = 8
-        prior = ex.priors.TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
+        prior = TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
         priors = [prior] * M
-        simulators = [ex.simulators.MultivariateT(df) for df in np.arange(1, 101, M)]
-        generative_model = MetaGenerativeModel(ex.priors.model_prior, priors, simulators)
+        simulators = [MultivariateTSimulator(df) for df in np.arange(1, 101, M)]
+        generative_model = MetaGenerativeModel(model_prior, priors, simulators)
         return generative_model
 
     @classmethod
     def init_different_param_shapes(cls):
         priors = [ex.priors.model1_params_prior, ex.priors.model2_params_prior, ex.priors.model3_params_prior]
         simulators = [ex.simulators.forward_model1, ex.simulators.forward_model2, ex.simulators.forward_model3]
-        generative_model = MetaGenerativeModel(ex.priors.model_prior, priors, simulators)
+        generative_model = MetaGenerativeModel(model_prior, priors, simulators)
         return generative_model
 
     @classmethod
@@ -126,11 +128,11 @@ class TestMetaGenerativeModel(unittest.TestCase):
 
         M = 10
         D = 8
-        prior = ex.priors.TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
+        prior = TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
         priors = [prior] * M
-        simulators = [ex.simulators.MultivariateT(df) for df in np.arange(1, 101, M)]
+        simulators = [MultivariateTSimulator(df) for df in np.arange(1, 101, M)]
 
-        _generative_model = MetaGenerativeModel(model_prior=ex.priors.model_prior, priors=priors, simulators=simulators,
+        _generative_model = MetaGenerativeModel(model_prior=model_prior, priors=priors, simulators=simulators,
                                                 param_transforms=param_transform, data_transforms=data_transform)
 
     def test_same_param_transform(self):
@@ -139,11 +141,11 @@ class TestMetaGenerativeModel(unittest.TestCase):
 
         M = 10
         D = 8
-        prior = ex.priors.TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
+        prior = TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
         priors = [prior] * M
-        simulators = [ex.simulators.MultivariateT(df) for df in np.arange(1, 101, M)]
+        simulators = [MultivariateTSimulator(df) for df in np.arange(1, 101, M)]
 
-        _generative_model = MetaGenerativeModel(model_prior=ex.priors.model_prior, priors=priors, simulators=simulators,
+        _generative_model = MetaGenerativeModel(model_prior=model_prior, priors=priors, simulators=simulators,
                                                 param_transforms=param_transform)
 
     def test_same_data_transform(self):
@@ -153,11 +155,11 @@ class TestMetaGenerativeModel(unittest.TestCase):
 
         M = 10
         D = 8
-        prior = ex.priors.TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
+        prior = TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
         priors = [prior] * M
-        simulators = [ex.simulators.MultivariateT(df) for df in np.arange(1, 101, M)]
+        simulators = [MultivariateTSimulator(df) for df in np.arange(1, 101, M)]
 
-        _generative_model = MetaGenerativeModel(model_prior=ex.priors.model_prior, priors=priors, simulators=simulators,
+        _generative_model = MetaGenerativeModel(model_prior=model_prior, priors=priors, simulators=simulators,
                                                 data_transforms=data_transform)
 
     def test_individual_param_and_data_transform(self):
@@ -171,9 +173,9 @@ class TestMetaGenerativeModel(unittest.TestCase):
 
         M = 3
         D = 4
-        prior = ex.priors.TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
+        prior = TPrior(D // 2, mu_scale=1.0, scale_scale=5.0)
         priors = [prior] * M
-        simulators = [ex.simulators.MultivariateT(df) for df in np.round(np.linspace(1, 101, M))]
+        simulators = [MultivariateTSimulator(df) for df in np.round(np.linspace(1, 101, M))]
 
-        _generative_model = MetaGenerativeModel(model_prior=ex.priors.model_prior, priors=priors, simulators=simulators,
+        _generative_model = MetaGenerativeModel(model_prior=model_prior, priors=priors, simulators=simulators,
                                                 param_transforms=param_transforms, data_transforms=data_transforms)

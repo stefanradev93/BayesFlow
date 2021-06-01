@@ -1,6 +1,5 @@
 import numpy as np
 from numba import njit
-from scipy import stats
 
 
 @njit
@@ -69,39 +68,6 @@ def dm_batch_simulator(prior_samples, n_obs, dt=0.005, s=1.0, max_iter=1e4):
 
     return sim_data
 
-
-class MultivariateT:
-    def __init__(self, df=10, seed=42):
-        self.df = df
-        self.seed = seed
-
-    def simulate_data(self, p_sample, n_obs):
-        """
-        Returns a dataset given a sample from the prior.
-        """
-
-        D = p_sample.shape[0] // 2
-        mu, sd = p_sample[:D], p_sample[D:]
-        x = stats.multivariate_t(loc=mu, shape=np.diag(sd), df=self.df).rvs(n_obs)
-        return x
-
-    def generate_multiple_datasets(self, p_samples, n_obs):
-        """ Generates multiple datasets through BayesianMultivariateT.generate_data() """
-
-        batch_size = p_samples.shape[0]
-        theta_dim = p_samples.shape[1] // 2
-        x = np.zeros((batch_size, n_obs, theta_dim))
-
-        for bi in range(batch_size):
-            x[bi] = self.simulate_data(p_samples[bi], n_obs)
-        return x.astype(np.float32)
-
-    def __call__(self, p_samples, n_obs=100):
-        """
-        Makes instances of the class callable.
-        """
-
-        return self.generate_multiple_datasets(p_samples, n_obs)
 
 @njit
 def forward_model1(params, n_obs, V0=-70, I_input=3, dt=0.2):

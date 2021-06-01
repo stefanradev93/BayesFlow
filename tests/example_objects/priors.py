@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import stats
 
 
 def dm_prior(batch_size):
@@ -43,25 +42,6 @@ def model_prior(batch_size, n_models=3, p_vals=None):
         p_vals = [1 / n_models] * n_models
     m_idx = np.random.choice(n_models, size=batch_size, p=p_vals).astype(np.int32)
     return m_idx
-
-
-class TPrior:
-
-    def __init__(self, theta_dim, mu_scale, scale_scale):
-        self.theta_dim = theta_dim
-        self.prior_mu = stats.multivariate_normal(np.zeros(self.theta_dim), mu_scale * np.eye(self.theta_dim))
-        self.prior_scale = stats.uniform(0, scale_scale)
-
-    def __call__(self, batch_size):
-        """
-        Returns a sample from the prior.
-        """
-
-        mu_samples = self.prior_mu.rvs(batch_size)
-        if batch_size == 1:
-            mu_samples = mu_samples[np.newaxis]
-        scale_samples = self.prior_scale.rvs((batch_size, self.theta_dim))
-        return np.c_[mu_samples, scale_samples].astype(np.float32)
 
 
 def model1_params_prior(**args):
