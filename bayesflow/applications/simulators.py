@@ -6,7 +6,7 @@ from scipy import stats
 from bayesflow.exceptions import ConfigurationError
 
 
-class GaussianSimulator:
+class GaussianMeanSimulator:
     """ Simulates batches of D-variate Gaussians.
 
     Attributes
@@ -32,31 +32,31 @@ class GaussianSimulator:
 
         Initializing a :class:`GaussianSimulator` with default unit scale.
 
-        >>> simulator = GaussianSimulator(D=3)
+        >>> simulator = GaussianMeanSimulator(D=3)
         >>> simulator.sigma   # np.diag([1, 1, 1])
 
 
         Initializing a :class:`GaussianSimulator` with isotropic scale.
 
-        >>> simulator = GaussianSimulator(D=3, s=2.5)
+        >>> simulator = GaussianMeanSimulator(D=3, s=2.5)
         >>> simulator.sigma   # np.diag([2.5, 2.5, 2.5])
 
 
         Initializing a :class:`GaussianSimulator` with custom diagonal scale as `list`.
 
-        >>> simulator = GaussianSimulator(D=3, s=[1, 2, 3])
+        >>> simulator = GaussianMeanSimulator(D=3, s=[1, 2, 3])
         >>> simulator.sigma   # np.diag([1.0, 2.0, 3.0])
 
 
         Initializing a :class:`GaussianSimulator` with custom diagnonal scale as `np.ndarray`.
 
-        >>> simulator = GaussianSimulator(D=3, s=np.array([1, 2, 3]))
+        >>> simulator = GaussianMeanSimulator(D=3, s=np.array([1, 2, 3]))
         >>> simulator.sigma   # np.diag([1.0, 2.0, 3.0])
 
         Initializing a :class:`GaussianSimulator` with a full scale matrix.
 
         >>> A = np.random.random((3, 3))
-        >>> simulator = GaussianSimulator(D=3, s = np.dot(A, A.T))  # AA^T is always positive semi-definite
+        >>> simulator = GaussianMeanSimulator(D=3, s = np.dot(A, A.T))  # AA^T is always positive semi-definite
         >>> simulator.sigma   # full matrix AA^T
 
 
@@ -121,6 +121,26 @@ class GaussianSimulator:
         sim_data = np.array(sim_data)
         sim_data = np.transpose(sim_data, (1, 0, 2))
         return sim_data
+
+
+class GaussianMeanCovSimulator:
+    def __call__(self, params, n_obs):
+        """ Generates batches of samples from the D-variate Gaussian
+        Parameters
+        ----------
+        params : tuple of np.ndarrays
+            Means and convariance matrices of the gaussians
+        n_obs  : int
+            Number of observations per dataset
+        Returns
+        -------
+        sim_data: np.ndarray
+            Simulated data, shape (n_sim, n_obs, D)
+        """
+        means, cov = params
+        tril_cov = tf.linalg.cholesky(cov)
+        sim_data = tfp.distributions.MultivariateNormalTriL(means, tril_cov).sample(n_obs)
+        return tf.transpose(sim_data, (1, 0, 2))
 
 
 class MultivariateTSimulator:

@@ -1,4 +1,6 @@
 import numpy as np
+import tensorflow as tf
+import tensorflow_probability as tfp
 from scipy import stats
 
 
@@ -30,9 +32,8 @@ def model_prior(batch_size, n_models=3, p_vals=None):
     return m_idx
 
 
-class GaussianPrior:
+class GaussianMeanPrior:
     """ Provides a gaussian prior for means of a D-variate Gaussian.
-
     Attributes
     ----------
     D : int
@@ -50,7 +51,6 @@ class GaussianPrior:
 
     def __call__(self, n_sim):
         """ Generates n_sim sets of parameter draws.
-
         Parameters
         ----------
         n_sim: int
@@ -60,10 +60,54 @@ class GaussianPrior:
         -------
         theta : np.ndarray
             Sampled parameters, shape (n_sim, D)
-
         """
         theta = np.random.default_rng().normal(self.mu_mean, self.mu_scale, size=(n_sim, self.D))
         return theta
+
+
+class GaussianMeanCovPrior:
+    """ Provides a Normal-Wishart prior over the mean and precision matrix
+    of a Gaussian distribution
+
+    Attributes
+    ----------
+    D  : int
+        Dimensionality of multivariate Gaussian
+    a0 : int
+        Degrees of freedom of the prior Wishart distribution
+    b0 : float
+        Scale factor of the prior Wishart distribution
+    m0 : float
+        Mean of the prior Gaussian distribution
+    beta0 : float
+        Precision factor for the Gaussian prior
+    """
+    def __init__(self, D, a0, b0, m0, beta0):
+        self.D = D
+        self.a0 = a0
+        self.B0 = np.eye(D) * b0
+        self.m0 = m0
+        self.beta0 = beta0
+        self.precision_prior = stats.wishart(self.a0, self.B0)
+
+    def __call__(self, n_sim):
+        """ Generates n_sim sets of parameter draws.
+        Parameters
+        ----------
+        n_sim: int
+            Batch size
+        Returns
+        -------
+        means : np.ndarray
+            Sampled means, shape (n_sim, D)
+        cov   : np.ndarray
+            Sampled covariance matrices, shape (n_sim, D, D)
+        """
+        precision = self.precision_prior.rvs(n_sim)
+        cov = tf.linalg.inv(self.beta0 * precision)
+        tril_cov = tf.linalg.cholesky(cov)
+        means = tfp.distributions.MultivariateNormalTriL(self.m0, tril_cov).sample()
+        return means, cov
 
 
 class TPrior:
