@@ -174,13 +174,15 @@ class MetaGenerativeModel(GenerativeModel):
 
         model_indices = tf.keras.utils.to_categorical(model_indices, self.n_models)
 
-        return model_indices.astype(np.float32), params.astype(np.float32), sim_data.astype(np.float32)
+        return np.array(model_indices, dtype=np.float32), \
+               np.array(params, dtype=np.float32), \
+               np.array(sim_data, dtype=np.float32)
 
     def _configure_transform(self, transform):
         """
         Prepares a transformation (either data or param) for internal use, if specified by the user.
         """
-        
+
         if isinstance(transform, list):
             if len(transform) == self.n_models:
                 if not all([callable(t) or t is None for t in transform]):
@@ -322,7 +324,7 @@ class SimpleGenerativeModel(GenerativeModel):
         if self.data_transform is not None:
             sim_data = self.data_transform(sim_data)
 
-        return params.astype(np.float32), sim_data.astype(np.float32)
+        return np.array(params, dtype=np.float32), np.array(sim_data, dtype=np.float32)
 
     def _set_prior_and_simulator(self):
         """ Wraps prior and simulator to support batch simulation and provide a uniform interface.
@@ -340,7 +342,11 @@ class SimpleGenerativeModel(GenerativeModel):
         # Wrap prior callable if necessary
         try:
             _params = self.prior(_n_sim)
-            assert _params.shape[0] == _n_sim
+            if self.param_transform is None:
+                assert _params.shape[0] == _n_sim
+            else:
+                assert (self.param_transform(_params)).shape[0] == _n_sim
+
             self.prior = self.prior  # prior already produces batches.
 
         except Exception as err:
@@ -348,12 +354,21 @@ class SimpleGenerativeModel(GenerativeModel):
             self.prior = lambda n_sim: np.array([self._single_prior() for _ in range(n_sim)])
 
             _params = self.prior(_n_sim)
-            if _params.shape[0] != _n_sim:
-                raise SimulationError(f"Prior callable could not be wrapped to batch generation!\n{repr(err)}")
+
+            if self.param_transform is None:
+                assert _params.shape[
+                           0] == _n_sim, f"Prior callable could not be wrapped to batch generation!\n{repr(err)}"
+            else:
+                assert (self.param_transform(_params)).shape[0] == _n_sim, f"Prior callable could not be wrapped to " \
+                                                                           f"batch generation!\n{repr(err)}"
 
         # Wrap simulator callable if necessary
         try:
             _sim_data = self.simulator(_params, _n_obs)
+
+            if self.data_transform is not None:
+                _sim_data = self.data_transform(_sim_data)
+
             assert _sim_data.shape[0] == _n_sim and _sim_data.shape[1] == _n_obs
             self.simulator = self.simulator  # simulator already produces batches.
 
@@ -364,6 +379,8 @@ class SimpleGenerativeModel(GenerativeModel):
                 np.array([self._single_simulator(theta, n_obs, **kwargs) for theta in params])
 
             _sim_data = self.simulator(_params, _n_obs)
+            if self.data_transform is not None:
+                _sim_data = self.data_transform(_sim_data)
             if _sim_data.shape[0] != _n_sim or _sim_data.shape[1] != _n_obs:
                 raise SimulationError(f"Simulator callable could not be wrapped to batch generation!\n{repr(err)}")
 

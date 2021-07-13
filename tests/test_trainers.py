@@ -5,6 +5,8 @@ import numpy as np
 
 import tests.example_objects as ex
 from bayesflow.amortizers import SingleModelAmortizer, MultiModelAmortizer
+from bayesflow.applications.priors import TPrior, model_prior
+from bayesflow.applications.simulators import MultivariateTSimulator
 from bayesflow.default_settings import DEFAULT_SETTING_INVARIANT_BAYES_FLOW
 from bayesflow.exceptions import OperationNotSupportedError
 from bayesflow.helpers import build_meta_dict
@@ -169,7 +171,7 @@ class TestModelComparisonTrainer(unittest.TestCase):
         trainer = ModelComparisonTrainer(amortizer, n_models=3)
 
         generative_model = GenerativeModel(
-            ex.priors.model_prior,
+            model_prior,
             [ex.priors.model1_params_prior, ex.priors.model2_params_prior, ex.priors.model3_params_prior],
             [ex.simulators.forward_model1, ex.simulators.forward_model2, ex.simulators.forward_model3]
         )
@@ -192,9 +194,9 @@ class TestMetaTrainer(unittest.TestCase):
 
         amortizer = ex.amortizers.InvariantBayesFlow(bf_meta)
         generative_model = GenerativeModel(
-            ex.priors.model_prior,
-            [ex.priors.TPrior(D // 2, 1.0, 5.0)] * J,
-            [ex.simulators.MultivariateT(df) for df in np.arange(1, J + 1, 1)]
+            model_prior,
+            [TPrior(D // 2, 1.0, 5.0)] * J,
+            [MultivariateTSimulator(df) for df in np.arange(1, J + 1, 1)]
         )
 
         trainer = MetaTrainer(amortizer,
@@ -259,9 +261,9 @@ class TestMetaTrainer(unittest.TestCase):
                               )
 
         generative_model = GenerativeModel(
-            ex.priors.model_prior,
-            [ex.priors.TPrior(D // 2, 1.0, 5.0)] * J,
-            [ex.simulators.MultivariateT(df) for df in np.arange(1, J + 1, 1)]
+            model_prior,
+            [TPrior(D // 2, 1.0, 5.0)] * J,
+            [MultivariateTSimulator(df) for df in np.arange(1, J + 1, 1)]
         )
         model_indices, params, sim_data = generative_model(64, 128)
         _losses = trainer.train_offline(2, 16, model_indices, params, sim_data)

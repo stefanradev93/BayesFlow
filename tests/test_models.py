@@ -3,8 +3,8 @@ import unittest
 import numpy as np
 
 import tests.example_objects as ex
-from bayesflow.applications.priors import model_prior, TPrior
-from bayesflow.applications.simulators import MultivariateTSimulator
+from bayesflow.applications.priors import model_prior, TPrior, GaussianMeanCovPrior
+from bayesflow.applications.simulators import MultivariateTSimulator, GaussianMeanCovSimulator
 from bayesflow.models import GenerativeModel, SimpleGenerativeModel, MetaGenerativeModel
 
 N_SIM = 16
@@ -179,3 +179,15 @@ class TestMetaGenerativeModel(unittest.TestCase):
 
         _generative_model = MetaGenerativeModel(model_prior=model_prior, priors=priors, simulators=simulators,
                                                 param_transforms=param_transforms, data_transforms=data_transforms)
+
+    def test_structural_param_transform_tuple_to_numpy(self):
+        D = 5
+
+        def param_transform_mvn(theta):
+            means, cov = theta
+            var = np.diagonal(cov, axis1=1, axis2=2)
+            return np.concatenate([means, var], axis=1)
+
+        prior = GaussianMeanCovPrior(D=D, a0=10, b0=1, m0=0, beta0=1)
+        simulator = GaussianMeanCovSimulator()
+        generative_model = GenerativeModel(prior, simulator, param_transform=param_transform_mvn)
