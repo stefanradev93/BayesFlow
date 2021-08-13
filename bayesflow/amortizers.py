@@ -186,7 +186,7 @@ class SingleModelAmortizer(tf.keras.Model):
         self.inference_net = inference_net
         self.summary_net = summary_net
 
-    def call(self, params, sim_data):
+    def call(self, params, sim_data, return_summary=False):
         """ Performs a forward pass through the summary and inference network.
 
         Parameters
@@ -195,12 +195,14 @@ class SingleModelAmortizer(tf.keras.Model):
             the parameters theta ~ p(theta | x) of interest
         sim_data  : tf.Tensor of shape (batch_size, n_obs, data_dim)
             the conditional data x
-
+        return_summary : bool
+            a flag which determines whether the data summaryis returned or not
         Returns
         -------
         out
             the outputs of ``inference_net(theta, summary_net(x))``, usually a latent variable and
-            log(det(Jacobian)), that is a tuple ``(z, log_det_J)``
+            log(det(Jacobian)), that is a tuple ``(z, log_det_J) or sum_data, (z, log_det_J) if 
+            return_summary is set to True and a summary network is defined.`` 
         """
 
         # Compute learnable summaries, if given
@@ -209,7 +211,10 @@ class SingleModelAmortizer(tf.keras.Model):
 
         # Compute output of inference net
         out = self.inference_net(params, sim_data)
-        return out
+
+        if not return_summary:
+            return out
+        return sim_data, out
 
     def sample(self, obs_data, n_samples, **kwargs):
         """ Performs inference on actually observed or simulated validation data.
