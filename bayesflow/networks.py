@@ -387,6 +387,250 @@ class ConditionalCouplingLayer(tf.keras.Model):
             return u
 
 
+class ActNormLayer(tf.keras.Model):
+    """Implements an Activation Normalization (ActNorm) Layer."""
+
+    def __init__ (self, n_params:int, params_init = None):
+        """ Creates an instance of an ActNorm Layer as proposed by [1].
+
+        Activation Normalization is learned invertible normalization, using
+        a Scale (s) and Bias (b) vector [1].
+            y = s * x + b (forward)
+            x = (y - b)/s (inverse)
+        
+        The scale and bias can be data dependent initalized, such that the
+        output has a mean of zero and standard deviation of one [1,2]. 
+        Alternatively, it is initialized with vectors of ones (scale) and 
+        zeros (bias).
+
+        [1] - Kingma, Diederik P., and Prafulla Dhariwal. 
+              "Glow: Generative flow with invertible 1x1 convolutions." 
+               arXiv preprint arXiv:1807.03039 (2018).
+
+        [2] - Salimans, Tim, and Durk P. Kingma. 
+              "Weight normalization: A simple reparameterization to accelerate 
+               training of deep neural networks." 
+              Advances in neural information processing systems 29 
+              (2016): 901-909.
+
+        Parameters
+        ----------
+        n_params : int
+            Ihe dimensionality of the input to the ActNorm layer.
+        
+        params_init : tf.Tensor or None
+            Tensor of shape (batch size, number of parameters) to initialize
+            the scale and bias parameter by computing the mean and standard
+            deviation along the first dimension of the Tensor.
+            Default is None.
+        """
+
+        super(ActNormLayer, self).__init__()
+        # Initialize scale and bias with zeros and ones if no
+        # batch for initalization was provided.
+        if params_init is None:
+            self.scale = tf.Variable(tf.ones((1, n_params)),
+                                     trainable = True,
+                                     dtype = tf.float32,
+                                     name  = 'ActNorm_scale')
+
+            self.bias  = tf.Variable(tf.zeros((1, n_params)),
+                                     trainable = True,
+                                     dtype = tf.float32,
+                                     name  = 'ActNorm_bias')
+        else:
+            self._initalize_parameters_data_dependent(params_init)
+
+
+    def _initalize_parameters_data_dependent(self, params_init):
+        """Performs a data dependent initalization of the scale and bias.
+        
+        Initalizes the scale and bias vector as proposed by [1], such that the 
+        layer output has an mean of zero and a standard deviation of one.
+
+        Parameters
+        ----------
+        x_init : tf.Tensor
+            ensor of shape (batch size, number of parameters) to initialize
+            the scale bias parameter by computing the mean and standard
+            deviation along the first dimension of the Tensor.
+        
+        Returns
+        -------
+        (scale, bias) : tuple(tf.Tensor, tf.Tensor)
+            scale and bias vector of shape (1, n_params).
+        
+        [1] - Salimans, Tim, and Durk P. Kingma. 
+              "Weight normalization: A simple reparameterization to accelerate 
+               training of deep neural networks." 
+              Advances in neural information processing systems 29 
+              (2016): 901-909.
+        """
+        
+        mean = tf.math.reduce_mean(params_init, 0) 
+        std  = tf.math.reduce_std(params_init,  0)
+
+        scale = 1.0/std
+        bias  = (-1.0 * mean)/std
+        
+        self.scale = tf.Variable(scale,
+                                 trainable = True,
+                                 dtype = tf.float32,
+                                 name  = 'ActNorm_scale')
+
+        self.bias  = tf.Variable(bias,
+                                 trainable = True,
+                                 dtype = tf.float32,
+                                 name  = 'ActNorm_bias')
+
+    def call(self, params, inverse:bool = False, log_det_J:bool = True):
+        """Performs one pass through an invertible chain (either inverse or forward).
+        
+        Parameters
+        ----------
+        params     : tf.Tensor
+            the parameters theta ~ p(theta|y) of interest, shape (batch_size, theta_dim) --
+        x         : tf.Tensor
+            the summarized conditional data of interest x = summary(x), shape (batch_size, summary_dim)
+        inverse   : bool, default: False
+            Flag indicating whether to run the block forward or backwards
+        log_det_J : bool, default: True
+            Flag indicating whether to return the log determinant of the Jacobian matrix.
+        
+        Returns
+        -------
+        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+            If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
+            v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
+
+        u               :  tf.Tensor
+            If inverse=True: The transformed out, shape (batch_size, inp_dim)
+
+        Important
+        ---------
+        If ``inverse=False``, the return is ``(v, log_det_J)``.\n
+        If ``inverse=True``, the return is ``u``.
+        """
+        
+        if not inverse:
+            return self.forward(params, log_det_J)
+        
+        else:
+            return self.inverse(params)
+
+    def forward(self, params, log_det_J:bool = True):
+        """Performs a forward pass through the ActNorm-layer."""
+
+        z = self.scale * params + self.bias
+
+        if log_det_J:
+            return z, (tf.zeros(z.shape[0], dtype = tf.float32) + 
+                       tf.math.reduce_sum(tf.math.log(tf.math.abs(self.scale))))
+        return z
+
+    def inverse(self, z):
+        """Performs an inverse pass through the ActNorm-layer."""
+        return (z - self.bias)/self.scale
+    
+
+class ActNormCounditionalCouplingLayer(tf.keras.Model):
+    """Combines an ActNorm layer with a conditional Coupling Layer."""
+
+    def __init__ (self, meta:dict, initialize:bool = False):
+        """Creates an instance which combines a Coupling and an ActNorm Layer.
+        
+        Parameters
+        ----------
+        meta : list(dict)
+            A list of dictionaries, where each dictionary holds parameter-value pairs
+            for a single :class:`keras.Dense` layer
+        
+        initialize : bool
+            Flag that indicates if a data dependent initalization should be performed.
+            as proposed by [1].
+            Default is False.
+        """
+
+        super(ActNormCounditionalCouplingLayer, self).__init__()
+
+        self.ActNorm = ActNormLayer(meta['n_params'])
+        self.CouplingLayer = ConditionalCouplingLayer(meta)
+
+        # Initilaize data dependent if data was provided.
+        if 'initalization_data' in meta and initialize:
+            self.ActNorm._initalize_parameters_data_dependent(
+                meta['initalization_data'])
+    
+    def _initalize_actnorm_data_dependent(self, init_data):
+        """Performs a data dependet inialization of the ActNorm-layer. 
+        
+        This method is indendent to be used for initialing a sequence of 
+        ActNormCounditionalCouplingLayer by forward through pass, such 
+        that every ActNorm-layer is data dependet initialized.
+
+        Parameters
+        ----------
+        init_data : (tf.Tensor)
+            Tensor of shape (batch_size, n_parameters) to initialize ActNorm.
+        """
+
+        self.ActNorm._initalize_parameters_data_dependent(init_data)
+
+    def call(self,params, x, inverse=False):
+        """Performs one pass through an invertible chain (either inverse or forward).
+        
+        Parameters
+        ----------
+        params     : tf.Tensor
+            the parameters theta ~ p(theta|y) of interest, shape (batch_size, theta_dim) --
+        x         : tf.Tensor
+            the summarized conditional data of interest x = summary(x), shape (batch_size, summary_dim)
+        inverse   : bool, default: False
+            Flag indicating whether to run the block forward or backwards
+        log_det_J : bool, default: True
+            Flag indicating whether to return the log determinant of the Jacobian matrix.
+        
+        Returns
+        -------
+        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+            If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
+            v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
+
+        u               :  tf.Tensor
+            If inverse=True: The transformed out, shape (batch_size, inp_dim)
+
+        Important
+        ---------
+        If ``inverse=False``, the return is ``(v, log_det_J)``.\n
+        If ``inv
+        """
+        
+        if not inverse:
+            return self.forward(params, x)
+        else:
+            return self.inverse(params, x)
+
+    def forward(self, params, x):
+        """Performs a forward pass through the ActNorm and Coupling layer."""
+
+        log_det_Js = []
+        params, log_det_J = self.ActNorm.forward(params)
+        log_det_Js.append(log_det_J)
+
+        params, log_det_J = self.CouplingLayer(params, x, inverse=False, log_det_J=True)
+        log_det_Js.append(log_det_J)
+
+        return params, tf.add_n(log_det_Js)
+
+    def inverse(self, z, x):
+        """Performs a inverse pass through the Coupling and the ActNorm layer."""
+
+        params = self.CouplingLayer(z, x, inverse=True, log_det_J=False)
+        params = self.ActNorm.inverse(params)
+
+        return params
+
+
 class InvertibleNetwork(tf.keras.Model):
     """Implements a chain of conditional invertible blocks for Bayesian parameter inference."""
 
@@ -407,8 +651,13 @@ class InvertibleNetwork(tf.keras.Model):
 
         meta = build_meta_dict(user_dict=meta,
                                default_setting=default_settings.DEFAULT_SETTING_INVERTIBLE_NET)
+        
+        if 'use_ActNorm' not in meta or not meta['use_ActNorm']:
+            self.cINNs = [ConditionalCouplingLayer(meta) for _ in range(meta['n_coupling_layers'])]
+        else:
+            self.cINNs = [ActNormCounditionalCouplingLayer(meta) for _ in range(meta['n_coupling_layers'] - 1)]
+            self.cINNs.insert(0, ActNormCounditionalCouplingLayer(meta, True))
 
-        self.cINNs = [ConditionalCouplingLayer(meta) for _ in range(meta['n_coupling_layers'])]
         self.z_dim = meta['n_params']
 
     def call(self, params, x, inverse=False):
