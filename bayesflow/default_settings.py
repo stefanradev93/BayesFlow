@@ -78,7 +78,9 @@ DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
             'initializer': 'glorot_uniform',
         },
         'alpha': 1.9,
-        'permute': True
+        'use_permutation': True,
+        'use_act_norm': True,
+        'act_norm_init': None
     },
     mandatory_fields=["n_params"]
 )
