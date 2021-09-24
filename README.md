@@ -1,7 +1,5 @@
 # BayesFlow
 
-![Logo](https://github.com/stefanradev93/BayesFlow/blob/img/logo.png)
-
 Welcome to the beta-version of our BayesFlow library for simulation-based Bayesian parameter estimation and model comparison!
 
 For starters, check out the walkthrough notebooks [Parameter_Estimation_Workflow.ipynb](docs/source/tutorial_notebooks/Parameter_Estimation_Workflow.ipynb) and [Model_Comparison_Workflow.ipynb](docs/source/tutorial_notebooks/Model_Comparison_Workflow.ipynb) in [docs/tutorial_notebooks](docs/source/tutorial_notebooks/). For short code samples, please read below!
