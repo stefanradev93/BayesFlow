@@ -1,6 +1,6 @@
 # BayesFlow
 
-![Logo](https://github.com/stefanradev93/BayesFlow/blob/img/logo.png?raw=true)
+![Logo](https://github.com/stefanradev93/BayesFlow/blob/img/logo.png)
 
 Welcome to the beta-version of our BayesFlow library for simulation-based Bayesian parameter estimation and model comparison!
 
