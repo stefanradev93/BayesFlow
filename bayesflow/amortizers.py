@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 from tensorflow.keras.utils import to_categorical
 
@@ -240,3 +241,145 @@ class SingleModelAmortizer(tf.keras.Model):
 
         post_samples = self.inference_net.sample(obs_data, n_samples, **kwargs)
         return post_samples
+
+
+class PosteriorLikelihoodAmortizer(tf.keras.Model):
+    """ Connects an inference network for parameter estimation with an optional summary network
+    as in the original BayesFlow set-up.
+    """
+
+    def __init__(self, posterior_net, likelihood_net):
+        """Initializes the PosteriorLikelihoodAmortizer
+
+        Parameters
+        ----------
+        posterior_net  : SingleModelAmortizer(tf.keras.Model)
+            An (invertible) inference network which processes the outputs of a generative model (i.e., params, sim_data)
+        likelihood_net : SingleModelAmortizer(tf.keras.Model)
+            An (invertible) inference network which processes the outputs of a generative model (i.e., sim_data, params)
+
+        """
+        super(PosteriorLikelihoodAmortizer, self).__init__()
+
+        self.posterior_net = posterior_net
+        self.likelihood_net = likelihood_net
+
+    def call(self, params, sim_data, return_summary=False):
+        """ Performs a forward pass through the summary and inference network.
+
+        Parameters
+        ----------
+        params    : tf.Tensor of shape (batch_size, n_params)
+            the parameters theta ~ p(theta | x) of interest
+        sim_data  : tf.Tensor of shape (batch_size, n_obs, data_dim)
+            the conditional data x
+        return_summary : bool
+            a flag which determines whether the data summaryis returned or not
+        Returns
+        -------
+        out
+            the outputs of ``inference_net(theta, summary_net(x))``, usually a latent variable and
+            log(det(Jacobian)), that is a tuple ``(z, log_det_J) or sum_data, (z, log_det_J) if 
+            return_summary is set to True and a summary network is defined.`` 
+        """
+
+        # Compute output of posteriior net
+        out_post = self.posterior_net(params, sim_data, return_summary=return_summary)
+
+        # Compute output of likelihood network
+        out_lik = self.likelihood_net(sim_data, params)
+        
+        if not return_summary:
+            return out_post, out_lik
+        return sim_data, out_post, out_lik
+
+    def sample_params_given_data(self, obs_data, n_samples, **kwargs):
+        """ Performs posterior inference on actually observed or simulated validation data.
+
+
+        Parameters
+        ----------
+
+        obs_data  : tf.Tensor of shape (n_datasets, n_obs, data_dim)
+            The conditional data set(s)
+        n_samples : int
+            The number of posterior samples to obtain from the approximate posterior
+
+        Returns
+        -------
+        post_samples : tf.Tensor of shape (n_samples, n_datasets, n_params)
+            the sampled parameters per data set
+        """
+
+        post_samples = self.posterior_net.sample(obs_data, n_samples, **kwargs)
+        return post_samples
+
+    def sample_data_given_params(self, params, n_samples, **kwargs):
+        """ Generates data from a synthetic likelihood given parameters.
+
+
+        Parameters
+        ----------
+
+        params    : tf.Tensor of shape (n_datasets, params_dim)
+            The conditional data set(s)
+        n_samples : int
+            The number of samples to obtain from the approximate likelihood.
+
+        Returns
+        -------
+        lik_samples : tf.Tensor of shape (n_obs, n_datasets, data_dim)
+            the sampled parameters per data set
+        """
+
+        lik_samples = self.likelihood_net.sample(params, n_samples, **kwargs)
+        return lik_samples
+
+    def log_likelihood(self, obs_data, params, normalized=True):
+        """ Calculates the approximate log-likelihood of params given obs_data.
+
+        Parameters
+        ----------
+        obs_data   : tf.Tensor of shape (batch_size, n_obs, data_dim)
+            the data of interest x_n ~ p(x | theta) 
+        params     : tf.Tensor of shape (batch_size, n_params)
+            the parameters of interest theta ~ p(theta | x) 
+        normalized : bool
+            a flag which determines whether the likelihood is normalzied or not.
+
+        Returns
+        -------
+        loglik     : tf.Tensor of shape (batch_size, n_obs)
+            the approximate log-likelihood of each data point in each data set
+        """
+
+        z, log_det_J = self.likelihood_net(obs_data, params)
+        k = z.shape[-1]
+        log_z_unnorm = -0.5 * tf.math.square(tf.norm(z, axis=-1)) 
+        if normalized:
+            log_z = log_z_unnorm - tf.math.log(tf.math.sqrt((2*np.pi)**k))
+        else:
+            log_z = log_z_unnorm
+        loglik = log_z + log_det_J
+        return loglik
+
+    def log_posterior(self, params, obs_data):
+        """ Calculates the approximate log-posterior of params given obs_data.
+
+        Parameters
+        ----------
+        params     : tf.Tensor of shape (batch_size, n_params)
+            the parameters of interest theta ~ p(theta | x) 
+        obs_data   : tf.Tensor of shape (batch_size, n_obs, data_dim)
+            the data of interest x_n ~ p(x | theta) 
+
+        Returns
+        -------
+        loglik     : tf.Tensor of shape (batch_size, n_obs)
+            the approximate log-likelihood of each data point in each data set
+        """
+        z, log_det_J = self.posterior_net(params, obs_data)
+        k = z.shape[-1]
+        log_z_unnorm = -0.5 * tf.math.square(tf.norm(z, axis=-1)) 
+        log_z = log_z_unnorm - tf.math.log(tf.math.sqrt((2*np.pi)**k))
+        return log_z + log_det_J

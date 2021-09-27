@@ -5,6 +5,7 @@ from tensorflow.keras.models import Sequential
 
 from bayesflow import default_settings
 from bayesflow.helpers import build_meta_dict
+from bayesflow.exceptions import ConfigurationError
 
     
 class InvariantModule(tf.keras.Model):
@@ -142,32 +143,32 @@ class Permutation(tf.keras.Model):
                                            dtype=tf.int32,
                                            name='inv_permutation')
 
-    def call(self, x, inverse=False):
+    def call(self, target, inverse=False):
         """ Permutes the batch of an input.
 
         Parameters
         ----------
-        x: tf.Tensor
-            Input to the layer.
-        inverse: bool, default: False
+        target   : tf.Tensor
+            The vector to be permuted.
+        inverse  : bool, default: False
             Controls if the current pass is forward (``inverse=False``) or inverse (``inverse=True``).
 
         Returns
         -------
-        out: tf.Tensor
+        out      : tf.Tensor
             Permuted input
 
         """
 
         if not inverse:
-            return tf.transpose(tf.gather(tf.transpose(x), self.permutation))
-        return tf.transpose(tf.gather(tf.transpose(x), self.inv_permutation))
+            return tf.transpose(tf.gather(tf.transpose(target), self.permutation))
+        return tf.transpose(tf.gather(tf.transpose(target), self.inv_permutation))
 
 
 class ActNorm(tf.keras.Model):
     """Implements an Activation Normalization (ActNorm) Layer."""
 
-    def __init__ (self, meta:dict):
+    def __init__ (self, meta):
         """ Creates an instance of an ActNorm Layer as proposed by [1].
 
         Activation Normalization is learned invertible normalization, using
@@ -199,17 +200,17 @@ class ActNorm(tf.keras.Model):
         super(ActNorm, self).__init__()
         # Initialize scale and bias with zeros and ones if no batch for initalization was provided.
         if meta.get('act_norm_init') is None:
-            self.scale = tf.Variable(tf.ones((1, meta['n_params'])),
+            self.scale = tf.Variable(tf.ones((meta['n_params'], )),
                                      trainable=True,
                                      name='act_norm_scale')
 
-            self.bias  = tf.Variable(tf.zeros((1, meta['n_params'])),
+            self.bias  = tf.Variable(tf.zeros((meta['n_params'], )),
                                      trainable=True,
                                      name='act_norm_bias')
         else:
             self._initalize_parameters_data_dependent(meta['act_norm_init'])
 
-    def _initalize_parameters_data_dependent(self, params_init):
+    def _initalize_parameters_data_dependent(self, init_data):
         """ Performs a data dependent initalization of the scale and bias.
         
         Initalizes the scale and bias vector as proposed by [1], such that the 
@@ -217,7 +218,7 @@ class ActNorm(tf.keras.Model):
 
         Parameters
         ----------
-        params_init : tf.Tensor
+        init_data : tf.Tensor
             of shape (batch size, number of parameters) to initialize
             the scale bias parameter by computing the mean and standard
             deviation along the first dimension of the Tensor.
@@ -234,8 +235,18 @@ class ActNorm(tf.keras.Model):
               (2016): 901-909.
         """
         
-        mean = tf.math.reduce_mean(params_init, axis=0) 
-        std  = tf.math.reduce_std(params_init,  axis=0)
+        # 2D Tensor case, assume first batch dimension
+        if len(init_data.shape) == 2:
+            mean = tf.math.reduce_mean(init_data, axis=0) 
+            std  = tf.math.reduce_std(init_data,  axis=0)
+        # 3D Tensor case, assume first batch dimension, second number of observations dimension
+        elif len(init_data.shape) == 3:
+            mean = tf.math.reduce_mean(init_data, axis=(0, 1)) 
+            std  = tf.math.reduce_std(init_data,  axis=(0, 1))
+        # Raise other cases
+        else:
+            raise ConfigurationError("""Currently, ActNorm supports only 2D and 3D Tensors, 
+                                     but act_norm_init contains data with shape.""".format(init_data.shape))
 
         scale = 1.0 / std
         bias  = (-1.0 * mean) / std
@@ -243,53 +254,53 @@ class ActNorm(tf.keras.Model):
         self.scale = tf.Variable(scale, trainable=True, name='act_norm_scale')
         self.bias  = tf.Variable(bias, trainable=True, name='act_norm_bias')
 
-    def call(self, params, inverse=False):
+    def call(self, target, inverse=False):
         """ Performs one pass through the actnorm layer (either inverse or forward).
         
         Parameters
         ----------
-        params     : tf.Tensor
-            the parameters theta ~ p(theta|y) of interest, shape (batch_size, theta_dim) --
-        x         : tf.Tensor
-            the summarized conditional data of interest x = summary(x), shape (batch_size, summary_dim)
-        inverse   : bool, default: False
+        target     : tf.Tensor
+            the target variables of interest, i.e., parameters for posterior estimation
+        inverse    : bool, default: False
             Flag indicating whether to run the block forward or backwards
         
         Returns
         -------
-        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+        (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
-            v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
+            v shape: (batch_size, inp_dim), log_det_J shape: (,)
 
-        u               :  tf.Tensor
-            If inverse=True: The transformed out, shape (batch_size, inp_dim)
+        target          :  tf.Tensor
+            If inverse=True: The inversly transformed targets, shape == target.shape
 
         Important
         ---------
-        If ``inverse=False``, the return is ``(v, log_det_J)``.\n
-        If ``inverse=True``, the return is ``u``.
+        If ``inverse=False``, the return is ``(z, log_det_J)``.\n
+        If ``inverse=True``, the return is ``target``.
         """
         
         if not inverse:
-            return self._forward(params)
+            return self._forward(target)
         else:
-            return self._inverse(params)
+            return self._inverse(target)
 
-    def _forward(self, params):
+    def _forward(self, target):
         """Performs a forward pass through the ActNorm layer."""
 
-        z = self.scale * params + self.bias
-        ldj = tf.zeros(z.shape[0]) + tf.math.reduce_sum(tf.math.log(tf.math.abs(self.scale)))
+        z = self.scale * target + self.bias
+        ldj = tf.math.reduce_sum(tf.math.log(tf.math.abs(self.scale)))
+        if len(target.shape) == 3:
+            ldj = ldj * target.shape[1]
         return z, ldj     
 
-    def _inverse(self, params):
+    def _inverse(self, target):
         """Performs an inverse pass through the ActNorm layer."""
 
-        return (params - self.bias) / self.scale
+        return (target - self.bias) / self.scale
 
 
 class CouplingNet(tf.keras.Model):
-    """Implements a conditional version of a sequential network."""
+    """Implements a conditional version of a satndard fully connected (FC) network."""
 
     def __init__(self, meta, n_out):
         """Creates a conditional coupling net (FC neural network).
@@ -314,18 +325,23 @@ class CouplingNet(tf.keras.Model):
             [Dense(n_out, kernel_initializer=meta['initializer'])]
         )
 
-    def call(self, params, x):
-        """Concatenates x and y and performs a forward pass through the coupling net.
+    def call(self, target, condition):
+        """Concatenates target and condition and performs a forward pass through the coupling net.
 
         Parameters
         ----------
-        params : tf.Tensor
-          The split parameters :math:`\\theta \sim p(\\theta)` of interest, shape (batch_size, n_params//2)
-        x      : tf.Tensor
-            the summarized conditional data of interest ``x = summary(x)``, shape (batch_size, summary_dim)
+        target      : tf.Tensor
+          The split estimation quntities, for instance, parameters :math:`\\theta \sim p(\\theta)` of interest, shape (batch_size, ...)
+        condition   : tf.Tensor
+            the conditioning vector of interest, for instance ``x = summary(x)``, shape (batch_size, summary_dim)
         """
 
-        inp = tf.concat((params, x), axis=-1)
+        # Handle 3D case for a set-flow
+        if len(target.shape) == 3:
+            # Extract information about N
+            N = int(target.shape[1])
+            condition = tf.stack([condition] * N, axis=1)
+        inp = tf.concat((target, condition), axis=-1)
         out = self.dense(inp)
         return out
 
@@ -368,15 +384,15 @@ class ConditionalCouplingLayer(tf.keras.Model):
         else:
             self.act_norm = None
 
-    def _forward(self, params, x):
+    def _forward(self, target, condition):
         """ Performs a forward pass through the coupling block. Used internally by the instance.
 
         Parameters
         ----------
-        params     : tf.Tensor
-            the parameters theta ~ p(theta|y) of interest, shape (batch_size, theta_dim) --
-        x         : tf.Tensor
-            the summarized conditional data of interest x = summary(x), shape (batch_size, summary_dim)
+        target     : tf.Tensor
+            the estimation quantities of interest, for instance, parameter vector of shape (batch_size, theta_dim)
+        condition  : tf.Tensor
+            the conditioning vector of interest, for instance, x = summary(x), shape (batch_size, summary_dim)
 
         Returns
         -------
@@ -386,22 +402,22 @@ class ConditionalCouplingLayer(tf.keras.Model):
         """
 
         # Split parameter vector
-        u1, u2 = tf.split(params, [self.n_out1, self.n_out2], axis=-1)
+        u1, u2 = tf.split(target, [self.n_out1, self.n_out2], axis=-1)
 
         # Pre-compute network outputs for v1
-        s1 = self.s1(u2, x)
+        s1 = self.s1(u2, condition)
         # Clamp s1 if specified
         if self.alpha is not None:
             s1 = (2. * self.alpha / np.pi) * tf.math.atan(s1 / self.alpha)
-        t1 = self.t1(u2, x)
+        t1 = self.t1(u2, condition)
         v1 = u1 * tf.exp(s1) + t1
 
         # Pre-compute network outputs for v2
-        s2 = self.s2(v1, x)
+        s2 = self.s2(v1, condition)
         # Clamp s2 if specified
         if self.alpha is not None:
             s2 = (2. * self.alpha / np.pi) * tf.math.atan(s2 / self.alpha)
-        t2 = self.t2(v1, x)
+        t2 = self.t2(v1, condition)
         v2 = u2 * tf.exp(s2) + t2
         v = tf.concat((v1, v2), axis=-1)
 
@@ -409,15 +425,15 @@ class ConditionalCouplingLayer(tf.keras.Model):
         log_det_J = tf.reduce_sum(s1, axis=-1) + tf.reduce_sum(s2, axis=-1)
         return v, log_det_J 
 
-    def _inverse(self, z, x):
+    def _inverse(self, z, condition):
         """ Performs an inverse pass through the coupling block. Used internally by the instance.
 
         Parameters
         ----------
         z         : tf.Tensor
             latent variables z ~ p(z), shape (batch_size, theta_dim)
-        x         : tf.Tensor
-            the summarized conditional data of interest x = summary(x), shape (batch_size, summary_dim)
+        condition  : tf.Tensor
+            the conditioning vector of interest, for instance, x = summary(x), shape (batch_size, summary_dim)
 
         Returns
         -------
@@ -429,31 +445,31 @@ class ConditionalCouplingLayer(tf.keras.Model):
         v1, v2 = tf.split(z, [self.n_out1, self.n_out2], axis=-1)
 
         # Pre-Compute s2
-        s2 = self.s2(v1, x)
+        s2 = self.s2(v1, condition)
         # Clamp s2 if specified
         if self.alpha is not None:
             s2 = (2. * self.alpha / np.pi) * tf.math.atan(s2 / self.alpha)
-        u2 = (v2 - self.t2(v1, x)) * tf.exp(-s2)
+        u2 = (v2 - self.t2(v1, condition)) * tf.exp(-s2)
 
         # Pre-Compute s1
-        s1 = self.s1(u2, x)
+        s1 = self.s1(u2, condition)
         # Clamp s1 if specified
         if self.alpha is not None:
             s1 = (2. * self.alpha / np.pi) * tf.math.atan(s1 / self.alpha)
-        u1 = (v1 - self.t1(u2, x)) * tf.exp(-s1)
+        u1 = (v1 - self.t1(u2, condition)) * tf.exp(-s1)
         u = tf.concat((u1, u2), axis=-1)
 
         return u
 
-    def call(self, params_or_z, x, inverse=False):
+    def call(self, target_or_z, condition, inverse=False):
         """Performs one pass through an invertible chain (either inverse or forward).
         
         Parameters
         ----------
-        params_or_z      : tf.Tensor
-            the parameters theta ~ p(theta|y) of interest or latent representations z ~ p(z), shape (batch_size, params_dim)
-        x                : tf.Tensor
-            the summarized conditional data of interest x = summary_fun(x), shape (batch_size, summary_dim)
+        target_or_z      : tf.Tensor
+            the estimation quantites of interest or latent representations z ~ p(z), shape (batch_size, ...)
+        condition        : tf.Tensor
+            the conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, ...)
         inverse          : bool, default: False
             Flag indicating whether to run the block forward or backwards
         
@@ -473,45 +489,44 @@ class ConditionalCouplingLayer(tf.keras.Model):
         """
         
         if not inverse:
-            return self.forward(params_or_z, x)
-        else:
-            return self.inverse(params_or_z, x)
+            return self.forward(target_or_z, condition)
+        return self.inverse(target_or_z, condition)
 
-    def forward(self, params, x):
+    def forward(self, target, condition):
         """Performs a forward pass through a coupling layer with an optinal permutation and act norm layer."""
 
-        # Initialize log_det_Js list
-        log_det_Js = []
+        # Initialize log_det_Js accumulator
+        log_det_Js = tf.zeros(1)
         
         # Normalize activation, if specified
         if self.act_norm is not None:
-            params, log_det_J_act = self.act_norm(params)
-            log_det_Js.append(log_det_J_act)
+            target, log_det_J_act = self.act_norm(target)
+            log_det_Js += log_det_J_act
 
         # Permute, if indicated
         if self.permutation is not None:
-            params = self.permutation(params)
+            target = self.permutation(target)
 
         # Pass through coupling layer
-        z, log_det_J_c = self._forward(params, x)
-        log_det_Js.append(log_det_J_c)
+        z, log_det_J_c = self._forward(target, condition)
+        log_det_Js += log_det_J_c
 
-        return z, tf.add_n(log_det_Js)
+        return z, log_det_Js
 
-    def inverse(self, z, x):
+    def inverse(self, z, condition):
         """Performs an inverse pass through a coupling layer with an optinal permutation and act norm layer."""
 
         # Pass through coupling layer
-        params = self._inverse(z, x)
+        target = self._inverse(z, condition)
 
         # Pass through optional permutation
         if self.permutation is not None:
-            params = self.permutation(params, inverse=True)
+            target = self.permutation(target, inverse=True)
         
         # Pass through activation normalization
         if self.act_norm is not None:
-            params = self.act_norm(params, inverse=True)
-        return params
+            target = self.act_norm(target, inverse=True)
+        return target
 
 
 class InvertibleNetwork(tf.keras.Model):
@@ -537,14 +552,14 @@ class InvertibleNetwork(tf.keras.Model):
         self.coupling_layers = [ConditionalCouplingLayer(meta) for _ in range(meta['n_coupling_layers'])]
         self.z_dim = meta['n_params']
 
-    def call(self, params, x, inverse=False):
+    def call(self, target, condition, inverse=False):
         """Performs one pass through an invertible chain (either inverse or forward).
 
         Parameters
         ----------
-        params    : tf.Tensor
-            The parameters theta ~ p(theta|x) of interest, shape (batch_size, inp_dim)
-        x         : tf.Tensor
+        target    : tf.Tensor
+            The estimation quantities of interest, shape (batch_size, ...)
+        condition : tf.Tensor
             The conditional data x, shape (batch_size, summary_dim)
         inverse   : bool, default: False
             Flag indicating whether to run the chain forward or backwards
@@ -553,49 +568,48 @@ class InvertibleNetwork(tf.keras.Model):
         -------
         (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
-            v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
+            v shape: (batch_size, ...), log_det_J shape: (batch_size, ...)
 
-        params          :  tf.Tensor
-            If inverse=True: The transformed out, shape (batch_size, inp_dim)
+        target          :  tf.Tensor
+            If inverse=True: The transformed out, shape (batch_size, ...)
 
         Important
         ---------
         If ``inverse=False``, the return is ``(z, log_det_J)``.\n
-        If ``inverse=True``, the return is ``params``.
+        If ``inverse=True``, the return is ``target``.
         """
         
         if inverse:
-            return self.inverse(params, x)
-        else:
-            return self.forward(params, x)
+            return self.inverse(target, condition)
+        return self.forward(target, condition)
 
-    def forward(self, params, x):
+    def forward(self, target, condition):
         """Performs a forward pass though the chain."""
 
-        z = params
+        z = target
         log_det_Js = []
         for layer in self.coupling_layers:
-            z, log_det_J = layer(z, x)
+            z, log_det_J = layer(z, condition)
             log_det_Js.append(log_det_J)
         # Sum Jacobian determinants for all layers (coupling blocks) to obtain total Jacobian.
         log_det_J = tf.add_n(log_det_Js)
         return z, log_det_J
 
-    def inverse(self, z, x):
+    def inverse(self, z, condition):
         """Performs a reverse pass through the chain."""
 
-        params = z
+        target = z
         for layer in reversed(self.coupling_layers):
-            params = layer(params, x, inverse=True)
-        return params
+            target = layer(target, condition, inverse=True)
+        return target
 
-    def sample(self, x, n_samples, to_numpy=True):
+    def sample(self, condition, n_samples, to_numpy=True):
         """
-        Samples from the inverse model given a single instance y or a batch of instances.
+        Samples from the inverse model given a single data instance or a batch of data instances.
 
         Parameters
         ----------
-        x         : tf.Tensor
+        condition : tf.Tensor
             The conditioning data set(s) of interest, shape (n_datasets, summary_dim)
         n_samples : int
             Number of samples to obtain from the approximate posterior
@@ -609,14 +623,14 @@ class InvertibleNetwork(tf.keras.Model):
         """
 
         # In case x is a single instance
-        if int(x.shape[0]) == 1:
-            z_normal_samples = tf.random.normal(shape=(n_samples, self.z_dim), dtype=tf.float32)
-            param_samples = self.inverse(z_normal_samples, tf.tile(x, [n_samples, 1]))
+        if int(condition.shape[0]) == 1:
+            z_normal_samples = tf.random.normal(shape=(n_samples, self.z_dim))
+            param_samples = self.inverse(z_normal_samples, tf.tile(condition, [n_samples, 1]))
         # In case of a batch input, send a 3D tensor through the invertible chain and use tensordot
         # Warning: This tensor could get pretty big if sampling a lot of values for a lot of batch instances!
         else:
-            z_normal_samples = tf.random.normal(shape=(n_samples, int(x.shape[0]), self.z_dim), dtype=tf.float32)
-            param_samples = self.inverse(z_normal_samples, tf.stack([x] * n_samples))
+            z_normal_samples = tf.random.normal(shape=(int(condition.shape[0]), n_samples, self.z_dim))
+            param_samples = self.inverse(z_normal_samples, condition)
 
         if to_numpy:
             return param_samples.numpy()
