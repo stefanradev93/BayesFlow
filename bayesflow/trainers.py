@@ -15,7 +15,7 @@ from bayesflow.losses import kl_latent_space, log_loss
 class BaseTrainer(ABC):
 
     def __init__(self, network, generative_model, loss, summary_stats, optimizer,
-                 learning_rate, checkpoint_path, max_to_keep, clip_method, clip_value):
+                 learning_rate, checkpoint_path, max_to_keep, clip_method, clip_value, skip_checks):
         """Base class for a trainer performing forward inference and training an amortized neural estimator.
 
         Parameters
@@ -40,6 +40,8 @@ class BaseTrainer(ABC):
             Optional gradient clipping method
         clip_value      : float
             The value used for gradient clipping when clip_method is in {'value', 'norm'}
+        skip_checks     : boolean
+            If True, do not perform consistency checks, i.e., simulator runs and passed through nets
         """
 
         self.network = network
@@ -79,7 +81,8 @@ class BaseTrainer(ABC):
             self.manager = None
         self.checkpoint_path = checkpoint_path
 
-        self._check_consistency()
+        if not skip_checks:
+            self._check_consistency()
 
     def load_pretrained_network(self):
         """Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.
@@ -444,7 +447,8 @@ class BaseTrainer(ABC):
 class MetaTrainer(BaseTrainer):
 
     def __init__(self, network, generative_model=None, loss=None, summary_stats=None, optimizer=None,
-                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
+                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', 
+                 clip_value=None, skip_checks=False):
         """ Creates a trainer instance for performing multi-model forward inference and training an
         amortized neural estimator for parameter estimation and model comparison (BayesFlow).
 
@@ -460,7 +464,7 @@ class MetaTrainer(BaseTrainer):
             _loss = loss
 
         super().__init__(network, generative_model, _loss, summary_stats, optimizer, learning_rate,
-                         checkpoint_path, max_to_keep, clip_method, clip_value)
+                         checkpoint_path, max_to_keep, clip_method, clip_value, skip_checks)
 
     def _forward_inference(self, n_sim, n_obs, summarize=True, **kwargs):
         """Performs one step of multi-model forward inference.
@@ -513,8 +517,9 @@ class MetaTrainer(BaseTrainer):
 
 class ModelComparisonTrainer(BaseTrainer):
 
-    def __init__(self, network, generative_model=None, loss=None, summary_stats=None, optimizer=None, n_models=None,
-                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
+    def __init__(self, network, generative_model=None, loss=None, summary_stats=None, optimizer=None, 
+                 n_models=None, learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', 
+                 clip_value=None, skip_checks=False):
         """Creates a trainer instance for performing multi-model forward inference and training an
         amortized neural estimator for model comparison.
 
@@ -531,7 +536,7 @@ class ModelComparisonTrainer(BaseTrainer):
 
         self.n_models = n_models
         super().__init__(network, generative_model, _loss, summary_stats, optimizer, learning_rate,
-                         checkpoint_path, max_to_keep, clip_method, clip_value)
+                         checkpoint_path, max_to_keep, clip_method, clip_value, skip_checks)
 
     def train_offline(self, epochs, batch_size, *args, **kwargs):
         """Handles one-hot encoding if necessary and calls superclass method.
@@ -637,7 +642,8 @@ class ModelComparisonTrainer(BaseTrainer):
 class ParameterEstimationTrainer(BaseTrainer):
 
     def __init__(self, network, generative_model=None, loss=None, summary_stats=None, optimizer=None,
-                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', clip_value=None):
+                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', 
+                 clip_value=None, skip_checks=False):
         """Creates a trainer instance for performing single-model forward inference and training an
         amortized neural estimator for parameter estimation (BayesFlow).
 
@@ -652,7 +658,7 @@ class ParameterEstimationTrainer(BaseTrainer):
             _loss = loss
 
         super().__init__(network, generative_model, _loss, summary_stats, optimizer, learning_rate,
-                         checkpoint_path, max_to_keep, clip_method, clip_value)
+                         checkpoint_path, max_to_keep, clip_method, clip_value, skip_checks)
 
     def train_experience_replay(self, epochs, batch_size, iterations_per_epoch, capacity, n_obs, **kwargs):
         """Trains the inference network(s) via experience replay.
@@ -757,8 +763,6 @@ class ParameterEstimationTrainer(BaseTrainer):
         # Return shape of params is (batch_size, param_dim)
         # Return shape of data is (batch_size, n_obs, data_dim)
         params, sim_data = self.generative_model(n_sim, n_obs, **kwargs)
-
-        # TODO - Apply transforms, if given
 
         # Compute hand-crafted summary stats, if given
         if summarize and self.summary_stats is not None:

@@ -133,7 +133,7 @@ def plot_sbc(theta_samples, theta_test, param_names, bins=25, dpi=300,
         axarr = axarr.flat
 
     # Compute ranks (using broadcasting)    
-    ranks = np.sum(theta_samples < theta_test, axis=0)
+    ranks = np.sum(theta_samples < theta_test[:, np.newaxis, :], axis=1)
     
     # Compute interval
     endpoints = binom.interval(interval, N, 1 / (bins+1))
@@ -271,13 +271,11 @@ def plot_expected_calibration_error(m_true, m_pred, n_bins=15):
     return np.array(cal_errs), np.array(probs)
 
 
-def plot_calibration_curves(cal_probs, cal_errs, model_names, font_size=12, figsize=(12, 4)):
+def plot_calibration_curves(cal_errs, model_names, font_size=12, figsize=(12, 4)):
     """Plots the calibration curves for a model comparison problem.
 
     Parameters
     ----------
-    cal_probs: np.array
-        Currently not used
     cal_errs: np.array or list
         Array of calibration curve data
     model_names: list(str)
