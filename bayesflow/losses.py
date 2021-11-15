@@ -116,6 +116,34 @@ def kl_latent_space(network, *args):
     loss = tf.reduce_mean(0.5 * tf.square(tf.norm(z, axis=-1)) - log_det_J)
     return loss
 
+def kl_latent_space_student(network, *args):
+    """ Computes the Kullback-Leibler divergence (Maximum Likelihood Loss) between true and approximate
+    posterior using simulated data and parameters. Assumes a latent student t-Distribution as a source.
+
+    Parameters
+    ----------
+    network   : tf.keras.Model
+        A single model amortizer
+    *args
+        List of arguments as inputs to network (e.g. model_indices, params, sim_data)
+
+    Returns
+    -------
+    loss : tf.Tensor
+        A single scalar value representing the KL loss, shape (,)
+    """
+    
+    v, z, log_det_J = network(*args)
+    d = z.shape[-1]
+    loss = 0.
+    loss -= d * tf.math.lgamma(0.5*(v + 1))
+    loss += d * tf.math.lgamma(0.5*v + 1e-15)
+    loss += (0.5*d) * tf.math.log(v + 1e-15)
+    loss += 0.5*(v+1) * tf.reduce_sum(tf.math.log1p(z**2 / v), axis=-1)
+    loss -= log_det_J
+    mean_loss = tf.reduce_mean(loss)
+    return mean_loss
+
 
 def log_loss(network, model_indices, sim_data, lambd=1.0):
     """ Computes the logloss given output probs and true model indices m_true.

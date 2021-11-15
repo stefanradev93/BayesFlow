@@ -80,7 +80,9 @@ DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
         'alpha': 1.9,
         'use_permutation': True,
         'use_act_norm': True,
-        'act_norm_init': None
+        'act_norm_init': None,
+        'adaptive_tails': False,
+        'tail_network': {}
     },
     mandatory_fields=["n_params"]
 )
