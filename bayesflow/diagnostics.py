@@ -170,9 +170,9 @@ def plot_confusion_matrix(m_true, m_pred, model_names, normalize=False,
     Parameters
     ----------
     m_true: np.array
-        Array of true model indices
+        Array of true model (one-hot-encoded) indices
     m_pred: np.array
-        Array of predicted model indices
+        Array of predicted model probabilities (same shape as m_true)
     model_names: list(str)
         List of model names for plotting
     normalize: bool, default: False
@@ -188,8 +188,9 @@ def plot_confusion_matrix(m_true, m_pred, model_names, normalize=False,
 
     """
 
-    # Take argmax of test
-    m_true = np.argmax(m_true.numpy(), axis=1).astype(np.int32)
+    # Take argmax of true and pred
+    m_true = np.argmax(m_true, axis=1).astype(np.int32)
+    m_pred = np.argmax(m_pred, axis=1).astype(np.int32)
 
 
     # Compute confusion matrix
@@ -229,7 +230,7 @@ def plot_confusion_matrix(m_true, m_pred, model_names, normalize=False,
     return fig
 
 
-def plot_expected_calibration_error(m_true, m_pred, n_bins=15):
+def expected_calibration_error(m_true, m_pred, n_bins=15):
     """Estimates the calibration error of a model comparison neural network.
 
     Important
@@ -268,15 +269,15 @@ def plot_expected_calibration_error(m_true, m_pred, n_bins=15):
         cal_errs.append(cal_err)
         probs.append((prob_true, prob_pred))
 
-    return np.array(cal_errs), np.array(probs)
+    return cal_errs, probs
 
 
-def plot_calibration_curves(cal_errs, model_names, font_size=12, figsize=(12, 4)):
+def plot_calibration_curves(m_true, m_pred, model_names, n_bins=10, font_size=12, figsize=(12, 4)):
     """Plots the calibration curves for a model comparison problem.
 
     Parameters
     ----------
-    cal_errs: np.array or list
+    cal_probs: np.array or list
         Array of calibration curve data
     model_names: list(str)
         List of model names for plotting
@@ -298,6 +299,8 @@ def plot_calibration_curves(cal_errs, model_names, font_size=12, figsize=(12, 4)
         n_col = n_models
         n_row = 1
 
+    cal_errs, cal_probs = expected_calibration_error(m_true, m_pred, n_bins)
+
     # Initialize figure
     f, axarr = plt.subplots(n_row, n_col, figsize=figsize)
     if n_row > 1:
@@ -307,7 +310,7 @@ def plot_calibration_curves(cal_errs, model_names, font_size=12, figsize=(12, 4)
     for i, ax in enumerate(axarr.flat):
 
         # Plot calibration curve
-        ax.plot(cal_errs[i, 0, :], cal_errs[i, 1, :])
+        ax.plot(cal_probs[i][0], cal_probs[i][1])
 
         # Plot AB line
         ax.plot(ax.get_xlim(), ax.get_xlim(), '--', color='black')
@@ -321,11 +324,11 @@ def plot_calibration_curves(cal_errs, model_names, font_size=12, figsize=(12, 4)
         ax.set_ylabel('Confidence')
         ax.set_xticks([0.2, 0.4, 0.6, 0.8, 1.0])
         ax.set_yticks([0.2, 0.4, 0.6, 0.8, 1.0])
-        ax.text(0.1, 0.9, r'$\widehat{ECE}$ = {0:.3f}'.format(cal_errs[i]),
+        ax.text(0.1, 0.9, r'$\widehat{{ECE}}$ = {0:.3f}'.format(cal_errs[i]),
                         horizontalalignment='left',
                         verticalalignment='center',
                         transform=ax.transAxes,
-                        size=12)
+                        size=font_size)
 
         # Set title
         ax.set_title(model_names[i])

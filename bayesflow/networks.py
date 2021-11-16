@@ -747,7 +747,7 @@ class EvidentialNetwork(tf.keras.Model):
         n_datasets = alpha.shape[0]
 
         # Sample for each dataset
-        pm_samples = np.stack([np.random.dirichlet(alpha[n, :], size=n_samples) for n in range(n_datasets)], axis=1)
+        pm_samples = np.stack([np.random.dirichlet(alpha[n, :], size=n_samples) for n in range(n_datasets)], axis=0)
 
         # Convert to tensor, if specified
         if not to_numpy:
