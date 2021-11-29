@@ -9,7 +9,7 @@ from tqdm.notebook import tqdm
 from bayesflow.buffer import MemoryReplayBuffer
 from bayesflow.exceptions import SimulationError, SummaryStatsError, OperationNotSupportedError, LossError
 from bayesflow.helpers import clip_gradients
-from bayesflow.losses import kl_latent_space, log_loss
+from bayesflow.losses import kl_latent_space_gaussian, log_loss
 
 
 class BaseTrainer(ABC):
@@ -20,27 +20,27 @@ class BaseTrainer(ABC):
 
         Parameters
         ----------
-        network         : bayesflow.amortizers.Amortizer
+        network          : bayesflow.amortizers.Amortizer
             The neural architecture to be optimized
         generative_model : bayesflow.models.GenerativeModel
             A generative model returning randomly sampled parameter vectors and datasets from a process model
-        loss            : callable
-            Loss function with three arguments: (network, m_indices, x)
-        summary_stats   : callable
+        loss             : callable
+            Loss function with three arguments: (network, *args)
+        summary_stats    : callable
             Optional summary statistics function
-        optimizer       : None or tf.keras.optimizer.Optimizer
+        optimizer        : None or tf.keras.optimizer.Optimizer
             Optimizer for the neural network. ``None`` will result in `tf.keras.optimizers.Adam`
-        learning_rate   : float
+        learning_rate    : float
             The learning rate used for the optimizer
-        checkpoint_path : string, optional
+        checkpoint_path  : string, optional
             Optional folder name for storing the trained network
-        max_to_keep     : int, optional
+        max_to_keep      : int, optional
             Number of checkpoints to keep
-        clip_method     : {'norm', 'value', 'global_norm'}
+        clip_method      : {'norm', 'value', 'global_norm'}
             Optional gradient clipping method
-        clip_value      : float
+        clip_value       : float
             The value used for gradient clipping when clip_method is in {'value', 'norm'}
-        skip_checks     : boolean
+        skip_checks      : boolean
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
         """
 
@@ -60,10 +60,7 @@ class BaseTrainer(ABC):
 
         # Optimizer settings
         if optimizer is None:
-            if tf.__version__.startswith('1'):
-                self.optimizer = tf.train.AdamOptimizer(learning_rate)
-            else:
-                self.optimizer = Adam(learning_rate)
+            self.optimizer = Adam(learning_rate)
         else:
             self.optimizer = optimizer(learning_rate)
 
@@ -459,7 +456,7 @@ class MetaTrainer(BaseTrainer):
 
         # Default or custom loss
         if loss is None:
-            _loss = kl_latent_space
+            _loss = kl_latent_space_gaussian
         else:
             _loss = loss
 
@@ -653,7 +650,7 @@ class ParameterEstimationTrainer(BaseTrainer):
         """
 
         if loss is None:
-            _loss = kl_latent_space
+            _loss = kl_latent_space_gaussian
         else:
             _loss = loss
 

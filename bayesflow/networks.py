@@ -1,4 +1,6 @@
 import numpy as np
+from scipy.stats import multivariate_t
+
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, LSTM
 from tensorflow.keras.models import Sequential
@@ -6,6 +8,43 @@ from tensorflow.keras.models import Sequential
 from bayesflow import default_settings
 from bayesflow.helpers import build_meta_dict
 from bayesflow.exceptions import ConfigurationError
+
+
+class TailNetwork(tf.keras.Model):
+    
+    def __init__(self, meta):
+        """ Creates a network which will adaptively learn the heavy-tailedness of the target distribution.
+
+        Parameters
+        ----------
+        meta : list(dict)
+            A list of dictionaries, where each dictionary holds parameter-value pairs
+            for a single :class:`keras.Dense` layer
+
+        """
+        
+        super(TailNetwork, self).__init__()
+        
+        self.net = Sequential(
+            [Dense(units, 
+                   activation=meta['activation'], 
+                   kernel_initializer=meta['initializer'])
+             for units in meta['units']] +
+            [Dense(1, kernel_initializer=meta['initializer'], activation='relu')]
+        )
+        
+    def call(self, condition):
+        """Performs a forward pass through the tail net. Output is the learned 'degrees of freedom' parameter
+        for the latent t-distribution.
+
+        Parameters
+        ----------
+        condition   : tf.Tensor
+            the conditioning vector of interest, for instance ``x = summary(x)``, shape (batch_size, summary_dim)
+        """
+        # Output is bounded between (1, inf)
+        out = self.net(condition) + 1.0
+        return out
 
     
 class InvariantModule(tf.keras.Model):
@@ -543,13 +582,17 @@ class InvertibleNetwork(tf.keras.Model):
 
         Notes
         -----
-        TODO: Allow for generic base distributions
+        Currently supports Gaussiand and Student-t latent spaces only.
         """
         super(InvertibleNetwork, self).__init__()
 
         meta = build_meta_dict(user_dict=meta,
                                default_setting=default_settings.DEFAULT_SETTING_INVERTIBLE_NET)
         self.coupling_layers = [ConditionalCouplingLayer(meta) for _ in range(meta['n_coupling_layers'])]
+        if meta['adaptive_tails']:
+            self.tail_network = TailNetwork(meta['tail_network'])
+        else:
+            self.tail_network = None
         self.z_dim = meta['n_params']
 
     def call(self, target, condition, inverse=False):
@@ -593,7 +636,13 @@ class InvertibleNetwork(tf.keras.Model):
             log_det_Js.append(log_det_J)
         # Sum Jacobian determinants for all layers (coupling blocks) to obtain total Jacobian.
         log_det_J = tf.add_n(log_det_Js)
-        return z, log_det_J
+        
+        # Adaptive tails or simply Gaussian
+        if self.tail_network is not None:
+            v = self.tail_network(condition)
+            return v, z, log_det_J
+        else:
+            return z, log_det_J
 
     def inverse(self, z, condition):
         """Performs a reverse pass through the chain."""
@@ -624,14 +673,34 @@ class InvertibleNetwork(tf.keras.Model):
 
         # In case x is a single instance
         if int(condition.shape[0]) == 1:
-            z_normal_samples = tf.random.normal(shape=(n_samples, self.z_dim))
-            param_samples = self.inverse(z_normal_samples, tf.tile(condition, [n_samples, 1]))
+            # Sample from a unit Gaussian
+            if self.tail_network is None:
+                z_samples = tf.random.normal(shape=(n_samples, self.z_dim))
+            # Sample from a t-distro
+            else:
+                df = self.tail_network(condition).numpy().item()
+                loc = np.zeros(self.z_dim)
+                shape = np.eye(self.z_dim)
+                z_samples = multivariate_t(df=df, loc=loc, shape=shape).rvs(n_samples)
+                
+            param_samples = self.inverse(z_samples, tf.tile(condition, [n_samples, 1]))
+            
         # In case of a batch input, send a 3D tensor through the invertible chain and use tensordot
         # Warning: This tensor could get pretty big if sampling a lot of values for a lot of batch instances!
         else:
-            z_normal_samples = tf.random.normal(shape=(int(condition.shape[0]), n_samples, self.z_dim))
-            param_samples = self.inverse(z_normal_samples, condition)
-
+            # Sample from a unit Gaussian
+            if self.tail_network is None:
+                z_samples = tf.random.normal(shape=(int(condition.shape[0]), n_samples, self.z_dim))
+            # Sample from a t-distro    
+            else:
+                dfs = self.tail_network(condition).numpy().squeeze()
+                loc = np.zeros(self.z_dim)
+                shape = np.eye(self.z_dim)
+                z_samples = tf.stack(
+                    [multivariate_t(df=df, loc=loc, shape=shape).rvs(n_samples) 
+                    for df in dfs]
+                )
+            param_samples = self.inverse(z_samples, condition)
         if to_numpy:
             return param_samples.numpy()
         return param_samples

@@ -2,12 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from scipy.stats import binom
-from sklearn.calibration import calibration_curve
 from sklearn.metrics import r2_score, confusion_matrix
 
+from computational_utilities import expected_calibration_error
 
-def true_vs_estimated(theta_true, theta_est, param_names, dpi=300,
-                      figsize=(20, 4), show=True, filename=None, font_size=12):
+
+def true_vs_estimated(theta_true, theta_est, param_names, dpi=300, figsize=(20, 4), show=True, filename=None, font_size=12):
     """ Plots a scatter plot with abline of the estimated posterior means vs true values.
 
     Parameters
@@ -18,8 +18,6 @@ def true_vs_estimated(theta_true, theta_est, param_names, dpi=300,
         Array of estimated parameters.
     param_names: list(str)
         List of parameter names for plotting.
-    dpi: int, default:300
-        Dots per inch (dpi) for the plot.
     figsize: tuple(int, int), default: (20,4)
         Figure size.
     show: boolean, default: True
@@ -28,7 +26,6 @@ def true_vs_estimated(theta_true, theta_est, param_names, dpi=300,
         Filename if plot shall be saved
     font_size: int, default: 12
         Font size
-
     """
 
 
@@ -84,16 +81,12 @@ def true_vs_estimated(theta_true, theta_est, param_names, dpi=300,
     
     # Adjust spaces
     f.tight_layout()
-
     if show:
         plt.show()
-
-    if filename is not None:
-        f.savefig(filename)
+    return f
 
 
-def plot_sbc(theta_samples, theta_test, param_names, bins=25, dpi=300,
-            figsize=(24, 12), interval=0.99, show=True, font_size=12):
+def plot_sbc(theta_samples, theta_test, param_names, bins=25, figsize=(24, 12), interval=0.99, show=True, font_size=12):
     """ Plots the simulation-based posterior checking histograms as advocated by Talts et al. (2018).
 
     Parameters
@@ -106,8 +99,6 @@ def plot_sbc(theta_samples, theta_test, param_names, bins=25, dpi=300,
         List of parameter names for plotting.
     bins: int, default: 25
         Bins for histogram plot
-    dpi: int, default: 300
-        Dots per inch (dpi) for plot
     figsize: tuple(int, int), default: (24, 12)
         Figure size
     interval: float, default: 0.99
@@ -156,7 +147,6 @@ def plot_sbc(theta_samples, theta_test, param_names, bins=25, dpi=300,
         axarr[j].set_ylabel('')
     
     f.tight_layout()
-    
     # Show, if specified
     if show:
         plt.show()
@@ -228,48 +218,6 @@ def plot_confusion_matrix(m_true, m_pred, model_names, normalize=False,
     if show:
         plt.show()
     return fig
-
-
-def expected_calibration_error(m_true, m_pred, n_bins=15):
-    """Estimates the calibration error of a model comparison neural network.
-
-    Important
-    ---------
-    Make sure that ``m_true`` are **one-hot encoded** classes!
-
-    Parameters
-    ----------
-    m_true: np.array or list
-        True model indices
-    m_pred: np.array or list
-        Predicted model indices
-    n_bins: int, default: 15
-        Number of bins for plot
-    """
-
-    # Convert tf.Tensors to numpy, if passed
-    if type(m_true) is not np.ndarray:
-        m_true = m_true.numpy() 
-    if type(m_pred) is not np.ndarray:
-        m_pred = m_pred.numpy()
-    
-    # Extract number of models and prepare containers
-    n_models = m_true.shape[1]
-    cal_errs = []
-    probs = []
-
-    # Loop for each model and compute calibration errs per bin
-    for k in range(n_models):
-
-        y_true = (m_true.argmax(axis=1) == k).astype(np.float32)
-        y_prob = m_pred[:, k]
-        prob_true, prob_pred = calibration_curve(y_true, y_prob, n_bins=n_bins)
-
-        cal_err = np.mean(np.abs(prob_true - prob_pred))
-        cal_errs.append(cal_err)
-        probs.append((prob_true, prob_pred))
-
-    return cal_errs, probs
 
 
 def plot_calibration_curves(m_true, m_pred, model_names, n_bins=10, font_size=12, figsize=(12, 4)):
