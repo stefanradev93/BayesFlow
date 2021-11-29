@@ -3,7 +3,6 @@ from computational_utilities import mmd_kernel, gaussian_kernel_matrix
 import tensorflow as tf
 
 
-
 def heteroscedastic_loss(network, params, x):
     """ Computes the heteroscedastic loss between true and predicted parameters. 
     Legacy, used in the paper
