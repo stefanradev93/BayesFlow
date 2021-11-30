@@ -1,6 +1,7 @@
 from functools import partial
-from computational_utilities import mmd_kernel, gaussian_kernel_matrix
 import tensorflow as tf
+
+from bayesflow.computational_utilities import mmd_kernel, gaussian_kernel_matrix
 
 
 def heteroscedastic_loss(network, params, x):

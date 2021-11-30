@@ -422,7 +422,7 @@ class BaseTrainer(ABC):
 
         # Run forward inference with n_sim=2 and catch any exception
         try:
-            args = self._forward_inference(n_sim=2, n_obs=150)
+            args = self._forward_inference(n_sim=2, n_obs=50)
         except Exception as err:
             raise SimulationError(repr(err))
 
@@ -435,7 +435,7 @@ class BaseTrainer(ABC):
 
         # Run loss function check
         try:
-            args = self._forward_inference(n_sim=2, n_obs=150)
+            args = self._forward_inference(n_sim=2, n_obs=50)
             _loss = self.loss(self.network, *args)
         except Exception as err:
             raise LossError(repr(err))

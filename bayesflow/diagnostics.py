@@ -4,7 +4,7 @@ import seaborn as sns
 from scipy.stats import binom
 from sklearn.metrics import r2_score, confusion_matrix
 
-from computational_utilities import expected_calibration_error
+from bayesflow.computational_utilities import expected_calibration_error
 
 
 def true_vs_estimated(theta_true, theta_est, param_names, dpi=300, figsize=(20, 4), show=True, filename=None, font_size=12):

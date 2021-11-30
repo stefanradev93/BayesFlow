@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from sklearn.calibration import calibration_curve
-from default_settings import MMD_BANDWIDTH_LIST
+from bayesflow.default_settings import MMD_BANDWIDTH_LIST
 
 
 def gaussian_kernel_matrix(x, y, sigmas=None):

@@ -52,7 +52,7 @@ class TestInvertibleNetwork(unittest.TestCase):
         trainable_variables_before = copy.deepcopy(self.network.trainable_variables)
         with tf.GradientTape() as tape:
             z, log_det_J = self.network(params, sim_data)
-            loss = tf.reduce_mean(0.5 * tf.square(tf.norm(z, axis=-1)) - log_det_J)  # kl latent space loss
+            loss = tf.reduce_mean(0.5 * tf.square(tf.norm(z, axis=-1)) - log_det_J) 
 
         gradients = tape.gradient(loss, self.network.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.network.trainable_variables))
@@ -62,3 +62,4 @@ class TestInvertibleNetwork(unittest.TestCase):
         # assert that any weights are updated in each layer
         for before, after in zip(trainable_variables_before, trainable_variables_after):
             self.assertTrue(np.any(before != after))
+
