@@ -161,7 +161,7 @@ class Prior:
 
         # Populate dictionary with context or leave at None
         if self.context_gen is not None:
-            context_dict = self.context_gen.generate_context(batch_size, *args, **kwargs)
+            context_dict = self.context_gen(batch_size, *args, **kwargs)
             out_dict['non_batchable_context'] = context_dict['non_batchable_context']
             out_dict['batchable_context'] = context_dict['batchable_context']
 
