@@ -45,6 +45,34 @@ class ContextGenerator:
         self.non_batchable_context_fun = non_batchable_context_fun
         self.use_non_batchable_for_batchable = use_non_batchable_for_batchable
 
+    def __call__(self, batch_size, *args, **kwargs):
+        """ Wraps the method generate_context, which returns a dictionary with 
+        batchable and non batchable context.
+        
+        Optional positional and keyword arguments are passed to the internal 
+        context-generating functions or ignored if the latter are None.
+
+         Parameters
+        ----------
+
+        batch_size : int
+            The batch_size argument used for batchable context.
+
+        Returns
+        -------
+
+        context_dict : dictionary
+            A dictionary with context variables with the following keys:
+            `batchable_context` : value
+            `non_batchable_context` : value
+        
+        Note, that the values of the context variables will be None, if the
+        corresponding context-generating functions have not been provided when
+        initializing this object.
+        """
+
+        return self.generate_context(batch_size, *args, **kwargs)
+
     def batchable_context(self, batch_size, *args, **kwargs):
         """ Generates 'batch_size' context variables given optional arguments. 
         Return type is a list of context variables.
@@ -62,8 +90,27 @@ class ContextGenerator:
         return None
 
     def generate_context(self, batch_size, *args, **kwargs):
-        """ Utility function to generate context types.
+        """ Creates a dictionary with batchable and non batchable context.
+
+         Parameters
+        ----------
+
+        batch_size : int
+            The batch_size argument used for batchable context.
+
+        Returns
+        -------
+
+        context_dict : dictionary
+            A dictionary with context variables with the following keys:
+            `batchable_context` : value
+            `non_batchable_context` : value
+        
+        Note, that the values of the context variables will be None, if the
+        corresponding context-generating functions have not been provided when
+        initializing this object.
         """
+
         out_dict = {}
         out_dict['non_batchable_context'] = self.non_batchable_context()
         if self.use_non_batchable_for_batchable:
