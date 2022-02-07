@@ -189,7 +189,7 @@ class Prior:
 
         return out_dict
 
-    def density(self, prior_draws):
+    def logpdf(self, prior_draws):
         raise NotImplementedError('Prior density computation is under construction!')
             
 
