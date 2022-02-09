@@ -60,7 +60,7 @@ class Trainer:
 
         # Checkpoint settings
         if checkpoint_path is not None:
-            self.checkpoint = tf.train.Checkpoint(optimizer=self.optimizer, model=self.network)
+            self.checkpoint = tf.train.Checkpoint(optimizer=self.optimizer, model=self.amortizer)
             self.manager = tf.train.CheckpointManager(self.checkpoint, checkpoint_path, max_to_keep=max_to_keep)
             self.checkpoint.restore(self.manager.latest_checkpoint)
             if self.manager.latest_checkpoint:
@@ -247,7 +247,7 @@ class Trainer:
     
     def _check_consistency(self):
         """Attempts to run one step generative_model -> configurator -> amortizer -> loss."""
-        
+
         if self.generative_model is not None:
             _n_sim = 2
             try: 
