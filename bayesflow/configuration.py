@@ -6,9 +6,27 @@ from tensorflow.keras.utils import to_categorical
 from bayesflow.exceptions import ConfigurationError
 
 
+class DefaultJointConfigurator:
+    """ Utility class for a generic configrator for joint posterior and likelihood learning.
+    """
+
+    def __init__(self, transform_fun=None, combine_fun=None):
+        
+        self.transformer = DefaultJointTransformer() if transform_fun is None else transform_fun
+        self.combiner= DefaultJointCombiner() if combine_fun is None else combine_fun
+
+    def __call__(self, forward_dict):
+        """ Configures the output of a generative model for joint learning.
+        """
+
+        # Default transformer and input
+        forward_dict = self.transformer(forward_dict)
+        input_dict = self.combiner(forward_dict)
+        return input_dict
+
+
 class DefaultLikelihoodConfigurator:
     """ Utility class for a generic configrator for likelihood emulation.
-    Assumes batchable context for simulator is n_obs.
     """
 
     def __init__(self, transform_fun=None, combine_fun=None, default_float_type=np.float32):
@@ -18,7 +36,7 @@ class DefaultLikelihoodConfigurator:
         self.default_float_type = default_float_type
 
     def __call__(self, forward_dict):
-        """ Configures the output of a default generative model for likelihood estimation.
+        """ Configures the output of a generative model for likelihood estimation.
         """
 
         # Default transformer and input
@@ -32,7 +50,6 @@ class DefaultLikelihoodConfigurator:
 
 class DefaultPosteriorConfigurator:
     """ Utility class for a generic configrator for posterior inference.
-    Assumes batchable context for simulator is n_obs.
     """
 
     def __init__(self, transform_fun=None, combine_fun=None, default_float_type=np.float32):
@@ -247,20 +264,6 @@ class DefaultLikelihoodCombiner:
 
         return out_dict
 
-class DefaultLikelihoodCombiner:
-    def __call__(self, forward_dict):
-
-        # Prepare placeholder
-        out_dict = {
-            'data': None,
-            'conditions': None
-        }
-
-        # Extract targets and conditions
-        out_dict['data'] = forward_dict['sim_data']
-        out_dict['conditions'] = forward_dict['prior_draws']
-
-        return out_dict
 
 class DefaultJointCombiner:
     def __init__(self, posterior_combiner=None, likelihood_combiner=None):
@@ -289,18 +292,22 @@ class DefaultJointCombiner:
         return out_dict
 
 
+class DefaultJointTransformer:
+    """TODO"""
+
+    def __call__(self, forward_dict):
+        return forward_dict
+
+
 class DefaultPosteriorTransformer:
     """TODO"""
     def __call__(self, forward_dict):
         return forward_dict
+
 
 class DefaultLikelihoodTransformer:
     """TODO"""
     def __call__(self, forward_dict):
         return forward_dict
 
-class DefaultJointTransformer:
-    """TODO"""
 
-    def __call__(self, forward_dict):
-        return forward_dict
