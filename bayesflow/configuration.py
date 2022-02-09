@@ -10,10 +10,11 @@ class DefaultJointConfigurator:
     """ Utility class for a generic configrator for joint posterior and likelihood learning.
     """
 
-    def __init__(self, transform_fun=None, combine_fun=None):
+    def __init__(self, transform_fun=None, combine_fun=None, default_float_type=np.float32):
         
         self.transformer = DefaultJointTransformer() if transform_fun is None else transform_fun
         self.combiner= DefaultJointCombiner() if combine_fun is None else combine_fun
+        self.default_float_type = default_float_type
 
     def __call__(self, forward_dict):
         """ Configures the output of a generative model for joint learning.
@@ -22,6 +23,13 @@ class DefaultJointConfigurator:
         # Default transformer and input
         forward_dict = self.transformer(forward_dict)
         input_dict = self.combiner(forward_dict)
+
+        # Determine float format
+        input_dict['posterior_input'] = {k : v.astype(self.default_float_type) if v is not None else v
+                        for k, v in input_dict['posterior_input'].items() }
+        input_dict['likelihood_input'] = {k : v.astype(self.default_float_type) if v is not None else v
+                        for k, v in input_dict['likelihood_input'].items() }
+
         return input_dict
 
 
@@ -282,12 +290,12 @@ class DefaultJointCombiner:
 
         # Prepare placeholder
         out_dict = {
-            'likelihood': None,
-            'posterior': None
+            'likelihood_input': None,
+            'posterior_input': None
         }
 
-        out_dict['posterior'] = self.posterior_combiner(forward_dict)
-        out_dict['likelihood'] = self.likelihood_combiner(forward_dict)
+        out_dict['posterior_input'] = self.posterior_combiner(forward_dict)
+        out_dict['likelihood_input'] = self.likelihood_combiner(forward_dict)
 
         return out_dict
 

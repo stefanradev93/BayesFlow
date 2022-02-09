@@ -44,11 +44,11 @@ DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
 
 DEFAULT_SETTING_DENSE_COUPLING = {
     't_args': {
-        'dense_args': dict(units=128, kernel_initializer='lecun_normal', activation='selu'),
+        'dense_args': dict(units=64, kernel_initializer='lecun_normal', activation='selu'),
         'n_dense': 2
     },
     's_args': {
-        'dense_args': dict(units=128, kernel_initializer='lecun_normal', activation='selu'),
+        'dense_args': dict(units=64, kernel_initializer='lecun_normal', activation='selu'),
         'n_dense': 2
     },
 }

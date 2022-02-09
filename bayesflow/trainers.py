@@ -7,6 +7,7 @@ from tensorflow.keras.optimizers import Adam
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
 from bayesflow.helpers import apply_gradients
+from bayesflow.default_settings import STRING_CONFIGS
 from bayesflow.amortized_inference import AmortizedPosterior, AmortizedLikelihood, JointAmortizer
 
 
@@ -201,8 +202,8 @@ class Trainer:
             
             # Unknown raises an error
             else:
-                raise NotImplementedError(f"Could not initialize configurator based on" +
-                                           "amortizer type {type(self.amortizer)}!")
+                raise NotImplementedError(f"Could not initialize configurator based on " +
+                                          f"amortizer type {type(self.amortizer)}!")
 
         # Check string types
         if type(config_fun) is str:
@@ -232,7 +233,7 @@ class Trainer:
                     combine_fun=default_combiner)
             else:
                 raise NotImplementedError(f"Could not initialize configurator based on string" +
-                                           "argument should be in {STRING_CONFIGS}")
+                                          f"argument should be in {STRING_CONFIGS}")
 
         elif config_fun is None:
             config_fun = default_config(
@@ -246,7 +247,7 @@ class Trainer:
     
     def _check_consistency(self):
         """Attempts to run one step generative_model -> configurator -> amortizer -> loss."""
-
+        
         if self.generative_model is not None:
             _n_sim = 2
             try: 

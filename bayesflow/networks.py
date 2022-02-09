@@ -324,9 +324,7 @@ class ActNorm(tf.keras.Model):
         """Performs a forward pass through the ActNorm layer."""
 
         z = self.scale * target + self.bias
-        ldj = tf.math.reduce_sum(tf.math.log(tf.math.abs(self.scale)))
-        if len(target.shape) == 3:
-            ldj = ldj * target.shape[1]
+        ldj = tf.math.reduce_sum(tf.math.log(tf.math.abs(self.scale)), axis=-1)
         return z, ldj     
 
     def _inverse(self, target):

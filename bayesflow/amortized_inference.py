@@ -377,16 +377,16 @@ class JointAmortizer(tf.keras.Model):
         ----------
         input_dict  : dict 
             Input dictionary containing the following mandatory keys: 
-            `posterior`  - The input dictionary for the amortized posterior
-            `likelihood` - The input dictionary for the amortized likelihood
+            `posterior_input`  - The input dictionary for the amortized posterior
+            `likelihood_input` - The input dictionary for the amortized likelihood
 
         Returns
         ----------
         TODO
         """
 
-        post_out = self.amortized_posterior(input_dict['posterior'], **kwargs)
-        lik_out = self.amortized_likelihood(input_dict['likelihood'], **kwargs)
+        post_out = self.amortized_posterior(input_dict['posterior_input'], **kwargs)
+        lik_out = self.amortized_likelihood(input_dict['likelihood_input'], **kwargs)
         return post_out, lik_out
 
     def compute_loss(self, input_dict, **kwargs):
@@ -395,16 +395,16 @@ class JointAmortizer(tf.keras.Model):
         ----------
         input_dict  : dict 
             Input dictionary containing the following mandatory keys: 
-            `posterior`  - The input dictionary for the amortized posterior
-            `likelihood` - The input dictionary for the amortized likelihood
+            `posterior_input`  - The input dictionary for the amortized posterior
+            `likelihood_input` - The input dictionary for the amortized likelihood
 
         Returns
         ----------
         TODO
         """
 
-        loss_post = self.amortiozed_posterior.compute_loss(input_dict['posterior'], **kwargs)
-        loss_lik = self.amortiozed_likelihood.compute_loss(input_dict['likelihood'], **kwargs)
+        loss_post = self.amortized_posterior.compute_loss(input_dict['posterior_input'], **kwargs)
+        loss_lik = self.amortized_likelihood.compute_loss(input_dict['likelihood_input'], **kwargs)
         total_loss = loss_post + loss_lik
         return total_loss
 
