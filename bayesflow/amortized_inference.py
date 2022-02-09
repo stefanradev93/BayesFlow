@@ -194,7 +194,15 @@ class AmortizedPosterior(tf.keras.Model):
             raise NotImplementedError("Could not infer summary_loss_fun, argument should be of type (None, callable, or str)!")
 
     def compute_loss(self, input_dict, **kwargs):
-        """ Computes the loss of the amortized as specified by the init arguments.
+        """ Computes the loss of the amortized given an input dictionary.
+
+        Parameters
+        ----------
+        input_dict : dict  
+            Input dictionary containing the following mandatory keys: 
+            `parameters`         : the latent model parameters over which a condition density is learned
+            `summary_conditions` : the conditioning variables (including data) that are first passed through a summary network
+            `direct_conditions`  : the conditioning variables that the directly passed to the inference network
         """
 
         if self.summary_loss is not None:
@@ -364,19 +372,39 @@ class JointAmortizer(tf.keras.Model):
 
     def call(self, input_dict, **kwargs):
         """ Performs a forward pass through both networks.
+
+        Parameters
+        ----------
+        input_dict  : dict 
+            Input dictionary containing the following mandatory keys: 
+            `posterior`  - The input dictionary for the amortized posterior
+            `likelihood` - The input dictionary for the amortized likelihood
+
+        Returns
+        ----------
+        TODO
         """
 
-        post_out = self.amortized_posterior(input_dict, **kwargs)
-        lik_out = self.amortized_likelihood(input_dict, **kwargs)
+        post_out = self.amortized_posterior(input_dict['posterior'], **kwargs)
+        lik_out = self.amortized_likelihood(input_dict['likelihood'], **kwargs)
         return post_out, lik_out
 
     def compute_loss(self, input_dict, **kwargs):
         """
+        Parameters
+        ----------
+        input_dict  : dict 
+            Input dictionary containing the following mandatory keys: 
+            `posterior`  - The input dictionary for the amortized posterior
+            `likelihood` - The input dictionary for the amortized likelihood
+
+        Returns
+        ----------
         TODO
         """
 
-        loss_post = self.amortiozed_posterior.compute_loss(input_dict, **kwargs)
-        loss_lik = self.amortiozed_likelihood.compute_loss(input_dict, **kwargs)
+        loss_post = self.amortiozed_posterior.compute_loss(input_dict['posterior'], **kwargs)
+        loss_lik = self.amortiozed_likelihood.compute_loss(input_dict['likelihood'], **kwargs)
         total_loss = loss_post + loss_lik
         return total_loss
 

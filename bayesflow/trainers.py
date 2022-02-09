@@ -7,7 +7,7 @@ from tensorflow.keras.optimizers import Adam
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
 from bayesflow.helpers import apply_gradients
-from bayesflow.amortized_inference import AmortizedPosterior, AmortizedLikelihood
+from bayesflow.amortized_inference import AmortizedPosterior, AmortizedLikelihood, JointAmortizer
 
 
 class Trainer:
@@ -175,21 +175,38 @@ class Trainer:
         """ Determines which configurator to use if None specified.        
         """
 
-        # Determine default configs
-        if type(self.amortizer) is AmortizedPosterior:
-            default_config = DefaultPosteriorConfigurator
-            default_combiner = DefaultPosteriorCombiner()
-            default_transfomer = DefaultPosteriorTransformer()
-        elif type(self.amortizer) is AmortizedLikelihood:
-            default_config = DefaultLikelihoodConfigurator
-            default_combiner = DefaultLikelihoodTransformer()
-            default_transfomer = DefaultLikelihoodCombiner()
+        # Do nothing if callable provided
+        if callable(config_fun):
+            return config_fun
+
+        # If None (default), infer default config based on amortizer type
         else:
-            raise NotImplementedError("Could not initialize configurator based on amortizer type!")
+            # Amortized posterior
+            if type(self.amortizer) is AmortizedPosterior:
+                default_config = DefaultPosteriorConfigurator
+                default_combiner = DefaultPosteriorCombiner()
+                default_transfomer = DefaultPosteriorTransformer()
+
+            # Amortized lieklihood
+            elif type(self.amortizer) is AmortizedLikelihood:
+                default_config = DefaultLikelihoodConfigurator
+                default_combiner = DefaultLikelihoodTransformer()
+                default_transfomer = DefaultLikelihoodCombiner()
+
+            # Joint amortizer
+            elif type(self.amortizer) is JointAmortizer:
+                default_config = DefaultJointConfigurator
+                default_combiner = DefaultJointTransformer()
+                default_transfomer = DefaultJointCombiner()
+            
+            # Unknown raises an error
+            else:
+                raise NotImplementedError(f"Could not initialize configurator based on" +
+                                           "amortizer type {type(self.amortizer)}!")
 
         # Check string types
         if type(config_fun) is str:
-            if config_fun == "var_obs":
+            if config_fun == "variable_num_obs":
                 return default_config(
                     transform_fun=VariableObservationsTransformer(),
                     combine_fun=default_combiner)
@@ -199,14 +216,14 @@ class Trainer:
                     transform_fun=OneHotTransformer(),
                     combine_fun=default_combiner)
 
-            elif config_fun == 'var_obs_one_hot':
+            elif config_fun == 'variable_num_obs_one_hot':
                 return default_config(
                     transform_fun=TransformerUnion([
                         VariableObservationsTransformer(),
                         OneHotTransformer(),
                     ]),
                     combine_fun=default_combiner)
-            elif config_fun == 'one_hot_var_obs':
+            elif config_fun == 'one_hot_variable_num_obs':
                 return default_config(
                     transform_fun=TransformerUnion([
                         OneHotTransformer(),
@@ -217,17 +234,13 @@ class Trainer:
                 raise NotImplementedError(f"Could not initialize configurator based on string" +
                                            "argument should be in {STRING_CONFIGS}")
 
-        # Handle callable version
-        elif callable(config_fun):
-            return config_fun
-
-        # Handle None
         elif config_fun is None:
             config_fun = default_config(
                 transform_fun=default_transfomer,
                 combine_fun=default_combiner
             )
             return config_fun
+        
         else:
             raise NotImplementedError(f"Could not infer configurator based on provided type: {type(config_fun)}")
     

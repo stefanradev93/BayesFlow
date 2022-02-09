@@ -247,6 +247,47 @@ class DefaultLikelihoodCombiner:
 
         return out_dict
 
+class DefaultLikelihoodCombiner:
+    def __call__(self, forward_dict):
+
+        # Prepare placeholder
+        out_dict = {
+            'data': None,
+            'conditions': None
+        }
+
+        # Extract targets and conditions
+        out_dict['data'] = forward_dict['sim_data']
+        out_dict['conditions'] = forward_dict['prior_draws']
+
+        return out_dict
+
+class DefaultJointCombiner:
+    def __init__(self, posterior_combiner=None, likelihood_combiner=None):
+
+        if posterior_combiner is None:
+            self.posterior_combiner = DefaultPosteriorCombiner()
+        else:
+            self.posterior_combiner = posterior_combiner
+
+        if likelihood_combiner is None:
+            self.likelihood_combiner = DefaultLikelihoodCombiner()
+        else:
+            self.likelihood_combiner = likelihood_combiner
+
+    def __call__(self, forward_dict):
+
+        # Prepare placeholder
+        out_dict = {
+            'likelihood': None,
+            'posterior': None
+        }
+
+        out_dict['posterior'] = self.posterior_combiner(forward_dict)
+        out_dict['likelihood'] = self.likelihood_combiner(forward_dict)
+
+        return out_dict
+
 
 class DefaultPosteriorTransformer:
     """TODO"""
@@ -258,3 +299,8 @@ class DefaultLikelihoodTransformer:
     def __call__(self, forward_dict):
         return forward_dict
 
+class DefaultJointTransformer:
+    """TODO"""
+
+    def __call__(self, forward_dict):
+        return forward_dict
