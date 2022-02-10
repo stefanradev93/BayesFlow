@@ -91,7 +91,7 @@ class Trainer:
         return status
 
     def train_online(self, epochs, iterations_per_epoch, batch_size, **kwargs):
-        """Trains the inference network(s) via online learning. Additional keyword arguments
+        """Trains an amortizer via online learning. Additional keyword arguments
         are passed to the generative mode, configurator, and amortizer.
 
         Parameters
@@ -137,18 +137,20 @@ class Trainer:
                 self.manager.save()
         return losses
 
-    def train_offline(self, epochs, batch_size, simulations_dict, **kwargs):
-        """Trains the inference network(s) via offline learning. Assume params and data have already
-        been simulated (i.e., forward inference).
+    def train_offline(self, simulations_dict, epochs, batch_size, **kwargs):
+        """ Trains an amortizer via offline learning. Assume parameters, data and optional 
+        context have already been simulated (i.e., forward inference has been performed).
+
         Parameters
         ----------
+        simulations_dict :
+            A dictionaty containing the simulated data / context, if using the default keys, 
+            the method expects mandatory keys `sim_data` and `prior_draws` to be present
         epochs           : int
             Number of epochs (and number of times a checkpoint is stored)
         batch_size       : int
             Number of simulations to perform at each backpropagation step
-        simulations_dict :
-            A dictionaty containing the simulated data / context, if using the default keys, 
-            expects mandatory keys `sim_data` and `prior_draws`
+
         Returns
         -------
         losses : dict(ep_num : list(losses))
@@ -187,6 +189,54 @@ class Trainer:
             # Store after each epoch, if specified
             if self.manager is not None:
                 self.manager.save()
+        return losses
+
+    def train_rounds(self, epochs, rounds, sim_per_round, batch_size, **kwargs):
+        """Trains an amortizer via round-based learning.
+        Parameters
+        ----------
+        epochs         : int
+            Number of epochs (and number of times a checkpoint is stored)
+        rounds         : int
+            Number of rounds to perform
+        sim_per_round  : int
+            Number of simulations per round
+        batch_size     : int
+            Number of simulations to perform at each backpropagation step
+        **kwargs : dict
+            Passed to the simulator(s)
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
+        """
+
+        logger = logging.getLogger()
+        losses = dict()
+        first_round = True
+
+        for r in range(1, rounds + 1):
+            # Data generation step
+            if first_round:
+                # Simulate initial data
+                logger.info(f'Simulating initial {sim_per_round} data sets...')
+                simulations_dict = self._forward_inference(sim_per_round, **kwargs)
+                first_round = False
+            else:
+                # Simulate further data
+                logger.info(f'Simulating new {sim_per_round} data sets and appending to previous...')
+                logger.info(f'New total number of simulated data sets: {sim_per_round * r}')
+                simulations_dict_r = self._forward_inference(sim_per_round, **kwargs)
+
+                # Attempt to concatenate data sets
+                for k in simulations_dict.keys():
+                    if simulations_dict[k] is not None:
+                        simulations_dict[k] = np.concatenate((simulations_dict[k], simulations_dict_r[k]), axis=0)
+        
+            # Train offline with generated stuff
+            losses_r = self.train_offline(simulations_dict, epochs, batch_size, **kwargs)
+            losses[r] = losses_r
+
         return losses
 
     def _forward_inference(self, n_sim, *args):
