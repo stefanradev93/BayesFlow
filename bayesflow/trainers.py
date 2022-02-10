@@ -8,7 +8,8 @@ from tensorflow.keras.optimizers import Adam
 
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
-from bayesflow.helpers import apply_gradients
+from bayesflow.helper_functions import apply_gradients
+from bayesflow.helper_classes import SimulatedDataset
 from bayesflow.default_settings import STRING_CONFIGS
 from bayesflow.amortized_inference import AmortizedPosterior, AmortizedLikelihood, JointAmortizer
 
@@ -136,7 +137,7 @@ class Trainer:
                 self.manager.save()
         return losses
 
-    def train_offline(self, epochs, batch_size, *args, **kwargs):
+    def train_offline(self, epochs, batch_size, simulations_dict, **kwargs):
         """Trains the inference network(s) via offline learning. Assume params and data have already
         been simulated (i.e., forward inference).
         Parameters
@@ -145,11 +146,9 @@ class Trainer:
             Number of epochs (and number of times a checkpoint is stored)
         batch_size       : int
             Number of simulations to perform at each backpropagation step
-        *args : tuple
-            Input to the trainer, e.g. (params, sim_data) or (model_indices, params, sim_data)
-        **kwargs: dict(arg_name, arg)
-            Input to the trainer, e.g. {'params': theta, 'sim_data': x}
-            Note that argument names must be in {'model_indices', 'params', 'sim_data'}
+        simulations_dict :
+            A dictionaty containing the simulated data / context, if using the default keys, 
+            expects mandatory keys `sim_data` and `prior_draws`
         Returns
         -------
         losses : dict(ep_num : list(losses))
@@ -162,39 +161,25 @@ class Trainer:
         # TODO
         """
 
-        # preprocess kwargs to args
-        args = self._train_offline_kwargs_to_args(args, kwargs)
-
-        # Convert to a data set
-        n_sim = int(args[-1].shape[0])
-
-        # Compute summary statistics, if provided
-        if self.summary_stats is not None:
-            print('Computing hand-crafted summary statistics...')
-            args = list(args)
-            args[-1] = self.summary_stats(args[-1])
-            args = tuple(args)
-
-        print('Converting {} simulations to a TensorFlow data set...'.format(n_sim))
-        data_set = tf.data.Dataset \
-            .from_tensor_slices(args) \
-            .shuffle(n_sim) \
-            .batch(batch_size)
+        # Convert to custom data set
+        data_set = SimulatedDataset(simulations_dict, batch_size)
 
         losses = dict()
         for ep in range(1, epochs + 1):
             losses[ep] = []
-            with tqdm(total=int(np.ceil(n_sim / batch_size)), desc='Training epoch {}'.format(ep)) as p_bar:
+            with tqdm(total=int(np.ceil(data_set.n_sim / batch_size)), desc='Training epoch {}'.format(ep)) as p_bar:
                 # Loop through dataset
-                for bi, batch in enumerate(data_set):
-                    # Extract arguments from batch
-                    args_b = tuple(batch)
+                for bi, forward_dict in enumerate(data_set):
 
-                    # One step backpropagation
-                    loss = self._train_step(*args_b)
+                    # Configure generative model outputs for amortizer
+                    input_dict = self.configurator(forward_dict, **kwargs)
 
-                    # Store loss and update progress bar
+                    # Forward pass and one step backprop
+                    loss = self._train_step(input_dict, **kwargs)
+
+                    # Store loss into dictionary
                     losses[ep].append(loss)
+
                     p_bar.set_postfix_str("Epoch {0},Batch {1},Loss: {2:.3f},Running Loss: {3:.3f}"
                                           .format(ep, bi + 1, loss, np.mean(losses[ep])))
                     p_bar.update(1)

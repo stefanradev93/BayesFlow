@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+from bayesflow.default_settings import DEFAULT_KEYS
 
 class SimulatedDataset:
     """ Helper class to create a tensorflow Dataset which returns
@@ -11,13 +12,14 @@ class SimulatedDataset:
         Create a tensorfow Dataset from forward inference outputs and determines format. 
         """
         
-        slices, keys_used, keys_none = self._determine_slices(forward_dict)
-        self.keys_used = keys_used
-        self.keys_none = keys_none
+        slices, keys_used, keys_none, n_sim = self._determine_slices(forward_dict)
         self.data = tf.data.Dataset\
                 .from_tensor_slices(tuple(slices))\
                 .shuffle(self.n_sim)\
                 .batch(batch_size)
+        self.keys_used = keys_used
+        self.keys_none = keys_none
+        self.n_sim = n_sim
         
     def _determine_slices(self, forward_dict):
         """ Determine slices for a tensorflow Dataset.
@@ -32,8 +34,8 @@ class SimulatedDataset:
                 keys_used.append(k)
             else:
                 keys_none.append(k)
-        self.n_sim = forward_dict['sim_data'].shape[0]
-        return slices, keys_used, keys_none
+        n_sim = forward_dict[DEFAULT_KEYS['sim_data']].shape[0]
+        return slices, keys_used, keys_none, n_sim
     
     def __call__(self, batch_in):
         """ Convert output of tensorflow Dataset to dict.
