@@ -2,7 +2,7 @@ import unittest
 
 from bayesflow.default_settings import DEFAULT_SETTING_INVARIANT_NET, DEFAULT_SETTING_INVERTIBLE_NET, MetaDictSetting
 from bayesflow.exceptions import ConfigurationError
-from bayesflow.helpers import build_meta_dict, merge_left_into_right
+from bayesflow.helper_functions import build_meta_dict, merge_left_into_right
 
 
 class TestMergeLeftIntoRight(unittest.TestCase):

@@ -2,7 +2,7 @@ import numpy as np
 import logging
 logging.basicConfig()
 
-
+from bayesflow.default_settings import DEFAULT_KEYS
 from bayesflow.exceptions import ConfigurationError
 
 
@@ -104,7 +104,7 @@ class ContextGenerator:
         -------
 
         context_dict : dictionary
-            A dictionary with context variables with the following keys:
+            A dictionary with context variables with the following keys, if default keys not changed:
             `batchable_context` : value
             `non_batchable_context` : value
         
@@ -114,11 +114,12 @@ class ContextGenerator:
         """
 
         out_dict = {}
-        out_dict['non_batchable_context'] = self.non_batchable_context()
+        out_dict[DEFAULT_KEYS['non_batchable_context']] = self.non_batchable_context()
         if self.use_non_batchable_for_batchable:
-            out_dict['batchable_context'] = self.batchable_context(batch_size, out_dict['non_batchable_context'], *args, **kwargs)
+            out_dict[DEFAULT_KEYS['batchable_context']] = self.batchable_context(batch_size, 
+            out_dict[DEFAULT_KEYS['non_batchable_context']], *args, **kwargs)
         else:
-            out_dict['batchable_context'] = self.batchable_context(batch_size, *args, **kwargs)
+            out_dict[DEFAULT_KEYS['batchable_context']] = self.batchable_context(batch_size, *args, **kwargs)
         return out_dict
         
 
@@ -156,37 +157,37 @@ class Prior:
 
         # Prepare placeholder output dictionary
         out_dict = {
-            'prior_draws': None,
-            'batchable_context': None,
-            'non_batchable_context': None
+            DEFAULT_KEYS['prior_draws']: None,
+            DEFAULT_KEYS['batchable_context'] : None,
+            DEFAULT_KEYS['non_batchable_context'] : None
         }
 
         # Populate dictionary with context or leave at None
         if self.context_gen is not None:
             context_dict = self.context_gen(batch_size, *args, **kwargs)
-            out_dict['non_batchable_context'] = context_dict['non_batchable_context']
-            out_dict['batchable_context'] = context_dict['batchable_context']
+            out_dict[DEFAULT_KEYS['non_batchable_context']] = context_dict['non_batchable_context']
+            out_dict[DEFAULT_KEYS['batchable_context']] = context_dict[DEFAULT_KEYS['batchable_context']]
 
         # Generate prior draws according to context:
         # No context type
-        if out_dict['batchable_context'] is None and out_dict['non_batchable_context'] is None:
-            out_dict['prior_draws'] = np.array([self.prior(*args, **kwargs) for _ in range(batch_size)])
+        if out_dict[DEFAULT_KEYS['batchable_context']] is None and out_dict[DEFAULT_KEYS['non_batchable_context']] is None:
+            out_dict[DEFAULT_KEYS['prior_draws']] = np.array([self.prior(*args, **kwargs) for _ in range(batch_size)])
         
         # Only batchable context
-        elif out_dict['non_batchable_context'] is None:
-            out_dict['prior_draws'] = np.array([self.prior(out_dict['batchable_context'][b], *args, **kwargs) 
+        elif out_dict[DEFAULT_KEYS['non_batchable_context']] is None:
+            out_dict[DEFAULT_KEYS['prior_draws']] = np.array([self.prior(out_dict[DEFAULT_KEYS['batchable_context']][b], *args, **kwargs) 
             for b in range(batch_size)])
             
         # Only non-batchable context
-        elif out_dict['batchable_context'] is None:
-            out_dict['prior_draws'] = np.array([self.prior(out_dict['non_batchable_context'], *args, **kwargs) 
+        elif out_dict[DEFAULT_KEYS['batchable_context']] is None:
+            out_dict[DEFAULT_KEYS['prior_draws']] = np.array([self.prior(out_dict[DEFAULT_KEYS['non_batchable_context']], *args, **kwargs) 
             for _ in range(batch_size)])
 
         # Both batchable and non_batchable context
         else:
-            out_dict['prior_draws'] = np.array([
-                self.prior(out_dict['batchable_context'][b], 
-                           out_dict['non_batchable_context'], *args, **kwargs) 
+            out_dict[DEFAULT_KEYS['prior_draws']] = np.array([
+                self.prior(out_dict[DEFAULT_KEYS['batchable_context']][b], 
+                           out_dict[DEFAULT_KEYS['non_batchable_context']], *args, **kwargs) 
                 for b in range(batch_size)])
 
         return out_dict
@@ -252,7 +253,7 @@ class Simulator:
         -------
 
         out_dict : dictionary
-            An output dictionary with randomly simulated variables, the following keys are mandatory 
+            An output dictionary with randomly simulated variables, the following keys are mandatory, if default keys not modified:
             `sim_data` : value
             `non_batchable_context` : value
             `batchable_context` : value
@@ -263,16 +264,16 @@ class Simulator:
         
         # Prepare placeholder dictionary
         out_dict = {
-            'sim_data': None,
-            'batchable_context': None,
-            'non_batchable_context': None
+            DEFAULT_KEYS['sim_data']: None,
+            DEFAULT_KEYS['batchable_context'] : None,
+            DEFAULT_KEYS['non_batchable_context'] : None
         }
         
         # Populate dictionary with context or leave at None
         if self.context_gen is not None:
             context_dict = self.context_gen.generate_context(batch_size, *args, **kwargs)
-            out_dict['non_batchable_context'] = context_dict['non_batchable_context']
-            out_dict['batchable_context'] = context_dict['batchable_context']
+            out_dict[DEFAULT_KEYS['non_batchable_context']] = context_dict[DEFAULT_KEYS['non_batchable_context']]
+            out_dict[DEFAULT_KEYS['batchable_context']] = context_dict[DEFAULT_KEYS['batchable_context']]
         
         if self.is_batched:
             return self._simulate_batched(params, out_dict, *args, **kwargs)
@@ -283,24 +284,24 @@ class Simulator:
         """
         
         # No context type
-        if out_dict['batchable_context'] is None and out_dict['non_batchable_context'] is None:
-            out_dict['sim_data'] = self.simulator(params, *args, **kwargs)
+        if out_dict[DEFAULT_KEYS['batchable_context']] is None and out_dict[DEFAULT_KEYS['non_batchable_context']] is None:
+            out_dict[DEFAULT_KEYS['sim_data']] = self.simulator(params, *args, **kwargs)
             
         # Only batchable context
         elif out_dict['non_batchable_context'] is None:
-            out_dict['sim_data'] = self.simulator(params, 
-                                                  out_dict['batchable_context'], *args, **kwargs)
+            out_dict[DEFAULT_KEYS['sim_data']] = self.simulator(params, 
+                                                  out_dict[DEFAULT_KEYS['batchable_context']], *args, **kwargs)
 
         # Only non-batchable context
-        elif out_dict['batchable_context'] is None:
-            out_dict['sim_data'] = self.simulator(params, 
-                                                  out_dict['non_batchable_context'], *args, **kwargs)
+        elif out_dict[DEFAULT_KEYS['batchable_context']] is None:
+            out_dict[DEFAULT_KEYS['sim_data']] = self.simulator(params, 
+                                                  out_dict[DEFAULT_KEYS['non_batchable_context']], *args, **kwargs)
         
         # Both batchable and non-batchable context
         else:
-            out_dict['sim_data'] = self.simulator(params, 
-                                                  out_dict['batchable_context'], 
-                                                  out_dict['non_batchable_context'], *args, **kwargs)
+            out_dict[DEFAULT_KEYS['sim_data']] = self.simulator(params, 
+                                                  out_dict[DEFAULT_KEYS['batchable_context']], 
+                                                  out_dict[DEFAULT_KEYS['non_batchable_context']], *args, **kwargs)
 
         return out_dict
     
@@ -312,28 +313,28 @@ class Simulator:
         batch_size = params.shape[0]
         
         # No context type
-        if out_dict['batchable_context'] is None and out_dict['non_batchable_context'] is None:
-            out_dict['sim_data'] = np.array([self.simulator(params[b],  *args, **kwargs) for b in range(batch_size)])
+        if out_dict[DEFAULT_KEYS['batchable_context']] is None and out_dict[DEFAULT_KEYS['non_batchable_context']] is None:
+            out_dict[DEFAULT_KEYS['sim_data']] = np.array([self.simulator(params[b],  *args, **kwargs) for b in range(batch_size)])
             
         # Only batchable context
         elif out_dict['non_batchable_context'] is None:
-            out_dict['sim_data'] = np.array([self.simulator(params[b], 
-                                                            out_dict['batchable_context'][b], 
+            out_dict[DEFAULT_KEYS['sim_data']] = np.array([self.simulator(params[b], 
+                                                            out_dict[DEFAULT_KEYS['batchable_context']][b], 
                                                             *args, **kwargs) 
                                              for b in range(batch_size)])
             
         # Only non-batchable context
-        elif out_dict['batchable_context'] is None:
-            out_dict['sim_data'] = np.array([self.simulator(params[b], 
-                                                            out_dict['non_batchable_context'], 
+        elif out_dict[DEFAULT_KEYS['batchable_context']] is None:
+            out_dict[DEFAULT_KEYS['sim_data']] = np.array([self.simulator(params[b], 
+                                                            out_dict[DEFAULT_KEYS['non_batchable_context']], 
                                                             *args, **kwargs) 
                                              for b in range(batch_size)])
             
         # Both batchable and non_batchable context
         else:
-            out_dict['sim_data'] = np.array([self.simulator(params[b], 
-                                                            out_dict['batchable_context'][b], 
-                                                            out_dict['non_batchable_context'], 
+            out_dict[DEFAULT_KEYS['sim_data']] = np.array([self.simulator(params[b], 
+                                                            out_dict[DEFAULT_KEYS['batchable_context']][b], 
+                                                            out_dict[DEFAULT_KEYS['non_batchable_context']], 
                                                             *args, **kwargs) 
                                              for b in range(batch_size)])
 

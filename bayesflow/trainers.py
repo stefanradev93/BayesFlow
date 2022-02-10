@@ -89,15 +89,6 @@ class Trainer:
         status = self.checkpoint.restore(self.manager.latest_checkpoint)
         return status
 
-    def change_optimizer(self, new_optimizer):
-        """ Overwrites the old optimizer with the provided `new_optimizer`.
-        """
-
-        self.optimizer = new_optimizer
-        if self.checkpoint is not None:
-            self.checkpoint.optimizer = new_optimizer
-            self.manager.save()
-
     def train_online(self, epochs, iterations_per_epoch, batch_size, **kwargs):
         """Trains the inference network(s) via online learning. Additional keyword arguments
         are passed to the generative mode, configurator, and amortizer.
@@ -138,6 +129,74 @@ class Trainer:
                     # Update progress bar
                     p_bar.set_postfix_str("Epoch {0},Iteration {1},Loss: {2:.3f},Running Loss: {3:.3f}"
                                           .format(ep, it, loss, np.mean(losses[ep])))
+                    p_bar.update(1)
+
+            # Store after each epoch, if specified
+            if self.manager is not None:
+                self.manager.save()
+        return losses
+
+    def train_offline(self, epochs, batch_size, *args, **kwargs):
+        """Trains the inference network(s) via offline learning. Assume params and data have already
+        been simulated (i.e., forward inference).
+        Parameters
+        ----------
+        epochs           : int
+            Number of epochs (and number of times a checkpoint is stored)
+        batch_size       : int
+            Number of simulations to perform at each backpropagation step
+        *args : tuple
+            Input to the trainer, e.g. (params, sim_data) or (model_indices, params, sim_data)
+        **kwargs: dict(arg_name, arg)
+            Input to the trainer, e.g. {'params': theta, 'sim_data': x}
+            Note that argument names must be in {'model_indices', 'params', 'sim_data'}
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
+        Important
+        ---------
+
+        Examples
+        --------
+        # TODO
+        """
+
+        # preprocess kwargs to args
+        args = self._train_offline_kwargs_to_args(args, kwargs)
+
+        # Convert to a data set
+        n_sim = int(args[-1].shape[0])
+
+        # Compute summary statistics, if provided
+        if self.summary_stats is not None:
+            print('Computing hand-crafted summary statistics...')
+            args = list(args)
+            args[-1] = self.summary_stats(args[-1])
+            args = tuple(args)
+
+        print('Converting {} simulations to a TensorFlow data set...'.format(n_sim))
+        data_set = tf.data.Dataset \
+            .from_tensor_slices(args) \
+            .shuffle(n_sim) \
+            .batch(batch_size)
+
+        losses = dict()
+        for ep in range(1, epochs + 1):
+            losses[ep] = []
+            with tqdm(total=int(np.ceil(n_sim / batch_size)), desc='Training epoch {}'.format(ep)) as p_bar:
+                # Loop through dataset
+                for bi, batch in enumerate(data_set):
+                    # Extract arguments from batch
+                    args_b = tuple(batch)
+
+                    # One step backpropagation
+                    loss = self._train_step(*args_b)
+
+                    # Store loss and update progress bar
+                    losses[ep].append(loss)
+                    p_bar.set_postfix_str("Epoch {0},Batch {1},Loss: {2:.3f},Running Loss: {3:.3f}"
+                                          .format(ep, bi + 1, loss, np.mean(losses[ep])))
                     p_bar.update(1)
 
             # Store after each epoch, if specified

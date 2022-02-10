@@ -6,7 +6,7 @@ from tensorflow.keras.layers import Dense, MultiHeadAttention
 from tensorflow.keras.models import Sequential
 
 from bayesflow import default_settings
-from bayesflow.helpers import build_meta_dict
+from bayesflow.helper_functions import build_meta_dict
 from bayesflow.exceptions import ConfigurationError
 
 

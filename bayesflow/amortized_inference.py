@@ -97,8 +97,8 @@ class AmortizedPosterior(tf.keras.Model):
 
         # Compute learnable summaries, if appropriate
         _, condition = self._compute_summary_condition(
-            input_dict['summary_conditions'], 
-            input_dict['direct_conditions'], 
+            input_dict.get('summary_conditions'), 
+            input_dict.get('direct_conditions'), 
             **kwargs
         )
 
@@ -128,8 +128,8 @@ class AmortizedPosterior(tf.keras.Model):
 
         # Compute learnable summaries, if appropriate
         _, conditions = self._compute_summary_condition(
-            input_dict['summary_conditions'], 
-            input_dict['direct_conditions'],
+            input_dict.get('summary_conditions'), 
+            input_dict.get('direct_conditions'),
             **kwargs
         )
 

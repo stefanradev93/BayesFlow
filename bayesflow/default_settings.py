@@ -96,6 +96,19 @@ DEFAULT_SETTING_TAIL_NET = MetaDictSetting(
 
 STRING_CONFIGS = ['var_obs', 'one_hot', 'var_obs_one_hot', 'one_hot_var_obs']
 
+
+DEFAULT_KEYS = {
+    'prior_draws'                   : 'prior_draws',
+    'sim_data'                      : 'sim_data',
+    'batchable_context'             : 'batchable_context',
+    'non_batchable_context'         : 'non_batchable_context',
+    'prior_batchable_context'       : 'prior_batchable_context',
+    'prior_non_batchable_context'   : 'prior_non_batchable_context',
+    'sim_batchable_context'         : 'prior_batchable_context',
+    'sim_non_batchable_context'     : 'prior_non_batchable_context',
+}
+
+
 MMD_BANDWIDTH_LIST = [
     1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 5, 10, 15, 20, 25, 30, 35, 100,
     1e3, 1e4, 1e5, 1e6
