@@ -1,6 +1,4 @@
 import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
 from scipy import stats
 
 
@@ -32,6 +30,24 @@ class GaussianMeanPrior:
         """
         theta = np.random.default_rng().normal(self.mu_mean, self.mu_scale, size=self.D)
         return theta
+
+    def log_density(self, prior_draws):
+        """ Computes prior density of the Gaussian prior. 
+
+        Parameters
+        -------
+
+        prior_draws : np.ndarray
+            The prior draws for which to compute the log pdf, shape (batch_size, D)
+
+        Returns
+        -------
+        lpdf : np.ndarray
+            The log pdf of the prior draws, shape (batch_size, )
+        
+        """
+
+        return stats.norm(loc=self.mu_mean, scale=self.mu_scale).logpdf(prior_draws)
 
 
 class StudentTPrior:

@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 
 
 from bayesflow.exceptions import ConfigurationError
@@ -211,7 +212,8 @@ class Simulator:
         Either a batch_simulator_fun or simulator_fun, but not both, should be provided to instantiate a Simulator object.
 
         If a batch_simulator_fun is provided, the interface will assume that the function operates on batches of parameter
-        vectors and context variables and will pass the latter directly to the function.
+        vectors and context variables and will pass the latter directly to the function. Power users should attempt to provide
+        optimized batched simulators. 
 
         If a simulator_fun is provided, the interface will assume thatthe function operates on single parameter vectors and
         context variables and will wrap the simulator internally to allow batched functionality.
@@ -239,11 +241,20 @@ class Simulator:
         self.context_gen = context_generator
         
     def __call__(self, params, *args, **kwargs):
-        """ Generates simulated data given param draws and optional context variable sgenerated internally
+        """ Generates simulated data given param draws and optional context variables generated internally.
         
         Parameters
         ----------
-        params  :  np.ndarray of shape (n_sim, ...) - the parameter draws obtained from the prior.
+        params   :  np.ndarray of shape (n_sim, ...) - the parameter draws obtained from the prior.
+
+        Returns
+        -------
+
+        out_dict : dictionary
+            An output dictionary with randomly simulated variables, the following keys are mandatory 
+            `sim_data` : value
+            `non_batchable_context` : value
+            `batchable_context` : value
         """
         
         # Always assume first dimension is batch dimension
@@ -336,6 +347,8 @@ class GenerativeModel:
     - Prior : A randomized function returning random parameter draws from a prior distribution;
     - Simulator : A function which transforms the parameters into observables in a non-deterministic manner.
     """
+
+    _N_SIM_TEST = 2 
     
     def __init__(self, prior: callable, simulator: callable, skip_test: bool = False, simulator_is_batched: bool = None):
         """
@@ -414,28 +427,33 @@ class GenerativeModel:
         """
 
         # Use minimal n_sim > 1
-        _n_sim = 2
+        _n_sim = GenerativeModel._N_SIM_TEST
         out = self(_n_sim)
 
-        # Print batch results
+        # Attempt to log batch results or fail and warn user
         try:
+            # Format strings
             p_shape_str = "(batch_size = {}, -{}".format(out["prior_draws"].shape[0], out["prior_draws"].shape[1:])
             p_shape_str = p_shape_str.replace('-(', '').replace(',)', ')')
             d_shape_str = "(batch_size = {}, -{}".format(out["sim_data"].shape[0], out["sim_data"].shape[1:])
             d_shape_str = d_shape_str.replace('-(', '').replace(',)', ')')
-            print(f'Shape of parameter batch after {_n_sim} pilot simulations: {p_shape_str}')
-            print(f'Shape of simulation batch after {_n_sim} pilot simulations: {d_shape_str}')
+
+            # Log to default-config
+            logging.info(f'Shape of parameter batch after {_n_sim} pilot simulations: {p_shape_str}')
+            logging.info(f'Shape of simulation batch after {_n_sim} pilot simulations: {d_shape_str}')
+
             for k, v in out.items():
                 if 'context' in k:
                     name = k.replace('_', ' ').replace('sim', 'simulation').replace('non ', 'non-')
                     if v is None:
-                        print(f'No {name} provided.')
+                        logging.info(f'No {name} provided.')
                     else:
                         try:
-                            print(f'Shape of {name}: {v.shape}')
+                            logging.info(f'Shape of {name}: {v.shape}')
                         except Exception as e:
-                            print(f'Could not determine shape of {name}. Type appears to be non-array: {type(v)},\
+                            logging.info(f'Could not determine shape of {name}. Type appears to be non-array: {type(v)},\
                                     so make sure your input configurator takes cares of that!')
         except Exception as err:
-            print('Could not run forward inference with specified generative model...Please re-examine model components!')
-            print(err)
+            logging.error('Could not run forward inference with specified generative model...Please re-examine model components!')
+            raise ConfigurationError(str(err))
+            
