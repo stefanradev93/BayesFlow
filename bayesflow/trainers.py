@@ -1,6 +1,7 @@
 import numpy as np
 from tqdm.notebook import tqdm
 import logging
+logging.basicConfig()
 
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
@@ -43,10 +44,13 @@ class Trainer:
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
         """
 
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+        
         self.amortizer = amortizer
         self.generative_model = generative_model
         if self.generative_model is None:
-            logging.info("Trainer initialization: No generative model provided. Only offline learning mode is available!")
+            logger.info("Trainer initialization: No generative model provided. Only offline learning mode is available!")
         self.configurator = self._manage_configurator(configurator)
 
         self.clip_method = clip_method
@@ -65,9 +69,9 @@ class Trainer:
             self.manager = tf.train.CheckpointManager(self.checkpoint, checkpoint_path, max_to_keep=max_to_keep)
             self.checkpoint.restore(self.manager.latest_checkpoint)
             if self.manager.latest_checkpoint:
-                logging.info("Networks loaded from {}".format(self.manager.latest_checkpoint))
+                logger.info("Networks loaded from {}".format(self.manager.latest_checkpoint))
             else:
-                logging.info("Initializing networks from scratch.")
+                logger.info("Initializing networks from scratch.")
         else:
             self.checkpoint = None
             self.manager = None
@@ -84,6 +88,15 @@ class Trainer:
             return False
         status = self.checkpoint.restore(self.manager.latest_checkpoint)
         return status
+
+    def change_optimizer(self, new_optimizer):
+        """ Overwrites the old optimizer with the provided `new_optimizer`.
+        """
+
+        self.optimizer = new_optimizer
+        if self.checkpoint is not None:
+            self.checkpoint.optimizer = new_optimizer
+            self.manager.save()
 
     def train_online(self, epochs, iterations_per_epoch, batch_size, **kwargs):
         """Trains the inference network(s) via online learning. Additional keyword arguments
@@ -249,12 +262,14 @@ class Trainer:
     def _check_consistency(self):
         """Attempts to run one step generative_model -> configurator -> amortizer -> loss."""
 
+        logger = logging.getLogger()
         if self.generative_model is not None:
             _n_sim = 2
             try: 
-                logging.info('Performing a consistency check with provided modules...', end="")
+
+                logger.info('Performing a consistency check with provided modules...')
                 _ = self.amortizer.compute_loss(self.configurator(self.generative_model(_n_sim)))
-                logging.info('Done.')
+                logger.info('Done.')
             except Exception as err:
-                logging.error(str(err))
-                raise ConfigurationError("Could not carry out computations of generative_model -> configurator -> amortizer -> loss!")
+                raise ConfigurationError("Could not carry out computations of generative_model ->" +
+                                         f"configurator -> amortizer -> loss! Error trace:\n {err}")

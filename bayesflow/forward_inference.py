@@ -1,5 +1,6 @@
 import numpy as np
 import logging
+logging.basicConfig()
 
 
 from bayesflow.exceptions import ConfigurationError
@@ -430,8 +431,13 @@ class GenerativeModel:
         _n_sim = GenerativeModel._N_SIM_TEST
         out = self(_n_sim)
 
+        # Logger
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
         # Attempt to log batch results or fail and warn user
         try:
+            logger.info(f'Performing {_n_sim} pilot runs of the generative model...')
             # Format strings
             p_shape_str = "(batch_size = {}, -{}".format(out["prior_draws"].shape[0], out["prior_draws"].shape[1:])
             p_shape_str = p_shape_str.replace('-(', '').replace(',)', ')')
@@ -439,21 +445,21 @@ class GenerativeModel:
             d_shape_str = d_shape_str.replace('-(', '').replace(',)', ')')
 
             # Log to default-config
-            logging.info(f'Shape of parameter batch after {_n_sim} pilot simulations: {p_shape_str}')
-            logging.info(f'Shape of simulation batch after {_n_sim} pilot simulations: {d_shape_str}')
+            logger.info(f'Shape of parameter batch after {_n_sim} pilot simulations: {p_shape_str}')
+            logger.info(f'Shape of simulation batch after {_n_sim} pilot simulations: {d_shape_str}')
 
             for k, v in out.items():
                 if 'context' in k:
                     name = k.replace('_', ' ').replace('sim', 'simulation').replace('non ', 'non-')
                     if v is None:
-                        logging.info(f'No {name} provided.')
+                        logger.info(f'No {name} provided.')
                     else:
                         try:
-                            logging.info(f'Shape of {name}: {v.shape}')
+                            logger.info(f'Shape of {name}: {v.shape}')
                         except Exception as e:
-                            logging.info(f'Could not determine shape of {name}. Type appears to be non-array: {type(v)},\
+                            logger.info(f'Could not determine shape of {name}. Type appears to be non-array: {type(v)},\
                                     so make sure your input configurator takes cares of that!')
         except Exception as err:
-            logging.error('Could not run forward inference with specified generative model...Please re-examine model components!')
-            raise ConfigurationError(str(err))
+            raise ConfigurationError('Could not run forward inference with specified generative model...' +
+                                    f'Please re-examine model components!\n {err}')
             
