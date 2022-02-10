@@ -191,20 +191,20 @@ class Trainer:
                 self.manager.save()
         return losses
 
-    def train_rounds(self, epochs, rounds, sim_per_round, batch_size, **kwargs):
+    def train_rounds(self, rounds, sim_per_round, epochs, batch_size, **kwargs):
         """Trains an amortizer via round-based learning.
+
         Parameters
         ----------
-        epochs         : int
-            Number of epochs (and number of times a checkpoint is stored)
         rounds         : int
-            Number of rounds to perform
+            Number of rounds to perform (outer loop)
         sim_per_round  : int
-            Number of simulations per round
+            Number of simulations per round.
+        epochs         : int
+            Number of epochs (and number of times a checkpoint is stored, inner loop) within a round.
         batch_size     : int
-            Number of simulations to perform at each backpropagation step
-        **kwargs : dict
-            Passed to the simulator(s)
+            Number of simulations to use at each backpropagation step
+
         Returns
         -------
         losses : dict(ep_num : list(losses))
