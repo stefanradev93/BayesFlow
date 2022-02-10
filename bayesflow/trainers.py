@@ -1,5 +1,6 @@
 import numpy as np
 from tqdm.notebook import tqdm
+
 import logging
 logging.basicConfig()
 
@@ -15,11 +16,46 @@ from bayesflow.amortized_inference import AmortizedPosterior, AmortizedLikelihoo
 
 
 class Trainer:
+    """ This class will connect a generative model (or, already simulated data from a model) to
+    a neural inference architecture for amortized inference (amortizer).
+
+    At the very minium, the trainer must be initialized with an `amortizer` instance, which is capable
+    of processing the (configured) outputs of a generative model. A `configurator` will then process
+    the outputs of the generative model and convert them in suitable inputs for the amortizer. Users
+    can choose from a palette of default configurators or create their own configurators, essentially
+    building a modularized pipeline GenerativeModel -> Configurator -> Amortizer.
+
+    Currently, the trainer supports the following simulation-based regimes:
+
+    - Online training
+        Usage:
+        >>> trainer.train_online(self, epochs, iterations_per_epoch, batch_size, **kwargs)
+
+        This training regime is optimal for fast generative models which can efficiently simulated data on-the-fly.
+        In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than 2-3 seconds.
+    
+    - Round-based training
+        Usage:
+        >>> trainer.train_rounds(self, rounds, sim_per_round, epochs, batch_size, **kwargs)
+
+        This training regime is optimal for slow, but still reasonably performant generative models.
+        In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than one 2-3 minutes.
+
+    - Offline taining
+        Usage:
+        >>> trainer.train_offline(self, simulations_dict, epochs, batch_size, **kwargs)
+
+        This training regime is optimal for very slow, external simulators, which take several minutes for a single simulation.
+    
+    Note: For extremely slow simulators (i.e., more than an hour of a single simulation), the BayesFlow framework might not be the ideal
+    choice and should be considered in combination with a black-box surrogate optimization method, such as Bayesian optimization.
+    """
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', 
                  clip_value=None, skip_checks=False):
-        """Base class for a trainer performing forward inference and training an amortized neural estimator.
+        """ Creates a trainer which will use a generative model (or data simulated from it) to optimize
+        a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
         Parameters
         ----------
@@ -360,8 +396,7 @@ class Trainer:
         if self.generative_model is not None:
             _n_sim = 2
             try: 
-
-                logger.info('Performing a consistency check with provided modules...')
+                logger.info('Performing a consistency check with provided components...')
                 _ = self.amortizer.compute_loss(self.configurator(self.generative_model(_n_sim)))
                 logger.info('Done.')
             except Exception as err:
