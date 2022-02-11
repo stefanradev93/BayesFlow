@@ -16,8 +16,9 @@ from bayesflow.amortized_inference import AmortizedPosterior, AmortizedLikelihoo
 
 
 class Trainer:
-    """ This class will connect a generative model (or, already simulated data from a model) to
-    a neural inference architecture for amortized inference (amortizer).
+    """ This class connects a generative model (or, already simulated data from a model) with
+    a configurator and a neural inference architecture for amortized inference (amortizer). A Trainer 
+    is responsible for optimizing the amortizer via various forms of simulation-based training.
 
     At the very minium, the trainer must be initialized with an `amortizer` instance, which is capable
     of processing the (configured) outputs of a generative model. A `configurator` will then process
@@ -25,7 +26,8 @@ class Trainer:
     can choose from a palette of default configurators or create their own configurators, essentially
     building a modularized pipeline GenerativeModel -> Configurator -> Amortizer.
 
-    Currently, the trainer supports the following simulation-based regimes:
+    Currently, the trainer supports the following simulation-based training regimes, based on efficiency
+    considerations:
 
     - Online training
         Usage:
@@ -33,6 +35,9 @@ class Trainer:
 
         This training regime is optimal for fast generative models which can efficiently simulated data on-the-fly.
         In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than 2-3 seconds.
+        
+        Important: overfitting presents a danger when using a small simulated data set, so it is recommended to use
+        some amount of regularization for the neural amortizer.
     
     - Round-based training
         Usage:
@@ -198,7 +203,6 @@ class Trainer:
         input_dict = self.configurator(forward_dict, **kwargs.pop('conf_args', {}))
         loss = self._backprop_step(input_dict, **kwargs.pop('net_args', {}))
         return loss
-
 
     def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True, **kwargs):
         """ Trains an amortizer via offline learning. Assume parameters, data and optional 

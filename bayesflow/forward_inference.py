@@ -445,7 +445,7 @@ class GenerativeModel:
 
         # Attempt to log batch results or fail and warn user
         try:
-            logger.info(f'Performing {_n_sim} pilot runs of the generative model...')
+            logger.info(f'Performing {_n_sim} pilot runs with the generative model...')
             # Format strings
             p_shape_str = "(batch_size = {}, -{}".format(out["prior_draws"].shape[0], out["prior_draws"].shape[1:])
             p_shape_str = p_shape_str.replace('-(', '').replace(',)', ')')
