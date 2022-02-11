@@ -408,12 +408,12 @@ class GenerativeModel:
 
         # Prepare placeholder
         out_dict = {
-            'prior_non_batchable_context': prior_out['non_batchable_context'],
-            'prior_batchable_context': prior_out['batchable_context'],
-            'prior_draws':  prior_out['prior_draws'],
-            'sim_non_batchable_context': sim_out['non_batchable_context'],
-            'sim_batchable_context': sim_out['batchable_context'],
-            'sim_data': sim_out['sim_data'],
+            DEFAULT_KEYS['prior_non_batchable_context']: prior_out[DEFAULT_KEYS['non_batchable_context']],
+            DEFAULT_KEYS['prior_batchable_context']: prior_out[DEFAULT_KEYS['batchable_context']],
+            DEFAULT_KEYS['prior_draws']:  prior_out[DEFAULT_KEYS['prior_draws']],
+            DEFAULT_KEYS['sim_non_batchable_context']: sim_out[DEFAULT_KEYS['non_batchable_context']],
+            DEFAULT_KEYS['sim_batchable_context']: sim_out[DEFAULT_KEYS['batchable_context']],
+            DEFAULT_KEYS['sim_data']: sim_out[DEFAULT_KEYS['sim_data']]
         }
 
         return out_dict
@@ -447,9 +447,11 @@ class GenerativeModel:
         try:
             logger.info(f'Performing {_n_sim} pilot runs with the generative model...')
             # Format strings
-            p_shape_str = "(batch_size = {}, -{}".format(out["prior_draws"].shape[0], out["prior_draws"].shape[1:])
+            p_shape_str = "(batch_size = {}, -{}".format(out[DEFAULT_KEYS['prior_draws']].shape[0], 
+                                                         out[DEFAULT_KEYS['prior_draws']].shape[1:])
             p_shape_str = p_shape_str.replace('-(', '').replace(',)', ')')
-            d_shape_str = "(batch_size = {}, -{}".format(out["sim_data"].shape[0], out["sim_data"].shape[1:])
+            d_shape_str = "(batch_size = {}, -{}".format(out[DEFAULT_KEYS['sim_data']].shape[0], 
+                                                         out[DEFAULT_KEYS['sim_data']].shape[1:])
             d_shape_str = d_shape_str.replace('-(', '').replace(',)', ')')
 
             # Log to default-config
@@ -464,10 +466,60 @@ class GenerativeModel:
                     else:
                         try:
                             logger.info(f'Shape of {name}: {v.shape}')
-                        except Exception as e:
+                        except Exception as _:
                             logger.info(f'Could not determine shape of {name}. Type appears to be non-array: {type(v)},\
                                     so make sure your input configurator takes cares of that!')
         except Exception as err:
             raise ConfigurationError('Could not run forward inference with specified generative model...' +
                                     f'Please re-examine model components!\n {err}')
             
+
+class MultiGenerativeModel:
+    """ Basic interface for multiple generative models in a simulation-based context.
+    A MultiveGenerativeModel instance consists of a list of GenerativeModel instances
+    and a prior distribution over candidate models defined by a list of probabilities.
+    """
+
+    def __init__(self, generative_models : list, model_probs='equal'):
+        """
+        Instantiates a multi-generative model responsible for generating parameters, data, and optional context
+        from a list of models according to specified prior model probabilities (PMPs).
+        
+        Parameters
+        ----------
+        generative_models : list of GenerativeModel instances
+            The list of candidate generative models
+        model_probs       : string (default - 'equal') or list fo floats with sum(model_probs) == 1.
+            The list of model probabilities, should have the same length as the list of
+            generative models. Probabilities should sum to one.
+        """
+
+        self.generative_models = generative_models
+        self.n_models = len(generative_models)
+        if model_probs == 'equal':
+            self.model_prior = lambda batch_size: np.random.default_rng().\
+                               randint(self.n_models, size=batch_size)
+        else:
+            self.model_prior = lambda batch_size: np.random.default_rng().\
+                               choice(self.n_models, size=batch_size, p=model_probs)
+        
+
+    def __call__(self, batch_size, **kwargs):
+
+        models_list = []
+        
+        # Sample model indices
+        model_indices = self.model_prior(batch_size)
+
+        # gather model indices and simulate datasets of same model index as batch
+        # create frequency table of model indices
+        m_idx, n = np.unique(model_indices, return_counts=True)
+
+        # Iterate over each unique model index and create all data sets for that model index
+        for m_idx, n in zip(m_idx, n):
+
+            # sample batch of same models
+            model_out = self.generative_models[m_idx](n, **kwargs)
+            models_list.append(model_out)
+        
+        #TODO
