@@ -9,6 +9,8 @@ from bayesflow.exceptions import ConfigurationError
 class ContextGenerator:
     """ Basic interface for a simulation module responsible for generating variables over which
     we want to amortize during simulation-based training, but do not want to perform inference on.
+    Both priors and simulators in a generative framework can have their own context generators,
+    depending on the particular modeling goals.
 
     The interface distinguishes between two types of context: batchable and non-batchable.
 
@@ -21,6 +23,11 @@ class ContextGenerator:
 
     While the latter can also be considered batchable in principle, batching them would require non-Tensor
     (i.e., non-rectangular) data structures, which usually means inefficient computations.  
+
+    Example for a simulation context which will generate a random number of observations between 1 and 100 for 
+    each training batch:
+
+    >>> gen = ContextGenerator(non_batchable_context_fun=lambda : np.random.randint(1, 101))
     """
 
     def __init__(self, batchable_context_fun : callable = None, non_batchable_context_fun: callable = None,

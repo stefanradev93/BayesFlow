@@ -126,7 +126,7 @@ class Trainer:
         status = self.checkpoint.restore(self.manager.latest_checkpoint)
         return status
 
-    def train_online(self, epochs, iterations_per_epoch, batch_size, **kwargs):
+    def train_online(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, **kwargs):
         """Trains an amortizer via online learning. Additional keyword arguments
         are passed to the generative mode, configurator, and amortizer.
 
@@ -138,6 +138,14 @@ class Trainer:
             Number of batch simulations to perform per epoch
         batch_size           : int 
             Number of simulations to perform at each backprop step
+        save_checkpoint      : bool (default - True)
+            A flag to decide whether to save checkpoints after each epoch,
+            if a checkpoint_path provided during initialization, otherwise ignored
+        **kwargs             : dict, optional
+            Optional keyword arguments, which can be one of:
+            `model_args` - optional keyword arguments passed to the generative model
+            `conf_args`  - optional keyword arguments passed to the configurator
+            `net_args`   - optional keyword arguments passed to the amortizer
 
         Returns
         -------
@@ -151,14 +159,8 @@ class Trainer:
             with tqdm(total=iterations_per_epoch, desc='Training epoch {}'.format(ep)) as p_bar:
                 for it in range(1, iterations_per_epoch + 1):
                     
-                    # Obtain generative model outputs
-                    forward_dict = self._forward_inference(batch_size, **kwargs)
-
-                    # Configure generative model outputs for amortizer
-                    input_dict = self.configurator(forward_dict, **kwargs)
-
-                    # Forward pass and one step backprop
-                    loss = self._train_step(input_dict, **kwargs)
+                    # Perform one training step and obtain current loss value
+                    loss = self._train_step(batch_size, **kwargs)
 
                     # Store loss into dictionary
                     losses[ep].append(loss)
@@ -169,11 +171,36 @@ class Trainer:
                     p_bar.update(1)
 
             # Store after each epoch, if specified
-            if self.manager is not None:
+            if self.manager is not None and save_checkpoint:
                 self.manager.save()
         return losses
+    
+    def _train_step(self, batch_size, forward_dict=None, **kwargs):
+        """ Performs forward inference -> configuration -> network -> loss pipeline.
 
-    def train_offline(self, simulations_dict, epochs, batch_size, **kwargs):
+        Parameters
+        ----------
+
+        batch_size    : int 
+            Number of simulations to perform at each backprop step
+        forward_dict  : dict
+            The optional forward dict from a generative model, simulated, if None
+        **kwargs      : dict (default - {})
+            Optional keyword arguments, which can be one of:
+            `model_args` - optional keyword arguments passed to the generative model
+            `conf_args`  - optional keyword arguments passed to the configurator
+            `net_args`   - optional keyword arguments passed to the amortizer
+        
+        """
+
+        if forward_dict is None:
+            forward_dict = self._forward_inference(batch_size, **kwargs.pop('model_args', {}))
+        input_dict = self.configurator(forward_dict, **kwargs.pop('conf_args', {}))
+        loss = self._backprop_step(input_dict, **kwargs.pop('net_args', {}))
+        return loss
+
+
+    def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True, **kwargs):
         """ Trains an amortizer via offline learning. Assume parameters, data and optional 
         context have already been simulated (i.e., forward inference has been performed).
 
@@ -186,6 +213,9 @@ class Trainer:
             Number of epochs (and number of times a checkpoint is stored)
         batch_size       : int
             Number of simulations to perform at each backpropagation step
+        save_checkpoint  : bool (default - True)
+            A flag to decide whether to save checkpoints after each epoch,
+            if a checkpoint_path provided during initialization, otherwise ignored
 
         Returns
         -------
@@ -209,11 +239,8 @@ class Trainer:
                 # Loop through dataset
                 for bi, forward_dict in enumerate(data_set):
 
-                    # Configure generative model outputs for amortizer
-                    input_dict = self.configurator(forward_dict, **kwargs)
-
-                    # Forward pass and one step backprop
-                    loss = self._train_step(input_dict, **kwargs)
+                    # Perform one training step and obtain current loss value
+                    loss = self._train_step(batch_size, forward_dict, **kwargs)
 
                     # Store loss into dictionary
                     losses[ep].append(loss)
@@ -223,11 +250,11 @@ class Trainer:
                     p_bar.update(1)
 
             # Store after each epoch, if specified
-            if self.manager is not None:
+            if self.manager is not None and save_checkpoint:
                 self.manager.save()
         return losses
 
-    def train_rounds(self, rounds, sim_per_round, epochs, batch_size, **kwargs):
+    def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, **kwargs):
         """Trains an amortizer via round-based learning.
 
         Parameters
@@ -240,6 +267,9 @@ class Trainer:
             Number of epochs (and number of times a checkpoint is stored, inner loop) within a round.
         batch_size     : int
             Number of simulations to use at each backpropagation step
+        save_checkpoint      : bool (default - True)
+            A flag to decide whether to save checkpoints after each epoch,
+            if a checkpoint_path provided during initialization, otherwise ignored
 
         Returns
         -------
@@ -270,19 +300,21 @@ class Trainer:
                         simulations_dict[k] = np.concatenate((simulations_dict[k], simulations_dict_r[k]), axis=0)
         
             # Train offline with generated stuff
-            losses_r = self.train_offline(simulations_dict, epochs, batch_size, **kwargs)
+            losses_r = self.train_offline(simulations_dict, epochs, batch_size, save_checkpoint, **kwargs)
             losses[r] = losses_r
 
         return losses
 
-    def _forward_inference(self, n_sim, *args):
+    def _forward_inference(self, n_sim, **kwargs):
         """
         Performs one step of single-model forward inference.
 
         Parameters
         ----------
-        n_sim : int
+        n_sim    : int
             Number of simulations to perform at the given step (i.e., batch size)
+        **kwargs : dict
+            Optional keyword arguments passed to the generative model
 
         Returns
         -------
@@ -298,11 +330,23 @@ class Trainer:
 
         if self.generative_model is None:
             raise SimulationError("No generative model specified. Only offline learning is available!")
-        out_dict = self.generative_model(n_sim, *args)
+        out_dict = self.generative_model(n_sim, **kwargs)
         return out_dict
 
-    def _train_step(self, input_dict, **kwargs):
+    def _backprop_step(self, input_dict, **kwargs):
         """Computes loss and applies gradients.
+
+         Parameters
+        ----------
+        input_dict  : dict
+            The configured output of the genrative model
+        **kwargs    : dict
+            Optional keyword arguments passed to the network's compute_loss method
+            
+        Returns
+        -------
+        out_dict : dict
+            The outputs of the generative model.
         """
 
         # Forward pass and loss computation
