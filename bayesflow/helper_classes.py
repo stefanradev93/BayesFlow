@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 
 from bayesflow.default_settings import DEFAULT_KEYS
@@ -50,3 +51,65 @@ class SimulatedDataset:
     
     def __iter__(self):
         return map(self, self.data)
+
+
+class ReduceLROnPlateau:
+    """Reduce learning rate when a loss has stopped improving. Code inspired by:
+
+    https://github.com/keras-team/keras/blob/v2.8.0/keras/callbacks.py#L2641-L2763
+
+    Parameters:
+    monitor: quantity to be monitored.
+    factor: factor by which the learning rate will be reduced.
+        `new_lr = lr * factor`.
+    patience: number of epochs with no improvement after which learning rate
+        will be reduced.
+    verbose: int. 0: quiet, 1: update messages.
+    min_delta: threshold for measuring the new optimum, to only focus on
+        significant changes.
+    cooldown: number of epochs to wait before resuming normal operation after
+        lr has been reduced.
+    min_lr: lower bound on the learning rate.
+
+    """
+
+    def __init__(self, factor=0.1, patience=3, min_delta=1e-1, cooldown=0, min_lr=0,):
+
+        if factor >= 1.0:
+            raise ValueError(f'ReduceLROnPlateau does not support a factor >= 1.0. Got {factor}')
+
+        self.factor = factor
+        self.min_lr = min_lr
+        self.min_delta = min_delta
+        self.patience = patience
+        self.cooldown = cooldown
+        self.wait = 0
+        self.best = 0
+        self._reset()
+
+
+    def _reset(self):
+        """Resets wait counter and cooldown counter."""
+
+        self.check_if_plateau = lambda a, b: np.less(a, b - self.min_delta)
+        self.best = np.Inf
+        self.wait = 0
+
+
+    def on_epoch_end(self, history, optimizer, logs=None):
+
+        num_epochs = list()
+
+
+        # if self.monitor_op(current, self.best):
+        # self.best = current
+        # self.wait = 0
+        # elif not self.in_cooldown():
+        # self.wait += 1
+        # if self.wait >= self.patience:
+        # old_lr = self.model.optimizer.lr.numpy()
+        # if old_lr > np.float32(self.min_lr):
+        # new_lr = old_lr * self.factor
+        # new_lr = max(new_lr, self.min_lr)
+        # backend.set_value(self.model.optimizer.lr, new_lr)
+        # self.wait = 0

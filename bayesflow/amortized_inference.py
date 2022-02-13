@@ -7,7 +7,7 @@ from bayesflow.default_settings import DEFAULT_KEYS
 
 class AmortizedPosterior(tf.keras.Model):
     """ An interface to connect an inference network for parameter estimation with an optional summary network
-    as in the original BayesFlow set-up, described in the paper:
+    as in the original BayesFlow set-up described in the paper:
 
     Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). 
     BayesFlow: Learning complex stochastic models with invertible neural networks. 
@@ -27,7 +27,7 @@ class AmortizedPosterior(tf.keras.Model):
     """
 
     def __init__(self, inference_net, summary_net=None, loss_fun=None, summary_loss_fun=None):
-        """Initializes the SingleModelAmortizer
+        """Initializes a composite neural network to represent an amortized approximate posterior.
 
         Parameters
         ----------
@@ -64,7 +64,7 @@ class AmortizedPosterior(tf.keras.Model):
 
         Parameters
         ----------
-        input_dict : dict  
+        input_dict     : dict  
             Input dictionary containing the following mandatory keys, if DEFAULT keys unchanged: 
             `parameters`         - the latent model parameters over which a condition density is learned
             `summary_conditions` - the conditioning variables (including data) that are first passed through a summary network
@@ -74,7 +74,7 @@ class AmortizedPosterior(tf.keras.Model):
 
         Returns
         -------
-        net_out or (net_out, summary_out)
+        net_out or (net_out, summary_out) : tuple of tf.Tensor
             the outputs of ``inference_net(theta, summary_net(x, c_s), c_d)``, usually a latent variable and
             log(det(Jacobian)), that is a tuple ``(z, log_det_J) or (sum_outputs, (z, log_det_J)) if 
             return_summary is set to True and a summary network is defined.`` 
@@ -220,7 +220,7 @@ class AmortizedPosterior(tf.keras.Model):
             raise NotImplementedError("Could not infer summary_loss_fun, argument should be of type (None, callable, or str)!")
 
     def compute_loss(self, input_dict, **kwargs):
-        """ Computes the loss of the amortized given an input dictionary.
+        """ Computes the loss of the posterior amortizer given an input dictionary.
 
         Parameters
         ----------
@@ -250,7 +250,8 @@ class AmortizedLikelihood(tf.keras.Model):
     """
 
     def __init__(self, surrogate_net, loss_fun=None):
-        """Initializes an amortized emulator for the simulator (i.e., implicit likelihood model).
+        """Initializes a composite neural architecture representing an amortized emulator 
+        for the simulator (i.e., the implicit likelihood model).
 
         Parameters
         ----------
@@ -537,3 +538,67 @@ class JointAmortizer(tf.keras.Model):
         """
         
         return self.amortized_posterior.sample(input_dict, n_samples, to_numpy=to_numpy, **kwargs)
+
+
+class AmortizedModelComparer(tf.keras.Model):
+    """ An interface to connect an evidential network for Bayesian model comparison with an optional summary network,
+    as described in the original paper on evidential neural networks for model comparison:
+
+    Radev, S. T., D'Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., & Bürkner, P. C. (2021). 
+    Amortized bayesian model comparison with evidential deep learning. 
+    IEEE Transactions on Neural Networks and Learning Systems.
+
+    Note: the original paper does not distinguish between the summary and the evidential networks, but
+    treats them as a whole, with the appropriate architetcure dictated by the model application. For the
+    sake of consistency, the BayesFlow library distinguisahes the two modules.
+    """
+
+    def __init__(self, evidential_net, summary_net=None, loss_fun=None):
+        """Initializes a composite neural architecture for amortized bayesian model comparison.
+
+        Parameters
+        ----------
+        evidential_net    : tf.keras.Model
+            A neural network which outputs model evidences. 
+        summary_net       : tf.keras.Model or None, optional, default: None
+            An optional summary network
+        loss_fun          : callable or None, optional, default: None
+            The loss function which accepts the outputs of the amortizer. If None, the loss is inferred
+            based on the `inference_net` type. 
+
+        Important
+        ----------
+        - If no `summary_net` is provided, then the output dictionary of your generative model should not contain
+        any `sumamry_conditions`, i.e., `summary_conditions` should be set to None, otherwise these will be ignored.
+
+        - If no custom `loss_fun` is provided, the loss function will be the log loss for the means of a Dirichlet
+        distribution, as described in:
+
+        Radev, S. T., D'Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., & Bürkner, P. C. (2021). 
+        Amortized bayesian model comparison with evidential deep learning. 
+        IEEE Transactions on Neural Networks and Learning Systems.
+
+        The regularization weight will be set to 0.01
+        """
+
+        self.evidential_net = evidential_net
+        self.summary_net = summary_net
+        self.loss = self._determine_loss(loss_fun)
+
+    def __call__(self):
+        pass
+
+    def compute_loss(self, input_dict, **kwargs):
+        pass
+
+    def sample(self, input_dict, to_numpy=True, **kwars):
+        pass
+
+    def evidence(self, input_dict, to_numpy=True, **kwargs):
+        pass
+
+    def uncertainty_score(self, input_dict, to_numpy=True, **kwargs):
+        pass
+
+    def _determine_loss(self, loss_fun):
+        pass
