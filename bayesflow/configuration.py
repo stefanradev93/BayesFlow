@@ -3,6 +3,7 @@ from copy import deepcopy
 
 from tensorflow.keras.utils import to_categorical
 
+from bayesflow.default_settings import DEFAULT_KEYS
 from bayesflow.exceptions import ConfigurationError
 
 
@@ -25,10 +26,10 @@ class DefaultJointConfigurator:
         input_dict = self.combiner(forward_dict)
 
         # Determine float format
-        input_dict['posterior_input'] = {k : v.astype(self.default_float_type) if v is not None else v
-                        for k, v in input_dict['posterior_input'].items() }
-        input_dict['likelihood_input'] = {k : v.astype(self.default_float_type) if v is not None else v
-                        for k, v in input_dict['likelihood_input'].items() }
+        input_dict['posterior_inputs'] = {k : v.astype(self.default_float_type) if v is not None else v
+                        for k, v in input_dict[DEFAULT_KEYS['posterior_inputs']].items() }
+        input_dict['likelihood_inputs'] = {k : v.astype(self.default_float_type) if v is not None else v
+                        for k, v in input_dict[DEFAULT_KEYS['likelihood_inputs']].items() }
 
         return input_dict
 

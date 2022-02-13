@@ -6,8 +6,24 @@ from bayesflow.default_settings import DEFAULT_KEYS
 
 
 class AmortizedPosterior(tf.keras.Model):
-    """ Connects an inference network for parameter estimation with an optional summary network
-    as in the original BayesFlow set-up.
+    """ An interface to connect an inference network for parameter estimation with an optional summary network
+    as in the original BayesFlow set-up, described in the paper:
+
+    Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). 
+    BayesFlow: Learning complex stochastic models with invertible neural networks. 
+    IEEE transactions on neural networks and learning systems.
+
+    But also allowing for augmented functionality, such as model misspecification detection in summary space:
+
+    Schmitt, M., Bürkner, P. C., Köthe, U., & Radev, S. T. (2021). 
+    BayesFlow can reliably detect Model Misspecification and Posterior Errors in Amortized Bayesian Inference. 
+    arXiv preprint arXiv:2112.08866.
+
+    And learning of fat-tailed posteriors with a Student-t latent pushforward density:
+
+    Jaini, P., Kobyzev, I., Yu, Y., & Brubaker, M. (2020, November). 
+    Tails of lipschitz triangular flows. 
+    In International Conference on Machine Learning (pp. 4673-4681). PMLR.
     """
 
     def __init__(self, inference_net, summary_net=None, loss_fun=None, summary_loss_fun=None):
@@ -50,10 +66,10 @@ class AmortizedPosterior(tf.keras.Model):
         ----------
         input_dict : dict  
             Input dictionary containing the following mandatory keys, if DEFAULT keys unchanged: 
-            `parameters`         : the latent model parameters over which a condition density is learned
-            `summary_conditions` : the conditioning variables (including data) that are first passed through a summary network
-            `direct_conditions`  : the conditioning variables that the directly passed to the inference network
-        return_summary : bool (default - False)
+            `parameters`         - the latent model parameters over which a condition density is learned
+            `summary_conditions` - the conditioning variables (including data) that are first passed through a summary network
+            `direct_conditions`  - the conditioning variables that the directly passed to the inference network
+        return_summary : bool, optional, default: False
             A flag which determines whether the learnable data summaries (representations) are returned or not.
 
         Returns
@@ -88,7 +104,9 @@ class AmortizedPosterior(tf.keras.Model):
             `summary_conditions` : the conditioning variables (including data) that are first passed through a summary network
             `direct_conditions`  : the conditioning variables that the directly passed to the inference network
         n_samples   : int
-            The number of posterior samples to obtain from the approximate posterior
+            The number of posterior draws (samples) to obtain from the approximate posterior
+        to_numpy    : bool, optional, default: True
+            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
 
         Returns
         -------
@@ -121,6 +139,8 @@ class AmortizedPosterior(tf.keras.Model):
             `parameters`         : the latent model parameters over which a conditional density (i.e., a posterior) is learned
             `summary_conditions` : the conditioning variables (including data) that are first passed through a summary network
             `direct_conditions`  : the conditioning variables that are directly passed to the inference network
+        to_numpy  : bool, optional, default: True
+            Flag indicating whether to return the lpdf values as a `np.array` or a `tf.Tensor`
 
         Returns
         -------
@@ -289,7 +309,7 @@ class AmortizedLikelihood(tf.keras.Model):
             `conditions` - the conditioning variables that the directly passed to the inference network
         n_samples    : int
             The number of posterior samples to obtain from the approximate posterior
-        to_numpy  : bool, default: True
+        to_numpy  : bool, optional, default: True
             Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
 
         Returns
@@ -314,8 +334,8 @@ class AmortizedLikelihood(tf.keras.Model):
             Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged: 
             `observables` - the variables over which a condition density is learned (i.e., the observables)
             `conditions`  - the conditioning variables that the directly passed to the inference network
-        to_numpy   : bool, default: True
-            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+        to_numpy   : bool, optional, default: True
+            Boolean flag indicating whether to return the log-lik values as a `np.array` or a `tf.Tensor`
 
         Returns
         -------
@@ -400,16 +420,17 @@ class JointAmortizer(tf.keras.Model):
         ----------
         input_dict  : dict 
             Input dictionary containing the following mandatory keys: 
-            `posterior_input`  - The input dictionary for the amortized posterior
-            `likelihood_input` - The input dictionary for the amortized likelihood
+            `posterior_inputs`  - The input dictionary for the amortized posterior
+            `likelihood_inputs` - The input dictionary for the amortized likelihood
 
         Returns
         -------
-        TODO
+        (post_out, lik_out) : tuple
+            The outputs of the posterior and likelihood networks given input variables.
         """
 
-        post_out = self.amortized_posterior(input_dict['posterior_input'], **kwargs)
-        lik_out = self.amortized_likelihood(input_dict['likelihood_input'], **kwargs)
+        post_out = self.amortized_posterior(input_dict['posterior_inputs'], **kwargs)
+        lik_out = self.amortized_likelihood(input_dict['likelihood_inputs'], **kwargs)
         return post_out, lik_out
 
     def compute_loss(self, input_dict, **kwargs):
@@ -420,16 +441,16 @@ class JointAmortizer(tf.keras.Model):
         ----------
         input_dict  : dict 
             Nested input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:: 
-            `posterior_input`  - The input dictionary for the amortized posterior
-            `likelihood_input` - The input dictionary for the amortized likelihood
+            `posterior_inputs`  - The input dictionary for the amortized posterior
+            `likelihood_inputs` - The input dictionary for the amortized likelihood
 
         Returns
         -------
         total_loss  : tf.Tensor of shape (1,) - the total computed loss given input variables
         """
 
-        loss_post = self.amortized_posterior.compute_loss(input_dict[DEFAULT_KEYS['posterior_input']], **kwargs)
-        loss_lik = self.amortized_likelihood.compute_loss(input_dict[DEFAULT_KEYS['likelihood_input']], **kwargs)
+        loss_post = self.amortized_posterior.compute_loss(input_dict[DEFAULT_KEYS['posterior_inputs']], **kwargs)
+        loss_lik = self.amortized_likelihood.compute_loss(input_dict[DEFAULT_KEYS['likelihood_inputs']], **kwargs)
         total_loss = loss_post + loss_lik
         return total_loss
 
@@ -442,9 +463,10 @@ class JointAmortizer(tf.keras.Model):
         input_dict : dict  
             Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:
             `observables` - the variables over which a condition density is learned (i.e., the observables)
-            `conditions`  - the conditioning variables that the directly passed to the inference network
-        to_numpy   : bool, default: True
+            `conditions`  - the conditioning variables that are directly passed to the inference network
+        to_numpy   : bool, optional, default: True
             Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+
         Returns
         -------
         log_lik     : tf.Tensor of shape (batch_size, n_obs)
@@ -461,7 +483,7 @@ class JointAmortizer(tf.keras.Model):
         ----------
         input_dict : dict  
             Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:
-            `parameters`         - the latent model parameters over which a condition density is learned
+            `parameters`         - the latent generative model parameters over which a condition density is learned
             `summary_conditions` - the conditioning variables that are first passed through a summary network
             `direct_conditions`  - the conditioning variables that the directly passed to the inference network
 
@@ -484,7 +506,7 @@ class JointAmortizer(tf.keras.Model):
             `conditions` - the conditioning variables that the directly passed to the inference network
         n_samples    : int
             The number of posterior samples to obtain from the approximate posterior
-        to_numpy  : bool, default: True
+        to_numpy     : bool, optional, default: True
             Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
 
         Returns
@@ -505,6 +527,8 @@ class JointAmortizer(tf.keras.Model):
             `direct_conditions`  : the conditioning variables that the directly passed to the inference network
         n_samples    : int
             The number of posterior samples to obtain from the approximate posterior
+        to_numpy     : bool, optional, default: True
+            Boolean flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
 
         Returns
         -------
