@@ -406,7 +406,7 @@ class GenerativeModel:
         prior_out = self.prior(batch_size, *args, **kwargs)
         sim_out = self.simulator(prior_out['prior_draws'], *args, **kwargs)
 
-        # Prepare placeholder
+        # Prepare and fill placeholder dict
         out_dict = {
             DEFAULT_KEYS['prior_non_batchable_context']: prior_out[DEFAULT_KEYS['non_batchable_context']],
             DEFAULT_KEYS['prior_batchable_context']: prior_out[DEFAULT_KEYS['batchable_context']],

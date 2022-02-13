@@ -99,6 +99,7 @@ STRING_CONFIGS = ['var_obs', 'one_hot', 'var_obs_one_hot', 'one_hot_var_obs']
 
 DEFAULT_KEYS = {
     'prior_draws'                   : 'prior_draws',
+    'obs_data'                      : 'obs_data',
     'sim_data'                      : 'sim_data',
     'batchable_context'             : 'batchable_context',
     'non_batchable_context'         : 'non_batchable_context',
@@ -106,7 +107,14 @@ DEFAULT_KEYS = {
     'prior_non_batchable_context'   : 'prior_non_batchable_context',
     'sim_batchable_context'         : 'sim_batchable_context',
     'sim_non_batchable_context'     : 'sim_non_batchable_context',
-    'true_model_indices'            : 'true_model_indices'
+    'true_model_indices'            : 'true_model_indices',
+    'summary_conditions'            : 'summary_conditions',
+    'direct_conditions'             : 'direct_conditions',
+    'parameters'                    : 'parameters',
+    'observables'                   : 'observables',
+    'conditions'                    : 'conditions',
+    'posterior_inputs'              : 'posterior_inputs',
+    'likelihood_inputs'             : 'likelihood_inputs'
 }
 
 
