@@ -25,12 +25,12 @@ class DefaultJointConfigurator:
         forward_dict = self.transformer(forward_dict)
         input_dict = self.combiner(forward_dict)
 
-        # Determine float format
+        # Determine and fix float types, if necessary
+
         input_dict['posterior_inputs'] = {k : v.astype(self.default_float_type) if v is not None else v
                         for k, v in input_dict[DEFAULT_KEYS['posterior_inputs']].items() }
         input_dict['likelihood_inputs'] = {k : v.astype(self.default_float_type) if v is not None else v
                         for k, v in input_dict[DEFAULT_KEYS['likelihood_inputs']].items() }
-
         return input_dict
 
 
@@ -53,7 +53,8 @@ class DefaultLikelihoodConfigurator:
         input_dict = self.combiner(forward_dict)
 
         # Convert everything to default type or fail gently
-        input_dict = {k : v.astype(self.default_float_type) for k, v in input_dict.items()}
+        input_dict = {k : v.astype(self.default_float_type) if v is not None else v 
+                      for k, v in input_dict.items()}
         return input_dict
 
 
@@ -76,7 +77,7 @@ class DefaultPosteriorConfigurator:
         input_dict = self.combiner(forward_dict)
 
         # Convert everything to default type or fail gently
-        input_dict = {k : v.astype(self.default_float_type) for k, v in input_dict.items()}
+        input_dict = {k : v.astype(self.default_float_type) if v is not None else v for k, v in input_dict.items()}
         return input_dict
 
 
@@ -107,17 +108,17 @@ class VariableObservationsTransformer:
 
     def __call__(self, forward_dict, copy=True):
         """ Transform integer n_obs to an array of size (batch_size, 1), which can be
-        concatenated along the (summarized data) and passed as a condition for the
-        invertible network.
+        concatenated along the (summarized data) and passed as a direct condition for the
+        invertible inference network.
         """
 
         if copy:
             forward_dict = deepcopy(forward_dict)
 
         # Convert n_obs to vector and transform to sqrt
-        N = forward_dict['sim_non_batchable_context']
-        B = forward_dict['prior_draws'].shape[0]
-        forward_dict['sim_non_batchable_context'] = self.n_obs_to_array(N, B)
+        N = forward_dict[DEFAULT_KEYS['sim_non_batchable_context']]
+        B = forward_dict[DEFAULT_KEYS['prior_draws']].shape[0]
+        forward_dict[DEFAULT_KEYS['sim_non_batchable_context']] = self.n_obs_to_array(N, B)
         return forward_dict
 
 
@@ -126,6 +127,11 @@ class OneHotTransformer:
     """
 
     def __init__(self, n_categories_prior_context=None, n_categories_sim_context=None):
+        """ Creates an instance of a utility one-hot-transofmration class. The user is advised to
+        specify the number of categories for prior and simulator context, otherwise erroneous cases
+        might arise during batch simulations if a batch contains (as per randomness) less categories
+        than actually present.
+        """
 
         self.n_categories_prior_context = n_categories_prior_context
         self.n_categories_sim_context = n_categories_sim_context
@@ -138,17 +144,18 @@ class OneHotTransformer:
 
         if copy:
             forward_dict = deepcopy(forward_dict)
+        
+        # Transform prior batchable context
+        if forward_dict[DEFAULT_KEYS['prior_batchable_context']] is not None:
+            forward_dict[DEFAULT_KEYS['prior_batchable_context']] = to_categorical(
+                    forward_dict[DEFAULT_KEYS['prior_batchable_context']],
+                    self.n_categories_prior_context)
 
-        if forward_dict['prior_batchable_context'] is not None:
-            forward_dict['prior_batchable_context'] = to_categorical(
-                    forward_dict['prior_batchable_context'],
-                    self.n_categories_prior_context
-            )
-        if forward_dict['sim_batchable_context'] is not None:
-            forward_dict['sim_batchable_context'] = to_categorical(
-                    forward_dict['sim_batchable_context'],
-                    self.n_categories_sim_context
-            )
+        # Transform simulator batchable context
+        if forward_dict[DEFAULT_KEYS['sim_batchable_context']] is not None:
+            forward_dict[DEFAULT_KEYS['sim_batchable_context']] = to_categorical(
+                    forward_dict[DEFAULT_KEYS['sim_batchable_context']],
+                    self.n_categories_sim_context)
         return forward_dict
 
 
@@ -160,41 +167,64 @@ class DefaultPosteriorCombiner:
     """
     
     def __call__(self, forward_dict):
-        """ Convert all variables to arrays and combines them for inference into a dictionary with following keys:
-        'parameters' - the pushforward quantities for an inference network (e.g., parameters)
-        'summary_conditions' - the quantities that will first be passed through a summary network
-        'direct_conditions' - the quantities that will be used to condition the inference network directly
-        TODO
+        """ Convert all variables to arrays and combines them for inference into a dictionary with 
+        the following keys, if DEFAULT_KEYS dictionary unchanged: 
+
+        `parameters`         - the latent model parameters over which a condition density is learned
+        `summary_conditions` - the conditioning variables that are first passed through a summary network
+        `direct_conditions`  - the conditioning variables that the directly passed to the inference network
+
+        Parameters
+        ----------
+        forward_dict : dict  
+            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS dictionary unchanged: 
+            # TODO
         """
         
         # Prepare placeholder
         out_dict = {
-            'parameters': None,
-            'summary_conditions': None,
-            'direct_conditions': None
+            DEFAULT_KEYS['parameters']: None,
+            DEFAULT_KEYS['summary_conditions']: None,
+            DEFAULT_KEYS['direct_conditions']: None
         }
 
-        # Assume prior_draws contains all pushforward quantities
-        out_dict['parameters'] = forward_dict['prior_draws']
+
+        # Determine whether simulated or observed data available, throw if None present
+        if forward_dict.get(DEFAULT_KEYS['sim_data']) is None and \
+           forward_dict.get(DEFAULT_KEYS['obs_data']) is None:
+
+           raise ConfigurationError(f"Either {DEFAULT_KEYS['sim_data']} or {DEFAULT_KEYS['obs_data']}" + 
+                                    " should be present as keys in the forward_dict.")
+
+        # If only simulated or observed data present, all good
+        elif forward_dict.get(DEFAULT_KEYS['sim_data']) is not None:
+            data = forward_dict.get(DEFAULT_KEYS['sim_data'])
+        elif forward_dict.get(DEFAULT_KEYS['obs_data']) is not None:
+            data = forward_dict.get(DEFAULT_KEYS['obs_data'])
         
-        # Handle data
+        # Else if neither 'sim_data' nor 'obs_data' present, throw again
+        else:
+            raise ConfigurationError(f"Either {DEFAULT_KEYS['sim_data']} or {DEFAULT_KEYS['obs_data']}" + 
+                                    " should be present as keys in the forward_dict.")
+
+        # Handle simulated or observed data or throw if the data could not be converted to an array 
         try:
-            if type(forward_dict['sim_data']) is not np.ndarray:
-                summary_conditions = np.array(forward_dict['sim_data'])
+            if type(data) is not np.ndarray:
+                summary_conditions = np.array(data)
             else:
-                summary_conditions = forward_dict['sim_data']
+                summary_conditions = data
         except Exception as _:
             raise ConfigurationError("Could not convert data to array...")
         
-        # Handle prior batchable context
-        if forward_dict['prior_batchable_context'] is not None:
+        # Handle prior batchable context or throw if error encountered
+        if forward_dict.get(DEFAULT_KEYS['prior_batchable_context']) is not None:
             try:
-                if type(forward_dict['prior_batchable_context']) is not np.ndarray:
-                    pbc_as_array = np.array(forward_dict['prior_batchable_context'])
+                if type(forward_dict[DEFAULT_KEYS['prior_batchable_context']]) is not np.ndarray:
+                    pbc_as_array = np.array(forward_dict[DEFAULT_KEYS['prior_batchable_context']])
                 else:
-                    pbc_as_array = forward_dict['prior_batchable_context']
+                    pbc_as_array = forward_dict[DEFAULT_KEYS['prior_batchable_context']]
             except Exception as _:
-                raise ConfigurationError("Could not convert prior batchable context to array")
+                raise ConfigurationError("Could not convert prior batchable context to array!")
                 
             try:
                 summary_conditions = np.concatenate([summary_conditions, pbc_as_array], axis=-1)
@@ -202,59 +232,63 @@ class DefaultPosteriorCombiner:
                 raise ConfigurationError(f"Could not concatenate data and prior batchable context. Shape mismatch: " +
                                           "data - {summary_conditions.shape}, prior_batchable_context - {pbc_as_array.shape}.")
 
-        # Handle simulation batchable context
-        if forward_dict['sim_batchable_context'] is not None:
+        # Handle simulation batchable context, or throw if error encountered
+        if forward_dict.get(DEFAULT_KEYS['sim_batchable_context']) is not None:
             try:
-                if type(forward_dict['sim_batchable_context']) is not np.ndarray:
-                    sbc_as_array = np.array(forward_dict['sim_batchable_context'])
+                if type(forward_dict[DEFAULT_KEYS['sim_batchable_context']]) is not np.ndarray:
+                    sbc_as_array = np.array(forward_dict[DEFAULT_KEYS['sim_batchable_context']])
                 else:
-                    sbc_as_array = forward_dict['sim_batchable_context']
+                    sbc_as_array = forward_dict[DEFAULT_KEYS['sim_batchable_context']]
             except Exception as _:
-                raise ConfigurationError("Could not convert simulation batchable context to array")
+                raise ConfigurationError("Could not convert simulation batchable context to array!")
                 
             try:
                 summary_conditions = np.concatenate([summary_conditions, sbc_as_array], axis=-1)
             except Exception as _:
-                raise ConfigurationError(f"Could not concatenate data (+optional prior context) and simulation batchable context. Shape mismatch: \
-                            data - {summary_conditions.shape}, prior_batchable_context - {sbc_as_array.shape}")
-        out_dict['summary_conditions'] = summary_conditions
-        
+                raise ConfigurationError(f"Could not concatenate data (+optional prior context) and" +
+                                         f" simulation batchable context. Shape mismatch:" + 
+                                         f" data - {summary_conditions.shape}, prior_batchable_context - {sbc_as_array.shape}")
+
         # Handle non-batchable contexts
-        if forward_dict['prior_non_batchable_context'] is None and forward_dict['sim_non_batchable_context'] is None:
+        if forward_dict.get(DEFAULT_KEYS['prior_non_batchable_context']) is None and \
+           forward_dict.get(DEFAULT_KEYS['sim_non_batchable_context']) is None:
             return out_dict
 
-        # Prior non-batchable context
-        conditions = None
-        if forward_dict['prior_non_batchable_context'] is not None:
+        # Handle prior non-batchable context
+        direct_conditions = None
+        if forward_dict.get(DEFAULT_KEYS['prior_non_batchable_context']) is not None:
             try:
-                if type(forward_dict['prior_non_batchable_context']) is not np.ndarray:
-                    pnbc_conditions = np.array(forward_dict['prior_non_batchable_context'])
+                if type(forward_dict[DEFAULT_KEYS['prior_non_batchable_context']]) is not np.ndarray:
+                    pnbc_conditions = np.array(forward_dict[DEFAULT_KEYS['prior_non_batchable_context']])
                 else:
-                    pnbc_conditions = forward_dict['prior_non_batchable_context']
+                    pnbc_conditions = forward_dict[DEFAULT_KEYS['prior_non_batchable_context']]
             except Exception as _:
-                raise ConfigurationError("Could not convert prior non_batchable_context to array")
-            conditions = pnbc_conditions
+                raise ConfigurationError("Could not convert prior non_batchable_context to an array!")
+            direct_conditions = pnbc_conditions
 
-        # Simulation non-batchable context
-        if forward_dict['sim_non_batchable_context'] is not None:
+        # Handle simulation non-batchable context
+        if forward_dict.get(DEFAULT_KEYS['sim_non_batchable_context']) is not None:
             try:
-                if type(forward_dict['sim_non_batchable_context']) is not np.ndarray:
-                    snbc_conditions = np.array(forward_dict['sim_non_batchable_context'])
+                if type(forward_dict[DEFAULT_KEYS['sim_non_batchable_context']]) is not np.ndarray:
+                    snbc_conditions = np.array(forward_dict[DEFAULT_KEYS['sim_non_batchable_context']])
                 else:
-                    snbc_conditions = forward_dict['sim_non_batchable_context']
+                    snbc_conditions = forward_dict[DEFAULT_KEYS['sim_non_batchable_context']]
             except Exception as _:
-                raise ConfigurationError("Could not convert sim_non_batchable_context to array")
+                raise ConfigurationError("Could not convert sim_non_batchable_context to array!")
             try:
-                if conditions is not None:
-                    conditions = np.concatenate([conditions, snbc_conditions], axis=-1)
+                if direct_conditions is not None:
+                    direct_conditions = np.concatenate([direct_conditions, snbc_conditions], axis=-1)
                 else:
-                    conditions = snbc_conditions
+                    direct_conditions = snbc_conditions
             except Exception as _:
                 raise ConfigurationError(f"Could not concatenate prior non-batchable context and  \
                             simulation non-batchable context. Shape mismatch: \
-                                - {conditions.shape} vs. {snbc_conditions.shape}")
+                                - {direct_conditions.shape} vs. {snbc_conditions.shape}")
         
-        out_dict['direct_conditions'] = conditions
+        # Populate dictionaries
+        out_dict[DEFAULT_KEYS['parameters']] = forward_dict[DEFAULT_KEYS['prior_draws']]
+        out_dict[DEFAULT_KEYS['summary_conditions']] = summary_conditions
+        out_dict[DEFAULT_KEYS['direct_conditions']] = direct_conditions
         return out_dict
 
 
@@ -263,13 +297,31 @@ class DefaultLikelihoodCombiner:
 
         # Prepare placeholder
         out_dict = {
-            'data': None,
-            'conditions': None
+            DEFAULT_KEYS['observables']: None,
+            DEFAULT_KEYS['conditions']: None
         }
 
+        # Determine whether simulated or observed data available, throw if None present
+        if forward_dict.get(DEFAULT_KEYS['sim_data']) is None and \
+           forward_dict.get(DEFAULT_KEYS['obs_data']) is None:
+
+           raise ConfigurationError(f"Either {DEFAULT_KEYS['sim_data']} or {DEFAULT_KEYS['obs_data']}" + 
+                                    " should be present as keys in the forward_dict.")
+
+        # If only simulated or observed data present, all good
+        elif forward_dict.get(DEFAULT_KEYS['sim_data']) is not None:
+            data = forward_dict.get(DEFAULT_KEYS['sim_data'])
+        elif forward_dict.get(DEFAULT_KEYS['obs_data']) is not None:
+            data = forward_dict.get(DEFAULT_KEYS['obs_data'])
+        
+        # Else if neither 'sim_data' nor 'obs_data' present, throw again
+        else:
+            raise ConfigurationError(f"Either {DEFAULT_KEYS['sim_data']} or {DEFAULT_KEYS['obs_data']}" + 
+                                    " should be present as keys in the forward_dict.")
+
         # Extract targets and conditions
-        out_dict['data'] = forward_dict['sim_data']
-        out_dict['conditions'] = forward_dict['prior_draws']
+        out_dict[DEFAULT_KEYS['observables']] = data
+        out_dict[DEFAULT_KEYS['conditions']] = forward_dict[DEFAULT_KEYS['prior_draws']]
 
         return out_dict
 
@@ -289,14 +341,15 @@ class DefaultJointCombiner:
 
     def __call__(self, forward_dict):
 
-        # Prepare placeholder
+        # Prepare placeholder for output dictionary
         out_dict = {
-            'likelihood_input': None,
-            'posterior_input': None
+            DEFAULT_KEYS['likelihood_inputs']: None,
+            DEFAULT_KEYS['posterior_inputs']: None
         }
 
-        out_dict['posterior_input'] = self.posterior_combiner(forward_dict)
-        out_dict['likelihood_input'] = self.likelihood_combiner(forward_dict)
+        # Populate output dictionary
+        out_dict[DEFAULT_KEYS['posterior_inputs']] = self.posterior_combiner(forward_dict)
+        out_dict[DEFAULT_KEYS['likelihood_inputs']] = self.likelihood_combiner(forward_dict)
 
         return out_dict
 

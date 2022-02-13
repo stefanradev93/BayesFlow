@@ -404,7 +404,7 @@ class JointAmortizer(tf.keras.Model):
             The generative neural likelihood approximator.
 
         Important
-        ---------- 
+        ---------
         #TODO
         """
 
