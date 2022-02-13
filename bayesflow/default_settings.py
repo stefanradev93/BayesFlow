@@ -104,8 +104,8 @@ DEFAULT_KEYS = {
     'non_batchable_context'         : 'non_batchable_context',
     'prior_batchable_context'       : 'prior_batchable_context',
     'prior_non_batchable_context'   : 'prior_non_batchable_context',
-    'sim_batchable_context'         : 'prior_batchable_context',
-    'sim_non_batchable_context'     : 'prior_non_batchable_context',
+    'sim_batchable_context'         : 'sim_batchable_context',
+    'sim_non_batchable_context'     : 'sim_non_batchable_context',
     'true_model_indices'            : 'true_model_indices'
 }
 

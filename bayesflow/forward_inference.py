@@ -505,8 +505,12 @@ class MultiGenerativeModel:
         
 
     def __call__(self, batch_size, **kwargs):
-
-        models_list = []
+        
+        # Prepare placeholders
+        out_dict = {
+            DEFAULT_KEYS['model_outputs']: [],
+            DEFAULT_KEYS['model_indices'] : []
+        }
         
         # Sample model indices
         model_indices = self.model_prior(batch_size)
@@ -518,8 +522,8 @@ class MultiGenerativeModel:
         # Iterate over each unique model index and create all data sets for that model index
         for m_idx, n in zip(m_idx, n):
 
-            # sample batch of same models
             model_out = self.generative_models[m_idx](n, **kwargs)
-            models_list.append(model_out)
+            out_dict[DEFAULT_KEYS['model_outputs']].append(model_out)
+            out_dict[DEFAULT_KEYS['model_indices']].append(m_idx)
         
-        #TODO
+        return out_dict
