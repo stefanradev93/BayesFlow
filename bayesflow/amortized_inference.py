@@ -606,7 +606,7 @@ class AmortizedModelComparer(tf.keras.Model):
         Amortized bayesian model comparison with evidential deep learning. 
         IEEE Transactions on Neural Networks and Learning Systems.
 
-        The regularization weight will be set to 0.01
+        The regularization weight of the loss will be set to 0.01
         """
 
         self.evidential_net = evidential_net

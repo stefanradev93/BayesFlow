@@ -17,6 +17,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
+from bayesflow.computational_utilities import expected_calibration_error
+
+
 def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None, 
              num_bins=10, binomial_interval=0.95, label_fontsize=14, title_fontsize=16):
 
@@ -48,6 +51,10 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
         The font size of the y-label text
     title_fontsize    : int, optional, default: 16
         The font size of the title text
+
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
     """
     
     # Determine n params and param names if None given
@@ -71,8 +78,11 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
     N = int(prior_samples.shape[0])
     endpoints = binom.interval(binomial_interval, N, 1 / (num_bins+1))
 
-    # Plot histograms
-    ax = axarr.flat
+    # Plot marginal histograms in a loop
+    if n_row > 1:
+        ax = axarr.flat
+    else:
+        ax = axarr
     for j in range(len(param_names)):
 
         ax[j].axhspan(endpoints[0], endpoints[1], facecolor='gray', alpha=0.3)
@@ -85,3 +95,60 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
         ax[j].get_yaxis().set_ticks([])
         ax[j].set_ylabel('')
     f.tight_layout()
+    return f
+
+def plot_calibration_curves(m_true, m_pred, model_names=None, n_bins=10, font_size=12, fig_size=(12, 4)):
+    """Plots the calibration curves for a model comparison problem.
+
+    Parameters
+    ----------
+    TODO
+    """
+
+    n_models = m_pred.shape[-1]
+    if model_names is None:
+        model_names = [f'M_{m}' for m in range(1, n_models+1)]
+
+    # Determine n_subplots dynamically
+    n_row = int(np.ceil(n_models / 6))
+    n_col = int(np.ceil(n_models / n_row))
+
+    cal_errs, cal_probs = expected_calibration_error(m_true, m_pred, n_bins)
+
+    # Initialize figure
+    f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
+    if n_row > 1:
+        ax = axarr.flat
+
+    # Plot marginal calibration curves in a loop
+    if n_row > 1:
+        ax = axarr.flat
+    else:
+        ax = axarr
+    for j in range(n_models):
+
+        # Plot calibration curve
+        ax[j].plot(cal_probs[j][0], cal_probs[j][1])
+
+        # Plot AB line
+        ax[j].plot(ax[j].get_xlim(), ax[j].get_xlim(), '--', color='black')
+
+        # Tweak plot
+        ax[j].spines['right'].set_visible(False)
+        ax[j].spines['top'].set_visible(False)
+        ax[j].set_xlim([0, 1])
+        ax[j].set_ylim([0, 1])
+        ax[j].set_xlabel('Accuracy')
+        ax[j].set_ylabel('Confidence')
+        ax[j].set_xticks([0.2, 0.4, 0.6, 0.8, 1.0])
+        ax[j].set_yticks([0.2, 0.4, 0.6, 0.8, 1.0])
+        ax[j].text(0.1, 0.9, r'$\widehat{{ECE}}$ = {0:.3f}'.format(cal_errs[j]),
+                        horizontalalignment='left',
+                        verticalalignment='center',
+                        transform=ax[j].transAxes,
+                        size=font_size)
+
+        # Set title
+        ax.set_title(model_names[j])
+    f.tight_layout()
+    return f
