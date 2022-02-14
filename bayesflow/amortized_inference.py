@@ -429,7 +429,7 @@ class JointAmortizer(tf.keras.Model):
         self.amortized_likelihood = amortized_likelihood
 
     def call(self, input_dict, **kwargs):
-        """ Performs a forward pass through both networks.
+        """ Performs a forward pass through both amortizers.
 
         Parameters
         ----------
@@ -613,20 +613,115 @@ class AmortizedModelComparer(tf.keras.Model):
         self.summary_net = summary_net
         self.loss = self._determine_loss(loss_fun)
 
-    def __call__(self):
-        pass
+    def __call__(self, input_dict, return_summary=False, **kwargs):
+        """ Performs a forward pass through both networks.
+
+        Parameters
+        ----------
+        input_dict     : dict 
+            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged
+            `summary_conditions` - the conditioning variables that are first passed through a summary network
+            `direct_conditions`  - the conditioning variables that the directly passed to the evidential network
+        return_summary : bool, optional, default: False
+            Indicates whether the summary network outputs are returned along the estimated evidences.
+
+        Returns
+        -------
+        #TODO
+        """
+
+        summary_out, full_cond = self._compute_summary_condition(
+            input_dict.get(DEFAULT_KEYS['summary_conditions']), 
+            input_dict.get(DEFAULT_KEYS['direct_conditions']),
+            **kwargs
+        )
+
+        net_out = self.evidence_net(full_cond, **kwargs)
+
+        if not return_summary:
+            return net_out
+        return net_out, summary_out
 
     def compute_loss(self, input_dict, **kwargs):
         pass
 
-    def sample(self, input_dict, to_numpy=True, **kwars):
-        pass
+    def sample(self, input_dict, to_numpy=True, **kwargs):
+        """Samples posterior model probabilities from the higher order Dirichlet density.
+
+        Parameters
+        ----------
+        input_dict : dict
+            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged
+            `summary_conditions` - the conditioning variables that are first passed through a summary network
+            `direct_conditions`  - the conditioning variables that the directly passed to the evidential network
+        n_samples  : int
+            Number of samples to obtain from the approximate posterior
+        to_numpy   : bool, default: True
+            Flag indicating whether to return the samples as a np.array or a tf.Tensor
+            
+        Returns
+        -------
+        pm_samples : tf.Tensor or np.array
+            The posterior draws from the Dirichlet distribution, shape (n_samples, n_batch, n_models)
+        """
+
+        _, full_cond = self._compute_summary_condition(
+            input_dict.get(DEFAULT_KEYS['summary_conditions']), 
+            input_dict.get(DEFAULT_KEYS['direct_conditions']),
+            **kwargs
+        )
+
+        return self.evidence_net.sample(full_cond, to_numpy, **kwargs)
 
     def evidence(self, input_dict, to_numpy=True, **kwargs):
-        pass
+        """TODO"""
+
+        _, full_cond = self._compute_summary_condition(
+            input_dict.get(DEFAULT_KEYS['summary_conditions']), 
+            input_dict.get(DEFAULT_KEYS['direct_conditions']),
+            **kwargs
+        )
+
+        alphas = self(full_cond, return_summary=False, **kwargs)
+        if to_numpy:
+            return alphas.numpy()
+        return alphas
 
     def uncertainty_score(self, input_dict, to_numpy=True, **kwargs):
-        pass
+        """TODO"""
+
+        _, full_cond = self._compute_summary_condition(
+            input_dict.get(DEFAULT_KEYS['summary_conditions']), 
+            input_dict.get(DEFAULT_KEYS['direct_conditions']),
+            **kwargs
+        )
+
+        alphas = self(full_cond, return_summary=False, **kwargs)
+        u = tf.reduce_sum(alphas, axis=-1) / self.evidential_net.n_models
+        if to_numpy:
+            return u.numpy()
+        return u
+
+    def _compute_summary_condition(self, summary_conditions, direct_conditions, **kwargs):
+        """ Determines how to concatenate the provided conditions.
+        """
+
+        # Compute learnable summaries, if given
+        if self.summary_net is not None:
+            sum_condition = self.summary_net(summary_conditions, **kwargs)
+        else:
+            sum_condition = None
+
+        # Concatenate learnable summaries with fixed summaries, this 
+        if sum_condition is not None and direct_conditions is not None:
+            full_cond = tf.concat([sum_condition, direct_conditions], axis=-1)
+        elif sum_condition is not None:
+            full_cond = sum_condition
+        elif direct_conditions is not None:
+            full_cond = direct_conditions
+        else:
+            raise SummaryStatsError("Could not concatenarte or determine conditioning inputs...")
+        return sum_condition, full_cond
 
     def _determine_loss(self, loss_fun):
         pass
