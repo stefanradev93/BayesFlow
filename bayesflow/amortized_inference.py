@@ -495,6 +495,20 @@ class JointAmortizer(tf.keras.Model):
         """
 
         return self.amortized_posterior.log_posterior(input_dict, to_numpy=to_numpy, **kwargs)
+
+    def log_marginal_likelihood(self, input_dict, to_numpy=True, **kwargs):
+        """ Computes the approximate log marginal likelihood for some observed or simulated data.
+        #TODO
+        """
+
+        pass
+
+    def elpd(self, input_dict, to_numpy=True, **kwargs):
+        """ Computes the expected log predictive density (ELPD) of some observed or simulated data.
+        #TODO
+        """
+
+        pass
    
     def sample_data(self, input_dict, n_samples, to_numpy=True, **kwargs):
         """ Generates `n_samples` random draws from the surrogate likelihood given input conditions.

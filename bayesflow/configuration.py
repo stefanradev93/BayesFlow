@@ -1,3 +1,18 @@
+# Copyright 2022 Bayesflow. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Callbacks: utilities called at certain points during model training."""
+
 import numpy as np
 from copy import deepcopy
 
@@ -188,13 +203,16 @@ class DefaultPosteriorCombiner:
             DEFAULT_KEYS['direct_conditions']: None
         }
 
+        # Pushforward target are the parameters
+        out_dict[DEFAULT_KEYS['parameters']] = forward_dict[DEFAULT_KEYS['prior_draws']]
+
 
         # Determine whether simulated or observed data available, throw if None present
         if forward_dict.get(DEFAULT_KEYS['sim_data']) is None and \
            forward_dict.get(DEFAULT_KEYS['obs_data']) is None:
 
            raise ConfigurationError(f"Either {DEFAULT_KEYS['sim_data']} or {DEFAULT_KEYS['obs_data']}" + 
-                                    " should be present as keys in the forward_dict.")
+                                    " should be present as keys in the forward_dict, but not both!")
 
         # If only simulated or observed data present, all good
         elif forward_dict.get(DEFAULT_KEYS['sim_data']) is not None:
@@ -214,7 +232,7 @@ class DefaultPosteriorCombiner:
             else:
                 summary_conditions = data
         except Exception as _:
-            raise ConfigurationError("Could not convert data to array...")
+            raise ConfigurationError("Could not convert input data to array...")
         
         # Handle prior batchable context or throw if error encountered
         if forward_dict.get(DEFAULT_KEYS['prior_batchable_context']) is not None:
@@ -224,7 +242,7 @@ class DefaultPosteriorCombiner:
                 else:
                     pbc_as_array = forward_dict[DEFAULT_KEYS['prior_batchable_context']]
             except Exception as _:
-                raise ConfigurationError("Could not convert prior batchable context to array!")
+                raise ConfigurationError("Could not convert prior batchable context to array.")
                 
             try:
                 summary_conditions = np.concatenate([summary_conditions, pbc_as_array], axis=-1)
@@ -248,6 +266,9 @@ class DefaultPosteriorCombiner:
                 raise ConfigurationError(f"Could not concatenate data (+optional prior context) and" +
                                          f" simulation batchable context. Shape mismatch:" + 
                                          f" data - {summary_conditions.shape}, prior_batchable_context - {sbc_as_array.shape}")
+        
+        # Add summary conditions to output dict
+        out_dict[DEFAULT_KEYS['summary_conditions']] = summary_conditions
 
         # Handle non-batchable contexts
         if forward_dict.get(DEFAULT_KEYS['prior_non_batchable_context']) is None and \
@@ -284,11 +305,8 @@ class DefaultPosteriorCombiner:
                 raise ConfigurationError(f"Could not concatenate prior non-batchable context and  \
                             simulation non-batchable context. Shape mismatch: \
                                 - {direct_conditions.shape} vs. {snbc_conditions.shape}")
-        
-        # Populate dictionaries
-        out_dict[DEFAULT_KEYS['parameters']] = forward_dict[DEFAULT_KEYS['prior_draws']]
-        out_dict[DEFAULT_KEYS['summary_conditions']] = summary_conditions
         out_dict[DEFAULT_KEYS['direct_conditions']] = direct_conditions
+        
         return out_dict
 
 
