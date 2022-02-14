@@ -1,3 +1,17 @@
+# Copyright 2022 The BayesFlow Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import numpy as np
 from scipy.stats import multivariate_t, multivariate_normal
 
@@ -862,3 +876,83 @@ class InvertibleNetwork(tf.keras.Model):
         return log_pdf
 
 
+class EvidentialNetwork(tf.keras.Model):
+    """ Implements a network whose outputs are the concentration parameters of a Dirichlet density."""
+
+    def __init__(self, meta={}):
+        """Creates a instance of an evidential network.
+        Parameters
+        ----------
+        meta  : dict
+            A list of dictionaries, where each dictionary holds parameter-value pairs
+            for a single :class:`tf.keras.Dense` layer
+        """
+
+        super(EvidentialNetwork, self).__init__()
+
+        # Create settings dictionary
+        meta = build_meta_dict(user_dict=meta,
+                               default_setting=default_settings.DEFAULT_SETTING_EVIDENTIAL_NET)
+
+        # A network to increase representation power
+        self.dense = tf.keras.Sequential([
+            tf.keras.layers.Dense(**meta['dense_args'])
+            for _ in range(meta['n_dense'])
+        ])
+
+        # The layer to output model evidences
+        self.evidence_layer = tf.keras.layers.Dense(
+            meta['n_models'], activation=meta['output_activation'], 
+            **{k: v for k, v in meta['dense_args'].items() if k != 'units' and k != 'activation'})
+
+        self.n_models = meta['n_models']
+
+    def call(self, condition, **kwargs):
+        """Computes evidences for model comparison given a batch of data and optional concatenated context, 
+        typically passed through a summayr network.
+
+        Parameters
+        ----------
+        condition  : tf.Tensor of shape (batch_size, ...)
+            The input variables used for determining p(model | condition)
+
+        Returns
+        -------
+        alpha      : tf.Tensor of shape (batch_size, n_models) -- the model evidences
+        """
+
+        rep = self.dense(condition, **kwargs)
+        evidence = self.evidence_layer(rep, **kwargs)
+        alpha = evidence + 1
+
+        return alpha
+
+    def sample(self, condition, n_samples, to_numpy=True, **kwargs):
+        """Samples posterior model probabilities from the higher order Dirichlet density.
+
+        Parameters
+        ----------
+        condition  : tf.Tensor
+            The summary of the observed (or simulated) data, shape (n_data_sets, ...)
+        n_samples  : int
+            Number of samples to obtain from the approximate posterior
+        to_numpy   : bool, default: True
+            Flag indicating whether to return the samples as a np.array or a tf.Tensor
+            
+        Returns
+        -------
+        pm_samples : tf.Tensor or np.array
+            The posterior draws from the Dirichlet distribution, shape (n_samples, n_batch, n_models)
+        """
+
+        # Compute evidential values
+        alpha = self(condition, **kwargs)
+        n_datasets = alpha.shape[0]
+
+        # Sample for each dataset
+        pm_samples = np.stack([np.random.dirichlet(alpha[n, :], size=n_samples) for n in range(n_datasets)], axis=1)
+
+        # Convert to tensor, if specified
+        if not to_numpy:
+            pm_samples = tf.convert_to_tensor(pm_samples, dtype=tf.float32)
+        return pm_samples

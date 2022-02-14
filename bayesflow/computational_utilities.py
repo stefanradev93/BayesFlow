@@ -1,3 +1,17 @@
+# Copyright 2022 The BayesFlow Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import tensorflow as tf
 import numpy as np
 from sklearn.calibration import calibration_curve
@@ -11,14 +25,14 @@ def gaussian_kernel_matrix(x, y, sigmas=None):
 
     Parameters
     ----------
-    x :  tf.Tensor of shape (M, num_features)
-    y :  tf.Tensor of shape (N, num_features)
-    sigmas : list(float) or None (use default)
-        List which denotes the widths of each of the gaussians in the kernel.
+    x      :  tf.Tensor of shape (M, dimensions)
+    y      :  tf.Tensor of shape (N, dimensions)
+    sigmas :  list(float), optional, default: None (use default)
+        List which denotes the widths of each of the Gaussians in the kernel.
 
     Returns
     -------
-    kernel: tf.Tensor
+    kernel : tf.Tensor
         RBF kernel of shape [num_samples{x}, num_samples{y}]
     """
 
@@ -81,7 +95,7 @@ def mmd_kernel_unbiased(x, y, kernel=gaussian_kernel_matrix):
 
 
 def expected_calibration_error(m_true, m_pred, n_bins=15):
-    """ Estimates the calibration error of a model comparison neural network.
+    """ Estimates the calibration error of a model comparison network.
 
     Important
     ---------
@@ -95,6 +109,10 @@ def expected_calibration_error(m_true, m_pred, n_bins=15):
         Predicted model indices
     n_bins: int, default: 15
         Number of bins for plot
+
+    Returns
+    -------
+    #TODO
     """
 
     # Convert tf.Tensors to numpy, if passed

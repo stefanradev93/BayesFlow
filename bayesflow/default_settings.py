@@ -1,3 +1,17 @@
+# Copyright 2022 The BayesFlow Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from abc import ABC, abstractmethod
 
 
@@ -84,12 +98,20 @@ DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
     mandatory_fields=["n_params"]
 )
 
+DEFAULT_SETTING_EVIDENTIAL_NET = MetaDictSetting(
+    meta_dict={
+        'dense_args': dict(units=128, kernel_initializer='lecun_normal', activation='selu'),
+        'n_dense': 3,
+        'output_activation': 'softplus'
+    },
+    mandatory_fields=["n_models"]
+)
 
 
 DEFAULT_SETTING_TAIL_NET = MetaDictSetting(
     meta_dict={
-            'dense_args': dict(units=128, kernel_initializer='lecun_normal', activation='selu'),
-            'n_dense': 3
+        'dense_args': dict(units=128, kernel_initializer='lecun_normal', activation='selu'),
+        'n_dense': 3
     },
     mandatory_fields=[]
 )
