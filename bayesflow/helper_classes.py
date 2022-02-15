@@ -30,7 +30,7 @@ class SimulatedDataset:
         slices, keys_used, keys_none, n_sim = self._determine_slices(forward_dict)
         self.data = tf.data.Dataset\
                 .from_tensor_slices(tuple(slices))\
-                .shuffle(self.n_sim)\
+                .shuffle(n_sim)\
                 .batch(batch_size)
         self.keys_used = keys_used
         self.keys_none = keys_none

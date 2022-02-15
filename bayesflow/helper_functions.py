@@ -87,7 +87,10 @@ def merge_left_into_right(left_dict, right_dict):
     """
     for k, v in left_dict.items():
         if isinstance(v, dict):
-            right_dict[k] = merge_left_into_right(v, right_dict[k])
+            if right_dict.get(k) is not None:
+                right_dict[k] = merge_left_into_right(v, right_dict.get(k))
+            else:
+                right_dict[k] = v
         else:
             right_dict[k] = v
     return right_dict
