@@ -72,22 +72,21 @@ class ReduceLROnPlateau:
 
     https://github.com/keras-team/keras/blob/v2.8.0/keras/callbacks.py#L2641-L2763
 
-    Parameters:
-    monitor: quantity to be monitored.
-    factor: factor by which the learning rate will be reduced.
+    Parameters
+    ----------
+
+    factor   : factor by which the learning rate will be reduced.
         `new_lr = lr * factor`.
-    patience: number of epochs with no improvement after which learning rate
+    patience : number of epochs with no improvement after which learning rate
         will be reduced.
-    verbose: int. 0: quiet, 1: update messages.
+    verbose  : int. 0: quiet, 1: update messages.
     min_delta: threshold for measuring the new optimum, to only focus on
         significant changes.
-    cooldown: number of epochs to wait before resuming normal operation after
-        lr has been reduced.
-    min_lr: lower bound on the learning rate.
+    min_lr   : lower bound on the learning rate.
 
     """
 
-    def __init__(self, factor=0.1, patience=3, min_delta=1e-1, cooldown=0, min_lr=0,):
+    def __init__(self, factor=0.1, patience=3, min_delta=0.1, min_lr=0,):
 
         if factor >= 1.0:
             raise ValueError(f'ReduceLROnPlateau does not support a factor >= 1.0. Got {factor}')
@@ -96,7 +95,6 @@ class ReduceLROnPlateau:
         self.min_lr = min_lr
         self.min_delta = min_delta
         self.patience = patience
-        self.cooldown = cooldown
         self.wait = 0
         self.best = 0
         self._reset()

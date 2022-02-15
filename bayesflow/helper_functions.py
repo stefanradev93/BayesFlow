@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import tensorflow as tf
 
 from bayesflow import default_settings
@@ -117,8 +118,8 @@ def build_meta_dict(user_dict: dict, default_setting: default_settings.MetaDictS
 
     """
 
-    default_dict = default_setting.meta_dict
-    mandatory_fields = default_setting.mandatory_fields
+    default_dict = copy.deepcopy(default_setting.meta_dict)
+    mandatory_fields = copy.deepcopy(default_setting.mandatory_fields)
 
     # Check if all mandatory fields are provided by the user
     if not all([field in user_dict.keys() for field in mandatory_fields]):

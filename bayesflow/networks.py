@@ -21,7 +21,7 @@ from tensorflow.keras.models import Sequential
 
 from bayesflow import default_settings
 from bayesflow.helper_functions import build_meta_dict
-from bayesflow.exceptions import ConfigurationError
+from bayesflow.exceptions import ConfigurationError, InferenceError
 
 
 class TailNetwork(tf.keras.Model):
@@ -141,6 +141,7 @@ class InvariantNetwork(tf.keras.Model):
         
         self.equiv_seq = Sequential([EquivariantModule(meta) for _ in range(meta['n_equiv'])])
         self.inv = InvariantModule(meta)
+        self.out_layer = Dense(meta['summary_dim'], activation='linear')
     
     def call(self, x):
         """ Performs the forward pass of a learnable deep invariant transformation consisting of
@@ -161,7 +162,7 @@ class InvariantNetwork(tf.keras.Model):
         out_equiv = self.equiv_seq(x)
 
         # Pass through final invariant layer 
-        out = self.inv(out_equiv)
+        out = self.out_layer(self.inv(out_equiv))
 
         return out
     
@@ -425,7 +426,10 @@ class AttentiveCouplingNet(tf.keras.Model):
         condition : tf.Tensor
           The conditioning vector of interest, shape (batch_size, ...)
         """
-        
+
+        if len(target.shape) < 3:
+            raise InferenceError(f'target should be at least 3-dimensional for an attentive flow, but has shape {target.shape}')
+
         # Repeat parameters to match x
         T = int(target.shape[1])
         B = int(target.shape[0])
@@ -760,7 +764,7 @@ class InvertibleNetwork(tf.keras.Model):
         Parameters
         ----------
         condition : tf.Tensor
-            The conditioning data set(s) of interest, shape (n_datasets, summary_dim)
+            The conditioning data set(s) of interest, shape (n_data_sets, summary_dim)
         n_samples : int
             Number of samples to obtain from the approximate posterior
         Returns
@@ -769,36 +773,25 @@ class InvertibleNetwork(tf.keras.Model):
             Parameter samples, shape (n_samples, n_datasets, n_params)
         """
 
-        # In case x is a single instance
-        if int(condition.shape[0]) == 1:
-            # Sample from a unit Gaussian
-            if self.tail_network is None:
-                z_samples = tf.random.normal(shape=(n_samples, self.z_dim))
-            # Sample from a t-distro
-            else:
-                df = self.tail_network(condition, **kwargs).numpy().item()
-                loc = np.zeros(self.z_dim)
-                shape = np.eye(self.z_dim)
-                z_samples = multivariate_t(df=df, loc=loc, shape=shape).rvs(n_samples)
-                
-            target_samples = self.inverse(z_samples, tf.tile(condition, [n_samples, 1]), **kwargs)
-            
-        # In case of a batch input, send a 3D tensor through the invertible chain and use tensordot
-        # Warning: This tensor could get pretty big if sampling a lot of values for a lot of batch instances!
+        # Sample from a unit Gaussian
+        if self.tail_network is None:
+            z_samples = tf.random.normal(shape=(int(condition.shape[0]), n_samples, self.z_dim))
+        # Sample from a t-distro    
         else:
-            # Sample from a unit Gaussian
-            if self.tail_network is None:
-                z_samples = tf.random.normal(shape=(int(condition.shape[0]), n_samples, self.z_dim))
-            # Sample from a t-distro    
-            else:
-                dfs = self.tail_network(condition, **kwargs).numpy().squeeze()
-                loc = np.zeros(self.z_dim)
-                shape = np.eye(self.z_dim)
-                z_samples = tf.stack(
-                    [multivariate_t(df=df, loc=loc, shape=shape).rvs(n_samples) 
-                    for df in dfs]
-                )
-            target_samples = self.inverse(z_samples, condition, **kwargs)
+            dfs = self.tail_network(condition, **kwargs).numpy().squeeze()
+            loc = np.zeros(self.z_dim)
+            shape = np.eye(self.z_dim)
+            z_samples = tf.stack(
+                [multivariate_t(df=df, loc=loc, shape=shape).rvs(n_samples) 
+                for df in dfs]
+            )
+        
+        # Inverse pass
+        target_samples = self.inverse(z_samples, condition, **kwargs)
+
+        # Remove extra batch-dimension, if single instance
+        if int(target_samples.shape[0]) == 1:
+            target_samples = target_samples[0]
         return target_samples
 
     def log_density(self, targets, condition, **kwargs):

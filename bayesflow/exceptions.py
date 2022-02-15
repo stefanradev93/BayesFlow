@@ -18,6 +18,11 @@ class ConfigurationError(Exception):
     pass
 
 
+class InferenceError(Exception):
+    """Class for error in forward/inverse pass of a neural components."""
+    pass
+
+
 class OperationNotSupportedError(Exception):
     """
     Class for error that occurs when an operation is demanded but not supported,

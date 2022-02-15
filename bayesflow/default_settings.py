@@ -45,13 +45,14 @@ class MetaDictSetting(Setting):
 
 DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
     meta_dict={
-        'n_dense_s1': 2,
-        'n_dense_s2': 2,
-        'n_dense_s3': 2,
-        'n_equiv':    2,
-        'dense_s1_args': {'activation': 'relu', 'units': 32},
-        'dense_s2_args': {'activation': 'relu', 'units': 64},
-        'dense_s3_args': {'activation': 'relu', 'units': 32}
+        'n_dense_s1'    : 2,
+        'n_dense_s2'    : 2,
+        'n_dense_s3'    : 2,
+        'n_equiv'       : 2,
+        'dense_s1_args' : {'activation': 'relu', 'units': 64},
+        'dense_s2_args' : {'activation': 'relu', 'units': 64},
+        'dense_s3_args' : {'activation': 'relu', 'units': 64},
+        'summary_dim'   : 10
     },
     mandatory_fields=[]
 )
