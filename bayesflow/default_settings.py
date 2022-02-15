@@ -57,33 +57,39 @@ DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
     mandatory_fields=[]
 )
 
-DEFAULT_SETTING_DENSE_COUPLING = {
-    't_args': {
-        'dense_args': dict(units=64, kernel_initializer='lecun_normal', activation='selu'),
-        'n_dense': 2
+DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
+    meta_dict={
+        't_args': {
+            'dense_args': dict(units=64, kernel_initializer='lecun_normal', activation='selu'),
+            'n_dense': 2
+        },
+        's_args': {
+            'dense_args': dict(units=64, kernel_initializer='lecun_normal', activation='selu'),
+            'n_dense': 2
+        },
     },
-    's_args': {
-        'dense_args': dict(units=64, kernel_initializer='lecun_normal', activation='selu'),
-        'n_dense': 2
-    },
-}
+    mandatory_fields=[]
+)
 
-DEFAULT_SETTING_ATTENTIVE_COUPLING = {
-    't_args': {
-        'pre_dense_args': dict(units=32, kernel_initializer='lecun_normal', activation='selu'),
-        'n_dense_pre': 2,
-        'attention_args': dict(key_dim=32, num_heads=4),
-        'post_dense_args': dict(units=32, kernel_initializer='lecun_normal', activation='selu'),
-        'n_dense_post': 2
+DEFAULT_SETTING_ATTENTIVE_COUPLING = MetaDictSetting(
+    meta_dict={
+        't_args': {
+            'pre_dense_args': dict(units=32, kernel_initializer='lecun_normal', activation='selu'),
+            'n_dense_pre': 2,
+            'attention_args': dict(key_dim=32, num_heads=4),
+            'post_dense_args': dict(units=32, kernel_initializer='lecun_normal', activation='selu'),
+            'n_dense_post': 2
+        },
+        's_args': {
+            'pre_dense_args': dict(units=32, kernel_initializer='lecun_normal', activation='selu'),
+            'n_dense_pre': 2,
+            'attention_args': dict(key_dim=32, num_heads=4),
+            'post_dense_args': dict(units=32, kernel_initializer='lecun_normal', activation='selu'),
+            'n_dense_post': 2
+        },
     },
-    's_args': {
-        'pre_dense_args': dict(units=32, kernel_initializer='lecun_normal', activation='selu'),
-        'n_dense_pre': 2,
-        'attention_args': dict(key_dim=32, num_heads=4),
-        'post_dense_args': dict(units=32, kernel_initializer='lecun_normal', activation='selu'),
-        'n_dense_post': 2
-    }
-}
+    mandatory_fields=[]
+)
 
 DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
     meta_dict={

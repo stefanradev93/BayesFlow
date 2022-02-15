@@ -373,7 +373,6 @@ class DenseCouplingNet(tf.keras.Model):
         # Create network head
         self.dense.add(Dense(n_out, **{k: v for k, v in meta['dense_args'].items() if k != 'units'}))
 
-
     def call(self, target, condition):
         """Concatenates target and condition and performs a forward pass through the coupling net.
 
@@ -476,31 +475,40 @@ class ConditionalCouplingLayer(tf.keras.Model):
         self.n_out1 = theta_dim // 2
         self.n_out2 = theta_dim // 2 if theta_dim % 2 == 0 else theta_dim // 2 + 1
 
-        # Determine coupling design
+        # Custom coupling net and settings
         if callable(meta['coupling_design']):
             coupling_type = meta['coupling_design']
+            if meta.get('coupling_settings') is None:
+                raise ConfigurationError("Need to provide coupling_settings for a custom coupling type.")
+            coupling_settings = meta['coupling_settings']
+
+        # String type of dense or attention
         elif type(meta['coupling_design']) is str:
+            # Settings type
+            if meta.get('coupling_settings') is None:
+                user_dict = {}
+            elif type(meta.get('coupling_settings')) is dict:
+                user_dict = meta.get('coupling_settings')
+            else:
+                raise ConfigurationError("coupling_settings not understood")
+
+            # Dense
             if meta['coupling_design'] == 'dense':
                 coupling_type = DenseCouplingNet
+                coupling_settings = build_meta_dict(
+                    user_dict=user_dict, default_setting=default_settings.DEFAULT_SETTING_DENSE_COUPLING)
+            
+            # Attention
             elif meta['coupling_design'] == 'attention':
                 coupling_type = AttentiveCouplingNet
+                coupling_settings = build_meta_dict(
+                    user_dict=user_dict, default_setting=default_settings.DEFAULT_SETTING_ATTENTIVE_COUPLING)
             else:
                 raise NotImplementedError('String coupling_design should be one of ("dense", "attention).')
         else:
             raise NotImplementedError('coupling_design argument not understood. Should either be a callable generator or ' +
                                       'a string in ("dense", "attention).')
-        
-        # Determine coupling net settings
-        if meta.get('coupling_settings') is None:
-            if meta['coupling_design'] == 'dense':
-                coupling_settings = default_settings.DEFAULT_SETTING_DENSE_COUPLING
-            elif meta['coupling_design'] == 'attention':
-                coupling_settings = default_settings.DEFAULT_SETTING_ATTENTIVE_COUPLING
-            else:
-                raise NotImplementedError('Could not infer "coupling_settings" given coupling_design!')
-        else:
-            coupling_settings = meta['coupling_design']
-            
+      
         self.s1 = coupling_type(coupling_settings['s_args'], self.n_out1)
         self.t1 = coupling_type(coupling_settings['t_args'], self.n_out1)
         self.s2 = coupling_type(coupling_settings['s_args'], self.n_out2)
