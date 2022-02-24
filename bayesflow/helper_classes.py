@@ -17,7 +17,7 @@ import tensorflow as tf
 
 from bayesflow.default_settings import DEFAULT_KEYS
 
-class SimulatedDataset:
+class SimulationDataset:
     """ Helper class to create a tensorflow Dataset which returns
     dictionaries in BayesFlow format.
     """
@@ -67,6 +67,38 @@ class SimulatedDataset:
         return map(self, self.data)
 
 
+class SimulationMemory:
+    
+    def __init__(self, stores_raw=True, capacity_in_batches=100):
+        self.stores_raw = stores_raw
+        self._capacity = capacity_in_batches
+        self._buffer = [None] * self._capacity
+        self._idx = 0
+        self.size_in_batches = 0
+
+    def store(self, forward_dict):
+        """ Stores simulation outputs, if internal buffer is not full.
+
+        Parameters
+        ----------
+        forward_dict : dict
+            The outputs of the forward model.
+        """
+
+        # If full, overwrite at index
+        if not self.is_full():
+            self._buffer[self._idx] = forward_dict
+            self._idx += 1
+            self.size_in_batches += 1
+
+    def is_full(self):
+        """ Returns True if the buffer is full, otherwis False."""
+
+        if self._idx >= self._capacity:
+            return True
+        return False
+
+
 class ReduceLROnPlateau:
     """Reduce learning rate when a loss has stopped improving. Code inspired by:
 
@@ -110,8 +142,9 @@ class ReduceLROnPlateau:
 
     def on_epoch_end(self, history, optimizer, logs=None):
 
-        num_epochs = list()
-
+        # Try to make sense of history
+        
+        lr = optimizer.lr()
 
         # if self.monitor_op(current, self.best):
         # self.best = current

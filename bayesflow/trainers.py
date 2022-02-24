@@ -24,7 +24,7 @@ from tensorflow.keras.optimizers import Adam
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
 from bayesflow.helper_functions import apply_gradients
-from bayesflow.helper_classes import SimulatedDataset
+from bayesflow.helper_classes import SimulationDataset
 from bayesflow.default_settings import STRING_CONFIGS
 from bayesflow.amortized_inference import AmortizedPosterior, AmortizedLikelihood, JointAmortizer
 
@@ -248,7 +248,7 @@ class Trainer:
         """
 
         # Convert to custom data set
-        data_set = SimulatedDataset(simulations_dict, batch_size)
+        data_set = SimulationDataset(simulations_dict, batch_size)
 
         losses = dict()
         for ep in range(1, epochs + 1):

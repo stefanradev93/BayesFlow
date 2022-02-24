@@ -449,7 +449,7 @@ class AttentiveCouplingNet(tf.keras.Model):
         out = self.attention(inp, inp)
 
         # Pass through post-dense 
-        out = tf.concat((out, positional_encoding), axis=-1)
+        out = tf.concat((out, condition, positional_encoding), axis=-1)
         out = self.post_dense(out)
         return out
 
