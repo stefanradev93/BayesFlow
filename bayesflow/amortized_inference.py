@@ -554,7 +554,7 @@ class JointAmortizer(tf.keras.Model):
         return self.amortized_posterior.sample(input_dict, n_samples, to_numpy=to_numpy, **kwargs)
 
 
-class AmortizedModelComparer(tf.keras.Model):
+class ModelComparisonAmortizer(tf.keras.Model):
     """ An interface to connect an evidential network for Bayesian model comparison with an optional summary network,
     as described in the original paper on evidential neural networks for model comparison:
 
@@ -594,6 +594,8 @@ class AmortizedModelComparer(tf.keras.Model):
 
         The regularization weight of the loss will be set to 0.01
         """
+        
+        super(ModelComparisonAmortizer, self).__init__()
 
         self.evidential_net = evidential_net
         self.summary_net = summary_net

@@ -136,14 +136,15 @@ DEFAULT_KEYS = {
     'prior_non_batchable_context'   : 'prior_non_batchable_context',
     'sim_batchable_context'         : 'sim_batchable_context',
     'sim_non_batchable_context'     : 'sim_non_batchable_context',
-    'true_model_indices'            : 'true_model_indices',
     'summary_conditions'            : 'summary_conditions',
     'direct_conditions'             : 'direct_conditions',
     'parameters'                    : 'parameters',
     'observables'                   : 'observables',
     'conditions'                    : 'conditions',
     'posterior_inputs'              : 'posterior_inputs',
-    'likelihood_inputs'             : 'likelihood_inputs'
+    'likelihood_inputs'             : 'likelihood_inputs',
+    'model_outputs'                 : 'model_outputs',
+    'model_indices'                 : 'model_indices'
 }
 
 

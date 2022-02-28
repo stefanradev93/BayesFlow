@@ -703,6 +703,8 @@ class InvertibleNetwork(tf.keras.Model):
             self.tail_network = TailNetwork(default_settings.DEFAULT_SETTING_TAIL_NET)
         elif type(meta.get('tail_network')) is dict:
             self.tail_network = TailNetwork(meta.get('tail_network'))
+        elif callable(meta.get('tail_network')):
+            self.tail_network = meta.get('tail_network')
         else:
             raise ConfigurationError("tail_network argument type should be one of (True, None, dict)")
             

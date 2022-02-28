@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from re import M
+from turtle import forward
 import numpy as np
 from copy import deepcopy
 
@@ -73,7 +75,7 @@ class DefaultLikelihoodConfigurator:
 
 
 class DefaultPosteriorConfigurator:
-    """ Utility class for a generic configrator for posterior inference.
+    """ Utility class for a generic configrator for amortized posterior inference.
     """
 
     def __init__(self, transform_fun=None, combine_fun=None, default_float_type=np.float32):
@@ -94,6 +96,60 @@ class DefaultPosteriorConfigurator:
         input_dict = {k : v.astype(self.default_float_type) if v is not None else v for k, v in input_dict.items()}
         return input_dict
 
+
+
+class DefaultModelComparisonConfigurator:
+    """ Utility class for a default configurator for amortized model comparison."""
+
+    def __init__(self, n_models, config=None, default_float_type=np.float32):
+        
+        self.n_models = n_models
+        if config is None:
+            self.config = DefaultPosteriorConfigurator()
+        else:
+            self.config = config
+        self.default_float_type = default_float_type
+        
+    def __call__(self, forward_dict):
+        """ Convert all variables to arrays and combines them for inference into a dictionary with 
+        the following keys, if DEFAULT_KEYS dictionary unchanged: 
+
+        `model_indices`      - the latent model parameters over which a condition density is learned
+        `summary_conditions` - the conditioning variables that are first passed through a summary network
+        `direct_conditions`  - the conditioning variables that the directly passed to the inference network
+        """
+
+        # Prepare placeholders
+        out_dict = {
+            DEFAULT_KEYS['summary_conditions']: None,
+            DEFAULT_KEYS['direct_conditions']: None,
+            DEFAULT_KEYS['model_indices']: None
+        }
+        summary_conditions = []
+        direct_conditions = []
+        model_indices = []
+
+        # Loop through outputs of individual models
+        for m_idx, dict_m in zip(forward_dict[DEFAULT_KEYS['model_indices']], 
+                                 forward_dict[DEFAULT_KEYS['model_outputs']]):
+            # Configure individual model outputs
+            conf_out = self.config(dict_m)
+            # Extract summary conditions
+            if conf_out.get(DEFAULT_KEYS['summary_conditions']) is not None:
+                summary_conditions.append(conf_out[DEFAULT_KEYS['summary_conditions']])
+            # Extract direct conditions
+            if conf_out.get(DEFAULT_KEYS['direct_conditions']) is not None:
+                direct_conditions.append(conf_out[DEFAULT_KEYS['direct_conditions']])
+            # Extract model indices as one-hot
+            n_draws = dict_m[DEFAULT_KEYS['prior_draws']].shape[0]
+            model_indices.append( to_categorical([m_idx] * n_draws, self.n_models) )
+        
+        # At this point, all elements of the input_dicts should be arrays with identical keys
+        out_dict[DEFAULT_KEYS['summary_conditions']] = np.concatenate(summary_conditions) if summary_conditions else None
+        out_dict[DEFAULT_KEYS['direct_conditions']] = np.concatenate(direct_conditions) if direct_conditions else None
+        out_dict[DEFAULT_KEYS['model_indices']] = np.concatenate(model_indices).astype(self.default_float_type)
+
+        return out_dict
 
 class TransformerUnion:
     """ Utility class for combining the workings of multiple transformers
@@ -307,6 +363,9 @@ class DefaultPosteriorCombiner:
         out_dict[DEFAULT_KEYS['direct_conditions']] = direct_conditions
         
         return out_dict
+
+
+        
 
 
 class DefaultLikelihoodCombiner:

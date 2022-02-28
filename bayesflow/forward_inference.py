@@ -373,7 +373,8 @@ class GenerativeModel:
 
     _N_SIM_TEST = 2 
     
-    def __init__(self, prior: callable, simulator: callable, skip_test: bool = False, simulator_is_batched: bool = None):
+    def __init__(self, prior: callable, simulator: callable, skip_test: bool = False, 
+                 simulator_is_batched: bool = None, name: str =None):
         """
         Instantiates a generative model responsible for drawing generating params, data, and optional context.
         
@@ -389,6 +390,8 @@ class GenerativeModel:
             If True, a forward inference pass will be performed.
         simulator_is_batched : bool (default - None), only relevant and mandatory if providing a custom simulator without
             the Simulator wrapper. 
+        name                 : str (default - None)
+            An optional name for the generative model. If kept default (None), 'anonymous' is set as name.
 
         Important
         ----------
@@ -408,6 +411,11 @@ class GenerativeModel:
         else:
             self.simulator = simulator
         self.simulator_is_bactched = self.simulator.is_batched
+
+        if name is None:
+            self.name = 'anonymous'
+        else:
+            self.name = name
         
         if not skip_test:
             self._test()
@@ -459,7 +467,7 @@ class GenerativeModel:
 
         # Attempt to log batch results or fail and warn user
         try:
-            logger.info(f'Performing {_n_sim} pilot runs with the generative model...')
+            logger.info(f'Performing {_n_sim} pilot runs with the {self.name} model...')
             # Format strings
             p_shape_str = "(batch_size = {}, -{}".format(out[DEFAULT_KEYS['prior_draws']].shape[0], 
                                                          out[DEFAULT_KEYS['prior_draws']].shape[1:])
@@ -494,7 +502,7 @@ class MultiGenerativeModel:
     and a prior distribution over candidate models defined by a list of probabilities.
     """
 
-    def __init__(self, generative_models : list, model_probs='equal'):
+    def __init__(self, generative_models: list, model_probs='equal'):
         """
         Instantiates a multi-generative model responsible for generating parameters, data, and optional context
         from a list of models according to specified prior model probabilities (PMPs).
@@ -503,19 +511,22 @@ class MultiGenerativeModel:
         ----------
         generative_models : list of GenerativeModel instances
             The list of candidate generative models
-        model_probs       : string (default - 'equal') or list fo floats with sum(model_probs) == 1.
+        model_probs       : string (default - 'equal') or list of floats with sum(model_probs) == 1.
             The list of model probabilities, should have the same length as the list of
-            generative models. Probabilities should sum to one.
+            generative models. Note, that probabilities should sum to one.
         """
 
         self.generative_models = generative_models
         self.n_models = len(generative_models)
+        self.model_prior = self._determine_prior(model_probs)
+
+
+    def _determine_prior(self, model_probs):
+        """Creates the model prior p(M) given user input."""
+
         if model_probs == 'equal':
-            self.model_prior = lambda batch_size: np.random.default_rng().\
-                               randint(self.n_models, size=batch_size)
-        else:
-            self.model_prior = lambda batch_size: np.random.default_rng().\
-                               choice(self.n_models, size=batch_size, p=model_probs)
+            return lambda b: np.random.randint(self.n_models, size=b)
+        return lambda b: np.random.default_rng().choice(self.n_models, size=b, p=model_probs)
         
 
     def __call__(self, batch_size, **kwargs):
@@ -523,7 +534,7 @@ class MultiGenerativeModel:
         # Prepare placeholders
         out_dict = {
             DEFAULT_KEYS['model_outputs']: [],
-            DEFAULT_KEYS['model_indices'] : []
+            DEFAULT_KEYS['model_indices']: []
         }
         
         # Sample model indices

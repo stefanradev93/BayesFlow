@@ -26,7 +26,7 @@ from bayesflow.exceptions import SimulationError
 from bayesflow.helper_functions import apply_gradients
 from bayesflow.helper_classes import SimulationDataset
 from bayesflow.default_settings import STRING_CONFIGS
-from bayesflow.amortized_inference import AmortizedPosterior, AmortizedLikelihood, JointAmortizer
+from bayesflow.amortized_inference import *
 
 
 class Trainer:
@@ -72,7 +72,7 @@ class Trainer:
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', 
-                 clip_value=None, skip_checks=False):
+                 clip_value=None, skip_checks=False, **kwargs):
         """ Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
@@ -107,7 +107,9 @@ class Trainer:
         self.generative_model = generative_model
         if self.generative_model is None:
             logger.info("Trainer initialization: No generative model provided. Only offline learning mode is available!")
-        self.configurator = self._manage_configurator(configurator)
+
+        _n_models = kwargs.get('n_models') if self.generative_model is None else generative_model.n_models
+        self.configurator = self._manage_configurator(configurator, n_models=_n_models)
 
         self.clip_method = clip_method
         self.clip_value = clip_value
@@ -378,7 +380,7 @@ class Trainer:
 
         return loss.numpy()
 
-    def _manage_configurator(self, config_fun):
+    def _manage_configurator(self, config_fun, **kwargs):
         """ Determines which configurator to use if None specified.        
         """
 
@@ -405,7 +407,13 @@ class Trainer:
                 default_config = DefaultJointConfigurator
                 default_combiner = DefaultJointTransformer()
                 default_transfomer = DefaultJointCombiner()
-            
+
+            # Model comparison amortizer
+            elif type(self.amortizer) is ModelComparisonAmortizer:
+                if kwargs.get('n_models') is None:
+                    raise ConfigurationError('Either your generative model should have "n_models" attribute, or ' + 
+                                             'you need initialize Trainer with n_models explicitly!')
+                default_config = DefaultModelComparisonConfigurator(kwargs.get('n_models'))
             # Unknown raises an error
             else:
                 raise NotImplementedError(f"Could not initialize configurator based on " +
@@ -442,12 +450,14 @@ class Trainer:
                                           f"argument should be in {STRING_CONFIGS}")
 
         elif config_fun is None:
-            config_fun = default_config(
-                transform_fun=default_transfomer,
-                combine_fun=default_combiner
-            )
+            if type(self.amortizer) is ModelComparisonAmortizer:
+                config_fun = default_config
+            else:
+                config_fun = default_config(
+                    transform_fun=default_transfomer,
+                    combine_fun=default_combiner
+                )
             return config_fun
-        
         else:
             raise NotImplementedError(f"Could not infer configurator based on provided type: {type(config_fun)}")
     
