@@ -195,38 +195,14 @@ class Trainer:
             if self.manager is not None and save_checkpoint:
                 self.manager.save()
         return losses
-    
-    def _train_step(self, batch_size, forward_dict=None, **kwargs):
-        """ Performs forward inference -> configuration -> network -> loss pipeline.
 
-        Parameters
-        ----------
-
-        batch_size    : int 
-            Number of simulations to perform at each backprop step
-        forward_dict  : dict
-            The optional forward dict from a generative model, simulated, if None
-        **kwargs      : dict (default - {})
-            Optional keyword arguments, which can be one of:
-            `model_args` - optional keyword arguments passed to the generative model
-            `conf_args`  - optional keyword arguments passed to the configurator
-            `net_args`   - optional keyword arguments passed to the amortizer
-        
-        """
-
-        if forward_dict is None:
-            forward_dict = self._forward_inference(batch_size, **kwargs.pop('model_args', {}))
-        input_dict = self.configurator(forward_dict, **kwargs.pop('conf_args', {}))
-        loss = self._backprop_step(input_dict, **kwargs.pop('net_args', {}))
-        return loss
-
-    def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True, **kwargs):
+    def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True, pre_configured=False, **kwargs):
         """ Trains an amortizer via offline learning. Assume parameters, data and optional 
         context have already been simulated (i.e., forward inference has been performed).
 
         Parameters
         ----------
-        simulations_dict :
+        simulations_dict : dict
             A dictionaty containing the simulated data / context, if using the default keys, 
             the method expects mandatory keys `sim_data` and `prior_draws` to be present
         epochs           : int
@@ -234,8 +210,10 @@ class Trainer:
         batch_size       : int
             Number of simulations to perform at each backpropagation step
         save_checkpoint  : bool (default - True)
-            A flag to decide whether to save checkpoints after each epoch,
-            if a checkpoint_path provided during initialization, otherwise ignored
+            Determines whether to save checkpoints after each epoch,
+            if a checkpoint_path provided during initialization, otherwise ignored.
+        pre_configured   : bool (default - False)
+            Signals whether the simulations dict has been pre-configured or not.
 
         Returns
         -------
@@ -249,7 +227,9 @@ class Trainer:
         # TODO
         """
 
-        # Convert to custom data set
+        # Convert to custom data set, configure if specified
+        if not pre_configured:
+            simulations_dict = self.configurator(simulations_dict)
         data_set = SimulationDataset(simulations_dict, batch_size)
 
         losses = dict()
@@ -301,18 +281,23 @@ class Trainer:
         losses = dict()
         first_round = True
 
+        if type(self.amortizer) is ModelComparisonAmortizer:
+            pre_configured = True
+        else:
+            pre_configured = False
+
         for r in range(1, rounds + 1):
             # Data generation step
             if first_round:
                 # Simulate initial data
                 logger.info(f'Simulating initial {sim_per_round} data sets...')
-                simulations_dict = self._forward_inference(sim_per_round, **kwargs)
+                simulations_dict = self._forward_inference(sim_per_round, pre_configured, **kwargs)
                 first_round = False
             else:
                 # Simulate further data
                 logger.info(f'Simulating new {sim_per_round} data sets and appending to previous...')
                 logger.info(f'New total number of simulated data sets: {sim_per_round * r}')
-                simulations_dict_r = self._forward_inference(sim_per_round, **kwargs)
+                simulations_dict_r = self._forward_inference(sim_per_round,  pre_configured, **kwargs)
 
                 # Attempt to concatenate data sets
                 for k in simulations_dict.keys():
@@ -320,20 +305,45 @@ class Trainer:
                         simulations_dict[k] = np.concatenate((simulations_dict[k], simulations_dict_r[k]), axis=0)
         
             # Train offline with generated stuff
-            losses_r = self.train_offline(simulations_dict, epochs, batch_size, save_checkpoint, **kwargs)
+            losses_r = self.train_offline(simulations_dict, epochs, batch_size, save_checkpoint, pre_configured, **kwargs)
             losses[r] = losses_r
 
         return losses
 
-    def _forward_inference(self, n_sim, **kwargs):
+    def _train_step(self, batch_size, input_dict=None, **kwargs):
+        """ Performs forward inference -> configuration -> network -> loss pipeline.
+
+        Parameters
+        ----------
+
+        batch_size    : int 
+            Number of simulations to perform at each backprop step
+        input_dict    : dict
+            The optional pre-configured forward dict from a generative model, simulated, if None
+        **kwargs      : dict (default - {})
+            Optional keyword arguments, which can be one of:
+            `model_args` - optional keyword arguments passed to the generative model
+            `conf_args`  - optional keyword arguments passed to the configurator
+            `net_args`   - optional keyword arguments passed to the amortizer
+        
+        """
+
+        if input_dict is None:
+            input_dict = self._forward_inference(batch_size, **kwargs.pop('conf_args', {}), **kwargs.pop('model_args', {}))
+        loss = self._backprop_step(input_dict, **kwargs.pop('net_args', {}))
+        return loss
+
+    def _forward_inference(self, n_sim, configure=True, **kwargs):
         """
         Performs one step of single-model forward inference.
 
         Parameters
         ----------
-        n_sim    : int
+        n_sim         : int
             Number of simulations to perform at the given step (i.e., batch size)
-        **kwargs : dict
+        configure     : bool (default - True)
+            Determines whether to pass the forward inputs through a configurator. 
+        **kwargs      : dict
             Optional keyword arguments passed to the generative model
 
         Returns
@@ -350,7 +360,9 @@ class Trainer:
 
         if self.generative_model is None:
             raise SimulationError("No generative model specified. Only offline learning is available!")
-        out_dict = self.generative_model(n_sim, **kwargs)
+        out_dict = self.generative_model(n_sim, **kwargs.pop('model_args', {}))
+        if configure:
+            out_dict = self.configurator(out_dict, **kwargs.pop('conf_args', {}))
         return out_dict
 
     def _backprop_step(self, input_dict, **kwargs):

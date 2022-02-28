@@ -366,23 +366,6 @@ class AmortizedLikelihood(tf.keras.Model):
             return log_lik.numpy()
         return log_lik
 
-    def _determine_loss(self, loss_fun):
-        """ Determines which loss to use if None given, otherwise return provided argument.
-        """
-
-        if loss_fun is None:
-            try:
-                if self.surrogate_net.tail_network is not None:
-                    return kl_latent_space_student
-                else:
-                    return kl_latent_space_gaussian
-            except Exception as _:
-                raise ConfigurationError("Could not infer loss function based on surrogate_net type. Please input a loss function!")
-        elif callable(loss_fun):
-            return loss_fun
-        else:
-            raise ConfigurationError("Loss function is neither default not callable. Please provide a valid loss function!")
-
     def compute_loss(self, input_dict, **kwargs):
         """ Computes the loss of the amortized given input data provided in input_dict.
 
@@ -402,6 +385,23 @@ class AmortizedLikelihood(tf.keras.Model):
         loss =  self.loss(*net_out)
         return loss
             
+    def _determine_loss(self, loss_fun):
+        """ Determines which loss to use if None given, otherwise return provided argument.
+        """
+
+        if loss_fun is None:
+            try:
+                if self.surrogate_net.tail_network is not None:
+                    return kl_latent_space_student
+                else:
+                    return kl_latent_space_gaussian
+            except Exception as _:
+                raise ConfigurationError("Could not infer loss function based on surrogate_net type. Please input a loss function!")
+        elif callable(loss_fun):
+            return loss_fun
+        else:
+            raise ConfigurationError("Loss function is neither default not callable. Please provide a valid loss function!")
+
 
 class JointAmortizer(tf.keras.Model):
     """ An interface for jointly learning a surrogate model of the simulator and an approximate
@@ -577,10 +577,10 @@ class ModelComparisonAmortizer(tf.keras.Model):
         summary_net       : tf.keras.Model or None, optional, default: None
             An optional summary network
         loss_fun          : callable or None, optional, default: None
-            The loss function which accepts the outputs of the amortizer. If None, the loss is inferred
-            based on the `evidence_net` type. 
+            The loss function which accepts the outputs of the amortizer. If None, the loss will be the log-loss.
         kl_weight         : callable or None, optional, defult: None
-
+            The weight of the KL regularization, if None, no regualrization will be used.
+            
         Important
         ----------
         - If no `summary_net` is provided, then the output dictionary of your generative model should not contain

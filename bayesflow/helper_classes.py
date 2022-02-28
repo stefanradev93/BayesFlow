@@ -49,7 +49,10 @@ class SimulationDataset:
                 keys_used.append(k)
             else:
                 keys_none.append(k)
-        n_sim = forward_dict[DEFAULT_KEYS['sim_data']].shape[0]
+        try:
+            n_sim = forward_dict[DEFAULT_KEYS['sim_data']].shape[0]
+        except KeyError as _:
+            n_sim = forward_dict[DEFAULT_KEYS['model_indices']].shape[0]
         return slices, keys_used, keys_none, n_sim
     
     def __call__(self, batch_in):
