@@ -15,7 +15,7 @@
 import tensorflow as tf
 
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
-from bayesflow.losses import kl_latent_space_gaussian, kl_latent_space_student, mmd_summary_space
+from bayesflow.losses import *
 from bayesflow.default_settings import DEFAULT_KEYS
 
 
@@ -175,6 +175,30 @@ class AmortizedPosterior(tf.keras.Model):
         if to_numpy:
             return log_post.numpy()
         return log_post
+    
+    def compute_loss(self, input_dict, **kwargs):
+        """ Computes the loss of the posterior amortizer given an input dictionary.
+
+        Parameters
+        ----------
+        input_dict : dict  
+            Input dictionary containing the following mandatory keys: 
+            `parameters`         - the latent model parameters over which a condition density is learned
+            `summary_conditions` - the conditioning variables that are first passed through a summary network
+            `direct_conditions`  - the conditioning variables that the directly passed to the inference network
+
+        Returns
+        -------
+        loss      : tf.Tensor of shape (1,) - the total computed loss given input variables
+        """
+
+        if self.summary_loss is not None:
+            net_out, sum_out = self(input_dict, return_summary=True, **kwargs)
+            loss =  self.inference_loss(*net_out) + self.summary_loss(sum_out)
+        else:
+            net_out = self(input_dict, **kwargs)
+            loss = self.inference_loss(*net_out)
+        return loss
 
     def _compute_summary_condition(self, summary_conditions, direct_conditions, **kwargs):
         """ Determines how to concatenate the provided conditions.
@@ -232,30 +256,6 @@ class AmortizedPosterior(tf.keras.Model):
         # Throw if loss type unexpected
         else:
             raise NotImplementedError("Could not infer summary_loss_fun, argument should be of type (None, callable, or str)!")
-
-    def compute_loss(self, input_dict, **kwargs):
-        """ Computes the loss of the posterior amortizer given an input dictionary.
-
-        Parameters
-        ----------
-        input_dict : dict  
-            Input dictionary containing the following mandatory keys: 
-            `parameters`         - the latent model parameters over which a condition density is learned
-            `summary_conditions` - the conditioning variables that are first passed through a summary network
-            `direct_conditions`  - the conditioning variables that the directly passed to the inference network
-
-        Returns
-        -------
-        loss      : tf.Tensor of shape (1,) - the total computed loss given input variables
-        """
-
-        if self.summary_loss is not None:
-            net_out, sum_out = self(input_dict, return_summary=True, **kwargs)
-            loss =  self.inference_loss(*net_out) + self.summary_loss(sum_out)
-        else:
-            net_out = self(input_dict, **kwargs)
-            loss = self.inference_loss(*net_out)
-        return loss
 
 
 class AmortizedLikelihood(tf.keras.Model):
@@ -567,18 +567,19 @@ class ModelComparisonAmortizer(tf.keras.Model):
     sake of consistency, the BayesFlow library distinguisahes the two modules.
     """
 
-    def __init__(self, evidential_net, summary_net=None, loss_fun=None):
+    def __init__(self, evidence_net, summary_net=None, loss_fun=None, kl_weight=None):
         """Initializes a composite neural architecture for amortized bayesian model comparison.
 
         Parameters
         ----------
-        evidential_net    : tf.keras.Model
+        evidence_net      : tf.keras.Model
             A neural network which outputs model evidences. 
         summary_net       : tf.keras.Model or None, optional, default: None
             An optional summary network
         loss_fun          : callable or None, optional, default: None
             The loss function which accepts the outputs of the amortizer. If None, the loss is inferred
-            based on the `inference_net` type. 
+            based on the `evidence_net` type. 
+        kl_weight         : callable or None, optional, defult: None
 
         Important
         ----------
@@ -592,14 +593,16 @@ class ModelComparisonAmortizer(tf.keras.Model):
         Amortized bayesian model comparison with evidential deep learning. 
         IEEE Transactions on Neural Networks and Learning Systems.
 
-        The regularization weight of the loss will be set to 0.01
+        - If no `kl_weight` is provided, no regularization (ground-trith preserving prior) will be used
+        for detecting implausible observables during inference.
         """
-        
+
         super(ModelComparisonAmortizer, self).__init__()
 
-        self.evidential_net = evidential_net
+        self.evidence_net = evidence_net
         self.summary_net = summary_net
         self.loss = self._determine_loss(loss_fun)
+        self.kl_weight = kl_weight
 
     def __call__(self, input_dict, return_summary=False, **kwargs):
         """ Performs a forward pass through both networks.
@@ -610,12 +613,15 @@ class ModelComparisonAmortizer(tf.keras.Model):
             Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged
             `summary_conditions` - the conditioning variables that are first passed through a summary network
             `direct_conditions`  - the conditioning variables that the directly passed to the evidential network
+            `model_indices`      - the ground-truth, one-hot encoded model indices sampled from the model prior
         return_summary : bool, optional, default: False
             Indicates whether the summary network outputs are returned along the estimated evidences.
 
         Returns
         -------
-        #TODO
+        net_out : tf.Tensor of shape (batch_size, n_models) or tuple of (net_out (batch_size, n_models), 
+                  summary_out (batch_size, summary_dim)), the latter being the summary network outputs, if
+                  `return_summary` set to True.
         """
 
         summary_out, full_cond = self._compute_summary_condition(
@@ -631,10 +637,31 @@ class ModelComparisonAmortizer(tf.keras.Model):
         return net_out, summary_out
 
     def compute_loss(self, input_dict, **kwargs):
-        pass
+        """ Computes the loss of the amortized model comparison.
+
+        Parameters
+        ----------
+        input_dict  : dict 
+            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:: 
+            `summary_conditions` - the conditioning variables that are first passed through a summary network
+            `direct_conditions`  - the conditioning variables that the directly passed to the evidence network
+            `model_indices`      - the ground-truth, one-hot encoded model indices sampled from the model prior
+
+        Returns
+        -------
+        total_loss  : tf.Tensor of shape (1,) - the total computed loss given input variables
+        """
+
+        alphas = self(input_dict, **kwargs)
+        loss = self.loss(input_dict[DEFAULT_KEYS['model_indices']], alphas)
+        if self.kl_weight is None:
+            return loss
+        else:
+            kl = self.kl_weight * kl_dirichlet(input_dict[DEFAULT_KEYS['model_indices']], alphas)
+            return loss + kl
 
     def sample(self, input_dict, to_numpy=True, **kwargs):
-        """Samples posterior model probabilities from the higher order Dirichlet density.
+        """ Samples posterior model probabilities from the higher order Dirichlet density.
 
         Parameters
         ----------
@@ -642,6 +669,7 @@ class ModelComparisonAmortizer(tf.keras.Model):
             Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged
             `summary_conditions` - the conditioning variables that are first passed through a summary network
             `direct_conditions`  - the conditioning variables that the directly passed to the evidential network
+            `model_indices`      - the ground-truth, one-hot encoded model indices sampled from the model prior
         n_samples  : int
             Number of samples to obtain from the approximate posterior
         to_numpy   : bool, default: True
@@ -685,7 +713,7 @@ class ModelComparisonAmortizer(tf.keras.Model):
         )
 
         alphas = self(full_cond, return_summary=False, **kwargs)
-        u = tf.reduce_sum(alphas, axis=-1) / self.evidential_net.n_models
+        u = tf.reduce_sum(alphas, axis=-1) / self.evidence_net.n_models
         if to_numpy:
             return u.numpy()
         return u
@@ -712,4 +740,10 @@ class ModelComparisonAmortizer(tf.keras.Model):
         return sum_condition, full_cond
 
     def _determine_loss(self, loss_fun):
-        pass
+        
+        if loss_fun is None:
+            return log_loss
+        elif callable(loss_fun):
+            return loss_fun
+        else:
+            raise ConfigurationError("Loss function is neither default not callable. Please provide a valid loss function!")

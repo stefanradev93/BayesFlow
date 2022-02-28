@@ -518,17 +518,15 @@ class MultiGenerativeModel:
 
         self.generative_models = generative_models
         self.n_models = len(generative_models)
-        self.model_prior = self._determine_prior(model_probs)
+        self.model_prior = self._determine_model_prior(model_probs)
 
-
-    def _determine_prior(self, model_probs):
+    def _determine_model_prior(self, model_probs):
         """Creates the model prior p(M) given user input."""
 
         if model_probs == 'equal':
             return lambda b: np.random.randint(self.n_models, size=b)
         return lambda b: np.random.default_rng().choice(self.n_models, size=b, p=model_probs)
         
-
     def __call__(self, batch_size, **kwargs):
         
         # Prepare placeholders

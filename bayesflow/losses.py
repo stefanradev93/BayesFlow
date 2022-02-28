@@ -60,6 +60,40 @@ def kl_latent_space_student(v, z, log_det_J):
     mean_loss = tf.reduce_mean(loss)
     return mean_loss
 
+
+def kl_dirichlet(model_indices, alpha):
+    """ Computes the KL divergence between a Dirichlet distribution with parameter vector alpha and a uniform Dirichlet.
+
+    Parameters
+    ----------
+    model_indices : tf.Tensor of shape (batch_size, n_models)
+        one-hot-encoded true model indices
+    alpha         : tf.Tensor of shape (batch_size, n_models)
+        positive network outputs in ``[1, +inf]``
+
+    Returns
+    -------
+    kl : tf.Tensor
+        A single scalar representing :math:`D_{KL}(\mathrm{Dir}(\\alpha) | \mathrm{Dir}(1,1,\ldots,1) )`, shape (,)
+    """
+
+    # Extract number of models
+    J = int(model_indices.shape[1])
+
+    # Set-up ground-truth preserving prior
+    alpha = alpha * (1 - model_indices) + model_indices
+    beta = tf.ones((1, J), dtype=tf.float32)
+    alpha0 = tf.reduce_sum(alpha, axis=1, keepdims=True)
+
+    # Computation of KL
+    kl = tf.reduce_sum((alpha - beta) * (tf.math.digamma(alpha) - tf.math.digamma(alpha0)), axis=1, keepdims=True) + \
+        tf.math.lgamma(alpha0) - tf.reduce_sum(tf.math.lgamma(alpha), axis=1, keepdims=True) + \
+        tf.reduce_sum(tf.math.lgamma(beta), axis=1, keepdims=True) - tf.math.lgamma(
+        tf.reduce_sum(beta, axis=1, keepdims=True))
+    loss = tf.reduce_mean(kl)
+    return loss
+
+
 def mmd_summary_space(summary_outputs, z_dist=tf.random.normal):
     """ Computes the MMD(p(summary_otuputs) | z_dist) to re-shape the summary network outputs in
     an information-preserving manner.
@@ -75,4 +109,30 @@ def mmd_summary_space(summary_outputs, z_dist=tf.random.normal):
     mmd_loss = maximum_mean_discrepancy(summary_outputs, z_samples)
     return mmd_loss
 
+
+def log_loss(model_indices, alpha):
+    """ Computes the logloss given output probs and true model indices m_true.
+
+    Parameters
+    ----------
+    model_indices : tf.Tensor of shape (batch_size, n_models)
+        one-hot-encoded true model indices
+    alpha         : tf.Tensor of shape (batch_size, n_models)
+        positive network outputs in ``[1, +inf]``
+
+    Returns
+    -------
+    loss : tf.Tensor
+        A single scalar Monte-Carlo approximation of the log-loss, shape (,)
+    """
+
+    # Obtain probs
+    model_probs = alpha / tf.reduce_sum(alpha, axis=1, keepdims=True)
+
+    # Numerical stability
+    model_probs = tf.clip_by_value(model_probs, 1e-15, 1 - 1e-15)
+
+    # Actual loss + regularization (if given)
+    loss = -tf.reduce_mean(tf.reduce_sum(model_indices * tf.math.log(model_probs), axis=1))
+    return loss
 
