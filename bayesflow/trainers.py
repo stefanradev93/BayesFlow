@@ -237,10 +237,10 @@ class Trainer:
             losses[ep] = []
             with tqdm(total=int(np.ceil(data_set.n_sim / batch_size)), desc='Training epoch {}'.format(ep)) as p_bar:
                 # Loop through dataset
-                for bi, forward_dict in enumerate(data_set):
+                for bi, input_dict in enumerate(data_set):
 
                     # Perform one training step and obtain current loss value
-                    loss = self._train_step(batch_size, forward_dict, **kwargs)
+                    loss = self._train_step(batch_size, input_dict, **kwargs)
 
                     # Store loss into dictionary
                     losses[ep].append(loss)
@@ -383,7 +383,10 @@ class Trainer:
 
         # Forward pass and loss computation
         with tf.GradientTape() as tape:
+            # Compute custom loss
             loss = self.amortizer.compute_loss(input_dict, **kwargs)
+            # Collect regularization loss
+            loss += tf.add_n(self.amortizer.losses)
 
         # One step backprop
         gradients = tape.gradient(loss, self.amortizer.trainable_variables)
