@@ -385,7 +385,7 @@ class DenseCouplingNet(tf.keras.Model):
         """
 
         # Handle 3D case for a set-flow
-        if len(target.shape) == 3:
+        if len(target.shape) == 3 and len(condition.shape) == 2:
             # Extract information about second dimension
             N = int(target.shape[1])
             condition = tf.stack([condition] * N, axis=1)
