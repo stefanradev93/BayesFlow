@@ -394,7 +394,8 @@ class Trainer:
             # Compute custom loss
             loss = self.amortizer.compute_loss(input_dict, **kwargs)
             # Collect regularization loss
-            loss += tf.add_n(self.amortizer.losses)
+            if self.amortizer.losses != []:
+                loss += tf.add_n(self.amortizer.losses)
 
         # One step backprop
         gradients = tape.gradient(loss, self.amortizer.trainable_variables)
