@@ -16,6 +16,8 @@ import numpy as np
 from tqdm.notebook import tqdm
 
 import logging
+
+from bayesflow.forward_inference import MultiGenerativeModel
 logging.basicConfig()
 
 import tensorflow as tf
@@ -108,7 +110,13 @@ class Trainer:
         if self.generative_model is None:
             logger.info("Trainer initialization: No generative model provided. Only offline learning mode is available!")
 
-        _n_models = kwargs.get('n_models') if self.generative_model is None else generative_model.n_models
+        # Determine n models in case model comparison mode
+        if type(generative_model) is MultiGenerativeModel:
+            _n_models = generative_model.n_models
+        elif type(amortizer) is ModelComparisonAmortizer:
+            _n_models = amortizer.n_models
+        else:
+            _n_models = kwargs.get('n_models') 
         self.configurator = self._manage_configurator(configurator, n_models=_n_models)
 
         self.clip_method = clip_method
@@ -426,7 +434,7 @@ class Trainer:
             # Model comparison amortizer
             elif type(self.amortizer) is ModelComparisonAmortizer:
                 if kwargs.get('n_models') is None:
-                    raise ConfigurationError('Either your generative model should have "n_models" attribute, or ' + 
+                    raise ConfigurationError('Either your generative model or amortizer should have "n_models" attribute, or ' + 
                                              'you need initialize Trainer with n_models explicitly!')
                 default_config = DefaultModelComparisonConfigurator(kwargs.get('n_models'))
             # Unknown raises an error

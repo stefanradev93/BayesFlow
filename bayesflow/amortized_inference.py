@@ -603,6 +603,7 @@ class ModelComparisonAmortizer(tf.keras.Model):
         self.summary_net = summary_net
         self.loss = self._determine_loss(loss_fun)
         self.kl_weight = kl_weight
+        self.n_models = self.evidence_net.n_models
 
     def __call__(self, input_dict, return_summary=False, **kwargs):
         """ Performs a forward pass through both networks.
