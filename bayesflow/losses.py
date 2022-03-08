@@ -55,7 +55,7 @@ def kl_latent_space_student(v, z, log_det_J):
     loss -= d * tf.math.lgamma(0.5*(v + 1))
     loss += d * tf.math.lgamma(0.5*v + 1e-15)
     loss += (0.5*d) * tf.math.log(v + 1e-15)
-    if len(z.shape[0]) == 3:
+    if len(z.shape) == 3:
         fact = 0.5*(v[:, :, 0]+1)
     else:
         fact = 0.5*(v+1)
