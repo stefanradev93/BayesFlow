@@ -393,7 +393,7 @@ class Trainer:
         with tf.GradientTape() as tape:
             # Compute custom loss
             loss = self.amortizer.compute_loss(input_dict, **kwargs)
-            # Collect regularization loss
+            # Collect regularization loss, if any
             if self.amortizer.losses != []:
                 loss += tf.add_n(self.amortizer.losses)
 

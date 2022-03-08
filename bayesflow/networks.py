@@ -706,7 +706,7 @@ class InvertibleNetwork(tf.keras.Model):
         elif callable(meta.get('tail_network')):
             self.tail_network = meta.get('tail_network')
         else:
-            raise ConfigurationError("tail_network argument type should be one of (True, None, dict)")
+            raise ConfigurationError("tail_network argument type should be one of (True, None, dict, callable)")
             
         self.z_dim = meta['n_params']
 
