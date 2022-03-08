@@ -50,16 +50,13 @@ def kl_latent_space_student(v, z, log_det_J):
         A single scalar value representing the KL loss, shape (,)
     """
     
+    v = tf.squeeze(v)
     d = z.shape[-1]
     loss = 0.
     loss -= d * tf.math.lgamma(0.5*(v + 1))
     loss += d * tf.math.lgamma(0.5*v + 1e-15)
     loss += (0.5*d) * tf.math.log(v + 1e-15)
-    if len(z.shape) == 3:
-        fact = 0.5*(v[:, :, 0]+1)
-    else:
-        fact = 0.5*(v+1)
-    loss += fact * tf.reduce_sum(tf.math.log1p(z**2 / v), axis=-1)
+    loss += 0.5*(v+1) * tf.reduce_sum(tf.math.log1p(z**2 / tf.expand_dims(v, axis=-1)), axis=-1)
     loss -= log_det_J
     mean_loss = tf.reduce_mean(loss)
     return mean_loss
