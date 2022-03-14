@@ -25,3 +25,6 @@ projects/
 
 # build
 *.egg-info
+
+# tox
+.tox
