@@ -47,7 +47,8 @@ class TailNetwork(tf.keras.Model):
         )
 
         # Create network head
-        self.dense.add(Dense(1, **{k: v for k, v in meta['dense_args'].items() if k != 'units'}))
+        self.dense.add(Dense(1, activation='softplus', **{k: v for 
+        k, v in meta['dense_args'].items() if k != 'units' and k != 'activation'}))
         
     def call(self, condition):
         """Performs a forward pass through the tail net. Output is the learned 'degrees of freedom' parameter
@@ -791,7 +792,7 @@ class InvertibleNetwork(tf.keras.Model):
             z_samples = tf.random.normal(shape=(int(condition.shape[0]), n_samples, self.z_dim))
         # Sample from a t-distro    
         else:
-            dfs = self.tail_network(condition, **kwargs).numpy().squeeze()
+            dfs = self.tail_network(condition, **kwargs).numpy().squeeze(axis=-1)
             loc = np.zeros(self.z_dim)
             shape = np.eye(self.z_dim)
             z_samples = tf.stack(
