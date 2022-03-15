@@ -700,9 +700,11 @@ class InvertibleNetwork(tf.keras.Model):
         if meta.get('tail_network') is None:
             self.tail_network = None
         elif meta.get('tail_network') is True:
-            self.tail_network = TailNetwork(default_settings.DEFAULT_SETTING_TAIL_NET)
+            self.tail_network = TailNetwork(default_settings.DEFAULT_SETTING_TAIL_NET.meta_dict)
         elif type(meta.get('tail_network')) is dict:
-            self.tail_network = TailNetwork(meta.get('tail_network'))
+            tail_meta = build_meta_dict(user_dict=meta.get('tail_network'),
+                               default_setting=default_settings.DEFAULT_SETTING_TAIL_NET)
+            self.tail_network = TailNetwork(tail_meta)
         elif callable(meta.get('tail_network')):
             self.tail_network = meta.get('tail_network')
         else:
