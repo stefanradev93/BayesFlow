@@ -58,8 +58,9 @@ class TailNetwork(tf.keras.Model):
         condition   : tf.Tensor
             the conditioning vector of interest, for instance ``x = summary(x)``, shape (batch_size, summary_dim)
         """
+
         # Output is bounded between (1, inf)
-        out = self.net(condition) + 1.0
+        out = self.dense(condition) + 1.0
         return out
 
     
