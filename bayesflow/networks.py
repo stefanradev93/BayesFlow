@@ -879,6 +879,7 @@ class InvertibleNetwork(tf.keras.Model):
         log_z = [multivariate_t(df=v[b].numpy().item(), loc=np.zeros(self.z_dim), shape=1.).logpdf(z[b].numpy())
                 for b in range(batch_size)]
         log_z = tf.stack(log_z, axis=0)
+        log_z = tf.cast(log_z, dtype=log_det_J.dtype)
         log_pdf = log_z + log_det_J
         return log_pdf
 
