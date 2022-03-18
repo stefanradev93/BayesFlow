@@ -850,3 +850,24 @@ class SequenceNet(tf.keras.Model):
         lstm_out = self.lstm_part(x)
         out = tf.concat((conv_out, lstm_out), axis=-1)
         return out
+
+class FlattenNetwork(tf.keras.Model):
+    """Implements a flattening identity mapping of inputs to outputs."""
+    
+    def __init__(self):
+        super(FlattenNetwork, self).__init__()
+    
+    def call(self, x: tf.Tensor):
+        """Flattens a 3D Tensor input into a 2D-tensor.
+        
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, N, x_dim)
+        
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, N * x_dim)
+        """
+        return tf.reshape(x, (x.shape[0], x.shape[1] * x.shape[2]))
