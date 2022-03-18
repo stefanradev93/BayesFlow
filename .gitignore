@@ -19,3 +19,12 @@ docs/build/
 */.ipynb_checkpoints/
 design/
 projects/
+
+# vim
+*.swp
+
+# build
+*.egg-info
+
+# tox
+.tox
