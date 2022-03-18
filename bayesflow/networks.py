@@ -870,4 +870,4 @@ class FlattenNetwork(tf.keras.Model):
         out : tf.Tensor
             Output of shape (batch_size, N * x_dim)
         """
-        return tf.reshape(x, (x.shape[0], x.shape[1] * x.shape[2]))
+        return tf.reshape(x, (x.shape[0], -1))
