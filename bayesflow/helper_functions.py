@@ -133,16 +133,16 @@ def build_meta_dict(user_dict: dict, default_setting: default_settings.MetaDictS
     return merged_dict
 
 
-def format_loss_string(ep, it, loss, avg_dict):
+def format_loss_string(ep, it, loss, avg_dict, ep_str="Epoch", it_str='Iter', scalar_loss_str='Loss'):
     """ Prepare loss string for displaying on progress bar
     """
 
-    disp_str = f"Epoch: {ep},Iter: {it}"
+    disp_str = f"{ep_str}: {ep}, {it_str}: {it}"
     if type(loss) is dict:
         for k, v in loss.items():
             disp_str += f",{k}: {v.numpy():.3f}"
     else:
-        disp_str  += f",Loss: {loss.numpy():.3f}"
+        disp_str  += f", {scalar_loss_str}: {loss.numpy():.3f}"
     # Add running
     if avg_dict is not None:
         for k, v in avg_dict.items():
