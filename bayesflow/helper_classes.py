@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from copy import deepcopy
+
 import numpy as np
 import tensorflow as tf
 
@@ -49,10 +51,7 @@ class SimulationDataset:
                 keys_used.append(k)
             else:
                 keys_none.append(k)
-        try:
-            n_sim = forward_dict[DEFAULT_KEYS['sim_data']].shape[0]
-        except KeyError as _:
-            n_sim = forward_dict[DEFAULT_KEYS['model_indices']].shape[0]
+        n_sim = forward_dict[DEFAULT_KEYS['sim_data']].shape[0]
         return slices, keys_used, keys_none, n_sim
     
     def __call__(self, batch_in):
@@ -109,25 +108,27 @@ class LossHistory:
         else:
             self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(current_loss.numpy())
 
-    def running_losses(self, epoch):
+    def get_running_losses(self, epoch):
         """ Compute and return running means of the losses for current epoch.
         """
 
         means = np.atleast_1d(np.mean(self.history[f'Run {self._current_run}'][f'Epoch {epoch}'], axis=0))
         if means.shape[0] == 1:    
-            return {'Avg. Loss': means[0]}
+            return {'Avg.Loss': means[0]}
         else:
-            return {'Avg. ' + k: v for k, v in zip(self.loss_names, means)}
+            return {'Avg.' + k: v for k, v in zip(self.loss_names, means)}
     
     def flush(self):
-        """ 
-        Returns current history and removes all existing loss history.
+        """ Returns current history and removes all existing loss history.
         """
 
         h = self.history
         self.history = {}
         self._current_run = 0
         return h
+
+    def get_copy(self):
+        return deepcopy(self.history)
 
 class SimulationMemory:
     

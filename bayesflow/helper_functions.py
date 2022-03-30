@@ -131,3 +131,20 @@ def build_meta_dict(user_dict: dict, default_setting: default_settings.MetaDictS
     # Merge the user dict into the default dict
     merged_dict = merge_left_into_right(user_dict, default_dict)
     return merged_dict
+
+
+def format_loss_string(ep, it, loss, avg_dict):
+    """ Prepare loss string for displaying on progress bar
+    """
+
+    disp_str = f"Epoch: {ep},Iter: {it}"
+    if type(loss) is dict:
+        for k, v in loss.items():
+            disp_str += f",{k}: {v.numpy():.3f}"
+    else:
+        disp_str  += f",Loss: {loss.numpy():.3f}"
+    # Add running
+    if avg_dict is not None:
+        for k, v in avg_dict.items():
+            disp_str += f",{k}: {v:.3f}"
+    return disp_str

@@ -97,7 +97,6 @@ class DefaultPosteriorConfigurator:
         return input_dict
 
 
-
 class DefaultModelComparisonConfigurator:
     """ Utility class for a default configurator for amortized model comparison."""
 
@@ -150,6 +149,7 @@ class DefaultModelComparisonConfigurator:
         out_dict[DEFAULT_KEYS['model_indices']] = np.concatenate(model_indices).astype(self.default_float_type)
 
         return out_dict
+
 
 class TransformerUnion:
     """ Utility class for combining the workings of multiple transformers
@@ -363,9 +363,6 @@ class DefaultPosteriorCombiner:
         out_dict[DEFAULT_KEYS['direct_conditions']] = direct_conditions
         
         return out_dict
-
-
-        
 
 
 class DefaultLikelihoodCombiner:

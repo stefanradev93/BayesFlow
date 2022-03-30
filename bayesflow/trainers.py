@@ -25,7 +25,7 @@ from tensorflow.keras.optimizers import Adam
 
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
-from bayesflow.helper_functions import apply_gradients
+from bayesflow.helper_functions import apply_gradients, format_loss_string
 from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory
 from bayesflow.default_settings import STRING_CONFIGS
 from bayesflow.amortized_inference import *
@@ -202,18 +202,10 @@ class Trainer:
                     self.loss_history.add_entry(ep, loss)
 
                     # Compute running loss
-                    avg_dict = self.loss_history.running_losses(ep)
+                    avg_dict = self.loss_history.get_running_losses(ep)
 
-                    # Prepare string for progress bar, add loss elements
-                    disp_str = f"Epoch: {ep},Iter: {it}"
-                    if type(loss) is dict:
-                        for k, v in loss.items():
-                            disp_str += f",{k}: {v.numpy():.3f}"
-                    else:
-                        disp_str  += f",Loss: {loss.numpy():.3f}"
-                    # Add running
-                    for k, v in avg_dict.items():
-                        disp_str += f",{k}: {v:.3f}"
+                    # Format for display on progress bar
+                    disp_str = format_loss_string(ep, it, loss, avg_dict)
 
                     # Update progress bar
                     p_bar.set_postfix_str(disp_str)
@@ -222,9 +214,9 @@ class Trainer:
             # Store after each epoch, if specified
             if self.manager is not None and save_checkpoint:
                 self.manager.save()
-        return True
+        return self.loss_history.get_copy()
 
-    def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True, pre_configured=False, **kwargs):
+    def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True,**kwargs):
         """ Trains an amortizer via offline learning. Assume parameters, data and optional 
         context have already been simulated (i.e., forward inference has been performed).
 
@@ -240,8 +232,6 @@ class Trainer:
         save_checkpoint  : bool (default - True)
             Determines whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
-        pre_configured   : bool (default - False)
-            Signals whether the simulations dict has been pre-configured or not.
 
         Returns
         -------
@@ -255,32 +245,36 @@ class Trainer:
         # TODO
         """
 
-        # Convert to custom data set, configure if specified
-        if not pre_configured:
-            simulations_dict = self.configurator(simulations_dict)
+        # Convert to custom data set
         data_set = SimulationDataset(simulations_dict, batch_size)
 
-        losses = dict()
+        self.loss_history.start_new_run()
         for ep in range(1, epochs + 1):
-            losses[ep] = []
+
             with tqdm(total=int(np.ceil(data_set.n_sim / batch_size)), desc='Training epoch {}'.format(ep)) as p_bar:
                 # Loop through dataset
-                for bi, input_dict in enumerate(data_set):
+                for bi, forward_dict in enumerate(data_set):
 
                     # Perform one training step and obtain current loss value
+                    input_dict = self.configurator(forward_dict)
                     loss = self._train_step(batch_size, input_dict, **kwargs)
 
-                    # Store loss into dictionary
-                    losses[ep].append(loss)
+                    # Store returned loss
+                    self.loss_history.add_entry(ep, loss)
 
-                    p_bar.set_postfix_str("Epoch {0},Batch {1},Loss: {2:.3f},Running Loss: {3:.3f}"
-                                          .format(ep, bi + 1, loss, np.mean(losses[ep])))
+                    # Compute running loss
+                    avg_dict = self.loss_history.get_running_losses(ep)
+
+                    # Format for display on progress bar
+                    disp_str = format_loss_string(ep, bi, loss, avg_dict)
+
+                    p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
 
             # Store after each epoch, if specified
             if self.manager is not None and save_checkpoint:
                 self.manager.save()
-        return losses
+        return self.loss_history.get_copy()
 
     def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, **kwargs):
         """Trains an amortizer via round-based learning.
@@ -306,26 +300,20 @@ class Trainer:
         """
 
         logger = logging.getLogger()
-        losses = dict()
         first_round = True
-
-        if type(self.amortizer) is ModelComparisonAmortizer:
-            pre_configured = True
-        else:
-            pre_configured = False
 
         for r in range(1, rounds + 1):
             # Data generation step
             if first_round:
                 # Simulate initial data
                 logger.info(f'Simulating initial {sim_per_round} data sets...')
-                simulations_dict = self._forward_inference(sim_per_round, pre_configured, **kwargs)
+                simulations_dict = self._forward_inference(sim_per_round, configure=False, **kwargs)
                 first_round = False
             else:
                 # Simulate further data
                 logger.info(f'Simulating new {sim_per_round} data sets and appending to previous...')
                 logger.info(f'New total number of simulated data sets: {sim_per_round * r}')
-                simulations_dict_r = self._forward_inference(sim_per_round,  pre_configured, **kwargs)
+                simulations_dict_r = self._forward_inference(sim_per_round, configure=False, **kwargs)
 
                 # Attempt to concatenate data sets
                 for k in simulations_dict.keys():
@@ -333,10 +321,8 @@ class Trainer:
                         simulations_dict[k] = np.concatenate((simulations_dict[k], simulations_dict_r[k]), axis=0)
         
             # Train offline with generated stuff
-            losses_r = self.train_offline(simulations_dict, epochs, batch_size, save_checkpoint, pre_configured, **kwargs)
-            losses[r] = losses_r
-
-        return losses
+            _ = self.train_offline(simulations_dict, epochs, batch_size, save_checkpoint, **kwargs)
+        return self.loss_history.get_copy()
 
     def _train_step(self, batch_size, input_dict=None, **kwargs):
         """ Performs forward inference -> configuration -> network -> loss pipeline.
@@ -440,7 +426,6 @@ class Trainer:
         # Do nothing if callable provided
         if callable(config_fun):
             return config_fun
-
         # If None (default), infer default config based on amortizer type
         else:
             # Amortized posterior
@@ -473,6 +458,7 @@ class Trainer:
                                           f"amortizer type {type(self.amortizer)}!")
 
         # Check string types
+        # TODO: Make sure this works for all amortizers
         if type(config_fun) is str:
             if config_fun == "variable_num_obs":
                 return default_config(

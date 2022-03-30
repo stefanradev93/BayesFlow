@@ -467,7 +467,7 @@ class JointAmortizer(tf.keras.Model):
 
         loss_post = self.amortized_posterior.compute_loss(input_dict[DEFAULT_KEYS['posterior_inputs']], **kwargs)
         loss_lik = self.amortized_likelihood.compute_loss(input_dict[DEFAULT_KEYS['likelihood_inputs']], **kwargs)
-        return {'Post. Loss': loss_lik, 'Lik. Loss': loss_post}
+        return {'Post.Loss': loss_post, 'Lik.Loss': loss_lik}
 
     def log_likelihood(self, input_dict, to_numpy=True, **kwargs):
         """ Calculates the approximate log-likelihood of data given conditional variables via
@@ -518,7 +518,11 @@ class JointAmortizer(tf.keras.Model):
 
         input_dict   : dict  
             Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged: 
+
             `conditions` - the conditioning variables that the directly passed to the inference network
+            
+            OR a nested dictionary with key `likelihood_inputs` containing the above input dictionarty
+
         n_samples    : int
             The number of posterior samples to obtain from the approximate posterior
         to_numpy     : bool, optional, default: True
@@ -529,6 +533,10 @@ class JointAmortizer(tf.keras.Model):
         lik_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, None)
             Simulated observables from the surrogate likelihood.
         """
+        if input_dict.get(DEFAULT_KEYS['likelihood_inputs']) is not None:
+            return self.amortized_likelihood.sample(
+                input_dict[DEFAULT_KEYS['likelihood_inputs']], n_samples, to_numpy=to_numpy, **kwargs
+            )
         return self.amortized_likelihood.sample(input_dict, n_samples, to_numpy=to_numpy, **kwargs)
 
     def sample_parameters(self, input_dict, n_samples, to_numpy=True, **kwargs):
@@ -538,8 +546,11 @@ class JointAmortizer(tf.keras.Model):
         ----------
         input_dict   : dict  
             Input dictionary containing the following mandatory keys, if DEFAULT KEYS unchanged: 
+
             `summary_conditions` : the conditioning variables (including data) that are first passed through a summary network
             `direct_conditions`  : the conditioning variables that the directly passed to the inference network
+
+            OR a nested dictionary with key `posterior_inputs` containing the above input dictionary
         n_samples    : int
             The number of posterior samples to obtain from the approximate posterior
         to_numpy     : bool, optional, default: True
@@ -550,7 +561,10 @@ class JointAmortizer(tf.keras.Model):
         post_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, n_params)
             the sampled parameters per data set
         """
-        
+        if input_dict.get(DEFAULT_KEYS['posterior_inputs']) is not None:
+            return self.amortized_posterior.sample(
+                input_dict[DEFAULT_KEYS['posterior_inputs']], n_samples, to_numpy=to_numpy, **kwargs
+            )
         return self.amortized_posterior.sample(input_dict, n_samples, to_numpy=to_numpy, **kwargs)
 
 
