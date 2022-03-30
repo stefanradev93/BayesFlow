@@ -461,13 +461,13 @@ class JointAmortizer(tf.keras.Model):
 
         Returns
         -------
+        #TODO
         total_loss  : tf.Tensor of shape (1,) - the total computed loss given input variables
         """
 
         loss_post = self.amortized_posterior.compute_loss(input_dict[DEFAULT_KEYS['posterior_inputs']], **kwargs)
         loss_lik = self.amortized_likelihood.compute_loss(input_dict[DEFAULT_KEYS['likelihood_inputs']], **kwargs)
-        total_loss = loss_post + loss_lik
-        return total_loss
+        return {'Post. Loss': loss_lik, 'Lik. Loss': loss_post}
 
     def log_likelihood(self, input_dict, to_numpy=True, **kwargs):
         """ Calculates the approximate log-likelihood of data given conditional variables via

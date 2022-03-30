@@ -26,7 +26,7 @@ from tensorflow.keras.optimizers import Adam
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
 from bayesflow.helper_functions import apply_gradients
-from bayesflow.helper_classes import SimulationDataset
+from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory
 from bayesflow.default_settings import STRING_CONFIGS
 from bayesflow.amortized_inference import *
 
@@ -102,6 +102,7 @@ class Trainer:
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
         """
 
+        # Set-up logging
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
         
@@ -117,12 +118,14 @@ class Trainer:
             _n_models = amortizer.n_models
         else:
             _n_models = kwargs.get('n_models') 
+
+        # Set-up configurator
         self.configurator = self._manage_configurator(configurator, n_models=_n_models)
 
+        # Gradient clipping settings
         self.clip_method = clip_method
         self.clip_value = clip_value
-        self.n_obs = None
-
+        
         # Optimizer settings
         if optimizer is None:
             self.optimizer = Adam(learning_rate)
@@ -137,12 +140,17 @@ class Trainer:
             if self.manager.latest_checkpoint:
                 logger.info("Networks loaded from {}".format(self.manager.latest_checkpoint))
             else:
-                logger.info("Initializing networks from scratch.")
+                logger.info("Initialized networks from scratch.")
         else:
             self.checkpoint = None
             self.manager = None
         self.checkpoint_path = checkpoint_path
 
+        # Set-up memory classes
+        self.loss_history= LossHistory()
+        self.simulation_memory = SimulationMemory()
+
+        # Perform a sanity check wiuth provided components
         if not skip_checks:
             self._check_consistency()
 
@@ -182,27 +190,39 @@ class Trainer:
             A dictionary storing the losses across epochs and iterations
         """
 
-        losses = dict()
+        self.loss_history.start_new_run()
         for ep in range(1, epochs + 1):
-            losses[ep] = []
             with tqdm(total=iterations_per_epoch, desc='Training epoch {}'.format(ep)) as p_bar:
                 for it in range(1, iterations_per_epoch + 1):
                     
                     # Perform one training step and obtain current loss value
                     loss = self._train_step(batch_size, **kwargs)
 
-                    # Store loss into dictionary
-                    losses[ep].append(loss)
+                    # Store returned loss
+                    self.loss_history.add_entry(ep, loss)
+
+                    # Compute running loss
+                    avg_dict = self.loss_history.running_losses(ep)
+
+                    # Prepare string for progress bar, add loss elements
+                    disp_str = f"Epoch: {ep},Iter: {it}"
+                    if type(loss) is dict:
+                        for k, v in loss.items():
+                            disp_str += f",{k}: {v.numpy():.3f}"
+                    else:
+                        disp_str  += f",Loss: {loss.numpy():.3f}"
+                    # Add running
+                    for k, v in avg_dict.items():
+                        disp_str += f",{k}: {v:.3f}"
 
                     # Update progress bar
-                    p_bar.set_postfix_str("Epoch {0},Iteration {1},Loss: {2:.3f},Running Loss: {3:.3f}"
-                                          .format(ep, it, loss, np.mean(losses[ep])))
+                    p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
 
             # Store after each epoch, if specified
             if self.manager is not None and save_checkpoint:
                 self.manager.save()
-        return losses
+        return True
 
     def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True, pre_configured=False, **kwargs):
         """ Trains an amortizer via offline learning. Assume parameters, data and optional 
@@ -393,16 +413,25 @@ class Trainer:
         with tf.GradientTape() as tape:
             # Compute custom loss
             loss = self.amortizer.compute_loss(input_dict, **kwargs)
+            # If dict, add components
+            if type(loss) is dict:
+                _loss = tf.add_n(list(loss.values()))
+            else:
+                _loss = loss
             # Collect regularization loss, if any
             if self.amortizer.losses != []:
-                loss += tf.add_n(self.amortizer.losses)
-
+                reg = tf.add_n(self.amortizer.losses)
+                _loss += reg
+                if type(loss) is dict:
+                    loss['Regularization'] = reg
+                else:
+                    loss = {'Loss': loss, 'Regularization': reg}
         # One step backprop
-        gradients = tape.gradient(loss, self.amortizer.trainable_variables)
+        gradients = tape.gradient(_loss, self.amortizer.trainable_variables)
         apply_gradients(self.optimizer, gradients, self.amortizer.trainable_variables, 
                         self.clip_value, self.clip_method)
 
-        return loss.numpy()
+        return loss
 
     def _manage_configurator(self, config_fun, **kwargs):
         """ Determines which configurator to use if None specified.        

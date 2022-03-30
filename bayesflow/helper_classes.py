@@ -70,6 +70,65 @@ class SimulationDataset:
         return map(self, self.data)
 
 
+class LossHistory:
+    """ Helper class to keep track of losses during training.
+    """
+    def __init__(self):
+        self.history = {}
+        self._current_run = 0
+        self.loss_names = []
+
+    def start_new_run(self):
+        self._current_run += 1
+        self.history[f'Run {self._current_run}'] = {}
+
+    def add_entry(self, epoch, current_loss):
+        """ Adds loss entry for current epoch into memory data structure.
+        """
+
+        # Add epoch key, if specified
+        if self.history[f'Run {self._current_run}'].get(f'Epoch {epoch}') is None:
+            self.history[f'Run {self._current_run}'][f'Epoch {epoch}'] = []
+
+        # Handle dict loss output
+        if type(current_loss) is dict:
+            # Store keys, if none existing
+            if self.loss_names == []:
+                self.loss_names = [k for k in current_loss.keys()]
+            
+            # Create and store entry
+            entry = [v.numpy() if type(v) is not np.ndarray else v for v in current_loss.values()]
+            self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(entry)
+
+        # Handle tuple or list loss output
+        elif type(current_loss) is tuple or type(current_loss) is list:
+            entry = [v.numpy() if type(v) is not np.ndarray else v for v in current_loss]
+            self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(entry)
+        
+        # Assume scalar loss output
+        else:
+            self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(current_loss.numpy())
+
+    def running_losses(self, epoch):
+        """ Compute and return running means of the losses for current epoch.
+        """
+
+        means = np.atleast_1d(np.mean(self.history[f'Run {self._current_run}'][f'Epoch {epoch}'], axis=0))
+        if means.shape[0] == 1:    
+            return {'Avg. Loss': means[0]}
+        else:
+            return {'Avg. ' + k: v for k, v in zip(self.loss_names, means)}
+    
+    def flush(self):
+        """ 
+        Returns current history and removes all existing loss history.
+        """
+
+        h = self.history
+        self.history = {}
+        self._current_run = 0
+        return h
+
 class SimulationMemory:
     
     def __init__(self, stores_raw=True, capacity_in_batches=100):
