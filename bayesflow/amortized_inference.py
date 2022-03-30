@@ -477,8 +477,11 @@ class JointAmortizer(tf.keras.Model):
         ----------
         input_dict : dict  
             Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:
+
             `observables` - the variables over which a condition density is learned (i.e., the observables)
             `conditions`  - the conditioning variables that are directly passed to the inference network
+
+            OR a nested dictionary with key `likelihood_inputs` containing the above input dictionary
         to_numpy   : bool, optional, default: True
             Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
 
@@ -488,6 +491,10 @@ class JointAmortizer(tf.keras.Model):
             the approximate log-likelihood of each data point in each data set
         """
 
+        if input_dict.get(DEFAULT_KEYS['likelihood_inputs']) is not None:
+            return self.amortized_likelihood.log_likelihood(
+                input_dict[DEFAULT_KEYS['likelihood_inputs']], to_numpy=to_numpy, **kwargs
+            )
         return self.amortized_likelihood.log_likelihood(input_dict, to_numpy=to_numpy, **kwargs)
    
     def log_posterior(self, input_dict, to_numpy=True, **kwargs):
@@ -498,9 +505,12 @@ class JointAmortizer(tf.keras.Model):
         ----------
         input_dict : dict  
             Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:
+
             `parameters`         - the latent generative model parameters over which a condition density is learned
             `summary_conditions` - the conditioning variables that are first passed through a summary network
             `direct_conditions`  - the conditioning variables that the directly passed to the inference network
+
+            OR a nested dictionary with key `posterior_inputs` containing the above input dictionary
 
         Returns
         -------
@@ -508,6 +518,10 @@ class JointAmortizer(tf.keras.Model):
             the approximate log-likelihood of each data point in each data set
         """
 
+        if input_dict.get(DEFAULT_KEYS['posterior_inputs']) is not None:
+            return self.amortized_posterior.log_posterior(
+                input_dict[DEFAULT_KEYS['posterior_inputs']], to_numpy=to_numpy, **kwargs
+            )
         return self.amortized_posterior.log_posterior(input_dict, to_numpy=to_numpy, **kwargs)
    
     def sample_data(self, input_dict, n_samples, to_numpy=True, **kwargs):
@@ -521,8 +535,7 @@ class JointAmortizer(tf.keras.Model):
 
             `conditions` - the conditioning variables that the directly passed to the inference network
             
-            OR a nested dictionary with key `likelihood_inputs` containing the above input dictionarty
-
+            OR a nested dictionary with key `likelihood_inputs` containing the above input dictionary
         n_samples    : int
             The number of posterior samples to obtain from the approximate posterior
         to_numpy     : bool, optional, default: True
@@ -533,6 +546,7 @@ class JointAmortizer(tf.keras.Model):
         lik_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, None)
             Simulated observables from the surrogate likelihood.
         """
+
         if input_dict.get(DEFAULT_KEYS['likelihood_inputs']) is not None:
             return self.amortized_likelihood.sample(
                 input_dict[DEFAULT_KEYS['likelihood_inputs']], n_samples, to_numpy=to_numpy, **kwargs
