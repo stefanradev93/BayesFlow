@@ -38,9 +38,9 @@ def gaussian_kernel_matrix(x, y, sigmas=None):
 
     if sigmas is None:
         sigmas = MMD_BANDWIDTH_LIST
-
+    norm = lambda v: tf.reduce_sum(tf.square(v), 1)
     beta = 1. / (2. * (tf.expand_dims(sigmas, 1)))
-    dist = tf.transpose(tf.norm(tf.expand_dims(x, 2) - tf.transpose(y), axis=1))
+    dist = tf.transpose(norm(tf.expand_dims(x, 2) - tf.transpose(y)))
     s = tf.matmul(beta, tf.reshape(dist, (1, -1)))
     kernel = tf.reshape(tf.reduce_sum(tf.exp(-s), 0), tf.shape(dist))
     return kernel
