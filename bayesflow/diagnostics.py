@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -96,6 +96,7 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
         ax[j].set_ylabel('')
     f.tight_layout()
     return f
+
 
 def plot_calibration_curves(m_true, m_pred, model_names=None, n_bins=10, font_size=12, fig_size=(12, 4)):
     """Plots the calibration curves for a model comparison problem.

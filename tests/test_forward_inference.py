@@ -273,21 +273,8 @@ class TestSimulator(unittest.TestCase):
         self.assertIsNone(out['non_batchable_context'])
         self.assertTrue(np.all(expected_draws == out['sim_data']))
 
-    # def test_sim_no_context_non_batched(self):
-    
-    #     s_fun = lambda p_draws: np.random.normal(p_draws, 
-    #             size=(p_draws.shape[0], p_draws.shape[1], self._batch_size)
-    #         )
-    #     s = Simulator(s_fun)
-
-    #     # Prepare placeholder output dictionary
-    #     expected_draws =  np.zeros((self._batch_size, self._x_dim)),
-
-    #     out = s_fun(self._batch_size)
-
-    #     self.assertIsNone(out['batchable_context'])
-    #     self.assertIsNone(out['non_batchable_context'])
-    #     self.assertTrue(np.all(expected_draws == out['prior_draws']))
+    def test_sim_no_context_non_batched(self):
+        pass
 
     # def test_sim_with_batchable_context(self):
         
