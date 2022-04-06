@@ -194,7 +194,7 @@ class AmortizedPosterior(tf.keras.Model):
 
         if self.summary_loss is not None:
             net_out, sum_out = self(input_dict, return_summary=True, **kwargs)
-            loss =  self.inference_loss(*net_out) + self.summary_loss(sum_out)
+            loss =  self.summary_loss(sum_out) + self.inference_loss(*net_out)
         else:
             net_out = self(input_dict, **kwargs)
             loss = self.inference_loss(*net_out)
