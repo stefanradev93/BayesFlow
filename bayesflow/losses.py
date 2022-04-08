@@ -4,6 +4,7 @@ import tensorflow as tf
 
 from bayesflow.computational_utilities import maximum_mean_discrepancy
 
+
 def kl_latent_space_gaussian(z, log_det_J):
     """ Computes the Kullback-Leibler divergence between true and approximate
     posterior assumes a Gaussian latent space as a source distribution.
@@ -94,19 +95,22 @@ def kl_dirichlet(model_indices, alpha):
     return loss
 
 
-def mmd_summary_space(summary_outputs, z_dist=tf.random.normal):
+def mmd_summary_space(summary_outputs, z_dist=tf.random.normal, kernel='gaussian'):
     """ Computes the MMD(p(summary_otuputs) | z_dist) to re-shape the summary network outputs in
     an information-preserving manner.
 
     Parameters
     ----------
     summary_outputs   : tf Tensor of shape (batch_size, ...)
-        The degrees of freedom of the latent student t-distribution
-
+        The outputs of the summary network.
+    z_dist            : callable, default tf.random.normal
+        The latent data distribution towards which the summary outputs are optimized.
+    kernel            : str in ('gaussian', 'inverse_multiquadratic'), default 'gaussian'
+        The kernel function to use for MMD computation.
     """
 
     z_samples = z_dist(summary_outputs.shape) 
-    mmd_loss = maximum_mean_discrepancy(summary_outputs, z_samples)
+    mmd_loss = maximum_mean_discrepancy(summary_outputs, z_samples, kernel)
     return mmd_loss
 
 
