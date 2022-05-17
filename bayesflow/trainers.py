@@ -74,7 +74,7 @@ class Trainer:
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', 
-                 clip_value=None, skip_checks=False, **kwargs):
+                 clip_value=None, skip_checks=False, use_memory=True, **kwargs):
         """ Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
@@ -100,6 +100,8 @@ class Trainer:
             The value used for gradient clipping when clip_method is in {'value', 'norm'}
         skip_checks      : boolean
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
+        use_memory       : boolean
+            If True, store a pre-defined amount of simulations for later use (validation, etc.)
         """
 
         # Set-up logging
@@ -147,8 +149,11 @@ class Trainer:
         self.checkpoint_path = checkpoint_path
 
         # Set-up memory classes
-        self.loss_history= LossHistory()
-        self.simulation_memory = SimulationMemory()
+        self.loss_history = LossHistory()
+        if use_memory:
+            self.simulation_memory = SimulationMemory()
+        else:
+            self.simulation_memory = None
 
         # Perform a sanity check wiuth provided components
         if not skip_checks:
@@ -224,7 +229,7 @@ class Trainer:
         ----------
         simulations_dict : dict
             A dictionaty containing the simulated data / context, if using the default keys, 
-            the method expects mandatory keys `sim_data` and `prior_draws` to be present
+            the method expects at least the mandatory keys `sim_data` and `prior_draws` to be present
         epochs           : int
             Number of epochs (and number of times a checkpoint is stored)
         batch_size       : int
@@ -344,6 +349,8 @@ class Trainer:
 
         if input_dict is None:
             input_dict = self._forward_inference(batch_size, **kwargs.pop('conf_args', {}), **kwargs.pop('model_args', {}))
+        if self.simulation_memory is not None:
+            self.simulation_memory.store(input_dict)
         loss = self._backprop_step(input_dict, **kwargs.pop('net_args', {}))
         return loss
 

@@ -130,9 +130,10 @@ class LossHistory:
     def get_copy(self):
         return deepcopy(self.history)
 
+
 class SimulationMemory:
     
-    def __init__(self, stores_raw=True, capacity_in_batches=100):
+    def __init__(self, stores_raw=True, capacity_in_batches=50):
         self.stores_raw = stores_raw
         self._capacity = capacity_in_batches
         self._buffer = [None] * self._capacity

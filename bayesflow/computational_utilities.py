@@ -87,7 +87,7 @@ def mmd_kernel(x, y, kernel):
 
     Returns
     -------
-    loss : tf.Tensor
+    loss   : tf.Tensor
         squared maximum mean discrepancy loss, shape (,)
     """
 
