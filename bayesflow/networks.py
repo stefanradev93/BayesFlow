@@ -20,6 +20,7 @@ from tensorflow.keras.layers import Dense, MultiHeadAttention
 from tensorflow.keras.models import Sequential
 
 from bayesflow import default_settings
+from bayesflow.wrappers import SpectralNormalization
 from bayesflow.helper_functions import build_meta_dict
 from bayesflow.exceptions import ConfigurationError, InferenceError
 
