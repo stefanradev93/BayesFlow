@@ -13,16 +13,117 @@
 # limitations under the License.
 
 from scipy.stats import binom
+from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
 from bayesflow.computational_utilities import expected_calibration_error
 
+def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_agg=np.std, 
+                  param_names=None, fig_size=None, label_fontsize=14, title_fontsize=16,
+                  metric_fontsize=16, add_corr=True, add_r2=True, color='#8f2727'):
+    
+    """ Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
+    The point estimate can be controlled with the `point_agg` argument, and the uncertainty estimate
+    can be controlled with the `uncertainty_agg` argument.
+
+    Parameters
+    ----------
+    post_samples      : np.ndarray of shape (n_data_sets, n_post_draws, n_params)
+        The posterior draws obtained from n_data_sets
+    prior_samples     : np.ndarray of shape (n_data_sets, n_params)
+        The prior draws obtained for generating n_data_sets
+    point_agg         : callable, optional, default: np.mean
+        The function to apply to the posterior draws to get a point estimate.
+    uncertainty_agg   : callable or None, optional, default: np.std
+        The function to apply to the posterior draws to get an uncertainty estimate. 
+        If `None` provided, a simple scatter will be plotted.
+    param_names       : list or None, optional, default: None
+        The parameter names for nice plot titles. Inferred if None
+    fig_size          : tuple or None, optional, default : None
+        The figure size passed to the matplotlib constructor. Inferred if None.
+    label_fontsize    : int, optional, default: 14
+        The font size of the y-label text
+    title_fontsize    : int, optional, default: 16
+        The font size of the title text
+    metric_fontsize   : int, optional, default: 16
+        The font size of the goodness-of-fit metric (if provided)
+    add_corr          : boolean, optional, default: True
+        A flag for adding correlation between true and estimates to the plot.
+    add_r2            : boolean, optional, default: True
+        A flag for adding R^2 between true and estimates to the plot.
+    color             : str, optional, default: '#8f2727'
+        The color for the true vs. estimated scatter points and errobars.
+        
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
+    """
+    
+    # Compute point estimates and uncertainties
+    est = point_agg(post_samples, axis=1)
+    u = uncertainty_agg(post_samples, axis=1)
+    
+    # Determine n params and param names if None given
+    n_params = prior_samples.shape[-1]
+    if param_names is None:
+        param_names = [f'p_{i}' for i in range(1, n_params+1)]
+        
+    # Determine n_subplots dynamically
+    n_row = int(np.ceil(n_params / 6))
+    n_col = int(np.ceil(n_params / n_row))
+    
+    # Initialize figure
+    if fig_size is None:
+        fig_size = (20, int(4 * n_row))
+    f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
+
+    for i, ax in enumerate(axarr.flat):
+        
+        # Add scatter and errorbars
+        if uncertainty_agg is not None:
+            im = ax.errorbar(prior_samples[:, i], est[:, i], yerr=u[:, i], fmt='o', alpha=0.5, color=color)
+        else:
+            im = ax.scatter(prior_samples[:, i], est[:, i], alpha=0.5, color=color)
+
+        # Make plots quadratic to avoid visual illusions
+        lower = min(prior_samples[:, i].min(), est[:, i].min())
+        upper = max(prior_samples[:, i].max(), est[:, i].max())
+        eps = (upper - lower) * 0.1
+        ax.set_xlim([lower - eps, upper + eps])
+        ax.set_ylim([lower - eps, upper + eps]) 
+        ax.plot([ax.get_xlim()[0], ax.get_xlim()[1]], [ax.get_ylim()[0], ax.get_ylim()[1]], 
+                 color='black', alpha=0.9, linestyle='dashed')
+        
+        # Add labels, optional metrics and title
+        ax.set_xlabel('Ground truth', fontsize=label_fontsize)
+        ax.set_ylabel('Estimated', fontsize=label_fontsize)
+        if add_r2:
+            r2 = r2_score(prior_samples[:, i], est[:, i])
+            ax.text(0.1, 0.9, '$R^2$ = {:.3f}'.format(r2),
+                     horizontalalignment='left',
+                     verticalalignment='center',
+                     transform=ax.transAxes, 
+                     size=metric_fontsize)
+        if add_corr:
+            corr = np.corrcoef(prior_samples[:, i], est[:, i])[0, 1]
+            ax.text(0.1, 0.8, '$r$ = {:.3f}'.format(corr),
+                         horizontalalignment='left',
+                         verticalalignment='center',
+                         transform=ax.transAxes, 
+                         size=metric_fontsize)
+        ax.set_title(param_names[i], fontsize=title_fontsize)
+        
+        # Prettify
+        sns.despine(ax=ax)
+        ax.grid(alpha=0.5)
+    f.tight_layout()
+    return f
+
 
 def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None, 
              num_bins=10, binomial_interval=0.95, label_fontsize=14, title_fontsize=16):
-
     """ Creates and plots publication-ready histograms for simulation-based calibration 
     checks according to:
 

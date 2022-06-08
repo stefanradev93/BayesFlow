@@ -484,7 +484,7 @@ class GenerativeModel:
                 if 'context' in k:
                     name = k.replace('_', ' ').replace('sim', 'simulation').replace('non ', 'non-')
                     if v is None:
-                        logger.info(f'No {name} provided.')
+                        logger.info(f'No optional {name} provided.')
                     else:
                         try:
                             logger.info(f'Shape of {name}: {v.shape}')
