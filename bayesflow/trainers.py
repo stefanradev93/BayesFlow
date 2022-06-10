@@ -219,7 +219,7 @@ class Trainer:
             # Store after each epoch, if specified
             if self.manager is not None and save_checkpoint:
                 self.manager.save()
-        return self.loss_history.get_copy()
+        return self.loss_history.get_plottable()
 
     def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True,**kwargs):
         """ Trains an amortizer via offline learning. Assume parameters, data and optional 
@@ -279,7 +279,7 @@ class Trainer:
             # Store after each epoch, if specified
             if self.manager is not None and save_checkpoint:
                 self.manager.save()
-        return self.loss_history.get_copy()
+        return self.loss_history.get_plottable()
 
     def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, **kwargs):
         """Trains an amortizer via round-based learning.
@@ -327,7 +327,7 @@ class Trainer:
         
             # Train offline with generated stuff
             _ = self.train_offline(simulations_dict, epochs, batch_size, save_checkpoint, **kwargs)
-        return self.loss_history.get_copy()
+        return self.loss_history.get_plottable()
 
     def _train_step(self, batch_size, input_dict=None, **kwargs):
         """ Performs forward inference -> configuration -> network -> loss pipeline.

@@ -370,13 +370,13 @@ class DenseCouplingNet(tf.keras.Model):
         # Create network body
         self.dense = Sequential(
             # Hidden layer structure
-            [Dense(**meta['dense_args'])
+            [SpectralNormalization(Dense(**meta['dense_args'])) if meta['spec_norm'] else Dense(**meta['dense_args'])
              for _ in range(meta['n_dense'])]
         )
         # Create network head
         self.dense.add(Dense(n_out, **{k: v for k, v in meta['dense_args'].items() if k != 'units'}))
 
-    def call(self, target, condition):
+    def call(self, target, condition, **kwargs):
         """Concatenates target and condition and performs a forward pass through the coupling net.
 
         Parameters
@@ -393,7 +393,7 @@ class DenseCouplingNet(tf.keras.Model):
             N = int(target.shape[1])
             condition = tf.stack([condition] * N, axis=1)
         inp = tf.concat((target, condition), axis=-1)
-        out = self.dense(inp)
+        out = self.dense(inp, **kwargs)
         return out
 
 
@@ -401,7 +401,7 @@ class AttentiveCouplingNet(tf.keras.Model):
     """Implements a conditional attentive coupling net."""
 
     def __init__(self, meta, n_out):
-        """Creates the attentive conditional coupling net.
+        """Creates a conditional coupling net with self-attention.
 
         Parameters
         ----------
@@ -418,8 +418,8 @@ class AttentiveCouplingNet(tf.keras.Model):
         self.post_dense = Sequential([Dense(**meta['post_dense_args']) for _ in range(meta['n_dense_post'])])
         self.post_dense.add(Dense(n_out, **{k: v for k, v in meta['post_dense_args'].items() if k != 'units'}))
         
-    def call(self, target, condition):
-        """Concatenates x and y and performs a forward pass through the coupling net.
+    def call(self, target, condition, **kwargs):
+        """Concatenates x and y and performs a forward pass through the attentive network.
 
         Parameters
         ----------
@@ -439,21 +439,20 @@ class AttentiveCouplingNet(tf.keras.Model):
         # Repeat condition for each time index and create positional encoding
         if len(condition.shape) == 2:
             condition = tf.stack([condition] * T, axis=1)
-        positional_encoding = np.stack([np.sqrt(np.linspace(1, T, T))[:, np.newaxis]] * B, axis=0).astype(np.float32)
 
-        # Concat condition and positional encoding
-        inp = tf.concat((target, condition, positional_encoding), axis=-1)
+        # Concat target and condition
+        inp = tf.concat((target, condition), axis=-1)
 
-        # Pass through pre-dense
-        inp = self.pre_dense(inp)
-        inp = tf.concat((inp, positional_encoding), axis=-1)
+        # Pass through pre-dense and add back condition
+        inp = self.pre_dense(inp, **kwargs)
+        inp = tf.concat((inp, condition), axis=-1)
 
         # Pass through attention
         out = self.attention(inp, inp)
 
-        # Pass through post-dense 
-        out = tf.concat((out, positional_encoding), axis=-1)
-        out = self.post_dense(out)
+        # Add back condition and pass through post-dense 
+        out = tf.concat((out, condition), axis=-1)
+        out = self.post_dense(out, **kwargs)
         return out
 
 
@@ -529,7 +528,7 @@ class ConditionalCouplingLayer(tf.keras.Model):
         else:
             self.act_norm = None
 
-    def _forward(self, target, condition):
+    def _forward(self, target, condition, **kwargs):
         """ Performs a forward pass through the coupling block. Used internally by the instance.
 
         Parameters
@@ -550,19 +549,19 @@ class ConditionalCouplingLayer(tf.keras.Model):
         u1, u2 = tf.split(target, [self.n_out1, self.n_out2], axis=-1)
 
         # Pre-compute network outputs for v1
-        s1 = self.s1(u2, condition)
+        s1 = self.s1(u2, condition, **kwargs)
         # Clamp s1 if specified
         if self.alpha is not None:
             s1 = (2. * self.alpha / np.pi) * tf.math.atan(s1 / self.alpha)
-        t1 = self.t1(u2, condition)
+        t1 = self.t1(u2, condition, **kwargs)
         v1 = u1 * tf.exp(s1) + t1
 
         # Pre-compute network outputs for v2
-        s2 = self.s2(v1, condition)
+        s2 = self.s2(v1, condition, **kwargs)
         # Clamp s2 if specified
         if self.alpha is not None:
             s2 = (2. * self.alpha / np.pi) * tf.math.atan(s2 / self.alpha)
-        t2 = self.t2(v1, condition)
+        t2 = self.t2(v1, condition, **kwargs)
         v2 = u2 * tf.exp(s2) + t2
         v = tf.concat((v1, v2), axis=-1)
 
@@ -570,7 +569,7 @@ class ConditionalCouplingLayer(tf.keras.Model):
         log_det_J = tf.reduce_sum(s1, axis=-1) + tf.reduce_sum(s2, axis=-1)
         return v, log_det_J 
 
-    def _inverse(self, z, condition):
+    def _inverse(self, z, condition, **kwargs):
         """ Performs an inverse pass through the coupling block. Used internally by the instance.
 
         Parameters
@@ -590,24 +589,24 @@ class ConditionalCouplingLayer(tf.keras.Model):
         v1, v2 = tf.split(z, [self.n_out1, self.n_out2], axis=-1)
 
         # Pre-Compute s2
-        s2 = self.s2(v1, condition)
+        s2 = self.s2(v1, condition, **kwargs)
         # Clamp s2 if specified
         if self.alpha is not None:
             s2 = (2. * self.alpha / np.pi) * tf.math.atan(s2 / self.alpha)
-        u2 = (v2 - self.t2(v1, condition)) * tf.exp(-s2)
+        u2 = (v2 - self.t2(v1, condition, **kwargs)) * tf.exp(-s2)
 
         # Pre-Compute s1
-        s1 = self.s1(u2, condition)
+        s1 = self.s1(u2, condition, **kwargs)
         # Clamp s1 if specified
         if self.alpha is not None:
             s1 = (2. * self.alpha / np.pi) * tf.math.atan(s1 / self.alpha)
-        u1 = (v1 - self.t1(u2, condition)) * tf.exp(-s1)
+        u1 = (v1 - self.t1(u2, condition, **kwargs)) * tf.exp(-s1)
         u = tf.concat((u1, u2), axis=-1)
 
         return u
 
-    def call(self, target_or_z, condition, inverse=False):
-        """Performs one pass through an invertible chain (either inverse or forward).
+    def call(self, target_or_z, condition, inverse=False, **kwargs):
+        """ Performs one pass through an invertible chain (either inverse or forward).
         
         Parameters
         ----------
@@ -634,10 +633,10 @@ class ConditionalCouplingLayer(tf.keras.Model):
         """
         
         if not inverse:
-            return self.forward(target_or_z, condition)
-        return self.inverse(target_or_z, condition)
+            return self.forward(target_or_z, condition, **kwargs)
+        return self.inverse(target_or_z, condition, **kwargs)
 
-    def forward(self, target, condition):
+    def forward(self, target, condition, **kwargs):
         """Performs a forward pass through a coupling layer with an optinal permutation and act norm layer."""
 
         # Initialize log_det_Js accumulator
@@ -653,16 +652,16 @@ class ConditionalCouplingLayer(tf.keras.Model):
             target = self.permutation(target)
 
         # Pass through coupling layer
-        z, log_det_J_c = self._forward(target, condition)
+        z, log_det_J_c = self._forward(target, condition, **kwargs)
         log_det_Js += log_det_J_c
 
         return z, log_det_Js
 
-    def inverse(self, z, condition):
+    def inverse(self, z, condition, **kwargs):
         """Performs an inverse pass through a coupling layer with an optinal permutation and act norm layer."""
 
         # Pass through coupling layer
-        target = self._inverse(z, condition)
+        target = self._inverse(z, condition, **kwargs)
 
         # Pass through optional permutation
         if self.permutation is not None:
@@ -715,7 +714,7 @@ class InvertibleNetwork(tf.keras.Model):
             
         self.z_dim = meta['n_params']
 
-    def call(self, targets, condition, inverse=False):
+    def call(self, targets, condition, inverse=False, **kwargs):
         """Performs one pass through an invertible chain (either inverse or forward).
 
         Parameters
@@ -743,8 +742,8 @@ class InvertibleNetwork(tf.keras.Model):
         """
         
         if inverse:
-            return self.inverse(targets, condition)
-        return self.forward(targets, condition)
+            return self.inverse(targets, condition, **kwargs)
+        return self.forward(targets, condition, **kwargs)
 
     def forward(self, targets, condition, **kwargs):
         """Performs a forward pass though the chain."""

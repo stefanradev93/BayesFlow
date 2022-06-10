@@ -19,6 +19,7 @@ import numpy as np
 import seaborn as sns
 
 from bayesflow.computational_utilities import expected_calibration_error
+from bayesflow.helper_classes import LossHistory
 
 def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_agg=np.std, 
                   param_names=None, fig_size=None, label_fontsize=14, title_fontsize=16,
@@ -198,6 +199,46 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
     f.tight_layout()
     return f
 
+def plot_losses(history, fig_size=None, color='#8f2727', label_fontsize=14, title_fontsize=16):
+    """ A generic helper function to plot the losses of a series of training runs.
+    
+    Parameters
+    ----------
+    
+    history : pd.DataFrame or bayesflow.LossHistory object
+        The (plottable) history as returned by a train_[...] method of a `Trainer` instance.
+        
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
+    """
+
+    # Handle non-pd.DataFrame type
+    if type(history) is LossHistory:
+        history = history.get_plottable()
+    
+    # Determine the number of rows for plot
+    n_row = len(history.columns)
+    
+    # Initialize figure
+    if fig_size is None:
+        fig_size = (16, int(4 * n_row))
+    f, axarr = plt.subplots(n_row, 1, figsize=fig_size)
+    
+    # Get the number of steps as an array
+    step_index = np.arange(1, len(history)+1)
+    
+    # Loop through loss entries and populate plot
+    looper = [axarr] if n_row == 1 else axarr.flat
+    for i, ax in enumerate(looper):
+        ax.plot(step_index, history.iloc[:, i], color=color, lw=2)
+        ax.set_xlabel('Training step #', fontsize=label_fontsize)
+        ax.set_ylabel('Loss value', fontsize=label_fontsize)
+        sns.despine(ax=ax)
+        ax.grid(alpha=0.5)
+        ax.set_title(history.columns[i], fontsize=title_fontsize)
+    f.tight_layout()
+    return f
 
 def plot_calibration_curves(m_true, m_pred, model_names=None, n_bins=10, font_size=12, fig_size=(12, 4)):
     """Plots the calibration curves for a model comparison problem.

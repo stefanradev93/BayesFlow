@@ -136,7 +136,7 @@ class AmortizedPosterior(tf.keras.Model):
         )
 
         # Obtain random draws from the approximate posterior given conditioning variables
-        post_samples = self.inference_net.sample(condition, n_samples, **kwargs)
+        post_samples = self.inference_net.sample(condition, n_samples, training=False, **kwargs)
 
         if to_numpy:
             return post_samples.numpy()
@@ -170,7 +170,7 @@ class AmortizedPosterior(tf.keras.Model):
         )
 
         # Compute approximate log posterior of provided parameters
-        log_post = self.inference_net.log_density(input_dict[DEFAULT_KEYS['parameters']], conditions, **kwargs)
+        log_post = self.inference_net.log_density(input_dict[DEFAULT_KEYS['parameters']], conditions, training=False, **kwargs)
 
         if to_numpy:
             return log_post.numpy()
@@ -334,7 +334,11 @@ class AmortizedLikelihood(tf.keras.Model):
         """
 
         # Obtain random draws from the approximate posterior given conditioning variables
-        lik_samples = self.surrogate_net.sample(input_dict[DEFAULT_KEYS['conditions']], n_samples, **kwargs)
+        lik_samples = self.surrogate_net.sample(
+            input_dict[DEFAULT_KEYS['conditions']], 
+            n_samples, training=False, **kwargs
+        )
+
         if to_numpy:
             return lik_samples.numpy()
         return lik_samples
@@ -360,7 +364,8 @@ class AmortizedLikelihood(tf.keras.Model):
 
         log_lik = self.surrogate_net.log_density(
             input_dict[DEFAULT_KEYS['observables']], 
-            input_dict[DEFAULT_KEYS['conditions']], **kwargs)
+            input_dict[DEFAULT_KEYS['conditions']], training=False, **kwargs
+        )
 
         if to_numpy:
             return log_lik.numpy()
@@ -493,9 +498,9 @@ class JointAmortizer(tf.keras.Model):
 
         if input_dict.get(DEFAULT_KEYS['likelihood_inputs']) is not None:
             return self.amortized_likelihood.log_likelihood(
-                input_dict[DEFAULT_KEYS['likelihood_inputs']], to_numpy=to_numpy, **kwargs
+                input_dict[DEFAULT_KEYS['likelihood_inputs']], to_numpy=to_numpy, training=False, **kwargs
             )
-        return self.amortized_likelihood.log_likelihood(input_dict, to_numpy=to_numpy, **kwargs)
+        return self.amortized_likelihood.log_likelihood(input_dict, to_numpy=to_numpy, training=False, **kwargs)
    
     def log_posterior(self, input_dict, to_numpy=True, **kwargs):
         """ Calculates the approximate log-posterior of targets given conditional variables via
@@ -520,9 +525,9 @@ class JointAmortizer(tf.keras.Model):
 
         if input_dict.get(DEFAULT_KEYS['posterior_inputs']) is not None:
             return self.amortized_posterior.log_posterior(
-                input_dict[DEFAULT_KEYS['posterior_inputs']], to_numpy=to_numpy, **kwargs
+                input_dict[DEFAULT_KEYS['posterior_inputs']], to_numpy=to_numpy, training=False, **kwargs
             )
-        return self.amortized_posterior.log_posterior(input_dict, to_numpy=to_numpy, **kwargs)
+        return self.amortized_posterior.log_posterior(input_dict, to_numpy=to_numpy, training=False, **kwargs)
    
     def sample_data(self, input_dict, n_samples, to_numpy=True, **kwargs):
         """ Generates `n_samples` random draws from the surrogate likelihood given input conditions.
@@ -549,9 +554,9 @@ class JointAmortizer(tf.keras.Model):
 
         if input_dict.get(DEFAULT_KEYS['likelihood_inputs']) is not None:
             return self.amortized_likelihood.sample(
-                input_dict[DEFAULT_KEYS['likelihood_inputs']], n_samples, to_numpy=to_numpy, **kwargs
+                input_dict[DEFAULT_KEYS['likelihood_inputs']], n_samples, to_numpy=to_numpy, training=False, **kwargs
             )
-        return self.amortized_likelihood.sample(input_dict, n_samples, to_numpy=to_numpy, **kwargs)
+        return self.amortized_likelihood.sample(input_dict, n_samples, to_numpy=to_numpy, training=False, **kwargs)
 
     def sample_parameters(self, input_dict, n_samples, to_numpy=True, **kwargs):
         """ Generates random draws from the approximate posterior given conditonal variables.
@@ -577,9 +582,9 @@ class JointAmortizer(tf.keras.Model):
         """
         if input_dict.get(DEFAULT_KEYS['posterior_inputs']) is not None:
             return self.amortized_posterior.sample(
-                input_dict[DEFAULT_KEYS['posterior_inputs']], n_samples, to_numpy=to_numpy, **kwargs
+                input_dict[DEFAULT_KEYS['posterior_inputs']], n_samples, to_numpy=to_numpy, training=False, **kwargs
             )
-        return self.amortized_posterior.sample(input_dict, n_samples, to_numpy=to_numpy, **kwargs)
+        return self.amortized_posterior.sample(input_dict, n_samples, to_numpy=to_numpy, training=False, **kwargs)
 
 
 class ModelComparisonAmortizer(tf.keras.Model):

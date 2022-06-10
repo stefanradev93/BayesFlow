@@ -15,6 +15,7 @@
 from copy import deepcopy
 
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 
 from bayesflow.default_settings import DEFAULT_KEYS
@@ -82,7 +83,7 @@ class LossHistory:
         self.history[f'Run {self._current_run}'] = {}
 
     def add_entry(self, epoch, current_loss):
-        """ Adds loss entry for current epoch into memory data structure.
+        """ Adds loss entry for current epoch into internal memory data structure.
         """
 
         # Add epoch key, if specified
@@ -103,10 +104,16 @@ class LossHistory:
         elif type(current_loss) is tuple or type(current_loss) is list:
             entry = [v.numpy() if type(v) is not np.ndarray else v for v in current_loss]
             self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(entry)
+            # Store keys, if none existing
+            if self.loss_names == []:
+                self.loss_names = [f'Loss.{l}' for l in range(1, len(entry)+1)]
         
         # Assume scalar loss output
         else:
             self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(current_loss.numpy())
+            # Store keys, if none existing
+            if self.loss_names == []:
+                self.loss_names.append('Loss')
 
     def get_running_losses(self, epoch):
         """ Compute and return running means of the losses for current epoch.
@@ -117,7 +124,16 @@ class LossHistory:
             return {'Avg.Loss': means[0]}
         else:
             return {'Avg.' + k: v for k, v in zip(self.loss_names, means)}
-    
+
+    def get_plottable(self):
+        """ Returns the losses as a nicely formatted pandas DataFrame.
+        """
+
+        # Get losses
+        losses_df = pd.DataFrame(pd.concat([pd.melt(pd.DataFrame(self.history[r])) for r in self.history], axis=0).value.to_list())
+        losses_df.columns = self.loss_names
+        return losses_df.copy()
+
     def flush(self):
         """ Returns current history and removes all existing loss history.
         """

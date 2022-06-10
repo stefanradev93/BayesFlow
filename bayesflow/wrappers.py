@@ -11,13 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
 
 import tensorflow as tf
-from typeguard import typechecked
 
 
-@tf.keras.utils.register_keras_serializable(package="Addons")
 class SpectralNormalization(tf.keras.layers.Wrapper):
     """Performs spectral normalization on weights.
 
@@ -52,9 +49,8 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
       AttributeError: If `layer` does not has `kernel` or `embeddings` attribute.
     """
 
-    @typechecked
-    def __init__(self, layer: tf.keras.layers, power_iterations: int = 1, **kwargs):
-        super().__init__(layer, **kwargs)
+    def __init__(self, layer, power_iterations=1, **kwargs):
+        super(SpectralNormalization, self).__init__(layer, **kwargs)
         if power_iterations <= 0:
             raise ValueError(
                 "`power_iterations` should be greater than zero, got "
@@ -64,11 +60,12 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
         self._initialized = False
 
     def build(self, input_shape):
-        """Build `Layer`"""
-        super().build(input_shape)
-        input_shape = tf.TensorShape(input_shape)
-        self.input_spec = tf.keras.layers.InputSpec(shape=[None] + input_shape[1:])
+        """ Build `Layer`"""
 
+        # Register input shape
+        super().build(input_shape)
+
+        # Store reference to weights
         if hasattr(self.layer, "kernel"):
             self.w = self.layer.kernel
         elif hasattr(self.layer, "embeddings"):
@@ -89,19 +86,20 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
             dtype=self.w.dtype,
         )
 
-    def call(self, inputs, training=None):
-        """Call `Layer`"""
-        if training is None:
-            training = tf.keras.backend.learning_phase()
+    def call(self, inputs, training=True):
+        """ Call `Layer`
+        
+        Parameters
+        ----------
+
+        inputs : tf.Tensor of shape (None,...,condition_dim + target_dim)
+            The inputs to the corresponding layer.
+        """
 
         if training:
             self.normalize_weights()
-
         output = self.layer(inputs)
         return output
-
-    def compute_output_shape(self, input_shape):
-        return tf.TensorShape(self.layer.compute_output_shape(input_shape).as_list())
 
     def normalize_weights(self):
         """Generate spectral normalized weights.

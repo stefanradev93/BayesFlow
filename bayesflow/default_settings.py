@@ -61,11 +61,13 @@ DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
     meta_dict={
         't_args': {
             'dense_args': dict(units=64, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense': 2
+            'n_dense': 2,
+            'spec_norm': False
         },
         's_args': {
             'dense_args': dict(units=64, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense': 2
+            'n_dense': 2,
+            'spec_norm': False
         },
     },
     mandatory_fields=[]
