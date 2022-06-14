@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy as np
 import tensorflow as tf
 
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
@@ -109,7 +110,7 @@ class AmortizedPosterior(tf.keras.Model):
         return net_out, summary_out
 
     def sample(self, input_dict, n_samples, to_numpy=True, **kwargs):
-        """ Generates random draws from the approximate posterior given conditonal variables.
+        """ Generates random draws from the approximate posterior given a dictionary with conditonal variables.
 
         Parameters
         ----------
@@ -121,6 +122,8 @@ class AmortizedPosterior(tf.keras.Model):
             The number of posterior draws (samples) to obtain from the approximate posterior
         to_numpy    : bool, optional, default: True
             Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+        **kwargs    : dict, optional
+            Additional keyword arguments passed to the networks
 
         Returns
         -------
@@ -141,6 +144,36 @@ class AmortizedPosterior(tf.keras.Model):
         if to_numpy:
             return post_samples.numpy()
         return post_samples
+
+    def sample_loop(self, input_list, n_samples, to_numpy=True, **kwargs):
+        """ Generates random draws from the approximate posterior given a list of dicts with conditonal variables.
+        Useful when GPU memory is limited or data sets have a different (non-Tensor) structure. 
+
+        Parameters
+        ----------
+        input_list : list of dictionaries, each dictionary having the following mandatory keys, if DEFAULT KEYS unchanged: 
+            `summary_conditions` : the conditioning variables (including data) that are first passed through a summary network
+            `direct_conditions`  : the conditioning variables that the directly passed to the inference network
+        n_samples   : int
+            The number of posterior draws (samples) to obtain from the approximate posterior
+        to_numpy    : bool, optional, default: True
+            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+        **kwargs    : dict, optional
+            Additional keyword arguments passed to the networks
+
+        Returns
+        -------
+        post_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, n_params)
+            the sampled parameters per data set
+        """
+
+        post_samples = []
+        for input_dict in input_list:
+            post_samples.append(self.sample(input_dict, n_samples, to_numpy, **kwargs))
+        if to_numpy:
+            return np.concatenate(post_samples, axis=0)
+        return tf.concat(post_samples, axis=0)
+
 
     def log_posterior(self, input_dict, to_numpy=True, **kwargs):
         """ Calculates the approximate log-posterior of targets given conditional variables via
