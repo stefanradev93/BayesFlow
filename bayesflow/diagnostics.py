@@ -16,7 +16,11 @@ from scipy.stats import binom
 from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import seaborn as sns
+
+import logging
+logging.basicConfig()
 
 from bayesflow.computational_utilities import expected_calibration_error
 from bayesflow.helper_classes import LossHistory
@@ -28,6 +32,10 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     """ Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
     The point estimate can be controlled with the `point_agg` argument, and the uncertainty estimate
     can be controlled with the `uncertainty_agg` argument.
+
+    This plot yields the same information as the "posterior z-score":
+
+    https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html
 
     Parameters
     ----------
@@ -124,7 +132,7 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
 
 
 def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None, 
-             num_bins=10, binomial_interval=0.95, label_fontsize=14, title_fontsize=16):
+             num_bins=None, binomial_interval=0.95, label_fontsize=14, title_fontsize=16):
     """ Creates and plots publication-ready histograms for simulation-based calibration 
     checks according to:
 
@@ -158,9 +166,24 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
     -------
     f : plt.Figure - the figure instance for optional saving
     """
-    
+
+    # Determine the ratio of simulations to prior draws
+    n_sim, n_draws, n_params = post_samples.shape
+    ratio = int(n_sim / n_draws)
+
+    # Log a warning if N/B ratio recommended by Talts et al. (2018) < 20
+    if ratio < 20:
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+        logger.info(f"The ratio of simulations / posterior draws should be > 20 " + 
+                     "for reliable variance reduction, but your ratio is {ratio}. " + 
+                     "Confidence intervals might be unreliable!")
+
+    # Set n_bins automatically, if nothing provided
+    if num_bins is None:
+        num_bins = ratio
+
     # Determine n params and param names if None given
-    n_params = prior_samples.shape[-1]
     if param_names is None:
         param_names = [f'p_{i}' for i in range(1, n_params+1)]
         
@@ -186,7 +209,6 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
     else:
         ax = axarr
     for j in range(len(param_names)):
-
         ax[j].axhspan(endpoints[0], endpoints[1], facecolor='gray', alpha=0.3)
         ax[j].axhline(np.mean(endpoints), color='gray', zorder=0, alpha=0.5)
         sns.histplot(ranks[:, j], kde=False, ax=ax[j], color='#a34f4f', bins=num_bins, alpha=0.95)
@@ -198,6 +220,7 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
         ax[j].set_ylabel('')
     f.tight_layout()
     return f
+
 
 def plot_losses(history, fig_size=None, color='#8f2727', label_fontsize=14, title_fontsize=16):
     """ A generic helper function to plot the losses of a series of training runs.
@@ -240,8 +263,57 @@ def plot_losses(history, fig_size=None, color='#8f2727', label_fontsize=14, titl
     f.tight_layout()
     return f
 
+
+def plot_latent_space_2d(z_samples, height=2.5, color='#8f2727', **kwargs):
+    """ Creates pairplots for the latent space learned by the inference network. Enables
+    visual inspection of the the latent space and whether its structrue corresponds to the
+    one enforced by the optimization criterion.
+    
+    Parameters
+    ----------
+    z_samples   : np.ndarray or tf.Tensor of shape (n_sim, n_params)
+        The latent samples computed through a forward pass of the inference network.
+    height      : float, optional, default: 2.5
+        The height of the pair plot.
+    color       : str, optional, defailt : '#8f2727'
+        The color of the plot
+    **kwargs    : dict, optional
+        Additional keyword arguments passed to the sns.PairGrid constructor
+
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
+    """
+    
+    # Try to convert z_samples, if eventually tf.Tensor is passed
+    if type(z_samples) is not np.ndarray:
+        z_samples = z_samples.numpy()
+
+    # Get latent dimensionality and prepare titles
+    z_dim = z_samples.shape[-1]
+
+    # Convert samples to a pandas data frame
+    titles = [f'Latent Dim. {i}' for i in range(1, z_dim+1)]
+    data_to_plot = pd.DataFrame(z_samples, columns=titles)
+
+    # Generate plots
+    g = sns.PairGrid(data_to_plot, height=height, **kwargs)
+    g.map_diag(sns.kdeplot, fill=True, color=color, alpha=0.9)
+    g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
+    g.map_upper(plt.scatter, alpha=0.6, s=40, edgecolor='k', color=color)
+
+    # Add grids
+    for i in range(z_dim):
+        for j in range(z_dim):
+            g.axes[i, j].grid(alpha=0.5)
+    g.tight_layout()
+    return g.fig
+
+
 def plot_calibration_curves(m_true, m_pred, model_names=None, n_bins=10, font_size=12, fig_size=(12, 4)):
-    """Plots the calibration curves for a model comparison problem.
+    """ Plots the calibration curves and the ECE for a model comparison problem. Depends on the
+    `expected_calibration_error` function for computing the ECE.
+
 
     Parameters
     ----------

@@ -115,8 +115,6 @@ class GaussianMeanSimulator:
         return sim_data
 
 
-
-
 class MultivariateTSimulator:
     def __init__(self, df=10):
         """

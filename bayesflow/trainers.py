@@ -67,9 +67,10 @@ class Trainer:
         >>> trainer.train_offline(self, simulations_dict, epochs, batch_size, **kwargs)
 
         This training regime is optimal for very slow, external simulators, which take several minutes for a single simulation.
+        It assumes that all training data has been already simulated and stored on disk.
     
     Note: For extremely slow simulators (i.e., more than an hour of a single simulation), the BayesFlow framework might not be the ideal
-    choice and should be considered in combination with a black-box surrogate optimization method, such as Bayesian optimization.
+    choice and should probably be considered in combination with a black-box surrogate optimization method, such as Bayesian optimization.
     """
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,

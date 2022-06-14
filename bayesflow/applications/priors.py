@@ -16,7 +16,6 @@ import numpy as np
 from scipy import stats
 
 
-
 class GaussianMeanPrior:
     """ Provides a gaussian prior for means of a D-variate Gaussian.
     Attributes
