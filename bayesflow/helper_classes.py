@@ -113,7 +113,7 @@ class LossHistory:
             self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(current_loss.numpy())
             # Store keys, if none existing
             if self.loss_names == []:
-                self.loss_names.append('Loss')
+                self.loss_names.append('Default.Loss')
 
     def get_running_losses(self, epoch):
         """ Compute and return running means of the losses for current epoch.

@@ -85,7 +85,7 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     
     # Initialize figure
     if fig_size is None:
-        fig_size = (20, int(4 * n_row))
+        fig_size = (int(4 * n_col), int(4 * n_row))
     f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
 
     for i, ax in enumerate(axarr.flat):
@@ -132,7 +132,7 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
 
 
 def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None, 
-             num_bins=None, binomial_interval=0.95, label_fontsize=14, title_fontsize=16):
+             num_bins=None, binomial_interval=0.99, label_fontsize=14, title_fontsize=16):
     """ Creates and plots publication-ready histograms for simulation-based calibration 
     checks according to:
 
@@ -175,13 +175,16 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
     if ratio < 20:
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
-        logger.info(f"The ratio of simulations / posterior draws should be > 20 " + 
-                     "for reliable variance reduction, but your ratio is {ratio}. " + 
-                     "Confidence intervals might be unreliable!")
+        logger.info(f'The ratio of simulations / posterior draws should be > 20 ' + 
+                    f'for reliable variance reduction, but your ratio is {ratio}.\
+                    Confidence intervals might be unreliable!')
 
     # Set n_bins automatically, if nothing provided
     if num_bins is None:
-        num_bins = ratio
+        num_bins = int(ratio / 2)
+        # Attempt a fix if a single bin is determined so plot still makes sense
+        if num_bins == 1:
+            num_bins = 5
 
     # Determine n params and param names if None given
     if param_names is None:
