@@ -206,7 +206,7 @@ class Trainer:
         else:
             raise NotImplementedError("Latent space diagnostics are only available for type AmortizedPosterior!")
 
-    def diagnose_sbc(self, inputs=None, **kwargs):
+    def diagnose_sbc(self, inputs=None, n_samples=None, **kwargs):
         """ Performs visual pre-inference diagnostics via simulation-based calibration (SBC)
         (new simulations) or internal simulation memory.
         If `inputs is not None`, then diagnostics will be performed on the inputs, regardless
@@ -215,9 +215,12 @@ class Trainer:
         
         Parameters
         ----------
-        inputs : None, list or dict, optional (default - None)
+        inputs    : None, list or dict, optional (default - None)
             The optional inputs to use 
-        **kwargs             : dict, optional
+        n_samples : int, optional (default - None)
+            The number of posterior samples to draw for each simulated data set.
+            If None, the number will be heuristically determined so n_sim / n_draws ~= 20
+        **kwargs  : dict, optional
             Optional keyword arguments, which could be one of:
             `conf_args`  - optional keyword arguments passed to the configurator
             `net_args`   - optional keyword arguments passed to the amortizer
@@ -238,13 +241,21 @@ class Trainer:
                     inputs = self.simulation_memory.get_memory()
             else:
                 inputs = self.configurator(inputs, **kwargs.pop('conf_args', {}))
-            
+
+            # Heuristically determine the number of posterior samples
+            if n_samples is None:
+                if type(inputs) is list:
+                    n_sim = np.sum([inp['parameters'].shape[0] for inp in inputs])
+                    n_samples = int(np.ceil(n_sim / 20))
+                else:
+                    n_samples = int(np.ceil(inputs['parameters'].shape[0] / 20))
+                
             # Do inference
             if type(inputs) is list:
-                post_samples = self.amortizer.sample_loop(inputs, **kwargs.pop('net_args', {}))
-                prior_samples = np.concatenate(inp['parameters'] for inp in inputs)
+                post_samples = self.amortizer.sample_loop(inputs, n_samples=n_samples, **kwargs.pop('net_args', {}))
+                prior_samples = np.concatenate([inp['parameters'] for inp in inputs], axis=0)
             else:
-                post_samples = self.amortizer(inputs, **kwargs.pop('net_args', {}))
+                post_samples = self.amortizer(inputs, n_samples, n_samples, **kwargs.pop('net_args', {}))
                 prior_samples = inputs['parameters']
             return plot_sbc(post_samples, prior_samples, **kwargs.pop('plot_args', {}))
         else:

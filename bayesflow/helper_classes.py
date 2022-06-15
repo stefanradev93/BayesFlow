@@ -149,7 +149,7 @@ class LossHistory:
 
 class SimulationMemory:
     
-    def __init__(self, stores_raw=True, capacity_in_batches=None):
+    def __init__(self, stores_raw=True, capacity_in_batches=50):
         self.stores_raw = stores_raw
         self._capacity = capacity_in_batches
         self._buffer = [None] * self._capacity
