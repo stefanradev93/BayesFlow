@@ -164,8 +164,9 @@ class Trainer:
         if not skip_checks:
             self._check_consistency()
 
-    def diagnose(self, inputs=None, **kwargs):
-        """ Runs pre-infernce diagnostics on either provided inputs or internal simulation memory.
+    def diagnose_latent(self, inputs=None, **kwargs):
+        """ Performs visual pre-inference diagnostics of latent space on either provided validation data
+        (new simulations) or internal simulation memory.
         If `inputs is not None`, then diagnostics will be performed on the inputs, regardless
         whether the `simulation_memory` of the trainer is empty or not. If `inputs is None`, then
         the trainer will try to access is memory or raise a `ConfigurationError`.
@@ -175,7 +176,10 @@ class Trainer:
         inputs : None, list or dict, optional (default - None)
             The optional inputs to use 
         **kwargs             : dict, optional
-            Optional keyword arguments, which will be passed to the call() method of the networks.
+            Optional keyword arguments, which could be one of:
+            `conf_args`  - optional keyword arguments passed to the configurator
+            `net_args`   - optional keyword arguments passed to the amortizer
+            `plot_args`  - optional keyword arguments passed to `plot_latent_space_2d`
 
         Returns
         -------
@@ -183,19 +187,69 @@ class Trainer:
             A dictionary storing the losses across epochs and iterations
         """
 
-        
-        # If no inputs, try memory and throw if no memory
-        if inputs is None:
-            if self.simulation_memory is None:
-                raise ConfigurationError("You should either ")
+        if type(self.amortizer) is AmortizedPosterior:
+            # If no inputs, try memory and throw if no memory
+            if inputs is None:
+                if self.simulation_memory is None:
+                    raise ConfigurationError("You should either ")
+                else:
+                    inputs = self.simulation_memory.get_memory()
             else:
-                inputs = self.simulation_memory.get_memory()
-        
-        # Do inference
-
+                inputs = self.configurator(inputs, **kwargs.pop('conf_args', {}))
             
-        
+            # Do inference
+            if type(inputs) is list:
+                z, _ = self.amortizer.call_loop(inputs, **kwargs.pop('net_args', {}))
+            else:
+                z, _ = self.amortizer(inputs, **kwargs.pop('net_args', {}))
+            return plot_latent_space_2d(z, **kwargs.pop('plot_args', {}))
+        else:
+            raise NotImplementedError("Latent space diagnostics are only available for type AmortizedPosterior!")
 
+    def diagnose_sbc(self, inputs=None, **kwargs):
+        """ Performs visual pre-inference diagnostics via simulation-based calibration (SBC)
+        (new simulations) or internal simulation memory.
+        If `inputs is not None`, then diagnostics will be performed on the inputs, regardless
+        whether the `simulation_memory` of the trainer is empty or not. If `inputs is None`, then
+        the trainer will try to access is memory or raise a `ConfigurationError`.
+        
+        Parameters
+        ----------
+        inputs : None, list or dict, optional (default - None)
+            The optional inputs to use 
+        **kwargs             : dict, optional
+            Optional keyword arguments, which could be one of:
+            `conf_args`  - optional keyword arguments passed to the configurator
+            `net_args`   - optional keyword arguments passed to the amortizer
+            `plot_args`  - optional keyword arguments passed to `plot_sbc`
+
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
+        """
+
+        if type(self.amortizer) is AmortizedPosterior:
+            # If no inputs, try memory and throw if no memory
+            if inputs is None:
+                if self.simulation_memory is None:
+                    raise ConfigurationError("You should either ")
+                else:
+                    inputs = self.simulation_memory.get_memory()
+            else:
+                inputs = self.configurator(inputs, **kwargs.pop('conf_args', {}))
+            
+            # Do inference
+            if type(inputs) is list:
+                post_samples = self.amortizer.sample_loop(inputs, **kwargs.pop('net_args', {}))
+                prior_samples = np.concatenate(inp['parameters'] for inp in inputs)
+            else:
+                post_samples = self.amortizer(inputs, **kwargs.pop('net_args', {}))
+                prior_samples = inputs['parameters']
+            return plot_sbc(post_samples, prior_samples, **kwargs.pop('plot_args', {}))
+        else:
+            raise NotImplementedError("SBC diagnostics are only available for type AmortizedPosterior!")
+        
     def load_pretrained_network(self):
         """Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.
         """
