@@ -149,7 +149,7 @@ class LossHistory:
 
 class SimulationMemory:
     
-    def __init__(self, stores_raw=True, capacity_in_batches=50):
+    def __init__(self, stores_raw=True, capacity_in_batches=None):
         self.stores_raw = stores_raw
         self._capacity = capacity_in_batches
         self._buffer = [None] * self._capacity
@@ -162,7 +162,7 @@ class SimulationMemory:
         Parameters
         ----------
         forward_dict : dict
-            The outputs of the forward model.
+            The configured outputs of the forward model.
         """
 
         # If full, overwrite at index
@@ -170,6 +170,9 @@ class SimulationMemory:
             self._buffer[self._idx] = forward_dict
             self._idx += 1
             self.size_in_batches += 1
+    
+    def get_memory(self):
+        return deepcopy(self._buffer)
 
     def is_full(self):
         """ Returns True if the buffer is full, otherwis False."""

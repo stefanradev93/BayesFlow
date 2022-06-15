@@ -109,6 +109,35 @@ class AmortizedPosterior(tf.keras.Model):
             return net_out
         return net_out, summary_out
 
+    def call_loop(self, input_list, return_summary=False, **kwargs):
+        """ Performs a forward pass through the summary and inference network given a list of dicts 
+        with the appropriate entries (i.e., as used for the standard call method).
+
+        This method is useful when GPU memory is limited or data sets have a different (non-Tensor) structure.
+
+        Parameters
+        ----------
+        input_list     : list of dicts, where each dict contains the following mandatory keys, if DEFAULT keys unchanged: 
+            `parameters`         - the latent model parameters over which a condition density is learned
+            `summary_conditions` - the conditioning variables (including data) that are first passed through a summary network
+            `direct_conditions`  - the conditioning variables that the directly passed to the inference network
+        return_summary : bool, optional, default: False
+            A flag which determines whether the learnable data summaries (representations) are returned or not.
+
+        Returns
+        -------
+        net_out or (net_out, summary_out) : tuple of tf.Tensor
+            the outputs of ``inference_net(theta, summary_net(x, c_s), c_d)``, usually a latent variable and
+            log(det(Jacobian)), that is a tuple ``(z, log_det_J) or (sum_outputs, (z, log_det_J)) if 
+            return_summary is set to True and a summary network is defined.`` 
+        """
+
+        outputs = []
+        for forward_dict in input_list:
+            outputs.append(self(forward_dict, return_summary, **kwargs))
+        net_out = [tf.concat([o[i] for o in outputs], axis=0) for i in range(len(outputs[0]))]
+        return tuple(net_out)
+
     def sample(self, input_dict, n_samples, to_numpy=True, **kwargs):
         """ Generates random draws from the approximate posterior given a dictionary with conditonal variables.
 

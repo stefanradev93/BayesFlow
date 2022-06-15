@@ -29,6 +29,7 @@ from bayesflow.helper_functions import apply_gradients, format_loss_string
 from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory
 from bayesflow.default_settings import STRING_CONFIGS
 from bayesflow.amortized_inference import *
+from bayesflow.diagnostics import *
 
 
 class Trainer:
@@ -75,7 +76,7 @@ class Trainer:
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', 
-                 clip_value=None, skip_checks=False, use_memory=True, **kwargs):
+                 clip_value=None, skip_checks=False, memory=True, **kwargs):
         """ Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
@@ -101,8 +102,9 @@ class Trainer:
             The value used for gradient clipping when clip_method is in {'value', 'norm'}
         skip_checks      : boolean
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
-        use_memory       : boolean
-            If True, store a pre-defined amount of simulations for later use (validation, etc.)
+        memory           : boolean or bayesflow.SimulationMemory
+            If True, store a pre-defined amount of simulations for later use (validation, etc.). 
+            If SimulationMemory instance provided, store reference.
         """
 
         # Set-up logging
@@ -151,14 +153,48 @@ class Trainer:
 
         # Set-up memory classes
         self.loss_history = LossHistory()
-        if use_memory:
+        if memory is True:
             self.simulation_memory = SimulationMemory()
+        elif type(memory) is SimulationMemory:
+            self.simulation_memory = memory
         else:
             self.simulation_memory = None
 
         # Perform a sanity check wiuth provided components
         if not skip_checks:
             self._check_consistency()
+
+    def diagnose(self, inputs=None, **kwargs):
+        """ Runs pre-infernce diagnostics on either provided inputs or internal simulation memory.
+        If `inputs is not None`, then diagnostics will be performed on the inputs, regardless
+        whether the `simulation_memory` of the trainer is empty or not. If `inputs is None`, then
+        the trainer will try to access is memory or raise a `ConfigurationError`.
+        
+        Parameters
+        ----------
+        inputs : None, list or dict, optional (default - None)
+            The optional inputs to use 
+        **kwargs             : dict, optional
+            Optional keyword arguments, which will be passed to the call() method of the networks.
+
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
+        """
+
+        
+        # If no inputs, try memory and throw if no memory
+        if inputs is None:
+            if self.simulation_memory is None:
+                raise ConfigurationError("You should either ")
+            else:
+                inputs = self.simulation_memory.get_memory()
+        
+        # Do inference
+
+            
+        
 
     def load_pretrained_network(self):
         """Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.
