@@ -164,6 +164,7 @@ class AmortizedPosterior(tf.keras.Model):
         _, condition = self._compute_summary_condition(
             input_dict.get(DEFAULT_KEYS['summary_conditions']), 
             input_dict.get(DEFAULT_KEYS['direct_conditions']), 
+            training=False,
             **kwargs
         )
 
@@ -228,6 +229,7 @@ class AmortizedPosterior(tf.keras.Model):
         _, conditions = self._compute_summary_condition(
             input_dict.get(DEFAULT_KEYS['summary_conditions']), 
             input_dict.get(DEFAULT_KEYS['direct_conditions']), 
+            training=False,
             **kwargs
         )
 
