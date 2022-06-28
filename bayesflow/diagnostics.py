@@ -86,71 +86,93 @@ def true_vs_estimated(theta_true, theta_est, param_names, dpi=300, figsize=(20, 
     return f
 
 
-def plot_sbc(theta_samples, theta_test, param_names, bins=25, figsize=(24, 12), interval=0.99, show=True, font_size=12):
-    """ Plots the simulation-based posterior checking histograms as advocated by Talts et al. (2018).
-
+def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None, 
+             num_bins=None, binomial_interval=0.99, label_fontsize=14, title_fontsize=16):
+    """ Creates and plots publication-ready histograms for simulation-based calibration 
+    checks according to:
+    Talts, S., Betancourt, M., Simpson, D., Vehtari, A., & Gelman, A. (2018). 
+    Validating Bayesian inference algorithms with simulation-based calibration. 
+    arXiv preprint arXiv:1804.06788.
+    Any deviation from uniformity indicates miscalibration and thus poor convergence 
+    of the networks or poor combination between generative model / networks.
     Parameters
     ----------
-    theta_samples: np.array
-        Array of sampled parameters
-    theta_test: np.array
-        Array of test parameters
-    param_names: list(str)
-        List of parameter names for plotting.
-    bins: int, default: 25
-        Bins for histogram plot
-    figsize: tuple(int, int), default: (24, 12)
-        Figure size
-    interval: float, default: 0.99
-        Interval to plot
-    show: bool, default: True
-        Controls whether the plot shall be printed
-    font_size: int, default:12
-        Font size
-
+    post_samples      : np.ndarray of shape (n_data_sets, n_post_draws, n_params)
+        The posterior draws obtained from n_data_sets
+    prior_samples     : np.ndarray of shape (n_data_sets, n_params)
+        The prior draws obtained for generating n_data_sets
+    param_names       : list or None, optional, default: None
+        The parameter names for nice plot titles. Inferred if None
+    fig_size          : tuple or None, optional, default : None
+        The figure size passed to the matplotlib constructor. Inferred if None.
+    num_bins          : int, optional, default: 10
+        The number of bins to use for each marginal histogram
+    binomial_interval : float in (0, 1), optional, default: 0.95
+        The width of the confidence interval for the binomial distribution
+    label_fontsize    : int, optional, default: 14
+        The font size of the y-label text
+    title_fontsize    : int, optional, default: 16
+        The font size of the title text
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
     """
 
-    # Plot settings
-    plt.rcParams['font.size'] = font_size
-    N = int(theta_test.shape[0])
+    # Determine the ratio of simulations to prior draws
+    n_sim, n_draws, n_params = post_samples.shape
+    ratio = int(n_sim / n_draws)
 
+    # Log a warning if N/B ratio recommended by Talts et al. (2018) < 20
+    if ratio < 20:
+        print(f'The ratio of simulations / posterior draws should be > 20 ' + 
+                    f'for reliable variance reduction, but your ratio is {ratio}.\
+                    Confidence intervals might be unreliable!')
+
+    # Set n_bins automatically, if nothing provided
+    if num_bins is None:
+        num_bins = int(ratio / 2)
+        # Attempt a fix if a single bin is determined so plot still makes sense
+        if num_bins == 1:
+            num_bins = 5
+
+    # Determine n params and param names if None given
+    if param_names is None:
+        param_names = [f'p_{i}' for i in range(1, n_params+1)]
+        
     # Determine n_subplots dynamically
-    n_row = int(np.ceil(len(param_names) / 6))
-    n_col = int(np.ceil(len(param_names) / n_row))
-
+    n_row = int(np.ceil(n_params / 6))
+    n_col = int(np.ceil(n_params / n_row))
+    
     # Initialize figure
-    f, axarr = plt.subplots(n_row, n_col, figsize=figsize)
-    if n_row > 1:
-        axarr = axarr.flat
+    if fig_size is None:
+        fig_size = (20, int(4 * n_row))
+    f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
 
     # Compute ranks (using broadcasting)    
-    ranks = np.sum(theta_samples < theta_test[:, np.newaxis, :], axis=1)
-    
-    # Compute interval
-    endpoints = binom.interval(interval, N, 1 / (bins+1))
+    ranks = np.sum(post_samples < prior_samples[:, np.newaxis, :], axis=1)
 
-    # Plot histograms
+    # Compute confidence interval
+    N = int(prior_samples.shape[0])
+    endpoints = binom.interval(binomial_interval, N, 1 / (num_bins+1))
+
+    # Plot marginal histograms in a loop
+    if n_row > 1:
+        ax = axarr.flat
+    else:
+        ax = axarr
     for j in range(len(param_names)):
-        
-        # Add interval
-        axarr[j].axhspan(endpoints[0], endpoints[1], facecolor='gray', alpha=0.3)
-        axarr[j].axhline(np.mean(endpoints), color='gray', zorder=0, alpha=0.5)
-        
-        sns.histplot(ranks[:, j], kde=False, ax=axarr[j], color='#a34f4f', bins=bins, alpha=0.95)
-        
-        axarr[j].set_title(param_names[j])
-        axarr[j].spines['right'].set_visible(False)
-        axarr[j].spines['top'].set_visible(False)
-        if j == 0:
-            axarr[j].set_xlabel('Rank statistic')
-        axarr[j].get_yaxis().set_ticks([])
-        axarr[j].set_ylabel('')
-    
+        ax[j].axhspan(endpoints[0], endpoints[1], facecolor='gray', alpha=0.3)
+        ax[j].axhline(np.mean(endpoints), color='gray', zorder=0, alpha=0.5)
+        sns.histplot(ranks[:, j], kde=False, ax=ax[j], color='#a34f4f', bins=num_bins, alpha=0.95)
+        ax[j].set_title(param_names[j], fontsize=title_fontsize)
+        ax[j].spines['right'].set_visible(False)
+        ax[j].spines['top'].set_visible(False)
+        ax[j].set_xlabel('Rank statistic', fontsize=label_fontsize)
+        ax[j].get_yaxis().set_ticks([])
+        ax[j].set_ylabel('')
     f.tight_layout()
-    # Show, if specified
-    if show:
-        plt.show()
     return f
+
 
 
 def plot_confusion_matrix(m_true, m_pred, model_names, normalize=False, 
