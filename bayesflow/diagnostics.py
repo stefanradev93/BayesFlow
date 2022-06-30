@@ -25,6 +25,7 @@ logging.basicConfig()
 from bayesflow.computational_utilities import expected_calibration_error
 from bayesflow.helper_classes import LossHistory
 
+
 def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_agg=np.std, 
                   param_names=None, fig_size=None, label_fontsize=14, title_fontsize=16,
                   metric_fontsize=16, add_corr=True, add_r2=True, color='#8f2727'):
@@ -265,6 +266,59 @@ def plot_losses(history, fig_size=None, color='#8f2727', label_fontsize=14, titl
         ax.set_title(history.columns[i], fontsize=title_fontsize)
     f.tight_layout()
     return f
+
+
+def plot_prior2d(prior, param_names=None, n_samples=1000, height=2.5, color='#8f2727', **kwargs):
+    """ Creates pairplots for a given joint prior.
+    
+    Parameters
+    ----------
+    prior       : callable 
+        The prior object which takes a single integer argument and generates random draws.
+    param_names : list of str or None, optional, default None
+        An optional list of strings which 
+    n_samples   : int, optional, default: 1000
+        The number of random draws from the joint prior
+    height      : float, optional, default: 2.5
+        The height of the pair plot
+    color       : str, optional, defailt : '#8f2727'
+        The color of the plot
+    **kwargs    : dict, optional
+        Additional keyword arguments passed to the sns.PairGrid constructor
+
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
+    """
+    
+    # Generate prior draws
+    prior_samples = prior(n_samples)
+    # handle dict type
+    if type(prior_samples) is dict:
+        prior_samples = prior_samples['prior_draws']
+
+    # Get latent dimensionality and prepare titles
+    dim = prior_samples.shape[-1]
+
+    # Convert samples to a pandas data frame
+    if param_names is None:
+        titles = [f'Prior Param. {i}' for i in range(1, dim+1)]
+    else:
+        titles = ['Prior {p}' for p in param_names]
+    data_to_plot = pd.DataFrame(prior_samples, columns=titles)
+
+    # Generate plots
+    g = sns.PairGrid(data_to_plot, height=height, **kwargs)
+    g.map_diag(sns.histplot, fill=True, color=color, alpha=0.9, kde=True)
+    g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
+    g.map_upper(plt.scatter, alpha=0.6, s=40, edgecolor='k', color=color)
+    
+    # Add grids
+    for i in range(dim):
+        for j in range(dim):
+            g.axes[i, j].grid(alpha=0.5)
+    g.tight_layout()
+    return g.fig
 
 
 def plot_latent_space_2d(z_samples, height=2.5, color='#8f2727', **kwargs):
