@@ -17,7 +17,7 @@ from tqdm.notebook import tqdm
 
 import logging
 
-from bayesflow.forward_inference import MultiGenerativeModel
+from bayesflow.forward_inference import GenerativeModel, MultiGenerativeModel
 logging.basicConfig()
 
 import tensorflow as tf
@@ -164,7 +164,7 @@ class Trainer:
         if not skip_checks:
             self._check_consistency()
 
-    def diagnose_latent(self, inputs=None, **kwargs):
+    def diagnose_latent2d(self, inputs=None, **kwargs):
         """ Performs visual pre-inference diagnostics of latent space on either provided validation data
         (new simulations) or internal simulation memory.
         If `inputs is not None`, then diagnostics will be performed on the inputs, regardless
@@ -257,7 +257,13 @@ class Trainer:
             else:
                 post_samples = self.amortizer(inputs, n_samples, n_samples, **kwargs.pop('net_args', {}))
                 prior_samples = inputs['parameters']
-            return plot_sbc(post_samples, prior_samples, **kwargs.pop('plot_args', {}))
+
+            # Check for prior names and override keyword if available
+            plot_kwargs = kwargs.pop('plot_args', {})
+            if type(self.generative_model) is GenerativeModel:
+                plot_kwargs['param_names'] = self.generative_model.param_names
+            
+            return plot_sbc(post_samples, prior_samples, **plot_kwargs)
         else:
             raise NotImplementedError("SBC diagnostics are only available for type AmortizedPosterior!")
         

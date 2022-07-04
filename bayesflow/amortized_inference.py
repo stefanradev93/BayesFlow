@@ -41,7 +41,7 @@ class AmortizedPosterior(tf.keras.Model):
     In International Conference on Machine Learning (pp. 4673-4681). PMLR.
     """
 
-    def __init__(self, inference_net, summary_net=None, loss_fun=None, summary_loss_fun=None):
+    def __init__(self, inference_net, summary_net=None, loss_fun=None, summary_loss_fun=None, **kwargs):
         """Initializes a composite neural network to represent an amortized approximate posterior.
 
         Parameters
@@ -55,6 +55,8 @@ class AmortizedPosterior(tf.keras.Model):
             based on the `inference_net` type. 
         summary_loss_fun  : callable or None, optional, default: None
             The loss function which accepts the outputs of the summary network. If None, no loss is provided.
+        **kwargs    : dict, optional
+            Additional keyword arguments passed to the __init__ method of a tf.keras.Model instance.
 
         Important
         ----------
@@ -67,7 +69,7 @@ class AmortizedPosterior(tf.keras.Model):
         base distribution, make sure the inference net has a `tail_network` attribute.
         """
 
-        super(AmortizedPosterior, self).__init__()
+        super(AmortizedPosterior, self).__init__(**kwargs)
 
         self.inference_net = inference_net
         self.summary_net = summary_net

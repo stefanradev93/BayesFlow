@@ -18,6 +18,7 @@ logging.basicConfig()
 
 from bayesflow.default_settings import DEFAULT_KEYS
 from bayesflow.exceptions import ConfigurationError
+from bayesflow.diagnostics import plot_prior2d
 
 
 class ContextGenerator:
@@ -157,7 +158,7 @@ class Prior:
     - context_generator.non_batchable_context()
     """
 
-    def __init__(self, prior_fun : callable, context_generator : callable = None):
+    def __init__(self, prior_fun : callable, context_generator : callable = None, param_names : list = None):
         """
         Instantiates a prior generator which will draw random parameter configurations from a user-informed prior
         distribution. No improper priors are allowed, as these may render the generative scope of a model undefined.
@@ -166,14 +167,32 @@ class Prior:
         ----------
         prior_fun           : callable
             A function (callbale object) with optional control arguments responsible for generating per-simulation parameters.
-        context generator   : callable (default None, recommended instance of ContextGenerator)
+        context generator   : callable, optional, (default None, recommended instance of ContextGenerator)
             An optional function (ideally an instance of ContextGenerator) for generating prior context variables.
+        param_names         : list of str, optional, (default None)
+            A list with strings representing the names of the parameters.
         """
+
         self.prior = prior_fun
         self.context_gen = context_generator
-        
+        self.param_names = param_names
+
     def __call__(self, batch_size, *args, **kwargs):
-        """Generates 'batch_size' draws from the prior given optional context generator.
+        """ Generates 'batch_size' draws from the prior given optional context generator.
+
+        Parameters
+        ----------
+        batch_size : int
+            The number of draws to obtain from the prior + context generator functions.
+        *args      : tuple
+            Optional positional arguments passed to the generator functions.
+        **kwargs   : dict
+            Optional keyword arguments passed to the generator functions.
+
+        Returns
+        -------
+
+        out_dict - a dictionary with the quantities generated from the prior + context funcitons.
         """
 
         # Prepare placeholder output dictionary
@@ -212,6 +231,47 @@ class Prior:
                 for b in range(batch_size)])
 
         return out_dict
+
+    def plot_prior2d(self, **kwargs):
+        """ Generates a 2D plot representing bivariate prior ditributions. Uses the function
+        `bayesflow.diagnostics.plot_prior2d() internally for generating the plot.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Optional keyword arguments passed to the `plot_prior2d` function.
+
+        Returns
+        -------
+        f : plt.Figure - the figure instance for optional saving
+        """
+
+        return plot_prior2d(self, param_names=self.param_names, **kwargs)
+
+    def estimate_means_and_stds(self, n_draws=1000, *args, **kwargs):
+        """ Estimates prior means and stds given n_draws from the prior, useful
+        for z-standardization of the prior draws.
+        
+        Parameters
+        ----------
+
+        n_draws: int, optional (default = 1000)
+            The number of random draws to obtain from the joint prior.
+        *args      : tuple
+            Optional positional arguments passed to the generator functions.
+        **kwargs   : dict
+            Optional keyword arguments passed to the generator functions.
+
+        Returns
+        -------    
+        (prior_means, prior_stds) - tuple of np.ndarrays
+            The estimated means and stds of the joint prior.
+        """
+
+        out_dict = self(n_draws, *args, **kwargs)
+        prior_means = np.mean(out_dict[DEFAULT_KEYS['prior_draws']], axis=0, keepdims=True)
+        prior_stds = np.std(out_dict[DEFAULT_KEYS['prior_draws']], axis=0, ddof=1, keepdims=True)
+        return prior_means, prior_stds
 
     def logpdf(self, prior_draws):
         raise NotImplementedError('Prior density computation is under construction!')
@@ -252,6 +312,7 @@ class Simulator:
         context generator   : callable (default None, recommended instance of ContextGenerator)
             An optional function (ideally an instance of ContextGenerator) for generating prior context variables.
         """
+
         if (batch_simulator_fun is None) is (simulator_fun is None):
             raise ConfigurationError('Either batch_simulator_fun or simulator_fun should be provided, but not both!')
         
@@ -374,7 +435,7 @@ class GenerativeModel:
     _N_SIM_TEST = 2 
     
     def __init__(self, prior: callable, simulator: callable, skip_test: bool = False, 
-                 simulator_is_batched: bool = None, name: str =None):
+                 simulator_is_batched: bool = None, name: str = None):
         """
         Instantiates a generative model responsible for drawing generating params, data, and optional context.
         
@@ -416,6 +477,7 @@ class GenerativeModel:
             self.name = 'anonymous'
         else:
             self.name = name
+        self.param_names = prior.param_names
         
         if not skip_test:
             self._test()
@@ -452,7 +514,11 @@ class GenerativeModel:
             return Simulator(batch_simulator_fun=sim_fun)
         else:
             return Simulator(simulator_fun=sim_fun)
-    
+
+    def plot_prior_pushforward(self, funcs_list):
+        """ TODO"""
+        raise NotImplementedError('Prior density computation is under construction!')
+
     def _test(self):
         """ Performs a sanity check on forward inference and some verbose information.
         """

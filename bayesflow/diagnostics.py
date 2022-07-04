@@ -15,6 +15,7 @@
 from scipy.stats import binom
 from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -24,6 +25,7 @@ logging.basicConfig()
 
 from bayesflow.computational_utilities import expected_calibration_error
 from bayesflow.helper_classes import LossHistory
+from bayesflow.forward_inference import Prior
 
 
 def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_agg=np.std, 
@@ -226,6 +228,94 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
     return f
 
 
+def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names=None, height=2, 
+                      post_color='#8f2727', prior_color='gray', post_alpha=0.9, prior_alpha=0.7):
+    """ Generates a bivariate pairplot given posterior draws and prior.
+
+    posterior_draws   : np.ndarray of shape (n_post_draws, n_params)
+        The posterior draws obtained for a SINGLE observed data set.
+    prior             : bayesflow.forward_inference.Prior instance or None, optional (default: None)
+        The optional prior object having an input-output signature as given by ayesflow.forward_inference.Prior
+    prior_draws       : np.ndarray of shape (n_prior_draws, n_params) or None, optonal (default: None)
+        The optional prior draws obtained from the prior. If both prior and prior_draws are provided, prior_draws
+        will be used.
+    param_names       : list or None, optional, default: None
+        The parameter names for nice plot titles. Inferred if None
+    height            : float, optional, default: 2.
+        The height of the pairplot.
+    post_color        : str, optional, default: '#8f2727'
+        The color for the posterior histograms and KDEs.
+    priors_color      : str, optional, default: gray
+        The color for the optional prior histograms and KDEs.
+    post_alpha        : float in [0, 1], optonal, default: 0.9
+        The opacity of the posterior plots.
+    prior_alpha       : float in [0, 1], optonal, default: 0.7
+        The opacity of the prior plots.
+
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
+    """
+    
+    # Ensure correct shape
+    assert(len(posterior_draws.shape)) == 2, 'Shape of `posterior_samples` for a single data set should be 2 dimensional!'
+    
+    # Obtain n_draws and n_params
+    n_draws, n_params = posterior_draws.shape
+
+    # Determine if prior should be plotted
+
+    # If prior object is given and no draws, obtain draws
+    if prior is not None and prior_draws is None:
+        draws = prior(n_draws)
+        if type(draws) is dict:
+            prior_draws = draws['prior_draws']
+        else:
+            prior_draws = draws
+    # Otherwise, keep as is (prior_draws either filled or None)
+    else:
+        pass
+    
+    # Attempt to determine parameter names
+    if param_names is None:
+        if type(prior) is Prior:
+            param_names = prior.param_names
+        else:
+            param_names = [f'Param. {p}' for p in range(1, n_params+1)]
+
+    # Pack posterior draws into a dataframe
+    posterior_draws_df = pd.DataFrame(posterior_draws, columns=param_names)
+
+    # Add posterior
+    g = sns.PairGrid(posterior_draws_df, height=height)
+    g.map_diag(sns.histplot, fill=True, color=post_color, alpha=post_alpha, kde=True)
+    g.map_lower(sns.kdeplot, fill=True, color=post_color, alpha=post_alpha)
+
+    # Add prior, if given
+    if prior_draws is not None:
+        prior_draws_df = pd.DataFrame(prior_draws, columns=param_names)
+        g.data = prior_draws_df
+        g.map_diag(sns.histplot, fill=True, color=prior_color, alpha=prior_alpha, kde=True, zorder=-1)
+        g.map_lower(sns.kdeplot, fill=True, color=prior_color, alpha=prior_alpha, zorder=-1)
+
+    # Remove upper axis
+    for i, j in zip(*np.triu_indices_from(g.axes, 1)):
+        g.axes[i, j].axis('off')
+
+    # Add grids
+    for i in range(n_params):
+        for j in range(n_params):
+            g.axes[i, j].grid(alpha=0.5)
+    
+    # Add legend, if prior also given
+    if prior_draws is not None:
+        handles = [Line2D(xdata=[], ydata=[], color=prior_color, lw=3, alpha=prior_alpha, label='Prior'),
+                Line2D(xdata=[], ydata=[], color=post_color, lw=3, alpha=post_alpha, label='Posterior')]
+        g.add_legend(handles=handles)
+    g.tight_layout()
+    return g.fig
+
+
 def plot_losses(history, fig_size=None, color='#8f2727', label_fontsize=14, title_fontsize=16):
     """ A generic helper function to plot the losses of a series of training runs.
     
@@ -293,7 +383,8 @@ def plot_prior2d(prior, param_names=None, n_samples=1000, height=2.5, color='#8f
     
     # Generate prior draws
     prior_samples = prior(n_samples)
-    # handle dict type
+
+    # Handle dict type
     if type(prior_samples) is dict:
         prior_samples = prior_samples['prior_draws']
 
@@ -304,7 +395,7 @@ def plot_prior2d(prior, param_names=None, n_samples=1000, height=2.5, color='#8f
     if param_names is None:
         titles = [f'Prior Param. {i}' for i in range(1, dim+1)]
     else:
-        titles = ['Prior {p}' for p in param_names]
+        titles = [f'Prior {p}' for p in param_names]
     data_to_plot = pd.DataFrame(prior_samples, columns=titles)
 
     # Generate plots
@@ -355,7 +446,7 @@ def plot_latent_space_2d(z_samples, height=2.5, color='#8f2727', **kwargs):
 
     # Generate plots
     g = sns.PairGrid(data_to_plot, height=height, **kwargs)
-    g.map_diag(sns.kdeplot, fill=True, color=color, alpha=0.9)
+    g.map_diag(sns.histplot, fill=True, color=color, alpha=0.9, kde=True)
     g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
     g.map_upper(plt.scatter, alpha=0.6, s=40, edgecolor='k', color=color)
 
