@@ -309,9 +309,9 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
     
     # Add legend, if prior also given
     if prior_draws is not None:
-        handles = [Line2D(xdata=[], ydata=[], color=prior_color, lw=3, alpha=prior_alpha, label='Prior'),
-                Line2D(xdata=[], ydata=[], color=post_color, lw=3, alpha=post_alpha, label='Posterior')]
-        g.add_legend(handles=handles)
+        handles = [Line2D(xdata=[], ydata=[], color=prior_color, lw=3, alpha=prior_alpha),
+                Line2D(xdata=[], ydata=[], color=post_color, lw=3, alpha=post_alpha)]
+        g.add_legend(handles, ['Prior', 'Posterior'])
     g.tight_layout()
     return g.fig
 
