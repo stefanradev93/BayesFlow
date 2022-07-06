@@ -158,7 +158,7 @@ class InvariantNetwork(tf.keras.Model):
         Returns
         -------
         out : tf.Tensor
-            Output of shape (batch_size, out_dim + 1)
+            Output of shape (batch_size, out_dim)
         """
 
         # Pass through series of augmented equivariant transforms
