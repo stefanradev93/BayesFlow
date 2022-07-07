@@ -25,7 +25,6 @@ logging.basicConfig()
 
 from bayesflow.computational_utilities import expected_calibration_error
 from bayesflow.helper_classes import LossHistory
-from bayesflow.forward_inference import Prior
 
 
 def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_agg=np.std, 
@@ -278,7 +277,7 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
     
     # Attempt to determine parameter names
     if param_names is None:
-        if type(prior) is Prior:
+        if hasattr(prior, 'param_names'):
             param_names = prior.param_names
         else:
             param_names = [f'Param. {p}' for p in range(1, n_params+1)]
