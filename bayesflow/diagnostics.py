@@ -133,8 +133,78 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     return f
 
 
-def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None, 
-             num_bins=None, binomial_interval=0.99, label_fontsize=14, title_fontsize=16):
+def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_sim=5000, 
+              label_fontsize=14, rank_ecdf_color='#a34f4f'):
+    """ Creates the empirical CDFs for each marginal rank distribution and plots it against
+    a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform.
+    
+    This figure is useful for models with many parameters and is supposed to give an idea
+    of the overall calibration of a posterior approximator.
+
+    Parameters
+    ----------
+    post_samples      : np.ndarray of shape (n_data_sets, n_post_draws, n_params)
+        The posterior draws obtained from n_data_sets
+    prior_samples     : np.ndarray of shape (n_data_sets, n_params)
+        The prior draws obtained for generating n_data_sets
+    fig_size          : tuple, optional, default: (12, 8)
+        The figure size passed to the matplotlib constructor. Inferred if None.
+    alpha             : float in (0, 1), optional, default: 0.99
+        The width of the confidence interval for the uniform ECDF
+    n_sim             : int, optional, default: 5000
+        The number of uniform ECDFs to generate for determining the confidence bands.
+    label_fontsize    : int, optional, default: 14
+        The font size of the y-label text
+    title_fontsize    : int, optional, default: 16
+        The font size of the title text
+    rank_ecdf_color   : str, optional, default: '#a34f4f'
+        The color to use for the rank ECDFs
+
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
+    """
+    
+    # Compute ranks (using broadcasting)    
+    ranks = np.sum(post_samples < prior_samples[:, np.newaxis, :], axis=1)
+    
+    # Prepare figure
+    f, ax = plt.subplots(1, 1, figsize=fig_size)
+    
+    # Plot individual ecdf of parameters
+    for j in range(ranks.shape[-1]):
+        ecdf_single = np.sort(ranks[:, j])
+        xx = ecdf_single
+        yy = np.arange(1, xx.shape[-1]+1)/float(xx.shape[-1])
+        if j == 0:
+            ax.plot(xx, yy, color=rank_ecdf_color, alpha=0.95, label='Rank ECDFs')
+        else:
+            ax.plot(xx, yy, color=rank_ecdf_color, alpha=0.95)
+    
+    # Plot uniform ECDF and bands
+    n_samples = post_samples.shape[1]
+    x = np.random.randint(1, n_samples+1, size=(n_sim, n_samples))
+    xx = np.sort(x, axis=-1)
+    yy = np.arange(1, xx.shape[-1]+1)/float(xx.shape[-1])
+    qs = np.quantile(xx, [(1 - alpha) / 2, alpha + (1 - alpha) / 2], axis=0)
+    ax.plot(xx.mean(0), yy, color='black', linestyle='dashed', label='Uniform ECDF (Ideal)')
+    ax.fill_betweenx(yy, qs[1], qs[0], color='gray', alpha=0.2, label=f'{alpha} CI (Ideal)')
+    ax.plot(qs[0], yy, color='black', alpha=0.3)
+    ax.plot(qs[1], yy, color='black', alpha=0.3)
+    
+    # Prettify plot
+    sns.despine(ax=ax)
+    ax.grid(alpha=0.4)
+    ax.legend(fontsize=label_fontsize)
+    ax.set_xlabel('Rank statistic', fontsize=label_fontsize)
+    ax.set_ylabel('ECDF', fontsize=label_fontsize)
+    
+    f.tight_layout()
+    
+    return f
+
+def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None, num_bins=None, 
+             binomial_interval=0.99, label_fontsize=14, title_fontsize=16, hist_color='#a34f4f'):
     """ Creates and plots publication-ready histograms for simulation-based calibration 
     checks according to:
 
@@ -163,6 +233,8 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
         The font size of the y-label text
     title_fontsize    : int, optional, default: 16
         The font size of the title text
+    hist_color        : str, optional, default '#a34f4f'
+        The color to use for the histogram body
 
     Returns
     -------
@@ -216,7 +288,7 @@ def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None,
     for j in range(len(param_names)):
         ax[j].axhspan(endpoints[0], endpoints[1], facecolor='gray', alpha=0.3)
         ax[j].axhline(np.mean(endpoints), color='gray', zorder=0, alpha=0.5)
-        sns.histplot(ranks[:, j], kde=False, ax=ax[j], color='#a34f4f', bins=num_bins, alpha=0.95)
+        sns.histplot(ranks[:, j], kde=False, ax=ax[j], color=hist_color, bins=num_bins, alpha=0.95)
         ax[j].set_title(param_names[j], fontsize=title_fontsize)
         ax[j].spines['right'].set_visible(False)
         ax[j].spines['top'].set_visible(False)
