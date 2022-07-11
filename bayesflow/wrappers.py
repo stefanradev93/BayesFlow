@@ -16,7 +16,9 @@ import tensorflow as tf
 
 
 class SpectralNormalization(tf.keras.layers.Wrapper):
-    """Performs spectral normalization on weights.
+    """ Performs spectral normalization on neural network weights. Adapted from:
+
+    https://www.tensorflow.org/addons/api_docs/python/tfa/layers/SpectralNormalization
 
     This wrapper controls the Lipschitz constant of the layer by
     constraining its spectral norm, which can stabilize the training of GANs.
