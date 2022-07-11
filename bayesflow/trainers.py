@@ -206,7 +206,7 @@ class Trainer:
         else:
             raise NotImplementedError("Latent space diagnostics are only available for type AmortizedPosterior!")
 
-    def diagnose_sbc(self, inputs=None, n_samples=None, **kwargs):
+    def diagnose_sbc_histograms(self, inputs=None, n_samples=None, **kwargs):
         """ Performs visual pre-inference diagnostics via simulation-based calibration (SBC)
         (new simulations) or internal simulation memory.
         If `inputs is not None`, then diagnostics will be performed on the inputs, regardless
@@ -263,7 +263,7 @@ class Trainer:
             if type(self.generative_model) is GenerativeModel:
                 plot_kwargs['param_names'] = self.generative_model.param_names
             
-            return plot_sbc(post_samples, prior_samples, **plot_kwargs)
+            return plot_sbc_histograms(post_samples, prior_samples, **plot_kwargs)
         else:
             raise NotImplementedError("SBC diagnostics are only available for type AmortizedPosterior!")
         

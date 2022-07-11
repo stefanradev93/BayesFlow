@@ -133,10 +133,12 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     return f
 
 
-def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_sim=5000, 
+def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_sim=10000, 
               label_fontsize=14, rank_ecdf_color='#a34f4f'):
     """ Creates the empirical CDFs for each marginal rank distribution and plots it against
-    a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform.
+    a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform. Inspired by:
+
+    https://arxiv.org/abs/2103.10522
     
     This figure is useful for models with many parameters and is supposed to give an idea
     of the overall calibration of a posterior approximator.
@@ -151,7 +153,7 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_s
         The figure size passed to the matplotlib constructor. Inferred if None.
     alpha             : float in (0, 1), optional, default: 0.99
         The width of the confidence interval for the uniform ECDF
-    n_sim             : int, optional, default: 5000
+    n_sim             : int, optional, default: 10000
         The number of uniform ECDFs to generate for determining the confidence bands.
     label_fontsize    : int, optional, default: 14
         The font size of the y-label text
@@ -187,8 +189,8 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_s
     xx = np.sort(x, axis=-1)
     yy = np.arange(1, xx.shape[-1]+1)/float(xx.shape[-1])
     qs = np.quantile(xx, [(1 - alpha) / 2, alpha + (1 - alpha) / 2], axis=0)
-    ax.plot(xx.mean(0), yy, color='black', linestyle='dashed', label='Uniform ECDF (Ideal)')
-    ax.fill_betweenx(yy, qs[1], qs[0], color='gray', alpha=0.2, label=f'{alpha} CI (Ideal)')
+    ax.plot(xx.mean(0), yy, color='black', linestyle='dashed', label='Uniform Rank ECDF (Ideal)')
+    ax.fill_betweenx(yy, qs[1], qs[0], color='gray', alpha=0.2, label=f'{int(alpha * 100)}%-CI (Ideal)')
     ax.plot(qs[0], yy, color='black', alpha=0.3)
     ax.plot(qs[1], yy, color='black', alpha=0.3)
     
@@ -203,10 +205,11 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_s
     
     return f
 
-def plot_sbc(post_samples, prior_samples, param_names=None, fig_size=None, num_bins=None, 
+
+def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=None, num_bins=None, 
              binomial_interval=0.99, label_fontsize=14, title_fontsize=16, hist_color='#a34f4f'):
-    """ Creates and plots publication-ready histograms for simulation-based calibration 
-    checks according to:
+    """ Creates and plots publication-ready histograms of rank statistics for simulation-based calibration 
+    (SBC) checks according to:
 
     Talts, S., Betancourt, M., Simpson, D., Vehtari, A., & Gelman, A. (2018). 
     Validating Bayesian inference algorithms with simulation-based calibration. 
