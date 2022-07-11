@@ -16,7 +16,7 @@ import numpy as np
 from scipy.stats import multivariate_t, multivariate_normal
 
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, MultiHeadAttention
+from tensorflow.keras.layers import Dense, MultiHeadAttention, LSTM
 from tensorflow.keras.models import Sequential
 
 from bayesflow import default_settings
@@ -26,7 +26,8 @@ from bayesflow.exceptions import ConfigurationError, InferenceError
 
 
 class TailNetwork(tf.keras.Model):
-    
+    """Implements a standard fully connected network for learning the degrees of a student-t distribution."""
+
     def __init__(self, meta):
         """ Creates a network which will adaptively learn the heavy-tailedness of the target distribution.
 
@@ -67,7 +68,12 @@ class TailNetwork(tf.keras.Model):
 
     
 class InvariantModule(tf.keras.Model):
-    """Implements an invariant module with keras."""
+    """ Implements an invariant module performing a permutation-invariant transform. 
+    
+    For details and rationale, see:
+    
+    https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
+    """
     
     def __init__(self, meta):
         super(InvariantModule, self).__init__()
@@ -76,7 +82,7 @@ class InvariantModule(tf.keras.Model):
         self.s2 = Sequential([Dense(**meta['dense_s2_args']) for _ in range(meta['n_dense_s2'])])
                     
     def call(self, x):
-        """Performs the forward pass of a learnable invariant transform.
+        """ Performs the forward pass of a learnable invariant transform.
         
         Parameters
         ----------
@@ -92,10 +98,16 @@ class InvariantModule(tf.keras.Model):
         x_reduced = tf.reduce_mean(self.s1(x), axis=1)
         out = self.s2(x_reduced)
         return out
-    
-    
+
+
 class EquivariantModule(tf.keras.Model):
-    """Implements an equivariant module with keras."""
+    """ Implements an equivariant module performing an equivariant transform. 
+    
+    For details
+    and justification, see:
+
+    https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
+    """
     
     def __init__(self, meta):
         super(EquivariantModule, self).__init__()
@@ -168,15 +180,106 @@ class InvariantNetwork(tf.keras.Model):
         out = self.out_layer(self.inv(out_equiv))
 
         return out
+
+class MultiConv1D(tf.keras.Model):
+    """ Implements an inception-inspired 1D convolutional layer using different kernel sizes."""
+
+    def __init__(self, meta, **kwargs):
+        """ Creates an inception-like Conv1D layer
+
+        Parameters
+        ----------
+        meta  : dict
+            A dictionary which holds the arguments for the internal Conv1D layers.
+        """
+
+        super(MultiConv1D, self).__init__(**kwargs)
+        
+        # Create a list of Conv1D layers with different kernel sizes
+        # ranging from 'min_kernel_size' to 'max_kernel_size'
+        self.convs = [
+            tf.keras.layers.Conv1D(kernel_size=f, **meta['layer_args'])
+            for f in range(meta['min_kernel_size'], meta['max_kernel_size'])
+        ]
+
+        # Create final Conv1D layer for dimensionalitiy reduction
+        dim_red_args = {k : v for k, v in meta.items() if k not in ['kernel_size', 'strides']}
+        dim_red_args['kernel_size'] = 1
+        dim_red_args['strides'] = 1
+        self.dim_red = tf.keras.layers.Conv1D(**dim_red_args)
+        
+    def call(self, x, **kwargs):
+        """ Performs a forward pass through the layer.
+
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, n_time_steps, n_time_series)
+        
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, n_time_steps, n_filters)
+        """
+        
+        out = tf.concat([conv(x, **kwargs) for conv in self.convs], axis=-1)
+        out = self.dim_red(out, **kwargs)
+        return out
+
+
+class MultiConvNetwork(tf.keras.Model):
+    """ Implements a sequence of MultiConv1D layers followed by an LSTM network. 
     
-    
-class Permutation(tf.keras.Model):
-    """Implements a permutation layer to permute the input dimensions of the cINN block.
+    For details and rationale, see:
+
+    https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472
     """
+
+    def __init__(self, meta, **kwargs):
+        """ Creates a stack of inception-like layers followed by an LSTM network, with the idea
+        of learning vector representations from multivariate time series data.
+
+        Parameters
+        ----------
+        meta  : dict
+            A dictionary which holds the arguments for the MultiConv1D and LSTM layers.
+        """
+
+        super(MultiConvNetwork, self).__init__(**kwargs)
+        
+        self.net = tf.keras.Sequential([
+            MultiConv1D(meta['conv_args'])
+            for _ in range(meta['n_conv_layers'])
+        ])
+        
+        self.lstm = LSTM(**meta['lstm_args'])
+        
+    def call(self, x, **kwargs):
+        """ Performs a forward pass through the network by first passing
+        x through the sequence of multi-convolutional layers and then applying 
+        the LSTM network.
+
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, n_time_steps, n_time_series)
+        
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, hidden_units)
+        """
+        
+        out = self.net(x, **kwargs)
+        out = self.lstm(out, **kwargs)
+        return out
+    
+
+class Permutation(tf.keras.Model):
+    """ Implements a layer to permute the inputs to a coupling layer."""
 
     def __init__(self, input_dim):
         """ Creates a permutation layer for a conditional invertible block.
-
 
         Arguments
         ---------
@@ -222,7 +325,7 @@ class Permutation(tf.keras.Model):
 class ActNorm(tf.keras.Model):
     """Implements an Activation Normalization (ActNorm) Layer."""
 
-    def __init__ (self, meta):
+    def __init__ (self, meta, **kwargs):
         """ Creates an instance of an ActNorm Layer as proposed by [1].
 
         Activation Normalization is learned invertible normalization, using
@@ -251,7 +354,7 @@ class ActNorm(tf.keras.Model):
             Contains initialization settings for the act norm layer.
         """
 
-        super(ActNorm, self).__init__()
+        super(ActNorm, self).__init__(**kwargs)
         # Initialize scale and bias with zeros and ones if no batch for initalization was provided.
         if meta.get('act_norm_init') is None:
             self.scale = tf.Variable(tf.ones((meta['n_params'], )),
