@@ -201,7 +201,7 @@ class ReduceLROnPlateau:
 
     """
 
-    def __init__(self, factor=0.1, patience=3, min_delta=0.1, min_lr=0,):
+    def __init__(self, factor=0.5, patience=3, min_delta=0.05, min_lr=1e-5):
 
         if factor >= 1.0:
             raise ValueError(f'ReduceLROnPlateau does not support a factor >= 1.0. Got {factor}')
@@ -223,18 +223,19 @@ class ReduceLROnPlateau:
         self.wait = 0
 
 
-    def on_epoch_end(self, history, optimizer, logs=None):
-
+    def on_epoch_end(self, history, optimizer):
+        
+        # TODO
         # Try to make sense of history
         
         lr = optimizer.lr()
 
-        # if self.monitor_op(current, self.best):
+        #if self.monitor_op(current, self.best):
         # self.best = current
         # self.wait = 0
         # elif not self.in_cooldown():
         # self.wait += 1
-        # if self.wait >= self.patience:
+        #if self.wait >= self.patience:
         # old_lr = self.model.optimizer.lr.numpy()
         # if old_lr > np.float32(self.min_lr):
         # new_lr = old_lr * self.factor

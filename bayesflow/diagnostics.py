@@ -74,7 +74,8 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     
     # Compute point estimates and uncertainties
     est = point_agg(post_samples, axis=1)
-    u = uncertainty_agg(post_samples, axis=1)
+    if uncertainty_agg is not None:
+        u = uncertainty_agg(post_samples, axis=1)
     
     # Determine n params and param names if None given
     n_params = prior_samples.shape[-1]
