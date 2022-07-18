@@ -31,7 +31,7 @@ class AmortizedPosterior(tf.keras.Model):
     But also allowing for augmented functionality, such as model misspecification detection in summary space:
 
     Schmitt, M., Bürkner, P. C., Köthe, U., & Radev, S. T. (2021). 
-    BayesFlow can reliably detect Model Misspecification and Posterior Errors in Amortized Bayesian Inference. 
+    Detecting Model Misspecification in Amortized Bayesian Inference with Neural Networks
     arXiv preprint arXiv:2112.08866.
 
     And learning of fat-tailed posteriors with a Student-t latent pushforward density:
