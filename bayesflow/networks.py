@@ -794,7 +794,7 @@ class EvidentialNetwork(tf.keras.Model):
         return alpha
 
     def sample(self, obs_data, n_samples, to_numpy=True):
-        """Samples posterior model probabilities from the second-order Dirichlet distro.
+        """ Samples posterior model probabilities from the second-order Dirichlet distro.
 
         Parameters
         ----------
