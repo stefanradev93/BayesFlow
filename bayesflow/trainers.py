@@ -35,13 +35,14 @@ from bayesflow.diagnostics import *
 class Trainer:
     """ This class connects a generative model (or, already simulated data from a model) with
     a configurator and a neural inference architecture for amortized inference (amortizer). A Trainer 
-    is responsible for optimizing the amortizer via various forms of simulation-based training.
+    instance is responsible for optimizing the amortizer via various forms of simulation-based training.
 
-    At the very minium, the trainer must be initialized with an `amortizer` instance, which is capable
+    At the very minimum, the trainer must be initialized with an `amortizer` instance, which is capable
     of processing the (configured) outputs of a generative model. A `configurator` will then process
-    the outputs of the generative model and convert them in suitable inputs for the amortizer. Users
+    the outputs of the generative model and convert them into suitable inputs for the amortizer. Users
     can choose from a palette of default configurators or create their own configurators, essentially
-    building a modularized pipeline GenerativeModel -> Configurator -> Amortizer.
+    building a modularized pipeline GenerativeModel -> Configurator -> Amortizer. Most complex models 
+    wtill require custom configurators.
 
     Currently, the trainer supports the following simulation-based training regimes, based on efficiency
     considerations:
@@ -268,7 +269,7 @@ class Trainer:
             raise NotImplementedError("SBC diagnostics are only available for type AmortizedPosterior!")
         
     def load_pretrained_network(self):
-        """Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.
+        """ Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.
         """
 
         if self.manager is None or self.checkpoint is None:
@@ -277,7 +278,7 @@ class Trainer:
         return status
 
     def train_online(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, **kwargs):
-        """Trains an amortizer via online learning. Additional keyword arguments
+        """ Trains an amortizer via online learning. Additional keyword arguments
         are passed to the generative mode, configurator, and amortizer.
 
         Parameters
@@ -394,15 +395,15 @@ class Trainer:
 
         Parameters
         ----------
-        rounds         : int
+        rounds          : int
             Number of rounds to perform (outer loop)
-        sim_per_round  : int
+        sim_per_round   : int
             Number of simulations per round.
-        epochs         : int
+        epochs          : int
             Number of epochs (and number of times a checkpoint is stored, inner loop) within a round.
-        batch_size     : int
+        batch_size      : int
             Number of simulations to use at each backpropagation step
-        save_checkpoint      : bool (default - True)
+        save_checkpoint : bool, optional, (default - True)
             A flag to decide whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored
 
@@ -463,8 +464,7 @@ class Trainer:
         return loss
 
     def _forward_inference(self, n_sim, configure=True, **kwargs):
-        """
-        Performs one step of single-model forward inference.
+        """ Performs one step of single-model forward inference.
 
         Parameters
         ----------
@@ -495,7 +495,7 @@ class Trainer:
         return out_dict
 
     def _backprop_step(self, input_dict, **kwargs):
-        """Computes loss and applies gradients.
+        """ Computes the loss of the provided amortizer given an input dictionary and applies gradients.
 
          Parameters
         ----------
@@ -506,8 +506,9 @@ class Trainer:
             
         Returns
         -------
-        out_dict : dict
-            The outputs of the generative model.
+        loss : dict
+            The outputs of the compute_loss() method of the amortizer comprising all
+            loss components, such as divergences or regularization.
         """
 
         # Forward pass and loss computation
@@ -535,7 +536,7 @@ class Trainer:
         return loss
 
     def _manage_configurator(self, config_fun, **kwargs):
-        """ Determines which configurator to use if None specified.        
+        """ Determines which configurator to use if None specified during construction.      
         """
 
         # Do nothing if callable provided
@@ -616,7 +617,14 @@ class Trainer:
             raise NotImplementedError(f"Could not infer configurator based on provided type: {type(config_fun)}")
     
     def _check_consistency(self):
-        """Attempts to run one step generative_model -> configurator -> amortizer -> loss."""
+        """ Attempts to run one step generative_model -> configurator -> amortizer -> loss with 
+        batch_size=2. Should be skipped if generative model has non-standard behavior.
+
+        Raises
+        ------
+        ConfigurationError 
+            If any operation along the above chain fails.
+        """
 
         logger = logging.getLogger()
         if self.generative_model is not None:

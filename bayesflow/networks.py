@@ -181,6 +181,7 @@ class InvariantNetwork(tf.keras.Model):
 
         return out
 
+
 class MultiConv1D(tf.keras.Model):
     """ Implements an inception-inspired 1D convolutional layer using different kernel sizes."""
 
@@ -818,7 +819,7 @@ class InvertibleNetwork(tf.keras.Model):
         self.z_dim = meta['n_params']
 
     def call(self, targets, condition, inverse=False, **kwargs):
-        """Performs one pass through an invertible chain (either inverse or forward).
+        """ Performs one pass through an invertible chain (either inverse or forward).
 
         Parameters
         ----------
@@ -867,7 +868,7 @@ class InvertibleNetwork(tf.keras.Model):
             return z, log_det_J
 
     def inverse(self, z, condition, **kwargs):
-        """Performs a reverse pass through the chain."""
+        """ Performs a reverse pass through the chain."""
 
         target = z
         for layer in reversed(self.coupling_layers):
@@ -875,8 +876,7 @@ class InvertibleNetwork(tf.keras.Model):
         return target
 
     def sample(self, condition, n_samples, **kwargs):
-        """
-        Samples from the inverse model given a single data instance or a batch of data instances.
+        """ Samples from the inverse model given a single data instance or a batch of data instances.
 
         Parameters
         ----------
