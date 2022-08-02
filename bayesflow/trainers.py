@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import numpy as np
-from tqdm.notebook import tqdm
+from tqdm.autonotebook import tqdm
 
 import logging
 
