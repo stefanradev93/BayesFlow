@@ -47,8 +47,7 @@ class ContextGenerator:
 
     def __init__(self, batchable_context_fun : callable = None, non_batchable_context_fun: callable = None,
                  use_non_batchable_for_batchable: bool = False):
-        """
-        Instantiates a context generator responsible for random generation of variables which vary from data set
+        """ Instantiates a context generator responsible for random generation of variables which vary from data set
         to data set but cannot be considered data or parameters, e.g., time indices, number of observations, etc.
         A batchable, non-batchable, or both context functions should be provided to the constructor. An optional
         argument dictates whether the outputs of the non-batchable context function should be used as inputs to
