@@ -64,8 +64,9 @@ def simulator(theta):
     cov = rho*s1*s2
     S = np.array([[s1**2, cov], [cov, s2**2]])
     
-    # Obtain given number of draws
-    x = np.random.default_rng().multivariate_normal(loc, S, size=n_obs)
-    if flatten:
-        return x.flatten()
-    return x
+    # Obtain informative part
+    x_info = np.random.default_rng().multivariate_normal(loc, S, size=4).flatten()
+
+    # Obtain uninformative part
+   # TODO
+    return x_info
