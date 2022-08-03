@@ -53,8 +53,8 @@ def clip_gradients(gradients, clip_value=5., clip_method='norm'):
 
     Parameters
     ----------
-    gradients: list(tf.Tensor)
-        The computed gradients for neural network parameters.
+    gradients: list of tf.Tensor
+        The computed gradients of neural network parameters.
     clip_value: float > 0
         The value used for clipping.
     clip_method: {'norm', 'global_norm', 'value'}
@@ -62,8 +62,8 @@ def clip_gradients(gradients, clip_value=5., clip_method='norm'):
 
     Returns
     -------
-    gradients: list
-        The clipped gradients
+    gradients: list of tf.Tensor
+        The clipped gradients as given by the specified method.
 
     Raises
     ------
