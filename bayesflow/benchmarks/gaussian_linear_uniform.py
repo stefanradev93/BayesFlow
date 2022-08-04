@@ -18,7 +18,8 @@ import numpy as np
 
 def prior(D=10, lower_bound=-1., upper_bound=1.):
     """ Generates a draw from a D-dimensional uniform prior bounded between 
-    `lower_bound` and `upper_bound`.
+    `lower_bound` and `upper_bound` which represents the location vector of
+    a (conjugate) Gaussian likelihood.
     
     Parameters
     ----------
@@ -38,10 +39,10 @@ def prior(D=10, lower_bound=-1., upper_bound=1.):
     return np.random.default_rng().uniform(low=lower_bound, high=upper_bound, size=D)
 
 
-def batched_simulator(theta, n_obs=None, sigma=0.1):
+def batched_simulator(theta, n_obs=None, scale=0.1):
     """ Generates batched draws from a D-dimenional Gaussian distributions given a batch of 
     location (mean) parameters of D dimensions. Assumes a spherical convariance matrix given 
-    by sigma * I_D. 
+    by scale * I_D. 
     
     Parameters
     ----------
@@ -50,7 +51,7 @@ def batched_simulator(theta, n_obs=None, sigma=0.1):
     n_obs : int or None, optional, default: None
         The number of observations to draw from the likelihood given the location
         parameter `theta`. If None, a single draw is produced.
-    sigma : float, optional, default : 0.1
+    scale : float, optional, default : 0.1
         The scale of the Gaussian likelihood.
     
     Returns
@@ -61,6 +62,6 @@ def batched_simulator(theta, n_obs=None, sigma=0.1):
     """
     
     if n_obs is None:
-        return sigma * np.random.default_rng().normal(loc=theta)
-    x = sigma * np.random.default_rng().normal(loc=theta, size=(n_obs, theta.shape[0], theta.shape[1]))
+        return scale * np.random.default_rng().normal(loc=theta)
+    x = scale * np.random.default_rng().normal(loc=theta, size=(n_obs, theta.shape[0], theta.shape[1]))
     return np.transpose(x, (1, 0, 2))
