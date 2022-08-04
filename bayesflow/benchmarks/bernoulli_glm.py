@@ -1,0 +1,54 @@
+# Copyright 2022 The BayesFlow Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Corresponds to Task T.5 from the paper https://arxiv.org/pdf/2101.04653.pdf
+
+
+import numpy as np
+from scipy.special import expit
+
+F = np.zeros((9, 9))
+for i in range(9):
+    F[i, i] = 1 + np.sqrt(i / 9)
+    if i >= 1:
+        F[i, i-1] = -2
+    if i >= 2:
+        F[i, i-2] = 1
+Cov = np.linalg.inv(F.T@F)
+
+
+def prior():
+    """ TODO
+        
+    Returns
+    -------
+    theta : np.ndarray of shape (D, )
+        A single draw from the D-dimensional uniform prior.
+    """
+    
+    beta = np.random.default_rng().normal(0, 2)
+    f = np.random.default_rng().multivariate_normal(np.zeros(9), Cov)
+    return np.append(beta, f)
+    
+
+def simulator(theta, T=100):
+    
+    beta, f = theta[0], theta[1:]
+    V = np.random.default_rng().normal(size=(9, T))
+    z = np.random.default_rng().binomial(n=1, p=expit(V.T @ f + beta))
+
+    x1 = np.sum(z)
+    x_rest = V@z / x1
+    x = np.append(x1, x_rest)    
+    

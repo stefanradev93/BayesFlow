@@ -78,10 +78,10 @@ def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000)
         The time series of simulated infected individuals.
     """
     
-    # Create vector of initial conditions
+    # Create vector (list) of initial conditions
     x0 = N-I0-R0, I0, R0
     
-    # Unpack parameters
+    # Unpack parameter vector into scalars
     beta, gamma = theta
     
     # Prepate time vector between 0 and T of length T

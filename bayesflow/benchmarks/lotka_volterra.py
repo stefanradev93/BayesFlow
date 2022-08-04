@@ -73,10 +73,10 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True):
         The time series of simulated predator and pray populations
     """
     
-    # Create vector of initial conditions
+    # Create vector (list) of initial conditions
     x0 = X0, Y0
     
-    # Unpack parameters
+    # Unpack parameter vector into scalars
     alpha, beta, gamma, delta = theta
     
     # Prepate time vector between 0 and T of length T
