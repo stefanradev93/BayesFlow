@@ -36,7 +36,7 @@ def prior():
 
 
 def _deriv(x, t, N, beta, gamma):
-    """ Helper function for scipe.integrate.odeint."""
+    """ Helper function for scipy.integrate.odeint."""
 
     S, I, R = x
     dS = -beta * S * I / N
@@ -59,7 +59,7 @@ def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000)
     N           : float, optional, default: 1e6 = 1 000 000
         The size of the simulated population.
     T           : T, optional, default: 160
-        The duration of the simulation.
+        The duration (time horizon) of the simulation.
     I0          : float, optional, default: 1.
         The number of initially infected individuals.
     R0          : float, optional, default: 0.
@@ -86,7 +86,7 @@ def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000)
     
     # Prepate time vector between 0 and T of length T
     t_vec = np.linspace(0, T, T)
-    
+
     # Integrate using scipy and retain only infected (2-nd dimension)
     irt = odeint(_deriv, x0, t_vec, args=(N, beta, gamma))[:, 1]
     
