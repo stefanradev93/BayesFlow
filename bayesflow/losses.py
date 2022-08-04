@@ -7,7 +7,7 @@ from bayesflow.computational_utilities import maximum_mean_discrepancy
 
 def kl_latent_space_gaussian(z, log_det_J):
     """ Computes the Kullback-Leibler divergence between true and approximate
-    posterior assumes a Gaussian latent space as a source distribution.
+    posterior assuming a Gaussian latent space as a source distribution.
 
     Parameters
     ----------
@@ -25,7 +25,7 @@ def kl_latent_space_gaussian(z, log_det_J):
     --------
     Parameter estimation
 
-    >>> kl_latent_space(z, sim_data)
+    >>> kl_latent_space_gaussian(z, log_det_J)
     """
 
     loss = tf.reduce_mean(0.5 * tf.math.square(tf.norm(z, axis=-1)) - log_det_J)

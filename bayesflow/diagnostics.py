@@ -385,7 +385,7 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
     # Add legend, if prior also given
     if prior_draws is not None:
         handles = [Line2D(xdata=[], ydata=[], color=post_color, lw=3, alpha=post_alpha, label='Posterior'),
-                Line2D(xdata=[], ydata=[], color=prior_color, lw=3, alpha=prior_alpha, label='Prior')]
+                   Line2D(xdata=[], ydata=[], color=prior_color, lw=3, alpha=prior_alpha, label='Prior')]
         g.add_legend(handles)
     g.tight_layout()
     return g.fig
@@ -433,7 +433,7 @@ def plot_losses(history, fig_size=None, color='#8f2727', label_fontsize=14, titl
     return f
 
 
-def plot_prior2d(prior, param_names=None, n_samples=1000, height=2.5, color='#8f2727', **kwargs):
+def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color='#8f2727', **kwargs):
     """ Creates pairplots for a given joint prior.
     
     Parameters
