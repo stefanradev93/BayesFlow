@@ -16,32 +16,38 @@
 
 import numpy as np
 
-def prior():
+def prior(lower_bound=-1., upper_bound=1.):
     """ Generates a draw from a 2-dimensional uniform prior bounded between 
-    [-1, 1) x [-1, 1).
+    `lower_bound` and `upper_bound` which represents the two parameters of the two moons simulator
     
+    Parameters
+    ----------
+    lower_bound : float, optional, default : -1.
+        The lower bound of the uniform prior.
+    upper_bound : float, optional, default : 1.
+        The upper bound of the uniform prior.
         
     Returns
     -------
-    theta : np.ndarray of shape (2, )
+    theta : np.ndarray of shape (2,)
         A single draw from the 2-dimensional uniform prior.
     """
     
-    return np.random.default_rng().uniform(low=-1., high=1., size=2)
+    return np.random.default_rng().uniform(low=lower_bound, high=upper_bound, size=2)
 
 
 def simulator(theta):
     """ Implements data generation from the two-moons model with a bimodal posterior.
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.8
     
-     Parameters
+    Parameters
     ----------
-    theta   : np.ndarray of shape (2, )
+    theta   : np.ndarray of shape (2,)
         The vector of two model parameters.
     
     Returns
     -------
-    x : np.ndarray of shape (2, )
+    x : np.ndarray of shape (2,)
         The 2D vector generated from the two moons simulator.
     """
     
