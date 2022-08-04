@@ -18,7 +18,8 @@ import numpy as np
 
 def prior(lower_bound=-3., upper_bound=3.):
     """ Generates a draw from a 5-dimensional uniform prior bounded between 
-    `lower_bound` and `upper_bound`.
+    `lower_bound` and `upper_bound` which represents the 5 parameters of the SLCP
+    simulator.
     
     Parameters
     ----------
@@ -34,6 +35,7 @@ def prior(lower_bound=-3., upper_bound=3.):
     """
     
     return np.random.default_rng().uniform(low=lower_bound, high=upper_bound, size=5)
+
 
 def simulator(theta, n_obs, flatten=True):
     """ Implements data generation from the SLCP model designed as a benchmark

@@ -22,3 +22,4 @@
 #
 # However, it lifts the dependency on `torch` and implements the models as ready-made
 # tuples of prior and simulator functions capable of interacting with BayesFlow.
+# Note: All default hyperparameters are set according to the paper.
