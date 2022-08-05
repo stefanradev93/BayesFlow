@@ -16,6 +16,7 @@
 
 import numpy as np
 
+
 def prior(D=10, lower_bound=-1., upper_bound=1.):
     """ Generates a draw from a D-dimensional uniform prior bounded between 
     `lower_bound` and `upper_bound` which represents the location vector of

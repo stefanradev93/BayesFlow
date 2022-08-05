@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Corresponds to Task T.5 from the paper https://arxiv.org/pdf/2101.04653.pdf
+# Corresponds to Task T.6 from the paper https://arxiv.org/pdf/2101.04653.pdf
 
 import numpy as np
 from scipy.special import expit
 
-
+# Global covariance matrix computed once for efficiency
 F = np.zeros((9, 9))
 for i in range(9):
     F[i, i] = 1 + np.sqrt(i / 9)
@@ -47,33 +47,29 @@ def prior():
 
 def simulator(theta, T=100):
     """ Simulates data from the custom Bernoulli GLM likelihood, see
-    https://arxiv.org/pdf/2101.04653.pdf, Task T.5
+    https://arxiv.org/pdf/2101.04653.pdf, Task T.6
+
+    Returns the raw Bernoulli data.
 
     Parameters
     ----------
     theta : np.ndarray of shape (10,)
-        The vector of model parameters (`theta[0]` is intercept, `theta[i], i > 0` are weights).
+        The vector of model parameters (`theta[0]` is intercept, `theta[i], i > 0` are weights)
     T     : int, optional, default: 100
         The simulated duration of the task (eq. the number of Bernoulli draws).
         
     Returns
     -------
-    x : np.ndarray of shape (10,)
-        The vector of sufficient summary statistics of the data.
+    x : np.ndarray of shape (T,)
+        The full simulated set of Bernoulli draws
     """
-    
+
     # Unpack parameters
     beta, f = theta[0], theta[1:]
 
     # Generate design matrix
     V = np.random.default_rng().normal(size=(9, T))
 
-    # Draw from Bernoulli GLM
-    z = np.random.default_rng().binomial(n=1, p=expit(V.T @ f + beta))
-
-    # Compute and return sufficient summary statistics
-    x1 = np.sum(z)
-    x_rest = V@z / x1
-    x = np.append(x1, x_rest)   
-    return x
+    # Draw from Bernoulli GLM and return
+    return np.random.default_rng().binomial(n=1, p=expit(V.T @ f + beta))
     

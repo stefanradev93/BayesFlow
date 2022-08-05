@@ -16,6 +16,7 @@
 
 import numpy as np
 
+
 def prior(lower_bound=-1., upper_bound=1.):
     """ Generates a draw from a 2-dimensional uniform prior bounded between 
     `lower_bound` and `upper_bound` which represents the two parameters of the two moons simulator

@@ -16,6 +16,7 @@
 
 import numpy as np
 
+
 def prior(lower_bound=-3., upper_bound=3.):
     """ Generates a draw from a 5-dimensional uniform prior bounded between 
     `lower_bound` and `upper_bound` which represents the 5 parameters of the SLCP

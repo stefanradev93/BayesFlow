@@ -16,6 +16,7 @@
 
 import numpy as np
 
+
 def prior(lower_bound=-10., upper_bound=10.):
     """ Generates a draw from a 2-dimensional uniform prior bounded between 
     `lower_bound` and `upper_bound` representing the common mean of a 2D Gaussian
