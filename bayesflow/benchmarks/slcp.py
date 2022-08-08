@@ -38,7 +38,7 @@ def prior(lower_bound=-3., upper_bound=3.):
     return np.random.default_rng().uniform(low=lower_bound, high=upper_bound, size=5)
 
 
-def simulator(theta, n_obs, flatten=True):
+def simulator(theta, n_obs=4, flatten=True):
     """ Implements data generation from the SLCP model designed as a benchmark
     for a simple likelihood and a complex posterior due to non-linear pushforward theta -> x.
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.3
@@ -47,7 +47,7 @@ def simulator(theta, n_obs, flatten=True):
     ----------
     theta   : np.ndarray of shape (theta, D)
         The location parameters of the Gaussian likelihood.
-    n_obs   : int
+    n_obs   : int, optional, default: 4
         The number of observations to generate from the slcp likelihood.
     flatten : bool, optional, default: True
         A flag to indicate whather a 1D (`flatten=True`) or a 2D (`flatten=False`)
@@ -68,10 +68,10 @@ def simulator(theta, n_obs, flatten=True):
     s2 = theta[3] ** 2
     rho = np.tanh(theta[4])
     cov = rho*s1*s2
-    S = np.array([[s1**2, cov], [cov, s2**2]])
+    S_theta = np.array([[s1**2, cov], [cov, s2**2]])
     
-    # Obtain given number of draws
-    x = np.random.default_rng().multivariate_normal(loc, S, size=n_obs)
+    # Obtain given number of draws from the MVN likelihood
+    x = np.random.default_rng().multivariate_normal(loc, S_theta, size=n_obs)
     if flatten:
         return x.flatten()
     return x
