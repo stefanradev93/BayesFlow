@@ -18,6 +18,7 @@ import numpy as np
 from scipy.special import expit
 
 
+# Global covariance matrix computed once for efficiency
 F = np.zeros((9, 9))
 for i in range(9):
     F[i, i] = 1 + np.sqrt(i / 9)
