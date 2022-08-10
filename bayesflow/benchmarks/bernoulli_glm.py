@@ -53,7 +53,7 @@ def prior():
     return np.append(beta, f)
     
 
-def simulator(theta, T=100, scale_sum=True):
+def simulator(theta, T=100):
     """ Simulates data from the custom Bernoulli GLM likelihood, see
     https://arxiv.org/pdf/2101.04653.pdf, Task T.5
 
@@ -67,8 +67,6 @@ def simulator(theta, T=100, scale_sum=True):
         The vector of model parameters (`theta[0]` is intercept, `theta[i], i > 0` are weights).
     T         : int, optional, default: 100
         The simulated duration of the task (eq. the number of Bernoulli draws).
-    scale_sim : bool, optional, default: True
-        A flag indicating whether to scale the sum summary statistic.
         
     Returns
     -------
@@ -87,8 +85,6 @@ def simulator(theta, T=100, scale_sum=True):
 
     # Compute and return sufficient summary statistics
     x1 = np.sum(z)
-    if scale_sum:
-        x1 /= T
     x_rest = V@z
     x = np.append(x1, x_rest)   
     return x

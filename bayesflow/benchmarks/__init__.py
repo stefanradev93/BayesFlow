@@ -44,9 +44,10 @@ available_benchmarks = [
 
 
 def build_benchmark_module(benchmark_name):
+    """ Loads the corresponding benchmark file under bayesflow.benchmarks.<benchmark_name> as a 
+    module and returns it.
     """
-    Loads the according benchmark file under bayesflow.benchmarks.<benchmark_name> as a module and returns it.
-    """
+    
     try:
         benchmark_module = importlib.import_module(f'bayesflow.benchmarks.{benchmark_name}')
         return benchmark_module
