@@ -67,5 +67,4 @@ def batched_simulator(theta, n_obs=None, scale=0.1):
 
 def configurator(forward_dict):
     """ Default configurator to transform outputs of the generative model to BayesFlow-friendly format."""
-
-    
+    pass
