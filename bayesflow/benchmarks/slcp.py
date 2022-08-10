@@ -19,7 +19,8 @@ import numpy as np
 bayesflow_benchmark_info = {
     'generative_model_info':
         {
-            'simulator_is_batched': False
+            'simulator_is_batched': False,
+            'parameter_names': [],
         },
     'configurator_info': {}
 }
