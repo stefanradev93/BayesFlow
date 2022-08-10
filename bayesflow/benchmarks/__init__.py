@@ -43,7 +43,7 @@ available_benchmarks = [
 ]
 
 
-def build_benchmark_module(benchmark_name):
+def get_benchmark_module(benchmark_name):
     """ Loads the corresponding benchmark file under bayesflow.benchmarks.<benchmark_name> as a 
     module and returns it.
     """
@@ -60,15 +60,13 @@ class Benchmark:
     def __init__(self, benchmark_name):
         self.benchmark_name = benchmark_name
 
-        self.benchmark_module = build_benchmark_module(self.benchmark_name)
+        self.benchmark_module = get_benchmark_module(self.benchmark_name)
 
         self.benchmark_info = getattr(self.benchmark_module, 'bayesflow_benchmark_info')
 
-        self.prior = getattr(self.benchmark_module, 'prior')
-        self.simulator = getattr(self.benchmark_module, 'simulator')
-
         self.generative_model = GenerativeModel(
-            prior=Prior(self.prior),
-            simulator=self.simulator,
-            simulator_is_batched=self.benchmark_info["generative_model_info"]["simulator_is_batched"]
+            prior=Prior(prior_fun=getattr(self.benchmark_module, 'prior'),
+                        param_names=self.benchmark_info['generative_model_info']['parameter_names']),
+            simulator=getattr(self.benchmark_module, 'simulator'),
+            simulator_is_batched=self.benchmark_info['generative_model_info']['simulator_is_batched']
         )
