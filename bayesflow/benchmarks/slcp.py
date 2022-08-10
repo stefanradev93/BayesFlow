@@ -81,3 +81,14 @@ def simulator(theta, n_obs=4, flatten=False):
     if flatten:
         return x.flatten()
     return x
+
+def configurator(forward_dict, mode='posterior', scale_data=30.):
+    """ Configures simulator outputs for use in BayesFlow training."""
+
+    if mode == 'posterior':
+        input_dict = {}
+        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+        input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        return input_dict
+    else:
+        raise NotImplementedError('For now, only posterior mode is available!')

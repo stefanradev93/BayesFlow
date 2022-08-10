@@ -24,16 +24,19 @@ bayesflow_benchmark_info = {
 }
 
 
-def get_random_student_t(dim=2, mu_scale=15):
+def get_random_student_t(dim=2, mu_scale=15, shape_scale=0.01):
     """ A helper function to create a "frozen" multivariate student-t distribution of dimensions `dim`.
 
     Parameters
     ----------
-    dim      : int, optional, default: 2
+    dim          : int, optional, default: 2
         The dimensionality of the student-t distribution.
-    mu_scale : float, optional, default: 15
+    mu_scale     : float, optional, default: 15
         The scale of the zero-centered Gaussian prior from which the mean vector 
         of the student-t distribution is drawn. 
+    shape_scale  : float, optional, default: 0.01
+        The scale of the assumed `np.eye(dim)` shape matrix. The default is chosen to keep
+        the scale of the distractors and observations relatively similar.
   
     Returns
     -------
@@ -45,7 +48,7 @@ def get_random_student_t(dim=2, mu_scale=15):
     mu = mu_scale * np.random.default_rng().normal(size=dim)
     
     # Return student-t object
-    return multivariate_t(loc=mu, shape=0.01, df=2, allow_singular=True)
+    return multivariate_t(loc=mu, shape=shape_scale, df=2, allow_singular=True)
 
 
 def draw_mixture_student_t(num_students, n_draws=46, dim=2, mu_scale=15.):
@@ -68,8 +71,8 @@ def draw_mixture_student_t(num_students, n_draws=46, dim=2, mu_scale=15.):
     
     Returns
     -------
-    distractors : np.ndarray of shape (n_draws, dim)
-        The random draws from the mixture.
+    sample : np.ndarray of shape (n_draws, dim)
+        The random draws from the mixture of students.
     """
 
     # Obtain a list of scipy frozen distributions (each will have a different mean)
@@ -151,3 +154,17 @@ def simulator(theta, n_obs=4, n_dist=46, dim=2, mu_scale=15., flatten=False):
     if flatten:
         return x.flatten()
     return x
+
+def configurator(forward_dict, mode='posterior', scale_data=50., as_summary_condition=True):
+    """ Configures simulator outputs for use in BayesFlow training."""
+
+    if mode == 'posterior':
+        input_dict = {}
+        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+        if as_summary_condition:
+            input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        else:
+            input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        return input_dict
+    else:
+        raise NotImplementedError('For now, only posterior mode is available!')

@@ -82,7 +82,8 @@ def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000)
     Returns
     -------
     x : np.ndarray of shape (subsample,) or (T,) if subsample=None
-        The time series of simulated infected individuals.
+        The time series of simulated infected individuals. A trailing dimension of 1 should
+        be added by a BayesFlow configurator if the data is (properly) to be treated as time series. 
     """
     
     # Create vector (list) of initial conditions
@@ -104,3 +105,18 @@ def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000)
     # Add noise, scale and return
     x = np.random.default_rng().binomial(n=total_count, p=irt/N) / total_count
     return x
+
+
+def configurator(forward_dict, mode='posterior', as_summary_condition=True):
+    """ Configures simulator outputs for use in BayesFlow training."""
+
+    if mode == 'posterior':
+        input_dict = {}
+        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+        if as_summary_condition:
+            input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32)[:, :, np.newaxis]
+        else:
+            input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
+        return input_dict
+    else:
+        raise NotImplementedError('For now, only posterior mode is available!')

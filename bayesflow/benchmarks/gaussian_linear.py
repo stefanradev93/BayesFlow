@@ -71,6 +71,14 @@ def simulator(theta, n_obs=None, scale=0.1):
     x = scale*np.random.default_rng().normal(loc=theta, size=(n_obs, theta.shape[0], theta.shape[1]))
     return np.transpose(x, (1, 0, 2))
 
-def configurator(forward_dict):
-    """ Default configurator to transform outputs of the generative model to BayesFlow-friendly format."""
-    pass
+
+def configurator(forward_dict, mode='posterior'):
+    """ Configures simulator outputs for use in BayesFlow training."""
+
+    if mode == 'posterior':
+        input_dict = {}
+        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
+        return input_dict
+    else:
+        raise NotImplementedError('For now, only posterior mode is available!')

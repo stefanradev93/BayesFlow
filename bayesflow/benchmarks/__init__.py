@@ -56,7 +56,7 @@ def get_benchmark_module(benchmark_name):
 
 
 class Benchmark:
-
+    """TODO"""
     def __init__(self, benchmark_name):
         self.benchmark_name = benchmark_name
 

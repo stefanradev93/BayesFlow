@@ -51,7 +51,7 @@ def prior():
     return np.append(beta, f)
     
 
-def simulator(theta, T=100):
+def simulator(theta, T=100, scale_by_T=True):
     """ Simulates data from the custom Bernoulli GLM likelihood, see
     https://arxiv.org/pdf/2101.04653.pdf, Task T.5
 
@@ -61,11 +61,12 @@ def simulator(theta, T=100):
 
     Parameters
     ----------
-    theta     : np.ndarray of shape (10,)
+    theta      : np.ndarray of shape (10,)
         The vector of model parameters (`theta[0]` is intercept, `theta[i], i > 0` are weights).
-    T         : int, optional, default: 100
+    T          : int, optional, default: 100
         The simulated duration of the task (eq. the number of Bernoulli draws).
-        
+    scale_by_T : bool, optional, default: True
+        A flag indicating whether to scale the summayr statistics by T.
     Returns
     -------
     x : np.ndarray of shape (10,)
@@ -81,9 +82,22 @@ def simulator(theta, T=100):
     # Draw from Bernoulli GLM
     z = np.random.default_rng().binomial(n=1, p=expit(V.T @ f + beta))
 
-    # Compute and return sufficient summary statistics
+    # Compute and return (scaled) sufficient summary statistics
     x1 = np.sum(z)
     x_rest = V@z
-    x = np.append(x1, x_rest)   
+    x = np.append(x1, x_rest)
+    if scale_by_T:
+        x /= T
     return x
+
+def configurator(forward_dict, mode='posterior'):
+    """ Configures simulator outputs for use in BayesFlow training."""
+
+    if mode == 'posterior':
+        input_dict = {}
+        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
+        return input_dict
+    else:
+        raise NotImplementedError('For now, only posterior mode is available!')
     

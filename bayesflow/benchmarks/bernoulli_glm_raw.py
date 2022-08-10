@@ -67,7 +67,8 @@ def simulator(theta, T=100):
     Returns
     -------
     x : np.ndarray of shape (T,)
-        The full simulated set of Bernoulli draws
+        The full simulated set of Bernoulli draws. Should be configured with an additional trailing
+        dimension if the data is (properly) to be treated as a set.
     """
 
     # Unpack parameters
@@ -78,4 +79,19 @@ def simulator(theta, T=100):
 
     # Draw from Bernoulli GLM and return
     return np.random.default_rng().binomial(n=1, p=expit(V.T @ f + beta))
+
+
+def configurator(forward_dict, mode='posterior', as_summary_condition=True):
+    """ Configures simulator outputs for use in BayesFlow training."""
+
+    if mode == 'posterior':
+        input_dict = {}
+        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+        if as_summary_condition:
+            input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32)[:, :, np.newaxis]
+        else:
+            input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32)
+        return input_dict
+    else:
+        raise NotImplementedError('For now, only posterior mode is available!')
     
