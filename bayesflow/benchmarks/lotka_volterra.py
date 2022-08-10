@@ -18,12 +18,9 @@ import numpy as np
 from scipy.integrate import odeint
 
 bayesflow_benchmark_info = {
-    'generative_model_info':
-        {
-            'simulator_is_batched': False,
-            'parameter_names': [r'$\alpha$', r'$\beta$', r'$\gamma$', r'$\delta$'],
-        },
-    'configurator_info': {}
+    'simulator_is_batched': False,
+    'parameter_names': [r'$\alpha$', r'$\beta$', r'$\gamma$', r'$\delta$'],
+    'configurator_info': 'posterior'
 }
 
 

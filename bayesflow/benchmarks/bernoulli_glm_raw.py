@@ -18,12 +18,9 @@ import numpy as np
 from scipy.special import expit
 
 bayesflow_benchmark_info = {
-    'generative_model_info':
-        {
-            'simulator_is_batched': False,
-            'parameter_names': [r'$\beta$'] + [r'$f_{}$'.format(i) for i in range(1, 10)],
-        },
-    'configurator_info': {}
+    'simulator_is_batched': False,
+    'parameter_names': [r'$\beta$'] + [r'$f_{}$'.format(i) for i in range(1, 10)],
+    'configurator_info': 'posterior'
 }
 
 # Global covariance matrix computed once for efficiency

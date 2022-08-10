@@ -17,12 +17,9 @@
 import numpy as np
 
 bayesflow_benchmark_info = {
-    'generative_model_info':
-        {
-            'simulator_is_batched': False,
-            'parameter_names': [r'$\theta_1$', r'$\theta_2$'],
-        },
-    'configurator_info': {}
+    'simulator_is_batched': False,
+    'parameter_names': [r'$\theta_1$', r'$\theta_2$'],
+    'configurator_info': 'posterior'
 }
 
 

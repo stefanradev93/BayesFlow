@@ -18,12 +18,9 @@ import numpy as np
 from scipy.stats import multivariate_t
 
 bayesflow_benchmark_info = {
-    'generative_model_info':
-        {
-            'simulator_is_batched': False,
-            'parameter_names': [r'$\theta_{}$'.format(i) for i in range(1, 6)],
-        },
-    'configurator_info': {}
+    'simulator_is_batched': False,
+    'parameter_names': [r'$\theta_{}$'.format(i) for i in range(1, 6)],
+    'configurator_info': 'posterior'
 }
 
 

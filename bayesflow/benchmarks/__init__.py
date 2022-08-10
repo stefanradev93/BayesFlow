@@ -65,8 +65,10 @@ class Benchmark:
         self.benchmark_info = getattr(self.benchmark_module, 'bayesflow_benchmark_info')
 
         self.generative_model = GenerativeModel(
-            prior=Prior(prior_fun=getattr(self.benchmark_module, 'prior'),
-                        param_names=self.benchmark_info['generative_model_info']['parameter_names']),
+            prior=Prior(
+                prior_fun=getattr(self.benchmark_module, 'prior'),
+                param_names=self.benchmark_info['parameter_names']
+            ),
             simulator=getattr(self.benchmark_module, 'simulator'),
-            simulator_is_batched=self.benchmark_info['generative_model_info']['simulator_is_batched']
+            simulator_is_batched=self.benchmark_info['simulator_is_batched']
         )
