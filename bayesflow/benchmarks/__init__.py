@@ -23,3 +23,51 @@
 # However, it lifts the dependency on `torch` and implements the models as ready-made
 # tuples of prior and simulator functions capable of interacting with BayesFlow.
 # Note: All default hyperparameters are set according to the paper.
+
+import importlib
+
+from bayesflow.forward_inference import GenerativeModel, Prior
+from bayesflow.exceptions import ConfigurationError
+
+available_benchmarks = [
+    "bernoulli_glm",
+    "bernoulli_glm_raw",
+    "gaussian_linear",
+    "gaussian_linear_uniform",
+    "gaussian_mixture",
+    "lotka_volterra",
+    "sir",
+    "slcp",
+    "slcp_distractors",
+    "two_moons"
+]
+
+
+def build_benchmark_module(benchmark_name):
+    """
+    Loads the according benchmark file under bayesflow.benchmarks.<benchmark_name> as a module and returns it.
+    """
+    try:
+        benchmark_module = importlib.import_module(f'bayesflow.benchmarks.{benchmark_name}')
+        return benchmark_module
+    except ModuleNotFoundError:
+        raise ConfigurationError(f"You need to provide a valid name from: {available_benchmarks}")
+
+
+class Benchmark:
+
+    def __init__(self, benchmark_name):
+        self.benchmark_name = benchmark_name
+
+        self.benchmark_module = build_benchmark_module(self.benchmark_name)
+
+        self.benchmark_info = getattr(self.benchmark_module, 'bayesflow_benchmark_info')
+
+        self.prior = getattr(self.benchmark_module, 'prior')
+        self.simulator = getattr(self.benchmark_module, 'simulator')
+
+        self.generative_model = GenerativeModel(
+            prior=Prior(self.prior),
+            simulator=self.simulator,
+            simulator_is_batched=self.benchmark_info["generative_model_info"]["simulator_is_batched"]
+        )
