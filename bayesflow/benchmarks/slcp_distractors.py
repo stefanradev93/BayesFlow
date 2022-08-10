@@ -21,7 +21,7 @@ bayesflow_benchmark_info = {
     'generative_model_info':
         {
             'simulator_is_batched': False,
-            'parameter_names': [r'$\theta_{i}$'.format(i) for i in range(1, 6)],
+            'parameter_names': [r'$\theta_{}$'.format(i) for i in range(1, 6)],
         },
     'configurator_info': {}
 }
