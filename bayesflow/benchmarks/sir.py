@@ -17,6 +17,14 @@
 import numpy as np
 from scipy.integrate import odeint
 
+bayesflow_benchmark_info = {
+    'generative_model_info':
+        {
+            'simulator_is_batched': False
+        },
+    'configurator_info': {}
+}
+
 
 def prior():
     """ Generates a draw from a 2-dimensional (independent) lognormal prior

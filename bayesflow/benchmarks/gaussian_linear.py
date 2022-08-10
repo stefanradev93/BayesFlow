@@ -16,6 +16,14 @@
 
 import numpy as np
 
+bayesflow_benchmark_info = {
+    'generative_model_info':
+        {
+            'simulator_is_batched': True
+        },
+    'configurator_info': {}
+}
+
 
 def prior(D=10, scale=0.1):
     """ Generates a draw from a D-dimensional Gaussian prior distribution with a 
@@ -38,7 +46,7 @@ def prior(D=10, scale=0.1):
     return scale*np.random.default_rng().normal(size=D)
 
 
-def batched_simulator(theta, n_obs=None, scale=0.1):
+def simulator(theta, n_obs=None, scale=0.1):
     """ Generates batched draws from a D-dimenional Gaussian distributions given a batch of 
     location (mean) parameters of D dimensions. Assumes a spherical convariance matrix given 
     by scale * I_D. 

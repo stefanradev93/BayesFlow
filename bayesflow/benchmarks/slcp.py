@@ -16,6 +16,15 @@
 
 import numpy as np
 
+bayesflow_benchmark_info = {
+    'generative_model_info':
+        {
+            'simulator_is_batched': False
+        },
+    'configurator_info': {}
+}
+
+
 def prior(lower_bound=-3., upper_bound=3.):
     """ Generates a draw from a 5-dimensional uniform prior bounded between 
     `lower_bound` and `upper_bound` which represents the 5 parameters of the SLCP

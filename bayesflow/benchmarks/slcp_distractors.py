@@ -17,6 +17,14 @@
 import numpy as np
 from scipy.stats import multivariate_t
 
+bayesflow_benchmark_info = {
+    'generative_model_info':
+        {
+            'simulator_is_batched': False
+        },
+    'configurator_info': {}
+}
+
 
 def get_random_student_t(dim=2, mu_scale=15):
     """ A helper function to create a "frozen" multivariate student-t distribution of dimensions `dim`.

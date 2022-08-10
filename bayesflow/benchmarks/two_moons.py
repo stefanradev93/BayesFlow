@@ -16,6 +16,14 @@
 
 import numpy as np
 
+bayesflow_benchmark_info = {
+    'generative_model_info':
+        {
+            'simulator_is_batched': False
+        },
+    'configurator_info': {}
+}
+
 
 def prior(lower_bound=-1., upper_bound=1.):
     """ Generates a draw from a 2-dimensional uniform prior bounded between 

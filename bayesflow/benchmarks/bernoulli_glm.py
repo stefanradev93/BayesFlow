@@ -17,6 +17,13 @@
 import numpy as np
 from scipy.special import expit
 
+bayesflow_benchmark_info = {
+    'generative_model_info':
+        {
+            'simulator_is_batched': False
+        },
+    'configurator_info': {}
+}
 
 # Global covariance matrix computed once for efficiency
 F = np.zeros((9, 9))
