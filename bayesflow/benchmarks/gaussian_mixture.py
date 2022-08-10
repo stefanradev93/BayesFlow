@@ -20,7 +20,7 @@ bayesflow_benchmark_info = {
     'generative_model_info':
         {
             'simulator_is_batched': False,
-            'parameter_names': [],
+            'parameter_names': [r'$\mu_1$', r'$\mu_2$'],
         },
     'configurator_info': {}
 }
