@@ -44,6 +44,7 @@ def _deriv(x, t, N, beta, gamma):
     dR = gamma * I
     return dS, dI, dR
 
+
 def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000):
     """ Runs a SIR model simulation for T time steps and returns `subsample` evenly spaced
     points from the simulated trajectory, given disease parameters (contact and recovery rate) `theta`.

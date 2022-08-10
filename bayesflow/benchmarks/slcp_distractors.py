@@ -18,13 +18,11 @@ import numpy as np
 from scipy.stats import multivariate_t
 
 
-def get_random_student_t(Sigma, dim=2, mu_scale=15):
+def get_random_student_t(dim=2, mu_scale=15):
     """ A helper function to create a "frozen" multivariate student-t distribution of dimensions `dim`.
 
     Parameters
     ----------
-    Sigma    : np.ndarray of shape (dim, dim)
-        The (symmetric) positive semidefinite shape matrix of the student-t distribution.
     dim      : int, optional, default: 2
         The dimensionality of the student-t distribution.
     mu_scale : float, optional, default: 15
@@ -41,10 +39,10 @@ def get_random_student_t(Sigma, dim=2, mu_scale=15):
     mu = mu_scale * np.random.default_rng().normal(size=dim)
     
     # Return student-t object
-    return multivariate_t(loc=mu, shape=Sigma / mu_scale, df=2, allow_singular=True)
+    return multivariate_t(loc=mu, shape=0.01, df=2, allow_singular=True)
 
 
-def draw_mixture_student_t(num_students, Sigma, n_draws=46, dim=2, mu_scale=15.):
+def draw_mixture_student_t(num_students, n_draws=46, dim=2, mu_scale=15.):
     """ Helper function to generate `n_draws` random draws from a mixture of `num_students` 
     multivariate Student-t distributions. 
     
@@ -54,8 +52,6 @@ def draw_mixture_student_t(num_students, Sigma, n_draws=46, dim=2, mu_scale=15.)
     ----------
     num_students : int
         The number of multivariate student-t mixture components
-    Sigma        : np.ndarray of shape (dim, dim)
-        The (symmetric) positive semidefinite shared shape matrix of the student-t distributions.
     n_draws      : int, optional, default: 46 
         The number of draws to obtain from the mixture distribution.
     dim          : int, optional, default: 2
@@ -71,7 +67,7 @@ def draw_mixture_student_t(num_students, Sigma, n_draws=46, dim=2, mu_scale=15.)
     """
 
     # Obtain a list of scipy frozen distributions (each will have a different mean)
-    students = [get_random_student_t(Sigma, dim, mu_scale) for _ in range(num_students)]
+    students = [get_random_student_t(dim, mu_scale) for _ in range(num_students)]
 
     # Obtain the sample of n_draws from the mixture and return 
     sample = [students[np.random.default_rng().integers(low=0, high=num_students)].rvs() for _ in range(n_draws)]
@@ -143,7 +139,7 @@ def simulator(theta, n_obs=4, n_dist=46, dim=2, mu_scale=15., flatten=True):
 
     # Obtain uninformative part of the data
     x_uninfo = draw_mixture_student_t(
-        num_students=20, Sigma=S_theta, n_draws=n_dist, dim=dim, mu_scale=mu_scale)
+        num_students=20, n_draws=n_dist, dim=dim, mu_scale=mu_scale)
 
     # Concatenate informative with uninformative and return
     x = np.concatenate([x_info, x_uninfo], axis=0)
