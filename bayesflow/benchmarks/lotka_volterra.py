@@ -88,9 +88,12 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True):
     # Subsample evenly the specified number of points, if specified
     if subsample is not None:
         pp = pp[::(T // subsample)]
+
+    # Ensure minimum count is 0, which will later pass by log(0 + 1)
+    pp[pp<0] = 0
     
     # Add noise, decide whether to flatten and return
-    x = np.random.default_rng().lognormal(pp, sigma=0.1)
+    x = np.random.default_rng().lognormal(np.log1p(pp), sigma=0.1)
     if flatten:
         return x.flatten()
     return x

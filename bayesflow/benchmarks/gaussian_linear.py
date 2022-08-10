@@ -64,3 +64,8 @@ def batched_simulator(theta, n_obs=None, scale=0.1):
         return scale*np.random.default_rng().normal(loc=theta)
     x = scale*np.random.default_rng().normal(loc=theta, size=(n_obs, theta.shape[0], theta.shape[1]))
     return np.transpose(x, (1, 0, 2))
+
+def configurator(forward_dict):
+    """ Default configurator to transform outputs of the generative model to BayesFlow-friendly format."""
+
+    

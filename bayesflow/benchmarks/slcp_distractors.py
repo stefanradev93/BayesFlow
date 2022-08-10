@@ -18,7 +18,7 @@ import numpy as np
 from scipy.stats import multivariate_t
 
 
-def get_random_student_t(Sigma, dim=2, mu_scale=15.):
+def get_random_student_t(Sigma, dim=2, mu_scale=15):
     """ A helper function to create a "frozen" multivariate student-t distribution of dimensions `dim`.
 
     Parameters
@@ -41,7 +41,7 @@ def get_random_student_t(Sigma, dim=2, mu_scale=15.):
     mu = mu_scale * np.random.default_rng().normal(size=dim)
     
     # Return student-t object
-    return multivariate_t(loc=mu, shape=Sigma, df=2)
+    return multivariate_t(loc=mu, shape=Sigma / mu_scale, df=2, allow_singular=True)
 
 
 def draw_mixture_student_t(num_students, Sigma, n_draws=46, dim=2, mu_scale=15.):
