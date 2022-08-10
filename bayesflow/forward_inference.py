@@ -470,7 +470,7 @@ class GenerativeModel:
             self.simulator = self._config_custom_simulator(simulator, simulator_is_batched)
         else:
             self.simulator = simulator
-        self.simulator_is_bactched = self.simulator.is_batched
+        self.simulator_is_batched = self.simulator.is_batched
 
         if name is None:
             self.name = 'anonymous'
