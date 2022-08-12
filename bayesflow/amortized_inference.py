@@ -620,9 +620,9 @@ class JointAmortizer(tf.keras.Model):
 
         if input_dict.get(DEFAULT_KEYS['likelihood_inputs']) is not None:
             return self.amortized_likelihood.sample(
-                input_dict[DEFAULT_KEYS['likelihood_inputs']], n_samples, to_numpy=to_numpy, training=False, **kwargs
+                input_dict[DEFAULT_KEYS['likelihood_inputs']], n_samples, to_numpy=to_numpy, **kwargs
             )
-        return self.amortized_likelihood.sample(input_dict, n_samples, to_numpy=to_numpy, training=False, **kwargs)
+        return self.amortized_likelihood.sample(input_dict, n_samples, to_numpy=to_numpy, **kwargs)
 
     def sample_parameters(self, input_dict, n_samples, to_numpy=True, **kwargs):
         """ Generates random draws from the approximate posterior given conditonal variables.
@@ -648,9 +648,9 @@ class JointAmortizer(tf.keras.Model):
         """
         if input_dict.get(DEFAULT_KEYS['posterior_inputs']) is not None:
             return self.amortized_posterior.sample(
-                input_dict[DEFAULT_KEYS['posterior_inputs']], n_samples, to_numpy=to_numpy, training=False, **kwargs
+                input_dict[DEFAULT_KEYS['posterior_inputs']], n_samples, to_numpy=to_numpy, **kwargs
             )
-        return self.amortized_posterior.sample(input_dict, n_samples, to_numpy=to_numpy, training=False, **kwargs)
+        return self.amortized_posterior.sample(input_dict, n_samples, to_numpy=to_numpy, **kwargs)
 
 
 class ModelComparisonAmortizer(tf.keras.Model):
