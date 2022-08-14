@@ -19,6 +19,8 @@ from bayesflow.exceptions import ConfigurationError, SummaryStatsError
 from bayesflow.losses import *
 from bayesflow.default_settings import DEFAULT_KEYS
 
+from warnings import warn
+
 
 class AmortizedPosterior(tf.keras.Model):
     """ An interface to connect an inference network for parameter estimation with an optional summary network
@@ -646,6 +648,7 @@ class JointAmortizer(tf.keras.Model):
         post_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, n_params)
             the sampled parameters per data set
         """
+        
         if input_dict.get(DEFAULT_KEYS['posterior_inputs']) is not None:
             return self.amortized_posterior.sample(
                 input_dict[DEFAULT_KEYS['posterior_inputs']], n_samples, to_numpy=to_numpy, **kwargs
@@ -819,8 +822,7 @@ class ModelComparisonAmortizer(tf.keras.Model):
         return u
 
     def _compute_summary_condition(self, summary_conditions, direct_conditions, **kwargs):
-        """ Determines how to concatenate the provided conditions.
-        """
+        """ Determines how to concatenate the provided conditions."""
 
         # Compute learnable summaries, if given
         if self.summary_net is not None:
@@ -840,10 +842,22 @@ class ModelComparisonAmortizer(tf.keras.Model):
         return sum_condition, full_cond
 
     def _determine_loss(self, loss_fun):
-        
+        """ Helper method to determine loss function to use."""
+
         if loss_fun is None:
             return log_loss
         elif callable(loss_fun):
             return loss_fun
         else:
-            raise ConfigurationError("Loss function is neither default not callable. Please provide a valid loss function!")
+            raise ConfigurationError("Loss function is neither default (`None`) not callable. Please provide a valid loss function!")
+
+
+class SingleModelAmortizer(AmortizedPosterior):
+    """Deprecated class for amortizer posterior estimation."""
+    def __init_subclass__(cls, **kwargs):
+        warn(f'{cls.__name__} will be deprecated. Use `AmortizedPosterior` instead.', DeprecationWarning, stacklevel=2)
+        super().__init_subclass__(**kwargs)
+
+    def __init__(self, *args, **kwargs):
+        warn(f'{self.__class__.__name__} will be deprecated. Use `AmortizedPosterior` instead.', DeprecationWarning, stacklevel=2)
+        super().__init__(*args, **kwargs)
