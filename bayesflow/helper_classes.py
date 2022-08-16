@@ -77,7 +77,7 @@ class SimulationDataset:
 class RegressionLRAdjuster:
     """This class will compute the slope of the loss trajectory and inform learning rate decay."""
     
-    def __init__(self, optimizer, period=100, wait_between_fits=10, patience=5, tolerance=-0.1, 
+    def __init__(self, optimizer, period=100, wait_between_fits=10, patience=8, tolerance=-0.1, 
                  reduction_factor=0.25, num_resets=4, **kwargs):
         """ Creates an instance with given hyperparameters which will track the slope of the 
         loss trajectory.
@@ -96,9 +96,11 @@ class RegressionLRAdjuster:
         self.reduction_factor = reduction_factor
         self._reset_counter = 0
         self._patience_counter = 0
+        self._cooldown_counter = 0
         self._wait_counter = 0
         self._slope = None
         self._is_waiting = False
+        self._in_cooldown = False
         
     def get_slope(self, losses):
         """ Fits a Huber regression on the provided loss trajectory or returns None if
@@ -108,6 +110,9 @@ class RegressionLRAdjuster:
         # Return None if not enough loss values present
         if losses.shape[0] < self.period:
             return None
+
+        if self._in_cooldown:
+            self._cooldown_counter += 1
         
         # Check if still in a waiting phase and return old slope
         # if still waiting, otherwise refit Huber regression
@@ -122,6 +127,14 @@ class RegressionLRAdjuster:
 
     def _check_patience(self):
         """ Determines whether to reduce learning rate or be patient."""
+
+        # Do nothing, if still in cooldown period
+        if self._in_cooldown and self._cooldown_counter < self.period:
+            return 
+        # Otherwise set cooldown flag to False and reset counter
+        else:
+            self._in_cooldown = False
+            self._cooldown_counter = 0
 
         # Check if negetaive slope too small
         if self._slope > self.tolerance:
@@ -149,10 +162,13 @@ class RegressionLRAdjuster:
             old_lr = self.optimizer.lr.numpy()
             new_lr = self.reduction_factor * old_lr
             self.optimizer.lr.assign(new_lr)
-            self.num_resets += 1
+            self._reset_counter += 1
 
             # Verbose info to user
-            logger.info(f'Reducing learning rate from {old_lr} to: {new_lr}')
+            logger.info(f'Reducing learning rate from {old_lr} to: {new_lr}...')
+
+            # Set cooldown flag to avoid reset for some time.
+            self._in_cooldown = True
 
     def _check_waiting(self):
         """ Determines whether to compute a new slope or wait."""
