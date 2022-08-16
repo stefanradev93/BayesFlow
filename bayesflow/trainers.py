@@ -162,7 +162,7 @@ class Trainer:
             self.simulation_memory = None
 
         # Set-up regression adjuster #TODO allow for control per kwargs
-        self.lr_adjuster = RegressionLRAdjuster()
+        self.lr_adjuster = RegressionLRAdjuster(self.optimizer)
 
         # Perform a sanity check wiuth provided components
         if not skip_checks:

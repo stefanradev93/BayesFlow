@@ -13,11 +13,12 @@
 # limitations under the License.
 
 from copy import deepcopy
-from re import A
-
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+
+import logging
+logging.basicConfig()
 
 from sklearn.linear_model import HuberRegressor
 
@@ -136,12 +137,22 @@ class RegressionLRAdjuster:
     def _reduce_learning_rate(self):
         """ Reduces the learning rate by a given factor. """
 
+        # Logger
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
         if self._reset_counter >= self.num_resets:
-            print('Optional stopping!')
+            # TODO - add actual functionality
+            logging.info('Triggered optional stopping!')
         else:
+            # Take care of updating learning rate
             old_lr = self.optimizer.lr.numpy()
-            self.optimizer.lr.set_assign(self.reduction_factor * old_lr)
+            new_lr = self.reduction_factor * old_lr
+            self.optimizer.lr.assign(new_lr)
             self.num_resets += 1
+
+            # Verbose info to user
+            logger.info(f'Reducing learning rate from {old_lr} to: {new_lr}')
 
     def _check_waiting(self):
         """ Determines whether to compute a new slope or wait."""
