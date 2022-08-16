@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from copy import deepcopy
+from re import A
 
 import numpy as np
 import pandas as pd
@@ -75,7 +76,7 @@ class SimulationDataset:
 class RegressionLRAdjuster:
     """This class will compute the slope of the loss trajectory and inform learning rate decay."""
     
-    def __init__(self, period=100, wait_between_fits=10, **kwargs):
+    def __init__(self, period=100, wait_between_fits=10, patience=5, tolerance=-0.1, **kwargs):
         """ Creates an instance with given hyperparameters which will track the slope of the 
         loss trajectory.
         
@@ -86,6 +87,9 @@ class RegressionLRAdjuster:
         self.wait_between_periods = wait_between_fits
         self.regressor = HuberRegressor(**kwargs)
         self.t_vector = np.linspace(0, 1, self.period)[:, np.newaxis]
+        self.patience = patience
+        self.tolerance = tolerance
+        self._patience_counter = 0
         self._wait_counter = 0
         self._slope = None
         self._is_waiting = False
@@ -107,10 +111,24 @@ class RegressionLRAdjuster:
         else:
             self.regressor.fit(self.t_vector, losses[-self.period:])
             self._slope = self.regressor.coef_[0]
+            self._check_patience()
             return self._slope
-        
+
+    def _check_patience(self):
+        """ Determines whether to reduce learning rate or be patient."""
+        if self._slope > self.tolerance:
+            self._patience_counter += 1
+        else:
+            self._patience_counter = max(0, self._patience_counter - 1)
+
+        if self._patience_counter >= self.patience:
+            # CHANGE LEARNING RATE
+            print('Change LR!!')
+            self._patience_counter = 0
+
     def _check_waiting(self):
-        """ Determines whether """
+        """ Determines whether to compute a new slope or wait."""
+        
         # Case currently waiting
         if self._is_waiting:
             # Case currently waiting but period is over

@@ -148,7 +148,7 @@ def format_loss_string(ep, it, loss, avg_dict, slope, ep_str="Epoch", it_str='It
         for k, v in avg_dict.items():
             disp_str += f",{k}: {v:.3f}"
     if slope is None:
-        disp_str += f",Slope: NA"
+        disp_str += f",L.Slope: NA"
     else:
-        disp_str += f",Slope: {slope:.3f}"
+        disp_str += f",L.Slope: {slope:.3f}"
     return disp_str
