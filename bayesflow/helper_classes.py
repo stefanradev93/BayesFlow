@@ -76,19 +76,24 @@ class SimulationDataset:
 class RegressionLRAdjuster:
     """This class will compute the slope of the loss trajectory and inform learning rate decay."""
     
-    def __init__(self, period=100, wait_between_fits=10, patience=5, tolerance=-0.1, **kwargs):
+    def __init__(self, optimizer, period=100, wait_between_fits=10, patience=5, tolerance=-0.1, 
+                 reduction_factor=0.25, num_resets=4, **kwargs):
         """ Creates an instance with given hyperparameters which will track the slope of the 
         loss trajectory.
         
         TODO
         """
         
+        self.optimizer = optimizer
         self.period = period
         self.wait_between_periods = wait_between_fits
         self.regressor = HuberRegressor(**kwargs)
         self.t_vector = np.linspace(0, 1, self.period)[:, np.newaxis]
         self.patience = patience
         self.tolerance = tolerance
+        self.num_resets = num_resets
+        self.reduction_factor = reduction_factor
+        self._reset_counter = 0
         self._patience_counter = 0
         self._wait_counter = 0
         self._slope = None
@@ -99,7 +104,7 @@ class RegressionLRAdjuster:
         not enough data points present.
         """
         
-        # Return None if not enough losses present
+        # Return None if not enough loss values present
         if losses.shape[0] < self.period:
             return None
         
@@ -116,19 +121,31 @@ class RegressionLRAdjuster:
 
     def _check_patience(self):
         """ Determines whether to reduce learning rate or be patient."""
+
+        # Check if negetaive slope too small
         if self._slope > self.tolerance:
             self._patience_counter += 1
         else:
             self._patience_counter = max(0, self._patience_counter - 1)
 
+        # Check if patience surpassed and issue a reduction in learning rate
         if self._patience_counter >= self.patience:
-            # CHANGE LEARNING RATE
-            print('Change LR!!')
+            self._reduce_learning_rate()
             self._patience_counter = 0
+
+    def _reduce_learning_rate(self):
+        """ Reduces the learning rate by a given factor. """
+
+        if self._reset_counter >= self.num_resets:
+            print('Optional stopping!')
+        else:
+            old_lr = self.optimizer.lr.numpy()
+            self.optimizer.lr.set_assign(self.reduction_factor * old_lr)
+            self.num_resets += 1
 
     def _check_waiting(self):
         """ Determines whether to compute a new slope or wait."""
-        
+
         # Case currently waiting
         if self._is_waiting:
             # Case currently waiting but period is over
@@ -270,65 +287,3 @@ class SimulationMemory:
         if self._idx >= self._capacity:
             return True
         return False
-
-
-class ReduceLROnPlateau:
-    """Reduce learning rate when a loss has stopped improving. Code inspired by:
-
-    https://github.com/keras-team/keras/blob/v2.8.0/keras/callbacks.py#L2641-L2763
-
-    Parameters
-    ----------
-
-    factor   : factor by which the learning rate will be reduced.
-        `new_lr = lr * factor`.
-    patience : number of epochs with no improvement after which learning rate
-        will be reduced.
-    verbose  : int. 0: quiet, 1: update messages.
-    min_delta: threshold for measuring the new optimum, to only focus on
-        significant changes.
-    min_lr   : lower bound on the learning rate.
-
-    """
-
-    def __init__(self, factor=0.5, patience=3, min_delta=0.05, min_lr=1e-5):
-
-        if factor >= 1.0:
-            raise ValueError(f'ReduceLROnPlateau does not support a factor >= 1.0. Got {factor}')
-
-        self.factor = factor
-        self.min_lr = min_lr
-        self.min_delta = min_delta
-        self.patience = patience
-        self.wait = 0
-        self.best = 0
-        self._reset()
-
-
-    def _reset(self):
-        """Resets wait counter and cooldown counter."""
-
-        self.check_if_plateau = lambda a, b: np.less(a, b - self.min_delta)
-        self.best = np.Inf
-        self.wait = 0
-
-
-    def on_epoch_end(self, history, optimizer):
-        
-        # TODO
-        # Try to make sense of history
-        
-        lr = optimizer.lr()
-
-        #if self.monitor_op(current, self.best):
-        # self.best = current
-        # self.wait = 0
-        # elif not self.in_cooldown():
-        # self.wait += 1
-        #if self.wait >= self.patience:
-        # old_lr = self.model.optimizer.lr.numpy()
-        # if old_lr > np.float32(self.min_lr):
-        # new_lr = old_lr * self.factor
-        # new_lr = max(new_lr, self.min_lr)
-        # backend.set_value(self.model.optimizer.lr, new_lr)
-        # self.wait = 0
