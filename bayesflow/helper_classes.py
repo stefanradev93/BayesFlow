@@ -13,10 +13,13 @@
 # limitations under the License.
 
 from copy import deepcopy
+from re import A
 
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+
+from sklearn.linear_model import HuberRegressor
 
 from bayesflow.default_settings import DEFAULT_KEYS
 
@@ -70,13 +73,91 @@ class SimulationDataset:
         return map(self, self.data)
 
 
+class RegressionLRAdjuster:
+    """This class will compute the slope of the loss trajectory and inform learning rate decay."""
+    
+    def __init__(self, period=100, wait_between_fits=10, patience=5, tolerance=-0.1, **kwargs):
+        """ Creates an instance with given hyperparameters which will track the slope of the 
+        loss trajectory.
+        
+        TODO
+        """
+        
+        self.period = period
+        self.wait_between_periods = wait_between_fits
+        self.regressor = HuberRegressor(**kwargs)
+        self.t_vector = np.linspace(0, 1, self.period)[:, np.newaxis]
+        self.patience = patience
+        self.tolerance = tolerance
+        self._patience_counter = 0
+        self._wait_counter = 0
+        self._slope = None
+        self._is_waiting = False
+        
+    def get_slope(self, losses):
+        """ Fits a Huber regression on the provided loss trajectory or returns None if
+        not enough data points present.
+        """
+        
+        # Return None if not enough losses present
+        if losses.shape[0] < self.period:
+            return None
+        
+        # Check if still in a waiting phase and return old slope
+        # if still waiting, otherwise refit Huber regression
+        wait = self._check_waiting()
+        if wait:
+            return self._slope
+        else:
+            self.regressor.fit(self.t_vector, losses[-self.period:])
+            self._slope = self.regressor.coef_[0]
+            self._check_patience()
+            return self._slope
+
+    def _check_patience(self):
+        """ Determines whether to reduce learning rate or be patient."""
+        if self._slope > self.tolerance:
+            self._patience_counter += 1
+        else:
+            self._patience_counter = max(0, self._patience_counter - 1)
+
+        if self._patience_counter >= self.patience:
+            # CHANGE LEARNING RATE
+            print('Change LR!!')
+            self._patience_counter = 0
+
+    def _check_waiting(self):
+        """ Determines whether to compute a new slope or wait."""
+        
+        # Case currently waiting
+        if self._is_waiting:
+            # Case currently waiting but period is over
+            if self._wait_counter >= self.wait_between_periods - 1:
+                self._wait_counter = 0
+                self._is_waiting = False
+            # Case currently waiting and period not over
+            else:
+                self._wait_counter += 1
+            return True
+        # Case not waiting
+        else:
+            self._is_waiting = True
+            self._wait_counter += 1
+            return False
+
+
 class LossHistory:
     """ Helper class to keep track of losses during training.
     """
     def __init__(self):
         self.history = {}
-        self._current_run = 0
         self.loss_names = []
+        self._current_run = 0
+        self._total_loss = []
+
+    @property
+    def total_loss(self):
+        return np.array(self._total_loss)
 
     def start_new_run(self):
         self._current_run += 1
@@ -100,6 +181,9 @@ class LossHistory:
             entry = [v.numpy() if type(v) is not np.ndarray else v for v in current_loss.values()]
             self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(entry)
 
+            # Add entry to total loss
+            self._total_loss.append(sum(entry))
+
         # Handle tuple or list loss output
         elif type(current_loss) is tuple or type(current_loss) is list:
             entry = [v.numpy() if type(v) is not np.ndarray else v for v in current_loss]
@@ -107,6 +191,9 @@ class LossHistory:
             # Store keys, if none existing
             if self.loss_names == []:
                 self.loss_names = [f'Loss.{l}' for l in range(1, len(entry)+1)]
+
+            # Add entry to total loss
+            self._total_loss.append(sum(entry))
         
         # Assume scalar loss output
         else:
@@ -114,6 +201,9 @@ class LossHistory:
             # Store keys, if none existing
             if self.loss_names == []:
                 self.loss_names.append('Default.Loss')
+            
+            # Add entry to total loss
+            self._total_loss.append(current_loss.numpy())
 
     def get_running_losses(self, epoch):
         """ Compute and return running means of the losses for current epoch.

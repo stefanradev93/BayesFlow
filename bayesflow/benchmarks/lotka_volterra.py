@@ -17,6 +17,12 @@
 import numpy as np
 from scipy.integrate import odeint
 
+bayesflow_benchmark_info = {
+    'simulator_is_batched': False,
+    'parameter_names': [r'$\alpha$', r'$\beta$', r'$\gamma$', r'$\delta$'],
+    'configurator_info': 'posterior'
+}
+
 
 def prior():
     """ Generates a draw from a 4-dimensional (independent) lognormal prior
@@ -43,7 +49,8 @@ def _deriv(x, t, alpha, beta, gamma, delta):
     dY = -gamma*Y + delta*X*Y
     return dX, dY 
 
-def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True):
+
+def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=False):
     """ Runs a Lotka-Volterra simulation for T time steps and returns `subsample` evenly spaced
     points from the simulated trajectory, given contact parameters `theta`.
 
@@ -62,7 +69,7 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True):
     subsample   : int or None, optional, default: 10
         The number of evenly spaced time points to return. If None,
         no subsampling will be performed and all T timepoints will be returned.
-    flatten     : bool, optional, default: True 
+    flatten     : bool, optional, default: False 
         A flag to indicate whather a 1D (`flatten=True`) or a 2D (`flatten=False`)
         representation of the simulated data is returned.
 
@@ -73,10 +80,10 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True):
         The time series of simulated predator and pray populations
     """
     
-    # Create vector of initial conditions
+    # Create vector (list) of initial conditions
     x0 = X0, Y0
     
-    # Unpack parameters
+    # Unpack parameter vector into scalars
     alpha, beta, gamma, delta = theta
     
     # Prepate time vector between 0 and T of length T
@@ -88,9 +95,27 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True):
     # Subsample evenly the specified number of points, if specified
     if subsample is not None:
         pp = pp[::(T // subsample)]
+
+    # Ensure minimum count is 0, which will later pass by log(0 + 1)
+    pp[pp<0] = 0
     
     # Add noise, decide whether to flatten and return
-    x = np.random.default_rng().lognormal(pp, sigma=0.1)
+    x = np.random.default_rng().lognormal(np.log1p(pp), sigma=0.1)
     if flatten:
         return x.flatten()
     return x
+
+
+def configurator(forward_dict, mode='posterior', scale_data=1000, as_summary_condition=True):
+    """ Configures simulator outputs for use in BayesFlow training."""
+
+    if mode == 'posterior':
+        input_dict = {}
+        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+        if as_summary_condition:
+            input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        else:
+            input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        return input_dict
+    else:
+        raise NotImplementedError('For now, only posterior mode is available!')

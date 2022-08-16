@@ -16,6 +16,13 @@
 
 import numpy as np
 
+bayesflow_benchmark_info = {
+    'simulator_is_batched': False,
+    'parameter_names': [r'$\theta_1$', r'$\theta_2$'],
+    'configurator_info': 'posterior'
+}
+
+
 def prior(lower_bound=-1., upper_bound=1.):
     """ Generates a draw from a 2-dimensional uniform prior bounded between 
     `lower_bound` and `upper_bound` which represents the two parameters of the two moons simulator
@@ -66,3 +73,14 @@ def simulator(theta):
     ])
     
     return rhs1 + rhs2
+
+def configurator(forward_dict, mode='posterior'):
+    """ Configures simulator outputs for use in BayesFlow training."""
+
+    if mode == 'posterior':
+        input_dict = {}
+        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
+        return input_dict
+    else:
+        raise NotImplementedError('For now, only posterior mode is available!')

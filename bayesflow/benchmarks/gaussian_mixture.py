@@ -16,6 +16,13 @@
 
 import numpy as np
 
+bayesflow_benchmark_info = {
+    'simulator_is_batched': False,
+    'parameter_names': [r'$\mu_1$', r'$\mu_2$'],
+    'configurator_info': 'posterior'
+}
+
+
 def prior(lower_bound=-10., upper_bound=10.):
     """ Generates a draw from a 2-dimensional uniform prior bounded between 
     `lower_bound` and `upper_bound` representing the common mean of a 2D Gaussian
@@ -67,3 +74,15 @@ def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01):
     if idx == 0:
         return scale_c1*np.random.default_rng().normal(loc=theta)
     return scale_c2*np.random.default_rng().normal(loc=theta)
+
+
+def configurator(forward_dict, mode='posterior', scale_data=12):
+    """ Configures simulator outputs for use in BayesFlow training."""
+
+    if mode == 'posterior':
+        input_dict = {}
+        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        return input_dict
+    else:
+        raise NotImplementedError('For now, only posterior mode is available!')

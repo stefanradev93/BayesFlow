@@ -16,6 +16,12 @@
 
 import numpy as np
 
+bayesflow_benchmark_info = {
+    'simulator_is_batched': True,
+    'parameter_names': None,
+    'configurator_info': 'posterior'
+}
+
 
 def prior(D=10, scale=0.1):
     """ Generates a draw from a D-dimensional Gaussian prior distribution with a 
@@ -38,7 +44,7 @@ def prior(D=10, scale=0.1):
     return scale*np.random.default_rng().normal(size=D)
 
 
-def batched_simulator(theta, n_obs=None, scale=0.1):
+def simulator(theta, n_obs=None, scale=0.1):
     """ Generates batched draws from a D-dimenional Gaussian distributions given a batch of 
     location (mean) parameters of D dimensions. Assumes a spherical convariance matrix given 
     by scale * I_D. 
@@ -64,3 +70,15 @@ def batched_simulator(theta, n_obs=None, scale=0.1):
         return scale*np.random.default_rng().normal(loc=theta)
     x = scale*np.random.default_rng().normal(loc=theta, size=(n_obs, theta.shape[0], theta.shape[1]))
     return np.transpose(x, (1, 0, 2))
+
+
+def configurator(forward_dict, mode='posterior'):
+    """ Configures simulator outputs for use in BayesFlow training."""
+
+    if mode == 'posterior':
+        input_dict = {}
+        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
+        return input_dict
+    else:
+        raise NotImplementedError('For now, only posterior mode is available!')

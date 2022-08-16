@@ -26,7 +26,7 @@ from tensorflow.keras.optimizers import Adam
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
 from bayesflow.helper_functions import apply_gradients, format_loss_string
-from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory
+from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, RegressionLRAdjuster
 from bayesflow.default_settings import STRING_CONFIGS
 from bayesflow.amortized_inference import *
 from bayesflow.diagnostics import *
@@ -152,7 +152,7 @@ class Trainer:
             self.manager = None
         self.checkpoint_path = checkpoint_path
 
-        # Set-up memory classes
+        # Set-up memory classes #TODO allow for control per kwargs
         self.loss_history = LossHistory()
         if memory is True:
             self.simulation_memory = SimulationMemory()
@@ -160,6 +160,9 @@ class Trainer:
             self.simulation_memory = memory
         else:
             self.simulation_memory = None
+
+        # Set-up regression adjuster #TODO allow for control per kwargs
+        self.lr_adjuster = RegressionLRAdjuster()
 
         # Perform a sanity check wiuth provided components
         if not skip_checks:
@@ -318,8 +321,11 @@ class Trainer:
                     # Compute running loss
                     avg_dict = self.loss_history.get_running_losses(ep)
 
+                    # Get slope of loss trajectory #TODO - reduce learning rate
+                    slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
+
                     # Format for display on progress bar
-                    disp_str = format_loss_string(ep, it, loss, avg_dict)
+                    disp_str = format_loss_string(ep, it, loss, avg_dict, slope)
 
                     # Update progress bar
                     p_bar.set_postfix_str(disp_str)
