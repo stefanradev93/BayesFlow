@@ -385,8 +385,11 @@ class Trainer:
                     # Compute running loss
                     avg_dict = self.loss_history.get_running_losses(ep)
 
+                    # Get slope of loss trajectory #TODO - reduce learning rate
+                    slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
+
                     # Format for display on progress bar
-                    disp_str = format_loss_string(ep, bi, loss, avg_dict, it_str='Batch')
+                    disp_str = format_loss_string(ep, bi, loss, avg_dict, slope, it_str='Batch')
 
                     p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
