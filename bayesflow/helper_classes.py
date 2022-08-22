@@ -114,6 +114,7 @@ class RegressionLRAdjuster:
         self.tolerance = tolerance
         self.num_resets = num_resets
         self.reduction_factor = reduction_factor
+        self.stopping_issued = False
         self._reset_counter = 0
         self._patience_counter = 0
         self._cooldown_counter = 0
@@ -145,6 +146,17 @@ class RegressionLRAdjuster:
             self._check_patience()
             return self._slope
 
+    def reset(self):
+        """ Resets all stateful variables in preparation for a new start."""
+
+        self._reset_counter = 0
+        self._patience_counter = 0
+        self._cooldown_counter = 0
+        self._wait_counter = 0
+        self._in_cooldown = False
+        self._is_waiting = False
+        self.stopping_issued = False
+
     def _check_patience(self):
         """ Determines whether to reduce learning rate or be patient."""
 
@@ -170,24 +182,23 @@ class RegressionLRAdjuster:
     def _reduce_learning_rate(self):
         """ Reduces the learning rate by a given factor. """
 
-        # Logger
+        # Logger init
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
 
         if self._reset_counter >= self.num_resets:
-            # TODO - add actual functionality
-            logging.info('Triggered optional stopping!')
+            self.stopping_issued = True
         else:
             # Take care of updating learning rate
             old_lr = self.optimizer.lr.numpy()
-            new_lr = self.reduction_factor * old_lr
+            new_lr = round(self.reduction_factor * old_lr, 8)
             self.optimizer.lr.assign(new_lr)
             self._reset_counter += 1
 
             # Verbose info to user
-            logger.info(f'Reducing learning rate from {old_lr} to: {new_lr}...')
+            logger.info(f'Reducing learning rate from {old_lr:.8f} to: {new_lr:.8f} and entering cooldown...')
 
-            # Set cooldown flag to avoid reset for some time.
+            # Set cooldown flag to avoid reset for some time given by self.period
             self._in_cooldown = True
 
     def _check_waiting(self):
@@ -283,10 +294,15 @@ class LossHistory:
         """ Returns the losses as a nicely formatted pandas DataFrame.
         """
 
-        # Get losses
-        losses_df = pd.DataFrame(pd.concat([pd.melt(pd.DataFrame(self.history[r])) for r in self.history], axis=0).value.to_list())
-        losses_df.columns = self.loss_names
-        return losses_df.copy()
+        # Assume equal lengths per epoch and run
+        try:
+            losses_list = [pd.melt(pd.DataFrame.from_dict(self.history[r], orient='index').T) for r in self.history]
+            losses_df = pd.DataFrame(pd.concat(losses_list, axis=0).value.to_list())
+            losses_df.columns = self.loss_names
+            return losses_df.copy()
+        # Handle unequal lengths
+        except ValueError:
+            return self.history
 
     def flush(self):
         """ Returns current history and removes all existing loss history.

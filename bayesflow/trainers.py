@@ -77,35 +77,37 @@ class Trainer:
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', 
-                 clip_value=None, skip_checks=False, memory=True, **kwargs):
+                 clip_value=None, skip_checks=False, memory=True, optional_stopping=True, **kwargs):
         """ Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
         Parameters
         ----------
-        amortizer        : bayesflow.amortizers.Amortizer
+        amortizer         : bayesflow.amortizers.Amortizer
             The neural architecture to be optimized
-        generative_model : bayesflow.forward_inference.GenerativeModel
+        generative_model  : bayesflow.forward_inference.GenerativeModel
             A generative model returning a dictionary with randomly sampled parameters, data, and optional context
-        configurator     : callable 
+        configurator      : callable 
             A callable object transforming and combining the outputs of the generative model into inputs for BayesFlow
-        optimizer        : tf.keras.optimizer.Optimizer or None
+        optimizer         : tf.keras.optimizer.Optimizer or None
             Optimizer for the neural network. ``None`` will result in `tf.keras.optimizers.Adam`
-        learning_rate    : float or tf.keras.schedules.LearningRateSchedule
+        learning_rate     : float or tf.keras.schedules.LearningRateSchedule
             The learning rate used for the optimizer
-        checkpoint_path  : string, optional
+        checkpoint_path   : string, optional
             Optional folder name for storing the trained network
-        max_to_keep      : int, optional
+        max_to_keep       : int, optional
             Number of checkpoints to keep
-        clip_method      : {'norm', 'value', 'global_norm'}
+        clip_method       : {'norm', 'value', 'global_norm'}
             Optional gradient clipping method
-        clip_value       : float
+        clip_value        : float
             The value used for gradient clipping when clip_method is in {'value', 'norm'}
-        skip_checks      : boolean
+        skip_checks       : boolean
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
-        memory           : boolean or bayesflow.SimulationMemory
+        memory            : boolean or bayesflow.SimulationMemory
             If True, store a pre-defined amount of simulations for later use (validation, etc.). 
             If SimulationMemory instance provided, store reference.
+        optional_stopping : boolean, optional, default: True
+            Whether to use optional stopping or not during training. Highly recommended.
         """
 
         # Set-up logging
@@ -162,7 +164,10 @@ class Trainer:
             self.simulation_memory = None
 
         # Set-up regression adjuster #TODO allow for control per kwargs
-        self.lr_adjuster = RegressionLRAdjuster(self.optimizer)
+        if optional_stopping:
+            self.lr_adjuster = RegressionLRAdjuster(self.optimizer)
+        else:
+            self.lr_adjuster is None
 
         # Perform a sanity check wiuth provided components
         if not skip_checks:
@@ -321,8 +326,11 @@ class Trainer:
                     # Compute running loss
                     avg_dict = self.loss_history.get_running_losses(ep)
 
-                    # Get slope of loss trajectory #TODO - reduce learning rate
-                    slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
+                    # Get slope of loss trajectory for optional stopping
+                    if self.lr_adjuster is not None:
+                        slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
+                    else:
+                        slope = None
 
                     # Format for display on progress bar
                     disp_str = format_loss_string(ep, it, loss, avg_dict, slope)
@@ -330,6 +338,10 @@ class Trainer:
                     # Update progress bar
                     p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
+
+                    # Check optional stopping and end training
+                    if self._check_optional_stopping():
+                        return self._store_and_return_history(save_checkpoint)
 
             # Store after each epoch, if specified
             if self.manager is not None and save_checkpoint:
@@ -385,14 +397,22 @@ class Trainer:
                     # Compute running loss
                     avg_dict = self.loss_history.get_running_losses(ep)
 
-                    # Get slope of loss trajectory #TODO - reduce learning rate
-                    slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
+                    # Get slope of loss trajectory for optional stopping
+                    if self.lr_adjuster is not None:
+                        slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
+                    else:
+                        slope = None
 
                     # Format for display on progress bar
                     disp_str = format_loss_string(ep, bi, loss, avg_dict, slope, it_str='Batch')
 
+                    # Update progress
                     p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
+
+                    # Check optional stopping and end training
+                    if self._check_optional_stopping():
+                        return self._store_and_return_history(save_checkpoint)
 
             # Store after each epoch, if specified
             if self.manager is not None and save_checkpoint:
@@ -423,6 +443,7 @@ class Trainer:
         """
 
         logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
         first_round = True
 
         for r in range(1, rounds + 1):
@@ -446,6 +467,28 @@ class Trainer:
             # Train offline with generated stuff
             _ = self.train_offline(simulations_dict, epochs, batch_size, save_checkpoint, **kwargs)
         return self.loss_history.get_plottable()
+
+    def _store_and_return_history(self, save_checkpoint):
+        """ Helper method for saving checkpoint and returning formatted losses."""
+
+        if self.manager is not None and save_checkpoint:
+            self.manager.save()
+        return self.loss_history.get_plottable()
+
+    def _check_optional_stopping(self):
+        """ Helper method for checking optional stopping. Resets the adjuster
+        if a stopping recommendation is issued. 
+        """
+
+        if self.lr_adjuster is None:
+            return False
+        if self.lr_adjuster.stopping_issued:
+            self.lr_adjuster.reset()
+            logger = logging.getLogger()
+            logger.setLevel(logging.INFO)
+            logger.info('Optional stopping triggered.')
+            return True
+        return False
 
     def _train_step(self, batch_size, input_dict=None, **kwargs):
         """ Performs forward inference -> configuration -> network -> loss pipeline.
@@ -636,6 +679,7 @@ class Trainer:
         """
 
         logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
         if self.generative_model is not None:
             _n_sim = 2
             try: 
