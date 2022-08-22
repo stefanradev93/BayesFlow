@@ -80,9 +80,29 @@ class RegressionLRAdjuster:
     def __init__(self, optimizer, period=100, wait_between_fits=10, patience=8, tolerance=-0.1, 
                  reduction_factor=0.25, num_resets=4, **kwargs):
         """ Creates an instance with given hyperparameters which will track the slope of the 
-        loss trajectory.
+        loss trajectory according to specified hyperparameters and then issue an optional
+        stopping suggestion.
         
-        TODO
+        Parameters
+        ----------
+
+        optimizer         : tf.keras.optimizers.Optimizer instance
+            An optimizer implementing a lr() method
+        period            : int, optional, default: 100
+            How much loss values to consider from the past
+        wait_between_fits : int, optional, default: 10
+            How many backpropagation updates to wait between two successive fits
+        patience          : int, optional, default: 8
+            How many successive times the tolerance value is reached before lr update.
+        tolerance         : float, optional, default: -0.1
+            The minimum slope to be considered substantial for training.
+        reduction_factor  : float in [0, 1], optional, default: 0.25
+            The factor by which the learning rate is reduced upon hitting the `tolerance`
+            threshold for `patience` number of times
+        num_resets        : int, optional, default: 4
+            How many times to reduce the learning rate before issuing an optional stopping
+        **kwargs          : dict, optional, default {}
+            Additional keyword arguments passed to the `HuberRegression` class.
         """
         
         self.optimizer = optimizer
