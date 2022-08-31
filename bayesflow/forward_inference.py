@@ -157,15 +157,13 @@ class Prior:
     - context_generator.non_batchable_context()
     """
 
-    def __init__(self, batch_prior_fun : callable = None, prior_fun : callable = None, context_generator : callable = None, param_names : list = None):
+    def __init__(self, prior_fun : callable, context_generator : callable = None, param_names : list = None):
         """
         Instantiates a prior generator which will draw random parameter configurations from a user-informed prior
         distribution. No improper priors are allowed, as these may render the generative scope of a model undefined.
         
         Parameters
         ----------
-        batch_ prior_fun           : callable
-            A function (callbale object) with optional control arguments responsible for generating batches of per-simulation parameters.
         prior_fun           : callable
             A function (callbale object) with optional control arguments responsible for generating per-simulation parameters.
         context generator   : callable, optional, (default None, recommended instance of ContextGenerator)
@@ -175,10 +173,8 @@ class Prior:
         """
 
         self.prior = prior_fun
-        self.batched_prior = batch_prior_fun
         self.context_gen = context_generator
         self.param_names = param_names
-        self.is_batched = False
 
     def __call__(self, batch_size, *args, **kwargs):
         """ Generates 'batch_size' draws from the prior given optional context generator.
@@ -198,10 +194,6 @@ class Prior:
         out_dict - a dictionary with the quantities generated from the prior + context funcitons.
         """
 
-        if self.batched_prior is not None:
-            self.is_batched = True
-
-
         # Prepare placeholder output dictionary
         out_dict = {
             DEFAULT_KEYS['prior_draws']: None,
@@ -218,38 +210,24 @@ class Prior:
         # Generate prior draws according to context:
         # No context type
         if out_dict[DEFAULT_KEYS['batchable_context']] is None and out_dict[DEFAULT_KEYS['non_batchable_context']] is None:
-            if self.is_batched:
-                out_dict[DEFAULT_KEYS['prior_draws']] = np.array(self.batched_prior(batch_size=batch_size, *args, **kwargs))
-            else:
-                out_dict[DEFAULT_KEYS['prior_draws']] = np.array([self.prior(*args, **kwargs) for _ in range(batch_size)])
+            out_dict[DEFAULT_KEYS['prior_draws']] = np.array([self.prior(*args, **kwargs) for _ in range(batch_size)])
         
         # Only batchable context
         elif out_dict[DEFAULT_KEYS['non_batchable_context']] is None:
-            if self.is_batched:
-                out_dict[DEFAULT_KEYS['prior_draws']] = np.array(self.batched_prior(out_dict[DEFAULT_KEYS['batchable_context']], batch_size=batch_size, *args, **kwargs))
-            else: 
-                out_dict[DEFAULT_KEYS['prior_draws']] = np.array([self.prior(out_dict[DEFAULT_KEYS['batchable_context']][b], *args, **kwargs) 
-                for b in range(batch_size)])
+            out_dict[DEFAULT_KEYS['prior_draws']] = np.array([self.prior(out_dict[DEFAULT_KEYS['batchable_context']][b], *args, **kwargs) 
+            for b in range(batch_size)])
             
         # Only non-batchable context
         elif out_dict[DEFAULT_KEYS['batchable_context']] is None:
-            if self.is_batched:
-                out_dict[DEFAULT_KEYS['prior_draws']] = np.array(self.batched_prior(out_dict[DEFAULT_KEYS['non_batchable_context']], batch_size=batch_size))
-            else:
-                out_dict[DEFAULT_KEYS['prior_draws']] = np.array([self.prior(out_dict[DEFAULT_KEYS['non_batchable_context']], *args, **kwargs) 
-                for _ in range(batch_size)])
+            out_dict[DEFAULT_KEYS['prior_draws']] = np.array([self.prior(out_dict[DEFAULT_KEYS['non_batchable_context']], *args, **kwargs) 
+            for _ in range(batch_size)])
 
         # Both batchable and non_batchable context
         else:
-            if self.is_batched:
-                out_dict[DEFAULT_KEYS['prior_draws']] = np.array(
-                    self.batched_prior(out_dict[DEFAULT_KEYS['batchable_context']], 
-                               out_dict[DEFAULT_KEYS['non_batchable_context']], batch_size=batch_size, *args, **kwargs))
-            else:    
-                out_dict[DEFAULT_KEYS['prior_draws']] = np.array([
-                    self.prior(out_dict[DEFAULT_KEYS['batchable_context']][b], 
-                               out_dict[DEFAULT_KEYS['non_batchable_context']], *args, **kwargs) 
-                    for b in range(batch_size)])
+            out_dict[DEFAULT_KEYS['prior_draws']] = np.array([
+                self.prior(out_dict[DEFAULT_KEYS['batchable_context']][b], 
+                           out_dict[DEFAULT_KEYS['non_batchable_context']], *args, **kwargs) 
+                for b in range(batch_size)])
 
         return out_dict
 
@@ -456,7 +434,7 @@ class GenerativeModel:
     _N_SIM_TEST = 2 
     
     def __init__(self, prior: callable, simulator: callable, skip_test: bool = False, 
-                 prior_is_batched: bool = None, simulator_is_batched: bool = None, name: str = None):
+                 simulator_is_batched: bool = None, name: str = None):
         """
         Instantiates a generative model responsible for drawing generating params, data, and optional context.
         
@@ -470,8 +448,6 @@ class GenerativeModel:
             and returning obseravble data;
         skip_test            : bool (default - False)
             If True, a forward inference pass will be performed.
-        prior_is_batched     : bool (default - None), only relevant and mandatory if providing a custom prior without
-            the Prior wrapper.  
         simulator_is_batched : bool (default - None), only relevant and mandatory if providing a custom simulator without
             the Simulator wrapper. 
         name                 : str (default - None)
