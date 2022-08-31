@@ -140,11 +140,23 @@ class Trainer:
         else:
             self.optimizer = optimizer(learning_rate)
 
+        # Set-up memory classes #TODO allow for control per kwargs
+        self.loss_history = LossHistory()
+        if memory is True:
+            self.simulation_memory = SimulationMemory()
+        elif type(memory) is SimulationMemory:
+            self.simulation_memory = memory
+        else:
+            self.simulation_memory = None
+
         # Checkpoint settings
+        self.max_to_keep = max_to_keep
         if checkpoint_path is not None:
             self.checkpoint = tf.train.Checkpoint(optimizer=self.optimizer, model=self.amortizer)
-            self.manager = tf.train.CheckpointManager(self.checkpoint, checkpoint_path, max_to_keep=max_to_keep)
+            self.manager = tf.train.CheckpointManager(self.checkpoint, checkpoint_path, max_to_keep=self.max_to_keep)
             self.checkpoint.restore(self.manager.latest_checkpoint)
+            self.loss_history.load_from_file(checkpoint_path)
+            self.simulation_memory.load_from_file(checkpoint_path)
             if self.manager.latest_checkpoint:
                 logger.info("Networks loaded from {}".format(self.manager.latest_checkpoint))
             else:
@@ -154,14 +166,6 @@ class Trainer:
             self.manager = None
         self.checkpoint_path = checkpoint_path
 
-        # Set-up memory classes #TODO allow for control per kwargs
-        self.loss_history = LossHistory()
-        if memory is True:
-            self.simulation_memory = SimulationMemory()
-        elif type(memory) is SimulationMemory:
-            self.simulation_memory = memory
-        else:
-            self.simulation_memory = None
 
         # Set-up regression adjuster #TODO allow for control per kwargs
         if optional_stopping:
@@ -341,11 +345,13 @@ class Trainer:
 
                     # Check optional stopping and end training
                     if self._check_optional_stopping():
-                        return self._store_and_return_history(save_checkpoint)
-
+                        self._save_trainer(save_checkpoint)
+                        return self.loss_history.get_plottable()
+            
             # Store after each epoch, if specified
-            if self.manager is not None and save_checkpoint:
-                self.manager.save()
+            self._save_trainer(save_checkpoint)
+        
+        # self.loss_history.load_from_file(file_path=self.checkpoint_path)
         return self.loss_history.get_plottable()
 
     def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True,**kwargs):
@@ -412,11 +418,11 @@ class Trainer:
 
                     # Check optional stopping and end training
                     if self._check_optional_stopping():
-                        return self._store_and_return_history(save_checkpoint)
+                        self._save_trainer(save_checkpoint)
 
             # Store after each epoch, if specified
             if self.manager is not None and save_checkpoint:
-                self.manager.save()
+                self._save_trainer(save_checkpoint)
         return self.loss_history.get_plottable()
 
     def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, **kwargs):
@@ -473,8 +479,15 @@ class Trainer:
 
         if self.manager is not None and save_checkpoint:
             self.manager.save()
-        return self.loss_history.get_plottable()
+        # return self.loss_history.get_plottable()
 
+    def _save_trainer(self, save_checkpoint):
+        if self.manager is not None and save_checkpoint:
+            self.manager.save()
+            self.loss_history.save_to_file(file_path=self.checkpoint_path, max_to_keep=self.max_to_keep)
+            self.simulation_memory.save_to_file(file_path=self.checkpoint_path, max_to_keep=self.max_to_keep)
+    
+ 
     def _check_optional_stopping(self):
         """ Helper method for checking optional stopping. Resets the adjuster
         if a stopping recommendation is issued. 
@@ -689,3 +702,4 @@ class Trainer:
             except Exception as err:
                 raise ConfigurationError("Could not carry out computations of generative_model ->" +
                                          f"configurator -> amortizer -> loss! Error trace:\n {err}")
+        
