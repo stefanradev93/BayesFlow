@@ -167,7 +167,7 @@ class Trainer:
         if optional_stopping:
             self.lr_adjuster = RegressionLRAdjuster(self.optimizer)
         else:
-            self.lr_adjuster is None
+            self.lr_adjuster = None
 
         # Perform a sanity check wiuth provided components
         if not skip_checks:
