@@ -164,10 +164,12 @@ class Prior:
         
         Parameters
         ----------
-        batch_ prior_fun           : callable
-            A function (callbale object) with optional control arguments responsible for generating batches of per-simulation parameters.
+        batch_ prior_fun    : callable
+            A function (callbale object) with optional control arguments responsible for generating batches 
+            of per-simulation parameters.
         prior_fun           : callable
-            A function (callbale object) with optional control arguments responsible for generating per-simulation parameters.
+            A function (callbale object) with optional control arguments responsible for generating 
+            per-simulation parameters.
         context generator   : callable, optional, (default None, recommended instance of ContextGenerator)
             An optional function (ideally an instance of ContextGenerator) for generating prior context variables.
         param_names         : list of str, optional, (default None)
@@ -181,7 +183,7 @@ class Prior:
         self.is_batched = False
 
     def __call__(self, batch_size, *args, **kwargs):
-        """ Generates 'batch_size' draws from the prior given optional context generator.
+        """ Generates `batch_size` draws from the prior given optional context generator.
 
         Parameters
         ----------

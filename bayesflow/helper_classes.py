@@ -64,7 +64,7 @@ class SimulationDataset:
         return slices, keys_used, keys_none, n_sim
     
     def __call__(self, batch_in):
-        """ Convert output of tensorflow Dataset to dict.
+        """ Convert output of tensorflow.Dataset to dict.
         """
         
         forward_dict = {}
@@ -81,8 +81,8 @@ class SimulationDataset:
 class RegressionLRAdjuster:
     """This class will compute the slope of the loss trajectory and inform learning rate decay."""
     
-    def __init__(self, optimizer, period=100, wait_between_fits=10, patience=8, tolerance=-0.1, 
-                 reduction_factor=0.25, num_resets=4, **kwargs):
+    def __init__(self, optimizer, period=150, wait_between_fits=10, patience=10, tolerance=-0.1, 
+                 reduction_factor=0.25, cooldown_factor=4, num_resets=3, **kwargs):
         """ Creates an instance with given hyperparameters which will track the slope of the 
         loss trajectory according to specified hyperparameters and then issue an optional
         stopping suggestion.
@@ -92,17 +92,19 @@ class RegressionLRAdjuster:
 
         optimizer         : tf.keras.optimizers.Optimizer instance
             An optimizer implementing a lr() method
-        period            : int, optional, default: 100
+        period            : int, optional, default: 150
             How much loss values to consider from the past
         wait_between_fits : int, optional, default: 10
             How many backpropagation updates to wait between two successive fits
-        patience          : int, optional, default: 8
+        patience          : int, optional, default: 10
             How many successive times the tolerance value is reached before lr update.
         tolerance         : float, optional, default: -0.1
             The minimum slope to be considered substantial for training.
         reduction_factor  : float in [0, 1], optional, default: 0.25
             The factor by which the learning rate is reduced upon hitting the `tolerance`
             threshold for `patience` number of times
+        cooldown_factor   : float, optional, default: 4
+            The factor by which the `period` is multiplied to arrive at a cooldown period.
         num_resets        : int, optional, default: 4
             How many times to reduce the learning rate before issuing an optional stopping
         **kwargs          : dict, optional, default {}
@@ -119,6 +121,7 @@ class RegressionLRAdjuster:
         self.num_resets = num_resets
         self.reduction_factor = reduction_factor
         self.stopping_issued = False
+        self.cooldown_factor = cooldown_factor
         self._reset_counter = 0
         self._patience_counter = 0
         self._cooldown_counter = 0
@@ -165,7 +168,7 @@ class RegressionLRAdjuster:
         """ Determines whether to reduce learning rate or be patient."""
 
         # Do nothing, if still in cooldown period
-        if self._in_cooldown and self._cooldown_counter < self.period:
+        if self._in_cooldown and self._cooldown_counter < int(self.cooldown_factor * self.period):
             return 
         # Otherwise set cooldown flag to False and reset counter
         else:
