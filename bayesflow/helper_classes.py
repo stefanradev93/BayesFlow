@@ -322,6 +322,8 @@ class LossHistory:
         return deepcopy(self.history)
     
     def save_to_file(self, file_path, max_to_keep):
+        """TODO Docstring"""
+
         original_dir = os.getcwd()
         os.chdir(file_path)
         
@@ -344,11 +346,16 @@ class LossHistory:
                 if new_nr < current_nr:
                     current_nr = new_nr
             os.remove('history_'+str(current_nr)+'.pkl')
-                
         os.chdir(original_dir)
             
     
     def load_from_file(self, file_path):
+        """TODO Docstring"""
+
+        # Logger init
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
         original_dir = os.getcwd()
         if os.path.exists(file_path):
             os.chdir(file_path)
@@ -371,15 +378,16 @@ class LossHistory:
             for key in ['_total_loss', '_current_run', 'loss_names']:
                 del full_history_dict[key]
             self.history = full_history_dict
-            print("Loaded loss history from {}".format(file_path+'/history_' + str(current_nr) +'.pkl'))
+            logger.info("Loaded loss history from {}".format(file_path+'/history_' + str(current_nr) +'.pkl'))
             os.chdir(original_dir)
         else:
-            print("Initialized empty loss history")
+            logger.info("Initialized empty loss history.")
         
-
-
 class SimulationMemory:
-    
+    """ 
+    Helper class to keep track of a pre-determined number of simulations during training.
+    """
+
     def __init__(self, stores_raw=True, capacity_in_batches=50):
         self.stores_raw = stores_raw
         self._capacity = capacity_in_batches
@@ -414,6 +422,8 @@ class SimulationMemory:
         return False
     
     def save_to_file(self, file_path, max_to_keep):
+        """TODO Docstring"""
+
         original_dir = os.getcwd()
         os.chdir(file_path)
         
@@ -438,11 +448,15 @@ class SimulationMemory:
                 if new_nr < current_nr:
                     current_nr = new_nr
             os.remove('memory_'+str(current_nr)+'.pkl')
-                
         os.chdir(original_dir)
             
-    
-    def load_from_file(self, file_path):#, stores_raw = True, capacity_in_batches=50):
+    def load_from_file(self, file_path):
+        """TODO Docstring"""
+
+        # Logger init
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
         original_dir = os.getcwd()
         if os.path.exists(file_path):
             os.chdir(file_path)
@@ -464,7 +478,7 @@ class SimulationMemory:
             self._buffer = full_memory_dict['_buffer']
             self._idx = full_memory_dict['_idx']
             self.size_in_batches = full_memory_dict['_size_in_batches']
-            print("Loaded simulation memory from {}".format(file_path+'/memory_' + str(current_nr) +'.pkl'))
+            logger("Loaded simulation memory from {}".format(file_path+'/memory_' + str(current_nr) +'.pkl'))
             os.chdir(original_dir)
         else:
-            print("Initialized empty simulation memory")    
+            logger("Initialized empty simulation memory.")    

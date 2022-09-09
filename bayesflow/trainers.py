@@ -166,7 +166,6 @@ class Trainer:
             self.manager = None
         self.checkpoint_path = checkpoint_path
 
-
         # Set-up regression adjuster #TODO allow for control per kwargs
         if optional_stopping:
             self.lr_adjuster = RegressionLRAdjuster(self.optimizer)
