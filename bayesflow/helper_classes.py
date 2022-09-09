@@ -16,6 +16,10 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import pickle
+import os
+import glob
+import re
 
 import logging
 logging.basicConfig()
@@ -229,6 +233,7 @@ class LossHistory:
         self.loss_names = []
         self._current_run = 0
         self._total_loss = []
+        self.latest = 0
 
     @property
     def total_loss(self):
@@ -315,6 +320,62 @@ class LossHistory:
 
     def get_copy(self):
         return deepcopy(self.history)
+    
+    def save_to_file(self, file_path, max_to_keep):
+        original_dir = os.getcwd()
+        os.chdir(file_path)
+        
+        full_history_dict = deepcopy(self.history)
+        full_history_dict['loss_names'] = self.loss_names
+        full_history_dict['_current_run'] = self._current_run
+        full_history_dict['_total_loss'] = self._total_loss
+        
+        self.latest += 1
+
+        with open('history_' + str(self.latest) +'.pkl', 'wb') as f:
+            pickle.dump(full_history_dict, f)
+        
+        list_of_history_checkpoints = glob.glob('*history*')
+
+        if len(list_of_history_checkpoints) > max_to_keep:
+            current_nr = 10**10
+            for i, hist_ckpt in enumerate(list_of_history_checkpoints):
+                new_nr = int(re.search(r'history_(.*)\.pkl', hist_ckpt).group(1))
+                if new_nr < current_nr:
+                    current_nr = new_nr
+            os.remove('history_'+str(current_nr)+'.pkl')
+                
+        os.chdir(original_dir)
+            
+    
+    def load_from_file(self, file_path):
+        original_dir = os.getcwd()
+        if os.path.exists(file_path):
+            os.chdir(file_path)
+            list_of_history_checkpoints = glob.glob('*history*')
+        else:
+            list_of_history_checkpoints = []
+        
+        if len(list_of_history_checkpoints) > 0:
+            current_nr = 0
+            for i, hist_ckpt in enumerate(list_of_history_checkpoints):
+                new_nr = int(re.search(r'history_(.*)\.pkl', hist_ckpt).group(1))
+                if new_nr > current_nr:
+                    current_nr = new_nr
+            with open('history_' + str(current_nr) +'.pkl', 'rb') as f:
+                full_history_dict = pickle.load(f)
+            self.latest = current_nr
+            self._total_loss = full_history_dict['_total_loss']
+            self._current_run = full_history_dict['_current_run']
+            self.loss_names = full_history_dict['loss_names']
+            for key in ['_total_loss', '_current_run', 'loss_names']:
+                del full_history_dict[key]
+            self.history = full_history_dict
+            print("Loaded loss history from {}".format(file_path+'/history_' + str(current_nr) +'.pkl'))
+            os.chdir(original_dir)
+        else:
+            print("Initialized empty loss history")
+        
 
 
 class SimulationMemory:
@@ -325,6 +386,7 @@ class SimulationMemory:
         self._buffer = [None] * self._capacity
         self._idx = 0
         self.size_in_batches = 0
+        self.latest = 0
 
     def store(self, forward_dict):
         """ Stores simulation outputs, if internal buffer is not full.
@@ -350,3 +412,59 @@ class SimulationMemory:
         if self._idx >= self._capacity:
             return True
         return False
+    
+    def save_to_file(self, file_path, max_to_keep):
+        original_dir = os.getcwd()
+        os.chdir(file_path)
+        
+        full_memory_dict = {}
+        full_memory_dict['stores_raw'] = self.stores_raw
+        full_memory_dict['_capacity'] = self._capacity
+        full_memory_dict['_buffer'] = self._buffer
+        full_memory_dict['_idx'] = self._idx
+        full_memory_dict['_size_in_batches'] = self.size_in_batches
+        
+        self.latest += 1
+
+        with open('memory_' + str(self.latest) +'.pkl', 'wb') as f:
+            pickle.dump(full_memory_dict, f)
+        
+        list_of_memory_checkpoints = glob.glob('*memory*')
+
+        if len(list_of_memory_checkpoints) > max_to_keep:
+            current_nr = 10**10
+            for i, mem_ckpt in enumerate(list_of_memory_checkpoints):
+                new_nr = int(re.search(r'memory_(.*)\.pkl', mem_ckpt).group(1))
+                if new_nr < current_nr:
+                    current_nr = new_nr
+            os.remove('memory_'+str(current_nr)+'.pkl')
+                
+        os.chdir(original_dir)
+            
+    
+    def load_from_file(self, file_path):#, stores_raw = True, capacity_in_batches=50):
+        original_dir = os.getcwd()
+        if os.path.exists(file_path):
+            os.chdir(file_path)
+            list_of_memory_checkpoints = glob.glob('*memory*')
+        else:
+            list_of_memory_checkpoints = []
+        
+        if len(list_of_memory_checkpoints) > 0:
+            current_nr = 0
+            for i, hist_ckpt in enumerate(list_of_memory_checkpoints):
+                new_nr = int(re.search(r'memory_(.*)\.pkl', hist_ckpt).group(1))
+                if new_nr > current_nr:
+                    current_nr = new_nr
+            with open('memory_' + str(current_nr) +'.pkl', 'rb') as f:
+                full_memory_dict = pickle.load(f)
+            self.latest = current_nr
+            self.stores_raw = full_memory_dict['stores_raw']
+            self._capacity = full_memory_dict['_capacity']
+            self._buffer = full_memory_dict['_buffer']
+            self._idx = full_memory_dict['_idx']
+            self.size_in_batches = full_memory_dict['_size_in_batches']
+            print("Loaded simulation memory from {}".format(file_path+'/memory_' + str(current_nr) +'.pkl'))
+            os.chdir(original_dir)
+        else:
+            print("Initialized empty simulation memory")    
