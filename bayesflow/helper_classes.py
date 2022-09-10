@@ -139,6 +139,7 @@ class RegressionLRAdjuster:
         if losses.shape[0] < self.period:
             return None
 
+        # Increment counter
         if self._in_cooldown:
             self._cooldown_counter += 1
         
@@ -344,7 +345,7 @@ class LossHistory:
 
         if len(list_of_history_checkpoints) > max_to_keep:
             current_nr = 10**10
-            for i, hist_ckpt in enumerate(list_of_history_checkpoints):
+            for _, hist_ckpt in enumerate(list_of_history_checkpoints):
                 new_nr = int(re.search(r'history_(.*)\.pkl', hist_ckpt).group(1))
                 if new_nr < current_nr:
                     current_nr = new_nr

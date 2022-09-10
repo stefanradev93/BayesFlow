@@ -61,7 +61,7 @@ def simulator(theta, n_obs=4, flatten=False):
     
     Returns
     -------
-    x : np.ndarray of shape (n_obs * 2, ) or (n_obs, 2), as dictated by the `flatten`
+    x : np.ndarray of shape (n_obs*2, ) or (n_obs, 2), as dictated by the `flatten`
     boolean flag.
         The sample of simulated data from the slcp model. 
     """
@@ -82,13 +82,16 @@ def simulator(theta, n_obs=4, flatten=False):
         return x.flatten()
     return x
 
-def configurator(forward_dict, mode='posterior', scale_data=30.):
+def configurator(forward_dict, mode='posterior', scale_data=30., as_summary_condition=True):
     """ Configures simulator outputs for use in BayesFlow training."""
 
     if mode == 'posterior':
         input_dict = {}
         input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
-        input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        if as_summary_condition:
+            input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        else:
+            input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
         return input_dict
     else:
         raise NotImplementedError('For now, only posterior mode is available!')
