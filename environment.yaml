@@ -1,0 +1,8 @@
+# run: conda env create --file environment.yaml
+
+name: bayesflow
+dependencies:
+  - python==3.8
+  - pip
+  - pip:
+    - -r requirements.txt
