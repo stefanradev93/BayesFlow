@@ -15,6 +15,7 @@
 import tensorflow as tf
 import numpy as np
 from sklearn.calibration import calibration_curve
+
 from bayesflow.default_settings import MMD_BANDWIDTH_LIST
 
 
