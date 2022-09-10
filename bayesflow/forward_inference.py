@@ -157,7 +157,8 @@ class Prior:
     - context_generator.non_batchable_context()
     """
 
-    def __init__(self, batch_prior_fun : callable = None, prior_fun : callable = None, context_generator : callable = None, param_names : list = None):
+    def __init__(self, batch_prior_fun : callable = None, prior_fun : callable = None, 
+                 context_generator : callable = None, param_names : list = None):
         """
         Instantiates a prior generator which will draw random parameter configurations from a user-informed prior
         distribution. No improper priors are allowed, as these may render the generative scope of a model undefined.
@@ -176,11 +177,16 @@ class Prior:
             A list with strings representing the names of the parameters.
         """
 
+        if (batch_prior_fun is None) is (prior_fun is None):
+            raise ConfigurationError('Either batch_prior_fun or prior_fun should be provided, but not both!')
         self.prior = prior_fun
         self.batched_prior = batch_prior_fun
         self.context_gen = context_generator
         self.param_names = param_names
-        self.is_batched = False
+        if prior_fun is None:
+            self.is_batched = True
+        else:
+            self.is_batched = False
 
     def __call__(self, batch_size, *args, **kwargs):
         """ Generates `batch_size` draws from the prior given optional context generator.
@@ -196,13 +202,11 @@ class Prior:
 
         Returns
         -------
-
         out_dict - a dictionary with the quantities generated from the prior + context funcitons.
         """
 
         if self.batched_prior is not None:
             self.is_batched = True
-
 
         # Prepare placeholder output dictionary
         out_dict = {
@@ -458,7 +462,7 @@ class GenerativeModel:
     _N_SIM_TEST = 2 
     
     def __init__(self, prior: callable, simulator: callable, skip_test: bool = False, 
-                 prior_is_batched: bool = None, simulator_is_batched: bool = None, name: str = None):
+                 prior_is_batched: bool = False, simulator_is_batched: bool = False, name: str = "anonymous"):
         """
         Instantiates a generative model responsible for drawing generating params, data, and optional context.
         
@@ -472,11 +476,11 @@ class GenerativeModel:
             and returning obseravble data;
         skip_test            : bool (default - False)
             If True, a forward inference pass will be performed.
-        prior_is_batched     : bool (default - None), only relevant and mandatory if providing a custom prior without
+        prior_is_batched     : bool (default - False), only relevant and mandatory if providing a custom prior without
             the Prior wrapper.  
-        simulator_is_batched : bool (default - None), only relevant and mandatory if providing a custom simulator without
+        simulator_is_batched : bool (default - False), only relevant and mandatory if providing a custom simulator without
             the Simulator wrapper. 
-        name                 : str (default - None)
+        name                 : str (default - "anonoymous")
             An optional name for the generative model. If kept default (None), 'anonymous' is set as name.
 
         Important
@@ -488,15 +492,19 @@ class GenerativeModel:
         """
         
         if type(prior) is not Prior:
+            prior_args = {'prior_fun': prior} if prior_is_batched else {'prior_batch_fun': prior}
             self.prior = Prior(prior_fun=prior)
+            self.prior_is_batched = prior_is_batched
         else:
             self.prior = prior
+            self.prior_is_batched = self.prior_is_batched
 
         if type(simulator) is not Simulator:
             self.simulator = self._config_custom_simulator(simulator, simulator_is_batched)
         else:
             self.simulator = simulator
-        self.simulator_is_batched = self.simulator.is_batched
+            self.simulator_is_batched = self.simulator.is_batched
+        
 
         if name is None:
             self.name = 'anonymous'
