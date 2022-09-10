@@ -1,0 +1,1 @@
+Welcome to the beta version of our BayesFlow library for simulation-based Bayesian inference!
