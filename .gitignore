@@ -3,6 +3,14 @@ __pycache__/
 */.ipynb_checkpoints/
 */__pycache__/
 projects/
+*/bayesflow.egg-info
+
+# mypy
+.mypy_cache
+
+# pytest
+.coverage
+.pytest_cache
 
 # pycharm
 *.idea
