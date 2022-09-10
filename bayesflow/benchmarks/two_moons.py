@@ -74,6 +74,7 @@ def simulator(theta):
     
     return rhs1 + rhs2
 
+
 def configurator(forward_dict, mode='posterior'):
     """ Configures simulator outputs for use in BayesFlow training."""
 

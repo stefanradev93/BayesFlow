@@ -28,7 +28,7 @@ from bayesflow.exceptions import SimulationError
 from bayesflow.helper_functions import apply_gradients, format_loss_string
 from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, RegressionLRAdjuster
 from bayesflow.default_settings import STRING_CONFIGS
-from bayesflow.amortized_inference import *
+from bayesflow.amortized_inference import AmortizedLikelihood, AmortizedPosterior, JointAmortizer, ModelComparisonAmortizer
 from bayesflow.diagnostics import *
 
 

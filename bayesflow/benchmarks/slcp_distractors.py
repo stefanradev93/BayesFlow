@@ -155,6 +155,7 @@ def simulator(theta, n_obs=4, n_dist=46, dim=2, mu_scale=15., flatten=False):
         return x.flatten()
     return x
 
+
 def configurator(forward_dict, mode='posterior', scale_data=50., as_summary_condition=True):
     """ Configures simulator outputs for use in BayesFlow training."""
 

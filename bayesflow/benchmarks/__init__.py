@@ -14,8 +14,8 @@
 
 # This module implements all 10 benchmark models (tasks) from the paper:
 #
-# Lueckmann, J. M., Boelts, J., Greenberg, D., Goncalves, P., & Macke, J. (2021). 
-# Benchmarking simulation-based inference. 
+# Lueckmann, J. M., Boelts, J., Greenberg, D., Goncalves, P., & Macke, J. (2021).
+# Benchmarking simulation-based inference.
 # In International Conference on Artificial Intelligence and Statistics (pp. 343-351). PMLR.
 #
 # https://arxiv.org/pdf/2101.04653.pdf
@@ -44,10 +44,10 @@ available_benchmarks = [
 
 
 def get_benchmark_module(benchmark_name):
-    """ Loads the corresponding benchmark file under bayesflow.benchmarks.<benchmark_name> as a 
+    """ Loads the corresponding benchmark file under bayesflow.benchmarks.<benchmark_name> as a
     module and returns it.
     """
-    
+
     try:
         benchmark_module = importlib.import_module(f'bayesflow.benchmarks.{benchmark_name}')
         return benchmark_module
@@ -58,12 +58,10 @@ def get_benchmark_module(benchmark_name):
 class Benchmark:
     """TODO"""
     def __init__(self, benchmark_name):
+
         self.benchmark_name = benchmark_name
-
         self.benchmark_module = get_benchmark_module(self.benchmark_name)
-
         self.benchmark_info = getattr(self.benchmark_module, 'bayesflow_benchmark_info')
-
         self.generative_model = GenerativeModel(
             prior=Prior(
                 prior_fun=getattr(self.benchmark_module, 'prior'),

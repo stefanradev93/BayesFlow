@@ -26,20 +26,20 @@ class AmortizedPosterior(tf.keras.Model):
     """ An interface to connect an inference network for parameter estimation with an optional summary network
     as in the original BayesFlow set-up described in the paper:
 
-    Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). 
-    BayesFlow: Learning complex stochastic models with invertible neural networks. 
+    Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020).
+    BayesFlow: Learning complex stochastic models with invertible neural networks.
     IEEE transactions on neural networks and learning systems.
 
     But also allowing for augmented functionality, such as model misspecification detection in summary space:
 
-    Schmitt, M., Bürkner, P. C., Köthe, U., & Radev, S. T. (2021). 
+    Schmitt, M., Bürkner, P. C., Köthe, U., & Radev, S. T. (2021).
     Detecting Model Misspecification in Amortized Bayesian Inference with Neural Networks
     arXiv preprint arXiv:2112.08866.
 
     And learning of fat-tailed posteriors with a Student-t latent pushforward density:
 
-    Jaini, P., Kobyzev, I., Yu, Y., & Brubaker, M. (2020, November). 
-    Tails of lipschitz triangular flows. 
+    Jaini, P., Kobyzev, I., Yu, Y., & Brubaker, M. (2020, November).
+    Tails of lipschitz triangular flows.
     In International Conference on Machine Learning (pp. 4673-4681). PMLR.
     """
 
@@ -84,7 +84,7 @@ class AmortizedPosterior(tf.keras.Model):
         Parameters
         ----------
         input_dict     : dict  
-            Input dictionary containing the following mandatory keys, if DEFAULT keys unchanged: 
+            Input dictionary containing the following mandatory keys, if DEFAULT keys unchanged:
             `parameters`         - the latent model parameters over which a condition density is learned
             `summary_conditions` - the conditioning variables (including data) that are first passed through a summary network
             `direct_conditions`  - the conditioning variables that the directly passed to the inference network
@@ -95,10 +95,10 @@ class AmortizedPosterior(tf.keras.Model):
         -------
         net_out or (net_out, summary_out) : tuple of tf.Tensor
             the outputs of ``inference_net(theta, summary_net(x, c_s), c_d)``, usually a latent variable and
-            log(det(Jacobian)), that is a tuple ``(z, log_det_J) or (sum_outputs, (z, log_det_J)) if 
-            return_summary is set to True and a summary network is defined.`` 
+            log(det(Jacobian)), that is a tuple ``(z, log_det_J) or (sum_outputs, (z, log_det_J)) if
+            return_summary is set to True and a summary network is defined.``
         """
-        
+
         # Concatenate conditions, if given
         summary_out, full_cond = self._compute_summary_condition(
             input_dict.get(DEFAULT_KEYS['summary_conditions']), 
