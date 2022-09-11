@@ -1,16 +1,22 @@
-# Copyright 2020 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Copyright (c) 2022 The BayesFlow Developers
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 import tensorflow as tf
 
@@ -20,35 +26,10 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
 
     https://www.tensorflow.org/addons/api_docs/python/tfa/layers/SpectralNormalization
 
-    This wrapper controls the Lipschitz constant of the layer by
-    constraining its spectral norm, which can stabilize the training of GANs.
+    This wrapper controls the Lipschitz constant of a layer by
+    constraining its spectral norm, which can stabilize the training of generative networks.
 
-    See [Spectral Normalization for Generative Adversarial Networks](https://arxiv.org/abs/1802.05957).
-
-    Wrap `tf.keras.layers.Conv2D`:
-
-    >>> x = np.random.rand(1, 10, 10, 1)
-    >>> conv2d = SpectralNormalization(tf.keras.layers.Conv2D(2, 2))
-    >>> y = conv2d(x)
-    >>> y.shape
-    TensorShape([1, 9, 9, 2])
-
-    Wrap `tf.keras.layers.Dense`:
-
-    >>> x = np.random.rand(1, 10, 10, 1)
-    >>> dense = SpectralNormalization(tf.keras.layers.Dense(10))
-    >>> y = dense(x)
-    >>> y.shape
-    TensorShape([1, 10, 10, 10])
-
-    Args:
-      layer: A `tf.keras.layers.Layer` instance that
-        has either `kernel` or `embeddings` attribute.
-      power_iterations: `int`, the number of iterations during normalization.
-    Raises:
-      AssertionError: If not initialized with a `Layer` instance.
-      ValueError: If initialized with negative `power_iterations`.
-      AttributeError: If `layer` does not has `kernel` or `embeddings` attribute.
+    See Spectral Normalization for Generative Adversarial Networks](https://arxiv.org/abs/1802.05957).
     """
 
     def __init__(self, layer, power_iterations=1, **kwargs):

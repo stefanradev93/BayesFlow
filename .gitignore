@@ -15,6 +15,9 @@ projects/
 # pycharm
 *.idea
 
+# vscode
+.vscode
+
 # vim
 *.swp
 
