@@ -696,4 +696,3 @@ class Trainer:
             except Exception as err:
                 raise ConfigurationError("Could not carry out computations of generative_model ->" +
                                          f"configurator -> amortizer -> loss! Error trace:\n {err}")
-                                         
