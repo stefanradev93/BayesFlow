@@ -358,7 +358,6 @@ class LossHistory:
             os.remove('history_'+str(current_nr)+'.pkl')
         os.chdir(original_dir)
             
-    
     def load_from_file(self, file_path):
         """TODO Docstring"""
 
@@ -392,7 +391,8 @@ class LossHistory:
             os.chdir(original_dir)
         else:
             logger.info("Initialized empty loss history.")
-        
+
+
 class SimulationMemory:
     """ 
     Helper class to keep track of a pre-determined number of simulations during training.
@@ -453,7 +453,7 @@ class SimulationMemory:
 
         if len(list_of_memory_checkpoints) > max_to_keep:
             current_nr = 10**10
-            for i, mem_ckpt in enumerate(list_of_memory_checkpoints):
+            for _, mem_ckpt in enumerate(list_of_memory_checkpoints):
                 new_nr = int(re.search(r'memory_(.*)\.pkl', mem_ckpt).group(1))
                 if new_nr < current_nr:
                     current_nr = new_nr
@@ -476,7 +476,7 @@ class SimulationMemory:
         
         if len(list_of_memory_checkpoints) > 0:
             current_nr = 0
-            for i, hist_ckpt in enumerate(list_of_memory_checkpoints):
+            for _, hist_ckpt in enumerate(list_of_memory_checkpoints):
                 new_nr = int(re.search(r'memory_(.*)\.pkl', hist_ckpt).group(1))
                 if new_nr > current_nr:
                     current_nr = new_nr
@@ -491,4 +491,74 @@ class SimulationMemory:
             logger("Loaded simulation memory from {}".format(file_path+'/memory_' + str(current_nr) +'.pkl'))
             os.chdir(original_dir)
         else:
-            logger("Initialized empty simulation memory.")    
+            logger("Initialized empty simulation memory.")
+
+
+class MemoryReplayBuffer:
+    """Implements a memory replay buffer for simulation-based inference.
+
+    Attributes
+    ----------
+    TODO
+    """
+
+    def __init__(self, stores_raw=True, capacity_in_batches=50):
+        """TODO"""
+
+        self.stores_raw = stores_raw
+        self._capacity = capacity_in_batches
+        self._buffer = [None] * self._capacity
+        self._idx = 0
+        self._size_in_batches = 0
+        self._is_full = False
+
+    def store(self, forward_dict):
+        """ Stores simulation outputs, if internal buffer is not full.
+
+        Parameters
+        ----------
+        forward_dict : dict
+            The (raw or configured) outputs of the forward model.
+        """
+
+        # If full, overwrite at index
+        if self._is_full:
+            self._overwrite(forward_dict)
+        
+        # Otherwise still capacity to append
+        else:
+            # Add to internal list
+            self._buffer[self._idx] = forward_dict
+
+            # Increment index and # of batches currently stored
+            self._idx += 1
+            self._size_in_batches += 1
+
+            # Check whether buffer is full and set flag if thats the case
+            if self._idx == self._capacity:
+                self._is_full = True
+            
+    def sample(self):
+        """ Samples `batch_size` number of parameter vectors and simulations from buffer.
+
+        Returns
+        -------
+        forward_dict : dict
+            The (raw or configured) outputs of the forward model.
+        """
+        
+        rand_idx = np.random.default_rng().integers(low=0, high=self._size_in_batches)
+        return self._buffer[rand_idx]
+
+    def _overwrite(self, forward_dict):
+        """Overwrites a simulated batch at current position. Only called when the internal buffer is full."""
+
+        # Reset index, if at the end of buffer
+        if self._idx == self._capacity:
+            self._idx = 0
+
+        # Overwrite params and data at index
+        self._buffer[self._idx] = forward_dict
+
+        # Increment index
+        self._idx += 1
