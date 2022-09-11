@@ -499,11 +499,11 @@ class GenerativeModel:
         
         if type(prior) is not Prior:
             prior_args = {'prior_fun': prior} if prior_is_batched else {'prior_batch_fun': prior}
-            self.prior = Prior(prior_fun=prior)
+            self.prior = Prior(**prior_args)
             self.prior_is_batched = prior_is_batched
         else:
             self.prior = prior
-            self.prior_is_batched = self.prior_is_batched
+            self.prior_is_batched = prior_is_batched
 
         if type(simulator) is not Simulator:
             self.simulator = self._config_custom_simulator(simulator, simulator_is_batched)
