@@ -14,17 +14,16 @@ class LossError(Exception):
 
 
 class ConfigurationError(Exception):
-    """Class for error in model configuration, e.g. in meta dict"""
+    """ Class for error in model configuration, e.g. in meta dict"""
     pass
 
 
 class InferenceError(Exception):
-    """Class for error in forward/inverse pass of a neural components."""
+    """ Class for error in forward/inverse pass of a neural components."""
     pass
 
 
 class OperationNotSupportedError(Exception):
-    """
-    Class for error that occurs when an operation is demanded but not supported,
+    """ Class for error that occurs when an operation is demanded but not supported,
     e.g. when a trainer is initialized without generative model but the user demands it to simulate data.
     """
