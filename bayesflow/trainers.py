@@ -487,7 +487,7 @@ class Trainer:
         if self.manager is not None and save_checkpoint:
             self.manager.save()
             self.loss_history.save_to_file(file_path=self.checkpoint_path, max_to_keep=self.max_to_keep)
-        if self.simulation_memory is not None and save_checkpoint:
+        if self.simulation_memory is not None and self.manager is not None and save_checkpoint:
             self.simulation_memory.save_to_file(file_path=self.checkpoint_path, max_to_keep=self.max_to_keep)
 
     def _check_optional_stopping(self):
