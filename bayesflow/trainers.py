@@ -76,7 +76,7 @@ class Trainer:
     """
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
-                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=5, clip_method='global_norm', 
+                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=3, clip_method='global_norm', 
                  clip_value=None, skip_checks=False, memory=True, optional_stopping=True, **kwargs):
         """ Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
@@ -105,7 +105,8 @@ class Trainer:
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
         memory            : boolean or bayesflow.SimulationMemory
             If True, store a pre-defined amount of simulations for later use (validation, etc.). 
-            If SimulationMemory instance provided, store reference.
+            If SimulationMemory instance provided, store reference to the instance. 
+            Otherwise the corresponding attribute will be set to None.
         optional_stopping : boolean, optional, default: True
             Whether to use optional stopping or not during training. Highly recommended.
         """
@@ -156,7 +157,8 @@ class Trainer:
             self.manager = tf.train.CheckpointManager(self.checkpoint, checkpoint_path, max_to_keep=max_to_keep)
             self.checkpoint.restore(self.manager.latest_checkpoint)
             self.loss_history.load_from_file(checkpoint_path)
-            self.simulation_memory.load_from_file(checkpoint_path)
+            if self.simulation_memory is not None:
+                self.simulation_memory.load_from_file(checkpoint_path)
             if self.manager.latest_checkpoint:
                 logger.info("Networks loaded from {}".format(self.manager.latest_checkpoint))
             else:
@@ -203,7 +205,7 @@ class Trainer:
             # If no inputs, try memory and throw if no memory
             if inputs is None:
                 if self.simulation_memory is None:
-                    raise ConfigurationError("You should either ")
+                    raise ConfigurationError("You should either enable `simulation memory` or supply the `inputs` argument.")
                 else:
                     inputs = self.simulation_memory.get_memory()
             else:
@@ -479,6 +481,7 @@ class Trainer:
         if self.manager is not None and save_checkpoint:
             self.manager.save()
             self.loss_history.save_to_file(file_path=self.checkpoint_path, max_to_keep=self.max_to_keep)
+        if self.simulation_memory is not None and save_checkpoint:
             self.simulation_memory.save_to_file(file_path=self.checkpoint_path, max_to_keep=self.max_to_keep)
 
     def _check_optional_stopping(self):
