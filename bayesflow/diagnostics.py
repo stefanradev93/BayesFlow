@@ -22,6 +22,7 @@ from scipy.stats import binom
 from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+import sys
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -482,7 +483,13 @@ def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color='#8f
     # Generate plots
     g = sns.PairGrid(data_to_plot, height=height, **kwargs)
     g.map_diag(sns.histplot, fill=True, color=color, alpha=0.9, kde=True)
-    g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
+    # Kernel density estimation (KDE) may not always be possible (e.g. with parameters whose correlation is close to 1 or -1).
+    # In this scenario, a scatter-plot is generated instead.
+    try:
+        g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
+    except Exception as e:
+        logging.warn("KDE failed due to the following exception:\n"+repr(e)+"\nSubstituting scatter plot.")
+        g.map_lower(plt.scatter, alpha=0.6, s=40, edgecolor='k', color=color)
     g.map_upper(plt.scatter, alpha=0.6, s=40, edgecolor='k', color=color)
     
     # Add grids
