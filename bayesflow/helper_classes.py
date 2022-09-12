@@ -1,16 +1,22 @@
-# Copyright 2022 The BayesFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Copyright (c) 2022 The BayesFlow Developers
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 from copy import deepcopy
 import numpy as np
@@ -64,7 +70,7 @@ class SimulationDataset:
         return slices, keys_used, keys_none, n_sim
     
     def __call__(self, batch_in):
-        """ Convert output of tensorflow Dataset to dict.
+        """ Convert output of tensorflow.Dataset to dict.
         """
         
         forward_dict = {}
@@ -81,8 +87,8 @@ class SimulationDataset:
 class RegressionLRAdjuster:
     """This class will compute the slope of the loss trajectory and inform learning rate decay."""
     
-    def __init__(self, optimizer, period=100, wait_between_fits=10, patience=8, tolerance=-0.1, 
-                 reduction_factor=0.25, num_resets=4, **kwargs):
+    def __init__(self, optimizer, period=150, wait_between_fits=10, patience=10, tolerance=-0.1, 
+                 reduction_factor=0.25, cooldown_factor=4, num_resets=3, **kwargs):
         """ Creates an instance with given hyperparameters which will track the slope of the 
         loss trajectory according to specified hyperparameters and then issue an optional
         stopping suggestion.
@@ -92,17 +98,19 @@ class RegressionLRAdjuster:
 
         optimizer         : tf.keras.optimizers.Optimizer instance
             An optimizer implementing a lr() method
-        period            : int, optional, default: 100
+        period            : int, optional, default: 150
             How much loss values to consider from the past
         wait_between_fits : int, optional, default: 10
             How many backpropagation updates to wait between two successive fits
-        patience          : int, optional, default: 8
+        patience          : int, optional, default: 10
             How many successive times the tolerance value is reached before lr update.
         tolerance         : float, optional, default: -0.1
             The minimum slope to be considered substantial for training.
         reduction_factor  : float in [0, 1], optional, default: 0.25
             The factor by which the learning rate is reduced upon hitting the `tolerance`
             threshold for `patience` number of times
+        cooldown_factor   : float, optional, default: 4
+            The factor by which the `period` is multiplied to arrive at a cooldown period.
         num_resets        : int, optional, default: 4
             How many times to reduce the learning rate before issuing an optional stopping
         **kwargs          : dict, optional, default {}
@@ -119,6 +127,7 @@ class RegressionLRAdjuster:
         self.num_resets = num_resets
         self.reduction_factor = reduction_factor
         self.stopping_issued = False
+        self.cooldown_factor = cooldown_factor
         self._reset_counter = 0
         self._patience_counter = 0
         self._cooldown_counter = 0
@@ -136,6 +145,7 @@ class RegressionLRAdjuster:
         if losses.shape[0] < self.period:
             return None
 
+        # Increment counter
         if self._in_cooldown:
             self._cooldown_counter += 1
         
@@ -165,7 +175,7 @@ class RegressionLRAdjuster:
         """ Determines whether to reduce learning rate or be patient."""
 
         # Do nothing, if still in cooldown period
-        if self._in_cooldown and self._cooldown_counter < self.period:
+        if self._in_cooldown and self._cooldown_counter < int(self.cooldown_factor * self.period):
             return 
         # Otherwise set cooldown flag to False and reset counter
         else:
@@ -322,6 +332,8 @@ class LossHistory:
         return deepcopy(self.history)
     
     def save_to_file(self, file_path, max_to_keep):
+        """TODO Docstring"""
+
         original_dir = os.getcwd()
         os.chdir(file_path)
         
@@ -339,16 +351,20 @@ class LossHistory:
 
         if len(list_of_history_checkpoints) > max_to_keep:
             current_nr = 10**10
-            for i, hist_ckpt in enumerate(list_of_history_checkpoints):
+            for _, hist_ckpt in enumerate(list_of_history_checkpoints):
                 new_nr = int(re.search(r'history_(.*)\.pkl', hist_ckpt).group(1))
                 if new_nr < current_nr:
                     current_nr = new_nr
             os.remove('history_'+str(current_nr)+'.pkl')
-                
         os.chdir(original_dir)
             
-    
     def load_from_file(self, file_path):
+        """TODO Docstring"""
+
+        # Logger init
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
         original_dir = os.getcwd()
         if os.path.exists(file_path):
             os.chdir(file_path)
@@ -371,15 +387,17 @@ class LossHistory:
             for key in ['_total_loss', '_current_run', 'loss_names']:
                 del full_history_dict[key]
             self.history = full_history_dict
-            print("Loaded loss history from {}".format(file_path+'/history_' + str(current_nr) +'.pkl'))
+            logger.info("Loaded loss history from {}".format(file_path+'/history_' + str(current_nr) +'.pkl'))
             os.chdir(original_dir)
         else:
-            print("Initialized empty loss history")
-        
+            logger.info("Initialized empty loss history.")
 
 
 class SimulationMemory:
-    
+    """ 
+    Helper class to keep track of a pre-determined number of simulations during training.
+    """
+
     def __init__(self, stores_raw=True, capacity_in_batches=50):
         self.stores_raw = stores_raw
         self._capacity = capacity_in_batches
@@ -414,6 +432,8 @@ class SimulationMemory:
         return False
     
     def save_to_file(self, file_path, max_to_keep):
+        """TODO Docstring"""
+
         original_dir = os.getcwd()
         os.chdir(file_path)
         
@@ -433,16 +453,20 @@ class SimulationMemory:
 
         if len(list_of_memory_checkpoints) > max_to_keep:
             current_nr = 10**10
-            for i, mem_ckpt in enumerate(list_of_memory_checkpoints):
+            for _, mem_ckpt in enumerate(list_of_memory_checkpoints):
                 new_nr = int(re.search(r'memory_(.*)\.pkl', mem_ckpt).group(1))
                 if new_nr < current_nr:
                     current_nr = new_nr
             os.remove('memory_'+str(current_nr)+'.pkl')
-                
         os.chdir(original_dir)
             
-    
-    def load_from_file(self, file_path):#, stores_raw = True, capacity_in_batches=50):
+    def load_from_file(self, file_path):
+        """TODO Docstring"""
+
+        # Logger init
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
         original_dir = os.getcwd()
         if os.path.exists(file_path):
             os.chdir(file_path)
@@ -452,7 +476,7 @@ class SimulationMemory:
         
         if len(list_of_memory_checkpoints) > 0:
             current_nr = 0
-            for i, hist_ckpt in enumerate(list_of_memory_checkpoints):
+            for _, hist_ckpt in enumerate(list_of_memory_checkpoints):
                 new_nr = int(re.search(r'memory_(.*)\.pkl', hist_ckpt).group(1))
                 if new_nr > current_nr:
                     current_nr = new_nr
@@ -464,7 +488,77 @@ class SimulationMemory:
             self._buffer = full_memory_dict['_buffer']
             self._idx = full_memory_dict['_idx']
             self.size_in_batches = full_memory_dict['_size_in_batches']
-            print("Loaded simulation memory from {}".format(file_path+'/memory_' + str(current_nr) +'.pkl'))
+            logger.info("Loaded simulation memory from {}".format(file_path+'/memory_' + str(current_nr) +'.pkl'))
             os.chdir(original_dir)
         else:
-            print("Initialized empty simulation memory")    
+            logger.info("Initialized empty simulation memory.")
+
+
+class MemoryReplayBuffer:
+    """Implements a memory replay buffer for simulation-based inference.
+
+    Attributes
+    ----------
+    TODO
+    """
+
+    def __init__(self, stores_raw=True, capacity_in_batches=50):
+        """TODO"""
+
+        self.stores_raw = stores_raw
+        self._capacity = capacity_in_batches
+        self._buffer = [None] * self._capacity
+        self._idx = 0
+        self._size_in_batches = 0
+        self._is_full = False
+
+    def store(self, forward_dict):
+        """ Stores simulation outputs, if internal buffer is not full.
+
+        Parameters
+        ----------
+        forward_dict : dict
+            The (raw or configured) outputs of the forward model.
+        """
+
+        # If full, overwrite at index
+        if self._is_full:
+            self._overwrite(forward_dict)
+        
+        # Otherwise still capacity to append
+        else:
+            # Add to internal list
+            self._buffer[self._idx] = forward_dict
+
+            # Increment index and # of batches currently stored
+            self._idx += 1
+            self._size_in_batches += 1
+
+            # Check whether buffer is full and set flag if thats the case
+            if self._idx == self._capacity:
+                self._is_full = True
+            
+    def sample(self):
+        """ Samples `batch_size` number of parameter vectors and simulations from buffer.
+
+        Returns
+        -------
+        forward_dict : dict
+            The (raw or configured) outputs of the forward model.
+        """
+        
+        rand_idx = np.random.default_rng().integers(low=0, high=self._size_in_batches)
+        return self._buffer[rand_idx]
+
+    def _overwrite(self, forward_dict):
+        """Overwrites a simulated batch at current position. Only called when the internal buffer is full."""
+
+        # Reset index, if at the end of buffer
+        if self._idx == self._capacity:
+            self._idx = 0
+
+        # Overwrite params and data at index
+        self._buffer[self._idx] = forward_dict
+
+        # Increment index
+        self._idx += 1
