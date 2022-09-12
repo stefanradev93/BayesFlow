@@ -482,9 +482,7 @@ def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color='#8f
     try:
         g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
     except Exception as e:
-        print("KDE failed due to the following exception:")
-        print(e)
-        print("Substituting scatter-plot.")
+        logging.warn("KDE failed due to the following exception:\n"+repr(e)+"\nSubstituting scatter plot.")
         g.map_lower(plt.scatter, alpha=0.6, s=40, edgecolor='k', color=color)
     g.map_upper(plt.scatter, alpha=0.6, s=40, edgecolor='k', color=color)
     
