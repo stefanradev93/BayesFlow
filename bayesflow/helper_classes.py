@@ -332,7 +332,9 @@ class LossHistory:
         return deepcopy(self.history)
     
     def save_to_file(self, file_path, max_to_keep):
-        """TODO Docstring"""
+        """Saves a LossHistory object to a pickled dictionary in file_path.
+         If max_to_keep saved loss history files are found in file_path, the oldest is deleted before a new one is saved.
+         """
 
         original_dir = os.getcwd()
         os.chdir(file_path)
@@ -350,6 +352,7 @@ class LossHistory:
         list_of_history_checkpoints = glob.glob('*history*')
 
         if len(list_of_history_checkpoints) > max_to_keep:
+            # Determine the oldest saved loss history and remove it
             current_nr = 10**10
             for _, hist_ckpt in enumerate(list_of_history_checkpoints):
                 new_nr = int(re.search(r'history_(.*)\.pkl', hist_ckpt).group(1))
@@ -359,7 +362,7 @@ class LossHistory:
         os.chdir(original_dir)
             
     def load_from_file(self, file_path):
-        """TODO Docstring"""
+        """Loads the most recent saved LossHistory object from file_path."""
 
         # Logger init
         logger = logging.getLogger()
@@ -374,6 +377,7 @@ class LossHistory:
         
         if len(list_of_history_checkpoints) > 0:
             current_nr = 0
+            # Determine which file contains the latest LossHistory and load it
             for i, hist_ckpt in enumerate(list_of_history_checkpoints):
                 new_nr = int(re.search(r'history_(.*)\.pkl', hist_ckpt).group(1))
                 if new_nr > current_nr:
@@ -432,7 +436,9 @@ class SimulationMemory:
         return False
     
     def save_to_file(self, file_path, max_to_keep):
-        """TODO Docstring"""
+        """Saves a SimulationMemory object to a pickled dictionary in file_path.
+         If max_to_keep saved simulation memory files are found in file_path, the oldest is deleted before a new one is saved.
+         """
 
         original_dir = os.getcwd()
         os.chdir(file_path)
@@ -452,6 +458,7 @@ class SimulationMemory:
         list_of_memory_checkpoints = glob.glob('*memory*')
 
         if len(list_of_memory_checkpoints) > max_to_keep:
+            # Determine the oldest saved simulation memory and remove it
             current_nr = 10**10
             for _, mem_ckpt in enumerate(list_of_memory_checkpoints):
                 new_nr = int(re.search(r'memory_(.*)\.pkl', mem_ckpt).group(1))
@@ -461,7 +468,7 @@ class SimulationMemory:
         os.chdir(original_dir)
             
     def load_from_file(self, file_path):
-        """TODO Docstring"""
+        """Loads the most recent saved SimulationMemory object from file_path."""
 
         # Logger init
         logger = logging.getLogger()
@@ -475,6 +482,7 @@ class SimulationMemory:
             list_of_memory_checkpoints = []
         
         if len(list_of_memory_checkpoints) > 0:
+            # Determine which file contains the latest LossHistory and load it
             current_nr = 0
             for _, hist_ckpt in enumerate(list_of_memory_checkpoints):
                 new_nr = int(re.search(r'memory_(.*)\.pkl', hist_ckpt).group(1))
