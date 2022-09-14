@@ -1,16 +1,22 @@
-# Copyright 2022 The BayesFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Copyright (c) 2022 The BayesFlow Developers
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 # Corresponds to Task T.3 from the paper https://arxiv.org/pdf/2101.04653.pdf
 
@@ -61,7 +67,7 @@ def simulator(theta, n_obs=4, flatten=False):
     
     Returns
     -------
-    x : np.ndarray of shape (n_obs * 2, ) or (n_obs, 2), as dictated by the `flatten`
+    x : np.ndarray of shape (n_obs*2, ) or (n_obs, 2), as dictated by the `flatten`
     boolean flag.
         The sample of simulated data from the slcp model. 
     """
@@ -82,13 +88,16 @@ def simulator(theta, n_obs=4, flatten=False):
         return x.flatten()
     return x
 
-def configurator(forward_dict, mode='posterior', scale_data=30.):
+def configurator(forward_dict, mode='posterior', scale_data=30., as_summary_condition=True):
     """ Configures simulator outputs for use in BayesFlow training."""
 
     if mode == 'posterior':
         input_dict = {}
         input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
-        input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        if as_summary_condition:
+            input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        else:
+            input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
         return input_dict
     else:
         raise NotImplementedError('For now, only posterior mode is available!')

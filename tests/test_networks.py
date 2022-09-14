@@ -2,8 +2,6 @@ import unittest
 
 import numpy as np
 
-from bayesflow.applications.simulators import GaussianMeanSimulator
-from bayesflow.applications.priors import GaussianMeanPrior
 from bayesflow.networks import ConditionalCouplingLayer, DenseCouplingNet
 
 

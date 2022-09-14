@@ -1,19 +1,23 @@
-# Copyright 2022 The BayesFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Copyright (c) 2022 The BayesFlow Developers
 
-from re import M
-from turtle import forward
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import numpy as np
 from copy import deepcopy
 
@@ -24,8 +28,7 @@ from bayesflow.exceptions import ConfigurationError
 
 
 class DefaultJointConfigurator:
-    """ Utility class for a generic configrator for joint posterior and likelihood learning.
-    """
+    """ Utility class for a generic configrator for joint posterior and likelihood learning."""
 
     def __init__(self, transform_fun=None, combine_fun=None, default_float_type=np.float32):
         
@@ -42,7 +45,6 @@ class DefaultJointConfigurator:
         input_dict = self.combiner(forward_dict)
 
         # Determine and fix float types, if necessary
-
         input_dict['posterior_inputs'] = {k : v.astype(self.default_float_type) if v is not None else v
                         for k, v in input_dict[DEFAULT_KEYS['posterior_inputs']].items() }
         input_dict['likelihood_inputs'] = {k : v.astype(self.default_float_type) if v is not None else v
@@ -75,8 +77,7 @@ class DefaultLikelihoodConfigurator:
 
 
 class DefaultPosteriorConfigurator:
-    """ Utility class for a generic configrator for amortized posterior inference.
-    """
+    """ Utility class for a generic configrator for amortized posterior inference."""
 
     def __init__(self, transform_fun=None, combine_fun=None, default_float_type=np.float32):
 
@@ -110,8 +111,8 @@ class DefaultModelComparisonConfigurator:
         self.default_float_type = default_float_type
         
     def __call__(self, forward_dict):
-        """ Convert all variables to arrays and combines them for inference into a dictionary with 
-        the following keys, if DEFAULT_KEYS dictionary unchanged: 
+        """ Convert all variables to arrays and combines them for inference into a dictionary with
+        the following keys, if DEFAULT_KEYS dictionary unchanged:
 
         `model_indices`      - the latent model parameters over which a condition density is learned
         `summary_conditions` - the conditioning variables that are first passed through a summary network

@@ -1,21 +1,27 @@
-# Copyright 2022 The BayesFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Copyright (c) 2022 The BayesFlow Developers
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 # This module implements all 10 benchmark models (tasks) from the paper:
 #
-# Lueckmann, J. M., Boelts, J., Greenberg, D., Goncalves, P., & Macke, J. (2021). 
-# Benchmarking simulation-based inference. 
+# Lueckmann, J. M., Boelts, J., Greenberg, D., Goncalves, P., & Macke, J. (2021).
+# Benchmarking simulation-based inference.
 # In International Conference on Artificial Intelligence and Statistics (pp. 343-351). PMLR.
 #
 # https://arxiv.org/pdf/2101.04653.pdf
@@ -44,10 +50,10 @@ available_benchmarks = [
 
 
 def get_benchmark_module(benchmark_name):
-    """ Loads the corresponding benchmark file under bayesflow.benchmarks.<benchmark_name> as a 
+    """ Loads the corresponding benchmark file under bayesflow.benchmarks.<benchmark_name> as a
     module and returns it.
     """
-    
+
     try:
         benchmark_module = importlib.import_module(f'bayesflow.benchmarks.{benchmark_name}')
         return benchmark_module
@@ -58,12 +64,10 @@ def get_benchmark_module(benchmark_name):
 class Benchmark:
     """TODO"""
     def __init__(self, benchmark_name):
+
         self.benchmark_name = benchmark_name
-
         self.benchmark_module = get_benchmark_module(self.benchmark_name)
-
         self.benchmark_info = getattr(self.benchmark_module, 'bayesflow_benchmark_info')
-
         self.generative_model = GenerativeModel(
             prior=Prior(
                 prior_fun=getattr(self.benchmark_module, 'prior'),

@@ -437,9 +437,8 @@ class SimulationMemory:
     
     def save_to_file(self, file_path, max_to_keep):
         """Saves a SimulationMemory object to a pickled dictionary in file_path.
-         If max_to_keep saved simulation memory files are found in file_path, the oldest is deleted before a new one is saved.
-         """
-
+        If max_to_keep saved simulation memory files are found in file_path, the oldest is deleted before a new one is saved.
+        """
         original_dir = os.getcwd()
         os.chdir(file_path)
         

@@ -6,9 +6,7 @@ from bayesflow.forward_inference import ContextGenerator, Prior, Simulator, Gene
 
 
 class TestContext(unittest.TestCase):
-    """
-    Tests the ContextGenerator interface.
-    """
+    """ Tests the ContextGenerator interface."""
 
     def test_context_none_separate(self):
         gen = ContextGenerator()
@@ -166,9 +164,7 @@ class TestContext(unittest.TestCase):
 
 
 class TestPrior(unittest.TestCase):
-    """
-    Tests the Prior interface.
-    """
+    """ Tests the Prior interface."""
 
     @classmethod
     def setUpClass(cls):
@@ -177,7 +173,7 @@ class TestPrior(unittest.TestCase):
 
     def test_prior_no_context(self):
    
-        p = Prior(lambda : np.zeros(self._dim))
+        p = Prior(prior_fun=lambda : np.zeros(self._dim))
 
         # Prepare placeholder output dictionary
         expected_draws =  np.zeros((self._batch_size, self._dim)),
@@ -193,7 +189,7 @@ class TestPrior(unittest.TestCase):
         const_ret = 2
         batchable_fun = lambda :  const_ret
         gen = ContextGenerator(batchable_context_fun=batchable_fun)
-        p = Prior(lambda c : np.ones(self._dim) * c, gen)
+        p = Prior(prior_fun=lambda c : np.ones(self._dim) * c, context_generator=gen)
 
         # Prepare placeholder output dictionary
         expected_context = [const_ret]*self._batch_size
@@ -210,7 +206,7 @@ class TestPrior(unittest.TestCase):
         const_ret = 42
         non_batchable_fun = lambda :  const_ret
         gen = ContextGenerator(non_batchable_context_fun=non_batchable_fun)
-        p = Prior(lambda c : np.zeros(self._dim) * c, gen)
+        p = Prior(prior_fun=lambda c : np.zeros(self._dim) * c, context_generator=gen)
 
         # Prepare placeholder output dictionary
         expected_context = non_batchable_fun()
@@ -233,7 +229,7 @@ class TestPrior(unittest.TestCase):
             batchable_context_fun=batchable_fun
         )
 
-        p = Prior(lambda bc, nbc: np.ones(self._dim) * bc + nbc, gen)
+        p = Prior(prior_fun=lambda bc, nbc: np.ones(self._dim) * bc + nbc, context_generator=gen)
 
         # Prepare placeholder output dictionary
         expected_context_b = [const_ret_b]*self._batch_size
@@ -275,61 +271,3 @@ class TestSimulator(unittest.TestCase):
 
     def test_sim_no_context_non_batched(self):
         pass
-
-    # def test_sim_with_batchable_context(self):
-        
-    #     const_ret = 2
-    #     batchable_fun = lambda :  const_ret
-    #     gen = ContextGenerator(batchable_context_fun=batchable_fun)
-    #     p = Prior(lambda c : np.ones(self._p_dim) * c, gen)
-
-    #     # Prepare placeholder output dictionary
-    #     expected_context = [const_ret]*self._batch_size
-    #     expected_draws =  batchable_fun() * np.ones((self._batch_size, self._dim)),
-
-    #     out = p(self._batch_size)
-
-    #     self.assertIsNone(out['non_batchable_context'])
-    #     self.assertEqual(out['batchable_context'], expected_context)
-    #     self.assertTrue(np.all(expected_draws == out['prior_draws']))
-
-    # def test_sim_with_non_batchable_context(self):
-        
-    #     const_ret = 42
-    #     non_batchable_fun = lambda :  const_ret
-    #     gen = ContextGenerator(non_batchable_context_fun=non_batchable_fun)
-    #     p = Prior(lambda c : np.zeros(self._p_dim) * c, gen)
-
-    #     # Prepare placeholder output dictionary
-    #     expected_context = non_batchable_fun()
-    #     expected_draws =  np.zeros((self._batch_size, self._p_dim))
-
-    #     out = p(self._batch_size)
-
-    #     self.assertEqual(out['non_batchable_context'], expected_context)
-    #     self.assertIsNone(out['batchable_context'])
-    #     self.assertTrue(np.all(expected_draws == out['prior_draws']))
-
-    # def test_sim_with_both_contexts(self):
-        
-    #     const_ret_b = 2
-    #     const_ret_nb = 3
-    #     batchable_fun = lambda :  const_ret_b
-    #     non_batchable_fun = lambda :  const_ret_nb
-    #     gen = ContextGenerator(
-    #         non_batchable_context_fun=non_batchable_fun,
-    #         batchable_context_fun=batchable_fun
-    #     )
-
-    #     p = Prior(lambda bc, nbc: np.ones(self._p_dim) * bc + nbc, gen)
-
-    #     # Prepare placeholder output dictionary
-    #     expected_context_b = [const_ret_b]*self._batch_size
-    #     expected_context_nb = non_batchable_fun()
-    #     expected_draws =  batchable_fun() * np.ones((self._batch_size, self._p_dim)) + non_batchable_fun()
-
-    #     out = p(self._batch_size)
-
-    #     self.assertEqual(out['non_batchable_context'], expected_context_nb)
-    #     self.assertEqual(out['batchable_context'], expected_context_b)
-    #     self.assertTrue(np.all(expected_draws == out['prior_draws']))
