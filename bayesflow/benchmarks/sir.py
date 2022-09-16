@@ -107,6 +107,9 @@ def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000)
     # Subsample evenly the specified number of points, if specified
     if subsample is not None:
         irt = irt[::(T // subsample)]
+
+    # Truncate irt, so that small underflow below zero
+    irt = np.maximum(irt, 0.)
     
     # Add noise, scale and return
     x = np.random.default_rng().binomial(n=total_count, p=irt/N) / total_count
