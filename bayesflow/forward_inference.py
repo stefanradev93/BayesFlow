@@ -18,8 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from math import inf
 import numpy as np
 import logging
+import pickle
+import os
+from tqdm.autonotebook import tqdm
 logging.basicConfig()
 
 from bayesflow.default_settings import DEFAULT_KEYS
@@ -599,7 +603,122 @@ class GenerativeModel:
         except Exception as err:
             raise ConfigurationError('Could not run forward inference with specified generative model...' +
                                     f'Please re-examine model components!\n {err}')
+        
+    def presimulate_and_save(self, batch_size, folder_path, total_iterations=None, memory_limit=None, iterations_per_epoch = None, epochs = None):
+        """ Simulates a dataset for single-pass offline training (called via the train_from_presimulation method of the Trainer class in the trainers.py script).
+        One of the following pairs of parameters has to be provided: (iterations_per_epoch, epochs), (total_iterations, iterations_per_epoch) or (total_iterations, epochs).
+        Providing all three of the parameters in these pairs leads to a consistency check, since incompatible combinations are possible.
+        memory_limit is an upper bound on the size of individual files; this can be useful to avoid running out of RAM during training.
+    """
+        
+        if total_iterations is not None and iterations_per_epoch is not None and epochs is not None:
+            if iterations_per_epoch*epochs != total_iterations:
+                    raise ValueError ('The product of the number of epochs and the number of iterations per epoch provided is not equal to the total number of iterations.')
+        elif iterations_per_epoch is None and total_iterations is None:
+            raise ValueError ('Missing required parameters. At least two of the following must be provided: total_iterations, iterations_per_epoch and epochs.')
+        elif total_iterations is None or iterations_per_epoch is None and epochs is None:
+            raise ValueError ('Missing required parameters. At least two of the following must be provided: total_iterations, iterations_per_epoch and epochs.')
+
+        # Compute missing epochs parameter if necessary
+        if epochs is None:
+            epochs = total_iterations/iterations_per_epoch
+            if int(epochs) < epochs:
+                epochs = int(epochs)+1
+            else:
+                epochs = int(epochs)
+
+        # Determine the disk space required to save a file containing a single batch
+        test_batch = self.__call__(batch_size=batch_size)
+        with open('test_batch.pkl', 'wb') as f:
+            pickle.dump(test_batch, f)
+        batch_space = (10**(-6)) * os.path.getsize('test_batch.pkl')
+        os.remove('test_batch.pkl')
+
+        # Compute parameters not given
+        if total_iterations is None:
+            total_iterations = iterations_per_epoch*epochs
+        elif iterations_per_epoch is None:
+            iterations_per_epoch = total_iterations/epochs
+            if int(iterations_per_epoch) < total_iterations/epochs:
+                iterations_per_epoch = int(iterations_per_epoch)+1
+
+        # Compute  the total space requirement and get a prompt from users confirming the start of the presimulation process
+        required_space = total_iterations*batch_space
+        logging.warn("The presimulated dataset will take up {} Mb of disk space.".format(required_space))
+        user_choice = input("Are you sure you want to perform presimulation? (y/n)")
+        
+        if user_choice.find('y') != -1 or user_choice.find('Y') != -1:
+            logging.info("Performing presimulation.")
+        else:
+            logging.info("Presimulation aborted.")
+            return None
+        
+        # Choose a number of batches per file as specified via iterations_per_epoch unless
+        # the memory_limit per file forces a smaller choice, in which case the highest permissible
+        # value is chosen.
+        if memory_limit is None:
+            batches_per_file = iterations_per_epoch
+        else:
+            batches_per_file = min(int(memory_limit/batch_space), iterations_per_epoch)
+        
+        file_space = batches_per_file*batch_space
+        
+        # Ensure the folder path is interpreted as a directory and not a file and create it if necessary
+        if folder_path[-1] != '/':
+            folder_path += '/'
+        if not os.path.isdir(folder_path):
+            os.mkdir(folder_path)
+
+        # If only a single file needs to be generated, generation is rstraightforward and only requires one loop over total_iterations
+        if total_iterations < batches_per_file:
+            total_files = 1
+            file_counter = 1
+            logging.info("Generating a single file of size {} Mb containing {} batches".format(batch_space*total_iterations, total_iterations))
+            file_dict = {}
+            with tqdm(total=total_files, desc='Batches written:') as p_bar:
+                for k in range(total_iterations):
+                    file_dict[k+1] = self.__call__(batch_size=batch_size)
+                    p_bar.update(1)
+            with open(folder_path+'presim_file_'+str(file_counter)+'.pkl', 'wb') as f:
+                pickle.dump(file_dict, f)
+
+        # In the standard case of multiple files being generated, total_files-1 files are generated with an identical number of batches inside.
+        # The final file contains the number of batches missing to reach total_iterations (which may or may not be identical to previous batches per file.)
+        else:
+            total_files = total_iterations/batches_per_file
+            if int(total_files) < total_files:
+                total_files = int(total_files)+1
+                logging.info("Generating {} files. Of these, {} files are {} Mb in size and contain {} batches. The last file is smaller."\
+                    .format(total_files, total_files-1,file_space, batches_per_file))
+            else:
+                total_files = int(total_files)
+                logging.info("Generating {} files of size {} Mb containing {} batches each."\
+                    .format(total_files, file_space, batches_per_file))
             
+            # Generate all files but one
+            ctr = 0
+            for i in range(total_files-1):
+                with tqdm(total=batches_per_file, desc='Batches generated for file {}'.format(i+1)) as p_bar:
+                    file_dict = {}
+                    for k in range(batches_per_file):
+                        file_dict[k+1] = self.__call__(batch_size=batch_size)
+                        p_bar.update(1)
+                    with open(folder_path+'presim_file_'+str(i+1)+'.pkl', 'wb') as f:
+                        pickle.dump(file_dict, f)
+                    ctr +=1
+
+            # Generate the final file with potentially reduced batch_size so total_iterations is met in the end.    
+            missing_batches = total_iterations-((total_files-1)*batches_per_file)
+            file_dict = {}
+            with tqdm(total=missing_batches, desc='Batches generated for file {}'.format(total_files)) as p_bar:
+                for k in range(missing_batches):
+                    file_dict[k+1] = self.__call__(batch_size=batch_size)
+                    p_bar.update(1)
+            with open(folder_path+'presim_file_'+str(ctr+1)+'.pkl', 'wb') as f:
+                pickle.dump(file_dict, f)
+                
+        
+        logging.info("Presimulation complete. Generated {} files.".format(total_files))    
 
 class MultiGenerativeModel:
     """ Basic interface for multiple generative models in a simulation-based context.
