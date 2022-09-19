@@ -437,7 +437,7 @@ class Trainer:
         
         return self.loss_history.get_plottable()
 
-    def train_from_presimulation(self, presimulation_path, save_checkpoint=True, **kwargs):
+    def train_from_presimulation(self, presimulation_path, save_checkpoint=True, custom_loader = pickle.load, **kwargs):
         """ Trains an amortizer via a modified form of offline training. 
         Like regular offline training, it assumes that parameters, data and optional context have already
         been simulated (i.e., forward inference has been performed).
@@ -452,9 +452,8 @@ class Trainer:
         presimulation_path : str
             File path to the folder containing the files from the precomputed simulation.
             Ideally generated using a GenerativeModel's presimulate_and_save method, otherwise must match
-            the structure produced by that method: each file is generated from a dictionary using the dump
-            function of the pickle library; the dictionary's values are simulation_dict objects, numbered
-            by positive integers (1,2,3,...) as keys.
+            the structure produced by that method: each file is generated from a list or dictionary using the dump
+            function of the pickle library; the dictionary's values / the list's entries are simulation_dict objects.
             Training parameters like number of iterations and batch size are inferred from the files during training.
         save_checkpoint  : bool (default - True)
             Determines whether to save checkpoints after each epoch,
@@ -467,22 +466,29 @@ class Trainer:
         """    
         self.loss_history.start_new_run()
 
-        # Loop over the presimulated dataset. A single file is read into memory as a dictionary in each epoch.
+        # Loop over the presimulated dataset. A single file is read into memory as a dictionary or list in each epoch.
         file_list = os.listdir(presimulation_path)
         for current_ep, current_filename in enumerate(file_list):
             with open(presimulation_path+'/'+current_filename, 'rb') as current_file:
-                epoch_dict = pickle.load(current_file)
+                epoch_data = custom_loader(current_file)
             
             ep = current_ep+1
-            # For each epoch, the number of iterations is inferred from the presimulated dictionary used for that epoch
-            iterations_this_epoch = len(epoch_dict.keys())
-            
-            with tqdm(total=iterations_this_epoch, desc='Training epoch {}'.format(ep)) as p_bar:
-                for it in range(1, iterations_this_epoch + 1):
-                    
+            # For each epoch, the number of iterations is inferred from the presimulated dictionary or list used for that epoch
+            if isinstance(epoch_data, dict): 
+                index_list = list(epoch_data.keys())
+            elif isinstance(epoch_data, list):
+                index_list = np.arange(len(epoch_data))    
+            else:
+                raise ValueError("Loading a simulation file resulted in a {}. Must be dictionary or list.".format(type(epoch_data)))
+
+            with tqdm(total=len(index_list), desc='Training epoch {}'.format(ep)) as p_bar:
+                for i, index in enumerate(index_list):
+                    # Keep use of the variable it consistent across training types
+                    it = i+1
+
                     # Perform one training step and obtain current loss value
-                    input_dict = self.configurator(epoch_dict[it])
-                    # Like the number of iterations, the batch size is inferred from presimulated dictionary
+                    input_dict = self.configurator(epoch_data[index])
+                    # Like the number of iterations, the batch size is inferred from presimulated dictionary or list
                     batch_size = len(input_dict['parameters'][0])
                     loss = self._train_step(batch_size, input_dict, **kwargs)
 
