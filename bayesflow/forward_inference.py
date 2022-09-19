@@ -674,13 +674,13 @@ class GenerativeModel:
             total_files = 1
             file_counter = 1
             logging.info("Generating a single file of size {} Mb containing {} batches".format(batch_space*total_iterations, total_iterations))
-            file_dict = {}
+            file_list = [{} for k in range(total_iterations)]
             with tqdm(total=total_files, desc='Batches written:') as p_bar:
                 for k in range(total_iterations):
-                    file_dict[k+1] = self.__call__(batch_size=batch_size)
+                    file_list[k] = self.__call__(batch_size=batch_size)
                     p_bar.update(1)
             with open(folder_path+'presim_file_'+str(file_counter)+'.pkl', 'wb') as f:
-                pickle.dump(file_dict, f)
+                pickle.dump(file_list, f)
 
         # In the standard case of multiple files being generated, total_files-1 files are generated with an identical number of batches inside.
         # The final file contains the number of batches missing to reach total_iterations (which may or may not be identical to previous batches per file.)
@@ -699,23 +699,23 @@ class GenerativeModel:
             ctr = 0
             for i in range(total_files-1):
                 with tqdm(total=batches_per_file, desc='Batches generated for file {}'.format(i+1)) as p_bar:
-                    file_dict = {}
+                    file_list = [{} for k in range(batches_per_file)]
                     for k in range(batches_per_file):
-                        file_dict[k+1] = self.__call__(batch_size=batch_size)
+                        file_list[k] = self.__call__(batch_size=batch_size)
                         p_bar.update(1)
                     with open(folder_path+'presim_file_'+str(i+1)+'.pkl', 'wb') as f:
-                        pickle.dump(file_dict, f)
+                        pickle.dump(file_list, f)
                     ctr +=1
 
             # Generate the final file with potentially reduced batch_size so total_iterations is met in the end.    
             missing_batches = total_iterations-((total_files-1)*batches_per_file)
-            file_dict = {}
+            file_list = [{} for k in range(missing_batches)]
             with tqdm(total=missing_batches, desc='Batches generated for file {}'.format(total_files)) as p_bar:
                 for k in range(missing_batches):
-                    file_dict[k+1] = self.__call__(batch_size=batch_size)
+                    file_list[k] = self.__call__(batch_size=batch_size)
                     p_bar.update(1)
             with open(folder_path+'presim_file_'+str(ctr+1)+'.pkl', 'wb') as f:
-                pickle.dump(file_dict, f)
+                pickle.dump(file_list, f)
                 
         
         logging.info("Presimulation complete. Generated {} files.".format(total_files))    
