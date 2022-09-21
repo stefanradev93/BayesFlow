@@ -462,7 +462,9 @@ class ActNorm(tf.keras.Model):
 
 
 class DenseCouplingNet(tf.keras.Model):
-    """Implements a conditional version of a satndard fully connected (FC) network."""
+    """
+    Implements a conditional version of a satndard fully connected (FC) network.
+    Would also work as an unconditional estimator."""
 
     def __init__(self, meta, n_out):
         """Creates a conditional coupling net (FC neural network).
@@ -496,6 +498,10 @@ class DenseCouplingNet(tf.keras.Model):
         condition   : tf.Tensor
             the conditioning vector of interest, for instance ``x = summary(x)``, shape (batch_size, summary_dim)
         """
+
+        # Handle case no condition
+        if condition is None:
+            return self.dense(target, **kwargs)
 
         # Handle 3D case for a set-flow
         if len(target.shape) == 3 and len(condition.shape) == 2:
@@ -895,6 +901,12 @@ class InvertibleNetwork(tf.keras.Model):
         theta_samples : tf.Tensor or np.array
             Parameter samples, shape (n_samples, n_datasets, n_params)
         """
+
+        # Handle unconditional case
+        if condition is None:
+            z_samples = tf.random.normal(shape=(n_samples, self.z_dim))
+            target_samples = self.inverse(z_samples, condition, **kwargs)
+            return target_samples
 
         # Sample from a unit Gaussian
         if self.tail_network is None:
