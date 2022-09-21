@@ -36,7 +36,8 @@ from bayesflow.helper_classes import LossHistory
 
 def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_agg=np.std, 
                   param_names=None, fig_size=None, label_fontsize=14, title_fontsize=16,
-                  metric_fontsize=16, add_corr=True, add_r2=True, color='#8f2727'):
+                  metric_fontsize=16, add_corr=True, add_r2=True, color='#8f2727', 
+                  n_col=None, n_row=None):
     
     """ Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
     The point estimate can be controlled with the `point_agg` argument, and the uncertainty estimate
@@ -89,9 +90,15 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     if param_names is None:
         param_names = [f'p_{i}' for i in range(1, n_params+1)]
         
-    # Determine n_subplots dynamically
-    n_row = int(np.ceil(n_params / 6))
-    n_col = int(np.ceil(n_params / n_row))
+    # Determine number of rows and columns for subplots based on inputs
+    if n_row is None and n_col is None:
+        n_row = int(np.ceil(n_params / 6))
+        n_col = int(np.ceil(n_params / n_row))
+    elif n_row is None and n_col is not None:
+        n_row = int(np.ceil(n_params / n_col))
+    elif n_row is not None and n_col is None:
+        n_col = int(np.ceil(n_params / n_row))
+        
     
     # Initialize figure
     if fig_size is None:
@@ -99,7 +106,9 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
 
     for i, ax in enumerate(axarr.flat):
-        
+        if i >= n_params:
+            break
+
         # Add scatter and errorbars
         if uncertainty_agg is not None:
             im = ax.errorbar(prior_samples[:, i], est[:, i], yerr=u[:, i], fmt='o', alpha=0.5, color=color)
