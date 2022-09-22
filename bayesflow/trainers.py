@@ -673,7 +673,7 @@ class Trainer:
         # Forward pass and loss computation
         with tf.GradientTape() as tape:
             # Compute custom loss
-            loss = self.amortizer.compute_loss(input_dict, **kwargs)
+            loss = self.amortizer.compute_loss(input_dict, training=True, **kwargs)
             # If dict, add components
             if type(loss) is dict:
                 _loss = tf.add_n(list(loss.values()))
