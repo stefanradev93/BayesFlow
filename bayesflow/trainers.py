@@ -19,6 +19,8 @@
 # SOFTWARE.
 
 import numpy as np
+import os
+import pickle
 from tqdm.autonotebook import tqdm
 
 import logging
@@ -360,6 +362,7 @@ class Trainer:
         
         # self.loss_history.load_from_file(file_path=self.checkpoint_path)
         return self.loss_history.get_plottable()
+    
 
     def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True,**kwargs):
         """ Trains an amortizer via offline learning. Assume parameters, data and optional 
@@ -434,6 +437,91 @@ class Trainer:
         
         return self.loss_history.get_plottable()
 
+    def train_from_presimulation(self, presimulation_path, save_checkpoint=True, custom_loader = pickle.load, **kwargs):
+        """ Trains an amortizer via a modified form of offline training. 
+        Like regular offline training, it assumes that parameters, data and optional context have already
+        been simulated (i.e., forward inference has been performed).
+        Also like regular offline training, it is faster than online training in scenarios where simulations are slow.
+        Unlike regular offline training, it uses each batch from the presimulated dataset only once during training.
+        A larger presimulated dataset is therefore required than for offline training, and the increase in speed
+        gained by loading simulations instead of generating them on the fly comes at a cost: 
+        a large presimulated dataset takes up a large amount of hard drive space.
+
+        Parameters
+        ----------
+        presimulation_path : str
+            File path to the folder containing the files from the precomputed simulation.
+            Ideally generated using a GenerativeModel's presimulate_and_save method, otherwise must match
+            the structure produced by that method: each file is generated from a list or dictionary using the dump
+            function of the pickle library; the dictionary's values / the list's entries are simulation_dict objects.
+            Training parameters like number of iterations and batch size are inferred from the files during training.
+        save_checkpoint  : bool (default - True)
+            Determines whether to save checkpoints after each epoch,
+            if a checkpoint_path provided during initialization, otherwise ignored.
+
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
+        """    
+        self.loss_history.start_new_run()
+
+        # Loop over the presimulated dataset. A single file is read into memory as a dictionary or list in each epoch.
+        file_list = os.listdir(presimulation_path)
+        for current_ep, current_filename in enumerate(file_list):
+            with open(presimulation_path+'/'+current_filename, 'rb') as current_file:
+                epoch_data = custom_loader(current_file)
+            
+            ep = current_ep+1
+            # For each epoch, the number of iterations is inferred from the presimulated dictionary or list used for that epoch
+            if isinstance(epoch_data, dict): 
+                index_list = list(epoch_data.keys())
+            elif isinstance(epoch_data, list):
+                index_list = np.arange(len(epoch_data))    
+            else:
+                raise ValueError("Loading a simulation file resulted in a {}. Must be dictionary or list.".format(type(epoch_data)))
+
+            with tqdm(total=len(index_list), desc='Training epoch {}'.format(ep)) as p_bar:
+                for i, index in enumerate(index_list):
+                    # Keep use of the variable it consistent across training types
+                    it = i+1
+
+                    # Perform one training step and obtain current loss value
+                    input_dict = self.configurator(epoch_data[index])
+                    # Like the number of iterations, the batch size is inferred from presimulated dictionary or list
+                    batch_size = len(input_dict['parameters'][0])
+                    loss = self._train_step(batch_size, input_dict, **kwargs)
+
+                    # Store returned loss
+                    self.loss_history.add_entry(ep, loss)
+
+                    # Compute running loss
+                    avg_dict = self.loss_history.get_running_losses(ep)
+
+                    # Get slope of loss trajectory for optional stopping
+                    if self.lr_adjuster is not None:
+                        slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
+                    else:
+                        slope = None
+
+                    # Format for display on progress bar
+                    disp_str = format_loss_string(ep, it, loss, avg_dict, slope)
+
+                    # Update progress bar
+                    p_bar.set_postfix_str(disp_str)
+                    p_bar.update(1)
+
+                    # Check optional stopping and end training
+                    if self._check_optional_stopping():
+                        self._save_trainer(save_checkpoint)
+                        return self.loss_history.get_plottable()
+
+            # Store after each epoch, if specified
+            self._save_trainer(save_checkpoint)
+        
+        # self.loss_history.load_from_file(file_path=self.checkpoint_path)
+        return self.loss_history.get_plottable()
+    
     def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, **kwargs):
         """Trains an amortizer via round-based learning.
 
