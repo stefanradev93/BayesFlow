@@ -69,7 +69,7 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
             dtype=self.w.dtype,
         )
 
-    def call(self, inputs, training=True):
+    def call(self, inputs, training=False):
         """ Call `Layer`
         
         Parameters
