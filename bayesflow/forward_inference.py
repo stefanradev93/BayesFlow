@@ -605,7 +605,7 @@ class GenerativeModel:
                                     f'Please re-examine model components!\n {err}')
         
     def presimulate_and_save(self, batch_size, folder_path, total_iterations=None, memory_limit=None, 
-                             iterations_per_epoch = None, epochs = None, extend_from=0):
+                             iterations_per_epoch = None, epochs = None, extend_from=0, parallel=True):
         """ Simulates a dataset for single-pass offline training (called via the train_from_presimulation method 
         of the Trainer class in the trainers.py script).
 
@@ -751,7 +751,7 @@ class GenerativeModel:
             with open(folder_path+'presim_file_'+str(file_counter+1)+'.pkl', 'wb') as f:
                 pickle.dump(file_list, f)
                 
-        logging.info(f"Presimulation complete. Generated {total_files} files.")    
+        logging.info(f"Presimulation {extension} complete. Generated {total_files} files.")    
 
 
 class MultiGenerativeModel:
