@@ -436,7 +436,7 @@ class Trainer:
         
         return self.loss_history.get_plottable()
 
-    def train_from_presimulation(self, presimulation_path, save_checkpoint=True, custom_loader=None, **kwargs):
+    def train_from_presimulation(self, presimulation_path, max_epochs=None, save_checkpoint=True, custom_loader=None, **kwargs):
         """ Trains an amortizer via a modified form of offline training. 
 
         Like regular offline training, it assumes that parameters, data and optional context have already
@@ -483,6 +483,11 @@ class Trainer:
 
         # Loop over the presimulated dataset.
         file_list = os.listdir(presimulation_path)
+        
+        # Limit number of epochs to max_epochs
+        if len(file_list) > max_epochs:
+            file_list = file_list[:max_epochs]
+
         for ep, current_filename in enumerate(file_list, start=1):
 
             # Read single file into memory as a dictionary or list
