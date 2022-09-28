@@ -158,3 +158,23 @@ def format_loss_string(ep, it, loss, avg_dict, slope, ep_str="Epoch", it_str='It
     else:
         disp_str += f",L.Slope: {slope:.3f}"
     return disp_str
+
+
+def generate_lr_adjustment_dict(optimizer, period=150, wait_between_fits=10, patience=10, tolerance=-0.1, 
+                 reduction_factor=0.25, cooldown_factor=4, num_resets=3):
+    
+    lr_adjustment_dict = {}
+    lr_adjustment_dict['optimizer'] = optimizer
+    lr_adjustment_dict['period'] = period
+    lr_adjustment_dict['wait_between_fits'] = wait_between_fits
+    lr_adjustment_dict['patience'] = patience
+    lr_adjustment_dict['tolerance'] = tolerance
+    lr_adjustment_dict['reduction_factor'] = reduction_factor
+    lr_adjustment_dict['cooldown_factor'] = cooldown_factor
+    lr_adjustment_dict['num_resets'] = num_resets
+
+    return(lr_adjustment_dict)
+    
+    
+    
+
