@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from functools import lru_cache
 import numpy as np
 import os
 from pickle import load as pickle_load
@@ -33,7 +34,7 @@ from tensorflow.keras.optimizers import Adam
 
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
-from bayesflow.helper_functions import apply_gradients, format_loss_string
+from bayesflow.helper_functions import apply_gradients, format_loss_string, generate_lr_adjustment_dict
 from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, RegressionLRAdjuster
 from bayesflow.default_settings import STRING_CONFIGS, DEFAULT_KEYS
 from bayesflow.amortized_inference import AmortizedLikelihood, AmortizedPosterior, JointAmortizer, ModelComparisonAmortizer
@@ -85,7 +86,8 @@ class Trainer:
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=3, clip_method='global_norm', 
-                 clip_value=None, skip_checks=False, memory=True, optional_stopping=True, **kwargs):
+                 clip_value=None, skip_checks=False, memory=True, optional_stopping=True,
+                 lr_adjust_params=None, **kwargs):
         """ Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
@@ -117,6 +119,9 @@ class Trainer:
             Otherwise the corresponding attribute will be set to None.
         optional_stopping : boolean, optional, default: True
             Whether to use optional stopping or not during training. Highly recommended.
+        lr_adjust_params   : dictionary, optional, default: None
+            A dictionary containing parameters for a RegressionLRAdjuster object (for full list of possible keys, 
+            see RegressionLRAdjuster class in bayesflow.helper_classes.py)
         """
 
         # Set-up logging
@@ -176,10 +181,16 @@ class Trainer:
             self.manager = None
         self.checkpoint_path = checkpoint_path
 
-        # Set-up regression adjuster #TODO allow for control per kwargs
+        # Set-up regression adjuster based on lr_adjust_params
         if optional_stopping:
-            self.lr_adjuster = RegressionLRAdjuster(self.optimizer)
-        else:
+            if lr_adjust_params is None:
+                self.lr_adjuster = RegressionLRAdjuster(self.optimizer)
+            else: 
+                lr_adj = generate_lr_adjustment_dict(self.optimizer)
+                for key in lr_adjust_params.keys():
+                    lr_adj[key] = lr_adjust_params[key]
+                self.lr_adjuster = RegressionLRAdjuster(optimizer=lr_adj['optimizer'], period=lr_adj['period'], wait_between_fits=lr_adj['wait_between_fits'], patience=lr_adj['patience'],\
+                    tolerance=lr_adj['tolerance'], reduction_factor=lr_adj['reduction_factor'], cooldown_factor=lr_adj['cooldown_factor'], num_resets=lr_adj['num_resets'])
             self.lr_adjuster = None
 
         # Perform a sanity check wiuth provided components
@@ -688,7 +699,7 @@ class Trainer:
         # Forward pass and loss computation
         with tf.GradientTape() as tape:
             # Compute custom loss
-            loss = self.amortizer.compute_loss(input_dict, **kwargs)
+            loss = self.amortizer.compute_loss(input_dict, training=True, **kwargs)
             # If dict, add components
             if type(loss) is dict:
                 _loss = tf.add_n(list(loss.values()))
