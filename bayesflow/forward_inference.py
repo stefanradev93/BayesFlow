@@ -23,6 +23,7 @@ import numpy as np
 import logging
 import pickle
 import os
+import matplotlib.pyplot as plt
 from tqdm.autonotebook import tqdm
 logging.basicConfig()
 
@@ -558,9 +559,78 @@ class GenerativeModel:
         else:
             return Simulator(simulator_fun=sim_fun)
 
-    def plot_prior_pushforward(self, funcs_list):
-        """ TODO"""
-        raise NotImplementedError('Prior density computation is under construction!')
+    def plot_pushforward(self, parameter_draws=None, funcs_list=None, funcs_labels=None, batch_size=1000, show_raw_sims=True):
+        """ Creates simulations from parameter_draws (generated from self.prior if they are not passed as an argument)
+            and plots visualizations for them.
+
+            Parameters
+            ----------
+            parameter_draws     : numpy ndarray of the shape (batch_size, parameter_values)
+                A sample of parameters. May be drawn from either the prior (which is also the default behavior if no input is specified)
+                or from the posterior to do a prior/posterior pushforward.
+            funcs_list          : list of callables
+                A list of functions that can be used to aggregate simulation data (map a single simulation to a single real value). 
+                The default behavior without user input is to use numpy's mean and standard deviation functions.
+            funcs_labels        : list of strings
+                A list of labels for the functions in funcs_list.
+                The default behavior without user input is to call the functions "Aggregator function 1, Aggregator function 2, etc."
+            batch_size          : integer
+                The number of prior draws to generate (and then create and visualizes simulations from)
+            show_raw_sims       : boolean
+                Flag determining whether or not a plot of 49 raw (i.e. unaggregated) simulations is generated. 
+                Useful for very general data exploration. 
+
+            Returns
+            -------
+            simulations         : numpy ndarray
+                The simulations generated from parameter_draws (or prior draws generated on the fly)
+            aggregated_data     : list of numpy 1d arrays
+                Arrays generated from the simulations with the functions in funcs_list
+
+            """
+       
+        if parameter_draws is None:
+            parameter_draws = self.prior(batch_size=batch_size)['prior_draws']
+        
+        simulations = self.simulator(params=parameter_draws)['sim_data']
+
+        if funcs_list is not None and funcs_labels is None:
+            funcs_labels = [f"Aggregator function {i+1}" for i in range(len(funcs_list))]
+
+        if funcs_list is None:
+            funcs_list = [np.mean, np.std]
+            funcs_labels = ["Simulation mean", "Simulation standard deviation"]
+
+        if show_raw_sims:
+            if len(simulations.shape) != 2:
+                logging.warn("Cannot plot raw simulations since they are not one-dimensional.") 
+            else:
+                k = min(int(np.ceil(np.sqrt(batch_size))),7)
+                f, axarr = plt.subplots(k, k, figsize=(20, 10))
+
+                for i, ax in enumerate(axarr.flat):
+                    if i == batch_size:
+                        break
+                    x = simulations[i]
+                    ax.plot(x)
+                f.suptitle(f"Raw Data for {k*k} Simulations", fontsize=16)
+                f.tight_layout()
+            
+        funcs_count = len(funcs_list)
+        g, axarr = plt.subplots(funcs_count, 1, figsize=(20,10))
+        aggregated_data = []
+
+        for i, ax in enumerate(axarr.flat):
+            x = [funcs_list[i](simulations[l]) for l in range(batch_size)]
+            aggregated_data += [x]
+            ax.set_title(funcs_labels[i])
+            ax.set_xlabel("Simulation")
+            ax.set_ylabel("Aggregated value")
+            ax.plot(x)
+        g.suptitle("Aggregated Measures of Simulations", fontsize=16)
+        g.tight_layout()
+
+        return simulations, aggregated_data
 
     def _test(self):
         """ Performs a sanity check on forward inference and some verbose information.
