@@ -582,6 +582,8 @@ class GenerativeModel:
 
             Returns
             -------
+            parameters_draws    : numpy ndarray
+                The parameters provided by the user or generated internally.
             simulations         : numpy ndarray
                 The simulations generated from parameter_draws (or prior draws generated on the fly)
             aggregated_data     : list of numpy 1d arrays
@@ -630,7 +632,7 @@ class GenerativeModel:
         g.suptitle("Aggregated Measures of Simulations", fontsize=16)
         g.tight_layout()
 
-        return simulations, aggregated_data
+        return parameter_draws, simulations, aggregated_data
 
     def _test(self):
         """ Performs a sanity check on forward inference and some verbose information.
