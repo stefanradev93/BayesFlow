@@ -632,7 +632,8 @@ class GenerativeModel:
         g.suptitle("Aggregated Measures of Simulations", fontsize=16)
         g.tight_layout()
 
-        return parameter_draws, simulations, aggregated_data
+        output_dict = {'parameter_draws': parameter_draws, 'simulations': simulations, 'aggregated_data': aggregated_data, 'functions_used': funcs_list, 'function_names': funcs_labels}
+        return output_dict
 
     def _test(self):
         """ Performs a sanity check on forward inference and some verbose information.
