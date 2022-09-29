@@ -448,6 +448,7 @@ class Trainer:
         return self.loss_history.get_plottable()
 
     def train_from_presimulation(self, presimulation_path, max_epochs=None, save_checkpoint=True, custom_loader=None, **kwargs):
+
         """ Trains an amortizer via a modified form of offline training. 
 
         Like regular offline training, it assumes that parameters, data and optional context have already
@@ -465,21 +466,23 @@ class Trainer:
             File path to the folder containing the files from the precomputed simulation.
             Ideally generated using a GenerativeModel's presimulate_and_save method, otherwise must match
             the structure produced by that method: 
+
             Each file contains the data for one epoch, i.e. a number of batches, and must be compatible with the custom_loader provided:
             the custom_loader must read each file into a collection (either a dictionary or a list) of simulation_dict objects.
             This is easily achieved with the pickle library: if the files were generated from collections of simulation_dict objects
             using pickle.dump, the _default_loader (default for custom_load) will load them using pickle.load. 
+
             Training parameters like number of iterations and batch size are inferred from the files during training.
         save_checkpoint  : bool, optional, (default - True)
             Determines whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
+
         custom_loader    : callable, optional, (default - _default_loader)
-            Optional 
             Must take a string file_path as an input and output a collection (dictionary or list) of simulation_dict objects.
             A simulation_dict has the keys 'prior_non_batchable_context', 'prior_batchable_context', 'prior_draws', 'sim_non_batchable_context',
             'sim_batchable_context' and 'sim_data'. Unused keys should be paired with the value None; 'prior_draws' and 'sim_data' must have
             actual data as values.
-    
+
         Returns
         -------
         losses : dict(ep_num : list(losses))
