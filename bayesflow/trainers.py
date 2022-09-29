@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from functools import lru_cache
 import numpy as np
 import os
 from pickle import load as pickle_load
@@ -33,7 +34,7 @@ from tensorflow.keras.optimizers import Adam
 
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
-from bayesflow.helper_functions import apply_gradients, format_loss_string
+from bayesflow.helper_functions import apply_gradients, format_loss_string, generate_lr_adjustment_dict
 from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, RegressionLRAdjuster
 from bayesflow.default_settings import STRING_CONFIGS, DEFAULT_KEYS
 from bayesflow.amortized_inference import AmortizedLikelihood, AmortizedPosterior, JointAmortizer, ModelComparisonAmortizer
@@ -85,7 +86,8 @@ class Trainer:
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=3, clip_method='global_norm', 
-                 clip_value=None, skip_checks=False, memory=True, optional_stopping=True, **kwargs):
+                 clip_value=None, skip_checks=False, memory=True, optional_stopping=True,
+                 lr_adjust_params=None, **kwargs):
         """ Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
@@ -117,6 +119,9 @@ class Trainer:
             Otherwise the corresponding attribute will be set to None.
         optional_stopping : boolean, optional, default: True
             Whether to use optional stopping or not during training. Highly recommended.
+        lr_adjust_params   : dictionary, optional, default: None
+            A dictionary containing parameters for a RegressionLRAdjuster object (for full list of possible keys, 
+            see RegressionLRAdjuster class in bayesflow.helper_classes.py)
         """
 
         # Set-up logging
@@ -176,10 +181,16 @@ class Trainer:
             self.manager = None
         self.checkpoint_path = checkpoint_path
 
-        # Set-up regression adjuster #TODO allow for control per kwargs
+        # Set-up regression adjuster based on lr_adjust_params
         if optional_stopping:
-            self.lr_adjuster = RegressionLRAdjuster(self.optimizer)
-        else:
+            if lr_adjust_params is None:
+                self.lr_adjuster = RegressionLRAdjuster(self.optimizer)
+            else: 
+                lr_adj = generate_lr_adjustment_dict(self.optimizer)
+                for key in lr_adjust_params.keys():
+                    lr_adj[key] = lr_adjust_params[key]
+                self.lr_adjuster = RegressionLRAdjuster(optimizer=lr_adj['optimizer'], period=lr_adj['period'], wait_between_fits=lr_adj['wait_between_fits'], patience=lr_adj['patience'],\
+                    tolerance=lr_adj['tolerance'], reduction_factor=lr_adj['reduction_factor'], cooldown_factor=lr_adj['cooldown_factor'], num_resets=lr_adj['num_resets'])
             self.lr_adjuster = None
 
         # Perform a sanity check wiuth provided components
@@ -436,7 +447,8 @@ class Trainer:
         
         return self.loss_history.get_plottable()
 
-    def train_from_presimulation(self, presimulation_path, save_checkpoint=True, custom_loader=pickle_load, **kwargs):
+    def train_from_presimulation(self, presimulation_path, max_epochs=None, save_checkpoint=True, custom_loader=None, **kwargs):
+
         """ Trains an amortizer via a modified form of offline training. 
 
         Like regular offline training, it assumes that parameters, data and optional context have already
@@ -454,30 +466,47 @@ class Trainer:
             File path to the folder containing the files from the precomputed simulation.
             Ideally generated using a GenerativeModel's presimulate_and_save method, otherwise must match
             the structure produced by that method: 
-            Each file is generated from a list or dictionary using the dump
-            function of the pickle library; the dictionary's values / the list's entries are simulation_dict objects.
+
+            Each file contains the data for one epoch, i.e. a number of batches, and must be compatible with the custom_loader provided:
+            the custom_loader must read each file into a collection (either a dictionary or a list) of simulation_dict objects.
+            This is easily achieved with the pickle library: if the files were generated from collections of simulation_dict objects
+            using pickle.dump, the _default_loader (default for custom_load) will load them using pickle.load. 
+
             Training parameters like number of iterations and batch size are inferred from the files during training.
         save_checkpoint  : bool, optional, (default - True)
             Determines whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
-        custom_loader    : callable, optional, (default - pickle.load)
-            Optional 
+
+        custom_loader    : callable, optional, (default - _default_loader)
+            Must take a string file_path as an input and output a collection (dictionary or list) of simulation_dict objects.
+            A simulation_dict has the keys 'prior_non_batchable_context', 'prior_batchable_context', 'prior_draws', 'sim_non_batchable_context',
+            'sim_batchable_context' and 'sim_data'. Unused keys should be paired with the value None; 'prior_draws' and 'sim_data' must have
+            actual data as values.
 
         Returns
         -------
         losses : dict(ep_num : list(losses))
             A dictionary storing the losses across epochs and iterations
         """   
+        
+        # Use default loading function if none is provided
+        if custom_loader is None:
+            custom_loader = self._default_loader
 
         self.loss_history.start_new_run()
 
         # Loop over the presimulated dataset.
         file_list = os.listdir(presimulation_path)
+        
+        # Limit number of epochs to max_epochs
+        if len(file_list) > max_epochs:
+            file_list = file_list[:max_epochs]
+
         for ep, current_filename in enumerate(file_list, start=1):
 
             # Read single file into memory as a dictionary or list
-            with open(presimulation_path + '/' + current_filename, 'rb+') as current_file:
-                epoch_data = custom_loader(current_file)
+            file_path = presimulation_path + '/' + current_filename
+            epoch_data = custom_loader(file_path)
             
             # For each epoch, the number of iterations is inferred from the presimulated dictionary or list used for that epoch
             if isinstance(epoch_data, dict): 
@@ -796,3 +825,8 @@ class Trainer:
             except Exception as err:
                 raise ConfigurationError("Could not carry out computations of generative_model ->" +
                                          f"configurator -> amortizer -> loss! Error trace:\n {err}")
+    
+    def _default_loader(self, file_path):
+        with open(file_path, 'rb+') as f:
+                loaded_file = pickle_load(f)
+        return(loaded_file)

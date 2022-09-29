@@ -23,6 +23,7 @@ import numpy as np
 import logging
 import pickle
 import os
+import matplotlib.pyplot as plt
 from tqdm.autonotebook import tqdm
 logging.basicConfig()
 
@@ -558,9 +559,81 @@ class GenerativeModel:
         else:
             return Simulator(simulator_fun=sim_fun)
 
-    def plot_prior_pushforward(self, funcs_list):
-        """ TODO"""
-        raise NotImplementedError('Prior density computation is under construction!')
+    def plot_pushforward(self, parameter_draws=None, funcs_list=None, funcs_labels=None, batch_size=1000, show_raw_sims=True):
+        """ Creates simulations from parameter_draws (generated from self.prior if they are not passed as an argument)
+            and plots visualizations for them.
+
+            Parameters
+            ----------
+            parameter_draws     : numpy ndarray of the shape (batch_size, parameter_values)
+                A sample of parameters. May be drawn from either the prior (which is also the default behavior if no input is specified)
+                or from the posterior to do a prior/posterior pushforward.
+            funcs_list          : list of callables
+                A list of functions that can be used to aggregate simulation data (map a single simulation to a single real value). 
+                The default behavior without user input is to use numpy's mean and standard deviation functions.
+            funcs_labels        : list of strings
+                A list of labels for the functions in funcs_list.
+                The default behavior without user input is to call the functions "Aggregator function 1, Aggregator function 2, etc."
+            batch_size          : integer
+                The number of prior draws to generate (and then create and visualizes simulations from)
+            show_raw_sims       : boolean
+                Flag determining whether or not a plot of 49 raw (i.e. unaggregated) simulations is generated. 
+                Useful for very general data exploration. 
+
+            Returns
+            -------
+            parameters_draws    : numpy ndarray
+                The parameters provided by the user or generated internally.
+            simulations         : numpy ndarray
+                The simulations generated from parameter_draws (or prior draws generated on the fly)
+            aggregated_data     : list of numpy 1d arrays
+                Arrays generated from the simulations with the functions in funcs_list
+
+            """
+       
+        if parameter_draws is None:
+            parameter_draws = self.prior(batch_size=batch_size)['prior_draws']
+        
+        simulations = self.simulator(params=parameter_draws)['sim_data']
+
+        if funcs_list is not None and funcs_labels is None:
+            funcs_labels = [f"Aggregator function {i+1}" for i in range(len(funcs_list))]
+
+        if funcs_list is None:
+            funcs_list = [np.mean, np.std]
+            funcs_labels = ["Simulation mean", "Simulation standard deviation"]
+
+        if show_raw_sims:
+            if len(simulations.shape) != 2:
+                logging.warn("Cannot plot raw simulations since they are not one-dimensional.") 
+            else:
+                k = min(int(np.ceil(np.sqrt(batch_size))),7)
+                f, axarr = plt.subplots(k, k, figsize=(20, 10))
+
+                for i, ax in enumerate(axarr.flat):
+                    if i == batch_size:
+                        break
+                    x = simulations[i]
+                    ax.plot(x)
+                f.suptitle(f"Raw Data for {k*k} Simulations", fontsize=16)
+                f.tight_layout()
+            
+        funcs_count = len(funcs_list)
+        g, axarr = plt.subplots(funcs_count, 1, figsize=(20,10))
+        aggregated_data = []
+
+        for i, ax in enumerate(axarr.flat):
+            x = [funcs_list[i](simulations[l]) for l in range(batch_size)]
+            aggregated_data += [x]
+            ax.set_title(funcs_labels[i])
+            ax.set_xlabel("Simulation")
+            ax.set_ylabel("Aggregated value")
+            ax.plot(x)
+        g.suptitle("Aggregated Measures of Simulations", fontsize=16)
+        g.tight_layout()
+
+        output_dict = {'parameter_draws': parameter_draws, 'simulations': simulations, 'aggregated_data': aggregated_data, 'functions_used': funcs_list, 'function_names': funcs_labels}
+        return output_dict
 
     def _test(self):
         """ Performs a sanity check on forward inference and some verbose information.
@@ -605,7 +678,8 @@ class GenerativeModel:
                                     f'Please re-examine model components!\n {err}')
         
     def presimulate_and_save(self, batch_size, folder_path, total_iterations=None, memory_limit=None, 
-                             iterations_per_epoch = None, epochs = None):
+                             iterations_per_epoch = None, epochs = None, extend_from=0, parallel=True):
+
         """ Simulates a dataset for single-pass offline training (called via the train_from_presimulation method 
         of the Trainer class in the trainers.py script).
 
@@ -620,13 +694,17 @@ class GenerativeModel:
         `memory_limit` is an upper bound on the size of individual files; this can be useful to avoid running out of RAM during training.
         """
         
+        # Ensure that the combination of parameters provided is sufficient to perform presimulation and does not contain internal contradictions
         if total_iterations is not None and iterations_per_epoch is not None and epochs is not None:
             if iterations_per_epoch*epochs != total_iterations:
                 raise ValueError ('The product of the number of epochs and the number of iterations per epoch provided is not equal to the total number of iterations.')
-        elif iterations_per_epoch is None and total_iterations is None:
-            raise ValueError ('Missing required parameters. At least two of the following must be provided: total_iterations, iterations_per_epoch and epochs.')
-        elif total_iterations is None or iterations_per_epoch is None and epochs is None:
-            raise ValueError ('Missing required parameters. At least two of the following must be provided: total_iterations, iterations_per_epoch and epochs.')
+        else:
+            none_ctr = 0
+            for parameter in [total_iterations, iterations_per_epoch, epochs]:
+                if parameter is None:
+                    none_ctr += 1
+            if none_ctr > 1:
+                raise ValueError ('Missing required parameters. At least two of the following must be provided: total_iterations, iterations_per_epoch and epochs.')
 
         # Compute missing epochs parameter if necessary
         if epochs is None:
@@ -651,9 +729,18 @@ class GenerativeModel:
             if int(iterations_per_epoch) < total_iterations/epochs:
                 iterations_per_epoch = int(iterations_per_epoch)+1
 
+        # Ensure the folder path is interpreted as a directory and not a file
+        if folder_path[-1] != '/':
+            folder_path += '/'
+
         # Compute  the total space requirement and get a prompt from users confirming the start of the presimulation process
         required_space = total_iterations*batch_space
-        logging.warn(f"The presimulated dataset will take up {required_space} Mb of disk space.")
+        if extend_from > 0:
+            logging.info("You have chosen to extend an existing dataset.")
+            extension = 'extension'
+        else:
+            extension = ''
+        logging.warn(f"The presimulated dataset {extension} will take up {required_space} Mb of disk space.")
         user_choice = input("Are you sure you want to perform presimulation? (y/n)")
         
         if user_choice.find('y') != -1 or user_choice.find('Y') != -1:
@@ -662,6 +749,14 @@ class GenerativeModel:
             logging.info("Presimulation aborted.")
             return None
         
+        if extend_from > 0:
+            if not os.path.isdir(folder_path):
+                logging.warn(f"Cannot extend dataset in {folder_path} - folder does not exist. Creating folder and saving presimulated dataset extension inside.")
+            else:
+                already_simulated = len(os.listdir(folder_path))
+                if already_simulated != extend_from:
+                    logging.warn(f"The parameter you provided for extend_from does not match the actual number of files found in {folder_path}. File numbering may now prove erroneous.")
+            
         # Choose a number of batches per file as specified via iterations_per_epoch unless
         # the memory_limit per file forces a smaller choice, in which case the highest permissible
         # value is chosen.
@@ -672,16 +767,19 @@ class GenerativeModel:
         
         file_space = batches_per_file*batch_space
         
-        # Ensure the folder path is interpreted as a directory and not a file and create it if necessary
-        if folder_path[-1] != '/':
-            folder_path += '/'
+        # If folder_path does not exist yet, create it
         if not os.path.isdir(folder_path):
             os.mkdir(folder_path)
+        
+        # Compute as many priors as would have been computed when generating the original dataset.
+        # If a fixed random seed was used, this will move it forward, and computational cost is neglible (under 1/200000 of simulation time)
+        if extend_from > 0:
+            previous_priors = self.prior(batch_size = batch_size*iterations_per_epoch*extend_from)
 
-        # If only a single file needs to be generated, generation is rstraightforward and only requires one loop over total_iterations
+        # If only a single file needs to be generated, generation is straightforward and only requires one loop over total_iterations
         if total_iterations < batches_per_file:
             total_files = 1
-            file_counter = 1
+            file_counter = extend_from + 1
             total_space = batch_space*total_iterations
             logging.info(f"Generating a single file of size {total_space} Mb containing {total_iterations} batches")
             file_list = [{} for _ in range(total_iterations)]
@@ -706,16 +804,16 @@ class GenerativeModel:
                     .format(total_files, file_space, batches_per_file))
             
             # Generate all files but one
-            ctr = 0
+            file_counter = extend_from
             for i in range(total_files-1):
                 with tqdm(total=batches_per_file, desc=f'Batches generated for file {i+1}') as p_bar:
                     file_list = [{} for _ in range(batches_per_file)]
                     for k in range(batches_per_file):
                         file_list[k] = self.__call__(batch_size=batch_size)
                         p_bar.update(1)
-                    with open(folder_path+'presim_file_'+str(i+1)+'.pkl', 'wb+') as f:
+                    with open(folder_path+'presim_file_'+str(file_counter+1)+'.pkl', 'wb+') as f:
                         pickle.dump(file_list, f)
-                    ctr +=1
+                    file_counter +=1
 
             # Generate the final file with potentially reduced batch_size so total_iterations is met in the end.    
             missing_batches = total_iterations-((total_files-1)*batches_per_file)
@@ -724,10 +822,10 @@ class GenerativeModel:
                 for k in range(missing_batches):
                     file_list[k] = self.__call__(batch_size=batch_size)
                     p_bar.update(1)
-            with open(folder_path+'presim_file_'+str(ctr+1)+'.pkl', 'wb') as f:
+            with open(folder_path+'presim_file_'+str(file_counter+1)+'.pkl', 'wb') as f:
                 pickle.dump(file_list, f)
                 
-        logging.info(f"Presimulation complete. Generated {total_files} files.")    
+        logging.info(f"Presimulation {extension} complete. Generated {total_files} files.")    
 
 
 class MultiGenerativeModel:
