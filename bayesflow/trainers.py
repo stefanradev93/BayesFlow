@@ -191,6 +191,7 @@ class Trainer:
                     lr_adj[key] = lr_adjust_params[key]
                 self.lr_adjuster = RegressionLRAdjuster(optimizer=lr_adj['optimizer'], period=lr_adj['period'], wait_between_fits=lr_adj['wait_between_fits'], patience=lr_adj['patience'],\
                     tolerance=lr_adj['tolerance'], reduction_factor=lr_adj['reduction_factor'], cooldown_factor=lr_adj['cooldown_factor'], num_resets=lr_adj['num_resets'])
+        else:
             self.lr_adjuster = None
 
         # Perform a sanity check wiuth provided components
