@@ -31,6 +31,7 @@
 # Note: All default hyperparameters are set according to the paper.
 
 import importlib
+from functools import partial
 
 from bayesflow.forward_inference import GenerativeModel, Prior
 from bayesflow.exceptions import ConfigurationError
@@ -62,8 +63,8 @@ def get_benchmark_module(benchmark_name):
 
 
 class Benchmark:
-    """TODO"""
-    def __init__(self, benchmark_name):
+    """Interface class for a benchmark."""
+    def __init__(self, benchmark_name, mode='joint'):
 
         self.benchmark_name = benchmark_name
         self.benchmark_module = get_benchmark_module(self.benchmark_name)
@@ -77,5 +78,5 @@ class Benchmark:
             simulator_is_batched=self.benchmark_info['simulator_is_batched'],
             name=benchmark_name, 
         )
-
         self.configurator = getattr(self.benchmark_module, 'configurator')
+        self.configurator = partial(self.configurator, mode=mode)
