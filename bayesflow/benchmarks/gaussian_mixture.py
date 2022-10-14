@@ -29,7 +29,7 @@ bayesflow_benchmark_info = {
 }
 
 
-def prior(lower_bound=-10., upper_bound=10.):
+def prior(lower_bound=-10., upper_bound=10., D=2):
     """ Generates a draw from a 2-dimensional uniform prior bounded between 
     `lower_bound` and `upper_bound` representing the common mean of a 2D Gaussian
     mixture model (GMM).
@@ -40,6 +40,8 @@ def prior(lower_bound=-10., upper_bound=10.):
         The lower bound of the uniform prior.
     upper_bound : float, optional, default : 10
         The upper bound of the uniform prior.
+    D           : int, optional, default: 2
+        The dimensionality of the mixtrue model
         
     Returns
     -------
@@ -47,7 +49,7 @@ def prior(lower_bound=-10., upper_bound=10.):
         A single draw from the D-dimensional uniform prior.
     """
     
-    return np.random.default_rng().uniform(low=lower_bound, high=upper_bound)
+    return np.random.default_rng().uniform(low=lower_bound, high=upper_bound, size=D)
 
 
 def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01):
@@ -58,8 +60,8 @@ def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01):
     
     Parameters
     ----------
-    theta    : np.ndarray of shape (2,)
-        The 2-dimensional vector of parameter locations.
+    theta    : np.ndarray of shape (D,)
+        The D-dimensional vector of parameter locations.
     prob     : float, optional, default: 0.5
         The mixture probability (coefficient).
     scale_c1 : float, optional, default: 1.

@@ -74,7 +74,8 @@ class Benchmark:
                 param_names=self.benchmark_info['parameter_names']
             ),
             simulator=getattr(self.benchmark_module, 'simulator'),
-            simulator_is_batched=self.benchmark_info['simulator_is_batched']
+            simulator_is_batched=self.benchmark_info['simulator_is_batched'],
+            name=benchmark_name, 
         )
 
         self.configurator = getattr(self.benchmark_module, 'configurator')
