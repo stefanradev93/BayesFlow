@@ -296,9 +296,12 @@ def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=
     # Compute ranks (using broadcasting)    
     ranks = np.sum(post_samples < prior_samples[:, np.newaxis, :], axis=1)
 
-    # Compute confidence interval
+    # Compute confidence interval and mean
     N = int(prior_samples.shape[0])
-    endpoints = binom.interval(binomial_interval, N, 1 / (num_bins+1))
+    # uniform distribution expected -> for all bins: equal probability
+    # p = 1 / num_bins that a rank lands in that bin
+    endpoints = binom.interval(binomial_interval, N, 1 / num_bins)
+    mean = N / num_bins # corresponds to binom.mean(N, 1 / num_bins)
 
     # Plot marginal histograms in a loop
     if n_row > 1:
@@ -307,7 +310,7 @@ def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=
         ax = axarr
     for j in range(len(param_names)):
         ax[j].axhspan(endpoints[0], endpoints[1], facecolor='gray', alpha=0.3)
-        ax[j].axhline(np.mean(endpoints), color='gray', zorder=0, alpha=0.5)
+        ax[j].axhline(mean, color='gray', zorder=0, alpha=0.5)
         sns.histplot(ranks[:, j], kde=False, ax=ax[j], color=hist_color, bins=num_bins, alpha=0.95)
         ax[j].set_title(param_names[j], fontsize=title_fontsize)
         ax[j].spines['right'].set_visible(False)
