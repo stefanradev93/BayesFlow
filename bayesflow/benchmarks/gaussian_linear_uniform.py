@@ -84,9 +84,33 @@ def configurator(forward_dict, mode='posterior'):
     """ Configures simulator outputs for use in BayesFlow training."""
 
     if mode == 'posterior':
+        input_dict = _config_posterior(forward_dict)
+
+    elif mode == 'likelihood':
+        input_dict = _config_likelihood(forward_dict)
+
+    elif mode == 'joint':
         input_dict = {}
-        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
-        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
-        return input_dict
+        input_dict['posterior_inputs'] = _config_posterior(forward_dict)
+        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict)
     else:
-        raise NotImplementedError('For now, only posterior mode is available!')
+        raise NotImplementedError('For now, only a choice between ["posterior", "likelihood", "joint"] is available!')
+    return input_dict
+
+
+def _config_posterior(forward_dict):
+    """ Helepr function for posterior configuration."""
+
+    input_dict = {}
+    input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
+    return input_dict
+
+
+def _config_likelihood(forward_dict):
+    """ Helepr function for likelihood configuration."""
+
+    input_dict = {}
+    input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict['observables'] = forward_dict['sim_data'].astype(np.float32)
+    return input_dict

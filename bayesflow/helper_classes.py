@@ -34,6 +34,7 @@ from sklearn.linear_model import HuberRegressor
 
 from bayesflow.default_settings import DEFAULT_KEYS
 
+
 class SimulationDataset:
     """ Helper class to create a tensorflow Dataset which returns
     dictionaries in BayesFlow format.
