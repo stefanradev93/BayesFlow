@@ -120,6 +120,6 @@ def _config_likelihood(forward_dict, scale_data):
     """ Helper function for likelihood configuration."""
 
     input_dict = {}
-    input_dict['cobservables'] = forward_dict['sim_data'].astype(np.float32) / scale_data
     input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict['observables'] = forward_dict['sim_data'].astype(np.float32) / scale_data
     return input_dict
