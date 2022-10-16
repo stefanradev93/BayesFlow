@@ -162,7 +162,7 @@ def simulator(theta, n_obs=4, n_dist=46, dim=2, mu_scale=15., flatten=False):
     return x
 
 
-def configurator(forward_dict, mode='posterior', scale_data=50., as_summary_condition=True):
+def configurator(forward_dict, mode='posterior', scale_data=50., as_summary_condition=False):
     """ Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
@@ -176,8 +176,8 @@ def configurator(forward_dict, mode='posterior', scale_data=50., as_summary_cond
     # Case posterior and likelihood configuration
     elif mode == 'joint':
         input_dict = {}
-        input_dict['posterior_inputs'] = _config_posterior(forward_dict)
-        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict)
+        input_dict['posterior_inputs'] = _config_posterior(forward_dict, scale_data, as_summary_condition)
+        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict, scale_data)
 
     # Throw otherwise
     else:

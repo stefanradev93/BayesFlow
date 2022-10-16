@@ -87,7 +87,7 @@ def simulator(theta, T=100):
     return np.random.default_rng().binomial(n=1, p=expit(V.T @ f + beta))
 
 
-def configurator(forward_dict, mode='posterior', as_summary_condition=True):
+def configurator(forward_dict, mode='posterior', as_summary_condition=False):
     """ Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
@@ -101,7 +101,7 @@ def configurator(forward_dict, mode='posterior', as_summary_condition=True):
     # Case posterior and likelihood configuration
     elif mode == 'joint':
         input_dict = {}
-        input_dict['posterior_inputs'] = _config_posterior(forward_dict)
+        input_dict['posterior_inputs'] = _config_posterior(forward_dict, as_summary_condition)
         input_dict['likelihood_inputs'] = _config_likelihood(forward_dict)
 
     # Throw otherwise

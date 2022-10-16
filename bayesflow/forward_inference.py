@@ -632,7 +632,13 @@ class GenerativeModel:
         g.suptitle("Aggregated Measures of Simulations", fontsize=16)
         g.tight_layout()
 
-        output_dict = {'parameter_draws': parameter_draws, 'simulations': simulations, 'aggregated_data': aggregated_data, 'functions_used': funcs_list, 'function_names': funcs_labels}
+        output_dict = {
+            'parameter_draws': parameter_draws, 
+            'simulations': simulations, 
+            'aggregated_data': aggregated_data, 
+            'functions_used': funcs_list, 
+            'function_names': funcs_labels
+        }
         return output_dict
 
     def _test(self):

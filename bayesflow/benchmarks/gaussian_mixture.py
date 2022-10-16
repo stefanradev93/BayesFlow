@@ -98,8 +98,8 @@ def configurator(forward_dict, mode='posterior', scale_data=12):
     # Case posterior and likelihood configuration
     elif mode == 'joint':
         input_dict = {}
-        input_dict['posterior_inputs'] = _config_posterior(forward_dict)
-        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict)
+        input_dict['posterior_inputs'] = _config_posterior(forward_dict, scale_data)
+        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict, scale_data)
 
     # Throw otherwise
     else:
