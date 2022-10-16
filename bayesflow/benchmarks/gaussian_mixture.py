@@ -87,10 +87,39 @@ def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01):
 def configurator(forward_dict, mode='posterior', scale_data=12):
     """ Configures simulator outputs for use in BayesFlow training."""
 
+    # Case only posterior configuration
     if mode == 'posterior':
+        input_dict = _config_posterior(forward_dict, scale_data)
+
+    # Case only likelihood configuration
+    elif mode == 'likelihood':
+        input_dict = _config_likelihood(forward_dict, scale_data)
+
+    # Case posterior and likelihood configuration
+    elif mode == 'joint':
         input_dict = {}
-        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
-        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
-        return input_dict
+        input_dict['posterior_inputs'] = _config_posterior(forward_dict)
+        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict)
+
+    # Throw otherwise
     else:
-        raise NotImplementedError('For now, only posterior mode is available!')
+        raise NotImplementedError('For now, only a choice between ["posterior", "likelihood", "joint"] is available!')
+    return input_dict
+
+
+def _config_posterior(forward_dict, scale_data):
+    """ Helper function for posterior configuration."""
+
+    input_dict = {}
+    input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+    return input_dict
+
+
+def _config_likelihood(forward_dict, scale_data):
+    """ Helper function for likelihood configuration."""
+
+    input_dict = {}
+    input_dict['cobservables'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+    input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
+    return input_dict
