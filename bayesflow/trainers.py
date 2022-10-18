@@ -86,8 +86,7 @@ class Trainer:
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=3, clip_method='global_norm', 
-                 clip_value=None, skip_checks=False, memory=True, optional_stopping=False,
-                 lr_adjust_params=None, **kwargs):
+                 clip_value=None, skip_checks=False, memory=True, optional_stopping=False, **kwargs):
         """ Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
@@ -115,13 +114,19 @@ class Trainer:
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
         memory            : boolean or bayesflow.SimulationMemory
             If True, store a pre-defined amount of simulations for later use (validation, etc.). 
-            If SimulationMemory instance provided, store reference to the instance. 
+            If SimulationMemory instance provided, stores a reference to the instance. 
             Otherwise the corresponding attribute will be set to None.
         optional_stopping : boolean, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
-        lr_adjust_params  : dictionary, optional, default: None
-            A dictionary containing parameters for a RegressionLRAdjuster object (for full list of possible keys, 
-            see `RegressionLRAdjuster` class in `bayesflow.helper_classes.py`)
+        **kwargs          : dict, optional, default: {}
+            Optional keyword arguments for controling the behavior of the Trainer instance. As of now, these could be:
+
+            optimizer_kwargs         : dict
+                Keyword arguments to be passed to the optimizer instance.
+            memory_kwargs            : dict
+                Keyword arguments to be passed to the `SimulationMemory` instance, if memory=True
+            optional_stopping_kwargs : dict
+                Keyword arguments to be passed to the `RegressionLRAdjuster` instance if optional_stopping=True
         """
 
         # Set-up logging
@@ -150,14 +155,14 @@ class Trainer:
         
         # Optimizer settings
         if optimizer is None:
-            self.optimizer = Adam(learning_rate)
+            self.optimizer = Adam(learning_rate, **kwargs.pop('optimizer_kwargs', {}))
         else:
-            self.optimizer = optimizer(learning_rate)
+            self.optimizer = optimizer(learning_rate, **kwargs.pop('optimizer_kwargs', {}))
 
-        # Set-up memory classes #TODO allow for control per kwargs
+        # Set-up memory classes
         self.loss_history = LossHistory()
         if memory is True:
-            self.simulation_memory = SimulationMemory()
+            self.simulation_memory = SimulationMemory(**kwargs.pop('memory_kwargs', {}))
         elif type(memory) is SimulationMemory:
             self.simulation_memory = memory
         else:
@@ -181,12 +186,9 @@ class Trainer:
             self.manager = None
         self.checkpoint_path = checkpoint_path
 
-        # Set-up regression adjuster based on lr_adjust_params
+        # Set-up regression learning rate adjuster
         if optional_stopping:
-            if lr_adjust_params is None:
-                self.lr_adjuster = RegressionLRAdjuster(self.optimizer)
-            else: 
-                self.lr_adjuster = RegressionLRAdjuster(self.optimizer, **lr_adjust_params)
+            self.lr_adjuster = RegressionLRAdjuster(self.optimizer, **kwargs.pop('optional_stopping_kwargs', {}))
         else:
             self.lr_adjuster = None
 
