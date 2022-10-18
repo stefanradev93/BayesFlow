@@ -23,6 +23,7 @@
 import numpy as np
 from scipy.integrate import odeint
 
+
 bayesflow_benchmark_info = {
     'simulator_is_batched': False,
     'parameter_names': [r'$\beta$', r'$\gamma$'],

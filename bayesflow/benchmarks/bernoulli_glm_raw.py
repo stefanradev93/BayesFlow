@@ -23,6 +23,7 @@
 import numpy as np
 from scipy.special import expit
 
+
 bayesflow_benchmark_info = {
     'simulator_is_batched': False,
     'parameter_names': [r'$\beta$'] + [r'$f_{}$'.format(i) for i in range(1, 10)],

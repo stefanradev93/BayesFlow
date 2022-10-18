@@ -22,6 +22,7 @@
 
 import numpy as np
 
+
 bayesflow_benchmark_info = {
     'simulator_is_batched': True,
     'parameter_names': None,

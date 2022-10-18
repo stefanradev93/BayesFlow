@@ -23,6 +23,7 @@
 import numpy as np
 from scipy.stats import multivariate_t
 
+
 bayesflow_benchmark_info = {
     'simulator_is_batched': False,
     'parameter_names': [r'$\theta_{}$'.format(i) for i in range(1, 6)],

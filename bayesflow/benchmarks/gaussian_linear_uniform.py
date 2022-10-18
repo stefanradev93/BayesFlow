@@ -22,6 +22,7 @@
 
 import numpy as np
 
+
 bayesflow_benchmark_info = {
     'simulator_is_batched': True,
     'parameter_names': None,
@@ -96,7 +97,7 @@ def configurator(forward_dict, mode='posterior'):
         input_dict = {}
         input_dict['posterior_inputs'] = _config_posterior(forward_dict)
         input_dict['likelihood_inputs'] = _config_likelihood(forward_dict)
-        
+
     # Throw otherwise
     else:
         raise NotImplementedError('For now, only a choice between ["posterior", "likelihood", "joint"] is available!')
