@@ -47,14 +47,18 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
 
     https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html
 
+    Important: Posterior aggregates play no special role in Bayesian inference and should only
+    be used heuristically. For instanec, in the case of multi-modal posteriors, common point
+    estimates, such as mean, (geometric) median, or maximum a posteriori (MAP) mean nothing.
+
     Parameters
     ----------
     post_samples      : np.ndarray of shape (n_data_sets, n_post_draws, n_params)
         The posterior draws obtained from n_data_sets
     prior_samples     : np.ndarray of shape (n_data_sets, n_params)
-        The prior draws obtained for generating n_data_sets
+        The prior draws (true parameters) obtained for generating the n_data_sets
     point_agg         : callable, optional, default: np.mean
-        The function to apply to the posterior draws to get a point estimate.
+        The function to apply to the posterior draws to get a point estimate for each marginal.
     uncertainty_agg   : callable or None, optional, default: np.std
         The function to apply to the posterior draws to get an uncertainty estimate.
         If `None` provided, a simple scatter will be plotted.
