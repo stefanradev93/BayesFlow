@@ -86,7 +86,7 @@ class Trainer:
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
                  learning_rate=0.0005, checkpoint_path=None, max_to_keep=3, clip_method='global_norm', 
-                 clip_value=None, skip_checks=False, memory=True, optional_stopping=True,
+                 clip_value=None, skip_checks=False, memory=True, optional_stopping=False,
                  lr_adjust_params=None, **kwargs):
         """ Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
@@ -117,11 +117,11 @@ class Trainer:
             If True, store a pre-defined amount of simulations for later use (validation, etc.). 
             If SimulationMemory instance provided, store reference to the instance. 
             Otherwise the corresponding attribute will be set to None.
-        optional_stopping : boolean, optional, default: True
-            Whether to use optional stopping or not during training. Highly recommended.
+        optional_stopping : boolean, optional, default: False
+            Whether to use optional stopping or not during training. Could speed up training.
         lr_adjust_params   : dictionary, optional, default: None
             A dictionary containing parameters for a RegressionLRAdjuster object (for full list of possible keys, 
-            see RegressionLRAdjuster class in bayesflow.helper_classes.py)
+            see `RegressionLRAdjuster` class in `bayesflow.helper_classes.py`)
         """
 
         # Set-up logging
