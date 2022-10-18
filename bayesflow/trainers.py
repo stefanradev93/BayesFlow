@@ -34,7 +34,7 @@ from tensorflow.keras.optimizers import Adam
 
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
-from bayesflow.helper_functions import apply_gradients, format_loss_string, generate_lr_adjustment_dict
+from bayesflow.helper_functions import apply_gradients, format_loss_string
 from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, RegressionLRAdjuster
 from bayesflow.default_settings import STRING_CONFIGS, DEFAULT_KEYS
 from bayesflow.amortized_inference import AmortizedLikelihood, AmortizedPosterior, JointAmortizer, ModelComparisonAmortizer
@@ -100,7 +100,7 @@ class Trainer:
         configurator      : callable 
             A callable object transforming and combining the outputs of the generative model into inputs for BayesFlow
         optimizer         : tf.keras.optimizer.Optimizer or None
-            Optimizer for the neural network. ``None`` will result in `tf.keras.optimizers.Adam`
+            Optimizer for the neural network. `None` will result in `tf.keras.optimizers.Adam`
         learning_rate     : float or tf.keras.schedules.LearningRateSchedule
             The learning rate used for the optimizer
         checkpoint_path   : string, optional
@@ -119,7 +119,7 @@ class Trainer:
             Otherwise the corresponding attribute will be set to None.
         optional_stopping : boolean, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
-        lr_adjust_params   : dictionary, optional, default: None
+        lr_adjust_params  : dictionary, optional, default: None
             A dictionary containing parameters for a RegressionLRAdjuster object (for full list of possible keys, 
             see `RegressionLRAdjuster` class in `bayesflow.helper_classes.py`)
         """
@@ -186,11 +186,7 @@ class Trainer:
             if lr_adjust_params is None:
                 self.lr_adjuster = RegressionLRAdjuster(self.optimizer)
             else: 
-                lr_adj = generate_lr_adjustment_dict(self.optimizer)
-                for key in lr_adjust_params.keys():
-                    lr_adj[key] = lr_adjust_params[key]
-                self.lr_adjuster = RegressionLRAdjuster(optimizer=lr_adj['optimizer'], period=lr_adj['period'], wait_between_fits=lr_adj['wait_between_fits'], patience=lr_adj['patience'],\
-                    tolerance=lr_adj['tolerance'], reduction_factor=lr_adj['reduction_factor'], cooldown_factor=lr_adj['cooldown_factor'], num_resets=lr_adj['num_resets'])
+                self.lr_adjuster = RegressionLRAdjuster(self.optimizer, **lr_adjust_params)
         else:
             self.lr_adjuster = None
 
