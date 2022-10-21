@@ -30,7 +30,7 @@ import seaborn as sns
 import logging
 logging.basicConfig()
 
-from bayesflow.computational_utilities import expected_calibration_error
+from bayesflow.computational_utilities import expected_calibration_error, simultaneous_ecdf_bands
 from bayesflow.helper_classes import LossHistory
 
 
@@ -154,8 +154,8 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     return f
 
 
-def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_sim=10000, 
-                  label_fontsize=14, legend_fontsize=14, rank_ecdf_color='#a34f4f'):
+def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), label_fontsize=14, legend_fontsize=14, 
+                  rank_ecdf_color='#a34f4f', fill_color='grey', **kwargs):
     """ Creates the empirical CDFs for each marginal rank distribution and plots it against
     a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform. Inspired by:
 
@@ -172,24 +172,25 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_s
         The prior draws obtained for generating n_data_sets
     fig_size          : tuple, optional, default: (12, 8)
         The figure size passed to the matplotlib constructor. Inferred if None.
-    alpha             : float in (0, 1), optional, default: 0.99
-        The width of the confidence interval for the uniform ECDF
-    n_sim             : int, optional, default: 10000
-        The number of uniform ECDFs to generate for determining the confidence bands.
     label_fontsize    : int, optional, default: 14
         The font size of the y-label and y-label texts
     legend_fontsize   : int, optional, default: 14
         The font size of the legend text
     rank_ecdf_color   : str, optional, default: '#a34f4f'
         The color to use for the rank ECDFs
+    fill_color        : str, optional, default: 'grey'
+        The color of the fill arguments.
+    **kwargs          : dict, optional, default: {}
+        Keyword arguments can be passed to control the behavior of ECDF simultaneous band computation
+        through the `ecdf_bands_kwargs` dictionary. See `simultaneous_ecdf_bands` for keyword arguments
 
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
     """
     
-    # Compute ranks (using broadcasting)    
-    ranks = np.sum(post_samples < prior_samples[:, np.newaxis, :], axis=1)
+    # Compute fractional ranks (using broadcasting)    
+    ranks = np.sum(post_samples < prior_samples[:, np.newaxis, :], axis=1) / post_samples.shape[1]
     
     # Prepare figure
     f, ax = plt.subplots(1, 1, figsize=fig_size)
@@ -205,25 +206,19 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_s
             ax.plot(xx, yy, color=rank_ecdf_color, alpha=0.95)
     
     # Plot uniform ECDF and bands
-    n_samples = post_samples.shape[1]
-    x = np.random.randint(1, n_samples+1, size=(n_sim, n_samples))
-    xx = np.sort(x, axis=-1)
-    yy = np.arange(1, xx.shape[-1]+1)/float(xx.shape[-1])
-    qs = np.quantile(xx, [(1 - alpha) / 2, alpha + (1 - alpha) / 2], axis=0)
-    ax.plot(xx.mean(0), yy, color='black', linestyle='dashed', label='Uniform Rank ECDF (Ideal)')
-    ax.fill_betweenx(yy, qs[1], qs[0], color='gray', alpha=0.2, label=f'{int(alpha * 100)}%-CI (Ideal)')
-    ax.plot(qs[0], yy, color='black', alpha=0.3)
-    ax.plot(qs[1], yy, color='black', alpha=0.3)
+    alpha, z, L, H = simultaneous_ecdf_bands(post_samples.shape[1], **kwargs.pop('ecdf_bands_kwargs', {}))
+    ax.fill_between(z, L, H, color=fill_color, alpha=0.2, label=f'{int(alpha * 100)}% Confidence Bands')
+    ax.plot(z, L, color='black', alpha=0.3)
+    ax.plot(z, H, color='black', alpha=0.3)
     
     # Prettify plot
     sns.despine(ax=ax)
-    ax.grid(alpha=0.4)
+    ax.grid(alpha=0.35)
     ax.legend(fontsize=legend_fontsize)
     ax.set_xlabel('Rank statistic', fontsize=label_fontsize)
     ax.set_ylabel('ECDF', fontsize=label_fontsize)
     
     f.tight_layout()
-    
     return f
 
 

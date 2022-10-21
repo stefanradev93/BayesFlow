@@ -20,6 +20,7 @@
 
 import tensorflow as tf
 import numpy as np
+from scipy import stats
 from sklearn.calibration import calibration_curve
 
 from bayesflow.default_settings import MMD_BANDWIDTH_LIST
@@ -204,4 +205,79 @@ def maximum_mean_discrepancy(source_samples, target_samples, kernel, mmd_weight=
     loss_value = mmd_weight * tf.maximum(minimum, loss_value)
     return loss_value
 
+
+def get_coverage_probs(z, u):
+    """ Vectorized function to compute the minimal coverage probability for uniform
+    ECDFs given evaluation points z and a sample of samples u.
+    
+    Parameters
+    ----------
+    z  : np.ndarray of shape (num_points, )
+        The vector of evaluation points.
+    u  : np.ndarray of shape (num_simulations, num_samples)
+        The matrix of simulated draws (samples) from U(0, 1)
+    """
+    
+    N = u.shape[1]
+    F_m = np.sum((z[:, np.newaxis] >= u[:, np.newaxis, :] ), axis=-1) / u.shape[1]
+    bin1 = stats.binom(N, z).cdf(N*F_m)
+    bin2 = stats.binom(N, z).cdf(N*F_m - 1)
+    gamma = 2*np.min(np.min(np.stack([bin1, 1 - bin2], axis=-1), axis=-1), axis=-1)
+    return gamma
+
+
+def simultaneous_ecdf_bands(num_samples, num_points=None, num_simulations=1000, 
+                            alpha=0.05, eps=1e-5, max_num_points=1000):
+    """ Computes the simultaneous ECDF bands through simulation according to
+    the algorithm described in Section 2.2:
+    
+    https://link.springer.com/content/pdf/10.1007/s11222-022-10090-6.pdf
+    
+    Depends on the vectorized utility function `get_coverage_probs(z, u)`.
+
+    Parameters
+    ----------
+    num_samples     : int
+        The sample size used for computing the ECDF. Will equal to the number of posterior
+        samples when used for calibrarion. Corresponds to `N` in the paper above.
+    num_points      : int, optional, default: None
+        The number of evaluation points on the interval (0, 1). Defaults to `num_points = num_samples` if 
+        not explicitly specified. Correspond to `K` in the paper above.
+    num_simulations : int, optional, default: 1000
+        The number of samples of size `n_samples` to simulate for determining the simultaneous CIs.
+    alpha           : float in (0, 1), optional, default: 0.05
+        The confidence level, 1 - `alpha` specifies the width of the confidence interval.
+    eps             : float, optional, default: 1e-5
+        Small number to add to the lower and subtract from the upper bound of the interval [0, 1]
+        to avoid edge artefacts. No need to touch this.
+    max_num_points  : int, optional, default: 1000
+        Upper bound on `num_points`. Saves computation time when `num_samples` is large.
+    Returns
+    -------
+    (alpha, z, L, U) - tuple of scalar and three arrays of size (num_samples,) containing the confidence level as well as
+                       the evaluation points, the lower, and the upper confidence bands, respectively.
+    """
+    
+    # Use shorter var names throughout
+    N = num_samples
+    if num_points is None:
+        K = min(N, max_num_points)
+    else:
+        K = min(num_points, max_num_points)
+    M = num_simulations
+    
+    # Specify evaluation points
+    z = np.linspace(0+eps, 1-eps, K)
+    
+    # Simulate M samples of size N
+    u = np.random.uniform(size=(M, N))
+    
+    # Compute minimal coverage probabilities
+    gammas = get_coverage_probs(z, u)
+    
+    # Use insights from paper to compute lower and upper confidence interval
+    gamma = np.percentile(gammas, 100*alpha)
+    L = stats.binom(N, z).ppf(gamma / 2) / N
+    U = stats.binom(N, z).ppf(1 - gamma / 2) / N
+    return alpha, z, L, U
 
