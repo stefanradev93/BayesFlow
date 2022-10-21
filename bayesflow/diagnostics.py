@@ -155,7 +155,7 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
 
 
 def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_sim=10000, 
-              label_fontsize=14, rank_ecdf_color='#a34f4f'):
+                  label_fontsize=14, legend_fontsize=14, rank_ecdf_color='#a34f4f'):
     """ Creates the empirical CDFs for each marginal rank distribution and plots it against
     a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform. Inspired by:
 
@@ -177,9 +177,9 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_s
     n_sim             : int, optional, default: 10000
         The number of uniform ECDFs to generate for determining the confidence bands.
     label_fontsize    : int, optional, default: 14
-        The font size of the y-label text
-    title_fontsize    : int, optional, default: 16
-        The font size of the title text
+        The font size of the y-label and y-label texts
+    legend_fontsize   : int, optional, default: 14
+        The font size of the legend text
     rank_ecdf_color   : str, optional, default: '#a34f4f'
         The color to use for the rank ECDFs
 
@@ -218,7 +218,7 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_s
     # Prettify plot
     sns.despine(ax=ax)
     ax.grid(alpha=0.4)
-    ax.legend(fontsize=label_fontsize)
+    ax.legend(fontsize=legend_fontsize)
     ax.set_xlabel('Rank statistic', fontsize=label_fontsize)
     ax.set_ylabel('ECDF', fontsize=label_fontsize)
     
