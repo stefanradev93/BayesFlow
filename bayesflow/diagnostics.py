@@ -154,8 +154,8 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     return f
 
 
-def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), label_fontsize=14, legend_fontsize=14, 
-                  rank_ecdf_color='#a34f4f', fill_color='grey', **kwargs):
+def plot_sbc_ecdf(post_samples, prior_samples, difference=False, fig_size=(10, 6), label_fontsize=14, 
+                  legend_fontsize=14, rank_ecdf_color='#a34f4f', fill_color='grey', **kwargs):
     """ Creates the empirical CDFs for each marginal rank distribution and plots it against
     a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform. Inspired by:
 
@@ -170,6 +170,8 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), label_fontsize=
         The posterior draws obtained from n_data_sets
     prior_samples     : np.ndarray of shape (n_data_sets, n_params)
         The prior draws obtained for generating n_data_sets
+    difference        : boolean, optional, default: False
+        If `True`, plots the ECDF difference. Enables a more dynamic visualization range.
     fig_size          : tuple, optional, default: (12, 8)
         The figure size passed to the matplotlib constructor. Inferred if None.
     label_fontsize    : int, optional, default: 14
@@ -200,6 +202,10 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), label_fontsize=
         ecdf_single = np.sort(ranks[:, j])
         xx = ecdf_single
         yy = np.arange(1, xx.shape[-1]+1)/float(xx.shape[-1])
+
+        # Difference, if specified
+        if difference:
+            yy -= xx
         if j == 0:
             ax.plot(xx, yy, color=rank_ecdf_color, alpha=0.95, label='Rank ECDFs')
         else:
@@ -207,6 +213,11 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), label_fontsize=
     
     # Plot uniform ECDF and bands
     alpha, z, L, H = simultaneous_ecdf_bands(post_samples.shape[1], **kwargs.pop('ecdf_bands_kwargs', {}))
+
+    # Difference, if specified
+    if difference:
+        L -= z
+        H -= z
     ax.fill_between(z, L, H, color=fill_color, alpha=0.2, label=f'{int((1-alpha) * 100)}% Confidence Bands')
     ax.plot(z, L, color='black', alpha=0.3)
     ax.plot(z, H, color='black', alpha=0.3)
@@ -216,7 +227,11 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), label_fontsize=
     ax.grid(alpha=0.35)
     ax.legend(fontsize=legend_fontsize)
     ax.set_xlabel('Fractional rank statistic', fontsize=label_fontsize)
-    ax.set_ylabel('ECDF', fontsize=label_fontsize)
+    if difference:
+        ylab = 'ECDF difference'
+    else:
+        ylab = 'ECDF'
+    ax.set_ylabel(ylab, fontsize=label_fontsize)
     
     f.tight_layout()
     return f
