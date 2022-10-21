@@ -207,7 +207,7 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), label_fontsize=
     
     # Plot uniform ECDF and bands
     alpha, z, L, H = simultaneous_ecdf_bands(post_samples.shape[1], **kwargs.pop('ecdf_bands_kwargs', {}))
-    ax.fill_between(z, L, H, color=fill_color, alpha=0.2, label=f'{int(alpha * 100)}% Confidence Bands')
+    ax.fill_between(z, L, H, color=fill_color, alpha=0.2, label=f'{int((1-alpha) * 100)}% Confidence Bands')
     ax.plot(z, L, color='black', alpha=0.3)
     ax.plot(z, H, color='black', alpha=0.3)
     
