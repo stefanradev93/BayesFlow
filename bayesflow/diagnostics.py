@@ -215,7 +215,7 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), label_fontsize=
     sns.despine(ax=ax)
     ax.grid(alpha=0.35)
     ax.legend(fontsize=legend_fontsize)
-    ax.set_xlabel('Rank statistic', fontsize=label_fontsize)
+    ax.set_xlabel('Fractional rank statistic', fontsize=label_fontsize)
     ax.set_ylabel('ECDF', fontsize=label_fontsize)
     
     f.tight_layout()
