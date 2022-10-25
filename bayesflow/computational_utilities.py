@@ -227,7 +227,7 @@ def get_coverage_probs(z, u):
 
 
 def simultaneous_ecdf_bands(num_samples, num_points=None, num_simulations=1000, 
-                            alpha=0.05, eps=1e-5, max_num_points=1000):
+                            confidence=0.95, eps=1e-5, max_num_points=1000):
     """ Computes the simultaneous ECDF bands through simulation according to
     the algorithm described in Section 2.2:
     
@@ -245,8 +245,8 @@ def simultaneous_ecdf_bands(num_samples, num_points=None, num_simulations=1000,
         not explicitly specified. Correspond to `K` in the paper above.
     num_simulations : int, optional, default: 1000
         The number of samples of size `n_samples` to simulate for determining the simultaneous CIs.
-    alpha           : float in (0, 1), optional, default: 0.05
-        The confidence level, 1 - `alpha` specifies the width of the confidence interval.
+    confidence      : float in (0, 1), optional, default: 0.95
+        The confidence level, `confidence = 1 - alpha` specifies the width of the confidence interval.
     eps             : float, optional, default: 1e-5
         Small number to add to the lower and subtract from the upper bound of the interval [0, 1]
         to avoid edge artefacts. No need to touch this.
@@ -271,6 +271,9 @@ def simultaneous_ecdf_bands(num_samples, num_points=None, num_simulations=1000,
     
     # Simulate M samples of size N
     u = np.random.uniform(size=(M, N))
+    
+    # Get alpha
+    alpha = 1 - confidence
     
     # Compute minimal coverage probabilities
     gammas = get_coverage_probs(z, u)
