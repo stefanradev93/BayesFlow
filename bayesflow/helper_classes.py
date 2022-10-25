@@ -313,11 +313,14 @@ class LossHistory:
         # Assume equal lengths per epoch and run
         try:
             losses_list = [pd.melt(pd.DataFrame.from_dict(self.history[r], orient='index').T) for r in self.history]
-            losses_df = pd.DataFrame(pd.concat(losses_list, axis=0).value.to_list())
-            losses_df.columns = self.loss_names
-            return losses_df.copy()
-        # Handle unequal lengths
-        except ValueError:
+            losses_list = pd.concat(losses_list, axis=0).value.to_list()
+            losses_list = [l for l in losses_list if l is not None]
+            losses_df = pd.DataFrame(losses_list, columns=self.loss_names)
+            return losses_df
+        # Handle unequal lengths or problems when user kills training with an interrupt
+        except ValueError as ve:
+            return self.history
+        except TypeError as te:
             return self.history
 
     def flush(self):

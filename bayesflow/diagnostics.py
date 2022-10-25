@@ -212,7 +212,7 @@ def plot_sbc_ecdf(post_samples, prior_samples, difference=False, fig_size=(10, 6
             ax.plot(xx, yy, color=rank_ecdf_color, alpha=0.95)
     
     # Plot uniform ECDF and bands
-    alpha, z, L, H = simultaneous_ecdf_bands(post_samples.shape[1], **kwargs.pop('ecdf_bands_kwargs', {}))
+    alpha, z, L, H = simultaneous_ecdf_bands(post_samples.shape[0], **kwargs.pop('ecdf_bands_kwargs', {}))
 
     # Difference, if specified
     if difference:
