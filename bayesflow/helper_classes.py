@@ -88,8 +88,8 @@ class SimulationDataset:
 class RegressionLRAdjuster:
     """This class will compute the slope of the loss trajectory and inform learning rate decay."""
     
-    def __init__(self, optimizer, period=150, wait_between_fits=10, patience=10, tolerance=-0.1, 
-                 reduction_factor=0.25, cooldown_factor=4, num_resets=3, **kwargs):
+    def __init__(self, optimizer, period=1000, wait_between_fits=10, patience=10, tolerance=-0.05, 
+                 reduction_factor=0.25, cooldown_factor=2, num_resets=3, **kwargs):
         """ Creates an instance with given hyperparameters which will track the slope of the 
         loss trajectory according to specified hyperparameters and then issue an optional
         stopping suggestion.
@@ -99,20 +99,20 @@ class RegressionLRAdjuster:
 
         optimizer         : tf.keras.optimizers.Optimizer instance
             An optimizer implementing a lr() method
-        period            : int, optional, default: 150
+        period            : int, optional, default: 1000
             How much loss values to consider from the past
         wait_between_fits : int, optional, default: 10
             How many backpropagation updates to wait between two successive fits
         patience          : int, optional, default: 10
             How many successive times the tolerance value is reached before lr update.
-        tolerance         : float, optional, default: -0.1
+        tolerance         : float, optional, default: -0.05
             The minimum slope to be considered substantial for training.
         reduction_factor  : float in [0, 1], optional, default: 0.25
             The factor by which the learning rate is reduced upon hitting the `tolerance`
             threshold for `patience` number of times
-        cooldown_factor   : float, optional, default: 4
+        cooldown_factor   : float, optional, default: 2
             The factor by which the `period` is multiplied to arrive at a cooldown period.
-        num_resets        : int, optional, default: 4
+        num_resets        : int, optional, default: 3
             How many times to reduce the learning rate before issuing an optional stopping
         **kwargs          : dict, optional, default {}
             Additional keyword arguments passed to the `HuberRegression` class.
