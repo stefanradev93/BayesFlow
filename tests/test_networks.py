@@ -1,8 +1,5 @@
 import unittest
-
 import numpy as np
-
-from bayesflow.networks import ConditionalCouplingLayer, DenseCouplingNet
 
 
 class TestDenseCouplingBlock(unittest.TestCase):
