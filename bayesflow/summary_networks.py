@@ -235,48 +235,55 @@ class MultiConvNetwork(tf.keras.Model):
 
 
 class SplitNetwork(tf.keras.Model):
-    """Implements a vertical stack of networks and concatenates outputs. Allows for splitting
-    of data to provide an individual network for each split.
+    """Implements a vertical stack of networks and concatenates their individual outputs. Allows for splitting
+    of data to provide an individual network for each split of the data.
     """
 
-    def __init__(self, num_splits, split_data_configurator, network_type=InvariantNetwork, meta={}):
-        """ Create a network of `num_splits` networks of type `network_type`, each with configuration
+    def __init__(self, num_splits, split_data_configurator, network_type=InvariantNetwork, meta={}, **kwargs):
+        """ Creates a composite network of `num_splits` sub-networks of type `network_type`, each with configuration
         specified by `meta`.
+
         Parameters
         ----------
-        num_splits : int
-            Number of networks
+        num_splits              : int
+            The number if splits for the data, which will equal the number of sub-networks.
         split_data_configurator : callable
-            Function that takes the arguments `i`, `x` where `i` is the index of the network
-            and `x` are the inputs to the `SplitNetwork`.
-            Should return the input for the corresponding network.
-        network_type : class
-            Type of Network to use
-            default: InvariantNetwork
-        meta : dict
+            Function that takes the arguments `i` and `x` where `i` is the index of the network
+            and `x` are the inputs to the `SplitNetwork`. Should return the input for the corresponding network.
+            
+            For example, to achieve a network with is permutation-invariant both vertically (i.e., across rows)
+            and horizontally (i.e., across columns), one could to:
+            `def config(i, x):
+            TODO
+            `
+        network_type            : callable, optional, default: `InvariantNetowk`
+            Type of neural network to use.
+        meta                    : dict, optional, default: {}
             A dictionary containing the configuration for the networks.
+        **kwargs
+            Optional keyword arguments to be passed to the `tf.keras.Model` superclass.
         """
-        super(SplitNetwork, self).__init__()
-        self.networks = []
+
+        super(SplitNetwork, self).__init__(**kwargs)
+
         self.num_splits = num_splits
         self.split_data_configurator = split_data_configurator
-        for i in range(num_splits):
-            self.networks.append(network_type(meta))
-
+        self.networks = [network_type(meta) for _ in range(num_splits)]
 
     def call(self, x):
-        """ Performs the forward pass
+        """ Performs the forward pass through the networks.
+
         Parameters
         ----------
         x : tf.Tensor
             Input of shape (batch_size, n_obs, data_dim)
+
         Returns
         -------
         out : tf.Tensor
             Output of shape (batch_size, out_dim)
         """
-        out = []
-        for i in range(self.num_splits):
-            out.append(self.networks[i](self.split_data_configurator(i, x)))
 
-        return tf.concat(out, axis = -1)
+        out = [self.networks[i](self.split_data_configurator(i, x)) for i in range(self.num_splits)]
+        out = tf.concat(out, axis = -1)
+        return out
