@@ -111,7 +111,7 @@ def prior(lower_bound=-3., upper_bound=3.):
     return np.random.default_rng().uniform(low=lower_bound, high=upper_bound, size=5)
 
 
-def simulator(theta, n_obs=4, n_dist=46, dim=2, mu_scale=15., flatten=False):
+def simulator(theta, n_obs=4, n_dist=46, dim=2, mu_scale=15., flatten=True):
     """ Implements data generation from the SLCP model with distractors designed as a benchmark
     for a simple likelihood and a complex posterior due to non-linear pushforward theta -> x.
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.4
@@ -129,7 +129,7 @@ def simulator(theta, n_obs=4, n_dist=46, dim=2, mu_scale=15., flatten=False):
     mu_scale     : float, optional, default: 15
         The scale of the zero-centered Gaussian prior from which the mean vector 
         of each student-t distribution in the mixture is drawn. 
-    flatten : bool, optional, default: False
+    flatten : bool, optional, default: True
         A flag to indicate whather a 1D (`flatten=True`) or a 2D (`flatten=False`)
         representation of the simulated data is returned.
     
