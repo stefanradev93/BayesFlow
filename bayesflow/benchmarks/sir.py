@@ -109,7 +109,7 @@ def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000)
     if subsample is not None:
         irt = irt[::(T // subsample)]
 
-    # Truncate irt, so that small underflow below zero
+    # Truncate irt, so that small underflow below zero becomes zero
     irt = np.maximum(irt, 0.)
     
     # Add noise, scale and return
