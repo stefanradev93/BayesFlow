@@ -27,11 +27,9 @@ Currently, the following training approaches are implemented:
 
 ## Parameter Estimation
 
-The BayesFlow approach for parameter estimation incorporates a *summary network* and an *inference network* which are jointly optimized to invert a complex computational model (simulator). The summary network is responsible for learning the most informative data representations (i.e., summary statistics) in an end-to-end manner. The inference network is responsible for learning an invertible mapping between the posterior and an easy-to-sample-from latent space (e.g., Gaussian) for *any* possible observation or set of observations arising from the simulator. The BayesFlow method for amortized parameter estimation is based on our paper:
+The BayesFlow approach for amortized parameter estimation is based on our paper:
 
-Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. <em>IEEE Transactions on Neural Networks and Learning Systems</em>, available for free at: https://arxiv.org/abs/2003.06281
-
-The general pattern for building amortized posterior approximators is illsutrated below:
+Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. <em>IEEE Transactions on Neural Networks and Learning Systems</em>, available for free at: https://arxiv.org/abs/2003.06281. The general pattern for building amortized posterior approximators is illsutrated below:
 
 ![BayesFlow](https://github.com/stefanradev93/BayesFlow/blob/Future/docs/source/tutorial_notebooks/img/trainer_connection.png?raw=true)
 
