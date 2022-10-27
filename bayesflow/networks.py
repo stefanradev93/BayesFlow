@@ -18,12 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from warnings import warn
-
+"""Meta-module for easy access of different neural network architectures."""
 from bayesflow.inference_networks import InvertibleNetwork, EvidentialNetwork
 from bayesflow.summary_networks import InvariantNetwork, MultiConvNetwork
-
-warn(
-    "The module networks.py will be deprecated. Import from summary_networks.py and inference_networks.py instead.", 
-    DeprecationWarning, stacklevel=2
-)
