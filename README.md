@@ -37,10 +37,8 @@ Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). Baye
 
 For instance, in order to tackle a simple memoryless model with 10 free parameters, we first need to set up an optional summary network and an inference network:
 ```python
-# Use default settings
 summary_net = InvariantNetwork()
 inference_net = InvertibleNetwork({'n_params': 10})
-# Connect summary and inference network
 amortizer = AmortizedPosterior(inference_net, summary_net)
 ```
 Next, we define a generative model which connects a *prior* (a function returning random draws from the prior distribution over parameters) with a *simulator* (a function accepting the prior draws as arguments) and returning a simulated data set with *n_obs* potentially multivariate observations.
@@ -49,7 +47,6 @@ generative_model = GenerativeModel(prior, simulator)
 ```
 Finally, we connect the networks with the generative model via a trainer instance:
 ```python
-# Using default settings
 trainer = Trainer(
     network=amortizer, 
     generative_model=generative_model
