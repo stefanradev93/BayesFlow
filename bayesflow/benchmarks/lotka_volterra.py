@@ -57,7 +57,7 @@ def _deriv(x, t, alpha, beta, gamma, delta):
     return dX, dY 
 
 
-def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=False):
+def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True):
     """ Runs a Lotka-Volterra simulation for T time steps and returns `subsample` evenly spaced
     points from the simulated trajectory, given contact parameters `theta`.
 
@@ -76,7 +76,7 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=False):
     subsample   : int or None, optional, default: 10
         The number of evenly spaced time points to return. If None,
         no subsampling will be performed and all T timepoints will be returned.
-    flatten     : bool, optional, default: False 
+    flatten     : bool, optional, default: True
         A flag to indicate whather a 1D (`flatten=True`) or a 2D (`flatten=False`)
         representation of the simulated data is returned.
 

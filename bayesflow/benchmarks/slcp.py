@@ -51,7 +51,7 @@ def prior(lower_bound=-3., upper_bound=3.):
     return np.random.default_rng().uniform(low=lower_bound, high=upper_bound, size=5)
 
 
-def simulator(theta, n_obs=4, flatten=False):
+def simulator(theta, n_obs=4, flatten=True):
     """ Implements data generation from the SLCP model designed as a benchmark
     for a simple likelihood and a complex posterior due to non-linear pushforward theta -> x.
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.3
@@ -62,7 +62,7 @@ def simulator(theta, n_obs=4, flatten=False):
         The location parameters of the Gaussian likelihood.
     n_obs   : int, optional, default: 4
         The number of observations to generate from the slcp likelihood.
-    flatten : bool, optional, default: False
+    flatten : bool, optional, default: True
         A flag to indicate whather a 1D (`flatten=True`) or a 2D (`flatten=False`)
         representation of the simulated data is returned.
     

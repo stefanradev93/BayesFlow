@@ -37,16 +37,16 @@ from bayesflow.forward_inference import GenerativeModel, Prior
 from bayesflow.exceptions import ConfigurationError
 
 available_benchmarks = [
-    "bernoulli_glm",
-    "bernoulli_glm_raw",
-    "gaussian_linear",
-    "gaussian_linear_uniform",
-    "gaussian_mixture",
-    "lotka_volterra",
-    "sir",
-    "slcp",
-    "slcp_distractors",
-    "two_moons"
+    'gaussian_linear',
+    'gaussian_linear_uniform',
+    'slcp',
+    'slcp_distractors',
+    'bernoulli_glm',
+    'bernoulli_glm_raw',
+    'gaussian_mixture',
+    'two_moons',
+    'sir',
+    'lotka_volterra'
 ]
 
 
