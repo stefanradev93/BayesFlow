@@ -204,6 +204,7 @@ class SplitNetwork(tf.keras.Model):
         split_data_configurator : callable
             Function that takes the arguments `i`, `x` where `i` is the index of the network
             and `x` are the inputs to the `SplitNetwork`.
+            Should return the input for the corresponding network.
         network_type : class
             Type of Network to use
             default: InvariantNetwork
