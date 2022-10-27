@@ -38,7 +38,7 @@ class AmortizedPosterior(tf.keras.Model):
 
     But also allowing for augmented functionality, such as model misspecification detection in summary space:
 
-    Schmitt, M., Bürkner, P. C., Köthe, U., & Radev, S. T. (2021).
+    Schmitt, M., Bürkner, P. C., Köthe, U., & Radev, S. T. (2022).
     Detecting Model Misspecification in Amortized Bayesian Inference with Neural Networks
     arXiv preprint arXiv:2112.08866.
 
@@ -483,7 +483,7 @@ class AmortizedLikelihood(tf.keras.Model):
 
 
 class JointAmortizer(tf.keras.Model):
-    """ An interface for jointly learning a surrogate model of the simulator and an approximate
+    """An interface for jointly learning a surrogate model of the simulator and an approximate
     posterior given a generative model.
     """
 
@@ -663,7 +663,7 @@ class JointAmortizer(tf.keras.Model):
 
 
 class ModelComparisonAmortizer(tf.keras.Model):
-    """ An interface to connect an evidential network for Bayesian model comparison with an optional summary network,
+    """An interface to connect an evidential network for Bayesian model comparison with an optional summary network,
     as described in the original paper on evidential neural networks for model comparison:
 
     Radev, S. T., D'Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., & Bürkner, P. C. (2021). 
@@ -828,7 +828,7 @@ class ModelComparisonAmortizer(tf.keras.Model):
         return u
 
     def _compute_summary_condition(self, summary_conditions, direct_conditions, **kwargs):
-        """ Determines how to concatenate the provided conditions."""
+        """Determines how to concatenate the provided conditions."""
 
         # Compute learnable summaries, if given
         if self.summary_net is not None:
