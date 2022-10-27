@@ -233,3 +233,50 @@ class MultiConvNetwork(tf.keras.Model):
         out = self.lstm(out, **kwargs)
         return out
 
+
+class SplitNetwork(tf.keras.Model):
+    """Implements a vertical stack of networks and concatenates outputs. Allows for splitting
+    of data to provide an individual network for each split.
+    """
+
+    def __init__(self, num_splits, split_data_configurator, network_type=InvariantNetwork, meta={}):
+        """ Create a network of `num_splits` networks of type `network_type`, each with configuration
+        specified by `meta`.
+        Parameters
+        ----------
+        num_splits : int
+            Number of networks
+        split_data_configurator : callable
+            Function that takes the arguments `i`, `x` where `i` is the index of the network
+            and `x` are the inputs to the `SplitNetwork`.
+            Should return the input for the corresponding network.
+        network_type : class
+            Type of Network to use
+            default: InvariantNetwork
+        meta : dict
+            A dictionary containing the configuration for the networks.
+        """
+        super(SplitNetwork, self).__init__()
+        self.networks = []
+        self.num_splits = num_splits
+        self.split_data_configurator = split_data_configurator
+        for i in range(num_splits):
+            self.networks.append(network_type(meta))
+
+
+    def call(self, x):
+        """ Performs the forward pass
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, n_obs, data_dim)
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, out_dim)
+        """
+        out = []
+        for i in range(self.num_splits):
+            out.append(self.networks[i](self.split_data_configurator(i, x)))
+
+        return tf.concat(out, axis = -1)
