@@ -22,10 +22,14 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import pickle
 import os
 import glob
 import re
+
+try:
+    import cPickle as pickle
+except:
+    import pickle
 
 import logging
 logging.basicConfig()
@@ -339,31 +343,30 @@ class LossHistory:
         """Saves a LossHistory object to a pickled dictionary in file_path.
          If max_to_keep saved loss history files are found in file_path, the oldest is deleted before a new one is saved.
          """
-
-        original_dir = os.getcwd()
-        os.chdir(file_path)
         
-        full_history_dict = deepcopy(self.history)
+        # Increment history index
+        self.latest += 1
+        
+        # Path to history
+        history_path = os.path.join(file_path, f'history_{self.latest}.pkl')
+        
+        # Prepare full history dict 
+        full_history_dict = self.get_copy()
         full_history_dict['loss_names'] = self.loss_names
         full_history_dict['_current_run'] = self._current_run
         full_history_dict['_total_loss'] = self._total_loss
         
-        self.latest += 1
-
-        with open('history_' + str(self.latest) +'.pkl', 'wb') as f:
+        # Pickle current
+        with open(history_path, 'wb') as f:
             pickle.dump(full_history_dict, f)
         
-        list_of_history_checkpoints = glob.glob('*history*')
-
-        if len(list_of_history_checkpoints) > max_to_keep:
-            # Determine the oldest saved loss history and remove it
-            current_nr = 10**10
-            for _, hist_ckpt in enumerate(list_of_history_checkpoints):
-                new_nr = int(re.search(r'history_(.*)\.pkl', hist_ckpt).group(1))
-                if new_nr < current_nr:
-                    current_nr = new_nr
-            os.remove('history_'+str(current_nr)+'.pkl')
-        os.chdir(original_dir)
+        # Get list of history checkpoints
+        history_checkpoints_list = [l for l in os.listdir(file_path) if 'history' in l]
+            
+        # Determine the oldest saved loss history and remove it
+        if len(history_checkpoints_list) > max_to_keep:
+            oldest_history_path = os.path.join(file_path, f'history_{self.latest-max_to_keep}.pkl')
+            os.remove(oldest_history_path)
             
     def load_from_file(self, file_path):
         """Loads the most recent saved LossHistory object from file_path."""
@@ -372,31 +375,36 @@ class LossHistory:
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
 
-        original_dir = os.getcwd()
+        # Get list of histories
         if os.path.exists(file_path):
-            os.chdir(file_path)
-            list_of_history_checkpoints = glob.glob('*history*')
+            history_checkpoints_list = [l for l in os.listdir(file_path) if 'history' in l]
         else:
-            list_of_history_checkpoints = []
+            history_checkpoints_list = []
         
-        if len(list_of_history_checkpoints) > 0:
-            current_nr = 0
+        # Case history list is not empty
+        if len(history_checkpoints_list) > 0:
+            
             # Determine which file contains the latest LossHistory and load it
-            for i, hist_ckpt in enumerate(list_of_history_checkpoints):
-                new_nr = int(re.search(r'history_(.*)\.pkl', hist_ckpt).group(1))
-                if new_nr > current_nr:
-                    current_nr = new_nr
-            with open('history_' + str(current_nr) +'.pkl', 'rb') as f:
+            file_numbers = [int(re.findall(r'\d+', h)[0]) for h in history_checkpoints_list]
+            latest_file = history_checkpoints_list[np.argmax(file_numbers)]
+            latest_number = np.max(file_numbers)
+            latest_path = os.path.join(file_path, latest_file)
+            
+            # Load dictionary
+            with open(latest_path, 'rb') as f:
                 full_history_dict = pickle.load(f)
-            self.latest = current_nr
+                
+            # Fill entries
+            self.latest = latest_number
             self._total_loss = full_history_dict['_total_loss']
             self._current_run = full_history_dict['_current_run']
             self.loss_names = full_history_dict['loss_names']
-            for key in ['_total_loss', '_current_run', 'loss_names']:
-                del full_history_dict[key]
-            self.history = full_history_dict
-            logger.info("Loaded loss history from {}".format(file_path+'/history_' + str(current_nr) +'.pkl'))
-            os.chdir(original_dir)
+            self.history = {k:v for k, v in full_history_dict.items() if k not in ['_total_loss', '_current_run', 'loss_names']}
+            
+            # Verbose
+            logger.info(f"Loaded loss history from {latest_path}")
+
+        # Case history list is empty
         else:
             logger.info("Initialized empty loss history.")
 
