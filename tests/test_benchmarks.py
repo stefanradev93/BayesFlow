@@ -18,8 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from matplotlib.style import available
-
 import copy
 import numpy as np
 import tensorflow as tf
