@@ -23,7 +23,6 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import os
-import glob
 import re
 
 try:
@@ -75,7 +74,7 @@ class SimulationDataset:
         return slices, keys_used, keys_none, n_sim
     
     def __call__(self, batch_in):
-        """ Convert output of tensorflow.Dataset to dict.
+        """ Convert output of tensorflow.data.Dataset to dict.
         """
         
         forward_dict = {}
@@ -243,6 +242,9 @@ class RegressionLRAdjuster:
 class LossHistory:
     """ Helper class to keep track of losses during training.
     """
+
+    file_name = 'history'
+
     def __init__(self):
         self.history = {}
         self.loss_names = []
@@ -348,7 +350,7 @@ class LossHistory:
         self.latest += 1
         
         # Path to history
-        history_path = os.path.join(file_path, f'history_{self.latest}.pkl')
+        history_path = os.path.join(file_path, f'{LossHistory.file_name}_{self.latest}.pkl')
         
         # Prepare full history dict 
         full_history_dict = self.get_copy()
@@ -377,7 +379,7 @@ class LossHistory:
 
         # Get list of histories
         if os.path.exists(file_path):
-            history_checkpoints_list = [l for l in os.listdir(file_path) if 'history' in l]
+            history_checkpoints_list = [l for l in os.listdir(file_path) if LossHistory.file_name in l]
         else:
             history_checkpoints_list = []
         
@@ -410,9 +412,10 @@ class LossHistory:
 
 
 class SimulationMemory:
-    """ 
-    Helper class to keep track of a pre-determined number of simulations during training.
+    """Helper class to keep track of a pre-determined number of simulations during training.
     """
+
+    file_name = 'memory'
 
     def __init__(self, stores_raw=True, capacity_in_batches=50):
         self.stores_raw = stores_raw
@@ -420,7 +423,6 @@ class SimulationMemory:
         self._buffer = [None] * self._capacity
         self._idx = 0
         self.size_in_batches = 0
-        self.latest = 0
 
     def store(self, forward_dict):
         """ Stores simulation outputs, if internal buffer is not full.
@@ -441,19 +443,21 @@ class SimulationMemory:
         return deepcopy(self._buffer)
 
     def is_full(self):
-        """ Returns True if the buffer is full, otherwis False."""
+        """ Returns True if the buffer is full, otherwise False."""
 
         if self._idx >= self._capacity:
             return True
         return False
     
     def save_to_file(self, file_path, max_to_keep):
-        """Saves a SimulationMemory object to a pickled dictionary in file_path.
+        """Saves a `SimulationMemory` object to a pickled dictionary in file_path.
         If max_to_keep saved simulation memory files are found in file_path, the oldest is deleted before a new one is saved.
         """
-        original_dir = os.getcwd()
-        os.chdir(file_path)
+
+        # Create path to memory
+        memory_path = os.path.join(file_path, f'{SimulationMemory.file_name}.pkl')
         
+        # Prepare attributes
         full_memory_dict = {}
         full_memory_dict['stores_raw'] = self.stores_raw
         full_memory_dict['_capacity'] = self._capacity
@@ -461,23 +465,10 @@ class SimulationMemory:
         full_memory_dict['_idx'] = self._idx
         full_memory_dict['_size_in_batches'] = self.size_in_batches
         
-        self.latest += 1
-
-        with open('memory_' + str(self.latest) +'.pkl', 'wb') as f:
+        # Dump as pickle object
+        with open(memory_path, 'wb') as f:
             pickle.dump(full_memory_dict, f)
-        
-        list_of_memory_checkpoints = glob.glob('*memory*')
 
-        if len(list_of_memory_checkpoints) > max_to_keep:
-            # Determine the oldest saved simulation memory and remove it
-            current_nr = 10**10
-            for _, mem_ckpt in enumerate(list_of_memory_checkpoints):
-                new_nr = int(re.search(r'memory_(.*)\.pkl', mem_ckpt).group(1))
-                if new_nr < current_nr:
-                    current_nr = new_nr
-            os.remove('memory_'+str(current_nr)+'.pkl')
-        os.chdir(original_dir)
-            
     def load_from_file(self, file_path):
         """Loads the most recent saved SimulationMemory object from file_path."""
 
@@ -485,30 +476,24 @@ class SimulationMemory:
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
 
-        original_dir = os.getcwd()
+        # Create path to memory
+        memory_path = os.path.join(file_path, f'{SimulationMemory.file_name}.pkl')
+
+        # Case memory file exists
         if os.path.exists(file_path):
-            os.chdir(file_path)
-            list_of_memory_checkpoints = glob.glob('*memory*')
-        else:
-            list_of_memory_checkpoints = []
-        
-        if len(list_of_memory_checkpoints) > 0:
-            # Determine which file contains the latest LossHistory and load it
-            current_nr = 0
-            for _, hist_ckpt in enumerate(list_of_memory_checkpoints):
-                new_nr = int(re.search(r'memory_(.*)\.pkl', hist_ckpt).group(1))
-                if new_nr > current_nr:
-                    current_nr = new_nr
-            with open('memory_' + str(current_nr) +'.pkl', 'rb') as f:
+
+            # Load pickle and fill in attributes
+            with open(memory_path, 'wb') as f:
                 full_memory_dict = pickle.load(f)
-            self.latest = current_nr
+
             self.stores_raw = full_memory_dict['stores_raw']
             self._capacity = full_memory_dict['_capacity']
             self._buffer = full_memory_dict['_buffer']
             self._idx = full_memory_dict['_idx']
             self.size_in_batches = full_memory_dict['_size_in_batches']
-            logger.info("Loaded simulation memory from {}".format(file_path+'/memory_' + str(current_nr) +'.pkl'))
-            os.chdir(original_dir)
+            logger.info(f"Loaded simulation memory from {memory_path}")
+
+        # Case memory file does not exist
         else:
             logger.info("Initialized empty simulation memory.")
 
