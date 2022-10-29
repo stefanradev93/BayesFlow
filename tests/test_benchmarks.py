@@ -28,6 +28,7 @@ from bayesflow import benchmarks
 from bayesflow.trainers import Trainer
 from bayesflow.networks import InvertibleNetwork
 from bayesflow.amortized_inference import AmortizedPosterior, AmortizedLikelihood, JointAmortizer
+
 from assets.benchmark_netwotk_architectures import NETWORK_SETTINGS
 
 
@@ -86,5 +87,3 @@ def test_posterior(benchmark_name, mode):
     # Test whether weights change
     for before, after in zip(trainable_variables_pre, trainable_variables_post):
         assert np.any(before != after)
-
-        
