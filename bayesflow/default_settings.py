@@ -63,6 +63,26 @@ DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
     mandatory_fields=[]
 )
 
+DEFAULT_SETTING_MULTI_CONV_NET = MetaDictSetting(
+    meta_dict={
+        'conv_args'     : {
+            'layer_args': {
+                'activation': 'relu',
+                'filters': 32,
+                'strides': 1,
+                'padding': 'causal'
+            },
+            'min_kernel_size': 1,
+            'max_kernel_size': 3
+        },
+        'n_conv_layers' : 2,
+        'lstm_args'     : {
+            'units': 64
+        },
+        'summary_dim'   : 10
+    }
+)
+
 DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
     meta_dict={
         't_args': {

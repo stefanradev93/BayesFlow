@@ -106,8 +106,8 @@ class InvariantNetwork(tf.keras.Model):
     """Implements an invariant network with keras.
     """
 
-    def __init__(self, meta={}):
-        super(InvariantNetwork, self).__init__()
+    def __init__(self, meta={}, **kwargs):
+        super(InvariantNetwork, self).__init__(**kwargs)
 
         meta = build_meta_dict(user_dict=meta,
                                default_setting=default_settings.DEFAULT_SETTING_INVARIANT_NET)
@@ -115,6 +115,7 @@ class InvariantNetwork(tf.keras.Model):
         self.equiv_seq = Sequential([EquivariantModule(meta) for _ in range(meta['n_equiv'])])
         self.inv = InvariantModule(meta)
         self.out_layer = Dense(meta['summary_dim'], activation='linear')
+        self.summary_dim = meta['summary_dim']
     
     def call(self, x):
         """ Performs the forward pass of a learnable deep invariant transformation consisting of
@@ -162,7 +163,7 @@ class MultiConv1D(tf.keras.Model):
         ]
 
         # Create final Conv1D layer for dimensionalitiy reduction
-        dim_red_args = {k : v for k, v in meta.items() if k not in ['kernel_size', 'strides']}
+        dim_red_args = {k : v for k, v in meta['layer_args'].items() if k not in ['kernel_size', 'strides']}
         dim_red_args['kernel_size'] = 1
         dim_red_args['strides'] = 1
         self.dim_red = Conv1D(**dim_red_args)
@@ -194,7 +195,7 @@ class MultiConvNetwork(tf.keras.Model):
     https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472
     """
 
-    def __init__(self, meta, **kwargs):
+    def __init__(self, meta={}, **kwargs):
         """ Creates a stack of inception-like layers followed by an LSTM network, with the idea
         of learning vector representations from multivariate time series data.
 
@@ -206,13 +207,18 @@ class MultiConvNetwork(tf.keras.Model):
 
         super(MultiConvNetwork, self).__init__(**kwargs)
         
+        meta = build_meta_dict(user_dict=meta,
+                        default_setting=default_settings.DEFAULT_SETTING_MULTI_CONV_NET)
+
         self.net = Sequential([
             MultiConv1D(meta['conv_args'])
             for _ in range(meta['n_conv_layers'])
         ])
         
         self.lstm = LSTM(**meta['lstm_args'])
-        
+        self.out_layer = Dense(meta['summary_dim'], activation='linear')
+        self.summary_dim = meta['summary_dim']
+
     def call(self, x, **kwargs):
         """Performs a forward pass through the network by first passing
         x through the sequence of multi-convolutional layers and then applying 
@@ -226,11 +232,12 @@ class MultiConvNetwork(tf.keras.Model):
         Returns
         -------
         out : tf.Tensor
-            Output of shape (batch_size, hidden_units)
+            Output of shape (batch_size, summary_dim)
         """
         
         out = self.net(x, **kwargs)
         out = self.lstm(out, **kwargs)
+        out = self.out_layer(out, **kwargs)
         return out
 
 
