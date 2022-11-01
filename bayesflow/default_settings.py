@@ -80,7 +80,8 @@ DEFAULT_SETTING_MULTI_CONV_NET = MetaDictSetting(
             'units': 64
         },
         'summary_dim'   : 10
-    }
+    },
+    mandatory_fields=[]
 )
 
 DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
