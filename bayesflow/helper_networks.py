@@ -162,50 +162,6 @@ class ActNorm(tf.keras.Model):
         else:
             self._initalize_parameters_data_dependent(meta['act_norm_init'])
 
-    def _initalize_parameters_data_dependent(self, init_data):
-        """Performs a data dependent initalization of the scale and bias.
-        
-        Initalizes the scale and bias vector as proposed by [1], such that the 
-        layer output has a mean of zero and a standard deviation of one.
-
-        Parameters
-        ----------
-        init_data    : tf.Tensor
-            of shape (batch size, number of parameters) to initialize
-            the scale bias parameter by computing the mean and standard
-            deviation along the first dimension of the Tensor.
-        
-        Returns
-        -------
-        (scale, bias) : tuple(tf.Tensor, tf.Tensor)
-            scale and bias vector of shape (1, n_params).
-        
-        [1] - Salimans, Tim, and Durk P. Kingma. 
-              "Weight normalization: A simple reparameterization to accelerate 
-               training of deep neural networks." 
-              Advances in neural information processing systems 29 
-              (2016): 901-909.
-        """
-        
-        # 2D Tensor case, assume first batch dimension
-        if len(init_data.shape) == 2:
-            mean = tf.math.reduce_mean(init_data, axis=0) 
-            std  = tf.math.reduce_std(init_data,  axis=0)
-        # 3D Tensor case, assume first batch dimension, second number of observations dimension
-        elif len(init_data.shape) == 3:
-            mean = tf.math.reduce_mean(init_data, axis=(0, 1)) 
-            std  = tf.math.reduce_std(init_data,  axis=(0, 1))
-        # Raise other cases
-        else:
-            raise ConfigurationError("""Currently, ActNorm supports only 2D and 3D Tensors, 
-                                     but act_norm_init contains data with shape.""".format(init_data.shape))
-
-        scale = 1.0 / std
-        bias  = (-1.0 * mean) / std
-        
-        self.scale = tf.Variable(scale, trainable=True, name='act_norm_scale')
-        self.bias  = tf.Variable(bias, trainable=True, name='act_norm_bias')
-
     def call(self, target, inverse=False):
         """Performs one pass through the actnorm layer (either inverse or forward) and normalizes
         the last axis of `target`.
@@ -249,9 +205,47 @@ class ActNorm(tf.keras.Model):
 
         return (target - self.bias) / self.scale
 
+    def _initalize_parameters_data_dependent(self, init_data):
+        """Performs a data dependent initalization of the scale and bias.
+        
+        Initalizes the scale and bias vector as proposed by [1], such that the 
+        layer output has a mean of zero and a standard deviation of one.
+
+        [1] - Salimans, Tim, and Durk P. Kingma. 
+        "Weight normalization: A simple reparameterization to accelerate 
+        training of deep neural networks." 
+        Advances in neural information processing systems 29 
+        (2016): 901-909.
+
+        Parameters
+        ----------
+        init_data    : tf.Tensor of shape (batch size, number of parameters) 
+            Initiall values to estimate the scale and bias parameters by computing 
+            the mean and standard deviation along the first dimension of `init_data`.
+        """
+        
+        # 2D Tensor case, assume first batch dimension
+        if len(init_data.shape) == 2:
+            mean = tf.math.reduce_mean(init_data, axis=0) 
+            std  = tf.math.reduce_std(init_data,  axis=0)
+        # 3D Tensor case, assume first batch dimension, second number of observations dimension
+        elif len(init_data.shape) == 3:
+            mean = tf.math.reduce_mean(init_data, axis=(0, 1)) 
+            std  = tf.math.reduce_std(init_data,  axis=(0, 1))
+        # Raise other cases
+        else:
+            raise ConfigurationError("""Currently, ActNorm supports only 2D and 3D Tensors, 
+                                     but act_norm_init contains data with shape.""".format(init_data.shape))
+
+        scale = 1.0 / std
+        bias  = (-1.0 * mean) / std
+        
+        self.scale = tf.Variable(scale, trainable=True, name='act_norm_scale')
+        self.bias  = tf.Variable(bias, trainable=True, name='act_norm_bias')
+
 
 class DenseCouplingNet(tf.keras.Model):
-    """Implements a conditional version of a satndard fully connected (FC) network.
+    """Implements a conditional version of a standard fully connected (FC) network.
     Would also work as an unconditional estimator."""
 
     def __init__(self, meta, n_out, **kwargs):
