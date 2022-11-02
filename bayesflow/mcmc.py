@@ -42,7 +42,7 @@ class MCMCSurrogateLikelihood:
         configurator               : callable, optional, default: None
             A function that takes the input to the `log_likelihood` and `log_likelihood_grad`
             calls and converts them to a dictionary containing the following mandatory keys,
-            if DEFAULT_KEYS unchanged: 
+            if DEFAULT_KEYS unchanged:
                 `observables` - the variables over which a condition density is learned (i.e., the observables)
                 `conditions`  - the conditioning variables that the directly passed to the inference network
             default: Return the first parameter - has to be a dicitionary with the mentioned characteristics
@@ -83,11 +83,16 @@ class MCMCSurrogateLikelihood:
         
         Parameters
         ----------
-        #TODO
-
+        The parameters as expected by `configurator`. For the default configurator,
+        the first parameter has to be a dictionary containing the following mandatory keys,
+        if DEFAULT_KEYS unchanged:
+            `observables` - the variables over which a condition density is learned (i.e., the observables)
+            `conditions`  - the conditioning variables that the directly passed to the inference network
         Returns
         -------
-        #TODO
+        out :
+            The output as returned by `likelihood_postprocessor`. For the default postprocessor,
+            this is the total log-likelihood given by the sum of all log-likelihood values.
         """
 
         input_dict = self.configurator(*args, **kwargs)
@@ -98,14 +103,20 @@ class MCMCSurrogateLikelihood:
     def log_likelihood_grad(self, *args, **kwargs):
         """ Calculates the gradient of the surrogate likelihood with respect to 
         every parameter in `conditions`.
-        
+
         Parameters
         ----------
-        #TODO
-
+        The parameters as expected by `configurator`. For the default configurator,
+        the first parameter has to be a dictionary containing the following mandatory keys,
+        if DEFAULT_KEYS unchanged: 
+            `observables` - the variables over which a condition density is learned (i.e., the observables)
+            `conditions`  - the conditioning variables that the directly passed to the inference network
         Returns
         -------
-        #TODO
+        out :
+            The output as returned by `grad_postprocessor`. For the default postprocessor,
+            this is an array containing the derivative with respect to each value in `conditions`
+            as returned by `configurator`.
         """
 
         input_dict = self.configurator(*args, **kwargs)
@@ -129,7 +140,7 @@ class MCMCSurrogateLikelihood:
 
         Returns
         -------
-        #TODO
+        out : tf.Tensor
         """
 
         with tf.GradientTape() as t:
