@@ -22,6 +22,7 @@
 
 import numpy as np
 
+
 bayesflow_benchmark_info = {
     'simulator_is_batched': False,
     'parameter_names': [r'$\theta_1$', r'$\theta_2$'],
@@ -84,10 +85,39 @@ def simulator(theta):
 def configurator(forward_dict, mode='posterior'):
     """ Configures simulator outputs for use in BayesFlow training."""
 
+    # Case only posterior configuration
     if mode == 'posterior':
+        input_dict = _config_posterior(forward_dict)
+
+    # Case only plikelihood configuration
+    elif mode == 'likelihood':
+        input_dict = _config_likelihood(forward_dict)
+
+    # Case posterior and likelihood configuration (i.e., joint inference)
+    elif mode == 'joint':
         input_dict = {}
-        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
-        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
-        return input_dict
+        input_dict['posterior_inputs'] = _config_posterior(forward_dict)
+        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict)
+
+    # Throw otherwise
     else:
-        raise NotImplementedError('For now, only posterior mode is available!')
+        raise NotImplementedError('For now, only a choice between ["posterior", "likelihood", "joint"] is available!')
+    return input_dict
+
+
+def _config_posterior(forward_dict):
+    """ Helper function for posterior configuration."""
+
+    input_dict = {}
+    input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
+    return input_dict
+
+
+def _config_likelihood(forward_dict):
+    """ Helper function for likelihood configuration."""
+
+    input_dict = {}
+    input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict['observables'] = forward_dict['sim_data'].astype(np.float32)
+    return input_dict

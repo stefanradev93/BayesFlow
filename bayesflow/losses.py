@@ -24,7 +24,7 @@ from bayesflow.computational_utilities import maximum_mean_discrepancy
 
 
 def kl_latent_space_gaussian(z, log_det_J):
-    """ Computes the Kullback-Leibler divergence between true and approximate
+    """Computes the Kullback-Leibler divergence between true and approximate
     posterior assuming a Gaussian latent space as a source distribution.
 
     Parameters
@@ -51,7 +51,7 @@ def kl_latent_space_gaussian(z, log_det_J):
 
 
 def kl_latent_space_student(v, z, log_det_J):
-    """ Computes the Kullback-Leibler divergence between true and approximate
+    """Computes the Kullback-Leibler divergence between true and approximate
     posterior assuming latent student t-distribution as a source distribution.
 
     Parameters
@@ -81,7 +81,7 @@ def kl_latent_space_student(v, z, log_det_J):
 
 
 def kl_dirichlet(model_indices, alpha):
-    """ Computes the KL divergence between a Dirichlet distribution with parameter vector alpha and a uniform Dirichlet.
+    """Computes the KL divergence between a Dirichlet distribution with parameter vector alpha and a uniform Dirichlet.
 
     Parameters
     ----------
@@ -114,7 +114,7 @@ def kl_dirichlet(model_indices, alpha):
 
 
 def mmd_summary_space(summary_outputs, z_dist=tf.random.normal, kernel='gaussian'):
-    """ Computes the MMD(p(summary_otuputs) | z_dist) to re-shape the summary network outputs in
+    """Computes the MMD(p(summary_otuputs) | z_dist) to re-shape the summary network outputs in
     an information-preserving manner.
 
     Parameters
@@ -133,7 +133,7 @@ def mmd_summary_space(summary_outputs, z_dist=tf.random.normal, kernel='gaussian
 
 
 def log_loss(model_indices, alpha):
-    """ Computes the logloss given output probs and true model indices m_true.
+    """Computes the logloss given output probs and true model indices m_true.
 
     Parameters
     ----------

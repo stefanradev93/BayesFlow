@@ -22,6 +22,7 @@
 
 import numpy as np
 
+
 bayesflow_benchmark_info = {
     'simulator_is_batched': False,
     'parameter_names': [r'$\mu_1$', r'$\mu_2$'],
@@ -29,7 +30,7 @@ bayesflow_benchmark_info = {
 }
 
 
-def prior(lower_bound=-10., upper_bound=10.):
+def prior(lower_bound=-10., upper_bound=10., D=2):
     """ Generates a draw from a 2-dimensional uniform prior bounded between 
     `lower_bound` and `upper_bound` representing the common mean of a 2D Gaussian
     mixture model (GMM).
@@ -40,6 +41,8 @@ def prior(lower_bound=-10., upper_bound=10.):
         The lower bound of the uniform prior.
     upper_bound : float, optional, default : 10
         The upper bound of the uniform prior.
+    D           : int, optional, default: 2
+        The dimensionality of the mixtrue model
         
     Returns
     -------
@@ -47,7 +50,7 @@ def prior(lower_bound=-10., upper_bound=10.):
         A single draw from the D-dimensional uniform prior.
     """
     
-    return np.random.default_rng().uniform(low=lower_bound, high=upper_bound)
+    return np.random.default_rng().uniform(low=lower_bound, high=upper_bound, size=D)
 
 
 def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01):
@@ -58,8 +61,8 @@ def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01):
     
     Parameters
     ----------
-    theta    : np.ndarray of shape (2,)
-        The 2-dimensional vector of parameter locations.
+    theta    : np.ndarray of shape (D,)
+        The D-dimensional vector of parameter locations.
     prob     : float, optional, default: 0.5
         The mixture probability (coefficient).
     scale_c1 : float, optional, default: 1.
@@ -85,10 +88,39 @@ def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01):
 def configurator(forward_dict, mode='posterior', scale_data=12):
     """ Configures simulator outputs for use in BayesFlow training."""
 
+    # Case only posterior configuration
     if mode == 'posterior':
+        input_dict = _config_posterior(forward_dict, scale_data)
+
+    # Case only likelihood configuration
+    elif mode == 'likelihood':
+        input_dict = _config_likelihood(forward_dict, scale_data)
+
+    # Case posterior and likelihood configuration
+    elif mode == 'joint':
         input_dict = {}
-        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
-        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
-        return input_dict
+        input_dict['posterior_inputs'] = _config_posterior(forward_dict, scale_data)
+        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict, scale_data)
+
+    # Throw otherwise
     else:
-        raise NotImplementedError('For now, only posterior mode is available!')
+        raise NotImplementedError('For now, only a choice between ["posterior", "likelihood", "joint"] is available!')
+    return input_dict
+
+
+def _config_posterior(forward_dict, scale_data):
+    """ Helper function for posterior configuration."""
+
+    input_dict = {}
+    input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+    return input_dict
+
+
+def _config_likelihood(forward_dict, scale_data):
+    """ Helper function for likelihood configuration."""
+
+    input_dict = {}
+    input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict['observables'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+    return input_dict

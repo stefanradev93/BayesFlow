@@ -22,7 +22,6 @@ from scipy.stats import binom
 from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-import sys
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -30,8 +29,9 @@ import seaborn as sns
 import logging
 logging.basicConfig()
 
-from bayesflow.computational_utilities import expected_calibration_error
+from bayesflow.computational_utilities import expected_calibration_error, simultaneous_ecdf_bands
 from bayesflow.helper_classes import LossHistory
+from bayesflow.helper_functions import check_posterior_prior_shapes
 
 
 def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_agg=np.std, 
@@ -47,14 +47,18 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
 
     https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html
 
+    Important: Posterior aggregates play no special role in Bayesian inference and should only
+    be used heuristically. For instanec, in the case of multi-modal posteriors, common point
+    estimates, such as mean, (geometric) median, or maximum a posteriori (MAP) mean nothing.
+
     Parameters
     ----------
     post_samples      : np.ndarray of shape (n_data_sets, n_post_draws, n_params)
         The posterior draws obtained from n_data_sets
     prior_samples     : np.ndarray of shape (n_data_sets, n_params)
-        The prior draws obtained for generating n_data_sets
+        The prior draws (true parameters) obtained for generating the n_data_sets
     point_agg         : callable, optional, default: np.mean
-        The function to apply to the posterior draws to get a point estimate.
+        The function to apply to the posterior draws to get a point estimate for each marginal.
     uncertainty_agg   : callable or None, optional, default: np.std
         The function to apply to the posterior draws to get an uncertainty estimate.
         If `None` provided, a simple scatter will be plotted.
@@ -78,7 +82,15 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
+
+    Raises
+    ------
+    ShapeError 
+        If there is a deviation form the expected shapes of `post_samples` and `prior_samples`.
     """
+
+    # Sanity check
+    check_posterior_prior_shapes(post_samples, prior_samples)
     
     # Compute point estimates and uncertainties
     est = point_agg(post_samples, axis=1)
@@ -150,8 +162,9 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     return f
 
 
-def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_sim=10000, 
-              label_fontsize=14, rank_ecdf_color='#a34f4f'):
+def plot_sbc_ecdf(post_samples, prior_samples, difference=False, stacked=False, fig_size=None, 
+                  param_names=None, label_fontsize=14, legend_fontsize=14, title_fontsize=16, 
+                  rank_ecdf_color='#a34f4f', fill_color='grey', **kwargs):
     """ Creates the empirical CDFs for each marginal rank distribution and plots it against
     a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform. Inspired by:
 
@@ -166,60 +179,120 @@ def plot_sbc_ecdf(post_samples, prior_samples, fig_size=(10, 6), alpha=0.99, n_s
         The posterior draws obtained from n_data_sets
     prior_samples     : np.ndarray of shape (n_data_sets, n_params)
         The prior draws obtained for generating n_data_sets
-    fig_size          : tuple, optional, default: (12, 8)
+    difference        : boolean, optional, default: False
+        If `True`, plots the ECDF difference. Enables a more dynamic visualization range.
+    stacked           : boolean, optional, default: False
+        If `True`, all ECDFs will be plotted on the same plot. If `False`, each ECDF will
+        have its own subplot, similar to the behavior of `plot_sbc_histograms`.
+    param_names       : list or None, optional, default: None
+        The parameter names for nice plot titles. Inferred if None. Only relevant if `stacked=False`.
+    fig_size          : tuple or None, optional, default: None
         The figure size passed to the matplotlib constructor. Inferred if None.
-    alpha             : float in (0, 1), optional, default: 0.99
-        The width of the confidence interval for the uniform ECDF
-    n_sim             : int, optional, default: 10000
-        The number of uniform ECDFs to generate for determining the confidence bands.
     label_fontsize    : int, optional, default: 14
-        The font size of the y-label text
+        The font size of the y-label and y-label texts
+    legend_fontsize   : int, optional, default: 14
+        The font size of the legend text
     title_fontsize    : int, optional, default: 16
-        The font size of the title text
+        The font size of the title text. Only relevant if `stacked=False`
     rank_ecdf_color   : str, optional, default: '#a34f4f'
         The color to use for the rank ECDFs
+    fill_color        : str, optional, default: 'grey'
+        The color of the fill arguments.
+    **kwargs          : dict, optional, default: {}
+        Keyword arguments can be passed to control the behavior of ECDF simultaneous band computation
+        through the `ecdf_bands_kwargs` dictionary. See `simultaneous_ecdf_bands` for keyword arguments
 
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
+
+    Raises
+    ------
+    ShapeError 
+        If there is a deviation form the expected shapes of `post_samples` and `prior_samples`.
     """
+
+    # Sanity checks
+    check_posterior_prior_shapes(post_samples, prior_samples)
+
+    # Store reference to number of parameters
+    n_params = post_samples.shape[-1]
     
-    # Compute ranks (using broadcasting)    
-    ranks = np.sum(post_samples < prior_samples[:, np.newaxis, :], axis=1)
+    # Compute fractional ranks (using broadcasting)    
+    ranks = np.sum(post_samples < prior_samples[:, np.newaxis, :], axis=1) / post_samples.shape[1]
     
     # Prepare figure
-    f, ax = plt.subplots(1, 1, figsize=fig_size)
+    if stacked:
+        f, ax = plt.subplots(1, 1, figsize=fig_size)
+    else:
+        # Determine n_subplots dynamically
+        n_row = int(np.ceil(n_params / 6))
+        n_col = int(np.ceil(n_params / n_row))
+
+        # Determine fig_size dynamically, if None
+        if fig_size is None:
+            fig_size = (int(5*n_col), int(5*n_row))
+        
+        # Initialize figure
+        f, ax = plt.subplots(n_row, n_col, figsize=fig_size)
     
     # Plot individual ecdf of parameters
     for j in range(ranks.shape[-1]):
+        
         ecdf_single = np.sort(ranks[:, j])
         xx = ecdf_single
         yy = np.arange(1, xx.shape[-1]+1)/float(xx.shape[-1])
-        if j == 0:
-            ax.plot(xx, yy, color=rank_ecdf_color, alpha=0.95, label='Rank ECDFs')
+
+        # Difference, if specified
+        if difference:
+            yy -= xx
+        
+        if stacked:
+            if j == 0:
+                ax.plot(xx, yy, color=rank_ecdf_color, alpha=0.95, label='Rank ECDFs')
+            else:
+                ax.plot(xx, yy, color=rank_ecdf_color, alpha=0.95)
+        else: 
+            ax.flat[j].plot(xx, yy, color=rank_ecdf_color, alpha=0.95, label='Rank ECDF')
+       
+    # Compute uniform ECDF and bands
+    alpha, z, L, H = simultaneous_ecdf_bands(post_samples.shape[0], **kwargs.pop('ecdf_bands_kwargs', {}))
+
+    # Difference, if specified
+    if difference:
+        L -= z
+        H -= z
+
+    # Add simultaneous bounds
+    if stacked:
+        titles = [None]
+        axes = [ax]
+
+    else:
+        axes = ax.flat
+        if param_names is None:
+            titles = [f'p_{i}' for i in range(1, n_params+1)]
         else:
-            ax.plot(xx, yy, color=rank_ecdf_color, alpha=0.95)
-    
-    # Plot uniform ECDF and bands
-    n_samples = post_samples.shape[1]
-    x = np.random.randint(1, n_samples+1, size=(n_sim, n_samples))
-    xx = np.sort(x, axis=-1)
-    yy = np.arange(1, xx.shape[-1]+1)/float(xx.shape[-1])
-    qs = np.quantile(xx, [(1 - alpha) / 2, alpha + (1 - alpha) / 2], axis=0)
-    ax.plot(xx.mean(0), yy, color='black', linestyle='dashed', label='Uniform Rank ECDF (Ideal)')
-    ax.fill_betweenx(yy, qs[1], qs[0], color='gray', alpha=0.2, label=f'{int(alpha * 100)}%-CI (Ideal)')
-    ax.plot(qs[0], yy, color='black', alpha=0.3)
-    ax.plot(qs[1], yy, color='black', alpha=0.3)
-    
-    # Prettify plot
-    sns.despine(ax=ax)
-    ax.grid(alpha=0.4)
-    ax.legend(fontsize=label_fontsize)
-    ax.set_xlabel('Rank statistic', fontsize=label_fontsize)
-    ax.set_ylabel('ECDF', fontsize=label_fontsize)
-    
+            titles = param_names
+
+    for _ax, title in zip(axes, titles):
+        _ax.fill_between(z, L, H, color=fill_color, alpha=0.2, label=f'{int((1-alpha) * 100)}% Confidence Bands')
+        _ax.plot(z, L, color='black', alpha=0.3)
+        _ax.plot(z, H, color='black', alpha=0.3)
+        
+        # Prettify plot
+        sns.despine(ax=_ax)
+        _ax.grid(alpha=0.35)
+        _ax.legend(fontsize=legend_fontsize)
+        _ax.set_xlabel('Fractional rank statistic', fontsize=label_fontsize)
+        if difference:
+            ylab = 'ECDF difference'
+        else:
+            ylab = 'ECDF'
+        _ax.set_ylabel(ylab, fontsize=label_fontsize)
+        _ax.set_title(title, fontsize=title_fontsize)
+
     f.tight_layout()
-    
     return f
 
 
@@ -259,7 +332,15 @@ def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
+
+    Raises
+    ------
+    ShapeError 
+        If there is a deviation form the expected shapes of `post_samples` and `prior_samples`.
     """
+
+    # Sanity check
+    check_posterior_prior_shapes(post_samples, prior_samples)
 
     # Determine the ratio of simulations to prior draws
     n_sim, n_draws, n_params = post_samples.shape
@@ -290,15 +371,18 @@ def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=
     
     # Initialize figure
     if fig_size is None:
-        fig_size = (20, int(4 * n_row))
+        fig_size = (int(5 * n_col), int(5 * n_row))
     f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
 
     # Compute ranks (using broadcasting)    
     ranks = np.sum(post_samples < prior_samples[:, np.newaxis, :], axis=1)
 
-    # Compute confidence interval
+    # Compute confidence interval and mean
     N = int(prior_samples.shape[0])
-    endpoints = binom.interval(binomial_interval, N, 1 / (num_bins+1))
+    # uniform distribution expected -> for all bins: equal probability
+    # p = 1 / num_bins that a rank lands in that bin
+    endpoints = binom.interval(binomial_interval, N, 1 / num_bins)
+    mean = N / num_bins # corresponds to binom.mean(N, 1 / num_bins)
 
     # Plot marginal histograms in a loop
     if n_row > 1:
@@ -307,7 +391,7 @@ def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=
         ax = axarr
     for j in range(len(param_names)):
         ax[j].axhspan(endpoints[0], endpoints[1], facecolor='gray', alpha=0.3)
-        ax[j].axhline(np.mean(endpoints), color='gray', zorder=0, alpha=0.5)
+        ax[j].axhline(mean, color='gray', zorder=0, alpha=0.5)
         sns.histplot(ranks[:, j], kde=False, ax=ax[j], color=hist_color, bins=num_bins, alpha=0.95)
         ax[j].set_title(param_names[j], fontsize=title_fontsize)
         ax[j].spines['right'].set_visible(False)
@@ -320,7 +404,8 @@ def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=
 
 
 def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names=None, height=2, 
-                      post_color='#8f2727', prior_color='gray', post_alpha=0.9, prior_alpha=0.7):
+                      legend_fontsize=14, post_color='#8f2727', prior_color='gray', post_alpha=0.9, 
+                      prior_alpha=0.7):
     """ Generates a bivariate pairplot given posterior draws and prior.
 
     posterior_draws   : np.ndarray of shape (n_post_draws, n_params)
@@ -334,6 +419,8 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
         The parameter names for nice plot titles. Inferred if None
     height            : float, optional, default: 2.
         The height of the pairplot.
+    legend_fontsize   : int, optional, default: 14
+        The font size of the legend text.
     post_color        : str, optional, default: '#8f2727'
         The color for the posterior histograms and KDEs.
     priors_color      : str, optional, default: gray
@@ -346,6 +433,11 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
+
+    Raises
+    ------
+    AssertionError
+        If the shape of posterior_draws is not 2-dimensional.
     """
     
     # Ensure correct shape
@@ -353,8 +445,6 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
     
     # Obtain n_draws and n_params
     n_draws, n_params = posterior_draws.shape
-
-    # Determine if prior should be plotted
 
     # If prior object is given and no draws, obtain draws
     if prior is not None and prior_draws is None:
@@ -389,6 +479,12 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
         g.map_diag(sns.histplot, fill=True, color=prior_color, alpha=prior_alpha, kde=True, zorder=-1)
         g.map_lower(sns.kdeplot, fill=True, color=prior_color, alpha=prior_alpha, zorder=-1)
 
+    # Add legend, if prior also given
+    if prior_draws is not None or prior is not None:
+        handles = [Line2D(xdata=[], ydata=[], color=post_color, lw=3, alpha=post_alpha),
+                   Line2D(xdata=[], ydata=[], color=prior_color, lw=3, alpha=prior_alpha)]
+        g.fig.legend(handles, ['Posterior', 'Prior'], fontsize=legend_fontsize, loc='center right')
+
     # Remove upper axis
     for i, j in zip(*np.triu_indices_from(g.axes, 1)):
         g.axes[i, j].axis('off')
@@ -398,11 +494,6 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
         for j in range(n_params):
             g.axes[i, j].grid(alpha=0.5)
     
-    # Add legend, if prior also given
-    if prior_draws is not None:
-        handles = [Line2D(xdata=[], ydata=[], color=post_color, lw=3, alpha=post_alpha, label='Posterior'),
-                   Line2D(xdata=[], ydata=[], color=prior_color, lw=3, alpha=prior_alpha, label='Prior')]
-        g.add_legend(handles)
     g.tight_layout()
     return g.fig
 

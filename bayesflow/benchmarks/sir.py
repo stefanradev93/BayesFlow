@@ -23,6 +23,7 @@
 import numpy as np
 from scipy.integrate import odeint
 
+
 bayesflow_benchmark_info = {
     'simulator_is_batched': False,
     'parameter_names': [r'$\beta$', r'$\gamma$'],
@@ -108,7 +109,7 @@ def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000)
     if subsample is not None:
         irt = irt[::(T // subsample)]
 
-    # Truncate irt, so that small underflow below zero
+    # Truncate irt, so that small underflow below zero becomes zero
     irt = np.maximum(irt, 0.)
     
     # Add noise, scale and return
@@ -116,16 +117,45 @@ def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000)
     return x
 
 
-def configurator(forward_dict, mode='posterior', as_summary_condition=True):
+def configurator(forward_dict, mode='posterior', as_summary_condition=False):
     """ Configures simulator outputs for use in BayesFlow training."""
 
+    # Case only posterior configuration
     if mode == 'posterior':
+        input_dict = _config_posterior(forward_dict, as_summary_condition)
+
+    # Case only likelihood configuration
+    elif mode == 'likelihood':
+        input_dict = _config_likelihood(forward_dict)
+
+    # Case posterior and likelihood configuration
+    elif mode == 'joint':
         input_dict = {}
-        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
-        if as_summary_condition:
-            input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32)[:, :, np.newaxis]
-        else:
-            input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
-        return input_dict
+        input_dict['posterior_inputs'] = _config_posterior(forward_dict, as_summary_condition)
+        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict)
+
+    # Throw otherwise
     else:
-        raise NotImplementedError('For now, only posterior mode is available!')
+        raise NotImplementedError('For now, only a choice between ["posterior", "likelihood", "joint"] is available!')
+    return input_dict
+
+
+def _config_posterior(forward_dict, as_summary_condition):
+    """ Helper function for posterior configuration."""
+
+    input_dict = {}
+    input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+    if as_summary_condition:
+        input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32)[:, :, np.newaxis]
+    else:
+        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
+    return input_dict
+
+
+def _config_likelihood(forward_dict):
+    """ Helper function for likelihood configuration."""
+
+    input_dict = {}
+    input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict['observables'] = forward_dict['sim_data'].astype(np.float32)
+    return input_dict

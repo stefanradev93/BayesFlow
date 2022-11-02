@@ -22,7 +22,7 @@ import copy
 import tensorflow as tf
 
 from bayesflow import default_settings
-from bayesflow.exceptions import ConfigurationError
+from bayesflow.exceptions import ConfigurationError, ShapeError
 
 
 def apply_gradients(optimizer, gradients, tensors, clip_value, clip_method):
@@ -160,21 +160,39 @@ def format_loss_string(ep, it, loss, avg_dict, slope, ep_str="Epoch", it_str='It
     return disp_str
 
 
-def generate_lr_adjustment_dict(optimizer, period=150, wait_between_fits=10, patience=10, tolerance=-0.1, 
-                 reduction_factor=0.25, cooldown_factor=4, num_resets=3):
+def check_posterior_prior_shapes(post_samples, prior_samples):
+    """Checks requirements for the shapes of posterior and prior draws as
+    necessitated by most diagnostic functions.
     
-    lr_adjustment_dict = {}
-    lr_adjustment_dict['optimizer'] = optimizer
-    lr_adjustment_dict['period'] = period
-    lr_adjustment_dict['wait_between_fits'] = wait_between_fits
-    lr_adjustment_dict['patience'] = patience
-    lr_adjustment_dict['tolerance'] = tolerance
-    lr_adjustment_dict['reduction_factor'] = reduction_factor
-    lr_adjustment_dict['cooldown_factor'] = cooldown_factor
-    lr_adjustment_dict['num_resets'] = num_resets
+    Parameters
+    ----------
+    post_samples      : np.ndarray of shape (n_data_sets, n_post_draws, n_params)
+        The posterior draws obtained from n_data_sets
+    prior_samples     : np.ndarray of shape (n_data_sets, n_params)
+        The prior draws obtained for generating n_data_sets
 
-    return(lr_adjustment_dict)
-    
-    
-    
+    Raises
+    ------
+    ShapeError 
+        If there is a deviation form the expected shapes of `post_samples` and `prior_samples`.
+    """
 
+    if len(post_samples.shape) != 3:
+        raise ShapeError(f'post_samples should be a 3-dimensional array, with the ' +
+                         f'first dimension being the number of (simulated) data sets, ' + 
+                         f'the second dimension being the number of posterior draws per data set, ' + 
+                         f'and the third dimension being the number of parameters (marginal distributions), ' +  
+                         f'but your input has dimensions {len(post_samples.shape)}')
+    elif len(prior_samples.shape) != 2:
+        raise ShapeError(f'prior_samples should be a 2-dimensional array, with the ' +  
+                         f'first dimension being the number of (simulated) data sets / prior draws ' + 
+                         f'and the second dimension being the number of parameters (marginal distributions), ' +  
+                         f'but your input has dimensions {len(prior_samples.shape)}')
+    elif post_samples.shape[0] != prior_samples.shape[0]:
+        raise ShapeError(f'The number of elements over the first dimension of post_samples and prior_samples' + 
+                         f'should match, but post_samples has {post_samples.shape[0]} and prior_samples has ' +
+                         f'{prior_samples.shape[0]} elements, respectively.')
+    elif post_samples.shape[-1] != prior_samples.shape[-1]:
+        raise ShapeError(f'The number of elements over the last dimension of post_samples and prior_samples' + 
+                         f'should match, but post_samples has {post_samples.shape[1]} and prior_samples has ' +
+                         f'{prior_samples.shape[-1]} elements, respectively.')

@@ -31,21 +31,22 @@
 # Note: All default hyperparameters are set according to the paper.
 
 import importlib
+from functools import partial
 
 from bayesflow.forward_inference import GenerativeModel, Prior
 from bayesflow.exceptions import ConfigurationError
 
 available_benchmarks = [
-    "bernoulli_glm",
-    "bernoulli_glm_raw",
-    "gaussian_linear",
-    "gaussian_linear_uniform",
-    "gaussian_mixture",
-    "lotka_volterra",
-    "sir",
-    "slcp",
-    "slcp_distractors",
-    "two_moons"
+    'gaussian_linear',
+    'gaussian_linear_uniform',
+    'slcp',
+    'slcp_distractors',
+    'bernoulli_glm',
+    'bernoulli_glm_raw',
+    'gaussian_mixture',
+    'two_moons',
+    'sir',
+    'lotka_volterra'
 ]
 
 
@@ -62,19 +63,26 @@ def get_benchmark_module(benchmark_name):
 
 
 class Benchmark:
-    """TODO"""
-    def __init__(self, benchmark_name):
+    """Interface class for a benchmark."""
+    def __init__(self, benchmark_name, mode='joint', **kwargs):
 
         self.benchmark_name = benchmark_name
         self.benchmark_module = get_benchmark_module(self.benchmark_name)
         self.benchmark_info = getattr(self.benchmark_module, 'bayesflow_benchmark_info')
+
+        if kwargs.get('sim_kwargs') is not None:
+            _simulator = partial(getattr(self.benchmark_module, 'simulator'), **kwargs.get('sim_kwargs'))
+        else:
+            _simulator = getattr(self.benchmark_module, 'simulator')
+
         self.generative_model = GenerativeModel(
             prior=Prior(
                 prior_fun=getattr(self.benchmark_module, 'prior'),
                 param_names=self.benchmark_info['parameter_names']
             ),
-            simulator=getattr(self.benchmark_module, 'simulator'),
-            simulator_is_batched=self.benchmark_info['simulator_is_batched']
+            simulator=_simulator,
+            simulator_is_batched=self.benchmark_info['simulator_is_batched'],
+            name=benchmark_name, 
         )
-
         self.configurator = getattr(self.benchmark_module, 'configurator')
+        self.configurator = partial(self.configurator, mode=mode)

@@ -3,13 +3,13 @@ requires = ["setuptools>=42.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
-addopts = "--cov=slapping"
+addopts = "--cov=bayesflow"
 testpaths = [
-    "tests",
+    "tests"
 ]
 
 [tool.mypy]
-mypy_path = "src"
+mypy_path = "bayesflow"
 check_untyped_defs = true
 disallow_any_generics = true
 ignore_missing_imports = true

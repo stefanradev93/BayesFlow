@@ -22,6 +22,7 @@
 
 import numpy as np
 
+
 bayesflow_benchmark_info = {
     'simulator_is_batched': False,
     'parameter_names': [r'$\theta_{}$'.format(i) for i in range(1, 6)],
@@ -50,7 +51,7 @@ def prior(lower_bound=-3., upper_bound=3.):
     return np.random.default_rng().uniform(low=lower_bound, high=upper_bound, size=5)
 
 
-def simulator(theta, n_obs=4, flatten=False):
+def simulator(theta, n_obs=4, flatten=True):
     """ Implements data generation from the SLCP model designed as a benchmark
     for a simple likelihood and a complex posterior due to non-linear pushforward theta -> x.
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.3
@@ -61,7 +62,7 @@ def simulator(theta, n_obs=4, flatten=False):
         The location parameters of the Gaussian likelihood.
     n_obs   : int, optional, default: 4
         The number of observations to generate from the slcp likelihood.
-    flatten : bool, optional, default: False
+    flatten : bool, optional, default: True
         A flag to indicate whather a 1D (`flatten=True`) or a 2D (`flatten=False`)
         representation of the simulated data is returned.
     
@@ -88,16 +89,45 @@ def simulator(theta, n_obs=4, flatten=False):
         return x.flatten()
     return x
 
-def configurator(forward_dict, mode='posterior', scale_data=30., as_summary_condition=True):
+def configurator(forward_dict, mode='posterior', scale_data=30., as_summary_condition=False):
     """ Configures simulator outputs for use in BayesFlow training."""
 
+    # Case only posterior configuration
     if mode == 'posterior':
+        input_dict = _config_posterior(forward_dict, scale_data, as_summary_condition)
+
+    # Case only likelihood configuration
+    elif mode == 'likelihood':
+        input_dict = _config_likelihood(forward_dict, scale_data)
+
+    # Case posterior and likelihood configuration
+    elif mode == 'joint':
         input_dict = {}
-        input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
-        if as_summary_condition:
-            input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
-        else:
-            input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
-        return input_dict
+        input_dict['posterior_inputs'] = _config_posterior(forward_dict, scale_data, as_summary_condition)
+        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict, scale_data)
+
+    # Throw otherwise
     else:
-        raise NotImplementedError('For now, only posterior mode is available!')
+        raise NotImplementedError('For now, only a choice between ["posterior", "likelihood", "joint"] is available!')
+    return input_dict
+
+
+def _config_posterior(forward_dict, scale_data, as_summary_condition):
+    """ Helper function for posterior configuration."""
+
+    input_dict = {}
+    input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+    if as_summary_condition:
+        input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+    else:
+        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+    return input_dict
+
+
+def _config_likelihood(forward_dict, scale_data):
+    """ Helper function for likelihood configuration."""
+
+    input_dict = {}
+    input_dict['observables'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+    input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
+    return input_dict

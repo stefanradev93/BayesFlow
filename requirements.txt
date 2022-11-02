@@ -4,6 +4,7 @@ numpy==1.19
 pandas==1.4
 scikit-learn==1.1
 scipy==1.9
+aesara==2.8.7 
 seaborn==0.12
 tensorflow==2.7
 tqdm==4.64

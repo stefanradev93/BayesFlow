@@ -22,10 +22,13 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import pickle
 import os
-import glob
 import re
+
+try:
+    import cPickle as pickle
+except:
+    import pickle
 
 import logging
 logging.basicConfig()
@@ -33,6 +36,7 @@ logging.basicConfig()
 from sklearn.linear_model import HuberRegressor
 
 from bayesflow.default_settings import DEFAULT_KEYS
+
 
 class SimulationDataset:
     """ Helper class to create a tensorflow Dataset which returns
@@ -70,7 +74,7 @@ class SimulationDataset:
         return slices, keys_used, keys_none, n_sim
     
     def __call__(self, batch_in):
-        """ Convert output of tensorflow.Dataset to dict.
+        """ Convert output of tensorflow.data.Dataset to dict.
         """
         
         forward_dict = {}
@@ -87,8 +91,8 @@ class SimulationDataset:
 class RegressionLRAdjuster:
     """This class will compute the slope of the loss trajectory and inform learning rate decay."""
     
-    def __init__(self, optimizer, period=150, wait_between_fits=10, patience=10, tolerance=-0.1, 
-                 reduction_factor=0.25, cooldown_factor=4, num_resets=3, **kwargs):
+    def __init__(self, optimizer, period=1000, wait_between_fits=10, patience=10, tolerance=-0.05, 
+                 reduction_factor=0.25, cooldown_factor=2, num_resets=3, **kwargs):
         """ Creates an instance with given hyperparameters which will track the slope of the 
         loss trajectory according to specified hyperparameters and then issue an optional
         stopping suggestion.
@@ -98,20 +102,20 @@ class RegressionLRAdjuster:
 
         optimizer         : tf.keras.optimizers.Optimizer instance
             An optimizer implementing a lr() method
-        period            : int, optional, default: 150
+        period            : int, optional, default: 1000
             How much loss values to consider from the past
         wait_between_fits : int, optional, default: 10
             How many backpropagation updates to wait between two successive fits
         patience          : int, optional, default: 10
             How many successive times the tolerance value is reached before lr update.
-        tolerance         : float, optional, default: -0.1
+        tolerance         : float, optional, default: -0.05
             The minimum slope to be considered substantial for training.
         reduction_factor  : float in [0, 1], optional, default: 0.25
             The factor by which the learning rate is reduced upon hitting the `tolerance`
             threshold for `patience` number of times
-        cooldown_factor   : float, optional, default: 4
+        cooldown_factor   : float, optional, default: 2
             The factor by which the `period` is multiplied to arrive at a cooldown period.
-        num_resets        : int, optional, default: 4
+        num_resets        : int, optional, default: 3
             How many times to reduce the learning rate before issuing an optional stopping
         **kwargs          : dict, optional, default {}
             Additional keyword arguments passed to the `HuberRegression` class.
@@ -238,6 +242,9 @@ class RegressionLRAdjuster:
 class LossHistory:
     """ Helper class to keep track of losses during training.
     """
+
+    file_name = 'history'
+
     def __init__(self):
         self.history = {}
         self.loss_names = []
@@ -312,11 +319,14 @@ class LossHistory:
         # Assume equal lengths per epoch and run
         try:
             losses_list = [pd.melt(pd.DataFrame.from_dict(self.history[r], orient='index').T) for r in self.history]
-            losses_df = pd.DataFrame(pd.concat(losses_list, axis=0).value.to_list())
-            losses_df.columns = self.loss_names
-            return losses_df.copy()
-        # Handle unequal lengths
-        except ValueError:
+            losses_list = pd.concat(losses_list, axis=0).value.to_list()
+            losses_list = [l for l in losses_list if l is not None]
+            losses_df = pd.DataFrame(losses_list, columns=self.loss_names)
+            return losses_df
+        # Handle unequal lengths or problems when user kills training with an interrupt
+        except ValueError as ve:
+            return self.history
+        except TypeError as te:
             return self.history
 
     def flush(self):
@@ -335,31 +345,30 @@ class LossHistory:
         """Saves a LossHistory object to a pickled dictionary in file_path.
          If max_to_keep saved loss history files are found in file_path, the oldest is deleted before a new one is saved.
          """
-
-        original_dir = os.getcwd()
-        os.chdir(file_path)
         
-        full_history_dict = deepcopy(self.history)
+        # Increment history index
+        self.latest += 1
+        
+        # Path to history
+        history_path = os.path.join(file_path, f'{LossHistory.file_name}_{self.latest}.pkl')
+        
+        # Prepare full history dict 
+        full_history_dict = self.get_copy()
         full_history_dict['loss_names'] = self.loss_names
         full_history_dict['_current_run'] = self._current_run
         full_history_dict['_total_loss'] = self._total_loss
         
-        self.latest += 1
-
-        with open('history_' + str(self.latest) +'.pkl', 'wb') as f:
+        # Pickle current
+        with open(history_path, 'wb') as f:
             pickle.dump(full_history_dict, f)
         
-        list_of_history_checkpoints = glob.glob('*history*')
-
-        if len(list_of_history_checkpoints) > max_to_keep:
-            # Determine the oldest saved loss history and remove it
-            current_nr = 10**10
-            for _, hist_ckpt in enumerate(list_of_history_checkpoints):
-                new_nr = int(re.search(r'history_(.*)\.pkl', hist_ckpt).group(1))
-                if new_nr < current_nr:
-                    current_nr = new_nr
-            os.remove('history_'+str(current_nr)+'.pkl')
-        os.chdir(original_dir)
+        # Get list of history checkpoints
+        history_checkpoints_list = [l for l in os.listdir(file_path) if 'history' in l]
+            
+        # Determine the oldest saved loss history and remove it
+        if len(history_checkpoints_list) > max_to_keep:
+            oldest_history_path = os.path.join(file_path, f'history_{self.latest-max_to_keep}.pkl')
+            os.remove(oldest_history_path)
             
     def load_from_file(self, file_path):
         """Loads the most recent saved LossHistory object from file_path."""
@@ -368,39 +377,45 @@ class LossHistory:
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
 
-        original_dir = os.getcwd()
+        # Get list of histories
         if os.path.exists(file_path):
-            os.chdir(file_path)
-            list_of_history_checkpoints = glob.glob('*history*')
+            history_checkpoints_list = [l for l in os.listdir(file_path) if LossHistory.file_name in l]
         else:
-            list_of_history_checkpoints = []
+            history_checkpoints_list = []
         
-        if len(list_of_history_checkpoints) > 0:
-            current_nr = 0
+        # Case history list is not empty
+        if len(history_checkpoints_list) > 0:
+            
             # Determine which file contains the latest LossHistory and load it
-            for i, hist_ckpt in enumerate(list_of_history_checkpoints):
-                new_nr = int(re.search(r'history_(.*)\.pkl', hist_ckpt).group(1))
-                if new_nr > current_nr:
-                    current_nr = new_nr
-            with open('history_' + str(current_nr) +'.pkl', 'rb') as f:
+            file_numbers = [int(re.findall(r'\d+', h)[0]) for h in history_checkpoints_list]
+            latest_file = history_checkpoints_list[np.argmax(file_numbers)]
+            latest_number = np.max(file_numbers)
+            latest_path = os.path.join(file_path, latest_file)
+            
+            # Load dictionary
+            with open(latest_path, 'rb') as f:
                 full_history_dict = pickle.load(f)
-            self.latest = current_nr
+                
+            # Fill entries
+            self.latest = latest_number
             self._total_loss = full_history_dict['_total_loss']
             self._current_run = full_history_dict['_current_run']
             self.loss_names = full_history_dict['loss_names']
-            for key in ['_total_loss', '_current_run', 'loss_names']:
-                del full_history_dict[key]
-            self.history = full_history_dict
-            logger.info("Loaded loss history from {}".format(file_path+'/history_' + str(current_nr) +'.pkl'))
-            os.chdir(original_dir)
+            self.history = {k:v for k, v in full_history_dict.items() if k not in ['_total_loss', '_current_run', 'loss_names']}
+            
+            # Verbose
+            logger.info(f"Loaded loss history from {latest_path}")
+
+        # Case history list is empty
         else:
             logger.info("Initialized empty loss history.")
 
 
 class SimulationMemory:
-    """ 
-    Helper class to keep track of a pre-determined number of simulations during training.
+    """Helper class to keep track of a pre-determined number of simulations during training.
     """
+
+    file_name = 'memory'
 
     def __init__(self, stores_raw=True, capacity_in_batches=50):
         self.stores_raw = stores_raw
@@ -408,7 +423,6 @@ class SimulationMemory:
         self._buffer = [None] * self._capacity
         self._idx = 0
         self.size_in_batches = 0
-        self.latest = 0
 
     def store(self, forward_dict):
         """ Stores simulation outputs, if internal buffer is not full.
@@ -429,19 +443,21 @@ class SimulationMemory:
         return deepcopy(self._buffer)
 
     def is_full(self):
-        """ Returns True if the buffer is full, otherwis False."""
+        """ Returns True if the buffer is full, otherwise False."""
 
         if self._idx >= self._capacity:
             return True
         return False
     
     def save_to_file(self, file_path, max_to_keep):
-        """Saves a SimulationMemory object to a pickled dictionary in file_path.
+        """Saves a `SimulationMemory` object to a pickled dictionary in file_path.
         If max_to_keep saved simulation memory files are found in file_path, the oldest is deleted before a new one is saved.
         """
-        original_dir = os.getcwd()
-        os.chdir(file_path)
+
+        # Create path to memory
+        memory_path = os.path.join(file_path, f'{SimulationMemory.file_name}.pkl')
         
+        # Prepare attributes
         full_memory_dict = {}
         full_memory_dict['stores_raw'] = self.stores_raw
         full_memory_dict['_capacity'] = self._capacity
@@ -449,23 +465,10 @@ class SimulationMemory:
         full_memory_dict['_idx'] = self._idx
         full_memory_dict['_size_in_batches'] = self.size_in_batches
         
-        self.latest += 1
-
-        with open('memory_' + str(self.latest) +'.pkl', 'wb') as f:
+        # Dump as pickle object
+        with open(memory_path, 'wb') as f:
             pickle.dump(full_memory_dict, f)
-        
-        list_of_memory_checkpoints = glob.glob('*memory*')
 
-        if len(list_of_memory_checkpoints) > max_to_keep:
-            # Determine the oldest saved simulation memory and remove it
-            current_nr = 10**10
-            for _, mem_ckpt in enumerate(list_of_memory_checkpoints):
-                new_nr = int(re.search(r'memory_(.*)\.pkl', mem_ckpt).group(1))
-                if new_nr < current_nr:
-                    current_nr = new_nr
-            os.remove('memory_'+str(current_nr)+'.pkl')
-        os.chdir(original_dir)
-            
     def load_from_file(self, file_path):
         """Loads the most recent saved SimulationMemory object from file_path."""
 
@@ -473,30 +476,24 @@ class SimulationMemory:
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
 
-        original_dir = os.getcwd()
+        # Create path to memory
+        memory_path = os.path.join(file_path, f'{SimulationMemory.file_name}.pkl')
+
+        # Case memory file exists
         if os.path.exists(file_path):
-            os.chdir(file_path)
-            list_of_memory_checkpoints = glob.glob('*memory*')
-        else:
-            list_of_memory_checkpoints = []
-        
-        if len(list_of_memory_checkpoints) > 0:
-            # Determine which file contains the latest LossHistory and load it
-            current_nr = 0
-            for _, hist_ckpt in enumerate(list_of_memory_checkpoints):
-                new_nr = int(re.search(r'memory_(.*)\.pkl', hist_ckpt).group(1))
-                if new_nr > current_nr:
-                    current_nr = new_nr
-            with open('memory_' + str(current_nr) +'.pkl', 'rb') as f:
+
+            # Load pickle and fill in attributes
+            with open(memory_path, 'rb') as f:
                 full_memory_dict = pickle.load(f)
-            self.latest = current_nr
+
             self.stores_raw = full_memory_dict['stores_raw']
             self._capacity = full_memory_dict['_capacity']
             self._buffer = full_memory_dict['_buffer']
             self._idx = full_memory_dict['_idx']
             self.size_in_batches = full_memory_dict['_size_in_batches']
-            logger.info("Loaded simulation memory from {}".format(file_path+'/memory_' + str(current_nr) +'.pkl'))
-            os.chdir(original_dir)
+            logger.info(f"Loaded simulation memory from {memory_path}")
+
+        # Case memory file does not exist
         else:
             logger.info("Initialized empty simulation memory.")
 
