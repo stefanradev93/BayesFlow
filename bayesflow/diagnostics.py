@@ -100,7 +100,7 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     # Determine n params and param names if None given
     n_params = prior_samples.shape[-1]
     if param_names is None:
-        param_names = [f'p_{i}' for i in range(1, n_params+1)]
+        param_names = [f'$p_{i}$' for i in range(1, n_params+1)]
         
     # Determine number of rows and columns for subplots based on inputs
     if n_row is None and n_col is None:
@@ -271,7 +271,7 @@ def plot_sbc_ecdf(post_samples, prior_samples, difference=False, stacked=False, 
     else:
         axes = ax.flat
         if param_names is None:
-            titles = [f'p_{i}' for i in range(1, n_params+1)]
+            titles = [f'$p_{i}$' for i in range(1, n_params+1)]
         else:
             titles = param_names
 
@@ -363,7 +363,7 @@ def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=
 
     # Determine n params and param names if None given
     if param_names is None:
-        param_names = [f'p_{i}' for i in range(1, n_params+1)]
+        param_names = [f'$p_{i}$' for i in range(1, n_params+1)]
         
     # Determine n_subplots dynamically
     n_row = int(np.ceil(n_params / 6))
@@ -658,7 +658,7 @@ def plot_calibration_curves(m_true, m_pred, model_names=None, n_bins=10, font_si
 
     n_models = m_pred.shape[-1]
     if model_names is None:
-        model_names = [f'M_{m}' for m in range(1, n_models+1)]
+        model_names = [f'$M_{m}$' for m in range(1, n_models+1)]
 
     # Determine n_subplots dynamically
     n_row = int(np.ceil(n_models / 6))
