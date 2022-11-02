@@ -39,14 +39,12 @@ from bayesflow.default_settings import DEFAULT_KEYS
 
 
 class SimulationDataset:
-    """ Helper class to create a tensorflow Dataset which returns
-    dictionaries in BayesFlow format.
+    """Helper class to create a tensorflow.data.Dataset which parses simulation dictionaries 
+    and returns simulation dictionaries as expected by BayesFlow amortizers.
     """
     
     def __init__(self, forward_dict, batch_size):
-        """
-        Create a tensorfow Dataset from forward inference outputs and determines format. 
-        """
+        """Creates a tensorfow.data.Dataset from forward inference outputs and determines format."""
         
         slices, keys_used, keys_none, n_sim = self._determine_slices(forward_dict)
         self.data = tf.data.Dataset\
@@ -58,8 +56,7 @@ class SimulationDataset:
         self.n_sim = n_sim
         
     def _determine_slices(self, forward_dict):
-        """ Determine slices for a tensorflow Dataset.
-        """
+        """Determine slices for a tensorflow Dataset."""
         
         keys_used = []
         keys_none = []
@@ -74,8 +71,7 @@ class SimulationDataset:
         return slices, keys_used, keys_none, n_sim
     
     def __call__(self, batch_in):
-        """ Convert output of tensorflow.data.Dataset to dict.
-        """
+        """Convert output of tensorflow.data.Dataset to dict."""
         
         forward_dict = {}
         for key_used, batch_stuff in zip(self.keys_used, batch_in):
@@ -93,7 +89,7 @@ class RegressionLRAdjuster:
     
     def __init__(self, optimizer, period=1000, wait_between_fits=10, patience=10, tolerance=-0.05, 
                  reduction_factor=0.25, cooldown_factor=2, num_resets=3, **kwargs):
-        """ Creates an instance with given hyperparameters which will track the slope of the 
+        """Creates an instance with given hyperparameters which will track the slope of the 
         loss trajectory according to specified hyperparameters and then issue an optional
         stopping suggestion.
         
@@ -132,6 +128,10 @@ class RegressionLRAdjuster:
         self.reduction_factor = reduction_factor
         self.stopping_issued = False
         self.cooldown_factor = cooldown_factor
+        self._history = {
+            'iteration'    : [], 
+            'learning_rate': []
+        }
         self._reset_counter = 0
         self._patience_counter = 0
         self._cooldown_counter = 0
@@ -141,7 +141,7 @@ class RegressionLRAdjuster:
         self._in_cooldown = False
         
     def get_slope(self, losses):
-        """ Fits a Huber regression on the provided loss trajectory or returns None if
+        """Fits a Huber regression on the provided loss trajectory or returns `None` if
         not enough data points present.
         """
         
@@ -165,7 +165,7 @@ class RegressionLRAdjuster:
             return self._slope
 
     def reset(self):
-        """ Resets all stateful variables in preparation for a new start."""
+        """Resets all stateful variables in preparation for a new start."""
 
         self._reset_counter = 0
         self._patience_counter = 0
@@ -176,7 +176,7 @@ class RegressionLRAdjuster:
         self.stopping_issued = False
 
     def _check_patience(self):
-        """ Determines whether to reduce learning rate or be patient."""
+        """Determines whether to reduce learning rate or be patient."""
 
         # Do nothing, if still in cooldown period
         if self._in_cooldown and self._cooldown_counter < int(self.cooldown_factor * self.period):
@@ -198,7 +198,7 @@ class RegressionLRAdjuster:
             self._patience_counter = 0
 
     def _reduce_learning_rate(self):
-        """ Reduces the learning rate by a given factor. """
+        """Reduces the learning rate by a given factor."""
 
         # Logger init
         logger = logging.getLogger()
@@ -213,6 +213,10 @@ class RegressionLRAdjuster:
             self.optimizer.lr.assign(new_lr)
             self._reset_counter += 1
 
+            # Store iteration and learning rate
+            self._history['iteration'].append(self.optimizer.iterations())
+            self._history['learning_rate'].append(old_lr)
+
             # Verbose info to user
             logger.info(f'Reducing learning rate from {old_lr:.8f} to: {new_lr:.8f} and entering cooldown...')
 
@@ -220,7 +224,7 @@ class RegressionLRAdjuster:
             self._in_cooldown = True
 
     def _check_waiting(self):
-        """ Determines whether to compute a new slope or wait."""
+        """Determines whether to compute a new slope or wait."""
 
         # Case currently waiting
         if self._is_waiting:
@@ -240,8 +244,7 @@ class RegressionLRAdjuster:
 
 
 class LossHistory:
-    """ Helper class to keep track of losses during training.
-    """
+    """Helper class to keep track of losses during training."""
 
     file_name = 'history'
 
@@ -303,8 +306,7 @@ class LossHistory:
             self._total_loss.append(current_loss.numpy())
 
     def get_running_losses(self, epoch):
-        """ Compute and return running means of the losses for current epoch.
-        """
+        """Compute and return running means of the losses for current epoch."""
 
         means = np.atleast_1d(np.mean(self.history[f'Run {self._current_run}'][f'Epoch {epoch}'], axis=0))
         if means.shape[0] == 1:    
@@ -313,8 +315,7 @@ class LossHistory:
             return {'Avg.' + k: v for k, v in zip(self.loss_names, means)}
 
     def get_plottable(self):
-        """ Returns the losses as a nicely formatted pandas DataFrame.
-        """
+        """Returns the losses as a nicely formatted pandas DataFrame."""
 
         # Assume equal lengths per epoch and run
         try:
@@ -330,8 +331,7 @@ class LossHistory:
             return self.history
 
     def flush(self):
-        """ Returns current history and removes all existing loss history.
-        """
+        """Returns current history and removes all existing loss history."""
 
         h = self.history
         self.history = {}
@@ -412,8 +412,7 @@ class LossHistory:
 
 
 class SimulationMemory:
-    """Helper class to keep track of a pre-determined number of simulations during training.
-    """
+    """Helper class to keep track of a pre-determined number of simulations during training."""
 
     file_name = 'memory'
 
@@ -425,7 +424,7 @@ class SimulationMemory:
         self.size_in_batches = 0
 
     def store(self, forward_dict):
-        """ Stores simulation outputs, if internal buffer is not full.
+        """Stores simulation outputs in `forward_dict`, if internal buffer is not full.
 
         Parameters
         ----------
@@ -443,13 +442,13 @@ class SimulationMemory:
         return deepcopy(self._buffer)
 
     def is_full(self):
-        """ Returns True if the buffer is full, otherwise False."""
+        """Returns True if the buffer is full, otherwise False."""
 
         if self._idx >= self._capacity:
             return True
         return False
     
-    def save_to_file(self, file_path, max_to_keep):
+    def save_to_file(self, file_path):
         """Saves a `SimulationMemory` object to a pickled dictionary in file_path.
         If max_to_keep saved simulation memory files are found in file_path, the oldest is deleted before a new one is saved.
         """
