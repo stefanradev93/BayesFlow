@@ -483,7 +483,7 @@ class SimulationMemory:
         if os.path.exists(file_path):
 
             # Load pickle and fill in attributes
-            with open(memory_path, 'wb') as f:
+            with open(memory_path, 'rb') as f:
                 full_memory_dict = pickle.load(f)
 
             self.stores_raw = full_memory_dict['stores_raw']
