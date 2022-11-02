@@ -410,7 +410,7 @@ class Trainer:
 
             with tqdm(total=int(np.ceil(data_set.n_sim / batch_size)), desc='Training epoch {}'.format(ep)) as p_bar:
                 # Loop through dataset
-                for bi, forward_dict in enumerate(data_set):
+                for bi, forward_dict in enumerate(data_set, start=1):
 
                     # Perform one training step and obtain current loss value
                     input_dict = self.configurator(forward_dict)

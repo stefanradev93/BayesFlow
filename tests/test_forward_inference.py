@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from bayesflow.forward_inference import ContextGenerator, Prior, Simulator, GenerativeModel
+from bayesflow.forward_inference import ContextGenerator, Prior, Simulator
 
 
 class TestContext(unittest.TestCase):

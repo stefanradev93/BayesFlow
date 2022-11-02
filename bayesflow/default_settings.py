@@ -63,6 +63,27 @@ DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
     mandatory_fields=[]
 )
 
+DEFAULT_SETTING_MULTI_CONV_NET = MetaDictSetting(
+    meta_dict={
+        'conv_args'     : {
+            'layer_args': {
+                'activation': 'relu',
+                'filters': 32,
+                'strides': 1,
+                'padding': 'causal'
+            },
+            'min_kernel_size': 1,
+            'max_kernel_size': 3
+        },
+        'n_conv_layers' : 2,
+        'lstm_args'     : {
+            'units': 64
+        },
+        'summary_dim'   : 10
+    },
+    mandatory_fields=[]
+)
+
 DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
     meta_dict={
         't_args': {
@@ -74,26 +95,6 @@ DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
             'dense_args': dict(units=64, kernel_initializer='glorot_uniform', activation='elu'),
             'n_dense': 2,
             'spec_norm': False
-        },
-    },
-    mandatory_fields=[]
-)
-
-DEFAULT_SETTING_ATTENTIVE_COUPLING = MetaDictSetting(
-    meta_dict={
-        't_args': {
-            'pre_dense_args': dict(units=32, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense_pre': 2,
-            'attention_args': dict(key_dim=32, num_heads=4),
-            'post_dense_args': dict(units=32, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense_post': 2
-        },
-        's_args': {
-            'pre_dense_args': dict(units=32, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense_pre': 2,
-            'attention_args': dict(key_dim=32, num_heads=4),
-            'post_dense_args': dict(units=32, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense_post': 2
         },
     },
     mandatory_fields=[]

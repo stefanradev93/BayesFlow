@@ -106,8 +106,8 @@ class InvariantNetwork(tf.keras.Model):
     """Implements an invariant network with keras.
     """
 
-    def __init__(self, meta={}):
-        super(InvariantNetwork, self).__init__()
+    def __init__(self, meta={}, **kwargs):
+        super(InvariantNetwork, self).__init__(**kwargs)
 
         meta = build_meta_dict(user_dict=meta,
                                default_setting=default_settings.DEFAULT_SETTING_INVARIANT_NET)
@@ -115,6 +115,7 @@ class InvariantNetwork(tf.keras.Model):
         self.equiv_seq = Sequential([EquivariantModule(meta) for _ in range(meta['n_equiv'])])
         self.inv = InvariantModule(meta)
         self.out_layer = Dense(meta['summary_dim'], activation='linear')
+        self.summary_dim = meta['summary_dim']
     
     def call(self, x):
         """ Performs the forward pass of a learnable deep invariant transformation consisting of
@@ -162,7 +163,7 @@ class MultiConv1D(tf.keras.Model):
         ]
 
         # Create final Conv1D layer for dimensionalitiy reduction
-        dim_red_args = {k : v for k, v in meta.items() if k not in ['kernel_size', 'strides']}
+        dim_red_args = {k : v for k, v in meta['layer_args'].items() if k not in ['kernel_size', 'strides']}
         dim_red_args['kernel_size'] = 1
         dim_red_args['strides'] = 1
         self.dim_red = Conv1D(**dim_red_args)
@@ -194,7 +195,7 @@ class MultiConvNetwork(tf.keras.Model):
     https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472
     """
 
-    def __init__(self, meta, **kwargs):
+    def __init__(self, meta={}, **kwargs):
         """ Creates a stack of inception-like layers followed by an LSTM network, with the idea
         of learning vector representations from multivariate time series data.
 
@@ -206,13 +207,18 @@ class MultiConvNetwork(tf.keras.Model):
 
         super(MultiConvNetwork, self).__init__(**kwargs)
         
+        meta = build_meta_dict(user_dict=meta,
+                        default_setting=default_settings.DEFAULT_SETTING_MULTI_CONV_NET)
+
         self.net = Sequential([
             MultiConv1D(meta['conv_args'])
             for _ in range(meta['n_conv_layers'])
         ])
         
         self.lstm = LSTM(**meta['lstm_args'])
-        
+        self.out_layer = Dense(meta['summary_dim'], activation='linear')
+        self.summary_dim = meta['summary_dim']
+
     def call(self, x, **kwargs):
         """Performs a forward pass through the network by first passing
         x through the sequence of multi-convolutional layers and then applying 
@@ -226,10 +232,65 @@ class MultiConvNetwork(tf.keras.Model):
         Returns
         -------
         out : tf.Tensor
-            Output of shape (batch_size, hidden_units)
+            Output of shape (batch_size, summary_dim)
         """
         
         out = self.net(x, **kwargs)
         out = self.lstm(out, **kwargs)
+        out = self.out_layer(out, **kwargs)
         return out
 
+
+class SplitNetwork(tf.keras.Model):
+    """Implements a vertical stack of networks and concatenates their individual outputs. Allows for splitting
+    of data to provide an individual network for each split of the data.
+    """
+
+    def __init__(self, num_splits, split_data_configurator, network_type=InvariantNetwork, meta={}, **kwargs):
+        """ Creates a composite network of `num_splits` sub-networks of type `network_type`, each with configuration
+        specified by `meta`.
+
+        Parameters
+        ----------
+        num_splits              : int
+            The number if splits for the data, which will equal the number of sub-networks.
+        split_data_configurator : callable
+            Function that takes the arguments `i` and `x` where `i` is the index of the network
+            and `x` are the inputs to the `SplitNetwork`. Should return the input for the corresponding network.
+            
+            For example, to achieve a network with is permutation-invariant both vertically (i.e., across rows)
+            and horizontally (i.e., across columns), one could to:
+            `def config(i, x):
+            TODO
+            `
+        network_type            : callable, optional, default: `InvariantNetowk`
+            Type of neural network to use.
+        meta                    : dict, optional, default: {}
+            A dictionary containing the configuration for the networks.
+        **kwargs
+            Optional keyword arguments to be passed to the `tf.keras.Model` superclass.
+        """
+
+        super(SplitNetwork, self).__init__(**kwargs)
+
+        self.num_splits = num_splits
+        self.split_data_configurator = split_data_configurator
+        self.networks = [network_type(meta) for _ in range(num_splits)]
+
+    def call(self, x):
+        """ Performs the forward pass through the networks.
+
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, n_obs, data_dim)
+
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, out_dim)
+        """
+
+        out = [self.networks[i](self.split_data_configurator(i, x)) for i in range(self.num_splits)]
+        out = tf.concat(out, axis = -1)
+        return out
