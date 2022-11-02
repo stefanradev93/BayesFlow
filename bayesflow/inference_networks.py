@@ -22,67 +22,11 @@ import numpy as np
 from scipy.stats import multivariate_t, multivariate_normal
 
 import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
 
 from bayesflow import default_settings
-from bayesflow.helper_networks import Permutation, TailNetwork, ActNorm
-from bayesflow.wrappers import SpectralNormalization
+from bayesflow.helper_networks import Permutation, TailNetwork, ActNorm, DenseCouplingNet
 from bayesflow.helper_functions import build_meta_dict
 from bayesflow.exceptions import ConfigurationError
-
-
-class DenseCouplingNet(tf.keras.Model):
-    """Implements a conditional version of a satndard fully connected (FC) network.
-    Would also work as an unconditional estimator."""
-
-    def __init__(self, meta, n_out, **kwargs):
-        """Creates a conditional coupling net (FC neural network).
-
-        Parameters
-        ----------
-        meta     : dict
-            A dictionary which holds arguments for a dense layer.
-        n_out    : int
-            Number of outputs of the coupling net
-        **kwargs : dict, optional, default: {}
-            Optional keyword arguments passed to the `tf.keras.Model` constructor. 
-        """
-
-        super(DenseCouplingNet, self).__init__(**kwargs)
-
-        # Create network body (input and hidden layers)
-        self.dense = Sequential(
-            # Hidden layer structure
-            [SpectralNormalization(Dense(**meta['dense_args'])) if meta['spec_norm'] else Dense(**meta['dense_args'])
-             for _ in range(meta['n_dense'])]
-        )
-        # Create network output head
-        self.dense.add(Dense(n_out, **{k: v for k, v in meta['dense_args'].items() if k != 'units'}))
-
-    def call(self, target, condition, **kwargs):
-        """Concatenates target and condition and performs a forward pass through the coupling net.
-
-        Parameters
-        ----------
-        target      : tf.Tensor
-          The split estimation quntities, for instance, parameters :math:`\\theta \sim p(\\theta)` of interest, shape (batch_size, ...)
-        condition   : tf.Tensor or None
-            the conditioning vector of interest, for instance ``x = summary(x)``, shape (batch_size, summary_dim)
-        """
-
-        # Handle case no condition
-        if condition is None:
-            return self.dense(target, **kwargs)
-
-        # Handle 3D case for a set-flow
-        if len(target.shape) == 3 and len(condition.shape) == 2:
-            # Extract information about second dimension
-            N = int(target.shape[1])
-            condition = tf.stack([condition] * N, axis=1)
-        inp = tf.concat((target, condition), axis=-1)
-        out = self.dense(inp, **kwargs)
-        return out
 
 
 class ConditionalCouplingLayer(tf.keras.Model):
