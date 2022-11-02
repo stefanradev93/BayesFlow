@@ -612,7 +612,7 @@ class Trainer:
             self.manager.save()
             self.loss_history.save_to_file(file_path=self.checkpoint_path, max_to_keep=self.max_to_keep)
             if self.lr_adjuster is not None:
-                self.lr_adjuster.save_to_file(file_path=checkpoint_path)
+                self.lr_adjuster.save_to_file(file_path=self.checkpoint_path)
             if self.simulation_memory is not None:
                 self.simulation_memory.save_to_file(file_path=self.checkpoint_path)
 
