@@ -42,7 +42,7 @@ class MCMCSurrogateLikelihood:
         configurator               : callable, optional, default: None
             A function that takes the input to the `log_likelihood` and `log_likelihood_grad`
             calls and converts them to a dictionary containing the following mandatory keys,
-            if DEFAULT_KEYS unchanged: 
+            if DEFAULT_KEYS unchanged:
                 `observables` - the variables over which a condition density is learned (i.e., the observables)
                 `conditions`  - the conditioning variables that the directly passed to the inference network
             default: Return the first parameter - has to be a dicitionary with the mentioned characteristics
@@ -80,14 +80,19 @@ class MCMCSurrogateLikelihood:
     @tf.function
     def log_likelihood(self, *args, **kwargs):
         """Calculates the approximate log-likelihood of targets given conditional variables.
-        
+
         Parameters
         ----------
-        #TODO
-
+        The parameters as expected by `configurator`. For the default configurator,
+        the first parameter has to be a dictionary containing the following mandatory keys,
+        if DEFAULT_KEYS unchanged:
+            `observables` - the variables over which a condition density is learned (i.e., the observables)
+            `conditions`  - the conditioning variables that the directly passed to the inference network
         Returns
         -------
-        #TODO
+        out :
+            The output as returned by `likelihood_postprocessor`. For the default postprocessor,
+            this is the total log-likelihood given by the sum of all log-likelihood values.
         """
 
         input_dict = self.configurator(*args, **kwargs)
@@ -96,16 +101,22 @@ class MCMCSurrogateLikelihood:
         )
 
     def log_likelihood_grad(self, *args, **kwargs):
-        """ Calculates the gradient of the surrogate likelihood with respect to 
+        """ Calculates the gradient of the surrogate likelihood with respect to
         every parameter in `conditions`.
-        
+
         Parameters
         ----------
-        #TODO
-
+        The parameters as expected by `configurator`. For the default configurator,
+        the first parameter has to be a dictionary containing the following mandatory keys,
+        if DEFAULT_KEYS unchanged:
+            `observables` - the variables over which a condition density is learned (i.e., the observables)
+            `conditions`  - the conditioning variables that the directly passed to the inference network
         Returns
         -------
-        #TODO
+        out :
+            The output as returned by `grad_postprocessor`. For the default postprocessor,
+            this is an array containing the derivative with respect to each value in `conditions`
+            as returned by `configurator`.
         """
 
         input_dict = self.configurator(*args, **kwargs)
@@ -122,14 +133,14 @@ class MCMCSurrogateLikelihood:
 
         Parameters
         ----------
-        input_dict : dict  
-            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged: 
+        input_dict : dict
+            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:
                 `observables` - tf.constant: the variables over which a condition density is learned (i.e., the observables)
                 `conditions`  - tf.Variable: the conditioning variables that the directly passed to the inference network
 
         Returns
         -------
-        #TODO
+        out : tf.Tensor
         """
 
         with tf.GradientTape() as t:
@@ -153,15 +164,14 @@ class _LogLikGrad(at.Op):
 
     def __init__(self, log_lik_grad, observables, default_type=np.float64):
         """
-        Initialise with various things that the function requires. Below
-        are the things that are needed in this particular example.
+        Initialise with the gradient function and the observables.
 
         Parameters
         ----------
         log_lik_grad  : callable
             The object that provides the gradient of the log-likelihood.
-        observables   : #TODO of shape (#TODO)
-            The arguments that the log-likelihood function takes in.
+        observables   : tf.constant, the shape depends on `log_lik_grad`.
+            The variables over which a condition density is learned (i.e., the observables).
         default_type  : np.dtype, optional, default: np.float64
             The default float type to use for the gradient vectors.
         """
@@ -173,11 +183,12 @@ class _LogLikGrad(at.Op):
     def perform(self, node, inputs, outputs):
         """Parameters
         ----------
-        #TODO
-
-        Returns
-        -------
-        #TODO
+        node      : The symbolic `aesara.graph.basic.Apply` node that represents this computation.
+        inputs    : Immutable sequence of non-symbolic/numeric inputs. These are the values of each
+                    `Variable` in `node.inputs`.
+        outputs   : List of mutable single-element lists (do not change the length of these lists).
+                    Each sub-list corresponds to value of each `Variable` in `node.outputs`.
+                    The primary purpose of this method is to set the values of these sub-lists.
         """
 
         (theta,) = inputs
@@ -203,20 +214,23 @@ class PyMCSurrogateLikelihood(at.Op, MCMCSurrogateLikelihood):
         ----------
         amortized_likelihood      : bayesflow.amortized_inference.AmortizedLikelihood
             A pre-trained (invertible) inference network which processes the outputs of the generative model.
-        observables:
-            The "observed" data that will be passed to the configurator
+        observables               :
+            The "observed" data that will be passed to the configurator.
+            For the default `configurator`, an np.array of shape (N, x_dim).
         configurator              : callable, optional, default None
-            A function that takes the input to the lpdf and grad calls and converts the to a dictionary
-            containing the following mandatory keys, if DEFAULT_KEYS unchanged: 
-            `observables` - the variables over which a condition density is learned (i.e., the observables)
-            `conditions`  - the conditioning variables that the directly passed to the inference network
-            default: Return the first parameter - has to be a dicitionary with the mentioned characteristics
-        likelihood_postprocessor  : callable, oiptional, default: None
+            A function that takes the input to the log_likelihood and log_likelihood_grad
+            calls and converts it to a dictionary containing the following mandatory keys,
+            if DEFAULT_KEYS unchanged:
+                `observables` - the variables over which a condition density is learned (i.e., the observables)
+                `conditions`  - the conditioning variables that the directly passed to the inference network
+            default behavior: convert `observables` to shape (1, N, x_dim),
+                expand parameters of shape (cond_dim) to shape (1, N, cond_dim)
+        likelihood_postprocessor  : callable, optional, default: None
             A function that takes the likelihood for each observable, can be used for aggregation
-            default: sum all likelihoods and return a single value
+            default behavior: sum all likelihoods and return a single value
         grad_postprocessor        : callable, optional, default: None
             A function that takes the gradient for each value in `conditions` as returned by the preprocessor
-            default: Leave the values unchanged
+            default behavior: Reduce shape from (1, N, cond_dim) to (cond_dim) by summing the corresponding values
         default_pymc_type         : np.dtype, optional, default: np.float64
             The default float type to use for numpy arrays as required by PyMC.
         default_tf_type           : np.dtype, optional, default: np.float32
@@ -231,37 +245,53 @@ class PyMCSurrogateLikelihood(at.Op, MCMCSurrogateLikelihood):
             grad_postprocessor=grad_postprocessor
         )
 
-
         self.observables = observables
         self.logpgrad = _LogLikGrad(self.log_likelihood_grad, self.observables, default_type=default_pymc_type)
         self.default_pymc_type = default_pymc_type
         self.default_tf_type = default_tf_type
 
+    @tf.function
+    def _default_configurator(self, obs, params):
+        return {
+            # add axis (corresponds to batch_size=1)
+            'observables': obs[tf.newaxis],
+            # expand conditions to match number of observables and add axis
+            'conditions': tf.tile(params[tf.newaxis, :], [obs.shape[0], 1])[tf.newaxis]
+        }
+
+    @tf.function
+    def _default_grad_postprocessor(self, grads):
+        # remove axis added in configurator and undo expansion by summing
+        return tf.reduce_sum(grads[0], axis=0)
+
     def perform(self, node, inputs, outputs):
         """Parameters
         ----------
-        #TODO
-
-        Returns
-        -------
-        #TODO
+        node      : The symbolic `aesara.graph.basic.Apply` node that represents this computation.
+        inputs    : Immutable sequence of non-symbolic/numeric inputs. These are the values of each
+                    `Variable` in `node.inputs`.
+        outputs   : List of mutable single-element lists (do not change the length of these lists).
+                    Each sub-list corresponds to value of each `Variable` in `node.outputs`.
+                    The primary purpose of this method is to set the values of these sub-lists.
         """
 
-        (theta,) = inputs  
+        (theta,) = inputs
         logl = self.log_likelihood(self.observables, self.default_tf_type(theta))
         outputs[0][0] = np.array(logl, dtype=self.default_pymc_type)
 
-    def grad(self, inputs, g):
+    def grad(self, inputs, output_grads):
         """Parameters
         ----------
-        #TODO
+        inputs        : The input variables.
+        output_grads  : The gradients of the output variables.
 
         Returns
         -------
-        #TODO
+        grads         : The gradients with respect to each `Variable` in `inputs`.
         """
 
         # the method that calculates the gradients - it actually returns the
-        # vector-Jacobian product - g[0] is a vector of parameter values
-        (theta,) = inputs  
-        return [g[0] * self.logpgrad(theta)]
+        # vector-Jacobian product - output_grads[0] is a vector of parameter values
+        (theta,) = inputs
+        grads = [output_grads[0] * self.logpgrad(theta)]
+        return grads
