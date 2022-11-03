@@ -22,8 +22,8 @@ from abc import ABC, abstractmethod
 
 
 class Setting(ABC):
-    """Abstract Base class for settings. It's here to potentially extend the setting functionality in future.
-    """
+    """Abstract base class for settings. It's here to potentially extend the setting functionality in future."""
+
     @abstractmethod
     def __init__(self):
         """"""
@@ -31,8 +31,8 @@ class Setting(ABC):
 
 
 class MetaDictSetting(Setting):
-    """Implements an interface for a default meta_dict with optional mandatory fields
-    """
+    """Implements an interface for a default meta_dict with optional mandatory fields."""
+
     def __init__(self, meta_dict: dict, mandatory_fields: list = []):
         """
 
@@ -132,7 +132,18 @@ DEFAULT_SETTING_TAIL_NET = MetaDictSetting(
     mandatory_fields=[]
 )
 
-STRING_CONFIGS = ['var_obs', 'one_hot', 'var_obs_one_hot', 'one_hot_var_obs']
+
+STRING_CONFIGS = [
+    'var_obs', 
+    'one_hot', 
+    'var_obs_one_hot', 
+    'one_hot_var_obs'
+]
+
+
+OPTIMIZER_DEFAULTS = {
+    'global_clipnorm': 3.
+}
 
 
 DEFAULT_KEYS = {

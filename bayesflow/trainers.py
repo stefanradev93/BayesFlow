@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from functools import lru_cache
+import copy
 import numpy as np
 import os
 from pickle import load as pickle_load
@@ -34,9 +34,9 @@ from tensorflow.keras.optimizers import Adam
 
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
-from bayesflow.helper_functions import apply_gradients, format_loss_string
+from bayesflow.helper_functions import format_loss_string
 from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, RegressionLRAdjuster
-from bayesflow.default_settings import STRING_CONFIGS, DEFAULT_KEYS
+from bayesflow.default_settings import STRING_CONFIGS, DEFAULT_KEYS, OPTIMIZER_DEFAULTS
 from bayesflow.amortized_inference import AmortizedLikelihood, AmortizedPosterior, JointAmortizer, ModelComparisonAmortizer
 from bayesflow.diagnostics import plot_sbc_histograms, plot_latent_space_2d
 
@@ -85,9 +85,9 @@ class Trainer:
     """
 
     def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
-                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=3, clip_method='global_norm', 
-                 clip_value=None, skip_checks=False, memory=True, optional_stopping=False, **kwargs):
-        """ Creates a trainer which will use a generative model (or data simulated from it) to optimize
+                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=3, skip_checks=False, 
+                 memory=True, optional_stopping=False, **kwargs):
+        """Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
         Parameters
@@ -101,15 +101,11 @@ class Trainer:
         optimizer         : tf.keras.optimizer.Optimizer or None
             Optimizer for the neural network. `None` will result in `tf.keras.optimizers.Adam`
         learning_rate     : float or tf.keras.schedules.LearningRateSchedule
-            The learning rate used for the optimizer
+            The learning rate used for the optimizer. Should not be part of the `optimizer_kwargs!` 
         checkpoint_path   : string, optional
             Optional folder name for storing the trained network
         max_to_keep       : int, optional
             Number of checkpoints to keep
-        clip_method       : {'norm', 'value', 'global_norm'}
-            Optional gradient clipping method
-        clip_value        : float
-            The value used for gradient clipping when clip_method is in {'value', 'norm'}
         skip_checks       : boolean
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
         memory            : boolean or bayesflow.SimulationMemory
@@ -148,16 +144,15 @@ class Trainer:
 
         # Set-up configurator
         self.configurator = self._manage_configurator(configurator, n_models=_n_models)
-
-        # Gradient clipping settings
-        self.clip_method = clip_method
-        self.clip_value = clip_value
         
         # Optimizer settings
+        opt_kwargs = kwargs.pop('optimizer_kwargs', {})
+        if not opt_kwargs:
+            opt_kwargs = OPTIMIZER_DEFAULTS
         if optimizer is None:
-            self.optimizer = Adam(learning_rate, **kwargs.pop('optimizer_kwargs', {}))
+            self.optimizer = Adam(learning_rate=learning_rate, **opt_kwargs)
         else:
-            self.optimizer = optimizer(learning_rate, **kwargs.pop('optimizer_kwargs', {}))
+            self.optimizer = optimizer(learning_rate=learning_rate, **opt_kwargs)
 
         # Set-up memory classes
         self.loss_history = LossHistory()
@@ -717,8 +712,7 @@ class Trainer:
                     loss = {'Loss': loss, 'Regularization': reg}
         # One step backprop
         gradients = tape.gradient(_loss, self.amortizer.trainable_variables)
-        apply_gradients(self.optimizer, gradients, self.amortizer.trainable_variables, 
-                        self.clip_value, self.clip_method)
+        self.optimizer.apply_gradients(zip(gradients, self.amortizer.trainable_variables))
 
         return loss
 
