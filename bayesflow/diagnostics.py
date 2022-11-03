@@ -276,7 +276,7 @@ def plot_sbc_ecdf(post_samples, prior_samples, difference=False, stacked=False, 
             titles = param_names
 
     for _ax, title in zip(axes, titles):
-        _ax.fill_between(z, L, H, color=fill_color, alpha=0.2, label=f'{int((1-alpha) * 100)}% Confidence Bands')
+        _ax.fill_between(z, L, H, color=fill_color, alpha=0.2, label=fr'{int((1-alpha) * 100)}\% Confidence Bands')
         _ax.plot(z, L, color='black', alpha=0.3)
         _ax.plot(z, H, color='black', alpha=0.3)
         
