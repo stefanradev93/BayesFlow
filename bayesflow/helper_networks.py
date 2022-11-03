@@ -271,6 +271,7 @@ class DenseCouplingNet(tf.keras.Model):
         )
         # Create network output head
         self.dense.add(Dense(n_out, **{k: v for k, v in meta['dense_args'].items() if k != 'units'}))
+        self.dense.build(input_shape=())
 
     def call(self, target, condition, **kwargs):
         """Concatenates target and condition and performs a forward pass through the coupling net.
