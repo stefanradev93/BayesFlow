@@ -30,7 +30,7 @@ from bayesflow.exceptions import ConfigurationError
 
 
 class ConditionalCouplingLayer(tf.keras.Model):
-    """Implements a conditional version of the INN block."""
+    """Implements a conditional version of the INN coupling layer."""
 
     def __init__(self, meta):
         """Creates a conditional invertible block.
@@ -95,6 +95,76 @@ class ConditionalCouplingLayer(tf.keras.Model):
         else:
             self.act_norm = None
 
+    def call(self, target_or_z, condition, inverse=False, **kwargs):
+        """Performs one pass through an invertible chain (either inverse or forward).
+        
+        Parameters
+        ----------
+        target_or_z      : tf.Tensor
+            the estimation quantites of interest or latent representations z ~ p(z), shape (batch_size, ...)
+        condition        : tf.Tensor
+            the conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, ...)
+        inverse          : bool, optional, default: False
+            Flag indicating whether to run the block forward or backward.
+        
+        Returns
+        -------
+        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+            If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
+            v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
+
+        u               :  tf.Tensor
+            If inverse=True: The transformed out, shape (batch_size, inp_dim)
+
+        Important
+        ---------
+        If ``inverse=False``, the return is ``(v, log_det_J)``.\n
+        If ``inverse=True``, the return is ``(z)``
+        """
+        
+        if not inverse:
+            return self.forward(target_or_z, condition, **kwargs)
+        return self.inverse(target_or_z, condition, **kwargs)
+
+    @tf.function
+    def forward(self, target, condition, **kwargs):
+        """Performs a forward pass through a coupling layer with an optinal `Permutation` and `ActNorm` layers."""
+
+        # Initialize log_det_Js accumulator
+        log_det_Js = tf.zeros(1)
+        
+        # Normalize activation, if specified
+        if self.act_norm is not None:
+            target, log_det_J_act = self.act_norm(target)
+            log_det_Js += log_det_J_act
+
+        # Permute, if indicated
+        if self.permutation is not None:
+            target = self.permutation(target)
+
+        # Pass through coupling layer
+        z, log_det_J_c = self._forward(target, condition, **kwargs)
+        log_det_Js += log_det_J_c
+
+        return z, log_det_Js
+
+    @tf.function
+    def inverse(self, z, condition, **kwargs):
+        """Performs an inverse pass through a coupling layer with an optinal `Permutation` and `ActNorm` layers."""
+
+        # Pass through coupling layer
+        target = self._inverse(z, condition, **kwargs)
+
+        # Pass through optional permutation
+        if self.permutation is not None:
+            target = self.permutation(target, inverse=True)
+        
+        # Pass through activation normalization
+        if self.act_norm is not None:
+            target = self.act_norm(target, inverse=True)
+        return target
+
+    @tf.function
     def _forward(self, target, condition, **kwargs):
         """ Performs a forward pass through the coupling block. Used internally by the instance.
 
@@ -136,6 +206,7 @@ class ConditionalCouplingLayer(tf.keras.Model):
         log_det_J = tf.reduce_sum(s1, axis=-1) + tf.reduce_sum(s2, axis=-1)
         return v, log_det_J 
 
+    @tf.function
     def _inverse(self, z, condition, **kwargs):
         """Performs an inverse pass through the coupling block. Used internally by the instance.
 
@@ -171,73 +242,6 @@ class ConditionalCouplingLayer(tf.keras.Model):
         u = tf.concat((u1, u2), axis=-1)
 
         return u
-
-    def call(self, target_or_z, condition, inverse=False, **kwargs):
-        """Performs one pass through an invertible chain (either inverse or forward).
-        
-        Parameters
-        ----------
-        target_or_z      : tf.Tensor
-            the estimation quantites of interest or latent representations z ~ p(z), shape (batch_size, ...)
-        condition        : tf.Tensor
-            the conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, ...)
-        inverse          : bool, optional, default: False
-            Flag indicating whether to run the block forward or backward.
-        
-        Returns
-        -------
-        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
-            If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
-            v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
-
-        u               :  tf.Tensor
-            If inverse=True: The transformed out, shape (batch_size, inp_dim)
-
-        Important
-        ---------
-        If ``inverse=False``, the return is ``(v, log_det_J)``.\n
-        If ``inverse=True``, the return is ``(z)``
-        """
-        
-        if not inverse:
-            return self.forward(target_or_z, condition, **kwargs)
-        return self.inverse(target_or_z, condition, **kwargs)
-
-    def forward(self, target, condition, **kwargs):
-        """Performs a forward pass through a coupling layer with an optinal `Permutation` and `ActNorm` layers."""
-
-        # Initialize log_det_Js accumulator
-        log_det_Js = tf.zeros(1)
-        
-        # Normalize activation, if specified
-        if self.act_norm is not None:
-            target, log_det_J_act = self.act_norm(target)
-            log_det_Js += log_det_J_act
-
-        # Permute, if indicated
-        if self.permutation is not None:
-            target = self.permutation(target)
-
-        # Pass through coupling layer
-        z, log_det_J_c = self._forward(target, condition, **kwargs)
-        log_det_Js += log_det_J_c
-
-        return z, log_det_Js
-
-    def inverse(self, z, condition, **kwargs):
-        """Performs an inverse pass through a coupling layer with an optinal `Permutation` and `ActNorm` layers."""
-
-        # Pass through coupling layer
-        target = self._inverse(z, condition, **kwargs)
-
-        # Pass through optional permutation
-        if self.permutation is not None:
-            target = self.permutation(target, inverse=True)
-        
-        # Pass through activation normalization
-        if self.act_norm is not None:
-            target = self.act_norm(target, inverse=True)
-        return target
 
 
 class InvertibleNetwork(tf.keras.Model):
@@ -313,6 +317,7 @@ class InvertibleNetwork(tf.keras.Model):
             return self.inverse(targets, condition, **kwargs)
         return self.forward(targets, condition, **kwargs)
 
+    @tf.function
     def forward(self, targets, condition, **kwargs):
         """Performs a forward pass though the chain."""
 
@@ -331,6 +336,7 @@ class InvertibleNetwork(tf.keras.Model):
         else:
             return z, log_det_J
 
+    @tf.function
     def inverse(self, z, condition, **kwargs):
         """ Performs a reverse pass through the chain."""
 

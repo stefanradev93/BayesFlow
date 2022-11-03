@@ -103,8 +103,7 @@ class EquivariantModule(tf.keras.Model):
 
 
 class InvariantNetwork(tf.keras.Model):
-    """Implements an invariant network with keras.
-    """
+    """Implements an invariant network with keras."""
 
     def __init__(self, meta={}, **kwargs):
         super(InvariantNetwork, self).__init__(**kwargs)
@@ -118,7 +117,7 @@ class InvariantNetwork(tf.keras.Model):
         self.summary_dim = meta['summary_dim']
     
     def call(self, x):
-        """ Performs the forward pass of a learnable deep invariant transformation consisting of
+        """Performs the forward pass of a learnable deep invariant transformation consisting of
         a sequence of equivariant transforms followed by an invariant transform.
         
         Parameters

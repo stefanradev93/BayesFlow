@@ -680,6 +680,7 @@ class Trainer:
             out_dict = self.configurator(out_dict, **kwargs.pop('conf_args', {}))
         return out_dict
 
+    @tf.function
     def _backprop_step(self, input_dict, **kwargs):
         """ Computes the loss of the provided amortizer given an input dictionary and applies gradients.
 
