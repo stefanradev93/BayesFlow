@@ -168,7 +168,13 @@ class Trainer:
         else:
             self.simulation_memory = None
 
-        # Checkpoint settings
+        # Set-up regression learning rate adjuster
+        if optional_stopping:
+            self.lr_adjuster = RegressionLRAdjuster(self.optimizer, **kwargs.pop('optional_stopping_kwargs', {}))
+        else:
+            self.lr_adjuster = None
+
+        # Checkpoint and helper classes settings
         self.max_to_keep = max_to_keep
         if checkpoint_path is not None:
             self.checkpoint = tf.train.Checkpoint(optimizer=self.optimizer, model=self.amortizer)
@@ -177,6 +183,8 @@ class Trainer:
             self.loss_history.load_from_file(checkpoint_path)
             if self.simulation_memory is not None:
                 self.simulation_memory.load_from_file(checkpoint_path)
+            if self.lr_adjuster is not None:
+                self.lr_adjuster.load_from_file(checkpoint_path)
             if self.manager.latest_checkpoint:
                 logger.info("Networks loaded from {}".format(self.manager.latest_checkpoint))
             else:
@@ -185,12 +193,6 @@ class Trainer:
             self.checkpoint = None
             self.manager = None
         self.checkpoint_path = checkpoint_path
-
-        # Set-up regression learning rate adjuster
-        if optional_stopping:
-            self.lr_adjuster = RegressionLRAdjuster(self.optimizer, **kwargs.pop('optional_stopping_kwargs', {}))
-        else:
-            self.lr_adjuster = None
 
         # Perform a sanity check wiuth provided components
         if not skip_checks:
@@ -607,8 +609,10 @@ class Trainer:
         if self.manager is not None and save_checkpoint:
             self.manager.save()
             self.loss_history.save_to_file(file_path=self.checkpoint_path, max_to_keep=self.max_to_keep)
-        if self.simulation_memory is not None and self.manager is not None and save_checkpoint:
-            self.simulation_memory.save_to_file(file_path=self.checkpoint_path, max_to_keep=self.max_to_keep)
+            if self.lr_adjuster is not None:
+                self.lr_adjuster.save_to_file(file_path=self.checkpoint_path)
+            if self.simulation_memory is not None:
+                self.simulation_memory.save_to_file(file_path=self.checkpoint_path)
 
     def _check_optional_stopping(self):
         """ Helper method for checking optional stopping. Resets the adjuster

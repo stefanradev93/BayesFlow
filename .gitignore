@@ -5,6 +5,9 @@ __pycache__/
 projects/
 */bayesflow.egg-info
 
+# Notebooks
+docs/source/tutorial_notebooks/**
+
 # mypy
 .mypy_cache
 
