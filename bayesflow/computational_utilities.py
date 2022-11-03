@@ -27,7 +27,7 @@ from bayesflow.default_settings import MMD_BANDWIDTH_LIST
 
 
 def gaussian_kernel_matrix(x, y, sigmas=None):
-    """ Computes a Gaussian Radial Basis Kernel between the samples of x and y.
+    """Computes a Gaussian Radial Basis Kernel between the samples of x and y.
 
     We create a sum of multiple Gaussian kernels each having a width :math:`\sigma_i`.
 
@@ -55,7 +55,7 @@ def gaussian_kernel_matrix(x, y, sigmas=None):
 
 
 def inverse_multiquadratic_kernel_matrix(x, y, sigmas=None):
-    """ Computes an inverse multiquadratic RBF between the samples of x and y.
+    """Computes an inverse multiquadratic RBF between the samples of x and y.
 
     We create a sum of multiple IM-RBF kernels each having a width :math:`\sigma_i`.
 
@@ -80,7 +80,7 @@ def inverse_multiquadratic_kernel_matrix(x, y, sigmas=None):
 
 
 def mmd_kernel(x, y, kernel):
-    """ Computes the Maximum Mean Discrepancy (MMD) between two samples: x and y.
+    """Computes the Maximum Mean Discrepancy (MMD) between two samples: x and y.
 
     Maximum Mean Discrepancy (MMD) is a distance-measure between random draws from 
     the distributions of x and y.
@@ -174,18 +174,24 @@ def expected_calibration_error(m_true, m_pred, n_bins=15):
     return cal_errs, probs
 
 
-def maximum_mean_discrepancy(source_samples, target_samples, kernel, mmd_weight=1., minimum=0.):
-    """ Computes the MMD given a particular choice of kernel.
+def maximum_mean_discrepancy(source_samples, target_samples, kernel='gaussian', mmd_weight=1., minimum=0.):
+    """Computes the MMD given a particular choice of kernel.
+
+    For details, consult Gretton et al. (2012):
+    https://www.jmlr.org/papers/volume13/gretton12a/gretton12a.pdf
 
     Parameters
     ----------
-    source_samples :  tf.Tensor of shape (N, num_features)
-    target_samples :  tf.Tensor of shape  (M, num_features)
-    kernel         : str in ('gaussian', 'inverse_multiquadratic')
-    mmd_weight     : float, default: 1.0
-        the weight of the MMD loss.
-    minimum        : float, default: 0.0
-        lower loss bound
+    source_samples : tf.Tensor of shape (N, num_features)
+        Random draws from the "source" distribution.
+    target_samples : tf.Tensor of shape  (M, num_features)
+        Random draws from the "target" distribution.
+    kernel         : str in ('gaussian', 'inverse_multiquadratic'), optional, default: 'gaussian'
+        The kernel to use for computing the sample representations.
+    mmd_weight     : float, optional, default: 1.0
+        The weight of the MMD value.
+    minimum        : float, optional, default: 0.0
+        The lower bound of the MMD value.
 
     Returns
     -------
@@ -200,6 +206,7 @@ def maximum_mean_discrepancy(source_samples, target_samples, kernel, mmd_weight=
         kernel_fun = inverse_multiquadratic_kernel_matrix
     else:
         kernel_fun = gaussian_kernel_matrix
+
     # Compute and return MMD value
     loss_value = mmd_kernel(source_samples, target_samples, kernel=kernel_fun)
     loss_value = mmd_weight * tf.maximum(minimum, loss_value)
@@ -207,7 +214,7 @@ def maximum_mean_discrepancy(source_samples, target_samples, kernel, mmd_weight=
 
 
 def get_coverage_probs(z, u):
-    """ Vectorized function to compute the minimal coverage probability for uniform
+    """Vectorized function to compute the minimal coverage probability for uniform
     ECDFs given evaluation points z and a sample of samples u.
     
     Parameters
@@ -228,7 +235,7 @@ def get_coverage_probs(z, u):
 
 def simultaneous_ecdf_bands(num_samples, num_points=None, num_simulations=1000, 
                             confidence=0.95, eps=1e-5, max_num_points=1000):
-    """ Computes the simultaneous ECDF bands through simulation according to
+    """Computes the simultaneous ECDF bands through simulation according to
     the algorithm described in Section 2.2:
     
     https://link.springer.com/content/pdf/10.1007/s11222-022-10090-6.pdf
@@ -283,4 +290,3 @@ def simultaneous_ecdf_bands(num_samples, num_points=None, num_simulations=1000,
     L = stats.binom(N, z).ppf(gamma / 2) / N
     U = stats.binom(N, z).ppf(1 - gamma / 2) / N
     return alpha, z, L, U
-
