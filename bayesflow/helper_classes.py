@@ -269,7 +269,7 @@ class RegressionLRAdjuster:
             self._reset_counter += 1
 
             # Store iteration and learning rate
-            self._history['iteration'].append(self.optimizer.iterations())
+            self._history['iteration'].append(self.optimizer.iterations.numpy())
             self._history['learning_rate'].append(old_lr)
 
             # Verbose info to user
