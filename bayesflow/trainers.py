@@ -174,7 +174,7 @@ class Trainer:
         else:
             self.lr_adjuster = None
 
-        # Checkpoint settings
+        # Checkpoint and helper classes settings
         self.max_to_keep = max_to_keep
         if checkpoint_path is not None:
             self.checkpoint = tf.train.Checkpoint(optimizer=self.optimizer, model=self.amortizer)
@@ -193,8 +193,6 @@ class Trainer:
             self.checkpoint = None
             self.manager = None
         self.checkpoint_path = checkpoint_path
-
-        
 
         # Perform a sanity check wiuth provided components
         if not skip_checks:

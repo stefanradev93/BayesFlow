@@ -87,8 +87,8 @@ class SimulationDataset:
 class RegressionLRAdjuster:
     """This class will compute the slope of the loss trajectory and inform learning rate decay."""
     
-    file_name = 'lradjuster'
-
+    file_name = 'lr_adjuster'
+    
     def __init__(self, optimizer, period=1000, wait_between_fits=10, patience=10, tolerance=-0.05, 
                  reduction_factor=0.25, cooldown_factor=2, num_resets=3, **kwargs):
         """Creates an instance with given hyperparameters which will track the slope of the 
@@ -178,26 +178,25 @@ class RegressionLRAdjuster:
         self.stopping_issued = False
 
     def save_to_file(self, file_path):
-        """Saves the state parameters of a RegressionLRAdjuster object to a pickled dictionary in file_path.
-        """
+        """Saves the state parameters of a RegressionLRAdjuster object to a pickled dictionary in file_path."""
 
         # Create path to memory
         memory_path = os.path.join(file_path, f'{RegressionLRAdjuster.file_name}.pkl')
         
         # Prepare attributes
-        LRAdjuster_states_dict = {}
-        LRAdjuster_states_dict['_history'] = self._history
-        LRAdjuster_states_dict['_reset_counter'] = self._reset_counter
-        LRAdjuster_states_dict['_patience_counter'] = self._patience_counter
-        LRAdjuster_states_dict['_cooldown_counter'] = self._cooldown_counter
-        LRAdjuster_states_dict['_wait_counter'] = self._wait_counter
-        LRAdjuster_states_dict['_slope'] = self._slope
-        LRAdjuster_states_dict['_is_waiting'] = self._is_waiting
-        LRAdjuster_states_dict['_in_cooldown'] = self._in_cooldown
+        states_dict = {}
+        states_dict['_history'] = self._history
+        states_dict['_reset_counter'] = self._reset_counter
+        states_dict['_patience_counter'] = self._patience_counter
+        states_dict['_cooldown_counter'] = self._cooldown_counter
+        states_dict['_wait_counter'] = self._wait_counter
+        states_dict['_slope'] = self._slope
+        states_dict['_is_waiting'] = self._is_waiting
+        states_dict['_in_cooldown'] = self._in_cooldown
         
         # Dump as pickle object
         with open(memory_path, 'wb') as f:
-            pickle.dump(LRAdjuster_states_dict, f)
+            pickle.dump(states_dict, f)
 
     def load_from_file(self, file_path):
         """Loads the saved LRAdjuster object from file_path."""
@@ -214,23 +213,22 @@ class RegressionLRAdjuster:
 
             # Load pickle and fill in attributes
             with open(memory_path, 'rb') as f:
-                LRAdjuster_states_dict = pickle.load(f)
+                states_dict = pickle.load(f)
 
-            self._history = LRAdjuster_states_dict['_history']
-            self._reset_counter = LRAdjuster_states_dict['_reset_counter']
-            self._patience_counter = LRAdjuster_states_dict['_patience_counter']
-            self._cooldown_counter = LRAdjuster_states_dict['_cooldown_counter']
-            self._wait_counter = LRAdjuster_states_dict['_wait_counter']
-            self._slope = LRAdjuster_states_dict['_slope']
-            self._is_waiting = LRAdjuster_states_dict['_is_waiting']
-            self._in_cooldown = LRAdjuster_states_dict['_in_cooldown']
+            self._history = states_dict['_history']
+            self._reset_counter = states_dict['_reset_counter']
+            self._patience_counter = states_dict['_patience_counter']
+            self._cooldown_counter = states_dict['_cooldown_counter']
+            self._wait_counter = states_dict['_wait_counter']
+            self._slope = states_dict['_slope']
+            self._is_waiting = states_dict['_is_waiting']
+            self._in_cooldown = states_dict['_in_cooldown']
 
             logger.info(f"Loaded RegressionLRAdjuster from {memory_path}")
 
         # Case memory file does not exist
         else:
-            logger.info("Newly initialized RegressionLRAdjuster.")
-
+            logger.info("Initialized a new RegressionLRAdjuster.")
 
     def _check_patience(self):
         """Determines whether to reduce learning rate or be patient."""
@@ -506,8 +504,7 @@ class SimulationMemory:
         return False
     
     def save_to_file(self, file_path):
-        """Saves a `SimulationMemory` object to a pickled dictionary in file_path.
-        """
+        """Saves a `SimulationMemory` object to a pickled dictionary in file_path."""
 
         # Create path to memory
         memory_path = os.path.join(file_path, f'{SimulationMemory.file_name}.pkl')
@@ -525,7 +522,7 @@ class SimulationMemory:
             pickle.dump(full_memory_dict, f)
 
     def load_from_file(self, file_path):
-        """Loads the saved SimulationMemory object from file_path."""
+        """Loads the saved `SimulationMemory` object from file_path."""
 
         # Logger init
         logger = logging.getLogger()
@@ -535,7 +532,7 @@ class SimulationMemory:
         memory_path = os.path.join(file_path, f'{SimulationMemory.file_name}.pkl')
 
         # Case memory file exists
-        if os.path.exists(memory_path):
+        if os.path.exists(file_path):
 
             # Load pickle and fill in attributes
             with open(memory_path, 'rb') as f:
