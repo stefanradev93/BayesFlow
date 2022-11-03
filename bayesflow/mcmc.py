@@ -27,14 +27,16 @@ from bayesflow.default_settings import DEFAULT_KEYS
 
 
 class MCMCSurrogateLikelihood:
-    """ An interface to provide likelihood evaluation and gradient estimation of a pre-trained
-    `AmortizedLikelihood` instance, which can be used in tandem with (HMC)-MCMC.
+    """An interface to provide likelihood evaluation and gradient estimation of a pre-trained
+    `AmortizedLikelihood` instance, which can be used in tandem with (HMC)-MCMC, as implemented,
+    for instance, in `PyMC3`.
     """
 
     @tf.function
     def __init__(self, amortized_likelihood, configurator=None, likelihood_postprocessor=None,
                  grad_postprocessor=None):
-        """
+        """Creates in instance of the surrogate likelihood using a pre-trained `AmortizedLikelihood` instance.
+
         Parameters
         ----------
         amortized_likelihood       : bayesflow.amortized_inference.AmortizedLikelihood
@@ -101,7 +103,7 @@ class MCMCSurrogateLikelihood:
         )
 
     def log_likelihood_grad(self, *args, **kwargs):
-        """ Calculates the gradient of the surrogate likelihood with respect to
+        """Calculates the gradient of the surrogate likelihood with respect to
         every parameter in `conditions`.
 
         Parameters
@@ -129,7 +131,7 @@ class MCMCSurrogateLikelihood:
 
     @tf.function
     def _log_likelihood_grad(self, input_dict, **kwargs):
-        """ Calculates the gradient with respect to every parameter in `conditions`.
+        """Calculates the gradient with respect to every parameter contained in `input_dict`.
 
         Parameters
         ----------
@@ -151,8 +153,7 @@ class MCMCSurrogateLikelihood:
 
 
 class _LogLikGrad(at.Op):
-    """
-    Custom log-likelihood operator, based on:
+    """Custom log-likelihood operator, based on:
     https://www.pymc.io/projects/examples/en/latest/case_studies/blackbox_external_likelihood_numpy.html#aesara-op-with-grad
 
     This Op will execute the `log_lik_grad` function, supplying the gradient
@@ -163,8 +164,7 @@ class _LogLikGrad(at.Op):
     otypes = [at.dvector]
 
     def __init__(self, log_lik_grad, observables, default_type=np.float64):
-        """
-        Initialise with the gradient function and the observables.
+        """Initialize with the gradient function and the observables.
 
         Parameters
         ----------
@@ -181,7 +181,9 @@ class _LogLikGrad(at.Op):
         self.default_type = default_type
 
     def perform(self, node, inputs, outputs):
-        """Parameters
+        """Computes gradients with respect to `inputs` (corresponding to the parameters of a model).
+
+        Parameters
         ----------
         node      : The symbolic `aesara.graph.basic.Apply` node that represents this computation.
         inputs    : Immutable sequence of non-symbolic/numeric inputs. These are the values of each
@@ -207,8 +209,7 @@ class PyMCSurrogateLikelihood(at.Op, MCMCSurrogateLikelihood):
 
     def __init__(self, amortized_likelihood, observables, configurator=None, likelihood_postprocessor=None,
                  grad_postprocessor=None, default_pymc_type=np.float64, default_tf_type=np.float32):
-        """
-        A custom likelihood function, to be used with pymc.Potential
+        """A custom surrogate likelihood function for integration with `PyMC3`, to be used with pymc.Potential
 
         Parameters
         ----------
@@ -265,7 +266,9 @@ class PyMCSurrogateLikelihood(at.Op, MCMCSurrogateLikelihood):
         return tf.reduce_sum(grads[0], axis=0)
 
     def perform(self, node, inputs, outputs):
-        """Parameters
+        """Computes the log-likelihood of `inputs` (typically the parameter vector of a model).
+        
+        Parameters
         ----------
         node      : The symbolic `aesara.graph.basic.Apply` node that represents this computation.
         inputs    : Immutable sequence of non-symbolic/numeric inputs. These are the values of each
@@ -280,7 +283,9 @@ class PyMCSurrogateLikelihood(at.Op, MCMCSurrogateLikelihood):
         outputs[0][0] = np.array(logl, dtype=self.default_pymc_type)
 
     def grad(self, inputs, output_grads):
-        """Parameters
+        """Aggregates gradients with respect to `inputs` (typically the parameter vector)
+        
+        Parameters
         ----------
         inputs        : The input variables.
         output_grads  : The gradients of the output variables.
