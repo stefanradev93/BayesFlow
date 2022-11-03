@@ -27,21 +27,24 @@ from bayesflow.default_settings import MMD_BANDWIDTH_LIST
 
 
 def gaussian_kernel_matrix(x, y, sigmas=None):
-    """Computes a Gaussian Radial Basis Kernel between the samples of x and y.
+    """Computes a Gaussian radial basis functions (RBFs) between the samples of x and y.
 
     We create a sum of multiple Gaussian kernels each having a width :math:`\sigma_i`.
 
     Parameters
     ----------
-    x      :  tf.Tensor of shape (N, num_features)
-    y      :  tf.Tensor of shape (M, num_features)
-    sigmas :  list(float), optional, default: None (use default)
-        List which denotes the widths of each of the Gaussians in the kernel.
+    x       :  tf.Tensor of shape (num_draws_x, num_features)
+        Comprises `num_draws_x` Random draws from the "source" distribution `P`.
+    y       :  tf.Tensor of shape (num_draws_y, num_features)
+        Comprises `num_draws_y` Random draws from the "source" distribution `Q`.
+    sigmas  : list(float), optional, default: None
+        List which denotes the widths of each of the gaussians in the kernel.
+        If `sigmas is None`, a default range will be used, contained in `bayesflow.default_settings.MMD_BANDWIDTH_LIST`
 
     Returns
     -------
-    kernel : tf.Tensor
-        RBF kernel of shape [num_samples{x}, num_samples{y}]
+    kernel  : tf.Tensor of shape (num_draws_x, num_draws_y)
+        The kernel matrix between pairs from `x` and `y`.
     """
 
     if sigmas is None:
@@ -61,15 +64,18 @@ def inverse_multiquadratic_kernel_matrix(x, y, sigmas=None):
 
     Parameters
     ----------
-    x :  tf.Tensor of shape (N, num_features)
-    y :  tf.Tensor of shape (M, num_features)
-    sigmas : list(float)
+    x       :  tf.Tensor of shape (num_draws_x, num_features)
+        Comprises `num_draws_x` Random draws from the "source" distribution `P`.
+    y       :  tf.Tensor of shape (num_draws_y, num_features)
+        Comprises `num_draws_y` Random draws from the "source" distribution `Q`.
+    sigmas  : list(float), optional, default: None
         List which denotes the widths of each of the gaussians in the kernel.
+        If `sigmas is None`, a default range will be used, contained in `bayesflow.default_settings.MMD_BANDWIDTH_LIST`
 
     Returns
     -------
-    kernel: tf.Tensor
-        RBF kernel of shape [num_samples{x}, num_samples{y}]
+    kernel  : tf.Tensor of shape (num_draws_x, num_draws_y)
+        The kernel matrix between pairs from `x` and `y`.
     """
 
     if sigmas is None:
@@ -80,23 +86,24 @@ def inverse_multiquadratic_kernel_matrix(x, y, sigmas=None):
 
 
 def mmd_kernel(x, y, kernel):
-    """Computes the Maximum Mean Discrepancy (MMD) between two samples: x and y.
+    """Computes the estimator of the Maximum Mean Discrepancy (MMD) between two samples: x and y.
 
     Maximum Mean Discrepancy (MMD) is a distance-measure between random draws from 
-    the distributions of x and y.
+    the distributions `x ~ P` and `y ~ Q`. 
 
     Parameters
     ----------
     x      : tf.Tensor of shape (N, num_features)
-        Random dtaws 
+        An array of `N` random draws from the "source" distribution `x ~ P`.
     y      : tf.Tensor of shape (M, num_features)
+        An array of `M` random draws from the "target" distribution `y ~ Q`.
     kernel : callable 
-        A function which computes the kernel for MMD.
+        A function which computes the distance between pairs of samples.
 
     Returns
     -------
-    loss   : tf.Tensor
-        squared maximum mean discrepancy loss, shape (,)
+    loss   : tf.Tensor of shape (,)
+        The statistically biased squared maximum mean discrepancy (MMD) value.
     """
 
     loss = tf.reduce_mean(kernel(x, x))  
@@ -106,20 +113,22 @@ def mmd_kernel(x, y, kernel):
 
 
 def mmd_kernel_unbiased(x, y, kernel):
-    """ Computes the unbiased estimator of the Maximum Mean Discrepancy (MMD) between two samples: x and y.
-    Maximum Mean Discrepancy (MMD) is a distance-measure between the samples of the distributions of x and y.
+    """Computes the unbiased estimator of the Maximum Mean Discrepancy (MMD) between two samples: x and y.
+    Maximum Mean Discrepancy (MMD) is a distance-measure between the samples of the distributions `x ~ P` and `y ~ Q`.
 
     Parameters
     ----------
     x      : tf.Tensor of shape (N, num_features)
+        An array of `N` random draws from the "source" distribution `x ~ P`.
     y      : tf.Tensor of shape (M, num_features)
+        An array of `M` random draws from the "target" distribution `y ~ Q`.
     kernel : callable
-        A function which computes the kernel for MMD.
+        A function which computes the distance between pairs of random draws from `x` and `y`.
 
     Returns
     -------
-    loss   : tf.Tensor
-        squared maximum mean discrepancy loss, shape (,)
+    loss   : tf.Tensor of shape (,)
+        The statistically unbiaserd squared maximum mean discrepancy (MMD) value.
     """
 
     m, n = x.shape[0], y.shape[0]
@@ -130,7 +139,7 @@ def mmd_kernel_unbiased(x, y, kernel):
 
 
 def expected_calibration_error(m_true, m_pred, n_bins=15):
-    """ Estimates the calibration error of a model comparison network.
+    """Estimates the calibration error of a model comparison network.
 
     Important
     ---------
@@ -183,11 +192,11 @@ def maximum_mean_discrepancy(source_samples, target_samples, kernel='gaussian', 
     Parameters
     ----------
     source_samples : tf.Tensor of shape (N, num_features)
-        Random draws from the "source" distribution.
+        An array of `N` random draws from the "source" distribution.
     target_samples : tf.Tensor of shape  (M, num_features)
-        Random draws from the "target" distribution.
+        An array of `M` random draws from the "target" distribution.
     kernel         : str in ('gaussian', 'inverse_multiquadratic'), optional, default: 'gaussian'
-        The kernel to use for computing the sample representations.
+        The kernel to use for computing the distance between pairs of random draws.
     mmd_weight     : float, optional, default: 1.0
         The weight of the MMD value.
     minimum        : float, optional, default: 0.0
