@@ -67,9 +67,12 @@ Coming soon...
 
 ## Model Misspecification
 
-What if we are dealing with misspecified models? That is, how faithful is our amortized inference if the generative model is a poor representation of reality?
+What if we are dealing with misspecified models? That is, how faithful is our amortized inference if the generative model is a poor representation of reality? A modified loss function optimizes the learned summary statistics towards a unit Gaussian and reliably detects model misspecification during inference time.
 
-Coming soon...
+![Model Misspecification](https://github.com/stefanradev93/BayesFlow/blob/Future/docs/source/images/model_misspecification_amortized_sbi.png?raw=true)
+
+
+
 
 ## Model Comparison
 
