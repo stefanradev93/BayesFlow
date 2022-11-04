@@ -67,6 +67,8 @@ Coming soon...
 
 ## Model Misspecification
 
+What if we are dealing with misspecified models? That is, how faithful is our amortized inference if the generative model is a poor representation of reality?
+
 Coming soon...
 
 ## Model Comparison
