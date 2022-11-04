@@ -72,7 +72,7 @@ class EquivariantModule(tf.keras.Model):
         
         self.invariant_module = InvariantModule(meta)
         self.s3 = Sequential([Dense(**meta['dense_s3_args']) for _ in range(meta['n_dense_s3'])])
-                    
+
     def call(self, x):
         """Performs the forward pass of a learnable equivariant transform.
         
@@ -88,12 +88,14 @@ class EquivariantModule(tf.keras.Model):
         """
         
         # Store N
-        N = int(x.shape[1])
+        shape = tf.shape(x)
         
         # Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
         out_inv = self.invariant_module(x)
-        out_inv_rep = tf.stack([out_inv] * N, axis=1)
-        
+        # out_inv_rep = tf.stack([out_inv] * N, axis=1)
+        out_inv = tf.expand_dims(out_inv, 1)
+        out_inv_rep= tf.tile(out_inv, [1, shape[1], 1])
+
         # Concatenate each x with the repeated invariant embedding
         out_c = tf.concat([x, out_inv_rep], axis=-1)
         

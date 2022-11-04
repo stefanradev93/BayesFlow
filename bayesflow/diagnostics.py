@@ -658,7 +658,7 @@ def plot_calibration_curves(m_true, m_pred, model_names=None, n_bins=10, font_si
 
     n_models = m_pred.shape[-1]
     if model_names is None:
-        model_names = [f'$M_{m}$' for m in range(1, n_models+1)]
+        model_names = [fr'$M_{{{m}}}$' for m in range(1, n_models+1)]
 
     # Determine n_subplots dynamically
     n_row = int(np.ceil(n_models / 6))
