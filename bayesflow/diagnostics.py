@@ -700,6 +700,6 @@ def plot_calibration_curves(m_true, m_pred, model_names=None, n_bins=10, font_si
                         size=font_size)
 
         # Set title
-        ax.set_title(model_names[j])
+        ax[j].set_title(model_names[j])
     f.tight_layout()
     return f
