@@ -53,7 +53,7 @@ class DefaultJointConfigurator:
 
 
 class DefaultLikelihoodConfigurator:
-    """ Utility class for a generic configrator for likelihood emulation.
+    """Utility class for a generic configrator for likelihood emulation.
     """
 
     def __init__(self, transform_fun=None, combine_fun=None, default_float_type=np.float32):

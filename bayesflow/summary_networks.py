@@ -92,7 +92,7 @@ class EquivariantModule(tf.keras.Model):
         
         # Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
         out_inv = self.invariant_module(x)
-        # out_inv_rep = tf.stack([out_inv] * N, axis=1)
+
         out_inv = tf.expand_dims(out_inv, 1)
         out_inv_rep= tf.tile(out_inv, [1, shape[1], 1])
 

@@ -288,12 +288,10 @@ class DenseCouplingNet(tf.keras.Model):
         if condition is None:
             return self.dense(target, **kwargs)
 
-        # Handle 3D case for a set-flow
-        if len(target.shape) == 3 and len(condition.shape) == 2:
-            # Extract information about second dimension
-            # Store N
+        # Handle 3D case for a set-flow and repeat condition over
+        # the second `time` or `n_observations` axis of `target``
+        if len(tf.shape(target)) == 3 and len(tf.shape(condition)) == 2:
             shape = tf.shape(target)
-
             condition = tf.expand_dims(condition, 1)
             condition = tf.tile(condition, [1, shape[1], 1])
         inp = tf.concat((target, condition), axis=-1)
