@@ -34,7 +34,7 @@ from tensorflow.keras.optimizers import Adam
 
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
-from bayesflow.helper_functions import format_loss_string
+from bayesflow.helper_functions import format_loss_string, extract_current_lr
 from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, RegressionLRAdjuster
 from bayesflow.default_settings import STRING_CONFIGS, DEFAULT_KEYS, OPTIMIZER_DEFAULTS
 from bayesflow.amortized_inference import AmortizedLikelihood, AmortizedPosterior, JointAmortizer, ModelComparisonAmortizer
@@ -352,8 +352,11 @@ class Trainer:
                     else:
                         slope = None
 
+                    # Extract current learning rate
+                    lr = extract_current_lr(self.optimizer)
+
                     # Format for display on progress bar
-                    disp_str = format_loss_string(ep, it, loss, avg_dict, slope)
+                    disp_str = format_loss_string(ep, it, loss, avg_dict, slope, lr)
 
                     # Update progress bar
                     p_bar.set_postfix_str(disp_str)
@@ -425,8 +428,11 @@ class Trainer:
                     else:
                         slope = None
 
+                    # Extract current learning rate
+                    lr = extract_current_lr(self.optimizer)
+
                     # Format for display on progress bar
-                    disp_str = format_loss_string(ep, bi, loss, avg_dict, slope, it_str='Batch')
+                    disp_str = format_loss_string(ep, bi, loss, avg_dict, slope, lr, it_str='Batch')
 
                     # Update progress
                     p_bar.set_postfix_str(disp_str)
@@ -534,8 +540,11 @@ class Trainer:
                     else:
                         slope = None
 
+                    # Extract current learning rate
+                    lr = extract_current_lr(self.optimizer)
+
                     # Format for display on progress bar
-                    disp_str = format_loss_string(ep, it, loss, avg_dict, slope)
+                    disp_str = format_loss_string(ep, it, loss, avg_dict, slope, lr)
 
                     # Update progress bar
                     p_bar.set_postfix_str(disp_str)

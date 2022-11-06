@@ -22,7 +22,7 @@ import copy
 
 from bayesflow import default_settings
 from bayesflow.exceptions import ConfigurationError, ShapeError
-
+from tensorflow.keras.optimizers.schedules import LearningRateSchedule
 
 def merge_left_into_right(left_dict, right_dict):
     """Function to merge nested dict `left_dict` into nested dict `right_dict`.
@@ -74,7 +74,32 @@ def build_meta_dict(user_dict: dict, default_setting: default_settings.MetaDictS
     return merged_dict
 
 
-def format_loss_string(ep, it, loss, avg_dict, slope, ep_str="Epoch", it_str='Iter', scalar_loss_str='Loss'):
+def extract_current_lr(optimizer):
+    """Extract current learning rate from `optimizer`
+
+    Parameters
+    ----------
+    optimizer : instance of subclass of `tf.keras.optimizers.Optimizer`
+        Optimizer to extract the learning rate from
+
+    Returns
+    -------
+    learning_rate : np.float or NoneType
+        Current learning rate, or `None` if it can't be determined
+    """
+    if isinstance(optimizer.lr, LearningRateSchedule):
+        # LearningRateSchedule instances need number of iterations
+        current_lr = optimizer.lr(optimizer.iterations).numpy()
+    elif hasattr(optimizer.lr, "numpy"):
+        # Convert learning rate to numpy
+        current_lr = optimizer.lr.numpy()
+    else:
+        # Unable to extract numerical value from optimizer.lr
+        current_lr = None
+    return current_lr
+
+
+def format_loss_string(ep, it, loss, avg_dict, slope, lr=None, ep_str="Epoch", it_str='Iter', scalar_loss_str='Loss'):
     """ Prepare loss string for displaying on progress bar
     """
 
@@ -88,10 +113,10 @@ def format_loss_string(ep, it, loss, avg_dict, slope, ep_str="Epoch", it_str='It
     if avg_dict is not None:
         for k, v in avg_dict.items():
             disp_str += f",{k}: {v:.3f}"
-    if slope is None:
-        disp_str += f",L.Slope: NA"
-    else:
+    if slope is not None:
         disp_str += f",L.Slope: {slope:.3f}"
+    if lr is not None:
+        disp_str += f",LR: {lr:.3E}"
     return disp_str
 
 
