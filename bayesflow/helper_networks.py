@@ -27,44 +27,59 @@ from bayesflow.wrappers import SpectralNormalization
 from bayesflow.exceptions import ConfigurationError
 
 
-class TailNetwork(tf.keras.Model):
-    """Implements a standard fully connected network for learning the degrees of a latent Student-t distribution."""
+class DenseCouplingNet(tf.keras.Model):
+    """Implements a conditional version of a standard fully connected (FC) network.
+    Would also work as an unconditional estimator."""
 
-    def __init__(self, meta):
-        """Creates a network which will adaptively learn the heavy-tailedness of the target distribution.
+    def __init__(self, meta, n_out, **kwargs):
+        """Creates a conditional coupling net (FC neural network).
 
         Parameters
         ----------
-        meta : list(dict)
-            A list of dictionaries, where each dictionary holds parameter-value pairs
-            for a single :class:`keras.Dense` layer
+        meta     : dict
+            A dictionary which holds arguments for a dense layer.
+        n_out    : int
+            Number of outputs of the coupling net
+        **kwargs : dict, optional, default: {}
+            Optional keyword arguments passed to the `tf.keras.Model` constructor. 
         """
-        
-        super().__init__()
 
-        # Create network body
+        super().__init__(**kwargs)
+
+        # Create network body (input and hidden layers)
         self.dense = Sequential(
             # Hidden layer structure
-            [Dense(**meta['dense_args'])
+            [SpectralNormalization(Dense(**meta['dense_args'])) if meta['spec_norm'] else Dense(**meta['dense_args'])
              for _ in range(meta['n_dense'])]
         )
 
-        # Create network head
-        self.dense.add(Dense(1, activation='softplus', **{k: v for 
-        k, v in meta['dense_args'].items() if k != 'units' and k != 'activation'}))
-        
-    def call(self, condition):
-        """Performs a forward pass through the tail network. Output is the learned "degrees of freedom" parameter
-        for the latent t-distribution.
+        # Create network output head
+        self.dense.add(Dense(n_out, kernel_initializer='zeros'))
+        self.dense.build(input_shape=())
+
+    def call(self, target, condition, **kwargs):
+        """Concatenates target and condition and performs a forward pass through the coupling net.
 
         Parameters
         ----------
-        condition   : tf.Tensor
+        target      : tf.Tensor
+          The split estimation quntities, for instance, parameters :math:`\\theta \sim p(\\theta)` of interest, shape (batch_size, ...)
+        condition   : tf.Tensor or None
             the conditioning vector of interest, for instance ``x = summary(x)``, shape (batch_size, summary_dim)
         """
 
-        # Output is bounded between (1, inf)
-        out = self.dense(condition) + 1.0
+        # Handle case no condition
+        if condition is None:
+            return self.dense(target, **kwargs)
+
+        # Handle 3D case for a set-flow and repeat condition over
+        # the second `time` or `n_observations` axis of `target``
+        if len(tf.shape(target)) == 3 and len(tf.shape(condition)) == 2:
+            shape = tf.shape(target)
+            condition = tf.expand_dims(condition, 1)
+            condition = tf.tile(condition, [1, shape[1], 1])
+        inp = tf.concat((target, condition), axis=-1)
+        out = self.dense(inp, **kwargs)
         return out
 
 
@@ -193,6 +208,7 @@ class ActNorm(tf.keras.Model):
         else:
             return self._inverse(target)
 
+    @tf.function
     def _forward(self, target):
         """Performs a forward pass through the `ActNorm` layer."""
 
@@ -200,6 +216,7 @@ class ActNorm(tf.keras.Model):
         ldj = tf.math.reduce_sum(tf.math.log(tf.math.abs(self.scale)), axis=-1)
         return z, ldj     
 
+    @tf.function
     def _inverse(self, target):
         """Performs an inverse pass through the `ActNorm` layer."""
 
@@ -234,67 +251,11 @@ class ActNorm(tf.keras.Model):
             std  = tf.math.reduce_std(init_data,  axis=(0, 1))
         # Raise other cases
         else:
-            raise ConfigurationError("""Currently, ActNorm supports only 2D and 3D Tensors, 
-                                     but act_norm_init contains data with shape.""".format(init_data.shape))
+            raise ConfigurationError(f"""Currently, ActNorm supports only 2D and 3D Tensors, 
+                                     but act_norm_init contains data with shape {init_data.shape}.""")
 
         scale = 1.0 / std
         bias  = (-1.0 * mean) / std
         
         self.scale = tf.Variable(scale, trainable=True, name='act_norm_scale')
         self.bias  = tf.Variable(bias, trainable=True, name='act_norm_bias')
-
-
-class DenseCouplingNet(tf.keras.Model):
-    """Implements a conditional version of a standard fully connected (FC) network.
-    Would also work as an unconditional estimator."""
-
-    def __init__(self, meta, n_out, **kwargs):
-        """Creates a conditional coupling net (FC neural network).
-
-        Parameters
-        ----------
-        meta     : dict
-            A dictionary which holds arguments for a dense layer.
-        n_out    : int
-            Number of outputs of the coupling net
-        **kwargs : dict, optional, default: {}
-            Optional keyword arguments passed to the `tf.keras.Model` constructor. 
-        """
-
-        super().__init__(**kwargs)
-
-        # Create network body (input and hidden layers)
-        self.dense = Sequential(
-            # Hidden layer structure
-            [SpectralNormalization(Dense(**meta['dense_args'])) if meta['spec_norm'] else Dense(**meta['dense_args'])
-             for _ in range(meta['n_dense'])]
-        )
-
-        # Create network output head
-        self.dense.add(Dense(n_out, kernel_initializer='zeros'))
-        self.dense.build(input_shape=())
-
-    def call(self, target, condition, **kwargs):
-        """Concatenates target and condition and performs a forward pass through the coupling net.
-
-        Parameters
-        ----------
-        target      : tf.Tensor
-          The split estimation quntities, for instance, parameters :math:`\\theta \sim p(\\theta)` of interest, shape (batch_size, ...)
-        condition   : tf.Tensor or None
-            the conditioning vector of interest, for instance ``x = summary(x)``, shape (batch_size, summary_dim)
-        """
-
-        # Handle case no condition
-        if condition is None:
-            return self.dense(target, **kwargs)
-
-        # Handle 3D case for a set-flow and repeat condition over
-        # the second `time` or `n_observations` axis of `target``
-        if len(tf.shape(target)) == 3 and len(tf.shape(condition)) == 2:
-            shape = tf.shape(target)
-            condition = tf.expand_dims(condition, 1)
-            condition = tf.tile(condition, [1, shape[1], 1])
-        inp = tf.concat((target, condition), axis=-1)
-        out = self.dense(inp, **kwargs)
-        return out

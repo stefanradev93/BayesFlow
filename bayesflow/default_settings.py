@@ -100,6 +100,7 @@ DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
     mandatory_fields=[]
 )
 
+
 DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
     meta_dict={
         'n_coupling_layers': 4,
@@ -112,6 +113,7 @@ DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
     },
     mandatory_fields=["n_params"]
 )
+
 
 DEFAULT_SETTING_EVIDENTIAL_NET = MetaDictSetting(
     meta_dict={

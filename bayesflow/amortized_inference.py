@@ -20,33 +20,55 @@
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras import Model
 
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
-from bayesflow.losses import *
+from bayesflow.losses import log_loss
 from bayesflow.default_settings import DEFAULT_KEYS
 
 import tensorflow_probability as tfp
 
 from warnings import warn
 
+from abc import ABC, abstractmethod
 
-class AmortizedPosterior(tf.keras.Model):
-    """An interface to connect an inference network for parameter estimation with an optional summary network
+
+class AmortizedTarget(ABC):
+    """An interface for an amortized learned distribution."""
+
+    @abstractmethod
+    def __init__(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def compute_loss(self, input_dict, **kwargs):
+        pass
+    
+    @abstractmethod
+    def sample(input_dict, **kwargs):
+        pass
+
+    @abstractmethod
+    def log_prob(input_dict, **kwargs):
+        pass
+
+class AmortizedPosterior(Model, AmortizedTarget):
+    """A wrapper to connect an inference network for parameter estimation with an optional summary network
     as in the original BayesFlow set-up described in the paper:
 
-    Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020).
+    [1] Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020).
     BayesFlow: Learning complex stochastic models with invertible neural networks.
     IEEE transactions on neural networks and learning systems.
 
     But also allowing for augmented functionality, such as model misspecification detection in summary space:
 
-    Schmitt, M., Bürkner, P. C., Köthe, U., & Radev, S. T. (2022).
+    [2] Schmitt, M., Bürkner, P. C., Köthe, U., & Radev, S. T. (2022).
     Detecting Model Misspecification in Amortized Bayesian Inference with Neural Networks
     arXiv preprint arXiv:2112.08866.
 
     And learning of fat-tailed posteriors with a Student-t latent pushforward density:
 
-    Jaini, P., Kobyzev, I., Yu, Y., & Brubaker, M. (2020, November).
+    [3] Jaini, P., Kobyzev, I., Yu, Y., & Brubaker, M. (2020, November).
     Tails of lipschitz triangular flows.
     In International Conference on Machine Learning (pp. 4673-4681). PMLR.
     """
@@ -86,7 +108,7 @@ class AmortizedPosterior(tf.keras.Model):
         any `sumamry_conditions`, i.e., `summary_conditions` should be set to None, otherwise these will be ignored.
         """
 
-        super().__init__(**kwargs)
+        Model.__init__(self, **kwargs)
 
         self.inference_net = inference_net
         self.summary_net = summary_net
@@ -210,7 +232,8 @@ class AmortizedPosterior(tf.keras.Model):
         n_samples   : int
             The number of posterior draws (samples) to obtain from the approximate posterior
         to_numpy    : bool, optional, default: True
-            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`.
+        
         **kwargs    : dict, optional
             Additional keyword arguments passed to the networks
 
@@ -259,13 +282,13 @@ class AmortizedPosterior(tf.keras.Model):
 
         Parameters
         ----------
-        input_list : list of dictionaries, each dictionary having the following mandatory keys, if DEFAULT KEYS unchanged: 
+        input_list  : list of dictionaries, each dictionary having the following mandatory keys, if DEFAULT KEYS unchanged: 
             `summary_conditions` : the conditioning variables (including data) that are first passed through a summary network
             `direct_conditions`  : the conditioning variables that the directly passed to the inference network
         n_samples   : int
             The number of posterior draws (samples) to obtain from the approximate posterior
         to_numpy    : bool, optional, default: True
-            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+            Flag indicating whether to return the samples as a `np.darray` or a `tf.Tensor`
         **kwargs    : dict, optional
             Additional keyword arguments passed to the networks
 
@@ -325,6 +348,11 @@ class AmortizedPosterior(tf.keras.Model):
         if to_numpy:
             return log_post.numpy()
         return log_post
+    
+    def log_prob(self, input_dict, to_numpy=True, **kwargs):
+        """Identical to `log_posterior(input_dict, to_numpy, **kwargs)`."""
+
+        return self.log_posterior(input_dict, to_numpy=to_numpy, **kwargs)
 
     def _compute_summary_condition(self, summary_conditions, direct_conditions, **kwargs):
         """Determines how to concatenate the provided conditions."""
@@ -374,12 +402,12 @@ class AmortizedPosterior(tf.keras.Model):
             raise NotImplementedError("Could not infer summary_loss_fun, argument should be of type (None, callable, or str)!")
 
 
-class AmortizedLikelihood(tf.keras.Model):
+class AmortizedLikelihood(Model, AmortizedTarget):
     """An interface for a surrogate model of a simulator, or an implicit likelihood
     ``p(params | data, context).''
     """
 
-    def __init__(self, surrogate_net, latent_dist=None):
+    def __init__(self, surrogate_net, latent_dist=None, **kwargs):
         """Initializes a composite neural architecture representing an amortized emulator 
         for the simulator (i.e., the implicit likelihood model).
 
@@ -392,7 +420,7 @@ class AmortizedLikelihood(tf.keras.Model):
             a multivariate unit Gaussian.
         """
 
-        super().__init__()
+        Model.__init__(self, **kwargs)
 
         self.surrogate_net = surrogate_net
         self.latent_dim = self.surrogate_net.latent_dim
@@ -543,6 +571,11 @@ class AmortizedLikelihood(tf.keras.Model):
             return log_lik.numpy()
         return log_lik
 
+    def log_prob(self, input_dict, to_numpy=True, **kwargs):
+        """Identical to `log_likelihood(input_dict, to_numpy, **kwargs)`."""
+
+        return self.log_likelihood(input_dict, to_numpy=to_numpy, **kwargs)
+
     def compute_loss(self, input_dict, **kwargs):
         """Computes the loss of the amortized given input data provided in input_dict.
 
@@ -572,12 +605,12 @@ class AmortizedLikelihood(tf.keras.Model):
             return latent_dist
 
 
-class JointAmortizer(tf.keras.Model):
+class JointAmortizer(Model, AmortizedTarget):
     """An interface for jointly learning a surrogate model of the simulator and an approximate
     posterior given a generative model.
     """
 
-    def __init__(self, amortized_posterior, amortized_likelihood):
+    def __init__(self, amortized_posterior, amortized_likelihood, **kwargs):
         """Initializes a joint learner comprising an amortized posterior and an amortized emulator.
 
         Parameters
@@ -588,7 +621,7 @@ class JointAmortizer(tf.keras.Model):
             The generative neural likelihood approximator.
         """
 
-        super(JointAmortizer, self).__init__()
+        Model.__init__(self, **kwargs)
 
         self.amortized_posterior = amortized_posterior
         self.amortized_likelihood = amortized_likelihood
@@ -664,7 +697,7 @@ class JointAmortizer(tf.keras.Model):
         return self.amortized_likelihood.log_likelihood(input_dict, to_numpy=to_numpy, training=False, **kwargs)
    
     def log_posterior(self, input_dict, to_numpy=True, **kwargs):
-        """ Calculates the approximate log-posterior of targets given conditional variables via
+        """Calculates the approximate log-posterior of targets given conditional variables via
         the change-of-variable formula for conditional normalizing flows.
 
         Parameters
@@ -689,9 +722,23 @@ class JointAmortizer(tf.keras.Model):
                 input_dict[DEFAULT_KEYS['posterior_inputs']], to_numpy=to_numpy, training=False, **kwargs
             )
         return self.amortized_posterior.log_posterior(input_dict, to_numpy=to_numpy, training=False, **kwargs)
+
+    def log_prob(self, input_dict, to_numpy=True, **kwargs):
+        """Identical to calling separate `log_likelihood()` and `log_posterior()`.
+        
+        Returns
+        -------
+        out_dict : dict with keys `log_posterior` and `log_likelihood` corresponding
+        to the computed log_pdfs of the approximate posterior and likelihood.
+        """
+
+        log_post = self.log_posterior(input_dict, to_numpy=to_numpy, **kwargs)
+        log_lik = self.log_likelihood(input_dict, to_numpy=to_numpy, **kwargs)
+        out_dict = {'log_posterior': log_post, 'log_likelihood': log_lik}
+        return out_dict
    
     def sample_data(self, input_dict, n_samples, to_numpy=True, **kwargs):
-        """ Generates `n_samples` random draws from the surrogate likelihood given input conditions.
+        """Generates `n_samples` random draws from the surrogate likelihood given input conditions.
 
         Parameters
         ----------
@@ -720,7 +767,7 @@ class JointAmortizer(tf.keras.Model):
         return self.amortized_likelihood.sample(input_dict, n_samples, to_numpy=to_numpy, **kwargs)
 
     def sample_parameters(self, input_dict, n_samples, to_numpy=True, **kwargs):
-        """ Generates random draws from the approximate posterior given conditonal variables.
+        """Generates random draws from the approximate posterior given conditonal variables.
 
         Parameters
         ----------
@@ -748,12 +795,26 @@ class JointAmortizer(tf.keras.Model):
             )
         return self.amortized_posterior.sample(input_dict, n_samples, to_numpy=to_numpy, **kwargs)
 
+    def sample(self, input_dict, n_post_samples, n_lik_samples, to_numpy=True, **kwargs):
+        """Identical to calling `sample_parameters()` and `sample_data()` separately.
+        
+        Returns
+        -------
+        out_dict : dict with keys `posterior_samples` and `likelihood_samples` corresponding
+        to the `n_samples` from the approximate posterior and likelihood, respectively
+        """
+
+        post_samples = self.sample_parameters(input_dict, n_post_samples, to_numpy=to_numpy, **kwargs)
+        lik_samples = self.sample_data(input_dict, n_lik_samples, to_numpy=to_numpy, **kwargs)
+        out_dict = {'posterior_samples': post_samples, 'likelihood_samples': lik_samples}
+        return out_dict
+
 
 class ModelComparisonAmortizer(tf.keras.Model):
     """An interface to connect an evidential network for Bayesian model comparison with an optional summary network,
     as described in the original paper on evidential neural networks for model comparison:
 
-    Radev, S. T., D'Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., & Bürkner, P. C. (2021). 
+    [1] Radev, S. T., D'Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., & Bürkner, P. C. (2021). 
     Amortized bayesian model comparison with evidential deep learning. 
     IEEE Transactions on Neural Networks and Learning Systems.
 
