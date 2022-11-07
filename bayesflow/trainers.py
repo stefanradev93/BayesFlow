@@ -619,7 +619,7 @@ class Trainer:
                 self.simulation_memory.save_to_file(file_path=self.checkpoint_path)
 
     def _check_optional_stopping(self):
-        """ Helper method for checking optional stopping. Resets the adjuster
+        """Helper method for checking optional stopping. Resets the adjuster
         if a stopping recommendation is issued. 
         """
 
@@ -634,7 +634,7 @@ class Trainer:
         return False
 
     def _train_step(self, batch_size, input_dict=None, **kwargs):
-        """ Performs forward inference -> configuration -> network -> loss pipeline.
+        """Performs forward inference -> configuration -> network -> loss pipeline.
 
         Parameters
         ----------
@@ -659,7 +659,7 @@ class Trainer:
         return loss
 
     def _forward_inference(self, n_sim, configure=True, **kwargs):
-        """ Performs one step of single-model forward inference.
+        """Performs one step of single-model forward inference.
 
         Parameters
         ----------
@@ -691,7 +691,7 @@ class Trainer:
 
     @tf.function(reduce_retracing=True)
     def _backprop_step(self, input_dict, **kwargs):
-        """ Computes the loss of the provided amortizer given an input dictionary and applies gradients.
+        """Computes the loss of the provided amortizer given an input dictionary and applies gradients.
 
          Parameters
         ----------
@@ -724,38 +724,31 @@ class Trainer:
                     loss['Regularization'] = reg
                 else:
                     loss = {'Loss': loss, 'Regularization': reg}
-        # One step backprop
+        # One step backprop and return loss
         gradients = tape.gradient(_loss, self.amortizer.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.amortizer.trainable_variables))
 
         return loss
 
     def _manage_configurator(self, config_fun, **kwargs):
-        """ Determines which configurator to use if None specified during construction.      
-        """
+        """Determines which configurator to use if None specified during construction."""
 
         # Do nothing if callable provided
         if callable(config_fun):
             return config_fun
-        # If None (default), infer default config based on amortizer type
+        # If None of something else (default), infer default config based on amortizer type
         else:
             # Amortized posterior
             if type(self.amortizer) is AmortizedPosterior:
-                default_config = DefaultPosteriorConfigurator
-                default_combiner = DefaultPosteriorCombiner()
-                default_transfomer = DefaultPosteriorTransformer()
+                default_config = DefaultPosteriorConfigurator()
 
             # Amortized lieklihood
             elif type(self.amortizer) is AmortizedLikelihood:
-                default_config = DefaultLikelihoodConfigurator
-                default_combiner = DefaultLikelihoodTransformer()
-                default_transfomer = DefaultLikelihoodCombiner()
+                default_config = DefaultLikelihoodConfigurator()
 
             # Joint amortizer
             elif type(self.amortizer) is JointAmortizer:
-                default_config = DefaultJointConfigurator
-                default_combiner = DefaultJointTransformer()
-                default_transfomer = DefaultJointCombiner()
+                default_config = DefaultJointConfigurator()
 
             # Model comparison amortizer
             elif type(self.amortizer) is ModelComparisonAmortizer:
@@ -767,52 +760,10 @@ class Trainer:
             else:
                 raise NotImplementedError(f"Could not initialize configurator based on " +
                                           f"amortizer type {type(self.amortizer)}!")
+            return default_config
 
-        # Check string types
-        # TODO: Make sure this works for all amortizers
-        if type(config_fun) is str:
-            if config_fun == "variable_num_obs":
-                return default_config(
-                    transform_fun=VariableObservationsTransformer(),
-                    combine_fun=default_combiner)
-
-            elif config_fun == 'one_hot':
-                return default_config(
-                    transform_fun=OneHotTransformer(),
-                    combine_fun=default_combiner)
-
-            elif config_fun == 'variable_num_obs_one_hot':
-                return default_config(
-                    transform_fun=TransformerUnion([
-                        VariableObservationsTransformer(),
-                        OneHotTransformer(),
-                    ]),
-                    combine_fun=default_combiner)
-            elif config_fun == 'one_hot_variable_num_obs':
-                return default_config(
-                    transform_fun=TransformerUnion([
-                        OneHotTransformer(),
-                        VariableObservationsTransformer(),
-                    ]),
-                    combine_fun=default_combiner)
-            else:
-                raise NotImplementedError(f"Could not initialize configurator based on string" +
-                                          f"argument should be in {STRING_CONFIGS}")
-
-        elif config_fun is None:
-            if type(self.amortizer) is ModelComparisonAmortizer:
-                config_fun = default_config
-            else:
-                config_fun = default_config(
-                    transform_fun=default_transfomer,
-                    combine_fun=default_combiner
-                )
-            return config_fun
-        else:
-            raise NotImplementedError(f"Could not infer configurator based on provided type: {type(config_fun)}")
-    
     def _check_consistency(self):
-        """ Attempts to run one step generative_model -> configurator -> amortizer -> loss with 
+        """Attempts to run one step generative_model -> configurator -> amortizer -> loss with 
         batch_size=2. Should be skipped if generative model has non-standard behavior.
 
         Raises
@@ -835,5 +786,5 @@ class Trainer:
     
     def _default_loader(self, file_path):
         with open(file_path, 'rb+') as f:
-                loaded_file = pickle_load(f)
-        return(loaded_file)
+            loaded_file = pickle_load(f)
+        return loaded_file

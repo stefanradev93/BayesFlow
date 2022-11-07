@@ -25,11 +25,13 @@ from bayesflow.exceptions import ConfigurationError, SummaryStatsError
 from bayesflow.losses import *
 from bayesflow.default_settings import DEFAULT_KEYS
 
+import tensorflow_probability as tfp
+
 from warnings import warn
 
 
 class AmortizedPosterior(tf.keras.Model):
-    """ An interface to connect an inference network for parameter estimation with an optional summary network
+    """An interface to connect an inference network for parameter estimation with an optional summary network
     as in the original BayesFlow set-up described in the paper:
 
     Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020).
@@ -49,7 +51,8 @@ class AmortizedPosterior(tf.keras.Model):
     In International Conference on Machine Learning (pp. 4673-4681). PMLR.
     """
 
-    def __init__(self, inference_net, summary_net=None, loss_fun=None, summary_loss_fun=None, **kwargs):
+    def __init__(self, inference_net, summary_net=None, latent_dist=None, latent_is_dynamic=False, 
+                 summary_loss_fun=None, **kwargs):
         """Initializes a composite neural network to represent an amortized approximate posterior.
 
         Parameters
@@ -57,35 +60,43 @@ class AmortizedPosterior(tf.keras.Model):
         inference_net     : tf.keras.Model
             An (invertible) inference network which processes the outputs of a generative model 
         summary_net       : tf.keras.Model or None, optional, default: None
-            An optional summary network
-        loss_fun          : callable or None, optional, default: None
-            The loss function which accepts the outputs of the amortizer. If None, the loss is inferred
-            based on the `inference_net` type. 
+            An optional summary network to compress non-vector data structures.
+        latent_dist       : callable or None, optional, default: None
+            The latent distribution towards which to optimize the networks. Defaults to
+            a multivariate unit Gaussian.
+        latent_is_dynamic : bool, optional, default: False
+            If set to `True`, assumes that `latent_dist` is a function of the condtion and takes 
+            a different shape depending on the condition. Useful for more expressive transforms
+            of complex distributions, such as fat-tailed or highly-multimodal distros. 
+            
+            Important: In the case of dynamic latents, the user is responsible that the
+            latent is appropriately parameterized! If not using `tensorflow_probability`,
+            the `latent_dist` object needs to implement the following methods:
+            - `latent_dist(x).log_prob(z)` and
+            - `latent_dist(x).sample(n_samples)`
+
         summary_loss_fun  : callable or None, optional, default: None
             The loss function which accepts the outputs of the summary network. If None, no loss is provided.
-        **kwargs    : dict, optional
+        **kwargs          : dict, optional
             Additional keyword arguments passed to the __init__ method of a tf.keras.Model instance.
 
         Important
         ----------
         - If no `summary_net` is provided, then the output dictionary of your generative model should not contain
         any `sumamry_conditions`, i.e., `summary_conditions` should be set to None, otherwise these will be ignored.
-
-        - If no custom `loss_fun` is provided, the loss function will either be a Kullback-Leibler (KL) divergence
-        for a latent Gaussian space or a KL for a latent Student-t space, depending on the existence of `tail_network`
-        attribute in the inference net. If you are using a custom inference net mapping parameters to a latent Student-t
-        base distribution, make sure the inference net has a `tail_network` attribute.
         """
 
-        super(AmortizedPosterior, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.inference_net = inference_net
         self.summary_net = summary_net
+        self.latent_dim = self.inference_net.latent_dim
+        self.latent_is_dynamic = latent_is_dynamic
         self.summary_loss = self._determine_summary_loss(summary_loss_fun)
-        self.inference_loss = self._determine_loss(loss_fun)
+        self.latent_dist = self._determine_latent_dist(latent_dist)
 
     def call(self, input_dict, return_summary=False, **kwargs):
-        """ Performs a forward pass through the summary and inference network.
+        """Performs a forward pass through the summary and inference network.
 
         Parameters
         ----------
@@ -114,13 +125,52 @@ class AmortizedPosterior(tf.keras.Model):
 
         # Compute output of inference net
         net_out = self.inference_net(input_dict[DEFAULT_KEYS['parameters']], full_cond, **kwargs)
+        
+        # Return summary outputs or not, depending on parameter
+        if return_summary:
+            return net_out, summary_out
+        return net_out
 
-        if not return_summary:
-            return net_out
-        return net_out, summary_out
+    def compute_loss(self, input_dict, **kwargs):
+        """Computes the loss of the posterior amortizer given an input dictionary.
+
+        Parameters
+        ----------
+        input_dict : dict  
+            Input dictionary containing the following mandatory keys: 
+            `parameters`         - the latent model parameters over which a condition density is learned
+            `summary_conditions` - the conditioning variables that are first passed through a summary network
+            `direct_conditions`  - the conditioning variables that the directly passed to the inference network
+
+        Returns
+        -------
+        total_loss : tf.Tensor of shape (1,) - the total computed loss given input variables
+        """
+        
+        # Get amortizer outputs
+        net_out, sum_out = self(input_dict, return_summary=True, **kwargs)
+        z, log_det_J = net_out
+
+        # Case summary loss should be computed
+        if self.summary_loss is not None:
+            sum_loss =  self.summary_loss(sum_out)
+        # Case no summary loss, simply add 0 for convenience
+        else:
+            sum_loss = 0.
+        
+        # Case dynamic latent space - function of summary conditions
+        if self.latent_is_dynamic:
+            logpdf = self.latent_dist(sum_out).log_prob(z)
+        # Case static latent space
+        else:
+            logpdf = self.latent_dist.log_prob(z)
+        
+        # Compute and return total loss
+        total_loss = tf.reduce_mean(-logpdf - log_det_J) + sum_loss
+        return total_loss
 
     def call_loop(self, input_list, return_summary=False, **kwargs):
-        """ Performs a forward pass through the summary and inference network given a list of dicts 
+        """Performs a forward pass through the summary and inference network given a list of dicts 
         with the appropriate entries (i.e., as used for the standard call method).
 
         This method is useful when GPU memory is limited or data sets have a different (non-Tensor) structure.
@@ -166,27 +216,45 @@ class AmortizedPosterior(tf.keras.Model):
 
         Returns
         -------
-        post_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, n_params)
+        post_samples : tf.Tensor or np.ndarray of shape (n_data_sets, n_samples, n_params)
             the sampled parameters per data set
         """
 
         # Compute learnable summaries, if appropriate
-        _, condition = self._compute_summary_condition(
+        _, conditions = self._compute_summary_condition(
             input_dict.get(DEFAULT_KEYS['summary_conditions']), 
             input_dict.get(DEFAULT_KEYS['direct_conditions']), 
             training=False,
             **kwargs
         )
 
-        # Obtain random draws from the approximate posterior given conditioning variables
-        post_samples = self.inference_net.sample(condition, n_samples, training=False, **kwargs)
+        # Obtain number of data sets
+        n_data_sets = conditions.shape[0]
 
+        # Obtain random draws from the approximate posterior given conditioning variables
+        # Case dynamic, assume tensorflow_probability instance, so need to reshape output from
+        # (n_samples, n_data_sets, latent_dim) to (n_data_sets, n_samples, latent_dim)
+        if self.latent_is_dynamic:
+            z_samples = self.latent_dist(conditions).sample(n_samples)
+            z_samples = tf.transpose(z_samples, (1, 0, 2))
+        # Case static latent - marginal samples from the specified dist
+        else:
+            z_samples = self.latent_dist.sample((n_data_sets, n_samples))
+
+        # Obtain random draws from the approximate posterior given conditioning variables
+        post_samples = self.inference_net.inverse(z_samples, conditions, training=False, **kwargs)
+
+        # Only return 2D array, if first dimensions is 1
+        if post_samples.shape[0] == 1:
+            post_samples = post_samples[0]
+
+        # Return numpy version of tensor or tensor itself
         if to_numpy:
             return post_samples.numpy()
         return post_samples
 
     def sample_loop(self, input_list, n_samples, to_numpy=True, **kwargs):
-        """ Generates random draws from the approximate posterior given a list of dicts with conditonal variables.
+        """Generates random draws from the approximate posterior given a list of dicts with conditonal variables.
         Useful when GPU memory is limited or data sets have a different (non-Tensor) structure. 
 
         Parameters
@@ -214,9 +282,8 @@ class AmortizedPosterior(tf.keras.Model):
             return np.concatenate(post_samples, axis=0)
         return tf.concat(post_samples, axis=0)
 
-
     def log_posterior(self, input_dict, to_numpy=True, **kwargs):
-        """ Calculates the approximate log-posterior of targets given conditional variables via
+        """Calculates the approximate log-posterior of targets given conditional variables via
         the change-of-variable formula for a conditional normalizing flow.
 
         Parameters
@@ -243,40 +310,24 @@ class AmortizedPosterior(tf.keras.Model):
             **kwargs
         )
 
-        # Compute approximate log posterior of provided parameters
-        log_post = self.inference_net.log_density(input_dict[DEFAULT_KEYS['parameters']], conditions, training=False, **kwargs)
+        # Forward pass through the network
+        z, log_det_J = self.inference_net.forward(
+            input_dict[DEFAULT_KEYS['parameters']], conditions, training=False, **kwargs)
+        
+        # Compute approximate log posterior
+        # Case dynamic latent - function of conditions
+        if self.latent_is_dynamic:
+            log_post = self.latent_dist(conditions).log_prob(z) + log_det_J
+        # Case static latent - marginal samples from z
+        else:
+            log_post = self.latent_dist.log_prob(z) + log_det_J
 
         if to_numpy:
             return log_post.numpy()
         return log_post
-    
-    def compute_loss(self, input_dict, **kwargs):
-        """ Computes the loss of the posterior amortizer given an input dictionary.
-
-        Parameters
-        ----------
-        input_dict : dict  
-            Input dictionary containing the following mandatory keys: 
-            `parameters`         - the latent model parameters over which a condition density is learned
-            `summary_conditions` - the conditioning variables that are first passed through a summary network
-            `direct_conditions`  - the conditioning variables that the directly passed to the inference network
-
-        Returns
-        -------
-        loss      : tf.Tensor of shape (1,) - the total computed loss given input variables
-        """
-
-        if self.summary_loss is not None:
-            net_out, sum_out = self(input_dict, return_summary=True, **kwargs)
-            loss =  self.summary_loss(sum_out) + self.inference_loss(*net_out)
-        else:
-            net_out = self(input_dict, **kwargs)
-            loss = self.inference_loss(*net_out)
-        return loss
 
     def _compute_summary_condition(self, summary_conditions, direct_conditions, **kwargs):
-        """ Determines how to concatenate the provided conditions.
-        """
+        """Determines how to concatenate the provided conditions."""
 
         # Compute learnable summaries, if given
         if self.summary_net is not None:
@@ -284,7 +335,7 @@ class AmortizedPosterior(tf.keras.Model):
         else:
             sum_condition = None
 
-        # Concatenate learnable summaries with fixed summaries, this 
+        # Concatenate learnable summaries with fixed summaries
         if sum_condition is not None and direct_conditions is not None:
             full_cond = tf.concat([sum_condition, direct_conditions], axis=-1)
         elif sum_condition is not None:
@@ -295,26 +346,17 @@ class AmortizedPosterior(tf.keras.Model):
             raise SummaryStatsError("Could not concatenarte or determine conditioning inputs...")
         return sum_condition, full_cond
 
-    def _determine_loss(self, loss_fun):
-        """ Determines which loss to use if default None argument provided, otherwise return argument.
+    def _determine_latent_dist(self, latent_dist):
+        """Determines which latent distribution to use and defaults to unit normal if none provided.
         """
 
-        if loss_fun is None:
-            try:
-                if self.inference_net.tail_network is not None:
-                    return kl_latent_space_student
-                else:
-                    return kl_latent_space_gaussian
-            except Exception as _:
-                raise ConfigurationError("Could not infer loss function based on inference net type. " +
-                                         "Please provide a custom loss function!")
-        elif callable(loss_fun):
-            return loss_fun
+        if latent_dist is None:
+            return tfp.distributions.MultivariateNormalDiag(loc=[0.]*self.latent_dim)
         else:
-            raise ConfigurationError("Loss function is neither default not callable. Please provide a valid loss function!")
+            return latent_dist
 
     def _determine_summary_loss(self, loss_fun):
-        """ Determines which summary loss to use if default None argument provided, otherwise return argument.
+        """Determines which summary loss to use if default `None` argument provided, otherwise return identity.
         """
 
         # If callable, return provided loss
@@ -333,11 +375,11 @@ class AmortizedPosterior(tf.keras.Model):
 
 
 class AmortizedLikelihood(tf.keras.Model):
-    """ An interface for a surrogate model of a simulator, or an implicit likelihood
+    """An interface for a surrogate model of a simulator, or an implicit likelihood
     ``p(params | data, context).''
     """
 
-    def __init__(self, surrogate_net, loss_fun=None):
+    def __init__(self, surrogate_net, latent_dist=None):
         """Initializes a composite neural architecture representing an amortized emulator 
         for the simulator (i.e., the implicit likelihood model).
 
@@ -345,26 +387,19 @@ class AmortizedLikelihood(tf.keras.Model):
         ----------
         surrogate_net : tf.keras.Model
             An (invertible) inference network which processes the outputs of the generative model.
-        loss_fun      : callable or None, optional, default: None
-            The loss function which accepts the outputs of the amortizer. If None, the loss is inferred
-            based on the `surrogate_net` type. 
-
-        Important
-        ----------
-        - If no custom `loss_fun` is provided, the loss function will either be a Kullback-Leibler (KL) divergence
-        for a latent Gaussian space or a KL for a latent student-t space, depending on the existence of `tail_network`
-        attribute in the `surrogate_net`. If you are using a custom `surrogate_net` mapping parameters to a latent student-t
-        base distribution, make sure the `surrogate_net` has a `tail_network` attribute.
-
+        latent_dist       : callable or None, optional, default: None
+            The latent distribution towards which to optimize the surrogate network outputs. Defaults to
+            a multivariate unit Gaussian.
         """
 
-        super(AmortizedLikelihood, self).__init__()
+        super().__init__()
 
         self.surrogate_net = surrogate_net
-        self.loss = self._determine_loss(loss_fun)
+        self.latent_dim = self.surrogate_net.latent_dim
+        self.latent_dist = self._determine_latent_dist(latent_dist)
 
     def call(self, input_dict, **kwargs):
-        """ Performs a forward pass through the summary and inference network.
+        """Performs a forward pass through the summary and inference network.
 
         Parameters
         ----------
@@ -376,9 +411,8 @@ class AmortizedLikelihood(tf.keras.Model):
         Returns
         -------
         net_out
-            the outputs of ``inference_net(theta, summary_net(x, c_s), c_d)``, usually a latent variable and
-            log(det(Jacobian)), that is a tuple ``(z, log_det_J)`` or (sum_outputs, (z, log_det_J)) if 
-            return_summary is set to True and a summary network is defined.`` 
+            the outputs of ``surrogate_net(theta, summary_net(x, c_s), c_d)``, usually a latent variable and
+            log(det(Jacobian)), that is a tuple ``(z, log_det_J)``. 
         """
 
         net_out = self.surrogate_net(
@@ -387,8 +421,33 @@ class AmortizedLikelihood(tf.keras.Model):
             **kwargs)
         return net_out
 
+    def call_loop(self, input_list, **kwargs):
+        """Performs a forward pass through the surrogate network given a list of dicts 
+        with the appropriate entries (i.e., as used for the standard call method).
+
+        This method is useful when GPU memory is limited or data sets have a different (non-Tensor) structure.
+
+        Parameters
+        ----------
+        input_list     : list of dicts, where each dict contains the following mandatory keys, if DEFAULT keys unchanged: 
+            `observables` - the observables over which a condition density is learned (i.e., the data)
+            `conditions`  - the conditioning variables that the directly passed to the inference network
+
+        Returns
+        -------
+        net_out or (net_out, summary_out) : tuple of tf.Tensor
+            the outputs of ``inference_net(theta, summary_net(x, c_s), c_d)``, usually a latent variable and
+            log(det(Jacobian)), that is a tuple ``(z, log_det_J).
+        """
+
+        outputs = []
+        for forward_dict in input_list:
+            outputs.append(self(forward_dict, **kwargs))
+        net_out = [tf.concat([o[i] for o in outputs], axis=0) for i in range(len(outputs[0]))]
+        return tuple(net_out)
+
     def sample(self, input_dict, n_samples, to_numpy=True, **kwargs):
-        """ Generates `n_samples` random draws from the surrogate likelihood given input conditions.
+        """Generates `n_samples` random draws from the surrogate likelihood given input conditions.
 
         Parameters
         ----------
@@ -407,18 +466,52 @@ class AmortizedLikelihood(tf.keras.Model):
             Simulated batch of observables from the surrogate likelihood.
         """
 
-        # Obtain random draws from the approximate posterior given conditioning variables
-        lik_samples = self.surrogate_net.sample(
-            input_dict[DEFAULT_KEYS['conditions']], 
-            n_samples, training=False, **kwargs
-        )
+        # Extract condition
+        conditions = input_dict[DEFAULT_KEYS['conditions']]
+
+        # Obtain number of data sets
+        n_data_sets = conditions.shape[0]
+
+        # Obtain random draws from the surrogate likelihood given conditioning variables
+        z_samples = self.latent_dist.sample((n_data_sets, n_samples))
+
+        # Obtain random draws from the surrogate likelihood given conditioning variables
+        lik_samples = self.inference_net.inverse(z_samples, conditions, training=False, **kwargs)
 
         if to_numpy:
             return lik_samples.numpy()
         return lik_samples
 
+    def sample_loop(self, input_list, n_samples, to_numpy=True, **kwargs):
+        """Generates random draws from the surrogate network given a list of dicts with conditonal variables.
+        Useful when GPU memory is limited or data sets have a different (non-Tensor) structure. 
+
+        Parameters
+        ----------
+        input_list   : list of dictionaries, each dictionary having the following mandatory keys, if DEFAULT KEYS unchanged: 
+            `conditions` - the conditioning variables that the directly passed to the inference network
+        n_samples    : int
+            The number of posterior draws (samples) to obtain from the approximate posterior
+        to_numpy     : bool, optional, default: True
+            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+        **kwargs     : dict, optional
+            Additional keyword arguments passed to the networks
+
+        Returns
+        -------
+        post_samples : tf.Tensor or np.ndarray of shape (n_data_sets, n_samples, data_dim)
+            the sampled parameters per data set
+        """
+
+        post_samples = []
+        for input_dict in input_list:
+            post_samples.append(self.sample(input_dict, n_samples, to_numpy, **kwargs))
+        if to_numpy:
+            return np.concatenate(post_samples, axis=0)
+        return tf.concat(post_samples, axis=0)
+
     def log_likelihood(self, input_dict, to_numpy=True, **kwargs):
-        """ Calculates the approximate log-likelihood of targets given conditional variables via
+        """Calculates the approximate log-likelihood of targets given conditional variables via
         the change-of-variable formula for a conditional normalizing flow.
 
         Parameters
@@ -436,17 +529,22 @@ class AmortizedLikelihood(tf.keras.Model):
             the approximate log-likelihood of each data point in each data set
         """
 
-        log_lik = self.surrogate_net.log_density(
+        # Forward pass through the network
+        z, log_det_J = self.surrogate_net.forward(
             input_dict[DEFAULT_KEYS['observables']], 
             input_dict[DEFAULT_KEYS['conditions']], training=False, **kwargs
         )
 
+        # Compute approximate log likelihood
+        log_lik = self.latent_dist.log_prob(z) + log_det_J
+
+        # Convert tensor to numpy array, if specified
         if to_numpy:
             return log_lik.numpy()
         return log_lik
 
     def compute_loss(self, input_dict, **kwargs):
-        """ Computes the loss of the amortized given input data provided in input_dict.
+        """Computes the loss of the amortized given input data provided in input_dict.
 
         Parameters
         ----------
@@ -460,26 +558,18 @@ class AmortizedLikelihood(tf.keras.Model):
         loss        : tf.Tensor of shape (1,) - the total computed loss given input variables
         """
 
-        net_out = self(input_dict, **kwargs)
-        loss =  self.loss(*net_out)
+        z, log_det_J = self(input_dict, **kwargs)
+        loss = tf.reduce_mean(-self.latent_dist.log_prob(z) - log_det_J)
         return loss
-            
-    def _determine_loss(self, loss_fun):
-        """ Determines which loss to use if None given, otherwise return provided argument.
+
+    def _determine_latent_dist(self, latent_dist):
+        """Determines which latent distribution to use and defaults to unit normal if none provided.
         """
 
-        if loss_fun is None:
-            try:
-                if self.surrogate_net.tail_network is not None:
-                    return kl_latent_space_student
-                else:
-                    return kl_latent_space_gaussian
-            except Exception as _:
-                raise ConfigurationError("Could not infer loss function based on surrogate_net type. Please input a loss function!")
-        elif callable(loss_fun):
-            return loss_fun
+        if latent_dist is None:
+            return tfp.distributions.MultivariateNormalDiag(loc=[0.]*self.latent_dim)
         else:
-            raise ConfigurationError("Loss function is neither default not callable. Please provide a valid loss function!")
+            return latent_dist
 
 
 class JointAmortizer(tf.keras.Model):
@@ -492,14 +582,10 @@ class JointAmortizer(tf.keras.Model):
 
         Parameters
         ----------
-        amortized_posterior  : an instance of AmortizedPosterior or tf.keras.Model
+        amortized_posterior  : an instance of AmortizedPosterior or a custom tf.keras.Model
             The generative neural posterior approximator.
-        amortized_likelihood : an instance of AmortizedEmulator or tf.keras.Model
+        amortized_likelihood : an instance of AmortizedLikelihood or a custom tf.keras.Model
             The generative neural likelihood approximator.
-
-        Important
-        ---------
-        #TODO
         """
 
         super(JointAmortizer, self).__init__()
@@ -533,15 +619,16 @@ class JointAmortizer(tf.keras.Model):
 
         Parameters
         ----------
-        input_dict  : dict 
+        input_dict   : dict 
             Nested input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:: 
             `posterior_inputs`  - The input dictionary for the amortized posterior
             `likelihood_inputs` - The input dictionary for the amortized likelihood
 
         Returns
         -------
-        #TODO
-        total_loss  : tf.Tensor of shape (1,) - the total computed loss given input variables
+        total_losses : dict
+            A dictionary with keys `Post.Loss` and `Lik.Loss` containing the individual losses for the
+            two amortizers.
         """
 
         loss_post = self.amortized_posterior.compute_loss(input_dict[DEFAULT_KEYS['posterior_inputs']], **kwargs)

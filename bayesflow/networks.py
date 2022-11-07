@@ -18,6 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Meta-module for easy access of different neural network architectures."""
+"""Meta-module for easy access of different neural network architecture interfaces"""
 from bayesflow.inference_networks import InvertibleNetwork, EvidentialNetwork
 from bayesflow.summary_networks import InvariantNetwork, MultiConvNetwork

@@ -87,12 +87,12 @@ DEFAULT_SETTING_MULTI_CONV_NET = MetaDictSetting(
 DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
     meta_dict={
         't_args': {
-            'dense_args': dict(units=64, kernel_initializer='glorot_uniform', activation='elu'),
+            'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='elu'),
             'n_dense': 2,
             'spec_norm': False
         },
         's_args': {
-            'dense_args': dict(units=64, kernel_initializer='glorot_uniform', activation='elu'),
+            'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='elu'),
             'n_dense': 2,
             'spec_norm': False
         },
@@ -108,8 +108,7 @@ DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
         'alpha': 1.9,
         'use_permutation': True,
         'use_act_norm': True,
-        'act_norm_init': None,
-        'tail_network': None
+        'act_norm_init': None
     },
     mandatory_fields=["n_params"]
 )
@@ -124,15 +123,6 @@ DEFAULT_SETTING_EVIDENTIAL_NET = MetaDictSetting(
 )
 
 
-DEFAULT_SETTING_TAIL_NET = MetaDictSetting(
-    meta_dict={
-        'dense_args': dict(units=128, kernel_initializer='lecun_normal', activation='selu'),
-        'n_dense': 3
-    },
-    mandatory_fields=[]
-)
-
-
 STRING_CONFIGS = [
     'var_obs', 
     'one_hot', 
@@ -142,7 +132,7 @@ STRING_CONFIGS = [
 
 
 OPTIMIZER_DEFAULTS = {
-    'global_clipnorm': 3.
+    'global_clipnorm': 1.
 }
 
 

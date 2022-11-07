@@ -40,7 +40,7 @@ class TailNetwork(tf.keras.Model):
             for a single :class:`keras.Dense` layer
         """
         
-        super(TailNetwork, self).__init__()
+        super().__init__()
 
         # Create network body
         self.dense = Sequential(
@@ -81,7 +81,7 @@ class Permutation(tf.keras.Model):
             Ihe dimensionality of the input to the (conditional) coupling layer.
         """
 
-        super(Permutation, self).__init__()
+        super().__init__()
 
         permutation_vec = np.random.permutation(input_dim)
         inv_permutation_vec = np.argsort(permutation_vec)
@@ -148,7 +148,7 @@ class ActNorm(tf.keras.Model):
             Contains initialization settings for the `ActNorm` layer.
         """
 
-        super(ActNorm, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         # Initialize scale and bias with zeros and ones if no batch for initalization was provided.
         if meta.get('act_norm_init') is None:
@@ -261,7 +261,7 @@ class DenseCouplingNet(tf.keras.Model):
             Optional keyword arguments passed to the `tf.keras.Model` constructor. 
         """
 
-        super(DenseCouplingNet, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         # Create network body (input and hidden layers)
         self.dense = Sequential(
@@ -269,8 +269,9 @@ class DenseCouplingNet(tf.keras.Model):
             [SpectralNormalization(Dense(**meta['dense_args'])) if meta['spec_norm'] else Dense(**meta['dense_args'])
              for _ in range(meta['n_dense'])]
         )
+
         # Create network output head
-        self.dense.add(Dense(n_out, **{k: v for k, v in meta['dense_args'].items() if k != 'units'}))
+        self.dense.add(Dense(n_out, kernel_initializer='zeros'))
         self.dense.build(input_shape=())
 
     def call(self, target, condition, **kwargs):

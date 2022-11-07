@@ -23,17 +23,36 @@ import tensorflow as tf
 
 import pytest
 
-from bayesflow.trainers import Trainer
+from bayesflow.summary_networks import *
 
 
-def test_train_online():
+def test_equivariant_module():
+    """This function tests the permutation equivariance property of the `EquivariantModule`."""
+
     pass
 
-def test_train_rounds():
+
+def test_invariant_module():
+    """This function tests the permutation invariance property of the `InvariantModule`."""
     pass
 
-def test_train_offline():
+
+def test_invariant_network():
+    """This function tests the fidelity of the invariant network with a couple of relevant
+    configurations w.r.t. permutation invariance and output dimensions."""
+
     pass
 
-def test_train_memory_replay():
+
+def test_multi_conv1d():
+    """This function tests the fidelity of the `MultiConv1D` module w.r.t. output dimensions
+    using a number of relevant configurations."""
+
+    pass
+
+
+def test_multi_conv_network():
+    """This function tests the fidelity of the `MultiConvNetwork` w.r.t. output dimensions
+    using a number of relevant configurations."""
+
     pass

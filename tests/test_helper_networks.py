@@ -23,7 +23,7 @@ import tensorflow as tf
 
 import pytest
 
-from bayesflow.helper_networks import DenseCouplingNet, Permutation
+from bayesflow.helper_networks import DenseCouplingNet, Permutation, ActNorm
 
 
 @pytest.mark.parametrize("input_dim", [3, 16])
@@ -72,3 +72,17 @@ def test_permutation(input_dim, shape):
 
     # Inverse should recover input
     assert np.allclose(x, x_rec)
+
+@pytest.mark.parametrize("input_dim", [2, 8])
+@pytest.mark.parametrize("shape", ['2d', '3d'])
+def test_actnorm(input_dim, shape):
+    """Tests the ActNorm layer in terms of invertibility and shape integrity."""
+    
+    # Create randomized input
+    if shape == '2d':
+        x = tf.random.normal((np.random.randint(low=1, high=32), input_dim))
+    else:
+        x = tf.random.normal((np.random.randint(low=1, high=32), np.random.randint(low=1, high=32), input_dim))
+    
+    # Create ActNorm layer
+    

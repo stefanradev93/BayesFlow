@@ -27,7 +27,7 @@ from bayesflow import default_settings
 
 
 class InvariantModule(tf.keras.Model):
-    """ Implements an invariant module performing a permutation-invariant transform. 
+    """Implements an invariant module performing a permutation-invariant transform. 
     
     For details and rationale, see:
     
@@ -35,7 +35,7 @@ class InvariantModule(tf.keras.Model):
     """
     
     def __init__(self, meta):
-        super(InvariantModule, self).__init__()
+        super().__init__()
         
         self.s1 = Sequential([Dense(**meta['dense_s1_args']) for _ in range(meta['n_dense_s1'])])
         self.s2 = Sequential([Dense(**meta['dense_s2_args']) for _ in range(meta['n_dense_s2'])])
@@ -68,7 +68,7 @@ class EquivariantModule(tf.keras.Model):
     """
     
     def __init__(self, meta):
-        super(EquivariantModule, self).__init__()
+        super().__init__()
         
         self.invariant_module = InvariantModule(meta)
         self.s3 = Sequential([Dense(**meta['dense_s3_args']) for _ in range(meta['n_dense_s3'])])
@@ -108,7 +108,7 @@ class InvariantNetwork(tf.keras.Model):
     """Implements an invariant network with keras."""
 
     def __init__(self, meta={}, **kwargs):
-        super(InvariantNetwork, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         meta = build_meta_dict(user_dict=meta,
                                default_setting=default_settings.DEFAULT_SETTING_INVARIANT_NET)
@@ -143,7 +143,7 @@ class InvariantNetwork(tf.keras.Model):
 
     
 class MultiConv1D(tf.keras.Model):
-    """ Implements an inception-inspired 1D convolutional layer using different kernel sizes."""
+    """Implements an inception-inspired 1D convolutional layer using different kernel sizes."""
 
     def __init__(self, meta, **kwargs):
         """ Creates an inception-like Conv1D layer
@@ -154,7 +154,7 @@ class MultiConv1D(tf.keras.Model):
             A dictionary which holds the arguments for the internal `Conv1D` layers.
         """
 
-        super(MultiConv1D, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         
         # Create a list of Conv1D layers with different kernel sizes
         # ranging from 'min_kernel_size' to 'max_kernel_size'
@@ -206,7 +206,7 @@ class MultiConvNetwork(tf.keras.Model):
             A dictionary which holds the arguments for the `MultiConv1D` and `LSTM` layers.
         """
 
-        super(MultiConvNetwork, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         
         meta = build_meta_dict(user_dict=meta,
                         default_setting=default_settings.DEFAULT_SETTING_MULTI_CONV_NET)
@@ -221,9 +221,8 @@ class MultiConvNetwork(tf.keras.Model):
         self.summary_dim = meta['summary_dim']
 
     def call(self, x, **kwargs):
-        """Performs a forward pass through the network by first passing
-        x through the sequence of multi-convolutional layers and then applying 
-        the LSTM network.
+        """Performs a forward pass through the network by first passing `x` through the sequence of 
+        multi-convolutional layers and then applying the LSTM network.
 
         Parameters
         ----------
@@ -272,14 +271,14 @@ class SplitNetwork(tf.keras.Model):
             Optional keyword arguments to be passed to the `tf.keras.Model` superclass.
         """
 
-        super(SplitNetwork, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.num_splits = num_splits
         self.split_data_configurator = split_data_configurator
         self.networks = [network_type(meta) for _ in range(num_splits)]
 
     def call(self, x):
-        """ Performs the forward pass through the networks.
+        """Performs a forward pass through the subnetworks and concatenates their output.
 
         Parameters
         ----------
