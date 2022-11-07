@@ -70,10 +70,10 @@ def test_permutation(input_dim, shape):
     perm = Permutation(input_dim)
     x_rec = perm(perm(x), inverse=True).numpy()
 
-    # Inverse should recover input
+    # Inverse should recover input regardless of input dim or shape
     assert np.allclose(x, x_rec)
 
-@pytest.mark.parametrize("input_dim", [2, 8])
+@pytest.mark.parametrize("input_dim", [2, 5])
 @pytest.mark.parametrize("shape", ['2d', '3d'])
 def test_actnorm(input_dim, shape):
     """Tests the ActNorm layer in terms of invertibility and shape integrity."""
@@ -85,4 +85,11 @@ def test_actnorm(input_dim, shape):
         x = tf.random.normal((np.random.randint(low=1, high=32), np.random.randint(low=1, high=32), input_dim))
     
     # Create ActNorm layer
-    
+    actnorm = ActNorm({'n_params': input_dim})
+
+    # Forward - inverse
+    z, _ = actnorm(x)
+    x_rec = actnorm(z, inverse=True).numpy()
+
+    # Inverse should recover input regardless of input dim or shape
+    assert np.allclose(x, x_rec)
