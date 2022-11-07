@@ -34,7 +34,13 @@ from abc import ABC, abstractmethod
 
 
 class AmortizedTarget(ABC):
-    """An interface for an amortized learned distribution."""
+    """An abstract interface for an amortized learned distribution. Children should
+    implement the following public methods:
+    
+    - compute_loss(self, input_dict, **kwargs)
+    - sample(input_dict, **kwargs)
+    - log_prob(input_dict, **kwargs)
+    """
 
     @abstractmethod
     def __init__(self, *args, **kwargs):
@@ -52,13 +58,14 @@ class AmortizedTarget(ABC):
     def log_prob(input_dict, **kwargs):
         pass
 
+
 class AmortizedPosterior(Model, AmortizedTarget):
     """A wrapper to connect an inference network for parameter estimation with an optional summary network
     as in the original BayesFlow set-up described in the paper:
 
     [1] Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020).
     BayesFlow: Learning complex stochastic models with invertible neural networks.
-    IEEE transactions on neural networks and learning systems.
+    IEEE Transactions on Neural Networks and Learning Systems.
 
     But also allowing for augmented functionality, such as model misspecification detection in summary space:
 

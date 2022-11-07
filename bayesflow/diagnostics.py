@@ -172,8 +172,8 @@ def plot_sbc_ecdf(post_samples, prior_samples, difference=False, stacked=False, 
     its applications in goodness-of-fit evaluation and multiple sample comparison. Statistics and Computing, 
     32(2), 1-21. https://arxiv.org/abs/2103.10522
     
-    This figure is useful for models with many parameters and is supposed to give an idea
-    of the overall calibration of a posterior approximator.
+    For models with many parameters, use `stacked=True` to obtain an idea of the overall calibration 
+    of a posterior approximator.
 
     Parameters
     ----------
