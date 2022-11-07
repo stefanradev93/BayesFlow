@@ -39,7 +39,7 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
                   metric_fontsize=16, add_corr=True, add_r2=True, color='#8f2727', 
                   n_col=None, n_row=None):
     
-    """ Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
+    """Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
     The point estimate can be controlled with the `point_agg` argument, and the uncertainty estimate
     can be controlled with the `uncertainty_agg` argument.
 
@@ -165,10 +165,12 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
 def plot_sbc_ecdf(post_samples, prior_samples, difference=False, stacked=False, fig_size=None, 
                   param_names=None, label_fontsize=14, legend_fontsize=14, title_fontsize=16, 
                   rank_ecdf_color='#a34f4f', fill_color='grey', **kwargs):
-    """ Creates the empirical CDFs for each marginal rank distribution and plots it against
+    """Creates the empirical CDFs for each marginal rank distribution and plots it against
     a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform. Inspired by:
 
-    https://arxiv.org/abs/2103.10522
+    [1] Säilynoja, T., Bürkner, P. C., & Vehtari, A. (2022). Graphical test for discrete uniformity and 
+    its applications in goodness-of-fit evaluation and multiple sample comparison. Statistics and Computing, 
+    32(2), 1-21. https://arxiv.org/abs/2103.10522
     
     This figure is useful for models with many parameters and is supposed to give an idea
     of the overall calibration of a posterior approximator.
@@ -296,10 +298,10 @@ def plot_sbc_ecdf(post_samples, prior_samples, difference=False, stacked=False, 
 
 def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=None, num_bins=None, 
              binomial_interval=0.99, label_fontsize=14, title_fontsize=16, hist_color='#a34f4f'):
-    """ Creates and plots publication-ready histograms of rank statistics for simulation-based calibration 
+    """Creates and plots publication-ready histograms of rank statistics for simulation-based calibration 
     (SBC) checks according to:
 
-    Talts, S., Betancourt, M., Simpson, D., Vehtari, A., & Gelman, A. (2018). 
+    [1] Talts, S., Betancourt, M., Simpson, D., Vehtari, A., & Gelman, A. (2018). 
     Validating Bayesian inference algorithms with simulation-based calibration. 
     arXiv preprint arXiv:1804.06788.
 
@@ -404,11 +406,11 @@ def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=
 def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names=None, height=2, 
                       legend_fontsize=14, post_color='#8f2727', prior_color='gray', post_alpha=0.9, 
                       prior_alpha=0.7):
-    """ Generates a bivariate pairplot given posterior draws and prior.
+    """Generates a bivariate pairplot given posterior draws and optional prior or prior draws.
 
     posterior_draws   : np.ndarray of shape (n_post_draws, n_params)
         The posterior draws obtained for a SINGLE observed data set.
-    prior             : bayesflow.forward_inference.Prior instance or None, optional (default: None)
+    prior             : bayesflow.forward_inference.Prior instance or None, optional, default: None
         The optional prior object having an input-output signature as given by ayesflow.forward_inference.Prior
     prior_draws       : np.ndarray of shape (n_prior_draws, n_params) or None, optonal (default: None)
         The optional prior draws obtained from the prior. If both prior and prior_draws are provided, prior_draws
@@ -497,7 +499,7 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
 
 
 def plot_losses(history, fig_size=None, color='#8f2727', label_fontsize=14, title_fontsize=16):
-    """ A generic helper function to plot the losses of a series of training runs.
+    """A generic helper function to plot the losses of a series of training epochs and runs.
     
     Parameters
     ----------
@@ -539,7 +541,7 @@ def plot_losses(history, fig_size=None, color='#8f2727', label_fontsize=14, titl
 
 
 def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color='#8f2727', **kwargs):
-    """ Creates pairplots for a given joint prior.
+    """Creates pairplots for a given joint prior.
     
     Parameters
     ----------
@@ -599,7 +601,7 @@ def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color='#8f
 
 
 def plot_latent_space_2d(z_samples, height=2.5, color='#8f2727', **kwargs):
-    """ Creates pairplots for the latent space learned by the inference network. Enables
+    """Creates pairplots for the latent space learned by the inference network. Enables
     visual inspection of the the latent space and whether its structrue corresponds to the
     one enforced by the optimization criterion.
     
