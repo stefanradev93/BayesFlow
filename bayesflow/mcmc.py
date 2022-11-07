@@ -21,7 +21,6 @@
 import numpy as np
 import tensorflow as tf
 import aesara.tensor as at
-from aesara.graph.op import Op
 
 from bayesflow.default_settings import DEFAULT_KEYS
 

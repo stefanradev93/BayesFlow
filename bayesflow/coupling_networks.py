@@ -95,30 +95,31 @@ class AffineCouplingLayer(tf.keras.Model):
             self.act_norm = None
 
     def call(self, target_or_z, condition, inverse=False, **kwargs):
-        """Performs one pass through an invertible chain (either inverse or forward).
+        """Performs one pass through a the affine coupling layer (either inverse or forward).
         
         Parameters
         ----------
         target_or_z      : tf.Tensor
-            the estimation quantites of interest or latent representations z ~ p(z), shape (batch_size, ...)
-        condition        : tf.Tensor
-            the conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, ...)
+            The estimation quantites of interest or latent representations z ~ p(z), shape (batch_size, ...)
+        condition        : tf.Tensor or None
+            The conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, ...).
+            If `condition is None`, then the layer recuces to an unconditional ACL.
         inverse          : bool, optional, default: False
             Flag indicating whether to run the block forward or backward.
         
         Returns
         -------
-        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+        (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
-            v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
+            z shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
 
-        u               :  tf.Tensor
-            If inverse=True: The transformed out, shape (batch_size, inp_dim)
+        target          :  tf.Tensor
+            If inverse=True: The back-transformed z, shape (batch_size, inp_dim)
 
         Important
         ---------
-        If ``inverse=False``, the return is ``(v, log_det_J)``.\n
-        If ``inverse=True``, the return is ``(z)``
+        If ``inverse=False``, the return is ``(z, log_det_J)``.\n
+        If ``inverse=True``, the return is ``target``
         """
         
         if not inverse:
@@ -127,7 +128,21 @@ class AffineCouplingLayer(tf.keras.Model):
 
     @tf.function
     def forward(self, target, condition, **kwargs):
-        """Performs a forward pass through a coupling layer with an optinal `Permutation` and `ActNorm` layers."""
+        """Performs a forward pass through a coupling layer with an optinal `Permutation` and `ActNorm` layers.
+        
+        Parameters
+        ----------
+        target     : tf.Tensor
+            The estimation quantities of interest, for instance, parameter vector of shape (batch_size, theta_dim)
+        condition  : tf.Tensor or None
+            The conditioning vector of interest, for instance, x = summary(x), shape (batch_size, summary_dim)
+            If `None`, transformation amounts to unconditional estimation.
+
+        Returns
+        -------
+        (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+            The transformed input and the corresponding Jacobian of the transformation.
+        """
 
         # Initialize log_det_Js accumulator
         log_det_Js = tf.zeros(1)
@@ -149,7 +164,21 @@ class AffineCouplingLayer(tf.keras.Model):
 
     @tf.function
     def inverse(self, z, condition, **kwargs):
-        """Performs an inverse pass through a coupling layer with an optinal `Permutation` and `ActNorm` layers."""
+        """Performs an inverse pass through a coupling layer with an optinal `Permutation` and `ActNorm` layers.
+        
+        Parameters
+        ----------
+        z          : tf.Tensor
+            latent variables z ~ p(z), shape (batch_size, theta_dim)
+        condition  : tf.Tensor or None
+            The conditioning vector of interest, for instance, x = summary(x), shape (batch_size, summary_dim).
+            If `None`, transformation amounts to unconditional estimation.
+
+        Returns
+        -------
+        target  :  tf.Tensor
+            The back-transformed latent variable z.
+        """
 
         # Pass through coupling layer
         target = self._inverse(z, condition, **kwargs)
@@ -165,20 +194,20 @@ class AffineCouplingLayer(tf.keras.Model):
 
     @tf.function
     def _forward(self, target, condition, **kwargs):
-        """ Performs a forward pass through the coupling block. Used internally by the instance.
+        """Performs a forward pass through the coupling layer. Used internally by the instance.
 
         Parameters
         ----------
         target     : tf.Tensor
-            the estimation quantities of interest, for instance, parameter vector of shape (batch_size, theta_dim)
+            The estimation quantities of interest, for instance, parameter vector of shape (batch_size, theta_dim)
         condition  : tf.Tensor or None
-            the conditioning vector of interest, for instance, x = summary(x), shape (batch_size, summary_dim)
+            The conditioning vector of interest, for instance, x = summary(x), shape (batch_size, summary_dim)
+            If `None`, transformation amounts to unconditional estimation.
 
         Returns
         -------
         (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
-            If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
-            v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
+            The transformed input and the corresponding Jacobian of the transformation.
         """
 
         # Split parameter vector
@@ -211,16 +240,16 @@ class AffineCouplingLayer(tf.keras.Model):
 
         Parameters
         ----------
-        z         : tf.Tensor
+        z          : tf.Tensor
             latent variables z ~ p(z), shape (batch_size, theta_dim)
         condition  : tf.Tensor or None
             The conditioning vector of interest, for instance, x = summary(x), shape (batch_size, summary_dim).
+            If `None`, transformation amounts to unconditional estimation.
 
         Returns
         -------
-        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
-            If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
-            v shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
+        u  :  tf.Tensor
+            The back-transformed input.
         """
 
         v1, v2 = tf.split(z, [self.n_out1, self.n_out2], axis=-1)

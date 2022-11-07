@@ -19,7 +19,6 @@
 # SOFTWARE.
 
 import numpy as np
-from copy import deepcopy
 
 from tensorflow.keras.utils import to_categorical
 
@@ -28,7 +27,7 @@ from bayesflow.exceptions import ConfigurationError
 
 
 class DefaultJointConfigurator:
-    """Fallback class for a generic configrator for joint posterior and likelihood learning."""
+    """Fallback class for a generic configrator for joint posterior and likelihood approximation."""
 
     def __init__(self, default_float_type=np.float32):
         self.posterior_config = DefaultPosteriorConfigurator(default_float_type=default_float_type)
@@ -43,8 +42,9 @@ class DefaultJointConfigurator:
         input_dict[DEFAULT_KEYS['likelihood_inputs']] = self.likelihood_config(forward_dict)
         return input_dict
 
+
 class DefaultLikelihoodConfigurator:
-    """Fallback class for a generic configrator for amortized likelihood emulation."""
+    """Fallback class for a generic configrator for amortized likelihood approximation."""
 
     def __init__(self, default_float_type=np.float32):
         self.default_float_type = default_float_type
@@ -94,7 +94,7 @@ class DefaultLikelihoodConfigurator:
 
 
 class DefaultPosteriorConfigurator:
-    """Fallback class for a generic configrator for amortized posterior inference."""
+    """Fallback class for a generic configrator for amortized posterior approximation."""
 
     def __init__(self, default_float_type=np.float32):
 
@@ -239,7 +239,7 @@ class DefaultPosteriorConfigurator:
 
 
 class DefaultModelComparisonConfigurator:
-    """ Utility class for a default configurator for amortized model comparison."""
+    """Fallback class for a default configurator for amortized model comparison."""
 
     def __init__(self, n_models, config=None, default_float_type=np.float32):
         
