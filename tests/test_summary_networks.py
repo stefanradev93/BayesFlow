@@ -26,6 +26,7 @@ from bayesflow.summary_networks import InvariantModule, EquivariantModule, Invar
 from bayesflow.helper_functions import build_meta_dict
 from bayesflow.default_settings import DEFAULT_SETTING_MULTI_CONV_NET, DEFAULT_SETTING_INVARIANT_NET
 
+
 def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
     """Helper function to generate randomized 3d data for summary modules, min and
     max dimensions for each axis are given by `low` and `high`."""

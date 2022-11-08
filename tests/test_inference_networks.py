@@ -19,21 +19,21 @@
 # SOFTWARE.
 
 import numpy as np
+import tensorflow as tf
 
 import pytest
 
-from bayesflow.coupling_networks import AffineCouplingLayer
+from bayesflow.inference_networks import InvertibleNetwork
 from bayesflow.helper_functions import build_meta_dict
 from bayesflow.default_settings import DEFAULT_SETTING_INVERTIBLE_NET
 
 
-@pytest.mark.parametrize("condition", [True, False])
-@pytest.mark.parametrize("spec_norm", [True, False])
-@pytest.mark.parametrize("use_perm", [True, False])
-@pytest.mark.parametrize("use_act_norm", [True, False])
 @pytest.mark.parametrize("input_shape", ['2d', '3d'])
-def test_coupling_layer(condition, spec_norm, use_perm, use_act_norm, input_shape):
-    """Tests the `CouplingLayer` instance with various configurations."""
+@pytest.mark.parametrize("condition", [True, False])
+@pytest.mark.parametrize("use_act_norm", [True, False])
+@pytest.mark.parametrize("n_coupling_layers", [1, 8])
+def test_invertible_network(input_shape, condition, use_act_norm, n_coupling_layers):
+    """Tests the `InvertibleNetwork` core class using a couple of relevant configurations."""
 
     # Randomize units and input dim
     units_t = np.random.randint(low=2, high=32)
@@ -44,24 +44,24 @@ def test_coupling_layer(condition, spec_norm, use_perm, use_act_norm, input_shap
     dense_net_settings = {
         't_args': {
             'dense_args': dict(units=units_t, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense': 2,
-            'spec_norm': spec_norm
+            'n_dense': 1,
+            'spec_norm': True
         },
         's_args': {
             'dense_args': dict(units=units_s, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense': 1,
-            'spec_norm': spec_norm
+            'n_dense': 2,
+            'spec_norm': False
         },
     }
     meta = build_meta_dict(user_dict={
         'coupling_settings': dense_net_settings,
-        'use_permutation': use_perm,
         'use_act_norm': use_act_norm,
+        'n_coupling_layers': n_coupling_layers,
         'n_params': input_dim
     },
     default_setting=DEFAULT_SETTING_INVERTIBLE_NET)
 
-    network = AffineCouplingLayer(meta)
+    network = InvertibleNetwork(meta)
 
     # Create randomized input and output conditions
     batch_size = np.random.randint(low=1, high=32)
@@ -82,18 +82,19 @@ def test_coupling_layer(condition, spec_norm, use_perm, use_act_norm, input_shap
     inp_rec = network(z, condition, inverse=True).numpy()
 
     # Test attributes
-    if use_perm:
-        assert network.permutation is not None
-    else:
-        assert network.permutation is None
-    if use_act_norm:
-        assert network.act_norm is not None
-    else:
-        assert network.act_norm is None
+    assert network.latent_dim == input_dim
+    assert len(network.coupling_layers) == n_coupling_layers
+    for l in network.coupling_layers:
+        assert l.permutation is not None
+        if use_act_norm:
+            assert l.act_norm is not None
+        else:
+            assert l.act_norm is None
     # Test invertibility
     assert np.allclose(inp, inp_rec, atol=1e6)
     # Test shapes (bijectivity)
     assert z.shape == inp.shape
+    assert z.shape[-1] == input_dim
     if input_shape == '2d':
         assert ldj.shape[0] == inp.shape[0]
     else:
