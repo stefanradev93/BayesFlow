@@ -727,9 +727,9 @@ class Trainer:
                 reg = tf.add_n(self.amortizer.losses)
                 _loss += reg
                 if type(loss) is dict:
-                    loss['Regularization'] = reg
+                    loss['W.Decay'] = reg
                 else:
-                    loss = {'Loss': loss, 'Regularization': reg}
+                    loss = {'Loss': loss, 'W.Decay': reg}
         # One step backprop and return loss
         gradients = tape.gradient(_loss, self.amortizer.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.amortizer.trainable_variables))
