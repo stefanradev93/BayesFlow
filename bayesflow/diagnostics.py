@@ -116,8 +116,14 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
     if fig_size is None:
         fig_size = (int(4 * n_col), int(4 * n_row))
     f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
+    # turn axarr into 1D list
+    if n_col > 1 or n_row > 1:
+        axarr = axarr.flat
+    else:
+        # for 1x1, axarr is not a list -> turn it into one for use with enumerate
+        axarr = [axarr]
 
-    for i, ax in enumerate(axarr.flat):
+    for i, ax in enumerate(axarr):
         if i >= n_params:
             break
 
