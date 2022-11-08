@@ -41,25 +41,32 @@ for i in range(9):
 Cov = np.linalg.inv(F.T@F)
 
 
-def prior():
-    """ Generates a random draw from the custom prior over the 10
+def prior(rng=None):
+    """Generates a random draw from the custom prior over the 10
     Bernoulli GLM parameters (1 intercept and 9 weights). Uses a
     global covariance matrix `Cov` for the multivariate Gaussian prior
     over the model weights, which is pre-computed for efficiency.
-        
+
+    Parameters
+    ----------
+    rng   : np.random.Generator or None, default: None
+        An optional random number generator to use.
+
     Returns
     -------
     theta : np.ndarray of shape (10,)
         A single draw from the prior.
     """
-    
-    beta = np.random.default_rng().normal(0, 2)
-    f = np.random.default_rng().multivariate_normal(np.zeros(9), Cov)
+
+    if rng is None:
+        rng = np.random.default_rng()
+    beta = rng.normal(0, 2)
+    f = rng.multivariate_normal(np.zeros(9), Cov)
     return np.append(beta, f)
     
 
-def simulator(theta, T=100, scale_by_T=True):
-    """ Simulates data from the custom Bernoulli GLM likelihood, see
+def simulator(theta, T=100, scale_by_T=True, rng=None):
+    """Simulates data from the custom Bernoulli GLM likelihood, see
     https://arxiv.org/pdf/2101.04653.pdf, Task T.5
 
     Important: `scale_sum` should be set to False if the simulator is used
@@ -74,20 +81,27 @@ def simulator(theta, T=100, scale_by_T=True):
         The simulated duration of the task (eq. the number of Bernoulli draws).
     scale_by_T : bool, optional, default: True
         A flag indicating whether to scale the summayr statistics by T.
+    rng        : np.random.Generator or None, default: None
+        An optional random number generator to use.
+
     Returns
     -------
     x : np.ndarray of shape (10,)
         The vector of sufficient summary statistics of the data.
     """
-    
+
+    # Use default RNG, if None provided
+    if rng is None:
+        rng = np.random.default_rng()
+
     # Unpack parameters
     beta, f = theta[0], theta[1:]
 
     # Generate design matrix
-    V = np.random.default_rng().normal(size=(9, T))
+    V = rng.normal(size=(9, T))
 
     # Draw from Bernoulli GLM
-    z = np.random.default_rng().binomial(n=1, p=expit(V.T @ f + beta))
+    z = rng.binomial(n=1, p=expit(V.T @ f + beta))
 
     # Compute and return (scaled) sufficient summary statistics
     x1 = np.sum(z)
@@ -99,7 +113,7 @@ def simulator(theta, T=100, scale_by_T=True):
 
 
 def configurator(forward_dict, mode='posterior'):
-    """ Configures simulator outputs for use in BayesFlow training."""
+    """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
     if mode == 'posterior':
@@ -122,7 +136,7 @@ def configurator(forward_dict, mode='posterior'):
 
 
 def _config_posterior(forward_dict):
-    """ Helper function for posterior configuration."""
+    """Helper function for posterior configuration."""
 
     input_dict = {}
     input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
@@ -131,7 +145,7 @@ def _config_posterior(forward_dict):
 
 
 def _config_likelihood(forward_dict):
-    """ Helper function for likelihood configuration."""
+    """Helper function for likelihood configuration."""
 
     input_dict = {}
     input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)

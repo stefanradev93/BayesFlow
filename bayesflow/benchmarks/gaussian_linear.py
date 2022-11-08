@@ -26,11 +26,12 @@ import numpy as np
 bayesflow_benchmark_info = {
     'simulator_is_batched': True,
     'parameter_names': None,
+    'configurator_info': 'posterior'
 }
 
 
-def prior(D=10, scale=0.1):
-    """ Generates a draw from a D-dimensional Gaussian prior distribution with a 
+def prior(D=10, scale=0.1, rng=None):
+    """Generates a random draw from a D-dimensional Gaussian prior distribution with a 
     spherical convariance matrix given by sigma * I_D. Represents the location vector of
     a (conjugate) Gaussian likelihood.
     
@@ -40,18 +41,22 @@ def prior(D=10, scale=0.1):
         The dimensionality of the Gaussian prior distribution.
     scale : float, optional, default : 0.1
         The scale of the Gaussian prior.
+    rng   : np.random.Generator or None, default: None
+        An optional random number generator to use.
         
     Returns
     -------
     theta : np.ndarray of shape (D, )
         A single draw from the D-dimensional Gaussian prior.
     """
-    
-    return scale*np.random.default_rng().normal(size=D)
+
+    if rng is None:
+        rng = np.random.default_rng()
+    return scale*rng.normal(size=D)
 
 
-def simulator(theta, n_obs=None, scale=0.1):
-    """ Generates batched draws from a D-dimenional Gaussian distributions given a batch of 
+def simulator(theta, n_obs=None, scale=0.1, rng=None):
+    """Generates batched draws from a D-dimenional Gaussian distributions given a batch of 
     location (mean) parameters of D dimensions. Assumes a spherical convariance matrix given 
     by scale * I_D. 
     
@@ -61,25 +66,31 @@ def simulator(theta, n_obs=None, scale=0.1):
         The location parameters of the Gaussian likelihood.
     n_obs  : int or None, optional, default: None
         The number of observations to draw from the likelihood given the location
-        parameter `theta`. If None, a single draw is produced.
+        parameter `theta`. If `n obs is None`, a single draw is produced.
     scale : float, optional, default : 0.1
         The scale of the Gaussian likelihood.
-    
+    rng   : np.random.Generator or None, default: None
+        An optional random number generator to use.
+
     Returns
     -------
     x : np.ndarray of shape (theta.shape[0], theta.shape[1]) if n_obs is None,
         else np.ndarray of shape (theta.shape[0], n_obs, theta.shape[1])
         A single draw or a sample from a batch of Gaussians.
     """
-    
+
+    # Use default RNG, if None provided
+    if rng is None:
+        rng = np.random.default_rng()
+    # Generate prior predictive samples, possibly a single if n_obs is None
     if n_obs is None:
-        return scale*np.random.default_rng().normal(loc=theta)
-    x = scale*np.random.default_rng().normal(loc=theta, size=(n_obs, theta.shape[0], theta.shape[1]))
+        return scale*rng.normal(loc=theta)
+    x = scale*rng.normal(loc=theta, size=(n_obs, theta.shape[0], theta.shape[1]))
     return np.transpose(x, (1, 0, 2))
 
 
 def configurator(forward_dict, mode='posterior'):
-    """ Configures simulator outputs for use in BayesFlow training."""
+    """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
     if mode == 'posterior':
@@ -102,7 +113,7 @@ def configurator(forward_dict, mode='posterior'):
 
 
 def _config_posterior(forward_dict):
-    """ Helper function for posterior configuration."""
+    """Helper function for posterior configuration."""
 
     input_dict = {}
     input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
@@ -111,7 +122,7 @@ def _config_posterior(forward_dict):
 
 
 def _config_likelihood(forward_dict):
-    """ Helper function for likelihood configuration."""
+    """Helper function for likelihood configuration."""
 
     input_dict = {}
     input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)

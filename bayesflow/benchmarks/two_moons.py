@@ -30,27 +30,31 @@ bayesflow_benchmark_info = {
 }
 
 
-def prior(lower_bound=-1., upper_bound=1.):
-    """ Generates a draw from a 2-dimensional uniform prior bounded between 
-    `lower_bound` and `upper_bound` which represents the two parameters of the two moons simulator
-    
+def prior(lower_bound=-1., upper_bound=1., rng=None):
+    """Generates a random draw from a 2-dimensional uniform prior bounded between 
+    `lower_bound` and `upper_bound` which represents the two parameters of the two moons simulator.
+
     Parameters
     ----------
-    lower_bound : float, optional, default : -1.
+    lower_bound : float, optional, default : -1
         The lower bound of the uniform prior.
-    upper_bound : float, optional, default : 1.
+    upper_bound : float, optional, default : 1
         The upper bound of the uniform prior.
-        
+    rng         : np.random.Generator or None, default: None
+        An optional random number generator to use.
+
     Returns
     -------
     theta : np.ndarray of shape (2,)
         A single draw from the 2-dimensional uniform prior.
     """
-    
-    return np.random.default_rng().uniform(low=lower_bound, high=upper_bound, size=2)
+
+    if rng is None:
+        rng = np.random.default_rng()
+    return rng.uniform(low=lower_bound, high=upper_bound, size=2)
 
 
-def simulator(theta):
+def simulator(theta, rng=None):
     """ Implements data generation from the two-moons model with a bimodal posterior.
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.8
     
@@ -58,17 +62,23 @@ def simulator(theta):
     ----------
     theta   : np.ndarray of shape (2,)
         The vector of two model parameters.
-    
+    rng     : np.random.Generator or None, default: None
+        An optional random number generator to use.
+
     Returns
     -------
     x : np.ndarray of shape (2,)
         The 2D vector generated from the two moons simulator.
     """
-    
+
+    # Use default RNG, if None specified
+    if rng is None:
+        rng = np.random.default_rng()
+
     # Generate noise
-    alpha = np.random.default_rng().uniform(low=-0.5*np.pi, high=0.5*np.pi)
-    r = np.random.default_rng().normal(loc=0.1, scale=0.01)
-    
+    alpha = rng.uniform(low=-0.5*np.pi, high=0.5*np.pi)
+    r = rng.normal(loc=0.1, scale=0.01)
+
     # Forward process
     rhs1 = np.array([
         r*np.cos(alpha) + 0.25, 
@@ -78,12 +88,12 @@ def simulator(theta):
         -np.abs(theta[0] + theta[1]) / np.sqrt(2.),
         (-theta[0] + theta[1]) / np.sqrt(2.)
     ])
-    
+
     return rhs1 + rhs2
 
 
 def configurator(forward_dict, mode='posterior'):
-    """ Configures simulator outputs for use in BayesFlow training."""
+    """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
     if mode == 'posterior':
@@ -106,7 +116,7 @@ def configurator(forward_dict, mode='posterior'):
 
 
 def _config_posterior(forward_dict):
-    """ Helper function for posterior configuration."""
+    """Helper function for posterior configuration."""
 
     input_dict = {}
     input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
@@ -115,7 +125,7 @@ def _config_posterior(forward_dict):
 
 
 def _config_likelihood(forward_dict):
-    """ Helper function for likelihood configuration."""
+    """Helper function for likelihood configuration."""
 
     input_dict = {}
     input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
