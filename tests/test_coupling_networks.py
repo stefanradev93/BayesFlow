@@ -91,7 +91,7 @@ def test_coupling_layer(condition, spec_norm, use_perm, use_act_norm, input_shap
     else:
         assert network.act_norm is None
     # Test invertibility
-    assert np.allclose(inp, inp_rec, atol=1e6)
+    assert np.allclose(inp, inp_rec, atol=1e-6)
     # Test shapes (bijectivity)
     assert z.shape == inp.shape
     if input_shape == '2d':

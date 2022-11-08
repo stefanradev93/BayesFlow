@@ -19,7 +19,6 @@
 # SOFTWARE.
 
 import numpy as np
-import tensorflow as tf
 
 import pytest
 
@@ -31,8 +30,9 @@ from bayesflow.default_settings import DEFAULT_SETTING_INVERTIBLE_NET
 @pytest.mark.parametrize("input_shape", ['2d', '3d'])
 @pytest.mark.parametrize("condition", [True, False])
 @pytest.mark.parametrize("use_act_norm", [True, False])
+@pytest.mark.parametrize("use_soft_flow", [True, False])
 @pytest.mark.parametrize("n_coupling_layers", [1, 8])
-def test_invertible_network(input_shape, condition, use_act_norm, n_coupling_layers):
+def test_invertible_network(input_shape, condition, use_act_norm, use_soft_flow, n_coupling_layers):
     """Tests the `InvertibleNetwork` core class using a couple of relevant configurations."""
 
     # Randomize units and input dim
@@ -56,6 +56,7 @@ def test_invertible_network(input_shape, condition, use_act_norm, n_coupling_lay
     meta = build_meta_dict(user_dict={
         'coupling_settings': dense_net_settings,
         'use_act_norm': use_act_norm,
+        'use_soft_flow': use_soft_flow,
         'n_coupling_layers': n_coupling_layers,
         'n_params': input_dim
     },
@@ -90,8 +91,13 @@ def test_invertible_network(input_shape, condition, use_act_norm, n_coupling_lay
             assert l.act_norm is not None
         else:
             assert l.act_norm is None
-    # Test invertibility
-    assert np.allclose(inp, inp_rec, atol=1e6)
+    if use_soft_flow:
+        assert network.soft_flow is True
+    else:
+        assert network.soft_flow is False
+    # Test invertibility (in case no soft flow)
+    if not use_soft_flow:
+        assert np.allclose(inp, inp_rec, atol=1e-6)
     # Test shapes (bijectivity)
     assert z.shape == inp.shape
     assert z.shape[-1] == input_dim
