@@ -194,7 +194,7 @@ class Trainer:
             self._check_consistency()
 
     def diagnose_latent2d(self, inputs=None, **kwargs):
-        """ Performs visual pre-inference diagnostics of latent space on either provided validation data
+        """Performs visual pre-inference diagnostics of latent space on either provided validation data
         (new simulations) or internal simulation memory.
         If `inputs is not None`, then diagnostics will be performed on the inputs, regardless
         whether the `simulation_memory` of the trainer is empty or not. If `inputs is None`, then
@@ -297,7 +297,7 @@ class Trainer:
             raise NotImplementedError("SBC diagnostics are only available for type AmortizedPosterior!")
         
     def load_pretrained_network(self):
-        """ Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.
+        """Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.
         """
 
         if self.manager is None or self.checkpoint is None:
@@ -306,7 +306,7 @@ class Trainer:
         return status
 
     def train_online(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, **kwargs):
-        """ Trains an amortizer via online learning. Additional keyword arguments
+        """Trains an amortizer via online learning. Additional keyword arguments
         are passed to the generative mode, configurator, and amortizer.
 
         Parameters
@@ -374,7 +374,7 @@ class Trainer:
         return self.loss_history.get_plottable()
     
     def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True,**kwargs):
-        """ Trains an amortizer via offline learning. Assume parameters, data and optional 
+        """Trains an amortizer via offline learning. Assume parameters, data and optional 
         context have already been simulated (i.e., forward inference has been performed).
 
         Parameters
@@ -449,9 +449,9 @@ class Trainer:
         
         return self.loss_history.get_plottable()
 
-    def train_from_presimulation(self, presimulation_path, max_epochs=None, save_checkpoint=True, custom_loader=None, **kwargs):
-
-        """ Trains an amortizer via a modified form of offline training. 
+    def train_from_presimulation(self, presimulation_path, max_epochs=None, save_checkpoint=True, 
+                                 custom_loader=None, **kwargs):
+        """Trains an amortizer via a modified form of offline training. 
 
         Like regular offline training, it assumes that parameters, data and optional context have already
         been simulated (i.e., forward inference has been performed).
@@ -559,9 +559,15 @@ class Trainer:
             self._save_trainer(save_checkpoint)
 
         return self.loss_history.get_plottable()
-    
+
     def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, **kwargs):
-        """Trains an amortizer via round-based learning.
+        """Trains an amortizer via round-based learning. In each round, `sim_per_round` data sets
+        are simulated from the generative model and added to the data sets simulated in previous 
+        round. Then, the networks are trained for `epochs` on the augmented set of data sets.
+        
+        Important: Training time will increase from round to round, since the number of simulations
+        increases correspondingly. The final round will then train the networks on `rounds * sim_per_round`
+        data sets, so make sure this number does not eat up all available memory. 
 
         Parameters
         ----------
@@ -721,9 +727,9 @@ class Trainer:
                 reg = tf.add_n(self.amortizer.losses)
                 _loss += reg
                 if type(loss) is dict:
-                    loss['Regularization'] = reg
+                    loss['W.Decay'] = reg
                 else:
-                    loss = {'Loss': loss, 'Regularization': reg}
+                    loss = {'Loss': loss, 'W.Decay': reg}
         # One step backprop and return loss
         gradients = tape.gradient(_loss, self.amortizer.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.amortizer.trainable_variables))

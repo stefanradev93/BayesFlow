@@ -31,17 +31,25 @@ bayesflow_benchmark_info = {
 }
 
 
-def prior():
-    """ Generates a draw from a 4-dimensional (independent) lognormal prior
+def prior(rng=None):
+    """Generates a random draw from a 4-dimensional (independent) lognormal prior
     which represents the four contact parameters of the Lotka-Volterra model.
-    
+
+    Parameters
+    ----------
+    rng   : np.random.Generator or None, default: None
+        An optional random number generator to use.
+
     Returns
     -------
     theta : np.ndarray of shape (4,)
         A single draw from the 4-dimensional prior.
     """
-    
-    theta = np.random.default_rng().lognormal(
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    theta = rng.lognormal(
         mean=[-0.125, -3, -0.125, -3], 
         sigma=0.5
     )    
@@ -49,7 +57,7 @@ def prior():
 
 
 def _deriv(x, t, alpha, beta, gamma, delta):
-    """ Helper function for scipy.integrate.odeint."""
+    """Helper function for scipy.integrate.odeint."""
 
     X, Y = x
     dX = alpha*X - beta*X*Y
@@ -57,8 +65,8 @@ def _deriv(x, t, alpha, beta, gamma, delta):
     return dX, dY 
 
 
-def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True):
-    """ Runs a Lotka-Volterra simulation for T time steps and returns `subsample` evenly spaced
+def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True, rng=None):
+    """Runs a Lotka-Volterra simulation for T time steps and returns `subsample` evenly spaced
     points from the simulated trajectory, given contact parameters `theta`.
 
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.10. 
@@ -79,6 +87,8 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True):
     flatten     : bool, optional, default: True
         A flag to indicate whather a 1D (`flatten=True`) or a 2D (`flatten=False`)
         representation of the simulated data is returned.
+    rng         : np.random.Generator or None, default: None
+        An optional random number generator to use.
 
     Returns
     -------
@@ -86,7 +96,11 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True):
         otherwise shape (T, 2) or (T*2,) if `subsample is None`.
         The time series of simulated predator and pray populations
     """
-    
+
+    # Use default RNG, if None specified
+    if rng is None:
+        rng = np.random.default_rng()
+
     # Create vector (list) of initial conditions
     x0 = X0, Y0
     
@@ -107,14 +121,14 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True):
     pp[pp<0] = 0
     
     # Add noise, decide whether to flatten and return
-    x = np.random.default_rng().lognormal(np.log1p(pp), sigma=0.1)
+    x = rng.lognormal(np.log1p(pp), sigma=0.1)
     if flatten:
         return x.flatten()
     return x
 
 
 def configurator(forward_dict, mode='posterior', scale_data=1000, as_summary_condition=False):
-    """ Configures simulator outputs for use in BayesFlow training."""
+    """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
     if mode == 'posterior':
@@ -137,7 +151,7 @@ def configurator(forward_dict, mode='posterior', scale_data=1000, as_summary_con
 
 
 def _config_posterior(forward_dict, scale_data, as_summary_condition):
-    """ Helper function for posterior configuration."""
+    """Helper function for posterior configuration."""
 
     input_dict = {}
     input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
@@ -149,10 +163,9 @@ def _config_posterior(forward_dict, scale_data, as_summary_condition):
 
 
 def _config_likelihood(forward_dict, scale_data):
-    """ Helper function for likelihood configuration."""
+    """Helper function for likelihood configuration."""
 
     input_dict = {}
     input_dict['observables'] = forward_dict['sim_data'].astype(np.float32) / scale_data
     input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
     return input_dict
-

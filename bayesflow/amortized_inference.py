@@ -23,7 +23,7 @@ import tensorflow as tf
 from tensorflow.keras import Model
 
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
-from bayesflow.losses import log_loss
+from bayesflow.losses import log_loss, mmd_summary_space
 from bayesflow.default_settings import DEFAULT_KEYS
 
 import tensorflow_probability as tfp

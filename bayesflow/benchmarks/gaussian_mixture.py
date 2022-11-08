@@ -30,11 +30,11 @@ bayesflow_benchmark_info = {
 }
 
 
-def prior(lower_bound=-10., upper_bound=10., D=2):
-    """ Generates a draw from a 2-dimensional uniform prior bounded between 
+def prior(lower_bound=-10., upper_bound=10., D=2, rng=None):
+    """Generates a random draw from a 2-dimensional uniform prior bounded between 
     `lower_bound` and `upper_bound` representing the common mean of a 2D Gaussian
     mixture model (GMM).
-    
+
     Parameters
     ----------
     lower_bound : float, optional, default : -10
@@ -43,18 +43,22 @@ def prior(lower_bound=-10., upper_bound=10., D=2):
         The upper bound of the uniform prior.
     D           : int, optional, default: 2
         The dimensionality of the mixtrue model
-        
+    rng         : np.random.Generator or None, default: None
+        An optional random number generator to use.
+
     Returns
     -------
     theta : np.ndarray of shape (D, )
         A single draw from the D-dimensional uniform prior.
     """
-    
-    return np.random.default_rng().uniform(low=lower_bound, high=upper_bound, size=D)
+
+    if rng is None:
+        rng = np.random.default_rng()
+    return rng.uniform(low=lower_bound, high=upper_bound, size=D)
 
 
-def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01):
-    """ Implements data generation from the Gaussian mixture model (GMM) with
+def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01, rng=None):
+    """Simulates data from the Gaussian mixture model (GMM) with
     shared location vector. For more details, see
     
     https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.7
@@ -69,24 +73,30 @@ def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01):
         The scale of the first component.
     scale_c2 : float, optional, default: 0.01
         The scale of the second component.
-    
+    rng      : np.random.Generator or None, default: None
+        An optional random number generator to use.
+
     Returns
     -------
     x : np.ndarray of shape (2,)
         The 2D vector generated from the GMM simulator.
     """
-    
+
+    # Use default RNG, if None specified
+    if rng is None:
+        rng = np.random.default_rng()
+
     # Draw component index
-    idx = np.random.default_rng().binomial(n=1, p=prob)
-    
+    idx = rng.binomial(n=1, p=prob)
+
     # Draw 2D-Gaussian sample according to component index
     if idx == 0:
-        return scale_c1*np.random.default_rng().normal(loc=theta)
-    return scale_c2*np.random.default_rng().normal(loc=theta)
+        return scale_c1*rng.normal(loc=theta)
+    return scale_c2*rng.normal(loc=theta)
 
 
 def configurator(forward_dict, mode='posterior', scale_data=12):
-    """ Configures simulator outputs for use in BayesFlow training."""
+    """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
     if mode == 'posterior':
@@ -109,7 +119,7 @@ def configurator(forward_dict, mode='posterior', scale_data=12):
 
 
 def _config_posterior(forward_dict, scale_data):
-    """ Helper function for posterior configuration."""
+    """Helper function for posterior configuration."""
 
     input_dict = {}
     input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
@@ -118,7 +128,7 @@ def _config_posterior(forward_dict, scale_data):
 
 
 def _config_likelihood(forward_dict, scale_data):
-    """ Helper function for likelihood configuration."""
+    """Helper function for likelihood configuration."""
 
     input_dict = {}
     input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)

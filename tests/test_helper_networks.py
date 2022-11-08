@@ -35,7 +35,7 @@ from bayesflow.helper_networks import DenseCouplingNet, Permutation, ActNorm
 ])
 @pytest.mark.parametrize("condition", [False, True])
 def test_dense_coupling_net(input_dim, meta, condition):
-    """This function tests the fidelity of the `DenseCouplingNet` using different configurations."""
+    """Tests the fidelity of the `DenseCouplingNet` using different configurations."""
 
     # Randomize input batch to avoid a single fixed batch size
     B = np.random.randint(low=1, high=32)
@@ -76,7 +76,7 @@ def test_permutation(input_dim, shape):
 @pytest.mark.parametrize("input_dim", [2, 5])
 @pytest.mark.parametrize("shape", ['2d', '3d'])
 def test_actnorm(input_dim, shape):
-    """Tests the ActNorm layer in terms of invertibility and shape integrity."""
+    """Tests the `ActNorm` layer in terms of invertibility and shape integrity."""
     
     # Create randomized input
     if shape == '2d':

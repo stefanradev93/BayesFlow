@@ -47,6 +47,9 @@ class InvertibleNetwork(tf.keras.Model):
 
         # Create sequence of coupling layers and store reference to dimensionality
         self.coupling_layers = [AffineCouplingLayer(meta) for _ in range(meta['n_coupling_layers'])]
+        self.soft_flow = meta['use_soft_flow']
+        self.soft_low = meta['soft_flow_bounds'][0]
+        self.soft_high = meta['soft_flow_bounds'][1]
         self.latent_dim = meta['n_params']
 
     def call(self, targets, condition, inverse=False, **kwargs):
@@ -75,7 +78,7 @@ class InvertibleNetwork(tf.keras.Model):
         If ``inverse=False``, the return is ``(z, log_det_J)``.\n
         If ``inverse=True``, the return is ``target``.
         """
-        
+
         if inverse:
             return self.inverse(targets, condition, **kwargs)
         return self.forward(targets, condition, **kwargs)
@@ -83,6 +86,25 @@ class InvertibleNetwork(tf.keras.Model):
     @tf.function
     def forward(self, targets, condition, **kwargs):
         """Performs a forward pass though the chain."""
+
+        # Add noise to target if using SoftFlow, use explicitly
+        # not in call(), since methods are public
+        if self.soft_flow and condition is not None:
+            # Needs to be concatinable with condition
+            shape_scale = (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
+            # Case training mode
+            if kwargs.get('training'):
+                noise_scale = tf.random.uniform(shape=shape_scale, minval=self.soft_low, maxval=self.soft_high)
+            # Case inference mode
+            else:
+                noise_scale = tf.zeros(shape=shape_scale) + self.soft_low
+            # Perturb data with noise (will broadcast to all dimensions)
+            if len(shape_scale) == 2 and len(targets.shape) == 3:
+                targets += tf.expand_dims(noise_scale, axis=1) * tf.random.normal(shape=targets.shape)
+            else:
+                targets += noise_scale * tf.random.normal(shape=targets.shape)
+            # Augment condition with noise scale variate
+            condition = tf.concat((condition, noise_scale), axis=-1)
 
         z = targets
         log_det_Js = []
@@ -97,6 +119,20 @@ class InvertibleNetwork(tf.keras.Model):
     @tf.function
     def inverse(self, z, condition, **kwargs):
         """Performs a reverse pass through the chain."""
+
+        # Add noise to target if using SoftFlow, use explicitly
+        # not in call(), since methods are public
+        if self.soft_flow and condition is not None:
+            # Needs to be concatinable with condition
+            shape_scale = (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
+            # Case training mode
+            if kwargs.get('training'):
+                noise_scale = tf.random.uniform(shape=shape_scale, minval=self.soft_low, maxval=self.soft_high)
+            # Case inference mode
+            else:
+                noise_scale = tf.zeros(shape=shape_scale) + self.soft_low
+            # Augment condition with noise scale variate
+            condition = tf.concat((condition, noise_scale), axis=-1)
 
         target = z
         for layer in reversed(self.coupling_layers):
