@@ -603,7 +603,7 @@ class AmortizedLikelihood(Model, AmortizedTarget):
         return loss
 
     def _determine_latent_dist(self, latent_dist):
-        """Determines which latent distribution to use and defaults to unit normal if none provided.
+        """Determines which latent distribution to use and defaults to unit normal if `None` provided.
         """
 
         if latent_dist is None:
@@ -699,9 +699,9 @@ class JointAmortizer(Model, AmortizedTarget):
 
         if input_dict.get(DEFAULT_KEYS['likelihood_inputs']) is not None:
             return self.amortized_likelihood.log_likelihood(
-                input_dict[DEFAULT_KEYS['likelihood_inputs']], to_numpy=to_numpy, training=False, **kwargs
+                input_dict[DEFAULT_KEYS['likelihood_inputs']], to_numpy=to_numpy, **kwargs
             )
-        return self.amortized_likelihood.log_likelihood(input_dict, to_numpy=to_numpy, training=False, **kwargs)
+        return self.amortized_likelihood.log_likelihood(input_dict, to_numpy=to_numpy, **kwargs)
    
     def log_posterior(self, input_dict, to_numpy=True, **kwargs):
         """Calculates the approximate log-posterior of targets given conditional variables via
@@ -726,9 +726,9 @@ class JointAmortizer(Model, AmortizedTarget):
 
         if input_dict.get(DEFAULT_KEYS['posterior_inputs']) is not None:
             return self.amortized_posterior.log_posterior(
-                input_dict[DEFAULT_KEYS['posterior_inputs']], to_numpy=to_numpy, training=False, **kwargs
+                input_dict[DEFAULT_KEYS['posterior_inputs']], to_numpy=to_numpy, **kwargs
             )
-        return self.amortized_posterior.log_posterior(input_dict, to_numpy=to_numpy, training=False, **kwargs)
+        return self.amortized_posterior.log_posterior(input_dict, to_numpy=to_numpy, **kwargs)
 
     def log_prob(self, input_dict, to_numpy=True, **kwargs):
         """Identical to calling separate `log_likelihood()` and `log_posterior()`.
