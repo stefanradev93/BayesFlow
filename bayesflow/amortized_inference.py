@@ -511,7 +511,7 @@ class AmortizedLikelihood(Model, AmortizedTarget):
         z_samples = self.latent_dist.sample((n_data_sets, n_samples))
 
         # Obtain random draws from the surrogate likelihood given conditioning variables
-        lik_samples = self.inference_net.inverse(z_samples, conditions, training=False, **kwargs)
+        lik_samples = self.surrogate_net.inverse(z_samples, conditions, training=False, **kwargs)
 
         if to_numpy:
             return lik_samples.numpy()
