@@ -67,13 +67,13 @@ def get_benchmark_module(benchmark_name):
 
 class Benchmark:
     """Interface class for a benchmark."""
-    def __init__(self, benchmark_name, mode='joint', seed=None, **kwargs):
+    def __init__(self, name, mode='joint', seed=None, **kwargs):
         """Creates a benchmark generative model by using the blueprint contained
         in a benchmark file.
 
         Parameters
         ----------
-        benchmark_name : str
+        name : str
             The name of the benchmark file (without suffix, i.e., .py) to use as a blueprint.
         mode           : str, otpional, default: 'joint'
             The mode in which to configure the data, should be in ('joint', 'posterior', 'likelihood')
@@ -84,7 +84,7 @@ class Benchmark:
             interpreted as arguments for the simulator and propagated accordingly.
         """
 
-        self.benchmark_name = benchmark_name
+        self.benchmark_name = name
         self._rng = np.random.default_rng(seed)
         self.benchmark_module = get_benchmark_module(self.benchmark_name)
         self.benchmark_info = getattr(self.benchmark_module, 'bayesflow_benchmark_info')
@@ -105,7 +105,7 @@ class Benchmark:
             ),
             simulator=_simulator,
             simulator_is_batched=self.benchmark_info['simulator_is_batched'],
-            name=benchmark_name, 
+            name=self.benchmark_name, 
         )
         self.configurator = getattr(self.benchmark_module, 'configurator')
         self.configurator = partial(self.configurator, mode=mode)
