@@ -302,4 +302,3 @@ def test_joint_amortizer(data_dim, params_dim):
         assert l_samples.shape[1] == n_samples_l
         assert p_samples.shape[2] == params_dim
         assert l_samples.shape[2] == data_dim
-    
