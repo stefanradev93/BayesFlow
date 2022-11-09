@@ -175,7 +175,7 @@ class Prior:
         
         Parameters
         ----------
-        batch_ prior_fun    : callable
+        batch_prior_fun     : callable
             A function (callbale object) with optional control arguments responsible for generating batches 
             of per-simulation parameters.
         prior_fun           : callable
@@ -214,9 +214,6 @@ class Prior:
         -------
         out_dict - a dictionary with the quantities generated from the prior + context funcitons.
         """
-
-        if self.batched_prior is not None:
-            self.is_batched = True
 
         # Prepare placeholder output dictionary
         out_dict = {
@@ -461,8 +458,7 @@ class Simulator:
                 
 
 class GenerativeModel:
-    """
-    Basic interface for a generative model in a simulation-based context.
+    """Basic interface for a generative model in a simulation-based context.
     Generally, a generative model consists of two mandatory components:
     
     - Prior : A randomized function returning random parameter draws from a prior distribution;
@@ -473,8 +469,7 @@ class GenerativeModel:
     
     def __init__(self, prior: callable, simulator: callable, skip_test: bool = False, 
                  prior_is_batched: bool = False, simulator_is_batched: bool = False, name: str = "anonymous"):
-        """
-        Instantiates a generative model responsible for drawing generating params, data, and optional context.
+        """Instantiates a generative model responsible for drawing generating params, data, and optional context.
         
         Parameters
         ----------
@@ -502,7 +497,7 @@ class GenerativeModel:
         """
         
         if type(prior) is not Prior:
-            prior_args = {'prior_fun': prior} if prior_is_batched else {'prior_batch_fun': prior}
+            prior_args = {'batch_prior_fun': prior} if prior_is_batched else {'prior_fun': prior}
             self.prior = Prior(**prior_args)
             self.prior_is_batched = prior_is_batched
         else:
@@ -514,13 +509,13 @@ class GenerativeModel:
         else:
             self.simulator = simulator
             self.simulator_is_batched = self.simulator.is_batched
-        
 
         if name is None:
             self.name = 'anonymous'
         else:
             self.name = name
-        self.param_names = prior.param_names
+
+        self.param_names = self.prior.param_names
         
         if not skip_test:
             self._test()
@@ -840,8 +835,7 @@ class MultiGenerativeModel:
     """
 
     def __init__(self, generative_models: list, model_probs='equal'):
-        """
-        Instantiates a multi-generative model responsible for generating parameters, data, and optional context
+        """Instantiates a multi-generative model responsible for generating parameters, data, and optional context
         from a list of models according to specified prior model probabilities (PMPs).
         
         Parameters
