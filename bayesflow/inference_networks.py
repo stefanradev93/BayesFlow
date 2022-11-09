@@ -118,19 +118,17 @@ class InvertibleNetwork(tf.keras.Model):
 
     @tf.function
     def inverse(self, z, condition, **kwargs):
-        """Performs a reverse pass through the chain."""
+        """Performs a reverse pass through the chain. Assumes only used
+        in inference mode, so **kwargs contains `training=False`."""
 
         # Add noise to target if using SoftFlow, use explicitly
         # not in call(), since methods are public
         if self.soft_flow and condition is not None:
+
             # Needs to be concatinable with condition
             shape_scale = (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
-            # Case training mode
-            if kwargs.get('training'):
-                noise_scale = tf.random.uniform(shape=shape_scale, minval=self.soft_low, maxval=self.soft_high)
-            # Case inference mode
-            else:
-                noise_scale = tf.zeros(shape=shape_scale) + self.soft_low
+            noise_scale = tf.zeros(shape=shape_scale) + 2.*self.soft_low
+
             # Augment condition with noise scale variate
             condition = tf.concat((condition, noise_scale), axis=-1)
 
