@@ -319,8 +319,7 @@ class LossHistory:
         self.history[f'Run {self._current_run}'] = {}
 
     def add_entry(self, epoch, current_loss):
-        """ Adds loss entry for current epoch into internal memory data structure.
-        """
+        """Adds loss entry for current epoch into internal memory data structure."""
 
         # Add epoch key, if specified
         if self.history[f'Run {self._current_run}'].get(f'Epoch {epoch}') is None:
@@ -397,7 +396,7 @@ class LossHistory:
         return deepcopy(self.history)
     
     def save_to_file(self, file_path, max_to_keep):
-        """Saves a LossHistory object to a pickled dictionary in file_path.
+        """Saves a `LossHistory` object to a pickled dictionary in file_path.
          If max_to_keep saved loss history files are found in file_path, the oldest is deleted before a new one is saved.
          """
         
@@ -426,7 +425,7 @@ class LossHistory:
             os.remove(oldest_history_path)
             
     def load_from_file(self, file_path):
-        """Loads the most recent saved LossHistory object from file_path."""
+        """Loads the most recent saved `LossHistory` object from `file_path`."""
 
         # Logger init
         logger = logging.getLogger()
