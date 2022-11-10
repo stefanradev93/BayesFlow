@@ -24,7 +24,7 @@ import pytest
 
 from bayesflow.networks import InvertibleNetwork, InvariantNetwork
 from bayesflow.default_settings import DEFAULT_KEYS
-from bayesflow.amortized_inference import AmortizedPosterior, AmortizedLikelihood, JointAmortizer
+from bayesflow.amortizers import AmortizedPosterior, AmortizedLikelihood, JointAmortizer
 
 
 @pytest.mark.parametrize("cond_shape", ['2d', '3d'])

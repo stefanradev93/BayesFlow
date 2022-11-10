@@ -31,8 +31,8 @@ from bayesflow.default_settings import DEFAULT_SETTING_INVERTIBLE_NET
 @pytest.mark.parametrize("condition", [True, False])
 @pytest.mark.parametrize("use_act_norm", [True, False])
 @pytest.mark.parametrize("use_soft_flow", [True, False])
-@pytest.mark.parametrize("n_coupling_layers", [1, 8])
-def test_invertible_network(input_shape, condition, use_act_norm, use_soft_flow, n_coupling_layers):
+@pytest.mark.parametrize("num_coupling_layers", [1, 8])
+def test_invertible_network(input_shape, condition, use_act_norm, use_soft_flow, num_coupling_layers):
     """Tests the `InvertibleNetwork` core class using a couple of relevant configurations."""
 
     # Randomize units and input dim
@@ -48,21 +48,21 @@ def test_invertible_network(input_shape, condition, use_act_norm, use_soft_flow,
             'spec_norm': True
         },
         's_args': {
-            'dense_args': dict(units=units_s, kernel_initializer='glorot_uniform', activation='elu'),
+            'dense_args': dict(units=units_s, kernel_initializer='glorot_normal', activation='relu'),
             'n_dense': 2,
             'spec_norm': False
         },
     }
-    meta = build_meta_dict(user_dict={
-        'coupling_settings': dense_net_settings,
+    settings = build_meta_dict(user_dict={
+        'coupling_net_settings': dense_net_settings,
         'use_act_norm': use_act_norm,
         'use_soft_flow': use_soft_flow,
-        'n_coupling_layers': n_coupling_layers,
-        'n_params': input_dim
+        'num_coupling_layers': num_coupling_layers,
+        'num_params': input_dim
     },
     default_setting=DEFAULT_SETTING_INVERTIBLE_NET)
 
-    network = InvertibleNetwork(meta)
+    network = InvertibleNetwork(**settings)
 
     # Create randomized input and output conditions
     batch_size = np.random.randint(low=1, high=32)
@@ -84,7 +84,7 @@ def test_invertible_network(input_shape, condition, use_act_norm, use_soft_flow,
 
     # Test attributes
     assert network.latent_dim == input_dim
-    assert len(network.coupling_layers) == n_coupling_layers
+    assert len(network.coupling_layers) == num_coupling_layers
     for l in network.coupling_layers:
         assert l.permutation is not None
         if use_act_norm:

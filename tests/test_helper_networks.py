@@ -73,6 +73,7 @@ def test_permutation(input_dim, shape):
     # Inverse should recover input regardless of input dim or shape
     assert np.allclose(x, x_rec)
 
+
 @pytest.mark.parametrize("input_dim", [2, 5])
 @pytest.mark.parametrize("shape", ['2d', '3d'])
 def test_actnorm(input_dim, shape):
@@ -85,7 +86,7 @@ def test_actnorm(input_dim, shape):
         x = tf.random.normal((np.random.randint(low=1, high=32), np.random.randint(low=1, high=32), input_dim))
     
     # Create ActNorm layer
-    actnorm = ActNorm({'n_params': input_dim})
+    actnorm = ActNorm({'latent_dim': input_dim})
 
     # Forward - inverse
     z, _ = actnorm(x)
