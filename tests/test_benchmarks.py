@@ -27,7 +27,7 @@ import pytest
 from bayesflow import benchmarks
 from bayesflow.trainers import Trainer
 from bayesflow.networks import InvertibleNetwork
-from bayesflow.amortized_inference import AmortizedPosterior, AmortizedLikelihood, JointAmortizer
+from bayesflow.amortizers import AmortizedPosterior, AmortizedLikelihood, AmortizedPosteriorLikelihood
 
 from assets.benchmark_netwotk_architectures import NETWORK_SETTINGS
 
@@ -44,16 +44,16 @@ def _get_trainer_configuration(benchmark_name, mode):
     # Setup posterior amortizer
     if mode == 'posterior':
         amortizer = AmortizedPosterior(
-            InvertibleNetwork(NETWORK_SETTINGS[benchmark_name][mode]))
+            InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name][mode]))
     elif mode == 'likelihood':
         amortizer = AmortizedLikelihood(
-            InvertibleNetwork(NETWORK_SETTINGS[benchmark_name][mode]))
+            InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name][mode]))
     else:
-        amortizer = JointAmortizer(
+        amortizer = AmortizedPosteriorLikelihood(
             amortized_posterior=AmortizedPosterior(
-                InvertibleNetwork(NETWORK_SETTINGS[benchmark_name]['posterior'])),
+                InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name]['posterior'])),
             amortized_likelihood=AmortizedLikelihood(
-                InvertibleNetwork(NETWORK_SETTINGS[benchmark_name]['likelihood']))
+                InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name]['likelihood']))
         )
     trainer = Trainer(
         amortizer=amortizer,

@@ -34,7 +34,8 @@ from bayesflow.simulation import GenerativeModel, MultiGenerativeModel
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
 from bayesflow.helper_functions import format_loss_string, extract_current_lr
-from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, RegressionLRAdjuster
+from bayesflow.helper_classes import (SimulationDataset, LossHistory, SimulationMemory, 
+                                      RegressionLRAdjuster, MemoryReplayBuffer)
 from bayesflow.default_settings import DEFAULT_KEYS, OPTIMIZER_DEFAULTS
 from bayesflow.amortizers import (AmortizedLikelihood, AmortizedPosterior, 
                                   AmortizedPosteriorLikelihood, AmortizedModelComparison)
@@ -42,7 +43,7 @@ from bayesflow.diagnostics import plot_sbc_histograms, plot_latent_space_2d
 
 
 class Trainer:
-    """ This class connects a generative model (or, already simulated data from a model) with
+    """This class connects a generative model (or, already simulated data from a model) with
     a configurator and a neural inference architecture for amortized inference (amortizer). A Trainer 
     instance is responsible for optimizing the amortizer via various forms of simulation-based training.
 
@@ -168,6 +169,9 @@ class Trainer:
             self.lr_adjuster = RegressionLRAdjuster(self.optimizer, **kwargs.pop('optional_stopping_kwargs', {}))
         else:
             self.lr_adjuster = None
+
+        # Set-up replay buffer
+        self.replay_buffer = None
 
         # Checkpoint and helper classes settings
         self.max_to_keep = max_to_keep
@@ -319,7 +323,7 @@ class Trainer:
             Number of simulations to perform at each backprop step
         save_checkpoint      : bool (default - True)
             A flag to decide whether to save checkpoints after each epoch,
-            if a checkpoint_path provided during initialization, otherwise ignored
+            if a checkpoint_path provided during initialization, otherwise ignored.
         **kwargs             : dict, optional
             Optional keyword arguments, which can be one of:
             `model_args` - optional keyword arguments passed to the generative model
@@ -334,7 +338,7 @@ class Trainer:
 
         self.loss_history.start_new_run()
         for ep in range(1, epochs + 1):
-            with tqdm(total=iterations_per_epoch, desc='Training epoch {}'.format(ep)) as p_bar:
+            with tqdm(total=iterations_per_epoch, desc=f'Training epoch {ep}') as p_bar:
                 for it in range(1, iterations_per_epoch + 1):
                     
                     # Perform one training step and obtain current loss value
@@ -558,6 +562,93 @@ class Trainer:
             # Store after each epoch, if specified
             self._save_trainer(save_checkpoint)
 
+        return self.loss_history.get_plottable()
+
+    def train_experience_replay(self, epochs, iterations_per_epoch, batch_size, 
+                                capacity_in_batches=1000, save_checkpoint=True, **kwargs):
+        """Trains the network(s) via experience replay using a memory replay buffer.
+        
+        Parameters
+        ----------
+        epochs               : int
+            Number of epochs (and number of times a checkpoint is stored)
+        iterations_per_epoch : int
+            Number of batch simulations to perform per epoch
+        batch_size           : int
+            Number of simulations to perform at each backpropagation step
+        capacity_in_batches  : int, optional, default: 1000
+            Max number of batches to store in buffer. For instance, if `batch_size=32`
+            and `capacity_in_batches=1000`, then the buffer will hold a maximum of
+            32 * 1000 = 32000 simulations. Be careful with memory!
+            
+            Important! Argument will be ignored if buffer has previously been initialized!
+
+        save_checkpoint      : bool (default - True)
+            A flag to decide whether to save checkpoints after each epoch,
+            if a checkpoint_path provided during initialization, otherwise ignored.
+        **kwargs             : dict, optional
+            Optional keyword arguments, which can be one of:
+            `model_args` - optional keyword arguments passed to the generative model
+            `conf_args`  - optional keyword arguments passed to the configurator
+            `net_args`   - optional keyword arguments passed to the amortizer
+
+        Returns
+        -------
+        losses : dict(ep_num : list(losses))
+            A dictionary storing the losses across epochs and iterations
+        """
+
+        # Initialize a new loss history run and replay buffer
+        self.loss_history.start_new_run()
+        if self.replay_buffer is None:
+            self.replay_buffer = MemoryReplayBuffer(capacity_in_batches)
+
+        # For each epoch, simulate, configure, add to replay buffer, sample from buffer and optimize
+        for ep in range(1, epochs + 1):
+            with tqdm(total=iterations_per_epoch, desc=f'Training epoch {ep}') as p_bar:
+                for it in range(1, iterations_per_epoch + 1):
+                    
+                    # Simulate a batch of data and store into buffer
+                    input_dict = self._forward_inference(batch_size, 
+                        **kwargs.pop('conf_args', {}), **kwargs.pop('model_args', {}))
+                    self.replay_buffer.store(input_dict)
+
+                    # Sample from buffer
+                    input_dict = self.replay_buffer.sample()
+
+                    # One step backprop
+                    loss = self._backprop_step(input_dict, **kwargs.pop('net_args', {}))
+
+                    # Store returned loss
+                    self.loss_history.add_entry(ep, loss)
+
+                    # Compute running loss
+                    avg_dict = self.loss_history.get_running_losses(ep)
+
+                    # Get slope of loss trajectory for optional stopping
+                    if self.lr_adjuster is not None:
+                        slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
+                    else:
+                        slope = None
+
+                    # Extract current learning rate
+                    lr = extract_current_lr(self.optimizer)
+
+                    # Format for display on progress bar
+                    disp_str = format_loss_string(ep, it, loss, avg_dict, slope, lr)
+
+                    # Update progress bar
+                    p_bar.set_postfix_str(disp_str)
+                    p_bar.update(1)
+
+                    # Check optional stopping and end training
+                    if self._check_optional_stopping():
+                        self._save_trainer(save_checkpoint)
+                        return self.loss_history.get_plottable()
+
+            # Store after each epoch, if specified
+            self._save_trainer(save_checkpoint)
+        # self.loss_history.load_from_file(file_path=self.checkpoint_path)
         return self.loss_history.get_plottable()
 
     def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, **kwargs):

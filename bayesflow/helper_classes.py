@@ -552,19 +552,16 @@ class SimulationMemory:
 class MemoryReplayBuffer:
     """Implements a memory replay buffer for simulation-based inference."""
 
-    def __init__(self, stores_raw=True, capacity_in_batches=500):
+    def __init__(self, capacity_in_batches=500):
         """Creates a circular buffer following the logic of experience replay.
         
         Parameters
         ----------
-        stores_raw          : bool, optional, default: True
-            Flag indicating whether the buffer stores raw simulation outputs or pre-configured.
         capacity_in_batches : int, optional, default: 50
             The capacity of the buffer in batches of simulations. Could potentially grow
             very large, so make sure you pick a reasonable number!
         """
 
-        self.stores_raw = stores_raw
         self._capacity = capacity_in_batches
         self._buffer = [None] * self._capacity
         self._idx = 0
@@ -577,7 +574,7 @@ class MemoryReplayBuffer:
         Parameters
         ----------
         forward_dict : dict
-            The (raw or configured) outputs of the forward model.
+            The confogired outputs of the forward model.
         """
 
         # If full, overwrite at index

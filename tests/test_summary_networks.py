@@ -22,9 +22,7 @@ import numpy as np
 
 import pytest
 
-from bayesflow.summary_networks import InvariantNetwork, MultiConv1D, MultiConvNetwork
-from bayesflow.helper_functions import build_meta_dict
-from bayesflow.default_settings import DEFAULT_SETTING_MULTI_CONV_NET, DEFAULT_SETTING_INVARIANT_NET
+from bayesflow.summary_networks import InvariantNetwork, SequentialNetwork
 
 
 def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
@@ -44,19 +42,18 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
     return x, x_perm, perm
 
 
-@pytest.mark.parametrize("n_equiv", [1, 3])
-@pytest.mark.parametrize("summary_dim", [13, 10])
-def test_invariant_network(n_equiv, summary_dim):
+@pytest.mark.parametrize("num_equiv", [1, 3])
+@pytest.mark.parametrize("summary_dim", [13, 2])
+def test_invariant_network(num_equiv, summary_dim):
     """This function tests the fidelity of the invariant network with a couple of relevant
     configurations w.r.t. permutation invariance and output dimensions."""
 
     # Prepare settings for invariant network
-    meta = build_meta_dict({
-        'num_equiv': n_equiv,
-        'summary_dim': summary_dim},
-        default_setting=DEFAULT_SETTING_INVARIANT_NET
-    )
-    inv_net = InvariantNetwork(meta)
+    settings = {
+        'num_equiv': num_equiv,
+        'summary_dim': summary_dim
+    }
+    inv_net = InvariantNetwork(**settings)
 
     # Create input and permuted version with randomized shapes 
     x, x_perm, _ = _gen_randomized_3d_data()
@@ -65,6 +62,8 @@ def test_invariant_network(n_equiv, summary_dim):
     out = inv_net(x).numpy()
     out_perm = inv_net(x_perm).numpy()
 
+    # Assert numebr of equivariant layers correct
+    assert len(inv_net.equiv_layers.layers) == num_equiv
     # Assert outputs equal
     assert np.allclose(out, out_perm, atol=1e-6)
     # Assert shape 2d
@@ -74,52 +73,19 @@ def test_invariant_network(n_equiv, summary_dim):
     assert out.shape[1] == summary_dim and out_perm.shape[1] == summary_dim
 
 
-@pytest.mark.parametrize("filters", [16, 32])
-@pytest.mark.parametrize("max_kernel_size", [2, 6])
-def test_multi_conv1d(filters, max_kernel_size):
-    """This function tests the fidelity of the `MultiConv1D` module w.r.t. output dimensions
-    using a number of relevant configurations."""
-
-    # Create settings and network
-    meta = {
-        'layer_args': {
-            'activation': 'relu',
-            'filters': filters,
-            'strides': 1,
-            'padding': 'causal'
-        },
-        'min_kernel_size': 1,
-        'max_kernel_size': max_kernel_size
-    }
-    conv = MultiConv1D(meta)
-
-    # Create test data and pass through network
-    x, _, _ = _gen_randomized_3d_data()
-    out = conv(x)
-
-    # Assert shape 3d
-    assert len(out.shape) == 3
-
-    # Assert first and second axes equal
-    assert out.shape[0] == x.shape[0]
-    assert out.shape[1] == x.shape[1]
-
-    # Assert number of channels as specified
-    assert out.shape[2] == filters
-
-@pytest.mark.parametrize("n_conv_layers", [1, 3])
+@pytest.mark.parametrize("num_conv_layers", [1, 3])
 @pytest.mark.parametrize("lstm_units", [16, 32])
-def test_multi_conv_network(n_conv_layers, lstm_units):
-    """This function tests the fidelity of the `MultiConvNetwork` w.r.t. output dimensions
+def test_sequential_network(num_conv_layers, lstm_units):
+    """This function tests the fidelity of the `SequentialNetwork` w.r.t. output dimensions
     using a number of relevant configurations."""
 
     # Create settings dict and network
-    meta = build_meta_dict({
-        'n_conv_layers': n_conv_layers,
-        'lstm_args': dict(units=lstm_units)},
-        default_setting=DEFAULT_SETTING_MULTI_CONV_NET
-    )
-    net = MultiConvNetwork(meta)
+    settings = {
+        'summary_dim': np.random.randint(low=1, high=32),
+        'num_conv_layers': num_conv_layers,
+        'lstm_units': lstm_units,
+    }
+    net = SequentialNetwork(**settings)
 
     # Create test data and pass through network
     x, _, _ = _gen_randomized_3d_data()
@@ -128,6 +94,6 @@ def test_multi_conv_network(n_conv_layers, lstm_units):
     # Test shape 2d
     assert len(out.shape) == 2
     # Test summary stats equal default
-    assert out.shape[1] == DEFAULT_SETTING_MULTI_CONV_NET.meta_dict['summary_dim']
+    assert out.shape[1] == settings['summary_dim']
     # Test first dimension unaltered
     assert out.shape[0] == x.shape[0]

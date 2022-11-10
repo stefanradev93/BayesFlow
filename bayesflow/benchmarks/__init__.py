@@ -35,7 +35,7 @@ from functools import partial
 
 import numpy as np
 
-from bayesflow.forward_inference import GenerativeModel, Prior
+from bayesflow.simulation import GenerativeModel, Prior
 from bayesflow.exceptions import ConfigurationError
 
 

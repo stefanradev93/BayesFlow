@@ -22,7 +22,7 @@ import numpy as np
 from functools import partial
 
 import tensorflow as tf
-from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dense, Conv1D
 from tensorflow.keras.models import Sequential
 
 from bayesflow.wrappers import SpectralNormalization
@@ -52,7 +52,7 @@ class DenseCouplingNet(tf.keras.Model):
         self.dense = Sequential(
             # Hidden layer structure
             [SpectralNormalization(Dense(**meta['dense_args'])) if meta['spec_norm'] else Dense(**meta['dense_args'])
-             for _ in range(meta['n_dense'])]
+             for _ in range(meta['num_dense'])]
         )
 
         # Create network output head
@@ -352,3 +352,55 @@ class EquivariantModule(tf.keras.Model):
         # Pass through equivariant func
         out = self.s3(out_c)
         return out
+
+
+class MultiConv1D(tf.keras.Model):
+    """Implements an inception-inspired 1D convolutional layer using different kernel sizes."""
+
+    def __init__(self, meta, **kwargs):
+        """ Creates an inception-like Conv1D layer
+
+        Parameters
+        ----------
+        meta  : dict
+            A dictionary which holds the arguments for the internal `Conv1D` layers.
+        """
+
+        super().__init__(**kwargs)
+        
+        # Create a list of Conv1D layers with different kernel sizes
+        # ranging from 'min_kernel_size' to 'max_kernel_size'
+        self.convs = [
+            Conv1D(kernel_size=f, **meta['layer_args'])
+            for f in range(meta['min_kernel_size'], meta['max_kernel_size'])
+        ]
+
+        # Create final Conv1D layer for dimensionalitiy reduction
+        dim_red_args = {k : v for k, v in meta['layer_args'].items() if k not in ['kernel_size', 'strides']}
+        dim_red_args['kernel_size'] = 1
+        dim_red_args['strides'] = 1
+        self.dim_red = Conv1D(**dim_red_args)
+        
+    def call(self, x, **kwargs):
+        """Performs a forward pass through the layer.
+
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, n_time_steps, n_time_series)
+        
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, n_time_steps, n_filters)
+        """
+        
+        out = self._multi_conv(x, **kwargs)
+        out = self.dim_red(out, **kwargs)
+        return out
+
+    @tf.function
+    def _multi_conv(self, x, **kwargs):
+        """Applies the convolutions with different sizes and concatenates outputs."""
+
+        return tf.concat([conv(x, **kwargs) for conv in self.convs], axis=-1)

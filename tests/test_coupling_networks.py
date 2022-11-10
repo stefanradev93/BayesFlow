@@ -23,8 +23,6 @@ import numpy as np
 import pytest
 
 from bayesflow.coupling_networks import AffineCouplingLayer
-from bayesflow.helper_functions import build_meta_dict
-from bayesflow.default_settings import DEFAULT_SETTING_INVERTIBLE_NET
 
 
 @pytest.mark.parametrize("condition", [True, False])
@@ -44,24 +42,25 @@ def test_coupling_layer(condition, spec_norm, use_perm, use_act_norm, input_shap
     dense_net_settings = {
         't_args': {
             'dense_args': dict(units=units_t, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense': 2,
+            'num_dense': 2,
             'spec_norm': spec_norm
         },
         's_args': {
             'dense_args': dict(units=units_s, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense': 1,
+            'num_dense': 1,
             'spec_norm': spec_norm
         },
     }
-    meta = build_meta_dict(user_dict={
-        'coupling_settings': dense_net_settings,
+    settings = {
+        'coupling_net_settings': dense_net_settings,
         'use_permutation': use_perm,
         'use_act_norm': use_act_norm,
-        'n_params': input_dim
-    },
-    default_setting=DEFAULT_SETTING_INVERTIBLE_NET)
+        'latent_dim': input_dim,
+        'alpha': 1.9,
+        'coupling_design': 'dense'
+    }
 
-    network = AffineCouplingLayer(meta)
+    network = AffineCouplingLayer(settings)
 
     # Create randomized input and output conditions
     batch_size = np.random.randint(low=1, high=32)

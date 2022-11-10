@@ -44,12 +44,12 @@ def test_invertible_network(input_shape, condition, use_act_norm, use_soft_flow,
     dense_net_settings = {
         't_args': {
             'dense_args': dict(units=units_t, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense': 1,
+            'num_dense': 1,
             'spec_norm': True
         },
         's_args': {
             'dense_args': dict(units=units_s, kernel_initializer='glorot_normal', activation='relu'),
-            'n_dense': 2,
+            'num_dense': 2,
             'spec_norm': False
         },
     }

@@ -45,10 +45,10 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
 
 @pytest.mark.parametrize("input_dim", [3, 16])
 @pytest.mark.parametrize("meta", [
-    dict(dense_args={'units': 32}, spec_norm=True, n_dense=1),
-    dict(dense_args={'units': 64}, spec_norm=True, n_dense=2),
-    dict(dense_args={'units': 32}, spec_norm=False, n_dense=1),
-    dict(dense_args={'units': 64}, spec_norm=False, n_dense=2)
+    dict(dense_args={'units': 32, 'activation': 'elu'}, spec_norm=True, num_dense=1),
+    dict(dense_args={'units': 64}, spec_norm=True, num_dense=2),
+    dict(dense_args={'units': 32, 'activation': 'relu'}, spec_norm=False, num_dense=1),
+    dict(dense_args={'units': 64}, spec_norm=False, num_dense=2)
 ])
 @pytest.mark.parametrize("condition", [False, True])
 def test_dense_coupling_net(input_dim, meta, condition):
@@ -119,7 +119,7 @@ def test_actnorm(input_dim, shape):
 def test_invariant_module(n_dense_s1, n_dense_s2, output_dim):
     """This function tests the permutation invariance property of the `InvariantModule` as well as
     its input-output integrity."""
-    
+
     # Prepare settings for invariant module and create it
     meta = {
         'dense_s1_args': dict(units=8, activation='elu'),
@@ -178,3 +178,37 @@ def test_equivariant_module(n_dense_s3, output_dim):
     # Assert first and last dimension equals output dimension
     assert x.shape[0] == out.shape[0] and x_perm.shape[0] == out.shape[0]
     assert out.shape[2] == output_dim and out_perm.shape[2] == output_dim
+
+
+@pytest.mark.parametrize("filters", [16, 32])
+@pytest.mark.parametrize("max_kernel_size", [2, 6])
+def test_multi_conv1d(filters, max_kernel_size):
+    """This function tests the fidelity of the `MultiConv1D` module w.r.t. output dimensions
+    using a number of relevant configurations."""
+
+    # Create settings and network
+    meta = {
+        'layer_args': {
+            'activation': 'relu',
+            'filters': filters,
+            'strides': 1,
+            'padding': 'causal'
+        },
+        'min_kernel_size': 1,
+        'max_kernel_size': max_kernel_size
+    }
+    conv = MultiConv1D(meta)
+
+    # Create test data and pass through network
+    x, _, _ = _gen_randomized_3d_data()
+    out = conv(x)
+
+    # Assert shape 3d
+    assert len(out.shape) == 3
+
+    # Assert first and second axes equal
+    assert out.shape[0] == x.shape[0]
+    assert out.shape[1] == x.shape[1]
+
+    # Assert number of channels as specified
+    assert out.shape[2] == filters

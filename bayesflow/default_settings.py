@@ -38,10 +38,10 @@ class MetaDictSetting(Setting):
 
         Parameters
         ----------
-        meta_dict: dict
+        meta_dict        : dict
             Default dictionary.
 
-        mandatory_fields: list, default: []
+        mandatory_fields : list, default: []
             List of keys in `meta_dict` that need to be provided by the user.
         """
         
@@ -64,9 +64,8 @@ DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
     mandatory_fields=[]
 )
 
-DEFAULT_SETTING_MULTI_CONV_NET = MetaDictSetting(
-    meta_dict={
-        'conv_args'     : {
+
+DEFAULT_SETTING_MULTI_CONV = {
             'layer_args': {
                 'activation': 'relu',
                 'filters': 32,
@@ -75,15 +74,7 @@ DEFAULT_SETTING_MULTI_CONV_NET = MetaDictSetting(
             },
             'min_kernel_size': 1,
             'max_kernel_size': 3
-        },
-        'n_conv_layers' : 2,
-        'lstm_args'     : {
-            'units': 64
-        },
-        'summary_dim'   : 10
-    },
-    mandatory_fields=[]
-)
+}
 
 
 DEFAULT_SETTING_DENSE_INVARIANT = {
@@ -97,12 +88,12 @@ DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
     meta_dict={
         't_args': {
             'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense': 2,
+            'num_dense': 2,
             'spec_norm': False
         },
         's_args': {
             'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='elu'),
-            'n_dense': 2,
+            'num_dense': 2,
             'spec_norm': False
         },
     },
