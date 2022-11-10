@@ -121,7 +121,7 @@ def test_amortized_posterior(cond_shape, summary_loss, soft):
     # Log posterior and lpdf should be the same, unless using softflow
     # which will introduce some noise in the untrained version
     if not soft:
-        assert np.allclose(log_post, lpdf, atol=1e-6)
+        assert np.allclose(log_post, lpdf, atol=1e-5)
 
     # Test shape of samples
     if batch_size == 1:
@@ -223,7 +223,7 @@ def test_amortized_likelihood(inp_shape, soft):
     # Log posterior and lpdf should be the same, unless using softflow
     # which will introduce some noise in the untrained version
     if not soft:
-        assert np.allclose(log_lik, lpdf, atol=1e-6)
+        assert np.allclose(log_lik, lpdf, atol=1e-5)
 
     # Test shape of samples
     if batch_size == 1:

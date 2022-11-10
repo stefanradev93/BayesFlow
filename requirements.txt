@@ -1,6 +1,6 @@
 h5py==3.5
 numba===0.55
-numpy==1.19
+numpy==1.21
 pandas==1.4
 scikit-learn==1.1
 scipy==1.9

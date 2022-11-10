@@ -138,7 +138,7 @@ def test_invariant_module(n_dense_s1, n_dense_s2, output_dim):
     out_perm = inv_module(x_perm).numpy()
 
     # Assert outputs equal
-    assert np.allclose(out, out_perm, atol=1e-6)
+    assert np.allclose(out, out_perm, atol=1e-5)
     # Assert shape 2d
     assert len(out.shape) == 2 and len(out_perm.shape) == 2
     # Assert first and last dimension equals output dimension
@@ -172,7 +172,7 @@ def test_equivariant_module(n_dense_s3, output_dim):
     out_perm = equiv_module(x_perm).numpy()
 
     # Assert outputs equal
-    assert np.allclose(out[:, perm, :], out_perm, atol=1e-6)
+    assert np.allclose(out[:, perm, :], out_perm, atol=1e-5)
     # Assert shape 3d
     assert len(out.shape) == 3 and len(out_perm.shape) == 3
     # Assert first and last dimension equals output dimension

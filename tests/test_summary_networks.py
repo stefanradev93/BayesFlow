@@ -65,7 +65,7 @@ def test_invariant_network(num_equiv, summary_dim):
     # Assert numebr of equivariant layers correct
     assert len(inv_net.equiv_layers.layers) == num_equiv
     # Assert outputs equal
-    assert np.allclose(out, out_perm, atol=1e-6)
+    assert np.allclose(out, out_perm, atol=1e-5)
     # Assert shape 2d
     assert len(out.shape) == 2 and len(out_perm.shape) == 2
     # Assert batch and last dimension equals output dimension

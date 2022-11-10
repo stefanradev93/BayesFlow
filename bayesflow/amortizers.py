@@ -513,6 +513,10 @@ class AmortizedLikelihood(Model, AmortizedTarget):
         # Obtain random draws from the surrogate likelihood given conditioning variables
         lik_samples = self.surrogate_net.inverse(z_samples, conditions, training=False, **kwargs)
 
+        # Only return 2D array, if first dimensions is 1
+        if lik_samples.shape[0] == 1:
+            lik_samples = lik_samples[0]
+
         if to_numpy:
             return lik_samples.numpy()
         return lik_samples

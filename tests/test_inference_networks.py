@@ -97,7 +97,7 @@ def test_invertible_network(input_shape, condition, use_act_norm, use_soft_flow,
         assert network.soft_flow is False
     # Test invertibility (in case no soft flow)
     if not use_soft_flow:
-        assert np.allclose(inp, inp_rec, atol=1e-6)
+        assert np.allclose(inp, inp_rec, atol=1e-5)
     # Test shapes (bijectivity)
     assert z.shape == inp.shape
     assert z.shape[-1] == input_dim

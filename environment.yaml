@@ -2,7 +2,7 @@
 
 name: bf
 dependencies:
-  - python==3.8
+  - python==3.9
   - pip
   - pip:
     - -r requirements.txt
