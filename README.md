@@ -18,24 +18,22 @@ when working with intractable simulators whose behavior as a whole is too comple
 
 ![Overview](https://github.com/stefanradev93/BayesFlow/blob/Future/img/high_level_framework.png?raw=true)
 
-Currently, the following training approaches are implemented:
-1. Online training
-2. Offline training (external simulations)
-3. Offline training (internal simulations)
-4. Experience replay
-5. Round-based training
-
 ## Parameter Estimation
 
 The BayesFlow approach for amortized parameter estimation is based on our paper:
 
-Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. <em>IEEE Transactions on Neural Networks and Learning Systems</em>, available for free at: https://arxiv.org/abs/2003.06281. The general pattern for building amortized posterior approximators is illsutrated below:
-
-![BayesFlow](https://github.com/stefanradev93/BayesFlow/blob/Future/docs/source/tutorial_notebooks/img/trainer_connection.png?raw=true)
+Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. <em>IEEE Transactions on Neural Networks and Learning Systems</em>, available for free at: https://arxiv.org/abs/2003.06281. 
 
 ### Minimal Example
 
-For instance, in order to tackle a simple memoryless model with 10 free parameters, we first need to set up an optional summary network and an inference network:
+```python
+def prior(D=2, mu=0., sigma=1.0):
+    return np.random.default_rng().normal(loc=mu, scale=sigma, size=D)
+
+def simulator(theta, n_obs=50, scale=1.0):
+    return np.random.default_rng().normal(loc=theta, scale=scale, size=(n_obs, theta.shape[0]))
+```
+
 ```python
 summary_net = InvariantNetwork()
 inference_net = InvertibleNetwork({'n_params': 10})
