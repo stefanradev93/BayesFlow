@@ -284,8 +284,8 @@ class InvariantModule(tf.keras.Model):
         elif meta['pooling_fun'] == 'max':
             pooling_fun = partial(tf.reduce_max, axis=1)
         else:
-            if callable(pooling_fun):
-                pooling_fun = pooling_fun
+            if callable(meta['pooling_fun']):
+                pooling_fun = meta['pooling_fun']
             else:
                 raise ConfigurationError('pooling_fun argument not understood!')
         self.pooler = pooling_fun
