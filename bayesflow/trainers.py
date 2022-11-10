@@ -566,7 +566,9 @@ class Trainer:
 
     def train_experience_replay(self, epochs, iterations_per_epoch, batch_size, 
                                 capacity_in_batches=1000, save_checkpoint=True, **kwargs):
-        """Trains the network(s) via experience replay using a memory replay buffer.
+        """Trains the network(s) via experience replay using a memory replay buffer, as utilized
+        in reinforcement learning. Additional keyword arguments are passed to the generative mode, 
+        configurator, and amortizer. Read below for signature.
         
         Parameters
         ----------
@@ -580,9 +582,7 @@ class Trainer:
             Max number of batches to store in buffer. For instance, if `batch_size=32`
             and `capacity_in_batches=1000`, then the buffer will hold a maximum of
             32 * 1000 = 32000 simulations. Be careful with memory!
-            
             Important! Argument will be ignored if buffer has previously been initialized!
-
         save_checkpoint      : bool (default - True)
             A flag to decide whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
