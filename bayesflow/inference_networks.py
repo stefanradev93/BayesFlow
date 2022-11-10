@@ -30,27 +30,87 @@ from bayesflow.helper_functions import build_meta_dict
 class InvertibleNetwork(tf.keras.Model):
     """Implements a chain of conditional invertible coupling layers for conditional density estimation."""
 
-    def __init__(self, meta={}):
-        """Creates a chain of coupling layers with optional `ActNorm` layers in-between.
+    def __init__(self, num_params, num_coupling_layers=4, coupling_net_settings=None, 
+                 coupling_design='dense', soft_clamping=1.9, use_permutation=True, use_act_norm=True, 
+                 act_norm_init=None, use_soft_flow=False, soft_flow_bounds=(1e-3, 5e-2), **kwargs):
+        """Creates a chain of coupling layers with optional `ActNorm` layers in-between. Implements ideas from:
+
+        [1] Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). 
+        BayesFlow: Learning complex stochastic models with invertible neural networks. 
+        IEEE transactions on neural networks and learning systems.
+
+        [2] Kim, H., Lee, H., Kang, W. H., Lee, J. Y., & Kim, N. S. (2020). 
+        Softflow: Probabilistic framework for normalizing flow on manifolds. 
+        Advances in Neural Information Processing Systems, 33, 16388-16397.
+
+        [3] Ardizzone, L., Kruse, J., Lüth, C., Bracher, N., Rother, C., & Köthe, U. (2020). 
+        Conditional invertible neural networks for diverse image-to-image translation. 
+        In DAGM German Conference on Pattern Recognition (pp. 373-387). Springer, Cham.
+
+        [4] Kingma, D. P., & Dhariwal, P. (2018). 
+        Glow: Generative flow with invertible 1x1 convolutions. 
+        Advances in neural information processing systems, 31.
 
         Parameters
         ----------
-        meta : dict
-            The configuration settings for the invertible network.
+        num_params            : int
+            The number of parameters to perform inference on. Equivalently, the dimensionality of the
+            latent space. 
+        num_coupling_layers   : int, optional, default: 4
+            The number of coupling layers to use as defined in [1] and [2]. In general, more coupling layers
+            will give you more expressive power, but will be slower and may need more simulations to train.
+            Typically, between 4 and 10 coupling layers should suffice for most applications.
+        coupling_net_settings : dict or None, optional, default: None
+            The coupling network settings to pass to the internal coupling layers. See `default_settings`
+            for the required entries.
+        coupling_design       : str or callable, optional, default: 'dense'
+            The type of internal coupling network to use. Currently, only 'dense' is understood as a
+            string argument, but you can also pass a callable which constructs a custom network. In that case,
+            the `coupling_net_settings` will be passed as a first argument to the callable.
+        soft_clamping         : float, optional, default: 1.9
+            The soft clamping parameter `alpha` in [3]. Typically you would not touch this.
+        use_permutation       : bool, optional, default: True
+            Whether to use fixed permutations between coupling layers. Highly recommended.
+        use_act_norm          : bool, optional, default: True
+            Whether to use activation normalization after each coupling layer, as used in [4].
+            Recommended to keep default.
+        act_norm_init         : np.ndarray of shape (num_simulations, num_params) or None, optional, default: None
+            Optional data-dependent initialization for the internal `ActNorm` layers, as done in [4]. Could be helpful 
+            for deep invertible networks.
+        use_soft_flow         : bool, optional, default: False
+            Whether to perturb the taregt distribution (i.e., parameters) with small amount of independent
+            noise, as done in [3]. Could be helpful for degenrate distributions.
+        soft_flow_bounds      : tuple(float, float), optional, default: (1e-3, 5e-2)
+            The bounds of the continuous uniform distribution from which the noise scale would be sampled
+            at each iteration. Only relevant when `use_soft_flow=True`.
+            The setting
+        **kwargs              : dict
+            Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.
         """
 
-        super().__init__()
+        super().__init__(**kwargs)
 
-        # Create settings dictionary
-        meta = build_meta_dict(user_dict=meta,
-                               default_setting=default_settings.DEFAULT_SETTING_INVERTIBLE_NET)
+        # Create settings dict for coupling layer
+        settings = dict(
+            latent_dim=num_params,
+            coupling_net_settings=coupling_net_settings,
+            coupling_design=coupling_design,
+            use_permutation=use_permutation,
+            use_act_norm=use_act_norm,
+            act_norm_init=act_norm_init,
+            alpha=soft_clamping
+        )
 
         # Create sequence of coupling layers and store reference to dimensionality
-        self.coupling_layers = [AffineCouplingLayer(meta) for _ in range(meta['n_coupling_layers'])]
-        self.soft_flow = meta['use_soft_flow']
-        self.soft_low = meta['soft_flow_bounds'][0]
-        self.soft_high = meta['soft_flow_bounds'][1]
-        self.latent_dim = meta['n_params']
+        self.coupling_layers = [AffineCouplingLayer(settings) for _ in range(num_coupling_layers)]
+
+        # Store attributes
+        self.soft_flow = use_soft_flow
+        self.soft_low = soft_flow_bounds[0]
+        self.soft_high = soft_flow_bounds[1]
+        self.use_permutation = use_permutation
+        self.use_act_norm = use_act_norm 
+        self.latent_dim = num_params
 
     def call(self, targets, condition, inverse=False, **kwargs):
         """Performs one pass through an invertible chain (either inverse or forward).
@@ -136,6 +196,15 @@ class InvertibleNetwork(tf.keras.Model):
         for layer in reversed(self.coupling_layers):
             target = layer(target, condition, inverse=True, **kwargs)
         return target
+
+    @classmethod
+    def create_config(cls, **kwargs):
+        """"Used to create the settings dictionary for the internal networks of the invertible
+        network. Will fill in missing """
+
+        settings = build_meta_dict(user_dict=kwargs,
+                                   default_setting=default_settings.DEFAULT_SETTING_INVERTIBLE_NET)
+        return settings
 
 
 class EvidentialNetwork(tf.keras.Model):

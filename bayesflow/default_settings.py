@@ -51,13 +51,13 @@ class MetaDictSetting(Setting):
 
 DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
     meta_dict={
-        'n_dense_s1'    : 2,
-        'n_dense_s2'    : 2,
-        'n_dense_s3'    : 2,
-        'n_equiv'       : 2,
-        'dense_s1_args' : {'activation': 'relu', 'units': 64},
-        'dense_s2_args' : {'activation': 'relu', 'units': 64},
-        'dense_s3_args' : {'activation': 'relu', 'units': 64},
+        'num_dense_s1'    : 2,
+        'num_dense_s2'    : 2,
+        'num_dense_s3'    : 2,
+        'num_equiv'       : 2,
+        'dense_s1_args' : {'activation': 'selu', 'units': 64, 'kernel_initializer': 'lecun_normal'},
+        'dense_s2_args' : {'activation': 'selu', 'units': 64, 'kernel_initializer': 'lecun_normal'},
+        'dense_s3_args' : {'activation': 'selu', 'units': 64, 'kernel_initializer': 'lecun_normal'},
         'summary_dim'   : 10
     },
     mandatory_fields=[]
@@ -103,17 +103,17 @@ DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
 
 DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
     meta_dict={
-        'n_coupling_layers': 4,
-        'coupling_settings': None,
+        'num_coupling_layers': 4,
+        'coupling_net_settings': None,
         'coupling_design': 'dense',
-        'alpha': 1.9,
+        'soft_clamping': 1.9,
         'use_permutation': True,
         'use_act_norm': True,
+        'act_norm_init': None,
         'use_soft_flow': False,
         'soft_flow_bounds': (1e-3, 5e-2),
-        'act_norm_init': None
     },
-    mandatory_fields=["n_params"]
+    mandatory_fields=["num_params"]
 )
 
 

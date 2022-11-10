@@ -167,11 +167,11 @@ class ActNorm(tf.keras.Model):
 
         # Initialize scale and bias with zeros and ones if no batch for initalization was provided.
         if meta.get('act_norm_init') is None:
-            self.scale = tf.Variable(tf.ones((meta['n_params'], )),
+            self.scale = tf.Variable(tf.ones((meta['latent_dim'], )),
                                      trainable=True,
                                      name='act_norm_scale')
 
-            self.bias  = tf.Variable(tf.zeros((meta['n_params'], )),
+            self.bias  = tf.Variable(tf.zeros((meta['latent_dim'], )),
                                      trainable=True,
                                      name='act_norm_bias')
         else:

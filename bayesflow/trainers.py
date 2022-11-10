@@ -18,7 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import copy
 import numpy as np
 import os
 from pickle import load as pickle_load
@@ -26,18 +25,19 @@ from tqdm.autonotebook import tqdm
 
 import logging
 
-from bayesflow.forward_inference import GenerativeModel, MultiGenerativeModel
 logging.basicConfig()
 
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 
+from bayesflow.simulation import GenerativeModel, MultiGenerativeModel
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
 from bayesflow.helper_functions import format_loss_string, extract_current_lr
 from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, RegressionLRAdjuster
-from bayesflow.default_settings import STRING_CONFIGS, DEFAULT_KEYS, OPTIMIZER_DEFAULTS
-from bayesflow.amortized_inference import AmortizedLikelihood, AmortizedPosterior, JointAmortizer, ModelComparisonAmortizer
+from bayesflow.default_settings import DEFAULT_KEYS, OPTIMIZER_DEFAULTS
+from bayesflow.amortizers import (AmortizedLikelihood, AmortizedPosterior, 
+                                  AmortizedPosteriorLikelihood, AmortizedModelComparison)
 from bayesflow.diagnostics import plot_sbc_histograms, plot_latent_space_2d
 
 
@@ -137,7 +137,7 @@ class Trainer:
         # Determine n models in case model comparison mode
         if type(generative_model) is MultiGenerativeModel:
             _n_models = generative_model.n_models
-        elif type(amortizer) is ModelComparisonAmortizer:
+        elif type(amortizer) is AmortizedModelComparison:
             _n_models = amortizer.n_models
         else:
             _n_models = kwargs.get('n_models') 
@@ -174,7 +174,7 @@ class Trainer:
         if checkpoint_path is not None:
             self.checkpoint = tf.train.Checkpoint(optimizer=self.optimizer, model=self.amortizer)
             self.manager = tf.train.CheckpointManager(self.checkpoint, checkpoint_path, max_to_keep=max_to_keep)
-            self.checkpoint.restore(self.manager.latest_checkpoint)
+            self.checkpoint.restore(self.manager.latest_checkpoint).expect_partial()
             self.loss_history.load_from_file(checkpoint_path)
             if self.simulation_memory is not None:
                 self.simulation_memory.load_from_file(checkpoint_path)
@@ -289,7 +289,7 @@ class Trainer:
 
             # Check for prior names and override keyword if available
             plot_kwargs = kwargs.pop('plot_args', {})
-            if type(self.generative_model) is GenerativeModel:
+            if type(self.generative_model) is GenerativeModel and plot_kwargs.get('param_names') is not None:
                 plot_kwargs['param_names'] = self.generative_model.param_names
             
             return plot_sbc_histograms(post_samples, prior_samples, **plot_kwargs)
@@ -753,11 +753,11 @@ class Trainer:
                 default_config = DefaultLikelihoodConfigurator()
 
             # Joint amortizer
-            elif type(self.amortizer) is JointAmortizer:
+            elif type(self.amortizer) is AmortizedPosteriorLikelihood:
                 default_config = DefaultJointConfigurator()
 
             # Model comparison amortizer
-            elif type(self.amortizer) is ModelComparisonAmortizer:
+            elif type(self.amortizer) is AmortizedModelComparison:
                 if kwargs.get('n_models') is None:
                     raise ConfigurationError('Either your generative model or amortizer should have "n_models" attribute, or ' + 
                                              'you need initialize Trainer with n_models explicitly!')
@@ -791,6 +791,7 @@ class Trainer:
                                          f"configurator -> amortizer -> loss! Error trace:\n {err}")
     
     def _default_loader(self, file_path):
+        """Uses pickle to load as a default."""
         with open(file_path, 'rb+') as f:
             loaded_file = pickle_load(f)
         return loaded_file

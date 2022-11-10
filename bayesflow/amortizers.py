@@ -36,7 +36,7 @@ from abc import ABC, abstractmethod
 class AmortizedTarget(ABC):
     """An abstract interface for an amortized learned distribution. Children should
     implement the following public methods:
-    
+
     - compute_loss(self, input_dict, **kwargs)
     - sample(input_dict, **kwargs)
     - log_prob(input_dict, **kwargs)
@@ -49,7 +49,7 @@ class AmortizedTarget(ABC):
     @abstractmethod
     def compute_loss(self, input_dict, **kwargs):
         pass
-    
+
     @abstractmethod
     def sample(input_dict, **kwargs):
         pass
@@ -612,7 +612,7 @@ class AmortizedLikelihood(Model, AmortizedTarget):
             return latent_dist
 
 
-class JointAmortizer(Model, AmortizedTarget):
+class AmortizedPosteriorLikelihood(Model, AmortizedTarget):
     """An interface for jointly learning a surrogate model of the simulator and an approximate
     posterior given a generative model.
     """
@@ -817,7 +817,7 @@ class JointAmortizer(Model, AmortizedTarget):
         return out_dict
 
 
-class ModelComparisonAmortizer(tf.keras.Model):
+class AmortizedModelComparison(tf.keras.Model):
     """An interface to connect an evidential network for Bayesian model comparison with an optional summary network,
     as described in the original paper on evidential neural networks for model comparison:
 
@@ -860,7 +860,7 @@ class ModelComparisonAmortizer(tf.keras.Model):
         for detecting implausible observables during inference.
         """
 
-        super(ModelComparisonAmortizer, self).__init__()
+        super().__init__()
 
         self.evidence_net = evidence_net
         self.summary_net = summary_net
@@ -901,7 +901,7 @@ class ModelComparisonAmortizer(tf.keras.Model):
         return net_out, summary_out
 
     def compute_loss(self, input_dict, **kwargs):
-        """ Computes the loss of the amortized model comparison.
+        """Computes the loss of the amortized model comparison.
 
         Parameters
         ----------
@@ -1015,6 +1015,7 @@ class ModelComparisonAmortizer(tf.keras.Model):
 
 class SingleModelAmortizer(AmortizedPosterior):
     """Deprecated class for amortizer posterior estimation."""
+
     def __init_subclass__(cls, **kwargs):
         warn(f'{cls.__name__} will be deprecated. Use `AmortizedPosterior` instead.', DeprecationWarning, stacklevel=2)
         super().__init_subclass__(**kwargs)

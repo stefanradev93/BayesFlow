@@ -45,31 +45,31 @@ class AffineCouplingLayer(tf.keras.Model):
 
         # Coupling net hyperparams
         self.alpha = meta['alpha']
-        theta_dim = meta['n_params']
-        self.n_out1 = theta_dim // 2
-        self.n_out2 = theta_dim // 2 if theta_dim % 2 == 0 else theta_dim // 2 + 1
+        self.latent_dim = meta['latent_dim']
+        self.n_out1 = self.latent_dim // 2
+        self.n_out2 = self.latent_dim // 2 if self.latent_dim % 2 == 0 else self.latent_dim // 2 + 1
 
         # Custom coupling net and settings
         if callable(meta['coupling_design']):
             coupling_type = meta['coupling_design']
-            if meta.get('coupling_settings') is None:
-                raise ConfigurationError("Need to provide coupling_settings for a custom coupling type.")
-            coupling_settings = meta['coupling_settings']
+            if meta.get('coupling_net_settings') is None:
+                raise ConfigurationError("You need to provide 'coupling_net_settings' for a custom coupling type!")
+            coupling_net_settings = meta['coupling_net_settings']
 
         # String type of dense or attention
         elif type(meta['coupling_design']) is str:
             # Settings type
-            if meta.get('coupling_settings') is None:
+            if meta.get('coupling_net_settings') is None:
                 user_dict = {}
-            elif type(meta.get('coupling_settings')) is dict:
-                user_dict = meta.get('coupling_settings')
+            elif type(meta.get('coupling_net_settings')) is dict:
+                user_dict = meta.get('coupling_net_settings')
             else:
-                raise ConfigurationError("coupling_settings not understood")
+                raise ConfigurationError("coupling_net_settings not understood")
 
             # Dense
             if meta['coupling_design'] == 'dense':
                 coupling_type = DenseCouplingNet
-                coupling_settings = build_meta_dict(
+                coupling_net_settings = build_meta_dict(
                     user_dict=user_dict, default_setting=default_settings.DEFAULT_SETTING_DENSE_COUPLING)
             else:
                 raise NotImplementedError('String coupling_design should be one of ["dense"].')
@@ -77,14 +77,14 @@ class AffineCouplingLayer(tf.keras.Model):
             raise NotImplementedError('coupling_design argument not understood. Should either be a callable generator or ' +
                                       'a string in ["dense"].')
       
-        self.s1 = coupling_type(coupling_settings['s_args'], self.n_out1)
-        self.t1 = coupling_type(coupling_settings['t_args'], self.n_out1)
-        self.s2 = coupling_type(coupling_settings['s_args'], self.n_out2)
-        self.t2 = coupling_type(coupling_settings['t_args'], self.n_out2)
+        self.s1 = coupling_type(coupling_net_settings['s_args'], self.n_out1)
+        self.t1 = coupling_type(coupling_net_settings['t_args'], self.n_out1)
+        self.s2 = coupling_type(coupling_net_settings['s_args'], self.n_out2)
+        self.t2 = coupling_type(coupling_net_settings['t_args'], self.n_out2)
 
         # Optional permutation
         if meta['use_permutation']:
-            self.permutation = Permutation(theta_dim)
+            self.permutation = Permutation(self.latent_dim)
         else:
             self.permutation = None
 
