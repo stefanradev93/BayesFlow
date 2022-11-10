@@ -26,7 +26,11 @@ Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). Baye
 
 ### Minimal Example
 
+First, we define a simple 2D toy model with a Gaussian prior and a Gaussian simulator (likelihood):
 ```python
+import numpy as np
+import bayesflow as bf
+
 def prior(D=2, mu=0., sigma=1.0):
     return np.random.default_rng().normal(loc=mu, scale=sigma, size=D)
 
@@ -34,30 +38,32 @@ def simulator(theta, n_obs=50, scale=1.0):
     return np.random.default_rng().normal(loc=theta, scale=scale, size=(n_obs, theta.shape[0]))
 ```
 
+Then, we create our BayesFlow setup consisting of a summary and an inference network:
 ```python
-summary_net = InvariantNetwork()
-inference_net = InvertibleNetwork({'n_params': 10})
-amortizer = AmortizedPosterior(inference_net, summary_net)
+summary_net = bf.networks.InvariantNetwork()
+inference_net = bf.networks.InvertibleNetwork(n_params=2)
+amortizer = bf.amortizers.AmortizedPosterior(inference_net, summary_net)
 ```
-Next, we define a generative model which connects a *prior* (a function returning random draws from the prior distribution over parameters) with a *simulator* (a function accepting the prior draws as arguments) and returning a simulated data set with *n_obs* potentially multivariate observations.
+Next, we create a generative model which connects the `prior` with the `simulator`:
 ```python
-generative_model = GenerativeModel(prior, simulator)
+generative_model = bf.simulation.GenerativeModel(prior, simulator)
 ```
-Finally, we connect the networks with the generative model via a trainer instance:
+
+Finally, we connect the networks with the generative model via a `Trainer` instance:
 ```python
-trainer = Trainer(
+trainer = bf.trainers.Trainer(
     network=amortizer, 
     generative_model=generative_model
 )
 ```
-We are now ready to train an amortized posterior approximator. For instance, to run online training, we simply call
+We are now ready to train an amortized posterior approximator. For instance, to run online training, we simply call:
 ```python
-losses = trainer.train_online(epochs=50, iterations_per_epoch=1000, batch_size=64)
+losses = trainer.train_online(epochs=10, iterations_per_epoch=500, batch_size=32)
 ```
-which performs online training for 50 epochs of 1000 iterations (batch simulations with 64 simulations per batch). See the [tutorial notebooks](docs/source/tutorial_notebooks) for more examples. Posterior inference is then fast and easy:
+which performs online training for 10 epochs of 500 iterations (batch simulations with 32 simulations per batch). Amortized posterior inference on 100 new data sets is then fast and easy:
 ```python
-# Obtain 5000 samples from the posterior given obs_data
-samples = amortizer.sample(obs_data, n_samples=5000)
+new_data = generative_model(100)
+samples = amortizer.sample(new_data, n_samples=5000)
 ```
 ### Further Reading
 
