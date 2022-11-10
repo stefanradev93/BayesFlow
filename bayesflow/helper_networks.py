@@ -19,6 +19,8 @@
 # SOFTWARE.
 
 import numpy as np
+from functools import partial
+
 import tensorflow as tf
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Sequential
@@ -259,3 +261,94 @@ class ActNorm(tf.keras.Model):
         
         self.scale = tf.Variable(scale, trainable=True, name='act_norm_scale')
         self.bias  = tf.Variable(bias, trainable=True, name='act_norm_bias')
+
+
+class InvariantModule(tf.keras.Model):
+    """Implements an invariant module performing a permutation-invariant transform. 
+    
+    For details and rationale, see:
+    
+    https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
+    """
+    
+    def __init__(self, meta):
+        super().__init__()
+        
+        # Create internal functions
+        self.s1 = Sequential([Dense(**meta['dense_s1_args']) for _ in range(meta['num_dense_s1'])])
+        self.s2 = Sequential([Dense(**meta['dense_s2_args']) for _ in range(meta['num_dense_s2'])])
+
+        # Pick pooling function
+        if meta['pooling_fun'] == 'mean':
+            pooling_fun = partial(tf.reduce_mean, axis=1)
+        elif meta['pooling_fun'] == 'max':
+            pooling_fun = partial(tf.reduce_max, axis=1)
+        else:
+            if callable(pooling_fun):
+                pooling_fun = pooling_fun
+            else:
+                raise ConfigurationError('pooling_fun argument not understood!')
+        self.pooler = pooling_fun
+
+    def call(self, x):
+        """Performs the forward pass of a learnable invariant transform.
+        
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, N, x_dim)
+        
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, out_dim)
+        """
+        
+        x_reduced = self.pooler(self.s1(x))
+        out = self.s2(x_reduced)
+        return out
+
+
+class EquivariantModule(tf.keras.Model):
+    """Implements an equivariant module performing an equivariant transform. 
+    
+    For details and justification, see:
+
+    https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
+    """
+    
+    def __init__(self, meta):
+        super().__init__()
+        
+        self.invariant_module = InvariantModule(meta)
+        self.s3 = Sequential([Dense(**meta['dense_s3_args']) for _ in range(meta['num_dense_s3'])])
+
+    def call(self, x):
+        """Performs the forward pass of a learnable equivariant transform.
+        
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of shape (batch_size, N, x_dim)
+        
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, N, equiv_dim)
+        """
+        
+        # Store N
+        shape = tf.shape(x)
+        
+        # Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
+        out_inv = self.invariant_module(x)
+
+        out_inv = tf.expand_dims(out_inv, 1)
+        out_inv_rep= tf.tile(out_inv, [1, shape[1], 1])
+
+        # Concatenate each x with the repeated invariant embedding
+        out_c = tf.concat([x, out_inv_rep], axis=-1)
+        
+        # Pass through equivariant func
+        out = self.s3(out_c)
+        return out

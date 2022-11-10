@@ -18,106 +18,75 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from functools import partial
 
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, Conv1D, LSTM
 from tensorflow.keras.models import Sequential
+
 from bayesflow.helper_functions import build_meta_dict
-from bayesflow import default_settings
-
-
-class InvariantModule(tf.keras.Model):
-    """Implements an invariant module performing a permutation-invariant transform. 
-    
-    For details and rationale, see:
-    
-    https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
-    """
-    
-    def __init__(self, meta):
-        super().__init__()
-        
-        self.s1 = Sequential([Dense(**meta['dense_s1_args']) for _ in range(meta['n_dense_s1'])])
-        self.s2 = Sequential([Dense(**meta['dense_s2_args']) for _ in range(meta['n_dense_s2'])])
-                    
-    def call(self, x):
-        """ Performs the forward pass of a learnable invariant transform.
-        
-        Parameters
-        ----------
-        x : tf.Tensor
-            Input of shape (batch_size, N, x_dim)
-        
-        Returns
-        -------
-        out : tf.Tensor
-            Output of shape (batch_size, out_dim)
-        """
-        
-        x_reduced = tf.reduce_mean(self.s1(x), axis=1)
-        out = self.s2(x_reduced)
-        return out
-
-
-class EquivariantModule(tf.keras.Model):
-    """Implements an equivariant module performing an equivariant transform. 
-    
-    For details and justification, see:
-
-    https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
-    """
-    
-    def __init__(self, meta):
-        super().__init__()
-        
-        self.invariant_module = InvariantModule(meta)
-        self.s3 = Sequential([Dense(**meta['dense_s3_args']) for _ in range(meta['n_dense_s3'])])
-
-    def call(self, x):
-        """Performs the forward pass of a learnable equivariant transform.
-        
-        Parameters
-        ----------
-        x : tf.Tensor
-            Input of shape (batch_size, N, x_dim)
-        
-        Returns
-        -------
-        out : tf.Tensor
-            Output of shape (batch_size, N, equiv_dim)
-        """
-        
-        # Store N
-        shape = tf.shape(x)
-        
-        # Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
-        out_inv = self.invariant_module(x)
-
-        out_inv = tf.expand_dims(out_inv, 1)
-        out_inv_rep= tf.tile(out_inv, [1, shape[1], 1])
-
-        # Concatenate each x with the repeated invariant embedding
-        out_c = tf.concat([x, out_inv_rep], axis=-1)
-        
-        # Pass through equivariant func
-        out = self.s3(out_c)
-        return out
+from bayesflow.helper_networks import InvariantModule, EquivariantModule
+from bayesflow import default_settings as defaults
 
 
 class InvariantNetwork(tf.keras.Model):
-    """Implements an invariant network with keras."""
+    """Implements a deep permutation-invariant network according to [1].
+    
+    [1] Zaheer, M., Kottur, S., Ravanbakhsh, S., Poczos, B., Salakhutdinov, R. R., & Smola, A. J. (2017). 
+    Deep sets. Advances in neural information processing systems, 30.
+    """
 
-    def __init__(self, meta={}, **kwargs):
+    def __init__(self, summary_dim=10, num_dense_s1=2, num_dense_s2=2, num_dense_s3=2, num_equiv=2, 
+                 dense_s1_args=None, dense_s2_args=None, dense_s3_args=None, pooling_fun='mean', **kwargs):
+        """Creates a stack of 'num_equiv' equivariant layers followed by a final invariant layer.
+        
+        Parameters
+        ----------
+        summary_dim   : int, optional, default: 10
+            The number of learned summary statistics. 
+        num_dense_s1  : int, optional, default: 2
+            The number of dense layers in the inner function of a deep set.
+        num_dense_s2  : int, optional, default: 2
+            The number of dense layers in the outer function of a deep set.    
+        num_dense_s3  : int, optional, default: 2
+            The number of dense layers in an equivariant layer.
+        dense_s1_args : dict or None, optional, default: None
+            The arguments for the dense layers of s1 (inner, pre-pooling function). If `None`,
+            defaults will be used (see `default_settings`).
+        dense_s2_args : dict or None, optional, default: None
+            The arguments for the dense layers of s2 (outer, post-pooling function). If `None`,
+            defaults will be used (see `default_settings`).
+        dense_s3_args : dict or None, optional, default: None
+            The arguments for the dense layers of s3 (equivariant function). If `None`,
+            defaults will be used (see `default_settings`).
+        pooling_fun   : str of callable, optional, default: 'mean'
+            If string argument provided, should be one in ['mean', 'max']. In addition, ac actual
+            neural network can be passed for learnable pooling.
+        **kwargs      : dict, optional, default: {}
+            Optional keyword arguments passed to the __init__() method of tf.keras.Model.
+        """
+
         super().__init__(**kwargs)
 
-        meta = build_meta_dict(user_dict=meta,
-                               default_setting=default_settings.DEFAULT_SETTING_INVARIANT_NET)
-        
-        self.equiv_seq = Sequential([EquivariantModule(meta) for _ in range(meta['n_equiv'])])
-        self.inv = InvariantModule(meta)
-        self.out_layer = Dense(meta['summary_dim'], activation='linear')
-        self.summary_dim = meta['summary_dim']
-    
+        # Prepare settings dictionary
+        settings = dict(
+            num_dense_s1=num_dense_s1,
+            num_dense_s2=num_dense_s2,
+            num_dense_s3=num_dense_s3,
+            dense_s1_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT\
+                if dense_s1_args is None else dense_s1_args,
+            dense_s2_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT\
+                if dense_s2_args is None else dense_s1_args,
+            dense_s3_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT\
+                if dense_s3_args is None else dense_s1_args,
+            pooling_fun=pooling_fun
+        )
+
+        self.equiv_seq = Sequential([EquivariantModule(settings) for _ in range(num_equiv)])
+        self.inv = InvariantModule(settings)
+        self.out_layer = Dense(summary_dim, activation='linear')
+        self.summary_dim = summary_dim
+
     def call(self, x):
         """Performs the forward pass of a learnable deep invariant transformation consisting of
         a sequence of equivariant transforms followed by an invariant transform.
@@ -141,7 +110,7 @@ class InvariantNetwork(tf.keras.Model):
 
         return out
 
-    
+
 class MultiConv1D(tf.keras.Model):
     """Implements an inception-inspired 1D convolutional layer using different kernel sizes."""
 

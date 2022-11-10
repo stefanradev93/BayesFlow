@@ -55,9 +55,10 @@ DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
         'num_dense_s2'    : 2,
         'num_dense_s3'    : 2,
         'num_equiv'       : 2,
-        'dense_s1_args' : {'activation': 'selu', 'units': 64, 'kernel_initializer': 'lecun_normal'},
-        'dense_s2_args' : {'activation': 'selu', 'units': 64, 'kernel_initializer': 'lecun_normal'},
-        'dense_s3_args' : {'activation': 'selu', 'units': 64, 'kernel_initializer': 'lecun_normal'},
+        'pooling_fun'     : 'mean',
+        'dense_s1_args' : None,
+        'dense_s2_args' : None,
+        'dense_s3_args' : None,
         'summary_dim'   : 10
     },
     mandatory_fields=[]
@@ -83,6 +84,14 @@ DEFAULT_SETTING_MULTI_CONV_NET = MetaDictSetting(
     },
     mandatory_fields=[]
 )
+
+
+DEFAULT_SETTING_DENSE_INVARIANT = {
+    'units': 64,
+    'activation': 'selu',  
+    'kernel_initializer': 'lecun_normal'
+}
+
 
 DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
     meta_dict={
@@ -125,14 +134,6 @@ DEFAULT_SETTING_EVIDENTIAL_NET = MetaDictSetting(
     },
     mandatory_fields=["n_models"]
 )
-
-
-STRING_CONFIGS = [
-    'var_obs', 
-    'one_hot', 
-    'var_obs_one_hot', 
-    'one_hot_var_obs'
-]
 
 
 OPTIMIZER_DEFAULTS = {
