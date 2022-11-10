@@ -18,8 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from functools import partial
-
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, Conv1D, LSTM
 from tensorflow.keras.models import Sequential
@@ -30,10 +28,14 @@ from bayesflow import default_settings as defaults
 
 
 class InvariantNetwork(tf.keras.Model):
-    """Implements a deep permutation-invariant network according to [1].
-    
+    """Implements a deep permutation-invariant network according to [1] and [2].
+
     [1] Zaheer, M., Kottur, S., Ravanbakhsh, S., Poczos, B., Salakhutdinov, R. R., & Smola, A. J. (2017). 
     Deep sets. Advances in neural information processing systems, 30.
+
+    [2] Bloem-Reddy, B., & Teh, Y. W. (2020). 
+    Probabilistic Symmetries and Invariant Neural Networks. 
+    J. Mach. Learn. Res., 21, 90-1.
     """
 
     def __init__(self, summary_dim=10, num_dense_s1=2, num_dense_s2=2, num_dense_s3=2, num_equiv=2, 
