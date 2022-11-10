@@ -22,7 +22,7 @@ import numpy as np
 
 import pytest
 
-from bayesflow.summary_networks import InvariantModule, EquivariantModule, InvariantNetwork, MultiConv1D, MultiConvNetwork
+from bayesflow.summary_networks import InvariantNetwork, MultiConv1D, MultiConvNetwork
 from bayesflow.helper_functions import build_meta_dict
 from bayesflow.default_settings import DEFAULT_SETTING_MULTI_CONV_NET, DEFAULT_SETTING_INVARIANT_NET
 
@@ -44,71 +44,6 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
     return x, x_perm, perm
 
 
-@pytest.mark.parametrize("n_dense_s1", [1, 2])
-@pytest.mark.parametrize("n_dense_s2", [1, 2])
-@pytest.mark.parametrize("output_dim", [3, 10])
-def test_invariant_module(n_dense_s1, n_dense_s2, output_dim):
-    """This function tests the permutation invariance property of the `InvariantModule` as well as
-    its input-output integrity."""
-    
-    # Prepare settings for invariant module and create it
-    meta = {
-        'dense_s1_args': dict(units=8, activation='elu'),
-        'dense_s2_args': dict(units=output_dim, activation='relu'),
-        'n_dense_s1': n_dense_s1,
-        'n_dense_s2': n_dense_s2
-    }
-    inv_module = InvariantModule(meta)
-
-    # Create input and permuted version with randomized shapes 
-    x, x_perm, _ = _gen_randomized_3d_data()
-
-    # Pass unpermuted and permuted inputs
-    out = inv_module(x).numpy()
-    out_perm = inv_module(x_perm).numpy()
-
-    # Assert outputs equal
-    assert np.allclose(out, out_perm, atol=1e-6)
-    # Assert shape 2d
-    assert len(out.shape) == 2 and len(out_perm.shape) == 2
-    # Assert first and last dimension equals output dimension
-    assert x.shape[0] == out.shape[0] and x_perm.shape[0] == out.shape[0]
-    assert out.shape[1] == output_dim and out_perm.shape[1] == output_dim
-
-
-@pytest.mark.parametrize("n_dense_s3", [1, 2])
-@pytest.mark.parametrize("output_dim", [3, 10])
-def test_equivariant_module(n_dense_s3, output_dim):
-    """This function tests the permutation equivariance property of the `EquivariantModule` as well
-    as its input-output integrity."""
-
-    # Prepare settings for equivariant module and create it
-    meta = {
-        'dense_s1_args': dict(units=8, activation='elu'),
-        'dense_s2_args': dict(units=2, activation='relu'),
-        'dense_s3_args': dict(units=output_dim),
-        'n_dense_s1': 1,
-        'n_dense_s2': 1,
-        'n_dense_s3': n_dense_s3
-    }
-    equiv_module = EquivariantModule(meta)
-
-    # Create input and permuted version with randomized shapes 
-    x, x_perm, perm = _gen_randomized_3d_data()
-
-    # Pass unpermuted and permuted inputs
-    out = equiv_module(x).numpy()
-    out_perm = equiv_module(x_perm).numpy()
-
-    # Assert outputs equal
-    assert np.allclose(out[:, perm, :], out_perm, atol=1e-6)
-    # Assert shape 3d
-    assert len(out.shape) == 3 and len(out_perm.shape) == 3
-    # Assert first and last dimension equals output dimension
-    assert x.shape[0] == out.shape[0] and x_perm.shape[0] == out.shape[0]
-    assert out.shape[2] == output_dim and out_perm.shape[2] == output_dim
-
-
 @pytest.mark.parametrize("n_equiv", [1, 3])
 @pytest.mark.parametrize("summary_dim", [13, 10])
 def test_invariant_network(n_equiv, summary_dim):
@@ -117,7 +52,7 @@ def test_invariant_network(n_equiv, summary_dim):
 
     # Prepare settings for invariant network
     meta = build_meta_dict({
-        'n_equiv': n_equiv,
+        'num_equiv': n_equiv,
         'summary_dim': summary_dim},
         default_setting=DEFAULT_SETTING_INVARIANT_NET
     )
