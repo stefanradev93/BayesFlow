@@ -765,5 +765,9 @@ class ParameterEstimationTrainer(BaseTrainer):
         if summarize and self.summary_stats is not None:
             # Return shape in this case is (batch_size, n_sum)
             sim_data = self.summary_stats(sim_data)
-
-        return params.astype(np.float32), sim_data.astype(np.float32)
+        
+        if type(params) is np.ndarray:
+            params = params.astype(np.float32)
+        if type(sim_data) is np.ndarray:
+            sim_data = sim_data.astype(np.float32)
+        return params, sim_data
