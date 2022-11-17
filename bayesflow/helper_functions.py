@@ -102,9 +102,9 @@ def extract_current_lr(optimizer):
     return current_lr
 
 
-def format_loss_string(ep, it, loss, avg_dict, slope, lr=None, ep_str="Epoch", it_str='Iter', scalar_loss_str='Loss'):
-    """ Prepare loss string for displaying on progress bar
-    """
+def format_loss_string(ep, it, loss, avg_dict, slope=None, lr=None, 
+                       ep_str="Epoch", it_str='Iter', scalar_loss_str='Loss'):
+    """ Prepare loss string for displaying on progress bar."""
 
     disp_str = f"{ep_str}: {ep}, {it_str}: {it}"
     if type(loss) is dict:

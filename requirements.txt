@@ -1,5 +1,4 @@
 h5py==3.5
-numba===0.55
 numpy==1.21
 pandas==1.4
 scikit-learn==1.1
@@ -7,7 +6,7 @@ scipy==1.9
 aesara==2.8.7 
 seaborn==0.12
 tensorflow==2.10
-tensorflow-probability==0.18
+tensorflow-probability==0.17
 tqdm==4.64
 matplotlib==3.5
 m2r2==0.3

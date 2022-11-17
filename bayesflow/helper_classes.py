@@ -43,13 +43,13 @@ class SimulationDataset:
     and returns simulation dictionaries as expected by BayesFlow amortizers.
     """
     
-    def __init__(self, forward_dict, batch_size):
+    def __init__(self, forward_dict, batch_size, buffer_size=1024):
         """Creates a tensorfow.data.Dataset from forward inference outputs and determines format."""
         
         slices, keys_used, keys_none, n_sim = self._determine_slices(forward_dict)
         self.data = tf.data.Dataset\
                 .from_tensor_slices(tuple(slices))\
-                .shuffle(n_sim)\
+                .shuffle(buffer_size)\
                 .batch(batch_size)
         self.keys_used = keys_used
         self.keys_none = keys_none

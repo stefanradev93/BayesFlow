@@ -85,9 +85,9 @@ class Trainer:
     choice and should probably be considered in combination with a black-box surrogate optimization method, such as Bayesian optimization.
     """
 
-    def __init__(self, amortizer, generative_model=None, configurator=None, optimizer=None,
-                 learning_rate=0.0005, checkpoint_path=None, max_to_keep=3, skip_checks=False, 
-                 memory=True, optional_stopping=False, **kwargs):
+    def __init__(self, amortizer, generative_model=None, configurator=None, checkpoint_path=None, 
+                 max_to_keep=3, default_lr_schedule = tf.keras.optimizers.schedules.CosineDecay,
+                 default_lr = 0.0005, skip_checks=False, memory=True, **kwargs):
         """Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
@@ -99,10 +99,6 @@ class Trainer:
             A generative model returning a dictionary with randomly sampled parameters, data, and optional context
         configurator      : callable 
             A callable object transforming and combining the outputs of the generative model into inputs for BayesFlow
-        optimizer         : tf.keras.optimizer.Optimizer or None
-            Optimizer for the neural network. `None` will result in `tf.keras.optimizers.Adam`
-        learning_rate     : float or tf.keras.schedules.LearningRateSchedule
-            The learning rate used for the optimizer. Should not be part of the `optimizer_kwargs!` 
         checkpoint_path   : string, optional
             Optional folder name for storing the trained network
         max_to_keep       : int, optional
@@ -113,17 +109,11 @@ class Trainer:
             If True, store a pre-defined amount of simulations for later use (validation, etc.). 
             If SimulationMemory instance provided, stores a reference to the instance. 
             Otherwise the corresponding attribute will be set to None.
-        optional_stopping : boolean, optional, default: False
-            Whether to use optional stopping or not during training. Could speed up training.
         **kwargs          : dict, optional, default: {}
             Optional keyword arguments for controling the behavior of the Trainer instance. As of now, these could be:
 
-            optimizer_kwargs         : dict
-                Keyword arguments to be passed to the optimizer instance.
             memory_kwargs            : dict
                 Keyword arguments to be passed to the `SimulationMemory` instance, if memory=True
-            optional_stopping_kwargs : dict
-                Keyword arguments to be passed to the `RegressionLRAdjuster` instance if optional_stopping=True
         """
 
         # Set-up logging
@@ -145,15 +135,6 @@ class Trainer:
 
         # Set-up configurator
         self.configurator = self._manage_configurator(configurator, n_models=_n_models)
-        
-        # Optimizer settings
-        opt_kwargs = kwargs.pop('optimizer_kwargs', {})
-        if not opt_kwargs:
-            opt_kwargs = OPTIMIZER_DEFAULTS
-        if optimizer is None:
-            self.optimizer = Adam(learning_rate=learning_rate, **opt_kwargs)
-        else:
-            self.optimizer = optimizer(learning_rate=learning_rate, **opt_kwargs)
 
         # Set-up memory classes
         self.loss_history = LossHistory()
@@ -164,26 +145,21 @@ class Trainer:
         else:
             self.simulation_memory = None
 
-        # Set-up regression learning rate adjuster
-        if optional_stopping:
-            self.lr_adjuster = RegressionLRAdjuster(self.optimizer, **kwargs.pop('optional_stopping_kwargs', {}))
-        else:
-            self.lr_adjuster = None
-
-        # Set-up replay buffer
+        # Set-up replay buffer and optimizer attributes
         self.replay_buffer = None
+        self.optimizer = None
+        self.default_lr = default_lr
+        self.default_lr_schedule = default_lr_schedule
 
         # Checkpoint and helper classes settings
         self.max_to_keep = max_to_keep
         if checkpoint_path is not None:
-            self.checkpoint = tf.train.Checkpoint(optimizer=self.optimizer, model=self.amortizer)
+            self.checkpoint = tf.train.Checkpoint(model=self.amortizer)
             self.manager = tf.train.CheckpointManager(self.checkpoint, checkpoint_path, max_to_keep=max_to_keep)
-            self.checkpoint.restore(self.manager.latest_checkpoint).expect_partial()
+            self.checkpoint.restore(self.manager.latest_checkpoint)
             self.loss_history.load_from_file(checkpoint_path)
             if self.simulation_memory is not None:
                 self.simulation_memory.load_from_file(checkpoint_path)
-            if self.lr_adjuster is not None:
-                self.lr_adjuster.load_from_file(checkpoint_path)
             if self.manager.latest_checkpoint:
                 logger.info("Networks loaded from {}".format(self.manager.latest_checkpoint))
             else:
@@ -309,7 +285,8 @@ class Trainer:
         status = self.checkpoint.restore(self.manager.latest_checkpoint)
         return status
 
-    def train_online(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, **kwargs):
+    def train_online(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, 
+                     optimizer=None, reuse_optimizer=False, optional_stopping=True, **kwargs):
         """Trains an amortizer via online learning. Additional keyword arguments
         are passed to the generative mode, configurator, and amortizer.
 
@@ -324,6 +301,16 @@ class Trainer:
         save_checkpoint      : bool (default - True)
             A flag to decide whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
+        optimizer         : tf.keras.optimizer.Optimizer or None
+            Optimizer for the neural network. `None` will result in `tf.keras.optimizers.Adam`
+            using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
+            will override default learning rate and schedule settings.
+        reuse_optimizer   : bool, optional, default: False
+            A flag indicating whether the optimizer instance should be treated as persistent or not.
+            If `False`, the optimizer and its states are not stored after training has finished. 
+            Otherwise, the optimizer will be stored as `self.optimizer` and re-used in further training runs.
+        optional_stopping : bool, optional, default: False
+            Whether to use optional stopping or not during training. Could speed up training.
         **kwargs             : dict, optional
             Optional keyword arguments, which can be one of:
             `model_args` - optional keyword arguments passed to the generative model
@@ -334,13 +321,15 @@ class Trainer:
         -------
         losses : dict(ep_num : list(losses))
             A dictionary storing the losses across epochs and iterations
-        """
+        """         
 
+        # Create new optimizer and initialize loss history
+        self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
         self.loss_history.start_new_run()
         for ep in range(1, epochs + 1):
             with tqdm(total=iterations_per_epoch, desc=f'Training epoch {ep}') as p_bar:
                 for it in range(1, iterations_per_epoch + 1):
-                    
+
                     # Perform one training step and obtain current loss value
                     loss = self._train_step(batch_size, **kwargs)
 
@@ -350,34 +339,26 @@ class Trainer:
                     # Compute running loss
                     avg_dict = self.loss_history.get_running_losses(ep)
 
-                    # Get slope of loss trajectory for optional stopping
-                    if self.lr_adjuster is not None:
-                        slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
-                    else:
-                        slope = None
-
                     # Extract current learning rate
                     lr = extract_current_lr(self.optimizer)
 
                     # Format for display on progress bar
-                    disp_str = format_loss_string(ep, it, loss, avg_dict, slope, lr)
+                    disp_str = format_loss_string(ep, it, loss, avg_dict, lr=lr)
 
                     # Update progress bar
                     p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
 
-                    # Check optional stopping and end training
-                    if self._check_optional_stopping():
-                        self._save_trainer(save_checkpoint)
-                        return self.loss_history.get_plottable()
-
             # Store after each epoch, if specified
             self._save_trainer(save_checkpoint)
-        
-        # self.loss_history.load_from_file(file_path=self.checkpoint_path)
+
+        # Remove optimizer reference, if not set as persistent
+        if not reuse_optimizer:
+            self.optimizer = None
         return self.loss_history.get_plottable()
     
-    def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True,**kwargs):
+    def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True, 
+                      optimizer=None, reuse_optimizer=False, optional_stopping=True, **kwargs):
         """Trains an amortizer via offline learning. Assume parameters, data and optional 
         context have already been simulated (i.e., forward inference has been performed).
 
@@ -393,26 +374,30 @@ class Trainer:
         save_checkpoint  : bool (default - True)
             Determines whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
+        optimizer         : tf.keras.optimizer.Optimizer or None
+            Optimizer for the neural network. `None` will result in `tf.keras.optimizers.Adam`
+            using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
+            will override default learning rate and schedule settings.
+        reuse_optimizer   : bool, optional, default: False
+            A flag indicating whether the optimizer instance should be treated as persistent or not.
+            If `False`, the optimizer and its states are not stored after training has finished. 
+            Otherwise, the optimizer will be stored as `self.optimizer` and re-used in further training runs.
+        optional_stopping : bool, optional, default: False
+            Whether to use optional stopping or not during training. Could speed up training.
 
         Returns
         -------
         losses : dict(ep_num : list(losses))
             A dictionary storing the losses across epochs and iterations
-        Important
-        ---------
-
-        Examples
-        --------
-        # TODO
         """
 
         # Convert to custom data set
         data_set = SimulationDataset(simulations_dict, batch_size)
-
+        self._setup_optimizer(optimizer, epochs, len(data_set.data))
         self.loss_history.start_new_run()
         for ep in range(1, epochs + 1):
 
-            with tqdm(total=int(np.ceil(data_set.n_sim / batch_size)), desc='Training epoch {}'.format(ep)) as p_bar:
+            with tqdm(total=len(data_set.data), desc='Training epoch {}'.format(ep)) as p_bar:
                 # Loop through dataset
                 for bi, forward_dict in enumerate(data_set, start=1):
 
@@ -426,31 +411,23 @@ class Trainer:
                     # Compute running loss
                     avg_dict = self.loss_history.get_running_losses(ep)
 
-                    # Get slope of loss trajectory for optional stopping
-                    if self.lr_adjuster is not None:
-                        slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
-                    else:
-                        slope = None
-
                     # Extract current learning rate
                     lr = extract_current_lr(self.optimizer)
 
                     # Format for display on progress bar
-                    disp_str = format_loss_string(ep, bi, loss, avg_dict, slope, lr, it_str='Batch')
+                    disp_str = format_loss_string(ep, bi, loss, avg_dict, lr=lr, it_str='Batch')
 
                     # Update progress
                     p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
 
-                    # Check optional stopping and end training
-                    if self._check_optional_stopping():
-                        self._save_trainer(save_checkpoint)
-                        return self.loss_history.get_plottable()
-
             # Store after each epoch, if specified
             if self.manager is not None and save_checkpoint:
                 self._save_trainer(save_checkpoint)
-        
+
+        # Remove optimizer reference, if not set as persistent
+        if not reuse_optimizer:
+            self.optimizer = None
         return self.loss_history.get_plottable()
 
     def train_from_presimulation(self, presimulation_path, max_epochs=None, save_checkpoint=True, 
@@ -511,7 +488,7 @@ class Trainer:
         for ep, current_filename in enumerate(file_list, start=1):
 
             # Read single file into memory as a dictionary or list
-            file_path = presimulation_path + '/' + current_filename
+            file_path = os.path.join(presimulation_path, current_filename)
             epoch_data = custom_loader(file_path)
             
             # For each epoch, the number of iterations is inferred from the presimulated dictionary or list used for that epoch
@@ -561,11 +538,11 @@ class Trainer:
 
             # Store after each epoch, if specified
             self._save_trainer(save_checkpoint)
-
         return self.loss_history.get_plottable()
 
-    def train_experience_replay(self, epochs, iterations_per_epoch, batch_size, 
-                                capacity_in_batches=1000, save_checkpoint=True, **kwargs):
+    def train_experience_replay(self, epochs, iterations_per_epoch, batch_size, buffer_capacity=1000, 
+                                optimizer=None, reuse_optimizer=False, optional_stopping=True, 
+                                save_checkpoint=True, **kwargs):
         """Trains the network(s) via experience replay using a memory replay buffer, as utilized
         in reinforcement learning. Additional keyword arguments are passed to the generative mode, 
         configurator, and amortizer. Read below for signature.
@@ -578,7 +555,17 @@ class Trainer:
             Number of batch simulations to perform per epoch
         batch_size           : int
             Number of simulations to perform at each backpropagation step
-        capacity_in_batches  : int, optional, default: 1000
+        optimizer            : tf.keras.optimizer.Optimizer or None
+            Optimizer for the neural network. `None` will result in `tf.keras.optimizers.Adam`
+            using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
+            will override default learning rate and schedule settings.
+        reuse_optimizer      : bool, optional, default: False
+            A flag indicating whether the optimizer instance should be treated as persistent or not.
+            If `False`, the optimizer and its states are not stored after training has finished. 
+            Otherwise, the optimizer will be stored as `self.optimizer` and re-used in further training runs.
+        optional_stopping    : bool, optional, default: False
+            Whether to use optional stopping or not during training. Could speed up training.
+        buffer_capacity      : int, optional, default: 1000
             Max number of batches to store in buffer. For instance, if `batch_size=32`
             and `capacity_in_batches=1000`, then the buffer will hold a maximum of
             32 * 1000 = 32000 simulations. Be careful with memory!
@@ -598,10 +585,11 @@ class Trainer:
             A dictionary storing the losses across epochs and iterations
         """
 
-        # Initialize a new loss history run and replay buffer
+        # Create new optimizer and initialize loss history
+        self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
         self.loss_history.start_new_run()
         if self.replay_buffer is None:
-            self.replay_buffer = MemoryReplayBuffer(capacity_in_batches)
+            self.replay_buffer = MemoryReplayBuffer(buffer_capacity)
 
         # For each epoch, simulate, configure, add to replay buffer, sample from buffer and optimize
         for ep in range(1, epochs + 1):
@@ -625,33 +613,26 @@ class Trainer:
                     # Compute running loss
                     avg_dict = self.loss_history.get_running_losses(ep)
 
-                    # Get slope of loss trajectory for optional stopping
-                    if self.lr_adjuster is not None:
-                        slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
-                    else:
-                        slope = None
-
                     # Extract current learning rate
                     lr = extract_current_lr(self.optimizer)
 
                     # Format for display on progress bar
-                    disp_str = format_loss_string(ep, it, loss, avg_dict, slope, lr)
+                    disp_str = format_loss_string(ep, it, loss, avg_dict, lr=lr)
 
                     # Update progress bar
                     p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
 
-                    # Check optional stopping and end training
-                    if self._check_optional_stopping():
-                        self._save_trainer(save_checkpoint)
-                        return self.loss_history.get_plottable()
-
             # Store after each epoch, if specified
             self._save_trainer(save_checkpoint)
-        # self.loss_history.load_from_file(file_path=self.checkpoint_path)
+
+        # Remove optimizer reference, if not set as persistent
+        if not reuse_optimizer:
+            self.optimizer = None
         return self.loss_history.get_plottable()
 
-    def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, **kwargs):
+    def train_rounds(self, rounds, sim_per_round, epochs, batch_size, optimizer=None, 
+                    reuse_optimizer=False, optional_stopping=True, save_checkpoint=True, **kwargs):
         """Trains an amortizer via round-based learning. In each round, `sim_per_round` data sets
         are simulated from the generative model and added to the data sets simulated in previous 
         round. Then, the networks are trained for `epochs` on the augmented set of data sets.
@@ -701,10 +682,28 @@ class Trainer:
                 for k in simulations_dict.keys():
                     if simulations_dict[k] is not None:
                         simulations_dict[k] = np.concatenate((simulations_dict[k], simulations_dict_r[k]), axis=0)
-        
+
             # Train offline with generated stuff
             _ = self.train_offline(simulations_dict, epochs, batch_size, save_checkpoint, **kwargs)
+
         return self.loss_history.get_plottable()
+
+    def _setup_optimizer(self, optimizer, epochs, iterations_per_epoch):
+        if optimizer is None:
+            # No optimizer so far and None provided
+            if self.optimizer is None:
+                # Calculate decay steps for default cosine decay
+                schedule = self.default_lr_schedule(
+                    self.default_lr,
+                    iterations_per_epoch * epochs
+                )
+                self.optimizer = Adam(schedule, **OPTIMIZER_DEFAULTS)
+            # No optimizer provided, but optimizer exists, that is,
+            # has been declared as persistent, so do nothing
+            else:
+                pass
+        else:
+            self.optimizer = optimizer   
 
     def _save_trainer(self, save_checkpoint):
         if self.manager is not None and save_checkpoint:
