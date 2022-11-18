@@ -84,6 +84,13 @@ DEFAULT_SETTING_DENSE_INVARIANT = {
 }
 
 
+DEFAULT_SETTINGS_DENSE_EVIDENTIAL = {
+    'units': 128,
+    'kernel_initializer': 'lecun_normal',
+    'activation': 'selu',
+}
+
+
 DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
     meta_dict={
         't_args': {
@@ -120,10 +127,10 @@ DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
 DEFAULT_SETTING_EVIDENTIAL_NET = MetaDictSetting(
     meta_dict={
         'dense_args': dict(units=128, kernel_initializer='lecun_normal', activation='selu'),
-        'n_dense': 3,
+        'num_dense': 3,
         'output_activation': 'softplus'
     },
-    mandatory_fields=["n_models"]
+    mandatory_fields=["num_models"]
 )
 
 

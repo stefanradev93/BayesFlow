@@ -28,14 +28,12 @@ import logging
 logging.basicConfig()
 
 import tensorflow as tf
-from tensorflow.keras.optimizers import Adam
 
 from bayesflow.simulation import GenerativeModel, MultiGenerativeModel
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
 from bayesflow.helper_functions import format_loss_string, extract_current_lr
-from bayesflow.helper_classes import (SimulationDataset, LossHistory, SimulationMemory, 
-                                      RegressionLRAdjuster, MemoryReplayBuffer)
+from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, MemoryReplayBuffer
 from bayesflow.default_settings import DEFAULT_KEYS, OPTIMIZER_DEFAULTS
 from bayesflow.amortizers import (AmortizedLikelihood, AmortizedPosterior, 
                                   AmortizedPosteriorLikelihood, AmortizedModelComparison)
@@ -81,13 +79,14 @@ class Trainer:
         This training regime is optimal for very slow, external simulators, which take several minutes for a single simulation.
         It assumes that all training data has been already simulated and stored on disk.
     
-    Note: For extremely slow simulators (i.e., more than an hour of a single simulation), the BayesFlow framework might not be the ideal
-    choice and should probably be considered in combination with a black-box surrogate optimization method, such as Bayesian optimization.
+    Note: For extremely slow simulators (i.e., more than an hour of a single simulation), the BayesFlow framework 
+    might not be the ideal choice and should probably be considered in combination with a black-box surrogate optimization method, 
+    such as Bayesian optimization.
     """
 
     def __init__(self, amortizer, generative_model=None, configurator=None, checkpoint_path=None, 
-                 max_to_keep=3, default_lr_schedule = tf.keras.optimizers.schedules.CosineDecay,
-                 default_lr = 0.0005, skip_checks=False, memory=True, **kwargs):
+                 max_to_keep=3, default_lr_schedule=tf.keras.optimizers.schedules.CosineDecay,
+                 default_lr=0.0005, skip_checks=False, memory=True, **kwargs):
         """Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
@@ -97,23 +96,26 @@ class Trainer:
             The neural architecture to be optimized
         generative_model  : bayesflow.forward_inference.GenerativeModel
             A generative model returning a dictionary with randomly sampled parameters, data, and optional context
-        configurator      : callable 
-            A callable object transforming and combining the outputs of the generative model into inputs for BayesFlow
-        checkpoint_path   : string, optional
-            Optional folder name for storing the trained network
-        max_to_keep       : int, optional
-            Number of checkpoints to keep
-        skip_checks       : boolean
+        configurator      : callable or None, optional, default: None 
+            A callable object transforming and combining the outputs of the generative model into inputs for a BayesFlow
+            amortizer. 
+        checkpoint_path   : string or None, optional, default: None
+            Optional file path for storing the trained amortizer, loss history and optional memory.
+        max_to_keep       : int, optional, default: 3
+            Number of checkpoints and loss history snapshots to keep.
+        skip_checks       : boolean, optional, default: False
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
-        memory            : boolean or bayesflow.SimulationMemory
-            If True, store a pre-defined amount of simulations for later use (validation, etc.). 
-            If SimulationMemory instance provided, stores a reference to the instance. 
+        memory            : boolean or bayesflow.SimulationMemory, optional, default: True
+            If `True`, store a pre-defined amount of simulations for later use (validation, etc.). 
+            If `SimulationMemory` instance provided, stores a reference to the instance. 
             Otherwise the corresponding attribute will be set to None.
         **kwargs          : dict, optional, default: {}
             Optional keyword arguments for controling the behavior of the Trainer instance. As of now, these could be:
-
             memory_kwargs            : dict
                 Keyword arguments to be passed to the `SimulationMemory` instance, if memory=True
+            num_models               : int
+                The number of models in an amortized model comparison scenario, in case of a custom model comparison
+                amortizer which does not have a num_models attribute.
         """
 
         # Set-up logging
@@ -127,14 +129,14 @@ class Trainer:
 
         # Determine n models in case model comparison mode
         if type(generative_model) is MultiGenerativeModel:
-            _n_models = generative_model.n_models
+            _num_models = generative_model.num_models
         elif type(amortizer) is AmortizedModelComparison:
-            _n_models = amortizer.n_models
+            _num_models = amortizer.num_models
         else:
-            _n_models = kwargs.get('n_models') 
+            _num_models = kwargs.get('num_models') 
 
         # Set-up configurator
-        self.configurator = self._manage_configurator(configurator, n_models=_n_models)
+        self.configurator = self._manage_configurator(configurator, num_models=_num_models)
 
         # Set-up memory classes
         self.loss_history = LossHistory()
@@ -185,7 +187,7 @@ class Trainer:
         inputs : None, list or dict, optional (default - None)
             The optional inputs to use 
         **kwargs             : dict, optional
-            Optional keyword arguments, which could be one of:
+            Optional keyword arguments, which could be:
             `conf_args`  - optional keyword arguments passed to the configurator
             `net_args`   - optional keyword arguments passed to the amortizer
             `plot_args`  - optional keyword arguments passed to `plot_latent_space_2d`
@@ -230,7 +232,7 @@ class Trainer:
             The number of posterior samples to draw for each simulated data set.
             If None, the number will be heuristically determined so n_sim / n_draws ~= 20
         **kwargs  : dict, optional
-            Optional keyword arguments, which could be one of:
+            Optional keyword arguments, which could be:
             `conf_args`  - optional keyword arguments passed to the configurator
             `net_args`   - optional keyword arguments passed to the amortizer
             `plot_args`  - optional keyword arguments passed to `plot_sbc`
@@ -312,14 +314,14 @@ class Trainer:
         optional_stopping : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
         **kwargs             : dict, optional
-            Optional keyword arguments, which can be one of:
+            Optional keyword arguments, which can be:
             `model_args` - optional keyword arguments passed to the generative model
             `conf_args`  - optional keyword arguments passed to the configurator
             `net_args`   - optional keyword arguments passed to the amortizer
 
         Returns
         -------
-        losses : dict(ep_num : list(losses))
+        losses : dict or pandas.DataFrame
             A dictionary storing the losses across epochs and iterations
         """         
 
@@ -387,7 +389,7 @@ class Trainer:
 
         Returns
         -------
-        losses : dict(ep_num : list(losses))
+        losses : dict or pandas.DataFrame
             A dictionary storing the losses across epochs and iterations
         """
 
@@ -430,8 +432,8 @@ class Trainer:
             self.optimizer = None
         return self.loss_history.get_plottable()
 
-    def train_from_presimulation(self, presimulation_path, max_epochs=None, save_checkpoint=True, 
-                                 custom_loader=None, **kwargs):
+    def train_from_presimulation(self, presimulation_path, optimizer, save_checkpoint=True, max_epochs=None, 
+                                 reuse_optimizer=False, custom_loader=None, optional_stopping=True, **kwargs):
         """Trains an amortizer via a modified form of offline training. 
 
         Like regular offline training, it assumes that parameters, data and optional context have already
@@ -445,38 +447,59 @@ class Trainer:
 
         Parameters
         ----------
-        presimulation_path : str
+        presimulation_path   : str
             File path to the folder containing the files from the precomputed simulation.
             Ideally generated using a GenerativeModel's presimulate_and_save method, otherwise must match
             the structure produced by that method: 
 
-            Each file contains the data for one epoch, i.e. a number of batches, and must be compatible with the custom_loader provided:
-            the custom_loader must read each file into a collection (either a dictionary or a list) of simulation_dict objects.
+            Each file contains the data for one epoch (i.e. a number of batches), and must be compatible 
+            with the custom_loader provided.
+            The custom_loader must read each file into a collection (either a dictionary or a list) of simulation_dict objects.
             This is easily achieved with the pickle library: if the files were generated from collections of simulation_dict objects
             using pickle.dump, the _default_loader (default for custom_load) will load them using pickle.load. 
-
             Training parameters like number of iterations and batch size are inferred from the files during training.
-        save_checkpoint  : bool, optional, (default - True)
+        optimizer            : tf.keras.optimizer.Optimizer
+            Optimizer for the neural network training. Since for this training, it is impossible to guess the number of 
+            iterations beforehead, an optimizer must be provided.
+        save_checkpoint      : bool, optional, default : True
             Determines whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
-
-        custom_loader    : callable, optional, (default - _default_loader)
+        max_epochs           : int or None, optional, default: None
+            An optional parameter to limit the number of epochs.
+        reuse_optimizer      : bool, optional, default: False
+            A flag indicating whether the optimizer instance should be treated as persistent or not.
+            If `False`, the optimizer and its states are not stored after training has finished. 
+            Otherwise, the optimizer will be stored as `self.optimizer` and re-used in further training runs.
+        custom_loader        : callable, optional, default: self._default_loader
             Must take a string file_path as an input and output a collection (dictionary or list) of simulation_dict objects.
-            A simulation_dict has the keys 'prior_non_batchable_context', 'prior_batchable_context', 'prior_draws', 'sim_non_batchable_context',
-            'sim_batchable_context' and 'sim_data'. Unused keys should be paired with the value None; 'prior_draws' and 'sim_data' must have
-            actual data as values.
+            A simulation_dict has the keys 
+            - 'prior_non_batchable_context', 
+            - 'prior_batchable_context', 
+            - 'prior_draws', 
+            - 'sim_non_batchable_context',
+            - 'sim_batchable_context'
+            - 'sim_data'. 
+            'prior_draws' and 'sim_data' must have actual data as values, the rest are optional.
+        optional_stopping    : bool, optional, default: False
+            Whether to use optional stopping or not during training. Could speed up training.
+        **kwargs             : dict, optional
+            Optional keyword arguments, which can be:
+            `conf_args`  - optional keyword arguments passed to the configurator
+            `net_args`   - optional keyword arguments passed to the amortizer
 
         Returns
         -------
-        losses : dict(ep_num : list(losses))
-            A dictionary storing the losses across epochs and iterations
+        losses : dict or pandas.DataFrame
+            A dictionary or pandas.DataFrame storing the losses across epochs and iterations
         """   
-        
+
         # Use default loading function if none is provided
         if custom_loader is None:
             custom_loader = self._default_loader
 
+        # Init loss history and optimizer
         self.loss_history.start_new_run()
+        self.optimizer = optimizer
 
         # Loop over the presimulated dataset.
         file_list = os.listdir(presimulation_path)
@@ -497,7 +520,7 @@ class Trainer:
             elif isinstance(epoch_data, list):
                 index_list = np.arange(len(epoch_data))    
             else:
-                raise ValueError(f"Loading a simulation file resulted in a {type(epoch_data)}. Must be a dictionary or a list.")
+                raise ValueError(f"Loading a simulation file resulted in a {type(epoch_data)}. Must be a dictionary or a list!")
 
             with tqdm(total=len(index_list), desc=f'Training epoch {ep}') as p_bar:
                 for it, index in enumerate(index_list, start=1):
@@ -515,17 +538,11 @@ class Trainer:
                     # Compute running loss
                     avg_dict = self.loss_history.get_running_losses(ep)
 
-                    # Get slope of loss trajectory for optional stopping
-                    if self.lr_adjuster is not None:
-                        slope = self.lr_adjuster.get_slope(self.loss_history.total_loss)
-                    else:
-                        slope = None
-
                     # Extract current learning rate
                     lr = extract_current_lr(self.optimizer)
 
                     # Format for display on progress bar
-                    disp_str = format_loss_string(ep, it, loss, avg_dict, slope, lr)
+                    disp_str = format_loss_string(ep, it, loss, avg_dict, lr=lr)
 
                     # Update progress bar
                     p_bar.set_postfix_str(disp_str)
@@ -538,11 +555,15 @@ class Trainer:
 
             # Store after each epoch, if specified
             self._save_trainer(save_checkpoint)
+
+        # Remove reference to optimizer, if not set to persistent
+        if not reuse_optimizer:
+            self.optimizer = None
         return self.loss_history.get_plottable()
 
-    def train_experience_replay(self, epochs, iterations_per_epoch, batch_size, buffer_capacity=1000, 
-                                optimizer=None, reuse_optimizer=False, optional_stopping=True, 
-                                save_checkpoint=True, **kwargs):
+    def train_experience_replay(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, 
+                                optimizer=None, reuse_optimizer=False, buffer_capacity=1000, optional_stopping=True, 
+                                **kwargs):
         """Trains the network(s) via experience replay using a memory replay buffer, as utilized
         in reinforcement learning. Additional keyword arguments are passed to the generative mode, 
         configurator, and amortizer. Read below for signature.
@@ -554,7 +575,10 @@ class Trainer:
         iterations_per_epoch : int
             Number of batch simulations to perform per epoch
         batch_size           : int
-            Number of simulations to perform at each backpropagation step
+            Number of simulations to perform at each backpropagation step.
+        save_checkpoint      : bool, optional, default: True
+            A flag to decide whether to save checkpoints after each epoch,
+            if a `checkpoint_path` provided during initialization, otherwise ignored.
         optimizer            : tf.keras.optimizer.Optimizer or None
             Optimizer for the neural network. `None` will result in `tf.keras.optimizers.Adam`
             using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
@@ -570,19 +594,16 @@ class Trainer:
             and `capacity_in_batches=1000`, then the buffer will hold a maximum of
             32 * 1000 = 32000 simulations. Be careful with memory!
             Important! Argument will be ignored if buffer has previously been initialized!
-        save_checkpoint      : bool (default - True)
-            A flag to decide whether to save checkpoints after each epoch,
-            if a checkpoint_path provided during initialization, otherwise ignored.
-        **kwargs             : dict, optional
-            Optional keyword arguments, which can be one of:
+        **kwargs             : dict, optional, default: {}
+            Optional keyword arguments, which can be:
             `model_args` - optional keyword arguments passed to the generative model
             `conf_args`  - optional keyword arguments passed to the configurator
             `net_args`   - optional keyword arguments passed to the amortizer
 
         Returns
         -------
-        losses : dict(ep_num : list(losses))
-            A dictionary storing the losses across epochs and iterations
+        losses : dict or pandas.DataFrame
+            A dictionary or a pandas.DataFrame storing the losses across epochs and iterations.
         """
 
         # Create new optimizer and initialize loss history
@@ -631,8 +652,8 @@ class Trainer:
             self.optimizer = None
         return self.loss_history.get_plottable()
 
-    def train_rounds(self, rounds, sim_per_round, epochs, batch_size, optimizer=None, 
-                    reuse_optimizer=False, optional_stopping=True, save_checkpoint=True, **kwargs):
+    def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, 
+                     optimizer=None, reuse_optimizer=False, optional_stopping=True, **kwargs):
         """Trains an amortizer via round-based learning. In each round, `sim_per_round` data sets
         are simulated from the generative model and added to the data sets simulated in previous 
         round. Then, the networks are trained for `epochs` on the augmented set of data sets.
@@ -643,28 +664,51 @@ class Trainer:
 
         Parameters
         ----------
-        rounds          : int
+        rounds               : int
             Number of rounds to perform (outer loop)
-        sim_per_round   : int
-            Number of simulations per round.
-        epochs          : int
+        sim_per_round        : int
+            Number of simulations per round
+        epochs               : int
             Number of epochs (and number of times a checkpoint is stored, inner loop) within a round.
-        batch_size      : int
+        batch_size           : int
             Number of simulations to use at each backpropagation step
         save_checkpoint : bool, optional, (default - True)
             A flag to decide whether to save checkpoints after each epoch,
-            if a checkpoint_path provided during initialization, otherwise ignored
+            if a checkpoint_path provided during initialization, otherwise ignored.
+        optimizer            : tf.keras.optimizer.Optimizer or None
+            Optimizer for the neural network training. `None` will result in `tf.keras.optimizers.Adam`
+            using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
+            will override default learning rate and schedule settings.
+        reuse_optimizer      : bool, optional, default: False
+            A flag indicating whether the optimizer instance should be treated as persistent or not.
+            If `False`, the optimizer and its states are not stored after training has finished. 
+            Otherwise, the optimizer will be stored as `self.optimizer` and re-used in further training runs.
+        optional_stopping    : bool, optional, default: False
+            Whether to use optional stopping or not during training. Could speed up training.
+        **kwargs             : dict, optional
+            Optional keyword arguments, which can be:
+            `model_args` - optional keyword arguments passed to the generative model
+            `conf_args`  - optional keyword arguments passed to the configurator
+            `net_args`   - optional keyword arguments passed to the amortizer
 
         Returns
         -------
-        losses : dict(ep_num : list(losses))
-            A dictionary storing the losses across epochs and iterations
+        losses : dict or pandas.DataFrame
+            A dictionary or a pandas.DataFrame storing the losses across epochs and iterations
         """
 
+        # Prepare logger
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
-        first_round = True
 
+        # Create new optimizer and initialize loss history, needs to calculate iters per epoch
+        batches_per_sim = np.ceil(sim_per_round / batch_size)
+        sum_total = (rounds + rounds**2) / 2
+        iterations_per_epoch = int(batches_per_sim * sum_total)
+        self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
+
+        # Loop for each round
+        first_round = True
         for r in range(1, rounds + 1):
             # Data generation step
             if first_round:
@@ -684,8 +728,13 @@ class Trainer:
                         simulations_dict[k] = np.concatenate((simulations_dict[k], simulations_dict_r[k]), axis=0)
 
             # Train offline with generated stuff
-            _ = self.train_offline(simulations_dict, epochs, batch_size, save_checkpoint, **kwargs)
+            _ = self.train_offline(
+                simulations_dict, epochs, batch_size, save_checkpoint, reuse_optimizer=True, 
+                optional_stopping=optional_stopping, **kwargs)
 
+        # Remove optimizer reference, if not set as persistent
+        if not reuse_optimizer:
+            self.optimizer = None
         return self.loss_history.get_plottable()
 
     def _setup_optimizer(self, optimizer, epochs, iterations_per_epoch):
@@ -697,7 +746,7 @@ class Trainer:
                     self.default_lr,
                     iterations_per_epoch * epochs
                 )
-                self.optimizer = Adam(schedule, **OPTIMIZER_DEFAULTS)
+                self.optimizer = tf.keras.optimizers.Adam(schedule, **OPTIMIZER_DEFAULTS)
             # No optimizer provided, but optimizer exists, that is,
             # has been declared as persistent, so do nothing
             else:
@@ -740,7 +789,7 @@ class Trainer:
         input_dict    : dict
             The optional pre-configured forward dict from a generative model, simulated, if None
         **kwargs      : dict (default - {})
-            Optional keyword arguments, which can be one of:
+            Optional keyword arguments, which can be:
             `model_args` - optional keyword arguments passed to the generative model
             `conf_args`  - optional keyword arguments passed to the configurator
             `net_args`   - optional keyword arguments passed to the amortizer
@@ -848,10 +897,10 @@ class Trainer:
 
             # Model comparison amortizer
             elif type(self.amortizer) is AmortizedModelComparison:
-                if kwargs.get('n_models') is None:
-                    raise ConfigurationError('Either your generative model or amortizer should have "n_models" attribute, or ' + 
-                                             'you need initialize Trainer with n_models explicitly!')
-                default_config = DefaultModelComparisonConfigurator(kwargs.get('n_models'))
+                if kwargs.get('num_models') is None:
+                    raise ConfigurationError('Either your generative model or amortizer should have "num_models" attribute, or ' + 
+                                             'you need initialize Trainer with num_models explicitly!')
+                default_config = DefaultModelComparisonConfigurator(kwargs.get('num_models'))
             # Unknown raises an error
             else:
                 raise NotImplementedError(f"Could not initialize configurator based on " +

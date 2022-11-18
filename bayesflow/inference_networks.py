@@ -209,39 +209,53 @@ class InvertibleNetwork(tf.keras.Model):
 
 class EvidentialNetwork(tf.keras.Model):
     """Implements a network whose outputs are the concentration parameters of a Dirichlet density.
+
+    Follows ideas from:
     
-    Follows the implementation from:
-    https://arxiv.org/abs/2004.10629
+    [1] Radev, S. T., D'Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., & Bürkner, P. C. (2021). 
+    Amortized Bayesian model comparison with evidential deep learning. 
+    IEEE Transactions on Neural Networks and Learning Systems.
+
+    [2] Sensoy, M., Kaplan, L., & Kandemir, M. (2018). 
+    Evidential deep learning to quantify classification uncertainty. 
+    Advances in neural information processing systems, 31.
     """
 
-    def __init__(self, meta={}):
+    def __init__(self, num_models, dense_args=None, num_dense=3, output_activation='softplus', **kwargs):
         """Creates an instance of an evidential network for amortized model comparison.
 
         Parameters
         ----------
-        meta  : dict
-            A list of dictionaries, where each dictionary holds parameter-value pairs
-            for a single :class:`tf.keras.Dense` layer
+        num_models        : int
+            The number of candidate (competing models) for the comparison scenario.
+        dense_args        : dict or None, optional, default: None
+            The arguments for a tf.keras.layers.Dense layer. If None, defaults will be used.
+        num_dense         : int, optional, default: 3
+            The number of dense layers for the main network part. 
+        output_activation : str or callable, optional, default: 'softplus'
+            The activation function to use for the network outputs. 
+            Important: needs to have positive outputs.
+        **kwargs          : dict, optional, default: {}
+            Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.
         """
 
-        super().__init__()
+        super().__init__(**kwargs)
 
-        # Create settings dictionary
-        meta = build_meta_dict(user_dict=meta,
-                               default_setting=default_settings.DEFAULT_SETTING_EVIDENTIAL_NET)
+        if dense_args is None:
+            dense_args = default_settings.DEFAULT_SETTINGS_DENSE_EVIDENTIAL
 
         # A network to increase representation power
         self.dense = tf.keras.Sequential([
-            tf.keras.layers.Dense(**meta['dense_args'])
-            for _ in range(meta['n_dense'])
+            tf.keras.layers.Dense(**dense_args)
+            for _ in range(num_dense)
         ])
 
         # The layer to output model evidences
-        self.evidence_layer = tf.keras.layers.Dense(
-            meta['n_models'], activation=meta['output_activation'], 
-            **{k: v for k, v in meta['dense_args'].items() if k != 'units' and k != 'activation'})
+        self.alpha_layer = tf.keras.layers.Dense(
+            num_models, activation=output_activation, 
+            **{k: v for k, v in dense_args.items() if k != 'units' and k != 'activation'})
 
-        self.n_models = meta['n_models']
+        self.num_models = num_models
 
     def call(self, condition, **kwargs):
         """Computes evidences for model comparison given a batch of data and optional concatenated context, 
@@ -254,13 +268,17 @@ class EvidentialNetwork(tf.keras.Model):
 
         Returns
         -------
-        alpha      : tf.Tensor of shape (batch_size, n_models) -- the learned model evidences
+        evidence    : tf.Tensor of shape (batch_size, num_models) -- the learned model evidences
         """
 
+        return self.evidence(condition, **kwargs)
+
+    @tf.function
+    def evidence(self, condition, **kwargs):
         rep = self.dense(condition, **kwargs)
-        evidence = self.evidence_layer(rep, **kwargs)
-        alpha = evidence + 1
-        return alpha
+        alpha = self.alpha_layer(rep, **kwargs)
+        evidence = alpha + 1.
+        return evidence
 
     def sample(self, condition, n_samples, **kwargs):
         """Samples posterior model probabilities from the higher-order Dirichlet density.
@@ -271,17 +289,24 @@ class EvidentialNetwork(tf.keras.Model):
             The summary of the observed (or simulated) data, shape (n_data_sets, ...)
         n_samples  : int
             Number of samples to obtain from the approximate posterior
-            
+
         Returns
         -------
         pm_samples : tf.Tensor or np.array
-            The posterior draws from the Dirichlet distribution, shape (n_samples, n_batch, n_models)
+            The posterior draws from the Dirichlet distribution, shape (num_samples, num_batch, num_models)
         """
 
-        # Compute evidential values
-        alpha = self(condition, **kwargs)
+        alpha = self.evidence(condition, **kwargs)
         n_datasets = alpha.shape[0]
-
-        # Sample for each dataset
-        pm_samples = np.stack([np.random.dirichlet(alpha[n, :], size=n_samples) for n in range(n_datasets)], axis=1)
+        pm_samples = np.stack(
+            [np.default_rng().dirichlet(alpha[n, :], size=n_samples) for n in range(n_datasets)], axis=1)
         return pm_samples
+
+    @classmethod
+    def create_config(cls, **kwargs):
+        """"Used to create the settings dictionary for the internal networks of the invertible
+        network. Will fill in missing """
+
+        settings = build_meta_dict(user_dict=kwargs,
+                                   default_setting=default_settings.DEFAULT_SETTING_EVIDENTIAL_NET)
+        return settings

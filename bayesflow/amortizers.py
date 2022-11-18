@@ -23,7 +23,7 @@ import tensorflow as tf
 from tensorflow.keras import Model
 
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
-from bayesflow.losses import log_loss, mmd_summary_space
+from bayesflow.losses import log_loss, mmd_summary_space, kl_dirichlet
 from bayesflow.default_settings import DEFAULT_KEYS
 
 import tensorflow_probability as tfp
@@ -870,7 +870,7 @@ class AmortizedModelComparison(tf.keras.Model):
         self.summary_net = summary_net
         self.loss = self._determine_loss(loss_fun)
         self.kl_weight = kl_weight
-        self.n_models = self.evidence_net.n_models
+        self.num_models = self.evidence_net.num_models
 
     def __call__(self, input_dict, return_summary=False, **kwargs):
         """ Performs a forward pass through both networks.
@@ -887,7 +887,7 @@ class AmortizedModelComparison(tf.keras.Model):
 
         Returns
         -------
-        net_out : tf.Tensor of shape (batch_size, n_models) or tuple of (net_out (batch_size, n_models), 
+        net_out : tf.Tensor of shape (batch_size, num_models) or tuple of (net_out (batch_size, num_models), 
                   summary_out (batch_size, summary_dim)), the latter being the summary network outputs, if
                   `return_summary` set to True.
         """
@@ -905,7 +905,7 @@ class AmortizedModelComparison(tf.keras.Model):
         return net_out, summary_out
 
     def compute_loss(self, input_dict, **kwargs):
-        """Computes the loss of the amortized model comparison.
+        """Computes the loss of the amortized model comparison instance.
 
         Parameters
         ----------
@@ -929,7 +929,7 @@ class AmortizedModelComparison(tf.keras.Model):
             return loss + kl
 
     def sample(self, input_dict, to_numpy=True, **kwargs):
-        """ Samples posterior model probabilities from the higher order Dirichlet density.
+        """Samples posterior model probabilities from the higher order Dirichlet density.
 
         Parameters
         ----------
@@ -946,7 +946,7 @@ class AmortizedModelComparison(tf.keras.Model):
         Returns
         -------
         pm_samples : tf.Tensor or np.array
-            The posterior draws from the Dirichlet distribution, shape (n_samples, n_batch, n_models)
+            The posterior draws from the Dirichlet distribution, shape (num_samples, num_batch, num_models)
         """
 
         _, full_cond = self._compute_summary_condition(
@@ -958,7 +958,8 @@ class AmortizedModelComparison(tf.keras.Model):
         return self.evidence_net.sample(full_cond, to_numpy, **kwargs)
 
     def evidence(self, input_dict, to_numpy=True, **kwargs):
-        """TODO"""
+        """Computes the evidence for the competing models given the data sets
+        contained in `input_dict`."""
 
         _, full_cond = self._compute_summary_condition(
             input_dict.get(DEFAULT_KEYS['summary_conditions']), 
@@ -972,7 +973,7 @@ class AmortizedModelComparison(tf.keras.Model):
         return alphas
 
     def uncertainty_score(self, input_dict, to_numpy=True, **kwargs):
-        """TODO"""
+        """Computes the uncertainy score according to sum(alphas) / num_models."""
 
         _, full_cond = self._compute_summary_condition(
             input_dict.get(DEFAULT_KEYS['summary_conditions']), 
@@ -981,7 +982,7 @@ class AmortizedModelComparison(tf.keras.Model):
         )
 
         alphas = self(full_cond, return_summary=False, **kwargs)
-        u = tf.reduce_sum(alphas, axis=-1) / self.evidence_net.n_models
+        u = tf.reduce_sum(alphas, axis=-1) / self.evidence_net.num_models
         if to_numpy:
             return u.numpy()
         return u
@@ -1007,7 +1008,7 @@ class AmortizedModelComparison(tf.keras.Model):
         return sum_condition, full_cond
 
     def _determine_loss(self, loss_fun):
-        """ Helper method to determine loss function to use."""
+        """Helper method to determine loss function to use."""
 
         if loss_fun is None:
             return log_loss
