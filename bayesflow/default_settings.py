@@ -66,14 +66,14 @@ DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
 
 
 DEFAULT_SETTING_MULTI_CONV = {
-            'layer_args': {
-                'activation': 'relu',
-                'filters': 32,
-                'strides': 1,
-                'padding': 'causal'
-            },
-            'min_kernel_size': 1,
-            'max_kernel_size': 3
+    'layer_args': {
+        'activation': 'relu',
+        'filters': 32,
+        'strides': 1,
+        'padding': 'causal'
+    },
+    'min_kernel_size': 1,
+    'max_kernel_size': 3
 }
 
 
@@ -84,7 +84,7 @@ DEFAULT_SETTING_DENSE_INVARIANT = {
 }
 
 
-DEFAULT_SETTINGS_DENSE_EVIDENTIAL = {
+DEFAULT_SETTING_DENSE_EVIDENTIAL = {
     'units': 128,
     'kernel_initializer': 'lecun_normal',
     'activation': 'selu',

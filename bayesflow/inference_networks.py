@@ -242,7 +242,7 @@ class EvidentialNetwork(tf.keras.Model):
         super().__init__(**kwargs)
 
         if dense_args is None:
-            dense_args = default_settings.DEFAULT_SETTINGS_DENSE_EVIDENTIAL
+            dense_args = default_settings.DEFAULT_SETTING_DENSE_EVIDENTIAL
 
         # A network to increase representation power
         self.dense = tf.keras.Sequential([
