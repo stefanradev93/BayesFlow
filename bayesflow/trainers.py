@@ -152,6 +152,8 @@ class Trainer:
         self.replay_buffer = None
         self.optimizer = None
         self.default_lr = default_lr
+        # Currently unused attribute
+        self.lr_adjuster = None
 
         # Checkpoint and helper classes settings
         self.max_to_keep = max_to_keep
