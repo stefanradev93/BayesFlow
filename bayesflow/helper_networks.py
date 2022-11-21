@@ -118,19 +118,29 @@ class Permutation(tf.keras.Model):
         ----------
         target   : tf.Tensor of shape (batch_size, ...)
             The target vector to be permuted over its last axis.
-        inverse  : bool, default: False
+        inverse  : bool, optional, default: False
             Controls if the current pass is forward (``inverse=False``) or inverse (``inverse=True``).
 
         Returns
         -------
         out      : tf.Tensor of the same shape as `target`.
-            The permuted target vector.
-
+            The (un-)permuted target vector.
         """
 
         if not inverse:
-            return tf.transpose(tf.gather(tf.transpose(target), self.permutation))
-        return tf.transpose(tf.gather(tf.transpose(target), self.inv_permutation))
+            return self._forward(target)
+        else:
+            return self._inverse(target)
+
+    @tf.function
+    def _forward(self, target):
+        """Performs a fixed permutation over the last axis."""
+        return tf.gather(target, self.permutation, axis=-1)
+    
+    @tf.function
+    def _inverse(self, target):
+        """Un-does the fixed permutation over the last axis."""
+        return tf.gather(target, self.inv_permutation, axis=-1)
 
 
 class ActNorm(tf.keras.Model):

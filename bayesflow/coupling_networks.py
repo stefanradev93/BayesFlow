@@ -85,6 +85,7 @@ class AffineCouplingLayer(tf.keras.Model):
         # Optional permutation
         if meta['use_permutation']:
             self.permutation = Permutation(self.latent_dim)
+            self.permutation.trainable = False
         else:
             self.permutation = None
 

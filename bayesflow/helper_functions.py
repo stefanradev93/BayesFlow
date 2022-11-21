@@ -20,6 +20,7 @@
 
 import copy
 
+import tensorflow as tf
 from tensorflow.keras.optimizers.schedules import LearningRateSchedule
 
 from bayesflow import default_settings
@@ -104,7 +105,7 @@ def extract_current_lr(optimizer):
 
 def format_loss_string(ep, it, loss, avg_dict, slope=None, lr=None, 
                        ep_str="Epoch", it_str='Iter', scalar_loss_str='Loss'):
-    """ Prepare loss string for displaying on progress bar."""
+    """Prepare loss string for displaying on progress bar."""
 
     disp_str = f"{ep_str}: {ep}, {it_str}: {it}"
     if type(loss) is dict:
@@ -121,6 +122,50 @@ def format_loss_string(ep, it, loss, avg_dict, slope=None, lr=None,
     if lr is not None:
         disp_str += f",LR: {lr:.2E}"
     return disp_str
+
+
+def backprop_step(input_dict, amortizer, optimizer, **kwargs):
+    """Computes the loss of the provided amortizer given an input dictionary and applies gradients.
+
+    Parameters
+    ----------
+    input_dict  : dict
+        The configured output of the genrative model
+    amortizer   : tf.keras.Model
+        The custom amortizer. Needs to implement a compute_loss method.
+    optimizer   : tf.keras.optimizers.Optimizer
+        The optimizer used to update the amortizer's parameters.
+    **kwargs    : dict
+        Optional keyword arguments passed to the network's compute_loss method
+        
+    Returns
+    -------
+    loss : dict
+        The outputs of the compute_loss() method of the amortizer comprising all
+        loss components, such as divergences or regularization.
+    """
+
+    # Forward pass and loss computation
+    with tf.GradientTape() as tape:
+        # Compute custom loss
+        loss = amortizer.compute_loss(input_dict, training=True, **kwargs)
+        # If dict, add components
+        if type(loss) is dict:
+            _loss = tf.add_n(list(loss.values()))
+        else:
+            _loss = loss
+        # Collect regularization loss, if any
+        if amortizer.losses != []:
+            reg = tf.add_n(amortizer.losses)
+            _loss += reg
+            if type(loss) is dict:
+                loss['W.Decay'] = reg
+            else:
+                loss = {'Loss': loss, 'W.Decay': reg}
+    # One step backprop and return loss
+    gradients = tape.gradient(_loss, amortizer.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, amortizer.trainable_variables))
+    return loss
 
 
 def check_posterior_prior_shapes(post_samples, prior_samples):

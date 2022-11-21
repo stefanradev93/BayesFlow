@@ -32,7 +32,7 @@ import tensorflow as tf
 from bayesflow.simulation import GenerativeModel, MultiGenerativeModel
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
-from bayesflow.helper_functions import format_loss_string, extract_current_lr
+from bayesflow.helper_functions import format_loss_string, extract_current_lr, backprop_step
 from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, MemoryReplayBuffer
 from bayesflow.default_settings import DEFAULT_KEYS, OPTIMIZER_DEFAULTS
 from bayesflow.amortizers import (AmortizedLikelihood, AmortizedPosterior, 
@@ -85,8 +85,7 @@ class Trainer:
     """
 
     def __init__(self, amortizer, generative_model=None, configurator=None, checkpoint_path=None, 
-                 max_to_keep=3, default_lr_schedule=tf.keras.optimizers.schedules.CosineDecay,
-                 default_lr=0.0005, skip_checks=False, memory=True, **kwargs):
+                 max_to_keep=3, default_lr=0.0005, skip_checks=False, memory=True, **kwargs):
         """Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
@@ -103,6 +102,8 @@ class Trainer:
             Optional file path for storing the trained amortizer, loss history and optional memory.
         max_to_keep       : int, optional, default: 3
             Number of checkpoints and loss history snapshots to keep.
+        default_lr        : float, optional, default: 0.0005
+            The default learning rate to use for default optimizers.
         skip_checks       : boolean, optional, default: False
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
         memory            : boolean or bayesflow.SimulationMemory, optional, default: True
@@ -151,7 +152,6 @@ class Trainer:
         self.replay_buffer = None
         self.optimizer = None
         self.default_lr = default_lr
-        self.default_lr_schedule = default_lr_schedule
 
         # Checkpoint and helper classes settings
         self.max_to_keep = max_to_keep
@@ -288,7 +288,8 @@ class Trainer:
         return status
 
     def train_online(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, 
-                     optimizer=None, reuse_optimizer=False, optional_stopping=True, **kwargs):
+                     optimizer=None, reuse_optimizer=False, optional_stopping=True, use_autograph=True, 
+                     **kwargs):
         """Trains an amortizer via online learning. Additional keyword arguments
         are passed to the generative mode, configurator, and amortizer.
 
@@ -303,16 +304,19 @@ class Trainer:
         save_checkpoint      : bool (default - True)
             A flag to decide whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
-        optimizer         : tf.keras.optimizer.Optimizer or None
+        optimizer            : tf.keras.optimizer.Optimizer or None
             Optimizer for the neural network. `None` will result in `tf.keras.optimizers.Adam`
             using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
             will override default learning rate and schedule settings.
-        reuse_optimizer   : bool, optional, default: False
+        reuse_optimizer      : bool, optional, default: False
             A flag indicating whether the optimizer instance should be treated as persistent or not.
             If `False`, the optimizer and its states are not stored after training has finished. 
             Otherwise, the optimizer will be stored as `self.optimizer` and re-used in further training runs.
-        optional_stopping : bool, optional, default: False
+        optional_stopping    : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
+        use_autograph        : bool, optional, default: True
+            Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
+            could also be harder to debug.
         **kwargs             : dict, optional
             Optional keyword arguments, which can be:
             `model_args` - optional keyword arguments passed to the generative model
@@ -323,8 +327,14 @@ class Trainer:
         -------
         losses : dict or pandas.DataFrame
             A dictionary storing the losses across epochs and iterations
-        """         
+        """
 
+        # Compile update function, if specified
+        if use_autograph:
+            _backprop_step = tf.function(backprop_step, reduce_retracing=True)
+        else:
+            _backprop_step = _backprop_step
+         
         # Create new optimizer and initialize loss history
         self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
         self.loss_history.start_new_run()
@@ -333,7 +343,7 @@ class Trainer:
                 for it in range(1, iterations_per_epoch + 1):
 
                     # Perform one training step and obtain current loss value
-                    loss = self._train_step(batch_size, **kwargs)
+                    loss = self._train_step(batch_size, update_step=_backprop_step, **kwargs)
 
                     # Store returned loss
                     self.loss_history.add_entry(ep, loss)
@@ -360,7 +370,8 @@ class Trainer:
         return self.loss_history.get_plottable()
     
     def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True, 
-                      optimizer=None, reuse_optimizer=False, optional_stopping=True, **kwargs):
+                      optimizer=None, reuse_optimizer=False, optional_stopping=True, 
+                      use_autograph=True, **kwargs):
         """Trains an amortizer via offline learning. Assume parameters, data and optional 
         context have already been simulated (i.e., forward inference has been performed).
 
@@ -386,6 +397,8 @@ class Trainer:
             Otherwise, the optimizer will be stored as `self.optimizer` and re-used in further training runs.
         optional_stopping : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
+        use_autograph     : bool, optional, default: True
+            #TODO
 
         Returns
         -------
@@ -393,11 +406,17 @@ class Trainer:
             A dictionary storing the losses across epochs and iterations
         """
 
+        # Compile update function, if specified
+        if use_autograph:
+            _backprop_step = tf.function(backprop_step, reduce_retracing=True)
+        else:
+            _backprop_step = _backprop_step
+
         # Convert to custom data set
         data_set = SimulationDataset(simulations_dict, batch_size)
         self._setup_optimizer(optimizer, epochs, len(data_set.data))
         self.loss_history.start_new_run()
-        for ep in range(1, epochs + 1):
+        for ep in range(1, epochs+1):
 
             with tqdm(total=len(data_set.data), desc='Training epoch {}'.format(ep)) as p_bar:
                 # Loop through dataset
@@ -405,7 +424,7 @@ class Trainer:
 
                     # Perform one training step and obtain current loss value
                     input_dict = self.configurator(forward_dict)
-                    loss = self._train_step(batch_size, input_dict, **kwargs)
+                    loss = self._train_step(batch_size, _backprop_step, input_dict, **kwargs)
 
                     # Store returned loss
                     self.loss_history.add_entry(ep, loss)
@@ -433,7 +452,8 @@ class Trainer:
         return self.loss_history.get_plottable()
 
     def train_from_presimulation(self, presimulation_path, optimizer, save_checkpoint=True, max_epochs=None, 
-                                 reuse_optimizer=False, custom_loader=None, optional_stopping=True, **kwargs):
+                                 reuse_optimizer=False, custom_loader=None, optional_stopping=True, use_autograph=True,
+                                 **kwargs):
         """Trains an amortizer via a modified form of offline training. 
 
         Like regular offline training, it assumes that parameters, data and optional context have already
@@ -482,6 +502,7 @@ class Trainer:
             'prior_draws' and 'sim_data' must have actual data as values, the rest are optional.
         optional_stopping    : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
+        use_autograph        : bool, optional, default: True
         **kwargs             : dict, optional
             Optional keyword arguments, which can be:
             `conf_args`  - optional keyword arguments passed to the configurator
@@ -529,7 +550,7 @@ class Trainer:
                     input_dict = self.configurator(epoch_data[index])
 
                     # Like the number of iterations, the batch size is inferred from presimulated dictionary or list
-                    batch_size = len(input_dict[DEFAULT_KEYS['parameters']][0])
+                    batch_size = epoch_data[index][DEFAULT_KEYS['sim_data']].shape[0]
                     loss = self._train_step(batch_size, input_dict, **kwargs)
 
                     # Store returned loss
@@ -548,11 +569,6 @@ class Trainer:
                     p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
 
-                    # Check optional stopping and end training
-                    if self._check_optional_stopping():
-                        self._save_trainer(save_checkpoint)
-                        return self.loss_history.get_plottable()
-
             # Store after each epoch, if specified
             self._save_trainer(save_checkpoint)
 
@@ -563,7 +579,7 @@ class Trainer:
 
     def train_experience_replay(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, 
                                 optimizer=None, reuse_optimizer=False, buffer_capacity=1000, optional_stopping=True, 
-                                **kwargs):
+                                use_autograph=True, **kwargs):
         """Trains the network(s) via experience replay using a memory replay buffer, as utilized
         in reinforcement learning. Additional keyword arguments are passed to the generative mode, 
         configurator, and amortizer. Read below for signature.
@@ -587,12 +603,14 @@ class Trainer:
             A flag indicating whether the optimizer instance should be treated as persistent or not.
             If `False`, the optimizer and its states are not stored after training has finished. 
             Otherwise, the optimizer will be stored as `self.optimizer` and re-used in further training runs.
-        optional_stopping    : bool, optional, default: False
-            Whether to use optional stopping or not during training. Could speed up training.
         buffer_capacity      : int, optional, default: 1000
             Max number of batches to store in buffer. For instance, if `batch_size=32`
             and `capacity_in_batches=1000`, then the buffer will hold a maximum of
             32 * 1000 = 32000 simulations. Be careful with memory!
+        optional_stopping    : bool, optional, default: True
+            Whether to use optional stopping or not during training. Could speed up training.
+        use_autograph        : bool, optional, default: True
+            #TODO
             Important! Argument will be ignored if buffer has previously been initialized!
         **kwargs             : dict, optional, default: {}
             Optional keyword arguments, which can be:
@@ -605,6 +623,12 @@ class Trainer:
         losses : dict or pandas.DataFrame
             A dictionary or a pandas.DataFrame storing the losses across epochs and iterations.
         """
+
+        # Compile update function, if specified
+        if use_autograph:
+            _backprop_step = tf.function(backprop_step, reduce_retracing=True)
+        else:
+            _backprop_step = _backprop_step
 
         # Create new optimizer and initialize loss history
         self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
@@ -626,7 +650,7 @@ class Trainer:
                     input_dict = self.replay_buffer.sample()
 
                     # One step backprop
-                    loss = self._backprop_step(input_dict, **kwargs.pop('net_args', {}))
+                    loss = _backprop_step(input_dict, self.amortizer, self.optimizer, **kwargs.pop('net_args', {}))
 
                     # Store returned loss
                     self.loss_history.add_entry(ep, loss)
@@ -653,7 +677,8 @@ class Trainer:
         return self.loss_history.get_plottable()
 
     def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, 
-                     optimizer=None, reuse_optimizer=False, optional_stopping=True, **kwargs):
+                     optimizer=None, reuse_optimizer=False, optional_stopping=True, use_autograph=True,
+                     **kwargs):
         """Trains an amortizer via round-based learning. In each round, `sim_per_round` data sets
         are simulated from the generative model and added to the data sets simulated in previous 
         round. Then, the networks are trained for `epochs` on the augmented set of data sets.
@@ -685,6 +710,8 @@ class Trainer:
             Otherwise, the optimizer will be stored as `self.optimizer` and re-used in further training runs.
         optional_stopping    : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
+        use_autograph        : bool, optional, default: True
+        #TODO
         **kwargs             : dict, optional
             Optional keyword arguments, which can be:
             `model_args` - optional keyword arguments passed to the generative model
@@ -730,7 +757,7 @@ class Trainer:
             # Train offline with generated stuff
             _ = self.train_offline(
                 simulations_dict, epochs, batch_size, save_checkpoint, reuse_optimizer=True, 
-                optional_stopping=optional_stopping, **kwargs)
+                optional_stopping=optional_stopping, use_autograph=use_autograph, **kwargs)
 
         # Remove optimizer reference, if not set as persistent
         if not reuse_optimizer:
@@ -742,9 +769,10 @@ class Trainer:
             # No optimizer so far and None provided
             if self.optimizer is None:
                 # Calculate decay steps for default cosine decay
-                schedule = self.default_lr_schedule(
+                schedule = tf.keras.optimizers.schedules.CosineDecay(
                     self.default_lr,
-                    iterations_per_epoch * epochs
+                    iterations_per_epoch * epochs,
+                    name='lr_decay'
                 )
                 self.optimizer = tf.keras.optimizers.Adam(schedule, **OPTIMIZER_DEFAULTS)
             # No optimizer provided, but optimizer exists, that is,
@@ -778,7 +806,7 @@ class Trainer:
             return True
         return False
 
-    def _train_step(self, batch_size, input_dict=None, **kwargs):
+    def _train_step(self, batch_size, update_step, input_dict=None, **kwargs):
         """Performs forward inference -> configuration -> network -> loss pipeline.
 
         Parameters
@@ -786,6 +814,9 @@ class Trainer:
 
         batch_size    : int 
             Number of simulations to perform at each backprop step
+        update_step   : callable
+            The function which will perform one backprop step on a batch. Should have the following signature:
+            `update_step(input_dict, amortizer, optimizer, **kwargs)`
         input_dict    : dict
             The optional pre-configured forward dict from a generative model, simulated, if None
         **kwargs      : dict (default - {})
@@ -800,7 +831,7 @@ class Trainer:
             input_dict = self._forward_inference(batch_size, **kwargs.pop('conf_args', {}), **kwargs.pop('model_args', {}))
         if self.simulation_memory is not None:
             self.simulation_memory.store(input_dict)
-        loss = self._backprop_step(input_dict, **kwargs.pop('net_args', {}))
+        loss = update_step(input_dict, self.amortizer, self.optimizer, **kwargs.pop('net_args', {}))
         return loss
 
     def _forward_inference(self, n_sim, configure=True, **kwargs):
@@ -833,47 +864,6 @@ class Trainer:
         if configure:
             out_dict = self.configurator(out_dict, **kwargs.pop('conf_args', {}))
         return out_dict
-
-    @tf.function(reduce_retracing=True)
-    def _backprop_step(self, input_dict, **kwargs):
-        """Computes the loss of the provided amortizer given an input dictionary and applies gradients.
-
-         Parameters
-        ----------
-        input_dict  : dict
-            The configured output of the genrative model
-        **kwargs    : dict
-            Optional keyword arguments passed to the network's compute_loss method
-            
-        Returns
-        -------
-        loss : dict
-            The outputs of the compute_loss() method of the amortizer comprising all
-            loss components, such as divergences or regularization.
-        """
-
-        # Forward pass and loss computation
-        with tf.GradientTape() as tape:
-            # Compute custom loss
-            loss = self.amortizer.compute_loss(input_dict, training=True, **kwargs)
-            # If dict, add components
-            if type(loss) is dict:
-                _loss = tf.add_n(list(loss.values()))
-            else:
-                _loss = loss
-            # Collect regularization loss, if any
-            if self.amortizer.losses != []:
-                reg = tf.add_n(self.amortizer.losses)
-                _loss += reg
-                if type(loss) is dict:
-                    loss['W.Decay'] = reg
-                else:
-                    loss = {'Loss': loss, 'W.Decay': reg}
-        # One step backprop and return loss
-        gradients = tape.gradient(_loss, self.amortizer.trainable_variables)
-        self.optimizer.apply_gradients(zip(gradients, self.amortizer.trainable_variables))
-
-        return loss
 
     def _manage_configurator(self, config_fun, **kwargs):
         """Determines which configurator to use if None specified during construction."""
