@@ -126,7 +126,7 @@ DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
 
 DEFAULT_SETTING_EVIDENTIAL_NET = MetaDictSetting(
     meta_dict={
-        'dense_args': dict(units=128, kernel_initializer='lecun_normal', activation='selu'),
+        'dense_args': dict(units=128, kernel_initializer='glorot_normal', activation='elu'),
         'num_dense': 3,
         'output_activation': 'softplus'
     },
