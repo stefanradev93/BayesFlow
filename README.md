@@ -1,6 +1,6 @@
 # BayesFlow
 
-Welcome to our BayesFlow library for amortized simulation-based Bayesian inference.
+Welcome to our BayesFlow library for efficient simulation-based Bayesian workflows! Our library enables users to create specialized neural networks for *amortized Bayesian inference*, which repays users with rapid and fully Bayesian parameter estimation or model comparison after a simulation-based training phase. 
 
 For starters, check out some or our walk-through notebooks:
 
@@ -22,9 +22,9 @@ overview of neurally bootstrapped Bayesian inference.
 
 <img src="img/high_level_framework.png" width=80% height=80%>
 
-## Parameter Estimation
+## Getting Started: Parameter Estimation
 
-The original BayesFlow approach for amortized parameter estimation is based on our paper:
+The core functionality of BayesFlow is amortized Bayesian posterior estimation, as described in our paper:
 
 Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020).
 BayesFlow: Learning complex stochastic models with invertible neural networks.
