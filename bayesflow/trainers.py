@@ -57,28 +57,39 @@ class Trainer:
 
     - Online training
         Usage:
-        >>> trainer.train_online(self, epochs, iterations_per_epoch, batch_size, **kwargs)
+        >>> trainer.train_online(epochs, iterations_per_epoch, batch_size, **kwargs)
 
         This training regime is optimal for fast generative models which can efficiently simulated data on-the-fly.
         In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than 2-3 seconds.
-        
-        Important: overfitting presents a danger when using a small simulated data set, so it is recommended to use
-        some amount of regularization for the neural amortizer.
+
+    - Experience replay training
+        Usage:
+        >>> trainer.train_experience_replay(epochs, iterations_per_epoch, batch_size, **kwargs)
+
+        This training regime is also good for fast generative models capable of efficiently simulating data on-the-fly.
+        Compare to pure online training, this training will keep an `experience replay` buffer from which simulations
+        are randomly sampled, so the networks will likely see some simulations multiple times.
     
     - Round-based training
         Usage:
-        >>> trainer.train_rounds(self, rounds, sim_per_round, epochs, batch_size, **kwargs)
+        >>> trainer.train_rounds(rounds, sim_per_round, epochs, batch_size, **kwargs)
 
         This training regime is optimal for slow, but still reasonably performant generative models.
         In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than one 2-3 minutes.
 
+        Important: overfitting presents a danger when using small numbers of simulated data sets, so it is recommended to use
+        some amount of regularization for the neural amortizer(s).
+
     - Offline taining
         Usage:
-        >>> trainer.train_offline(self, simulations_dict, epochs, batch_size, **kwargs)
+        >>> trainer.train_offline(simulations_dict, epochs, batch_size, **kwargs)
 
         This training regime is optimal for very slow, external simulators, which take several minutes for a single simulation.
         It assumes that all training data has been already simulated and stored on disk.
-    
+
+        Important: overfitting presents a danger when using a small simulated data set, so it is recommended to use
+        some amount of regularization for the neural amortizer(s).
+
     Note: For extremely slow simulators (i.e., more than an hour of a single simulation), the BayesFlow framework 
     might not be the ideal choice and should probably be considered in combination with a black-box surrogate optimization method, 
     such as Bayesian optimization.
