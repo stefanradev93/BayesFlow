@@ -19,10 +19,13 @@
 # SOFTWARE.
 
 # Add easy access imports
-from bayesflow import default_settings
-from bayesflow import amortizers
-from bayesflow import networks
-from bayesflow import diagnostics
-from bayesflow import trainers
-from bayesflow import losses
-from bayesflow import mcmc
+try:
+    from bayesflow import default_settings
+    from bayesflow import amortizers
+    from bayesflow import networks
+    from bayesflow import diagnostics
+    from bayesflow import trainers
+    from bayesflow import losses
+    from bayesflow import mcmc
+except ImportError:
+    pass
