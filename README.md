@@ -156,7 +156,7 @@ The amortizer knows how to combine its losses.
 
 - Schmitt, M., Bürkner P. C., Köthe U., & Radev S. T. (2022). Detecting Model
 Misspecification in Amortized Bayesian Inference with Neural Networks. <em>ArXiv
-preprint</em>.
+preprint</em>, available for free at: https://arxiv.org/abs/2112.08866
 
 ## Model Comparison
 
