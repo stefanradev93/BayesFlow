@@ -145,9 +145,12 @@ Gaussian and reliably detects model misspecification during inference time.
 
 In order to use this method, you should only provide the `summary_loss_fun` argument 
 to the `AmortizedPosterior` instance:
+
 ```python
 amortizer = bf.amortizers.AmortizedPosterior(inference_net, summary_net, summary_loss_fun='MMD')
 ```
+
+The amortizer knows how to combine its losses.
 
 ### References and Further Reading
 
