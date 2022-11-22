@@ -56,6 +56,7 @@ Before inference, we can use simulation-based calibration (SBC, https://arxiv.or
 ```python
 fig = trainer.diagnose_sbc_histograms(plot_args=dict(param_names=[r'$\theta_1$', r'$\theta_2$']))
 ```
+![SBC](https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_sbc.png?raw=true)
 Amortized inference on new (real or simulated) data is then easy and fast:
 ```python
 # Simulate 200 new data sets and generate 500 posterior draws per data set
@@ -66,10 +67,12 @@ We can then quickly inspect the parameter recoverability of the model
 ```python
 fig = bf.diagnostics.plot_recovery(posterior_draws, new_sims['parameters'])
 ```
+![Recovery](https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_recovery.png?raw=true)
 or look at single posteriors in relation to the prior:
 ```python
 fig = bf.diagnostics.plot_posterior_2d(posterior_draws[0], prior=generative_model.prior)
 ```
+![Posterior](https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_posterior.png?raw=true)
 
 ### Further Reading
 
