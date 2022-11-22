@@ -2,7 +2,7 @@
 
 Welcome to our BayesFlow library for efficient simulation-based Bayesian workflows! Our library enables users to create specialized neural networks for *amortized Bayesian inference*, which repays users with rapid and fully Bayesian parameter estimation or model comparison after a simulation-based training phase. 
 
-For starters, check out some or our walk-through notebooks:
+For starters, check out some of our walk-through notebooks:
 
 1. [Basic amortized posterior estimation](docs/source/tutorial_notebooks/Intro_Amortized_Posterior_Estimation.ipynb) 
 2. [Intermediate posterior estimation](docs/source/tutorial_notebooks/Covid19_Initial_Posterior_Estimation.ipynb) 
