@@ -79,15 +79,15 @@ DEFAULT_SETTING_MULTI_CONV = {
 
 DEFAULT_SETTING_DENSE_INVARIANT = {
     'units': 64,
-    'activation': 'selu',  
-    'kernel_initializer': 'lecun_normal'
+    'activation': 'elu',  
+    'kernel_initializer': 'glorot_normal'
 }
 
 
 DEFAULT_SETTING_DENSE_EVIDENTIAL = {
     'units': 128,
-    'kernel_initializer': 'lecun_normal',
-    'activation': 'selu',
+    'kernel_initializer': 'glorot_normal',
+    'activation': 'elu',
 }
 
 
