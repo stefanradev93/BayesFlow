@@ -528,7 +528,13 @@ class Trainer:
         -------
         losses : dict or pandas.DataFrame
             A dictionary or pandas.DataFrame storing the losses across epochs and iterations
-        """   
+        """
+
+        # Compile update function, if specified
+        if use_autograph:
+            _backprop_step = tf.function(backprop_step, reduce_retracing=True)
+        else:
+            _backprop_step = _backprop_step
 
         # Use default loading function if none is provided
         if custom_loader is None:
@@ -567,7 +573,7 @@ class Trainer:
 
                     # Like the number of iterations, the batch size is inferred from presimulated dictionary or list
                     batch_size = epoch_data[index][DEFAULT_KEYS['sim_data']].shape[0]
-                    loss = self._train_step(batch_size, input_dict, **kwargs)
+                    loss = self._train_step(batch_size, _backprop_step, input_dict, **kwargs)
 
                     # Store returned loss
                     self.loss_history.add_entry(ep, loss)
