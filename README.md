@@ -53,26 +53,36 @@ losses = trainer.train_online(epochs=10, iterations_per_epoch=500, batch_size=32
 ```
 
 Before inference, we can use simulation-based calibration (SBC, https://arxiv.org/abs/1804.06788) to check the computational faithfulness of the model-amortizer combination:
+
 ```python
 fig = trainer.diagnose_sbc_histograms()
 ```
-<img src="https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_sbc.png" width=50% height=50%>
+
+<img src="https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_sbc.png" width=65% height=65%>
+
 Amortized inference on new (real or simulated) data is then easy and fast:
+
 ```python
 # Simulate 200 new data sets and generate 500 posterior draws per data set
 new_sims = trainer.configurator(generative_model(200))
 posterior_draws = amortizer.sample(new_sims, n_samples=500)
 ```
-We can then quickly inspect the parameter recoverability of the model
+
+We can then quickly inspect the parameter recoverability of the model:
+
 ```python
 fig = bf.diagnostics.plot_recovery(posterior_draws, new_sims['parameters'])
 ```
-<img src="https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_recovery.png" width=50% height=50%>
-or look at single posteriors in relation to the prior:
+
+<img src="https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_recovery.png" width=65% height=65%>
+
+Or we can look at single posteriors in relation to the prior:
+
 ```python
 fig = bf.diagnostics.plot_posterior_2d(posterior_draws[0], prior=generative_model.prior)
 ```
-<img src="https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_posterior.png" width=40% height=40%>
+
+<img src="https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_posterior.png" width=45% height=45%>
 
 ### Further Reading
 
