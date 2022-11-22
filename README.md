@@ -16,7 +16,7 @@ The project documentation is available at <http://bayesflow.readthedocs.io>
 A cornerstone idea of amortized Bayesian inference is to employ generative neural networks for parameter estimation, model comparison, and model validation
 when working with intractable simulators whose behavior as a whole is too complex to be described analytically. The figure below presents a higher-level overview of neurally bootstrapped Bayesian inference. 
 
-![Overview](https://github.com/stefanradev93/BayesFlow/blob/Future/img/high_level_framework.png?raw=true)
+<img src="https://github.com/stefanradev93/BayesFlow/blob/Future/img/high_level_framework.png" width=80% height=80%>
 
 ## Parameter Estimation
 
@@ -39,22 +39,50 @@ def simulator(theta, n_obs=50, scale=1.0):
 
 # Then, we create our BayesFlow setup consisting of a summary and an inference network:
 summary_net = bf.networks.InvariantNetwork()
-inference_net = bf.networks.InvertibleNetwork(n_params=2)
+inference_net = bf.networks.InvertibleNetwork(num_params=2)
 amortizer = bf.amortizers.AmortizedPosterior(inference_net, summary_net)
 
 # Next, we connect the `prior` with the `simulator` using a `GenerativeModel` wrapper:
 generative_model = bf.simulation.GenerativeModel(prior, simulator)
 
 # Finally, we connect the networks with the generative model via a `Trainer` instance:
-trainer = bf.trainers.Trainer(network=amortizer, generative_model=generative_model)
+trainer = bf.trainers.Trainer(amortizer=amortizer, generative_model=generative_model)
 
 # We are now ready to train an amortized posterior approximator. For instance, to run online training, we simply call:
 losses = trainer.train_online(epochs=10, iterations_per_epoch=500, batch_size=32)
-
-# Amortized posterior inference on 100 new data sets is then fast and easy:
-new_data = generative_model(100)
-samples = amortizer.sample(new_data, n_samples=5000)
 ```
+
+Before inference, we can use simulation-based calibration (SBC, https://arxiv.org/abs/1804.06788) to check the computational faithfulness of the model-amortizer combination:
+
+```python
+fig = trainer.diagnose_sbc_histograms()
+```
+
+<img src="https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_sbc.png" width=65% height=65%>
+
+Amortized inference on new (real or simulated) data is then easy and fast:
+
+```python
+# Simulate 200 new data sets and generate 500 posterior draws per data set
+new_sims = trainer.configurator(generative_model(200))
+posterior_draws = amortizer.sample(new_sims, n_samples=500)
+```
+
+We can then quickly inspect the parameter recoverability of the model:
+
+```python
+fig = bf.diagnostics.plot_recovery(posterior_draws, new_sims['parameters'])
+```
+
+<img src="https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_recovery.png" width=65% height=65%>
+
+Or we can look at single posteriors in relation to the prior:
+
+```python
+fig = bf.diagnostics.plot_posterior_2d(posterior_draws[0], prior=generative_model.prior)
+```
+
+<img src="https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_posterior.png" width=45% height=45%>
 
 ### Further Reading
 
