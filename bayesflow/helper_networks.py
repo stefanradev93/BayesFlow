@@ -347,7 +347,7 @@ class EquivariantModule(tf.keras.Model):
             Output of shape (batch_size, N, equiv_dim)
         """
         
-        # Store N
+        # Store shape of x, will be (batch_size, N, some_dim)
         shape = tf.shape(x)
         
         # Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
