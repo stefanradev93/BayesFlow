@@ -29,7 +29,7 @@ from bayesflow.trainers import Trainer
 from bayesflow.networks import InvertibleNetwork
 from bayesflow.amortizers import AmortizedPosterior, AmortizedLikelihood, AmortizedPosteriorLikelihood
 
-from assets.benchmark_netwotk_architectures import NETWORK_SETTINGS
+from assets.benchmark_network_architectures import NETWORK_SETTINGS
 
 
 def _get_trainer_configuration(benchmark_name, mode):
