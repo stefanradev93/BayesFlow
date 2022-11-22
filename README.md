@@ -54,7 +54,7 @@ losses = trainer.train_online(epochs=10, iterations_per_epoch=500, batch_size=32
 
 Before inference, we can use simulation-based calibration (SBC, https://arxiv.org/abs/1804.06788) to check the computational faithfulness of the model-amortizer combination:
 ```python
-fig = trainer.diagnose_sbc_histograms(plot_args=dict(param_names=[r'$\theta_1$', r'$\theta_2$']))
+fig = trainer.diagnose_sbc_histograms()
 ```
 ![SBC](https://github.com/stefanradev93/BayesFlow/blob/Future/img/showcase_sbc.png?raw=true)
 Amortized inference on new (real or simulated) data is then easy and fast:
