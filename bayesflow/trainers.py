@@ -163,6 +163,7 @@ class Trainer:
         self.replay_buffer = None
         self.optimizer = None
         self.default_lr = default_lr
+
         # Currently unused attribute
         self.lr_adjuster = None
 
