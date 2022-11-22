@@ -1,8 +1,8 @@
 # BayesFlow
 
-Welcome to our BayesFlow library for amortized simulation-based Bayesian inference.
+Welcome to our BayesFlow library for efficient simulation-based Bayesian workflows! Our library enables users to create specialized neural networks for *amortized Bayesian inference*, which repays users with rapid and fully Bayesian parameter estimation or model comparison after a simulation-based training phase. 
 
-For starters, check out some or our walk-through notebooks:
+For starters, check out some of our walk-through notebooks:
 
 1. [Basic amortized posterior estimation](docs/source/tutorial_notebooks/Intro_Amortized_Posterior_Estimation.ipynb) 
 2. [Intermediate posterior estimation](docs/source/tutorial_notebooks/Covid19_Initial_Posterior_Estimation.ipynb) 
@@ -22,9 +22,9 @@ overview of neurally bootstrapped Bayesian inference.
 
 <img src="img/high_level_framework.png" width=80% height=80%>
 
-## Parameter Estimation
+## Getting Started: Parameter Estimation
 
-The original BayesFlow approach for amortized parameter estimation is based on our paper:
+The core functionality of BayesFlow is amortized Bayesian posterior estimation, as described in our paper:
 
 Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020).
 BayesFlow: Learning complex stochastic models with invertible neural networks.
@@ -133,6 +133,12 @@ BayesFlow: Learning complex stochastic models with invertible neural networks.
 <em>IEEE Transactions on Neural Networks and Learning Systems</em>, available
 for free at: https://arxiv.org/abs/2003.06281.
 
+- Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., & Köthe, U. (2021). 
+OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks and its application to the COVID-19 pandemics in Germany. <em>PLoS computational biology</em>, 17(10), e1009472.
+
+- von Krause, M., Radev, S. T., & Voss, A. (2022). 
+Mental speed is high until age 60 as revealed by analysis of over a million participants. 
+<em>Nature Human Behaviour</em>, 6(5), 700-708.
 
 ## Model Misspecification
 
@@ -143,15 +149,24 @@ Gaussian and reliably detects model misspecification during inference time.
 
 ![](docs/source/images/model_misspecification_amortized_sbi.png?raw=true)
 
+In order to use this method, you should only provide the `summary_loss_fun` argument 
+to the `AmortizedPosterior` instance:
+
+```python
+amortizer = bf.amortizers.AmortizedPosterior(inference_net, summary_net, summary_loss_fun='MMD')
+```
+
+The amortizer knows how to combine its losses.
+
 ### References and Further Reading
 
 - Schmitt, M., Bürkner P. C., Köthe U., & Radev S. T. (2022). Detecting Model
 Misspecification in Amortized Bayesian Inference with Neural Networks. <em>ArXiv
-preprint</em>.
+preprint</em>, available for free at: https://arxiv.org/abs/2112.08866
 
 ## Model Comparison
 
-Coming soon...
+Example coming soon...
 
 ### References and Further Reading
 
@@ -162,4 +177,4 @@ doi:10.1109/TNNLS.2021.3124052 available for free at: https://arxiv.org/abs/2004
 
 ## Likelihood emulation
 
-Coming soon...
+Example coming soon...
