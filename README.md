@@ -16,7 +16,7 @@ The project documentation is available at <http://bayesflow.readthedocs.io>
 A cornerstone idea of amortized Bayesian inference is to employ generative neural networks for parameter estimation, model comparison, and model validation
 when working with intractable simulators whose behavior as a whole is too complex to be described analytically. The figure below presents a higher-level overview of neurally bootstrapped Bayesian inference. 
 
-![Overview](https://github.com/stefanradev93/BayesFlow/blob/Future/img/high_level_framework.png?raw=true)
+<img src="https://github.com/stefanradev93/BayesFlow/blob/Future/img/high_level_framework.png" width=80% height=80%>
 
 ## Parameter Estimation
 
