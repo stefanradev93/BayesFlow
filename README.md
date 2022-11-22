@@ -143,6 +143,12 @@ Gaussian and reliably detects model misspecification during inference time.
 
 ![](docs/source/images/model_misspecification_amortized_sbi.png?raw=true)
 
+In order to use this method, you should only provide the `summary_loss_fun` argument 
+to the `AmortizedPosterior` instance:
+```python
+amortizer = bf.amortizers.AmortizedPosterior(inference_net, summary_net, summary_loss_fun='MMD')
+```
+
 ### References and Further Reading
 
 - Schmitt, M., Bürkner P. C., Köthe U., & Radev S. T. (2022). Detecting Model
@@ -151,7 +157,7 @@ preprint</em>.
 
 ## Model Comparison
 
-Coming soon...
+Example coming soon...
 
 ### References and Further Reading
 
@@ -162,4 +168,4 @@ doi:10.1109/TNNLS.2021.3124052 available for free at: https://arxiv.org/abs/2004
 
 ## Likelihood emulation
 
-Coming soon...
+Example coming soon...
