@@ -46,7 +46,7 @@ amortizer = bf.amortizers.AmortizedPosterior(inference_net, summary_net)
 generative_model = bf.simulation.GenerativeModel(prior, simulator)
 
 # Finally, we connect the networks with the generative model via a `Trainer` instance:
-trainer = bf.trainers.Trainer(network=amortizer, generative_model=generative_model)
+trainer = bf.trainers.Trainer(amortizer=amortizer, generative_model=generative_model)
 
 # We are now ready to train an amortized posterior approximator. For instance, to run online training, we simply call:
 losses = trainer.train_online(epochs=10, iterations_per_epoch=500, batch_size=32)
