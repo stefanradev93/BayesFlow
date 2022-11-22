@@ -39,7 +39,7 @@ def simulator(theta, n_obs=50, scale=1.0):
 
 # Then, we create our BayesFlow setup consisting of a summary and an inference network:
 summary_net = bf.networks.InvariantNetwork()
-inference_net = bf.networks.InvertibleNetwork(n_params=2)
+inference_net = bf.networks.InvertibleNetwork(num_params=2)
 amortizer = bf.amortizers.AmortizedPosterior(inference_net, summary_net)
 
 # Next, we connect the `prior` with the `simulator` using a `GenerativeModel` wrapper:
