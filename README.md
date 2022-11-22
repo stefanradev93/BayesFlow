@@ -50,10 +50,25 @@ trainer = bf.trainers.Trainer(amortizer=amortizer, generative_model=generative_m
 
 # We are now ready to train an amortized posterior approximator. For instance, to run online training, we simply call:
 losses = trainer.train_online(epochs=10, iterations_per_epoch=500, batch_size=32)
+```
 
-# Amortized posterior inference on 100 new data sets is then fast and easy:
-new_data = generative_model(100)
-samples = amortizer.sample(new_data, n_samples=5000)
+Before inference, we can use simulation-based calibration (SBC, https://arxiv.org/abs/1804.06788) to check the computational faithfulness of the model-amortizer combination:
+```python
+fig = trainer.diagnose_sbc_histograms(plot_args=dict(param_names=[r'$\theta_1$', r'$\theta_2$']))
+```
+Amortized inference on new (real or simulated) data is then easy and fast:
+```python
+# Simulate 200 new data sets and generate 500 posterior draws per data set
+new_sims = trainer.configurator(generative_model(200))
+posterior_draws = amortizer.sample(new_sims, n_samples=500)
+```
+We can then quickly inspect the parameter recoverability of the model
+```python
+fig = bf.diagnostics.plot_recovery(posterior_draws, new_sims['parameters'])
+```
+or look at single posteriors in relation to the prior:
+```python
+fig = bf.diagnostics.plot_posterior_2d(posterior_draws[0], prior=generative_model.prior)
 ```
 
 ### Further Reading
