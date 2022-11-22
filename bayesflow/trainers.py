@@ -85,7 +85,7 @@ class Trainer:
     """
 
     def __init__(self, amortizer, generative_model=None, configurator=None, checkpoint_path=None, 
-                 max_to_keep=3, default_lr=0.0005, skip_checks=False, memory=True, **kwargs):
+                 max_to_keep=3, default_lr=0.001, skip_checks=False, memory=True, **kwargs):
         """Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
@@ -102,7 +102,7 @@ class Trainer:
             Optional file path for storing the trained amortizer, loss history and optional memory.
         max_to_keep       : int, optional, default: 3
             Number of checkpoints and loss history snapshots to keep.
-        default_lr        : float, optional, default: 0.0005
+        default_lr        : float, optional, default: 0.001
             The default learning rate to use for default optimizers.
         skip_checks       : boolean, optional, default: False
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
@@ -271,7 +271,7 @@ class Trainer:
 
             # Check for prior names and override keyword if available
             plot_kwargs = kwargs.pop('plot_args', {})
-            if type(self.generative_model) is GenerativeModel and plot_kwargs.get('param_names') is not None:
+            if type(self.generative_model) is GenerativeModel and plot_kwargs.get('param_names') is None:
                 plot_kwargs['param_names'] = self.generative_model.param_names
             
             return plot_sbc_histograms(post_samples, prior_samples, **plot_kwargs)
@@ -414,7 +414,9 @@ class Trainer:
 
         # Convert to custom data set
         data_set = SimulationDataset(simulations_dict, batch_size)
+        # Prepare optimizer and initislize loss history
         self._setup_optimizer(optimizer, epochs, len(data_set.data))
+
         self.loss_history.start_new_run()
         for ep in range(1, epochs+1):
 

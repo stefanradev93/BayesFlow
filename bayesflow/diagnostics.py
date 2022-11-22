@@ -409,7 +409,7 @@ def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=
     return f
 
 
-def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names=None, height=2, 
+def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names=None, height=3, 
                       legend_fontsize=14, post_color='#8f2727', prior_color='gray', post_alpha=0.9, 
                       prior_alpha=0.7):
     """Generates a bivariate pairplot given posterior draws and optional prior or prior draws.
@@ -423,7 +423,7 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
         will be used.
     param_names       : list or None, optional, default: None
         The parameter names for nice plot titles. Inferred if None
-    height            : float, optional, default: 2.
+    height            : float, optional, default: 3.
         The height of the pairplot.
     legend_fontsize   : int, optional, default: 14
         The font size of the legend text.
@@ -466,9 +466,12 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
     # Attempt to determine parameter names
     if param_names is None:
         if hasattr(prior, 'param_names'):
-            param_names = prior.param_names
+            if prior.param_names is not None:
+                param_names = prior.param_names
+            else:
+                param_names = [f'$p_{i}$' for i in range(1, n_params+1)]
         else:
-            param_names = [f'Param. {p}' for p in range(1, n_params+1)]
+            param_names = [f'$p_{i}$' for i in range(1, n_params+1)]
 
     # Pack posterior draws into a dataframe
     posterior_draws_df = pd.DataFrame(posterior_draws, columns=param_names)

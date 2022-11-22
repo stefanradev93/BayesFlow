@@ -20,7 +20,6 @@
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import Model
 
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
 from bayesflow.losses import log_loss, mmd_summary_space, kl_dirichlet
@@ -59,7 +58,7 @@ class AmortizedTarget(ABC):
         pass
 
 
-class AmortizedPosterior(Model, AmortizedTarget):
+class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
     """A wrapper to connect an inference network for parameter estimation with an optional summary network
     as in the original BayesFlow set-up described in the paper:
 
@@ -115,7 +114,7 @@ class AmortizedPosterior(Model, AmortizedTarget):
         any `sumamry_conditions`, i.e., `summary_conditions` should be set to None, otherwise these will be ignored.
         """
 
-        Model.__init__(self, **kwargs)
+        tf.keras.Model.__init__(self, **kwargs)
 
         self.inference_net = inference_net
         self.summary_net = summary_net
@@ -409,7 +408,7 @@ class AmortizedPosterior(Model, AmortizedTarget):
             raise NotImplementedError("Could not infer summary_loss_fun, argument should be of type (None, callable, or str)!")
 
 
-class AmortizedLikelihood(Model, AmortizedTarget):
+class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
     """An interface for a surrogate model of a simulator, or an implicit likelihood
     ``p(params | data, context).''
     """
@@ -427,7 +426,7 @@ class AmortizedLikelihood(Model, AmortizedTarget):
             a multivariate unit Gaussian.
         """
 
-        Model.__init__(self, **kwargs)
+        tf.keras.Model.__init__(self, **kwargs)
 
         self.surrogate_net = surrogate_net
         self.latent_dim = self.surrogate_net.latent_dim
@@ -616,7 +615,7 @@ class AmortizedLikelihood(Model, AmortizedTarget):
             return latent_dist
 
 
-class AmortizedPosteriorLikelihood(Model, AmortizedTarget):
+class AmortizedPosteriorLikelihood(tf.keras.Model, AmortizedTarget):
     """An interface for jointly learning a surrogate model of the simulator and an approximate
     posterior given a generative model.
     """
@@ -632,7 +631,7 @@ class AmortizedPosteriorLikelihood(Model, AmortizedTarget):
             The generative neural likelihood approximator.
         """
 
-        Model.__init__(self, **kwargs)
+        tf.keras.Model.__init__(self, **kwargs)
 
         self.amortized_posterior = amortized_posterior
         self.amortized_likelihood = amortized_likelihood
