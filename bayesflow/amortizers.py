@@ -36,9 +36,9 @@ class AmortizedTarget(ABC):
     """An abstract interface for an amortized learned distribution. Children should
     implement the following public methods:
 
-    - compute_loss(self, input_dict, **kwargs)
-    - sample(input_dict, **kwargs)
-    - log_prob(input_dict, **kwargs)
+    1. ``compute_loss(self, input_dict, **kwargs)``
+    2. ``sample(input_dict, **kwargs)``
+    3. ``log_prob(input_dict, **kwargs)``
     """
 
     @abstractmethod
@@ -77,6 +77,8 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
     [3] Jaini, P., Kobyzev, I., Yu, Y., & Brubaker, M. (2020, November).
     Tails of lipschitz triangular flows.
     In International Conference on Machine Learning (pp. 4673-4681). PMLR.
+
+    Serves as in interface for learning ``p(parameters | data, context).``
     """
 
     def __init__(self, inference_net, summary_net=None, latent_dist=None, latent_is_dynamic=False, 
@@ -410,7 +412,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
 
 class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
     """An interface for a surrogate model of a simulator, or an implicit likelihood
-    ``p(params | data, context).''
+    ``p(data | parameters, context).``
     """
 
     def __init__(self, surrogate_net, latent_dist=None, **kwargs):
@@ -471,7 +473,7 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
         -------
         net_out or (net_out, summary_out) : tuple of tf.Tensor
             the outputs of ``inference_net(theta, summary_net(x, c_s), c_d)``, usually a latent variable and
-            log(det(Jacobian)), that is a tuple ``(z, log_det_J).
+            log(det(Jacobian)), that is a tuple ``(z, log_det_J)``.
         """
 
         outputs = []

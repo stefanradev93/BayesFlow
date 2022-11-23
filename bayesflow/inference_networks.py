@@ -178,8 +178,8 @@ class InvertibleNetwork(tf.keras.Model):
 
     @tf.function
     def inverse(self, z, condition, **kwargs):
-        """Performs a reverse pass through the chain. Assumes only used
-        in inference mode, so **kwargs contains `training=False`."""
+        """Performs a reverse pass through the chain. Assumes that it is only used
+        in inference mode, so ``**kwargs`` contains ``training=False``."""
 
         # Add noise to target if using SoftFlow, use explicitly
         # not in call(), since methods are public

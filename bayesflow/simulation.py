@@ -32,7 +32,7 @@ from bayesflow.diagnostics import plot_prior2d
 
 
 class ContextGenerator:
-    """ Basic interface for a simulation module responsible for generating variables over which
+    """Basic interface for a simulation module responsible for generating variables over which
     we want to amortize during simulation-based training, but do not want to perform inference on.
     Both priors and simulators in a generative framework can have their own context generators,
     depending on the particular modeling goals.
@@ -57,12 +57,12 @@ class ContextGenerator:
 
     def __init__(self, batchable_context_fun : callable = None, non_batchable_context_fun: callable = None,
                  use_non_batchable_for_batchable: bool = False):
-        """ Instantiates a context generator responsible for random generation of variables which vary from data set
+        """Instantiates a context generator responsible for random generation of variables which vary from data set
         to data set but cannot be considered data or parameters, e.g., time indices, number of observations, etc.
         A batchable, non-batchable, or both context functions should be provided to the constructor. An optional
         argument dictates whether the outputs of the non-batchable context function should be used as inputs to
         batchable context.
-        
+
         Parameters
         ----------
         batchable_context_fun             : callable
@@ -73,7 +73,7 @@ class ContextGenerator:
             Determines whether to use output of non_batchable_context_fun as input to batchable_context_fun. Only relevant
             when both context types are provided.
         """
-        
+
         self.batchable_context_fun = batchable_context_fun
         self.non_batchable_context_fun = non_batchable_context_fun
         self.use_non_batchable_for_batchable = use_non_batchable_for_batchable
@@ -81,11 +81,11 @@ class ContextGenerator:
     def __call__(self, batch_size, *args, **kwargs):
         """ Wraps the method generate_context, which returns a dictionary with 
         batchable and non batchable context.
-        
+
         Optional positional and keyword arguments are passed to the internal 
         context-generating functions or ignored if the latter are None.
 
-         Parameters
+        Parameters
         ----------
 
         batch_size : int
@@ -123,23 +123,22 @@ class ContextGenerator:
         return None
 
     def generate_context(self, batch_size, *args, **kwargs):
-        """ Creates a dictionary with batchable and non batchable context.
+        """Creates a dictionary with batchable and non batchable context.
 
          Parameters
         ----------
 
-        batch_size : int
+        batch_size   : int
             The batch_size argument used for batchable context.
 
         Returns
         -------
-
         context_dict : dictionary
             A dictionary with context variables with the following keys, if default keys not changed:
-            `batchable_context` : value
-            `non_batchable_context` : value
+            ``batchable_context`` : value
+            ``non_batchable_context`` : value
         
-        Note, that the values of the context variables will be None, if the
+        Note, that the values of the context variables will be ``None``, if the
         corresponding context-generating functions have not been provided when
         initializing this object.
         """
@@ -152,7 +151,7 @@ class ContextGenerator:
         else:
             out_dict[DEFAULT_KEYS['batchable_context']] = self.batchable_context(batch_size, *args, **kwargs)
         return out_dict
-        
+
 
 class Prior:
     """ Basic interface for a simulation module responsible for generating random draws from a 
@@ -636,8 +635,7 @@ class GenerativeModel:
         return output_dict
 
     def _test(self):
-        """ Performs a sanity check on forward inference and some verbose information.
-        """
+        """Performs a sanity check on forward inference and some verbose information."""
 
         # Use minimal n_sim > 1
         _n_sim = GenerativeModel._N_SIM_TEST
@@ -680,7 +678,7 @@ class GenerativeModel:
     def presimulate_and_save(self, batch_size, folder_path, total_iterations=None, memory_limit=None, 
                              iterations_per_epoch = None, epochs = None, extend_from=0, parallel=True):
 
-        """ Simulates a dataset for single-pass offline training (called via the train_from_presimulation method 
+        """Simulates a dataset for single-pass offline training (called via the train_from_presimulation method 
         of the Trainer class in the trainers.py script).
 
         One of the following pairs of parameters has to be provided: 
@@ -829,8 +827,8 @@ class GenerativeModel:
 
 
 class MultiGenerativeModel:
-    """ Basic interface for multiple generative models in a simulation-based context.
-    A MultiveGenerativeModel instance consists of a list of GenerativeModel instances
+    """Basic interface for multiple generative models in a simulation-based context.
+    A ``MultiveGenerativeModel`` instance consists of a list of ``GenerativeModel`` instances
     and a prior distribution over candidate models defined by a list of probabilities.
     """
 
