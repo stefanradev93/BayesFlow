@@ -1,6 +1,6 @@
 # BayesFlow
 
-Welcome to our BayesFlow library for efficient simulation-based Bayesian workflows! Our library enables users to create specialized neural networks for *amortized Bayesian inference*, which repays users with rapid and fully Bayesian parameter estimation or model comparison after a simulation-based training phase. 
+Welcome to our BayesFlow library for efficient simulation-based Bayesian workflows! Our library enables users to create specialized neural networks for *amortized Bayesian inference*, which repays users with rapid statistical inference after a potentially longer simulation-based training phase. 
 
 For starters, check out some of our walk-through notebooks:
 
