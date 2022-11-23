@@ -4,6 +4,8 @@ __pycache__/
 */__pycache__/
 projects/
 */bayesflow.egg-info
+docs/build/
+build
 
 # Notebooks
 docs/source/tutorial_notebooks/**
