@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bayesflow.inference_networks &mdash; BayesFlow beta documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> BayesFlow
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">bayesflow</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BayesFlow</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">bayesflow.inference_networks</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for bayesflow.inference_networks</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
+
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies or substantial portions of the Software.</span>
+
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="c1"># SOFTWARE.</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">bayesflow</span> <span class="kn">import</span> <span class="n">default_settings</span>
+<span class="kn">from</span> <span class="nn">bayesflow.coupling_networks</span> <span class="kn">import</span> <span class="n">AffineCouplingLayer</span>
+<span class="kn">from</span> <span class="nn">bayesflow.helper_functions</span> <span class="kn">import</span> <span class="n">build_meta_dict</span>
+
+
+<div class="viewcode-block" id="InvertibleNetwork"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.InvertibleNetwork">[docs]</a><span class="k">class</span> <span class="nc">InvertibleNetwork</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implements a chain of conditional invertible coupling layers for conditional density estimation.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_params</span><span class="p">,</span> <span class="n">num_coupling_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">coupling_net_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">coupling_design</span><span class="o">=</span><span class="s1">&#39;dense&#39;</span><span class="p">,</span> <span class="n">soft_clamping</span><span class="o">=</span><span class="mf">1.9</span><span class="p">,</span> <span class="n">use_permutation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_act_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                 <span class="n">act_norm_init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_soft_flow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">soft_flow_bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">5e-2</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a chain of coupling layers with optional `ActNorm` layers in-between. Implements ideas from:</span>
+
+<span class="sd">        [1] Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., &amp; Köthe, U. (2020). </span>
+<span class="sd">        BayesFlow: Learning complex stochastic models with invertible neural networks. </span>
+<span class="sd">        IEEE transactions on neural networks and learning systems.</span>
+
+<span class="sd">        [2] Kim, H., Lee, H., Kang, W. H., Lee, J. Y., &amp; Kim, N. S. (2020). </span>
+<span class="sd">        Softflow: Probabilistic framework for normalizing flow on manifolds. </span>
+<span class="sd">        Advances in Neural Information Processing Systems, 33, 16388-16397.</span>
+
+<span class="sd">        [3] Ardizzone, L., Kruse, J., Lüth, C., Bracher, N., Rother, C., &amp; Köthe, U. (2020). </span>
+<span class="sd">        Conditional invertible neural networks for diverse image-to-image translation. </span>
+<span class="sd">        In DAGM German Conference on Pattern Recognition (pp. 373-387). Springer, Cham.</span>
+
+<span class="sd">        [4] Kingma, D. P., &amp; Dhariwal, P. (2018). </span>
+<span class="sd">        Glow: Generative flow with invertible 1x1 convolutions. </span>
+<span class="sd">        Advances in neural information processing systems, 31.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        num_params            : int</span>
+<span class="sd">            The number of parameters to perform inference on. Equivalently, the dimensionality of the</span>
+<span class="sd">            latent space. </span>
+<span class="sd">        num_coupling_layers   : int, optional, default: 4</span>
+<span class="sd">            The number of coupling layers to use as defined in [1] and [2]. In general, more coupling layers</span>
+<span class="sd">            will give you more expressive power, but will be slower and may need more simulations to train.</span>
+<span class="sd">            Typically, between 4 and 10 coupling layers should suffice for most applications.</span>
+<span class="sd">        coupling_net_settings : dict or None, optional, default: None</span>
+<span class="sd">            The coupling network settings to pass to the internal coupling layers. See `default_settings`</span>
+<span class="sd">            for the required entries.</span>
+<span class="sd">        coupling_design       : str or callable, optional, default: &#39;dense&#39;</span>
+<span class="sd">            The type of internal coupling network to use. Currently, only &#39;dense&#39; is understood as a</span>
+<span class="sd">            string argument, but you can also pass a callable which constructs a custom network. In that case,</span>
+<span class="sd">            the `coupling_net_settings` will be passed as a first argument to the callable.</span>
+<span class="sd">        soft_clamping         : float, optional, default: 1.9</span>
+<span class="sd">            The soft clamping parameter `alpha` in [3]. Typically you would not touch this.</span>
+<span class="sd">        use_permutation       : bool, optional, default: True</span>
+<span class="sd">            Whether to use fixed permutations between coupling layers. Highly recommended.</span>
+<span class="sd">        use_act_norm          : bool, optional, default: True</span>
+<span class="sd">            Whether to use activation normalization after each coupling layer, as used in [4].</span>
+<span class="sd">            Recommended to keep default.</span>
+<span class="sd">        act_norm_init         : np.ndarray of shape (num_simulations, num_params) or None, optional, default: None</span>
+<span class="sd">            Optional data-dependent initialization for the internal `ActNorm` layers, as done in [4]. Could be helpful </span>
+<span class="sd">            for deep invertible networks.</span>
+<span class="sd">        use_soft_flow         : bool, optional, default: False</span>
+<span class="sd">            Whether to perturb the taregt distribution (i.e., parameters) with small amount of independent</span>
+<span class="sd">            noise, as done in [3]. Could be helpful for degenrate distributions.</span>
+<span class="sd">        soft_flow_bounds      : tuple(float, float), optional, default: (1e-3, 5e-2)</span>
+<span class="sd">            The bounds of the continuous uniform distribution from which the noise scale would be sampled</span>
+<span class="sd">            at each iteration. Only relevant when `use_soft_flow=True`.</span>
+<span class="sd">            The setting</span>
+<span class="sd">        **kwargs              : dict</span>
+<span class="sd">            Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Create settings dict for coupling layer</span>
+        <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">latent_dim</span><span class="o">=</span><span class="n">num_params</span><span class="p">,</span>
+            <span class="n">coupling_net_settings</span><span class="o">=</span><span class="n">coupling_net_settings</span><span class="p">,</span>
+            <span class="n">coupling_design</span><span class="o">=</span><span class="n">coupling_design</span><span class="p">,</span>
+            <span class="n">use_permutation</span><span class="o">=</span><span class="n">use_permutation</span><span class="p">,</span>
+            <span class="n">use_act_norm</span><span class="o">=</span><span class="n">use_act_norm</span><span class="p">,</span>
+            <span class="n">act_norm_init</span><span class="o">=</span><span class="n">act_norm_init</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">soft_clamping</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Create sequence of coupling layers and store reference to dimensionality</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coupling_layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">AffineCouplingLayer</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_coupling_layers</span><span class="p">)]</span>
+
+        <span class="c1"># Store attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">soft_flow</span> <span class="o">=</span> <span class="n">use_soft_flow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">soft_low</span> <span class="o">=</span> <span class="n">soft_flow_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">soft_high</span> <span class="o">=</span> <span class="n">soft_flow_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_permutation</span> <span class="o">=</span> <span class="n">use_permutation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_act_norm</span> <span class="o">=</span> <span class="n">use_act_norm</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim</span> <span class="o">=</span> <span class="n">num_params</span>
+
+<div class="viewcode-block" id="InvertibleNetwork.call"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.InvertibleNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Performs one pass through an invertible chain (either inverse or forward).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        targets   : tf.Tensor</span>
+<span class="sd">            The estimation quantities of interest, shape (batch_size, ...)</span>
+<span class="sd">        condition : tf.Tensor</span>
+<span class="sd">            The conditional data x, shape (batch_size, summary_dim)</span>
+<span class="sd">        inverse   : bool, default: False</span>
+<span class="sd">            Flag indicating whether to run the chain forward or backwards</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)</span>
+<span class="sd">            If inverse=False: The transformed input and the corresponding Jacobian of the transformation,</span>
+<span class="sd">            v shape: (batch_size, ...), log_det_J shape: (batch_size, ...)</span>
+
+<span class="sd">        target          :  tf.Tensor</span>
+<span class="sd">            If inverse=True: The transformed out, shape (batch_size, ...)</span>
+
+<span class="sd">        Important</span>
+<span class="sd">        ---------</span>
+<span class="sd">        If ``inverse=False``, the return is ``(z, log_det_J)``.\n</span>
+<span class="sd">        If ``inverse=True``, the return is ``target``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">inverse</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InvertibleNetwork.forward"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.InvertibleNetwork.forward">[docs]</a>    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Performs a forward pass though the chain.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Add noise to target if using SoftFlow, use explicitly</span>
+        <span class="c1"># not in call(), since methods are public</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">soft_flow</span> <span class="ow">and</span> <span class="n">condition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Needs to be concatinable with condition</span>
+            <span class="n">shape_scale</span> <span class="o">=</span> <span class="p">(</span><span class="n">condition</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">condition</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="p">(</span><span class="n">condition</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">condition</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># Case training mode</span>
+            <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;training&#39;</span><span class="p">):</span>
+                <span class="n">noise_scale</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape_scale</span><span class="p">,</span> <span class="n">minval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">soft_low</span><span class="p">,</span> <span class="n">maxval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">soft_high</span><span class="p">)</span>
+            <span class="c1"># Case inference mode</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">noise_scale</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape_scale</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">soft_low</span>
+            <span class="c1"># Perturb data with noise (will broadcast to all dimensions)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape_scale</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">targets</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">noise_scale</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">targets</span> <span class="o">+=</span> <span class="n">noise_scale</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="c1"># Augment condition with noise scale variate</span>
+            <span class="n">condition</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">condition</span><span class="p">,</span> <span class="n">noise_scale</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">z</span> <span class="o">=</span> <span class="n">targets</span>
+        <span class="n">log_det_Js</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coupling_layers</span><span class="p">:</span>
+            <span class="n">z</span><span class="p">,</span> <span class="n">log_det_J</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">log_det_Js</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">log_det_J</span><span class="p">)</span>
+
+        <span class="c1"># Sum Jacobian determinants for all layers (coupling blocks) to obtain total Jacobian.</span>
+        <span class="n">log_det_J</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">add_n</span><span class="p">(</span><span class="n">log_det_Js</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">z</span><span class="p">,</span> <span class="n">log_det_J</span></div>
+
+<div class="viewcode-block" id="InvertibleNetwork.inverse"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.InvertibleNetwork.inverse">[docs]</a>    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Performs a reverse pass through the chain. Assumes that it is only used</span>
+<span class="sd">        in inference mode, so ``**kwargs`` contains ``training=False``.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Add noise to target if using SoftFlow, use explicitly</span>
+        <span class="c1"># not in call(), since methods are public</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">soft_flow</span> <span class="ow">and</span> <span class="n">condition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># Needs to be concatinable with condition</span>
+            <span class="n">shape_scale</span> <span class="o">=</span> <span class="p">(</span><span class="n">condition</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">condition</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="p">(</span><span class="n">condition</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">condition</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">noise_scale</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape_scale</span><span class="p">)</span> <span class="o">+</span> <span class="mf">2.</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">soft_low</span>
+
+            <span class="c1"># Augment condition with noise scale variate</span>
+            <span class="n">condition</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">condition</span><span class="p">,</span> <span class="n">noise_scale</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">target</span> <span class="o">=</span> <span class="n">z</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coupling_layers</span><span class="p">):</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">target</span></div>
+
+<div class="viewcode-block" id="InvertibleNetwork.create_config"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.InvertibleNetwork.create_config">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;Used to create the settings dictionary for the internal networks of the invertible</span>
+<span class="sd">        network. Will fill in missing &quot;&quot;&quot;</span>
+
+        <span class="n">settings</span> <span class="o">=</span> <span class="n">build_meta_dict</span><span class="p">(</span><span class="n">user_dict</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+                                   <span class="n">default_setting</span><span class="o">=</span><span class="n">default_settings</span><span class="o">.</span><span class="n">DEFAULT_SETTING_INVERTIBLE_NET</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">settings</span></div></div>
+
+
+<div class="viewcode-block" id="EvidentialNetwork"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.EvidentialNetwork">[docs]</a><span class="k">class</span> <span class="nc">EvidentialNetwork</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implements a network whose outputs are the concentration parameters of a Dirichlet density.</span>
+
+<span class="sd">    Follows ideas from:</span>
+<span class="sd">    </span>
+<span class="sd">    [1] Radev, S. T., D&#39;Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., &amp; Bürkner, P. C. (2021). </span>
+<span class="sd">    Amortized Bayesian model comparison with evidential deep learning. </span>
+<span class="sd">    IEEE Transactions on Neural Networks and Learning Systems.</span>
+
+<span class="sd">    [2] Sensoy, M., Kaplan, L., &amp; Kandemir, M. (2018). </span>
+<span class="sd">    Evidential deep learning to quantify classification uncertainty. </span>
+<span class="sd">    Advances in neural information processing systems, 31.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_models</span><span class="p">,</span> <span class="n">dense_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_dense</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">output_activation</span><span class="o">=</span><span class="s1">&#39;softplus&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates an instance of an evidential network for amortized model comparison.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        num_models        : int</span>
+<span class="sd">            The number of candidate (competing models) for the comparison scenario.</span>
+<span class="sd">        dense_args        : dict or None, optional, default: None</span>
+<span class="sd">            The arguments for a tf.keras.layers.Dense layer. If None, defaults will be used.</span>
+<span class="sd">        num_dense         : int, optional, default: 3</span>
+<span class="sd">            The number of dense layers for the main network part. </span>
+<span class="sd">        output_activation : str or callable, optional, default: &#39;softplus&#39;</span>
+<span class="sd">            The activation function to use for the network outputs. </span>
+<span class="sd">            Important: needs to have positive outputs.</span>
+<span class="sd">        **kwargs          : dict, optional, default: {}</span>
+<span class="sd">            Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dense_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dense_args</span> <span class="o">=</span> <span class="n">default_settings</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_EVIDENTIAL</span>
+
+        <span class="c1"># A network to increase representation power</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dense</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="o">**</span><span class="n">dense_args</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_dense</span><span class="p">)</span>
+        <span class="p">])</span>
+
+        <span class="c1"># The layer to output model evidences</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_layer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
+            <span class="n">num_models</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">output_activation</span><span class="p">,</span> 
+            <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">dense_args</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;units&#39;</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;activation&#39;</span><span class="p">})</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_models</span> <span class="o">=</span> <span class="n">num_models</span>
+
+<div class="viewcode-block" id="EvidentialNetwork.call"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.EvidentialNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes evidences for model comparison given a batch of data and optional concatenated context, </span>
+<span class="sd">        typically passed through a summayr network.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        condition  : tf.Tensor of shape (batch_size, ...)</span>
+<span class="sd">            The input variables used for determining `p(model | condition)`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        evidence    : tf.Tensor of shape (batch_size, num_models) -- the learned model evidences</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evidence</span><span class="p">(</span><span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EvidentialNetwork.evidence"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.EvidentialNetwork.evidence">[docs]</a>    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">evidence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">rep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span><span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_layer</span><span class="p">(</span><span class="n">rep</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">evidence</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">+</span> <span class="mf">1.</span>
+        <span class="k">return</span> <span class="n">evidence</span></div>
+
+<div class="viewcode-block" id="EvidentialNetwork.sample"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.EvidentialNetwork.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Samples posterior model probabilities from the higher-order Dirichlet density.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        condition  : tf.Tensor</span>
+<span class="sd">            The summary of the observed (or simulated) data, shape (n_data_sets, ...)</span>
+<span class="sd">        n_samples  : int</span>
+<span class="sd">            Number of samples to obtain from the approximate posterior</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pm_samples : tf.Tensor or np.array</span>
+<span class="sd">            The posterior draws from the Dirichlet distribution, shape (num_samples, num_batch, num_models)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">evidence</span><span class="p">(</span><span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">n_datasets</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pm_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span><span class="o">.</span><span class="n">dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:],</span> <span class="n">size</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_datasets</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pm_samples</span></div>
+
+<div class="viewcode-block" id="EvidentialNetwork.create_config"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.EvidentialNetwork.create_config">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;Used to create the settings dictionary for the internal networks of the invertible</span>
+<span class="sd">        network. Will fill in missing &quot;&quot;&quot;</span>
+
+        <span class="n">settings</span> <span class="o">=</span> <span class="n">build_meta_dict</span><span class="p">(</span><span class="n">user_dict</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+                                   <span class="n">default_setting</span><span class="o">=</span><span class="n">default_settings</span><span class="o">.</span><span class="n">DEFAULT_SETTING_EVIDENTIAL_NET</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">settings</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Stefan T. Radev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
