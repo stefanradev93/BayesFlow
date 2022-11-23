@@ -5,7 +5,7 @@ scikit-learn==1.1
 scipy==1.9
 aesara==2.8.7 
 seaborn==0.12
-tensorflow==2.10
+tensorflow==2.10.1
 tensorflow-probability==0.17
 tqdm==4.64
 matplotlib==3.5
