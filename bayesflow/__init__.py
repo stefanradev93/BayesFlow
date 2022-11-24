@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import logging
+
 # Add easy access imports
 try:
     from bayesflow import default_settings
@@ -27,5 +29,8 @@ try:
     from bayesflow import trainers
     from bayesflow import losses
     from bayesflow import mcmc
-except ImportError:
-    pass
+except ImportError as err:
+    logger = logging.getLogger()
+    logger.setLevel(logging.WARNING)
+    logger.warn('Some dependencies failed to load. BayesFlow modules may not work properly!')
+    logger.warn(str(err))
