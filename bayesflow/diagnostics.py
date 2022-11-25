@@ -72,9 +72,9 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
         The font size of the title text
     metric_fontsize   : int, optional, default: 16
         The font size of the goodness-of-fit metric (if provided)
-    add_corr          : boolean, optional, default: True
+    add_corr          : bool, optional, default: True
         A flag for adding correlation between true and estimates to the plot.
-    add_r2            : boolean, optional, default: True
+    add_r2            : bool, optional, default: True
         A flag for adding R^2 between true and estimates to the plot.
     color             : str, optional, default: '#8f2727'
         The color for the true vs. estimated scatter points and errobars.
@@ -187,9 +187,9 @@ def plot_sbc_ecdf(post_samples, prior_samples, difference=False, stacked=False, 
         The posterior draws obtained from n_data_sets
     prior_samples     : np.ndarray of shape (n_data_sets, n_params)
         The prior draws obtained for generating n_data_sets
-    difference        : boolean, optional, default: False
+    difference        : bool, optional, default: False
         If `True`, plots the ECDF difference. Enables a more dynamic visualization range.
-    stacked           : boolean, optional, default: False
+    stacked           : bool, optional, default: False
         If `True`, all ECDFs will be plotted on the same plot. If `False`, each ECDF will
         have its own subplot, similar to the behavior of `plot_sbc_histograms`.
     param_names       : list or None, optional, default: None

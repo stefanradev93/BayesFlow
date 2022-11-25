@@ -22,7 +22,6 @@ import tensorflow as tf
 from tensorflow.keras.layers import Dense, LSTM
 from tensorflow.keras.models import Sequential
 
-from bayesflow.helper_functions import build_meta_dict
 from bayesflow.helper_networks import InvariantModule, EquivariantModule, MultiConv1D
 from bayesflow import default_settings as defaults
 

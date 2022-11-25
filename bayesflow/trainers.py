@@ -115,9 +115,9 @@ class Trainer:
             Number of checkpoints and loss history snapshots to keep.
         default_lr        : float, optional, default: 0.001
             The default learning rate to use for default optimizers.
-        skip_checks       : boolean, optional, default: False
+        skip_checks       : bool, optional, default: False
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
-        memory            : boolean or bayesflow.SimulationMemory, optional, default: True
+        memory            : bool or bayesflow.SimulationMemory, optional, default: True
             If ``True``, store a pre-defined amount of simulations for later use (validation, etc.). 
             If ``SimulationMemory`` instance provided, stores a reference to the instance. 
             Otherwise the corresponding attribute will be set to None.

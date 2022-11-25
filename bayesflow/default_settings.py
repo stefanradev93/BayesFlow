@@ -40,7 +40,6 @@ class MetaDictSetting(Setting):
         ----------
         meta_dict        : dict
             Default dictionary.
-
         mandatory_fields : list, default: []
             List of keys in `meta_dict` that need to be provided by the user.
         """

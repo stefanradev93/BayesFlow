@@ -558,30 +558,29 @@ class GenerativeModel:
 
             Parameters
             ----------
-            parameter_draws     : numpy ndarray of the shape (batch_size, parameter_values)
+            parameter_draws     : np.ndarray of shape (batch_size, num_parameters)
                 A sample of parameters. May be drawn from either the prior (which is also the default behavior if no input is specified)
                 or from the posterior to do a prior/posterior pushforward.
-            funcs_list          : list of callables
+            funcs_list          : list of callable
                 A list of functions that can be used to aggregate simulation data (map a single simulation to a single real value). 
                 The default behavior without user input is to use numpy's mean and standard deviation functions.
-            funcs_labels        : list of strings
+            funcs_labels        : list of str
                 A list of labels for the functions in funcs_list.
                 The default behavior without user input is to call the functions "Aggregator function 1, Aggregator function 2, etc."
-            batch_size          : integer
+            batch_size          : int
                 The number of prior draws to generate (and then create and visualizes simulations from)
-            show_raw_sims       : boolean
+            show_raw_sims       : bool
                 Flag determining whether or not a plot of 49 raw (i.e. unaggregated) simulations is generated. 
                 Useful for very general data exploration. 
 
             Returns
             -------
-            parameters_draws    : numpy ndarray
+            parameters_draws    : np.ndarray
                 The parameters provided by the user or generated internally.
-            simulations         : numpy ndarray
+            simulations         : np.ndarray
                 The simulations generated from parameter_draws (or prior draws generated on the fly)
-            aggregated_data     : list of numpy 1d arrays
+            aggregated_data     : list of np.ndarray
                 Arrays generated from the simulations with the functions in funcs_list
-
             """
        
         if parameter_draws is None:
@@ -602,7 +601,6 @@ class GenerativeModel:
             else:
                 k = min(int(np.ceil(np.sqrt(batch_size))),7)
                 f, axarr = plt.subplots(k, k, figsize=(20, 10))
-
                 for i, ax in enumerate(axarr.flat):
                     if i == batch_size:
                         break
