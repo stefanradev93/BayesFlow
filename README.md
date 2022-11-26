@@ -136,6 +136,9 @@ for free at: https://arxiv.org/abs/2003.06281.
 - Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., & Köthe, U. (2021). 
 OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks and its application to the COVID-19 pandemics in Germany. <em>PLoS computational biology</em>, 17(10), e1009472.
 
+- Bieringer, S., Butter, A., Heimel, T., Höche, S., Köthe, U., Plehn, T., & Radev, S. T. (2021). 
+Measuring QCD splittings with invertible networks. <em>SciPost Physics</em>, 10(6), 126.
+
 - von Krause, M., Radev, S. T., & Voss, A. (2022). 
 Mental speed is high until age 60 as revealed by analysis of over a million participants. 
 <em>Nature Human Behaviour</em>, 6(5), 700-708.
@@ -174,6 +177,10 @@ Example coming soon...
 C. (2021). Amortized Bayesian Model Comparison with Evidental Deep Learning.
 <em>IEEE Transactions on Neural Networks and Learning Systems</em>.
 doi:10.1109/TNNLS.2021.3124052 available for free at: https://arxiv.org/abs/2004.10629
+
+- Schmitt, M., Radev, S. T., & Bürkner, P. C. (2022). Meta-Uncertainty in 
+Bayesian Model Comparison. <em>ArXiv preprint</em>, available for free at: 
+https://arxiv.org/abs/2210.07278
 
 ## Likelihood emulation
 
