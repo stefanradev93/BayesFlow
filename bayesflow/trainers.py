@@ -473,9 +473,10 @@ class Trainer:
             self.optimizer = None
         return self.loss_history.get_plottable()
 
-    def train_from_presimulation(self, presimulation_path, optimizer, save_checkpoint=True, max_epochs=None, 
-                                 reuse_optimizer=False, custom_loader=None, optional_stopping=True, use_autograph=True,
+    def train_from_presimulation(self, presimulation_path, optimizer=None, iterations_per_epoch=None, save_checkpoint=True, max_epochs=None, 
+                                 reuse_optimizer=False, custom_loader=None, use_autograph=True,
                                  **kwargs):
+        
         """Trains an amortizer via a modified form of offline training. 
 
         Like regular offline training, it assumes that parameters, data and optional context have already
@@ -499,10 +500,18 @@ class Trainer:
             The custom_loader must read each file into a collection (either a dictionary or a list) of simulation_dict objects.
             This is easily achieved with the pickle library: if the files were generated from collections of simulation_dict objects
             using pickle.dump, the _default_loader (default for custom_load) will load them using pickle.load. 
-            Training parameters like number of iterations and batch size are inferred from the files during training.
+            Training parameters like batch size (and iterations per epoch if not provided) are inferred from the files during training.
         optimizer            : tf.keras.optimizer.Optimizer
-            Optimizer for the neural network training. Since for this training, it is impossible to guess the number of 
-            iterations beforehead, an optimizer must be provided.
+            Optimizer for the neural network training. 
+            Providing no optimizer will result in `tf.keras.optimizers.Adam` using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0.
+            A custom optimizer will override default learning rate and schedule settings.
+            If the number of iterations per epoch is not enforced during presimulation and input as a parameter here, a custom optimizer must be provided. 
+            This optimizer must be capable of dealing with the data as loaded from presimulation_path, e.g. handling potentially varying numbers of iterations in different epochs.  
+        iterations_per_epoch : int
+            If provided, the training method will assume that every file in presimulation_path contains this number of batches. During training, If a file is encountered
+            during training which contains more or fewer batches, an error is raised.
+            If not provided, its value is inferred from the first file in presimulation_path and an error is raised should any subsequent file contain
+            a different number of batches.
         save_checkpoint      : bool, optional, default : True
             Determines whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
@@ -510,32 +519,30 @@ class Trainer:
             An optional parameter to limit the number of epochs.
         reuse_optimizer      : bool, optional, default: False
             A flag indicating whether the optimizer instance should be treated as persistent or not.
-            If ``False``, the optimizer and its states are not stored after training has finished. 
-            Otherwise, the optimizer will be stored as ``self.optimizer`` and re-used in further training runs.
+            If `False`, the optimizer and its states are not stored after training has finished. 
+            Otherwise, the optimizer will be stored as `self.optimizer` and re-used in further training runs.
         custom_loader        : callable, optional, default: self._default_loader
             Must take a string file_path as an input and output a collection (dictionary or list) of simulation_dict objects.
             A simulation_dict has the keys 
-            - ``prior_non_batchable_context``, 
-            - ``prior_batchable_context``, 
-            - ``prior_draws``, 
-            - ``sim_non_batchable_context``,
-            - ``sim_batchable_context``,
-            - ``sim_data``. 
-            ``prior_draws`` and ``sim_data`` must have actual data as values, the rest are optional.
+            - 'prior_non_batchable_context', 
+            - 'prior_batchable_context', 
+            - 'prior_draws', 
+            - 'sim_non_batchable_context',
+            - 'sim_batchable_context'
+            - 'sim_data'. 
+            'prior_draws' and 'sim_data' must have actual data as values, the rest are optional.
         optional_stopping    : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
         use_autograph        : bool, optional, default: True
-            Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
-            could also be harder to debug.
         **kwargs             : dict, optional
             Optional keyword arguments, which can be:
-            ``conf_args``  - optional keyword arguments passed to the configurator
-            ``net_args``   - optional keyword arguments passed to the amortizer
+            `conf_args`  - optional keyword arguments passed to the configurator
+            `net_args`   - optional keyword arguments passed to the amortizer
 
         Returns
         -------
-        losses : ``dict`` or ``pandas.DataFrame``
-            A dictionary or a data frame storing the losses across epochs and iterations
+        losses : dict or pandas.DataFrame
+            A dictionary or pandas.DataFrame storing the losses across epochs and iterations
         """
 
         # Compile update function, if specified
@@ -548,10 +555,9 @@ class Trainer:
         if custom_loader is None:
             custom_loader = self._default_loader
 
-        # Init loss history and optimizer
+        # Init loss history
         self.loss_history.start_new_run()
-        self.optimizer = optimizer
-
+        
         # Loop over the presimulated dataset.
         file_list = os.listdir(presimulation_path)
         
@@ -559,8 +565,29 @@ class Trainer:
         if len(file_list) > max_epochs:
             file_list = file_list[:max_epochs]
 
-        for ep, current_filename in enumerate(file_list, start=1):
+            
+        # Init optimizer
+        if optimizer is None:
+            # Infer iterations_per_epoch if necessary
+            if iterations_per_epoch is None:
+                # Read first file into memory as a dictionary or list
+                file_path = os.path.join(presimulation_path, file_list[0])
+                epoch_1_data = custom_loader(file_path)
+                if isinstance(epoch_1_data, dict): 
+                    its_epoch_1 = len(list(epoch_1_data.keys()))
+                elif isinstance(epoch_1_data, list):
+                    its_epoch_1 = len(epoch_1_data)    
+                else:
+                    raise ValueError(f"Loading a simulation file resulted in a {type(epoch_1_data)}. Must be a dictionary or a list!")
+                iterations_per_epoch = its_epoch_1
+                logging.info(f"Inferred the number of iterations per epoch to be {iterations_per_epoch} based on {file_list[0]}. Should this not apply to all files, you must provide a custom optimizer or will encounter an error.")
+            self._setup_optimizer(None, min(len(file_list), max_epochs), iterations_per_epoch)
+            using_default_optimizer = True
+        else:
+            self.optimizer = optimizer
+            using_default_optimizer = False
 
+        for ep, current_filename in enumerate(file_list, start=1):
             # Read single file into memory as a dictionary or list
             file_path = os.path.join(presimulation_path, current_filename)
             epoch_data = custom_loader(file_path)
@@ -575,7 +602,13 @@ class Trainer:
 
             with tqdm(total=len(index_list), desc=f'Training epoch {ep}') as p_bar:
                 for it, index in enumerate(index_list, start=1):
-
+                    
+                    # If using the default optimizer, the number of iterations per batch as inferred from each file is monitored. 
+                    # If it is not consistent across the entire presimulated dataset, an error is raised.
+                    if using_default_optimizer:
+                        if len(index_list) != iterations_per_epoch:
+                            raise ValueError(f"{current_filename} does not contain {iterations_per_epoch} presimulated batches, but rather {len(index_list)}. You must provide a custom optimizer for files containing a varying number of batches.")
+                    
                     # Perform one training step and obtain current loss value
                     input_dict = self.configurator(epoch_data[index])
 
