@@ -676,21 +676,39 @@ class GenerativeModel:
                                     f'Please re-examine model components!\n {err}')
         
     def presimulate_and_save(self, batch_size, folder_path, total_iterations=None, memory_limit=None, 
-                             iterations_per_epoch = None, epochs = None, extend_from=0, parallel=True):
+                             iterations_per_epoch = None, epochs = None, extend_from=0):
 
-        """Simulates a dataset for single-pass offline training (called via the train_from_presimulation method 
+        """ Simulates a dataset for single-pass offline training (called via the train_from_presimulation method 
         of the Trainer class in the trainers.py script).
 
+        Parameters
+        ----------
+        batch_size           : int
+            Number of simulations which will be used in each backpropagation step of training.
+        total_iterations     : int
+            Total number of iterations to perform during training. If total_iterations divided by epochs is not an integer, it
+            will be increased so that said division does result in an integer.
+        memory_limit         : int
+            Upper bound on the size of individual files (in Mb); can be useful to avoid running out of RAM during training.
+        iterations_per_epoch : int
+            Number of batch simulations to perform per epoch file. If iterations_per_epoch batches per file lead to files
+            exceeding the memory_limit, iterations_per_epoch will be lowered so that the memory_limit can be enforced.
+        epochs               : int
+            Number of epoch files to generate. A higher number will be generated if the memory_limit for individual files requires it.
+        extend_from          : int
+            If folder_path already contains presimulations and the user wishes to add further simulations to these, 
+            extend_from must provide the number of the last presimulation file in folder_path.
+        
+        Important
+        ----------
         One of the following pairs of parameters has to be provided: 
         
         - (iterations_per_epoch, epochs), 
         - (total_iterations, iterations_per_epoch)
         - (total_iterations, epochs)
 
-        Providing all three of the parameters in these pairs leads to a consistency check, since 
-        incompatible combinations are possible. 
-        `memory_limit` is an upper bound on the size of individual files; this can be useful to avoid running out of RAM during training.
-        """
+        Providing all three of the parameters in these pairs leads to a consistency check, since incompatible combinations are possible. 
+      """
         
         # Ensure that the combination of parameters provided is sufficient to perform presimulation and does not contain internal contradictions
         if total_iterations is not None and iterations_per_epoch is not None and epochs is not None:
@@ -709,6 +727,8 @@ class GenerativeModel:
             epochs = total_iterations/iterations_per_epoch
             if int(epochs) < epochs:
                 epochs = int(epochs)+1
+                logging.info(f"Setting number of epochs to {epochs} and upping total number of iterations to {epochs*iterations_per_epoch} in order to create files of the same size.")
+                total_iterations = epochs*iterations_per_epoch
             else:
                 epochs = int(epochs)
 
@@ -726,6 +746,9 @@ class GenerativeModel:
             iterations_per_epoch = total_iterations/epochs
             if int(iterations_per_epoch) < total_iterations/epochs:
                 iterations_per_epoch = int(iterations_per_epoch)+1
+                total_iterations = iterations_per_epoch*epochs
+                logging.info(f"Setting number of iterations per epoch to {iterations_per_epoch} and upping total number of iterations to {total_iterations} \
+                    to create files of the same size and ensure that no less than the specified total number of iterations is simulated.")
 
         # Ensure the folder path is interpreted as a directory and not a file
         if folder_path[-1] != '/':
@@ -762,6 +785,8 @@ class GenerativeModel:
             batches_per_file = iterations_per_epoch
         else:
             batches_per_file = min(int(memory_limit/batch_space), iterations_per_epoch)
+            if batches_per_file < iterations_per_epoch:
+                logging.warn(f"Number of iterations per epoch was reduced to {batches_per_file} to ensure that the memory limit per file is not exceeded.")
         
         file_space = batches_per_file*batch_space
         
@@ -774,57 +799,29 @@ class GenerativeModel:
         if extend_from > 0:
             previous_priors = self.prior(batch_size = batch_size*iterations_per_epoch*extend_from)
 
-        # If only a single file needs to be generated, generation is straightforward and only requires one loop over total_iterations
-        if total_iterations < batches_per_file:
-            total_files = 1
-            file_counter = extend_from + 1
-            total_space = batch_space*total_iterations
-            logging.info(f"Generating a single file of size {total_space} Mb containing {total_iterations} batches")
-            file_list = [{} for _ in range(total_iterations)]
-            with tqdm(total=total_files, desc='Batches written:') as p_bar:
-                for k in range(total_iterations):
-                    file_list[k] = self.__call__(batch_size=batch_size)
-                    p_bar.update(1)
-            with open(folder_path+'presim_file_'+str(file_counter)+'.pkl', 'wb+') as f:
-                pickle.dump(file_list, f)
-
-        # In the standard case of multiple files being generated, total_files-1 files are generated with an identical number of batches inside.
-        # The final file contains the number of batches missing to reach total_iterations (which may or may not be identical to previous batches per file.)
+        # Ensure that the total number of iterations given or inferred is met (or exceeeded) whilst not violating the memory limit
+        total_files = total_iterations/batches_per_file
+        if int(total_files) < total_files:
+            total_files = int(total_files)+1
+            if total_files > epochs:
+                logging.info(f"Increased number of files (i.e. epochs) to {total_files} to ensure that the memory limit is not exceeded but the total number of iterations is met.")
         else:
-            total_files = total_iterations/batches_per_file
-            if int(total_files) < total_files:
-                total_files = int(total_files)+1
-                logging.info("Generating {} files. Of these, {} files are {} Mb in size and contain {} batches. The last file is smaller."\
-                    .format(total_files, total_files-1,file_space, batches_per_file))
-            else:
-                total_files = int(total_files)
-                logging.info("Generating {} files of size {} Mb containing {} batches each."\
-                    .format(total_files, file_space, batches_per_file))
-            
-            # Generate all files but one
-            file_counter = extend_from
-            for i in range(total_files-1):
-                with tqdm(total=batches_per_file, desc=f'Batches generated for file {i+1}') as p_bar:
-                    file_list = [{} for _ in range(batches_per_file)]
-                    for k in range(batches_per_file):
-                        file_list[k] = self.__call__(batch_size=batch_size)
-                        p_bar.update(1)
-                    with open(folder_path+'presim_file_'+str(file_counter+1)+'.pkl', 'wb+') as f:
-                        pickle.dump(file_list, f)
-                    file_counter +=1
+            total_files = int(total_files)
+        logging.info(f"Generating {total_files} files of size {file_space} Mb containing {batches_per_file} batches each.")
 
-            # Generate the final file with potentially reduced batch_size so total_iterations is met in the end.    
-            missing_batches = total_iterations-((total_files-1)*batches_per_file)
-            file_list = [{} for _ in range(missing_batches)]
-            with tqdm(total=missing_batches, desc=f'Batches generated for file {total_files}') as p_bar:
-                for k in range(missing_batches):
+        # Generate the presimulation files    
+        file_counter = extend_from
+        for i in range(total_files):
+            with tqdm(total=batches_per_file, desc=f'Batches generated for file {i+1}') as p_bar:
+                file_list = [{} for _ in range(batches_per_file)]
+                for k in range(batches_per_file):
                     file_list[k] = self.__call__(batch_size=batch_size)
                     p_bar.update(1)
-            with open(folder_path+'presim_file_'+str(file_counter+1)+'.pkl', 'wb') as f:
-                pickle.dump(file_list, f)
+                with open(folder_path+'presim_file_'+str(file_counter+1)+'.pkl', 'wb+') as f:
+                    pickle.dump(file_list, f)
+                file_counter +=1
                 
         logging.info(f"Presimulation {extension} complete. Generated {total_files} files.")    
-
 
 class MultiGenerativeModel:
     """Basic interface for multiple generative models in a simulation-based context.
