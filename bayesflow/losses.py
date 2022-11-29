@@ -139,10 +139,12 @@ def log_loss(model_indices, alpha, label_smoothing=.01):
 
     Parameters
     ----------
-    Model_indices : tf.Tensor of shape (batch_size, n_models)
+    model_indices : tf.Tensor of shape (batch_size, n_models)
         one-hot-encoded true model indices
-    Alpha         : tf.Tensor of shape (batch_size, n_models)
+    alpha         : tf.Tensor of shape (batch_size, n_models)
         positive network outputs in ``[1, +inf]``
+    label_smoothing : float or None, optional, default: 0.05
+        Optional label smoothing factor.
 
     Returns
     -------
