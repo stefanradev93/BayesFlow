@@ -85,8 +85,8 @@ DEFAULT_SETTING_DENSE_INVARIANT = {
 
 DEFAULT_SETTING_DENSE_EVIDENTIAL = {
     'units': 128,
-    'kernel_initializer': 'glorot_normal',
-    'activation': 'elu',
+    'kernel_initializer': 'glorot_uniform',
+    'activation': 'relu',
 }
 
 
@@ -125,7 +125,7 @@ DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
 
 DEFAULT_SETTING_EVIDENTIAL_NET = MetaDictSetting(
     meta_dict={
-        'dense_args': dict(units=128, kernel_initializer='glorot_normal', activation='elu'),
+        'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='relu'),
         'num_dense': 3,
         'output_activation': 'softplus'
     },
