@@ -77,6 +77,7 @@ def test_train_online(mode, reuse_optimizer):
         epochs=2, 
         iterations_per_epoch=3, 
         batch_size=8, 
+        use_autograph=False,
         reuse_optimizer=reuse_optimizer,
         skip_checks=True,
         memory=False,
@@ -129,7 +130,8 @@ def test_train_offline(mode, reuse_optimizer):
     h = trainer.train_offline(
         simulations_dict=simulations,
         epochs=2, 
-        batch_size=16, 
+        batch_size=16,
+        use_autograph=True,
         reuse_optimizer=reuse_optimizer,
     )
 
