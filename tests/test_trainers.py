@@ -66,6 +66,7 @@ def _create_training_setup(mode):
     trainer = Trainer(generative_model=model, amortizer=amortizer)
     return trainer
 
+
 @pytest.mark.parametrize("mode", ['posterior', 'likelihood'])
 @pytest.mark.parametrize("reuse_optimizer", [True, False])
 def test_train_online(mode, reuse_optimizer):
