@@ -22,7 +22,7 @@ import numpy as np
 import tensorflow as tf
 
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
-from bayesflow.losses import log_loss, mmd_summary_space, kl_dirichlet
+from bayesflow.losses import mmd_summary_space, kl_dirichlet, log_loss
 from bayesflow.default_settings import DEFAULT_KEYS
 
 import tensorflow_probability as tfp
@@ -873,7 +873,7 @@ class AmortizedModelComparison(tf.keras.Model):
         self.kl_weight = kl_weight
         self.num_models = self.evidence_net.num_models
 
-    def __call__(self, input_dict, return_summary=False, **kwargs):
+    def call(self, input_dict, return_summary=False, **kwargs):
         """ Performs a forward pass through both networks.
 
         Parameters
@@ -962,13 +962,7 @@ class AmortizedModelComparison(tf.keras.Model):
         """Computes the evidence for the competing models given the data sets
         contained in `input_dict`."""
 
-        _, full_cond = self._compute_summary_condition(
-            input_dict.get(DEFAULT_KEYS['summary_conditions']), 
-            input_dict.get(DEFAULT_KEYS['direct_conditions']),
-            **kwargs
-        )
-
-        alphas = self(full_cond, return_summary=False, **kwargs)
+        alphas = self(input_dict, **kwargs)
         if to_numpy:
             return alphas.numpy()
         return alphas
@@ -976,13 +970,7 @@ class AmortizedModelComparison(tf.keras.Model):
     def uncertainty_score(self, input_dict, to_numpy=True, **kwargs):
         """Computes the uncertainy score according to sum(alphas) / num_models."""
 
-        _, full_cond = self._compute_summary_condition(
-            input_dict.get(DEFAULT_KEYS['summary_conditions']), 
-            input_dict.get(DEFAULT_KEYS['direct_conditions']),
-            **kwargs
-        )
-
-        alphas = self(full_cond, return_summary=False, **kwargs)
+        alphas = self(input_dict, **kwargs)
         u = tf.reduce_sum(alphas, axis=-1) / self.evidence_net.num_models
         if to_numpy:
             return u.numpy()

@@ -264,7 +264,7 @@ class EvidentialNetwork(tf.keras.Model):
         Parameters
         ----------
         condition  : tf.Tensor of shape (batch_size, ...)
-            The input variables used for determining `p(model | condition)`
+            The input variables used for determining ``p(model | condition)``
 
         Returns
         -------
