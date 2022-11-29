@@ -28,7 +28,6 @@ try:
     from bayesflow import diagnostics
     from bayesflow import trainers
     from bayesflow import losses
-    from bayesflow import mcmc
 except ImportError as err:
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
