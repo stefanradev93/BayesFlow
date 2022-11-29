@@ -22,6 +22,8 @@ import tensorflow as tf
 
 from bayesflow.computational_utilities import maximum_mean_discrepancy
 
+import tensorflow_probability as tfp
+
 
 def kl_latent_space_gaussian(z, log_det_J):
     """Computes the Kullback-Leibler divergence between true and approximate
@@ -132,14 +134,14 @@ def mmd_summary_space(summary_outputs, z_dist=tf.random.normal, kernel='gaussian
     return mmd_loss
 
 
-def log_loss(model_indices, alpha):
+def log_loss(model_indices, alpha, label_smoothing=.01):
     """Computes the logloss given output probs and true model indices m_true.
 
     Parameters
     ----------
-    model_indices : tf.Tensor of shape (batch_size, n_models)
+    Model_indices : tf.Tensor of shape (batch_size, n_models)
         one-hot-encoded true model indices
-    alpha         : tf.Tensor of shape (batch_size, n_models)
+    Alpha         : tf.Tensor of shape (batch_size, n_models)
         positive network outputs in ``[1, +inf]``
 
     Returns
@@ -147,6 +149,12 @@ def log_loss(model_indices, alpha):
     loss : tf.Tensor
         A single scalar Monte-Carlo approximation of the log-loss, shape (,)
     """
+
+    # Apply label smoothing to indices, if specified
+    if label_smoothing is not None:
+        num_models = tf.cast(tf.shape(model_indices)[1], dtype=tf.float32)
+        model_indices *= (1. - label_smoothing)
+        model_indices += (label_smoothing / num_models)
 
     # Obtain probs
     model_probs = alpha / tf.reduce_sum(alpha, axis=1, keepdims=True)
@@ -157,4 +165,3 @@ def log_loss(model_indices, alpha):
     # Actual loss + regularization (if given)
     loss = -tf.reduce_mean(tf.reduce_sum(model_indices * tf.math.log(model_probs), axis=1))
     return loss
-
