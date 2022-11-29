@@ -96,7 +96,7 @@ class Trainer:
     """
 
     def __init__(self, amortizer, generative_model=None, configurator=None, checkpoint_path=None, 
-                 max_to_keep=3, default_lr=0.001, skip_checks=False, memory=True, **kwargs):
+                 max_to_keep=3, default_lr=0.0005, skip_checks=False, memory=True, **kwargs):
         """Creates a trainer which will use a generative model (or data simulated from it) to optimize
         a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
@@ -113,7 +113,7 @@ class Trainer:
             Optional file path for storing the trained amortizer, loss history and optional memory.
         max_to_keep       : int, optional, default: 3
             Number of checkpoints and loss history snapshots to keep.
-        default_lr        : float, optional, default: 0.001
+        default_lr        : float, optional, default: 0.0005
             The default learning rate to use for default optimizers.
         skip_checks       : bool, optional, default: False
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
@@ -347,7 +347,7 @@ class Trainer:
         if use_autograph:
             _backprop_step = tf.function(backprop_step, reduce_retracing=True)
         else:
-            _backprop_step = _backprop_step
+            _backprop_step = backprop_step
          
         # Create new optimizer and initialize loss history
         self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
@@ -430,7 +430,7 @@ class Trainer:
         if use_autograph:
             _backprop_step = tf.function(backprop_step, reduce_retracing=True)
         else:
-            _backprop_step = _backprop_step
+            _backprop_step = backprop_step
 
         # Convert to custom data set
         data_set = SimulationDataset(simulations_dict, batch_size)
@@ -542,7 +542,7 @@ class Trainer:
         if use_autograph:
             _backprop_step = tf.function(backprop_step, reduce_retracing=True)
         else:
-            _backprop_step = _backprop_step
+            _backprop_step = backprop_step
 
         # Use default loading function if none is provided
         if custom_loader is None:
@@ -659,7 +659,7 @@ class Trainer:
         if use_autograph:
             _backprop_step = tf.function(backprop_step, reduce_retracing=True)
         else:
-            _backprop_step = _backprop_step
+            _backprop_step = backprop_step
 
         # Create new optimizer and initialize loss history
         self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
@@ -957,6 +957,7 @@ class Trainer:
     
     def _default_loader(self, file_path):
         """Uses pickle to load as a default."""
+
         with open(file_path, 'rb+') as f:
             loaded_file = pickle_load(f)
         return loaded_file
