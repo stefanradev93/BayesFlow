@@ -851,7 +851,7 @@ class MultiGenerativeModel:
         """Creates the model prior p(M) given user input."""
 
         if model_probs == 'equal':
-            return lambda b: np.random.randint(self.num_models, size=b)
+            return lambda b: np.random.default_rng().integers(low=0, high=self.num_models, size=b)
         return lambda b: np.random.default_rng().choice(self.num_models, size=b, p=model_probs)
         
     def __call__(self, batch_size, **kwargs):
@@ -863,17 +863,15 @@ class MultiGenerativeModel:
         }
         
         # Sample model indices
-        model_indices = self.model_prior(batch_size)
+        model_samples = self.model_prior(batch_size)
 
         # gather model indices and simulate datasets of same model index as batch
         # create frequency table of model indices
-        m_idx, n = np.unique(model_indices, return_counts=True)
+        model_indices, counts = np.unique(model_samples, return_counts=True)
 
         # Iterate over each unique model index and create all data sets for that model index
-        for m_idx, n in zip(m_idx, n):
-
-            model_out = self.generative_models[m_idx](n, **kwargs)
+        for m, batch_size_m in zip(model_indices, counts):
+            model_out = self.generative_models[m](batch_size_m, **kwargs)
             out_dict[DEFAULT_KEYS['model_outputs']].append(model_out)
-            out_dict[DEFAULT_KEYS['model_indices']].append(m_idx)
-        
+            out_dict[DEFAULT_KEYS['model_indices']].append(m)
         return out_dict
