@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from scipy.stats import binom
+from scipy.stats import binom, median_abs_deviation
 from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -34,14 +34,14 @@ from bayesflow.helper_classes import LossHistory
 from bayesflow.helper_functions import check_posterior_prior_shapes
 
 
-def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_agg=np.std, 
+def plot_recovery(post_samples, prior_samples, point_agg=np.median, uncertainty_agg=median_abs_deviation,
                   param_names=None, fig_size=None, label_fontsize=14, title_fontsize=16,
                   metric_fontsize=16, add_corr=True, add_r2=True, color='#8f2727', 
                   n_col=None, n_row=None):
     
     """Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
-    The point estimate can be controlled with the `point_agg` argument, and the uncertainty estimate
-    can be controlled with the `uncertainty_agg` argument.
+    The point estimate can be controlled with the ``point_agg`` argument, and the uncertainty estimate
+    can be controlled with the ``uncertainty_agg`` argument.
 
     This plot yields the same information as the "posterior z-score":
 
@@ -57,11 +57,13 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.mean, uncertainty_ag
         The posterior draws obtained from n_data_sets
     prior_samples     : np.ndarray of shape (n_data_sets, n_params)
         The prior draws (true parameters) obtained for generating the n_data_sets
-    point_agg         : callable, optional, default: np.mean
+    point_agg         : callable, optional, default: np.median
         The function to apply to the posterior draws to get a point estimate for each marginal.
-    uncertainty_agg   : callable or None, optional, default: np.std
+        The default computes the marginal median for each marginal posterior as a robust
+        point estimate.
+    uncertainty_agg   : callable or None, optional, default: scipy.stats.median_abs_deviation
         The function to apply to the posterior draws to get an uncertainty estimate.
-        If `None` provided, a simple scatter will be plotted.
+        If ``None`` provided, a simple scatter using only ``point_agg`` will be plotted.
     param_names       : list or None, optional, default: None
         The parameter names for nice plot titles. Inferred if None
     fig_size          : tuple or None, optional, default : None
