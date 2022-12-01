@@ -22,7 +22,7 @@ import numpy as np
 from functools import partial
 
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, Conv1D
+from tensorflow.keras.layers import Dense, Conv1D, Dropout
 from tensorflow.keras.models import Sequential
 
 from bayesflow.wrappers import SpectralNormalization
@@ -49,15 +49,24 @@ class DenseCouplingNet(tf.keras.Model):
         super().__init__(**kwargs)
 
         # Create network body (input and hidden layers)
-        self.dense = Sequential(
-            # Hidden layer structure
-            [SpectralNormalization(Dense(**meta['dense_args'])) if meta['spec_norm'] else Dense(**meta['dense_args'])
-             for _ in range(meta['num_dense'])]
-        )
-
+        self.fc = Sequential()
+        for _ in range(meta['num_dense']):
+            # Create dense layer
+            layer = Dense(**meta['dense_args'])
+            # Wrap in spectral normalization, if specified
+            if meta.get('spec_norm') is True:
+                layer = SpectralNormalization(layer)
+            # Add to sequential
+            self.fc.add(layer)
+            # Add MC Dropout, if specified
+            if meta.get('mc_dropout'):
+                if meta.get('mc_dropout_prob'):
+                    self.fc.add(MCDropout(dropout_prob=meta.get('mc_dropout_prob')))
+                else:
+                    self.fc.add(MCDropout())
         # Create network output head
-        self.dense.add(Dense(n_out, kernel_initializer='zeros'))
-        self.dense.build(input_shape=())
+        self.fc.add(Dense(n_out, kernel_initializer='zeros'))
+        self.fc.build(input_shape=()) 
 
     def call(self, target, condition, **kwargs):
         """Concatenates target and condition and performs a forward pass through the coupling net.
@@ -72,7 +81,7 @@ class DenseCouplingNet(tf.keras.Model):
 
         # Handle case no condition
         if condition is None:
-            return self.dense(target, **kwargs)
+            return self.fc(target, **kwargs)
 
         # Handle 3D case for a set-flow and repeat condition over
         # the second `time` or `n_observations` axis of `target``
@@ -81,7 +90,7 @@ class DenseCouplingNet(tf.keras.Model):
             condition = tf.expand_dims(condition, 1)
             condition = tf.tile(condition, [1, shape[1], 1])
         inp = tf.concat((target, condition), axis=-1)
-        out = self.dense(inp, **kwargs)
+        out = self.fc(inp, **kwargs)
         return out
 
 
@@ -141,6 +150,48 @@ class Permutation(tf.keras.Model):
     def _inverse(self, target):
         """Un-does the fixed permutation over the last axis."""
         return tf.gather(target, self.inv_permutation, axis=-1)
+
+
+class MCDropout(tf.keras.Model):
+    """Implements Monte Carlo Dropout as a Bayesian approximation according to [1].
+
+    Perhaps not the best approximation, but arguably the cheapest one out there!
+
+    [1] Gal, Y., & Ghahramani, Z. (2016, June). Dropout as a bayesian approximation: 
+    Representing model uncertainty in deep learning. 
+    In international conference on machine learning (pp. 1050-1059). PMLR.
+    """
+
+    def __init__(self, dropout_prob=0.1, **kwargs):
+        """Creates a custom instance of an MC Dropout layer. Will be used both
+        during training and inference.
+        
+        Parameters
+        ----------
+        dropout_prob  : float, optional, default: 0.1
+            The dropout rate to be passed to ``tf.nn.experimental.stateless_dropout()``.
+            
+        """
+        super().__init__(**kwargs)
+        self.drop = Dropout(dropout_prob)
+
+    def call(self, inputs):
+        """Randomly sets elements of ``inputs`` to zero.
+
+        Parameters
+        ----------
+        inputs : tf.Tensor
+            Input of shape (batch_size, ...)
+        
+        Returns
+        -------
+        out    : tf.Tensor
+            Output of shape (batch_size, ...), same as ``inputs``.
+
+        """
+
+        out = self.drop(inputs, training=True)
+        return out
 
 
 class ActNorm(tf.keras.Model):
