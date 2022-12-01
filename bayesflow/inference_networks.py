@@ -37,7 +37,7 @@ class InvertibleNetwork(tf.keras.Model):
 
         [1] Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). 
         BayesFlow: Learning complex stochastic models with invertible neural networks. 
-        IEEE transactions on neural networks and learning systems.
+        IEEE Transactions on Neural Networks and Learning Systems.
 
         [2] Kim, H., Lee, H., Kang, W. H., Lee, J. Y., & Kim, N. S. (2020). 
         Softflow: Probabilistic framework for normalizing flow on manifolds. 
@@ -49,7 +49,7 @@ class InvertibleNetwork(tf.keras.Model):
 
         [4] Kingma, D. P., & Dhariwal, P. (2018). 
         Glow: Generative flow with invertible 1x1 convolutions. 
-        Advances in neural information processing systems, 31.
+        Advances in Neural Information Processing Systems, 31.
 
         Parameters
         ----------
@@ -83,7 +83,6 @@ class InvertibleNetwork(tf.keras.Model):
         soft_flow_bounds      : tuple(float, float), optional, default: (1e-3, 5e-2)
             The bounds of the continuous uniform distribution from which the noise scale would be sampled
             at each iteration. Only relevant when `use_soft_flow=True`.
-            The setting
         **kwargs              : dict
             Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.
         """
