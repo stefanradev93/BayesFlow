@@ -66,7 +66,7 @@ DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
 
 DEFAULT_SETTING_MULTI_CONV = {
     'layer_args': {
-        'activation': 'relu',
+        'activation': 'swish',
         'filters': 32,
         'strides': 1,
         'padding': 'causal'
@@ -78,29 +78,33 @@ DEFAULT_SETTING_MULTI_CONV = {
 
 DEFAULT_SETTING_DENSE_INVARIANT = {
     'units': 64,
-    'activation': 'elu',  
-    'kernel_initializer': 'glorot_normal'
+    'activation': 'swhish',  
+    'kernel_initializer': 'glorot_uniform'
 }
 
 
 DEFAULT_SETTING_DENSE_EVIDENTIAL = {
     'units': 128,
     'kernel_initializer': 'glorot_uniform',
-    'activation': 'relu',
+    'activation': 'swish',
 }
 
 
 DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
     meta_dict={
         't_args': {
-            'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='elu'),
+            'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='swish'),
             'num_dense': 2,
-            'spec_norm': False
+            'spec_norm': False,
+            'mc_dropout': False,
+            'mc_dropout_prob': 0.1
         },
         's_args': {
-            'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='elu'),
+            'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='swish'),
             'num_dense': 2,
-            'spec_norm': False
+            'spec_norm': False,
+            'mc_dropout': False,
+            'mc_dropout_prob': 0.1
         },
     },
     mandatory_fields=[]
@@ -109,7 +113,7 @@ DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
 
 DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
     meta_dict={
-        'num_coupling_layers': 4,
+        'num_coupling_layers': 6,
         'coupling_net_settings': None,
         'coupling_design': 'dense',
         'soft_clamping': 1.9,
