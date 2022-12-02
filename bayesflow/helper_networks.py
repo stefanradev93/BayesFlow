@@ -51,19 +51,33 @@ class DenseCouplingNet(tf.keras.Model):
         # Create network body (input and hidden layers)
         self.fc = Sequential()
         for _ in range(meta['num_dense']):
-            # Create dense layer
+
+            # Create dense layer with dict kwargs
             layer = Dense(**meta['dense_args'])
+
             # Wrap in spectral normalization, if specified
             if meta.get('spec_norm') is True:
                 layer = SpectralNormalization(layer)
-            # Add to sequential
             self.fc.add(layer)
-            # Add MC Dropout, if specified
-            if meta.get('mc_dropout'):
-                if meta.get('mc_dropout_prob'):
-                    self.fc.add(MCDropout(dropout_prob=meta.get('mc_dropout_prob')))
-                else:
-                    self.fc.add(MCDropout())
+
+            # Figure out which dropout to use, MC has precedence over standard
+            # Fails gently, if no dropout_prob is specified
+            # Case both specified, MC wins
+            if meta.get('dropout') and meta.get('mc_dropout'):
+                self.fc.add(MCDropout(dropout_prob=meta['dropout_prob']))
+
+            # Case only dropout, use standard
+            elif meta.get('dropout') and not meta.get('mc_dropout'):
+                self.fc.add(Dropout(rate=meta['dropout_prob']))
+
+            # Case only MC, use MC
+            elif not meta.get('dropout') and meta.get('mc_dropout'):
+                self.fc.add(MCDropout(dropout_prob=meta['dropout_prob']))
+
+            # No dropout
+            else:
+                pass
+
         # Create network output head
         self.fc.add(Dense(n_out, kernel_initializer='zeros'))
         self.fc.build(input_shape=()) 

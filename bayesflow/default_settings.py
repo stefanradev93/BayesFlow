@@ -97,14 +97,16 @@ DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
             'num_dense': 2,
             'spec_norm': False,
             'mc_dropout': False,
-            'mc_dropout_prob': 0.1
+            'dropout': False,
+            'dropout_prob': 0.1
         },
         's_args': {
             'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='swish'),
             'num_dense': 2,
             'spec_norm': False,
             'mc_dropout': False,
-            'mc_dropout_prob': 0.1
+            'dropout': False,
+            'dropout_prob': 0.1
         },
     },
     mandatory_fields=[]
