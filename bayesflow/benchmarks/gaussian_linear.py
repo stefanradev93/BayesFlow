@@ -43,7 +43,7 @@ def prior(D=10, scale=0.1, rng=None):
         The scale of the Gaussian prior.
     rng   : np.random.Generator or None, default: None
         An optional random number generator to use.
-        
+
     Returns
     -------
     theta : np.ndarray of shape (D, )
@@ -67,9 +67,9 @@ def simulator(theta, n_obs=None, scale=0.1, rng=None):
     n_obs  : int or None, optional, default: None
         The number of observations to draw from the likelihood given the location
         parameter `theta`. If `n obs is None`, a single draw is produced.
-    scale : float, optional, default : 0.1
+    scale  : float, optional, default : 0.1
         The scale of the Gaussian likelihood.
-    rng   : np.random.Generator or None, default: None
+    rng    : np.random.Generator or None, default: None
         An optional random number generator to use.
 
     Returns
