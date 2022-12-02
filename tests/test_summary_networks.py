@@ -27,7 +27,7 @@ from bayesflow.summary_networks import InvariantNetwork, SequentialNetwork
 
 def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
     """Helper function to generate randomized 3d data for summary modules, min and
-    max dimensions for each axis are given by `low` and `high`."""
+    max dimensions for each axis are given by ``low`` and ``high``."""
 
     # Randomize batch data
     x = np.random.default_rng().normal(size=(
@@ -45,7 +45,7 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
 @pytest.mark.parametrize("num_equiv", [1, 3])
 @pytest.mark.parametrize("summary_dim", [13, 2])
 def test_invariant_network(num_equiv, summary_dim):
-    """This function tests the fidelity of the invariant network with a couple of relevant
+    """This function tests the fidelity of the ``InvariantNetwork`` with a couple of relevant
     configurations w.r.t. permutation invariance and output dimensions."""
 
     # Prepare settings for invariant network
@@ -76,7 +76,7 @@ def test_invariant_network(num_equiv, summary_dim):
 @pytest.mark.parametrize("num_conv_layers", [1, 3])
 @pytest.mark.parametrize("lstm_units", [16, 32])
 def test_sequential_network(num_conv_layers, lstm_units):
-    """This function tests the fidelity of the `SequentialNetwork` w.r.t. output dimensions
+    """This function tests the fidelity of the ``SequentialNetwork`` w.r.t. output dimensions
     using a number of relevant configurations."""
 
     # Create settings dict and network

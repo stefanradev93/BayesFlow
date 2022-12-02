@@ -31,7 +31,7 @@ from bayesflow.coupling_networks import AffineCouplingLayer
 @pytest.mark.parametrize("use_act_norm", [True, False])
 @pytest.mark.parametrize("input_shape", ['2d', '3d'])
 def test_coupling_layer(condition, spec_norm, use_perm, use_act_norm, input_shape):
-    """Tests the `CouplingLayer` instance with various configurations."""
+    """Tests the ``CouplingLayer`` instance with various configurations."""
 
     # Randomize units and input dim
     units_t = np.random.randint(low=2, high=32)

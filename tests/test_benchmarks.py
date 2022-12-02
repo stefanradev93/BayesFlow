@@ -33,7 +33,7 @@ from assets.benchmark_network_architectures import NETWORK_SETTINGS
 
 
 def _get_trainer_configuration(benchmark_name, mode):
-    """Helper function to configure test `Trainer` instance."""
+    """Helper function to configure test ``Trainer`` instance."""
 
     # Clear tensorflow session
     tf.keras.backend.clear_session()
@@ -68,7 +68,7 @@ def _get_trainer_configuration(benchmark_name, mode):
 @pytest.mark.parametrize("mode", ['posterior', 'likelihood', 'joint'])
 def test_posterior(benchmark_name, mode):
     """This test will run posterior, likelihood, and joint estimation on all benchmarks. It will create a 
-    minimal `Trainer` instance and test whether the weights change after a couple of backpropagation updates. 
+    minimal ``Trainer`` instance and test whether the weights change after a couple of backpropagation updates. 
     
     Implicitly, the functuion will test wtheter the coupling GenerativeModel -> configurator -> Amortizer -> Trainer works.
     """

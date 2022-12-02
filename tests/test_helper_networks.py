@@ -28,7 +28,7 @@ from bayesflow.helper_networks import *
 
 def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
     """Helper function to generate randomized 3d data for summary modules, min and
-    max dimensions for each axis are given by `low` and `high`."""
+    max dimensions for each axis are given by ``low`` and ``high``."""
 
     # Randomize batch data
     x = np.random.default_rng().normal(size=(
@@ -52,7 +52,7 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
 ])
 @pytest.mark.parametrize("condition", [False, True])
 def test_dense_coupling_net(input_dim, meta, condition):
-    """Tests the fidelity of the `DenseCouplingNet` using different configurations."""
+    """Tests the fidelity of the ``DenseCouplingNet`` using different configurations."""
 
     # Randomize input batch to avoid a single fixed batch size
     B = np.random.randint(low=1, high=32)
@@ -75,7 +75,7 @@ def test_dense_coupling_net(input_dim, meta, condition):
 @pytest.mark.parametrize("input_dim", [3, 8])
 @pytest.mark.parametrize("shape", ['2d', '3d'])
 def test_permutation(input_dim, shape):
-    """Tests the fixed `Permutation` layer in terms of invertibility and input-output fidelity."""
+    """Tests the fixed ``Permutation`` layer in terms of invertibility and input-output fidelity."""
 
     # Create randomized input
     if shape == '2d':
@@ -94,7 +94,7 @@ def test_permutation(input_dim, shape):
 @pytest.mark.parametrize("input_dim", [2, 5])
 @pytest.mark.parametrize("shape", ['2d', '3d'])
 def test_actnorm(input_dim, shape):
-    """Tests the `ActNorm` layer in terms of invertibility and shape integrity."""
+    """Tests the ``ActNorm`` layer in terms of invertibility and shape integrity."""
     
     # Create randomized input
     if shape == '2d':
@@ -117,7 +117,7 @@ def test_actnorm(input_dim, shape):
 @pytest.mark.parametrize("n_dense_s2", [1, 2])
 @pytest.mark.parametrize("output_dim", [3, 10])
 def test_invariant_module(n_dense_s1, n_dense_s2, output_dim):
-    """This function tests the permutation invariance property of the `InvariantModule` as well as
+    """This function tests the permutation invariance property of the ``InvariantModule`` as well as
     its input-output integrity."""
 
     # Prepare settings for invariant module and create it
@@ -149,7 +149,7 @@ def test_invariant_module(n_dense_s1, n_dense_s2, output_dim):
 @pytest.mark.parametrize("n_dense_s3", [1, 2])
 @pytest.mark.parametrize("output_dim", [3, 10])
 def test_equivariant_module(n_dense_s3, output_dim):
-    """This function tests the permutation equivariance property of the `EquivariantModule` as well
+    """This function tests the permutation equivariance property of the ``EquivariantModule`` as well
     as its input-output integrity."""
 
     # Prepare settings for equivariant module and create it
@@ -183,7 +183,7 @@ def test_equivariant_module(n_dense_s3, output_dim):
 @pytest.mark.parametrize("filters", [16, 32])
 @pytest.mark.parametrize("max_kernel_size", [2, 6])
 def test_multi_conv1d(filters, max_kernel_size):
-    """This function tests the fidelity of the `MultiConv1D` module w.r.t. output dimensions
+    """This function tests the fidelity of the ``MultiConv1D`` module w.r.t. output dimensions
     using a number of relevant configurations."""
 
     # Create settings and network

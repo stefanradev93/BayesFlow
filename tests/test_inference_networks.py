@@ -33,7 +33,7 @@ from bayesflow.default_settings import DEFAULT_SETTING_INVERTIBLE_NET
 @pytest.mark.parametrize("use_soft_flow", [True, False])
 @pytest.mark.parametrize("num_coupling_layers", [1, 8])
 def test_invertible_network(input_shape, condition, use_act_norm, use_soft_flow, num_coupling_layers):
-    """Tests the `InvertibleNetwork` core class using a couple of relevant configurations."""
+    """Tests the ``InvertibleNetwork`` core class using a couple of relevant configurations."""
 
     # Randomize units and input dim
     units_t = np.random.randint(low=2, high=32)

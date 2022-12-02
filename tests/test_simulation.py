@@ -6,7 +6,7 @@ from bayesflow.simulation import ContextGenerator, Prior, Simulator
 
 
 class TestContext(unittest.TestCase):
-    """ Tests the ContextGenerator interface."""
+    """Tests the ``ContextGenerator`` interface."""
 
     def test_context_none_separate(self):
         gen = ContextGenerator()
@@ -164,7 +164,7 @@ class TestContext(unittest.TestCase):
 
 
 class TestPrior(unittest.TestCase):
-    """ Tests the Prior interface."""
+    """Tests the ``Prior`` interface."""
 
     @classmethod
     def setUpClass(cls):
@@ -244,9 +244,7 @@ class TestPrior(unittest.TestCase):
 
 
 class TestSimulator(unittest.TestCase):
-    """
-    Tests the Simulator interface.
-    """
+    """Tests the ``Simulator`` interface."""
 
     @classmethod
     def setUpClass(cls):
