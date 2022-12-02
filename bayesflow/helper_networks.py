@@ -186,6 +186,7 @@ class MCDropout(tf.keras.Model):
             The dropout rate to be passed to ``tf.nn.experimental.stateless_dropout()``.
             
         """
+
         super().__init__(**kwargs)
         self.drop = Dropout(dropout_prob)
 
