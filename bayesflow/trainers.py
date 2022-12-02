@@ -303,7 +303,7 @@ class Trainer:
 
     def train_online(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, 
                      optimizer=None, reuse_optimizer=False, optional_stopping=True, use_autograph=True, 
-                     **kwargs):
+                     validation_sims=None, **kwargs):
         """Trains an amortizer via online learning. Additional keyword arguments
         are passed to the generative mode, configurator, and amortizer.
 
@@ -331,6 +331,9 @@ class Trainer:
         use_autograph        : bool, optional, default: True
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
             could also be harder to debug.
+        validation_sims      : dict or None, optional, default: None
+            Simulations used for validation. Will call ``amortizer.compute_loss(configurator(validation_sims))''
+            after each epoch, so the above should go through!
         **kwargs             : dict, optional
             Optional keyword arguments, which can be:
             ``model_args`` - optional keyword arguments passed to the generative model
@@ -348,7 +351,7 @@ class Trainer:
             _backprop_step = tf.function(backprop_step, reduce_retracing=True)
         else:
             _backprop_step = backprop_step
-         
+
         # Create new optimizer and initialize loss history
         self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
         self.loss_history.start_new_run()
@@ -385,7 +388,7 @@ class Trainer:
     
     def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True, 
                       optimizer=None, reuse_optimizer=False, optional_stopping=True, 
-                      use_autograph=True, **kwargs):
+                      validation_sims=None, use_autograph=True, **kwargs):
         """Trains an amortizer via offline learning. Assume parameters, data and optional 
         context have already been simulated (i.e., forward inference has been performed).
 
@@ -414,6 +417,9 @@ class Trainer:
         use_autograph     : bool, optional, default: True
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
             could also be harder to debug.
+        validation_sims      : dict or None, optional, default: None
+            Simulations used for validation. Will call ``amortizer.compute_loss(configurator(validation_sims))''
+            after each epoch, so the above should go through!
         **kwargs          : dict, optional
             Optional keyword arguments, which can be:
             ``model_args`` - optional keyword arguments passed to the generative model
@@ -445,7 +451,7 @@ class Trainer:
                 for bi, forward_dict in enumerate(data_set, start=1):
 
                     # Perform one training step and obtain current loss value
-                    input_dict = self.configurator(forward_dict)
+                    input_dict = self.configurator(forward_dict, **kwargs.pop('conf_args', {}))
                     loss = self._train_step(batch_size, _backprop_step, input_dict, **kwargs)
 
                     # Store returned loss
@@ -467,6 +473,10 @@ class Trainer:
             # Store after each epoch, if specified
             if self.manager is not None and save_checkpoint:
                 self._save_trainer(save_checkpoint)
+
+            #TODO Handle validation
+            if validation_sims is not None:
+                pass
 
         # Remove optimizer reference, if not set as persistent
         if not reuse_optimizer:
