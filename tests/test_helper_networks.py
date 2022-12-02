@@ -45,8 +45,8 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
 
 @pytest.mark.parametrize("input_dim", [3, 16])
 @pytest.mark.parametrize("meta", [
-    dict(dense_args={'units': 32, 'activation': 'elu'}, spec_norm=True, num_dense=1),
-    dict(dense_args={'units': 64}, spec_norm=True, num_dense=2),
+    dict(dense_args={'units': 32, 'activation': 'elu'}, spec_norm=True, dropout=True, num_dense=1),
+    dict(dense_args={'units': 64}, spec_norm=True, mc_dropout=True, num_dense=2),
     dict(dense_args={'units': 32, 'activation': 'relu'}, spec_norm=False, num_dense=1),
     dict(dense_args={'units': 64}, spec_norm=False, num_dense=2)
 ])
