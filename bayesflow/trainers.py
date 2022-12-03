@@ -103,7 +103,7 @@ class Trainer:
         Parameters
         ----------
         amortizer         : bayesflow.amortizers.Amortizer
-            The neural architecture to be optimized
+            The neural architecture to be optimized.
         generative_model  : bayesflow.forward_inference.GenerativeModel
             A generative model returning a dictionary with randomly sampled parameters, data, and optional context
         configurator      : callable or None, optional, default: None 
@@ -332,19 +332,33 @@ class Trainer:
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
             could also be harder to debug.
         validation_sims      : dict or None, optional, default: None
-            Simulations used for validation. Will call ``amortizer.compute_loss(configurator(validation_sims))''
-            after each epoch, so the above should go through!
+            Simulations used as a "validation set".
+            If ``dict``, will assume it's the output of a generative model and try 
+            ``amortizer.compute_loss(configurator(validation_sims))''
+            after each epoch.
+            If ``int``, will assume it's the number of sims to generate from the generative
+            model before starting training. Only considered if a generative model has been 
+            provided during initialization.
+            If ``None`` (default), no validation set will be used.
         **kwargs             : dict, optional
             Optional keyword arguments, which can be:
-            ``model_args`` - optional keyword arguments passed to the generative model
-            ``conf_args``  - optional keyword arguments passed to the configurator
-            ``net_args``   - optional keyword arguments passed to the amortizer
+            ``model_args``     - optional kwargs passed to the generative model
+            ``val_model_args`` - optional kwargs passed to the generative model
+                                 for generating validation data. Only useful if 
+                                 ``type(validation_sims) is int``.
+            ``conf_args``      - optional kwargs passed to the configurator
+                                 before each backprop (update) step.
+            ``val_conf_args``  - optional kwargs passed to the configurator 
+                                 then configuring the validation data.
+            ``net_args``       - optional kwargs passed to the amortizer
 
         Returns
         -------
         losses : dict or pandas.DataFrame
             A dictionary storing the losses across epochs and iterations
         """
+
+        assert self.generative_model is not None, "No generative model found. Only offline training is possible!"
 
         # Compile update function, if specified
         if use_autograph:
@@ -355,6 +369,7 @@ class Trainer:
         # Create new optimizer and initialize loss history
         self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
         self.loss_history.start_new_run()
+        validation_sims = self._config_validation(validation_sims, **kwargs.pop('val_model_args', {}))
         for ep in range(1, epochs + 1):
             with tqdm(total=iterations_per_epoch, desc=f'Training epoch {ep}') as p_bar:
                 for it in range(1, iterations_per_epoch + 1):
@@ -378,8 +393,9 @@ class Trainer:
                     p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
 
-            # Store after each epoch, if specified
+            # Store and compute validation loss, if specified
             self._save_trainer(save_checkpoint)
+            self._validation(ep, validation_sims, **kwargs)
 
         # Remove optimizer reference, if not set as persistent
         if not reuse_optimizer:
@@ -417,14 +433,26 @@ class Trainer:
         use_autograph     : bool, optional, default: True
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
             could also be harder to debug.
-        validation_sims      : dict or None, optional, default: None
-            Simulations used for validation. Will call ``amortizer.compute_loss(configurator(validation_sims))''
-            after each epoch, so the above should go through!
-        **kwargs          : dict, optional
+        validation_sims      : dict, int, or None, optional, default: None
+            Simulations used as a "validation set".
+            If ``dict``, will assume it's the output of a generative model and try 
+            ``amortizer.compute_loss(configurator(validation_sims))''
+            after each epoch.
+            If ``int``, will assume it's the number of sims to generate from the generative
+            model before starting training. Only considered if a generative model has been 
+            provided during initialization.
+            If ``None`` (default), no validation set will be used.
+        **kwargs             : dict, optional
             Optional keyword arguments, which can be:
-            ``model_args`` - optional keyword arguments passed to the generative model
-            ``conf_args``  - optional keyword arguments passed to the configurator
-            ``net_args``   - optional keyword arguments passed to the amortizer
+            ``model_args``     - optional kwargs passed to the generative model
+            ``val_model_args`` - optional kwargs passed to the generative model
+                                 for generating validation data. Only useful if 
+                                 ``type(validation_sims) is int``.
+            ``conf_args``      - optional kwargs passed to the configurator
+                                 before each backprop (update) step.
+            ``val_conf_args``  - optional kwargs passed to the configurator 
+                                 then configuring the validation data.
+            ``net_args``       - optional kwargs passed to the amortizer
 
         Returns
         -------
@@ -438,14 +466,13 @@ class Trainer:
         else:
             _backprop_step = backprop_step
 
-        # Convert to custom data set
+        # Inits
         data_set = SimulationDataset(simulations_dict, batch_size)
-        # Prepare optimizer and initislize loss history
         self._setup_optimizer(optimizer, epochs, len(data_set.data))
-
         self.loss_history.start_new_run()
+        validation_sims = self._config_validation(validation_sims, **kwargs.pop('val_model_args', {}))
+        # Loop through epochs
         for ep in range(1, epochs+1):
-
             with tqdm(total=len(data_set.data), desc='Training epoch {}'.format(ep)) as p_bar:
                 # Loop through dataset
                 for bi, forward_dict in enumerate(data_set, start=1):
@@ -470,13 +497,9 @@ class Trainer:
                     p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
 
-            # Store after each epoch, if specified
-            if self.manager is not None and save_checkpoint:
-                self._save_trainer(save_checkpoint)
-
-            #TODO Handle validation
-            if validation_sims is not None:
-                pass
+            # Store and compute validation loss, if specified
+            self._save_trainer(save_checkpoint)
+            self._validation(ep, validation_sims, **kwargs)
 
         # Remove optimizer reference, if not set as persistent
         if not reuse_optimizer:
@@ -619,7 +642,7 @@ class Trainer:
 
     def train_experience_replay(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, 
                                 optimizer=None, reuse_optimizer=False, buffer_capacity=1000, optional_stopping=True, 
-                                use_autograph=True, **kwargs):
+                                use_autograph=True, validation_sims=None, **kwargs):
         """Trains the network(s) via experience replay using a memory replay buffer, as utilized
         in reinforcement learning. Additional keyword arguments are passed to the generative mode, 
         configurator, and amortizer. Read below for signature.
@@ -647,17 +670,32 @@ class Trainer:
             Max number of batches to store in buffer. For instance, if ``batch_size=32``
             and ``capacity_in_batches=1000``, then the buffer will hold a maximum of
             32 * 1000 = 32000 simulations. Be careful with memory!
+            Important! Argument will be ignored if buffer has previously been initialized!
         optional_stopping    : bool, optional, default: True
             Whether to use optional stopping or not during training. Could speed up training.
         use_autograph        : bool, optional, default: True
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
             could also be harder to debug.
-            Important! Argument will be ignored if buffer has previously been initialized!
+        validation_sims      : dict or None, optional, default: None
+            Simulations used as a "validation set".
+            If ``dict``, will assume it's the output of a generative model and try 
+            ``amortizer.compute_loss(configurator(validation_sims))''
+            after each epoch.
+            If ``int``, will assume it's the number of sims to generate from the generative
+            model before starting training. Only considered if a generative model has been 
+            provided during initialization.
+            If ``None`` (default), no validation set will be used.
         **kwargs             : dict, optional, default: {}
             Optional keyword arguments, which can be:
-            ``model_args`` - optional keyword arguments passed to the generative model
-            ``conf_args``  - optional keyword arguments passed to the configurator
-            ``net_args``   - optional keyword arguments passed to the amortizer
+            ``model_args``     - optional kwargs passed to the generative model
+            ``val_model_args`` - optional kwargs passed to the generative model
+                                 for generating validation data. Only useful if 
+                                 ``type(validation_sims) is int``.
+            ``conf_args``      - optional kwargs passed to the configurator
+                                 before each backprop (update) step.
+            ``val_conf_args``  - optional kwargs passed to the configurator 
+                                 then configuring the validation data.
+            ``net_args``       - optional kwargs passed to the amortizer
 
         Returns
         -------
@@ -665,23 +703,25 @@ class Trainer:
             A dictionary or a data frame storing the losses across epochs and iterations.
         """
 
+        assert self.generative_model is not None, "No generative model found. Only offline training is possible!"
+
         # Compile update function, if specified
         if use_autograph:
             _backprop_step = tf.function(backprop_step, reduce_retracing=True)
         else:
             _backprop_step = backprop_step
 
-        # Create new optimizer and initialize loss history
+        # Inits
         self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
         self.loss_history.start_new_run()
         if self.replay_buffer is None:
             self.replay_buffer = MemoryReplayBuffer(buffer_capacity)
-
-        # For each epoch, simulate, configure, add to replay buffer, sample from buffer and optimize
+        validation_sims = self._config_validation(validation_sims)
+        # Loop through epochs
         for ep in range(1, epochs + 1):
             with tqdm(total=iterations_per_epoch, desc=f'Training epoch {ep}') as p_bar:
                 for it in range(1, iterations_per_epoch + 1):
-                    
+
                     # Simulate a batch of data and store into buffer
                     input_dict = self._forward_inference(batch_size, 
                         **kwargs.pop('conf_args', {}), **kwargs.pop('model_args', {}))
@@ -709,8 +749,9 @@ class Trainer:
                     p_bar.set_postfix_str(disp_str)
                     p_bar.update(1)
 
-            # Store after each epoch, if specified
+            # Store and compute validation loss, if specified
             self._save_trainer(save_checkpoint)
+            self._validation(ep, validation_sims, **kwargs)
 
         # Remove optimizer reference, if not set as persistent
         if not reuse_optimizer:
@@ -719,7 +760,7 @@ class Trainer:
 
     def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, 
                      optimizer=None, reuse_optimizer=False, optional_stopping=True, use_autograph=True,
-                     **kwargs):
+                     validation_sims=None, **kwargs):
         """Trains an amortizer via round-based learning. In each round, ``sim_per_round`` data sets
         are simulated from the generative model and added to the data sets simulated in previous 
         round. Then, the networks are trained for ``epochs`` on the augmented set of data sets.
@@ -754,11 +795,26 @@ class Trainer:
         use_autograph        : bool, optional, default: True
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
             could also be harder to debug.
+        validation_sims      : dict or None, optional, default: None
+            Simulations used as a "validation set".
+            If ``dict``, will assume it's the output of a generative model and try 
+            ``amortizer.compute_loss(configurator(validation_sims))''
+            after each epoch.
+            If ``int``, will assume it's the number of sims to generate from the generative
+            model before starting training. Only considered if a generative model has been 
+            provided during initialization.
+            If ``None`` (default), no validation set will be used.
         **kwargs             : dict, optional
             Optional keyword arguments, which can be:
-            ``model_args`` - optional keyword arguments passed to the generative model
-            ``conf_args``  - optional keyword arguments passed to the configurator
-            ``net_args``   - optional keyword arguments passed to the amortizer
+            ``model_args``     - optional kwargs passed to the generative model
+            ``val_model_args`` - optional kwargs passed to the generative model
+                                 for generating validation data. Only useful if 
+                                 ``type(validation_sims) is int``.
+            ``conf_args``      - optional kwargs passed to the configurator
+                                 before each backprop (update) step.
+            ``val_conf_args``  - optional kwargs passed to the configurator 
+                                 then configuring the validation data.
+            ``net_args``       - optional kwargs passed to the amortizer
 
         Returns
         -------
@@ -766,15 +822,17 @@ class Trainer:
             A dictionary or a data frame storing the losses across epochs and iterations
         """
 
+        assert self.generative_model is not None, "No generative model found. Only offline training is possible!"
+
         # Prepare logger
         logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
 
         # Create new optimizer and initialize loss history, needs to calculate iters per epoch
         batches_per_sim = np.ceil(sim_per_round / batch_size)
         sum_total = (rounds + rounds**2) / 2
         iterations_per_epoch = int(batches_per_sim * sum_total)
         self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
+        validation_sims = self._config_validation(validation_sims)
 
         # Loop for each round
         first_round = True
@@ -782,13 +840,13 @@ class Trainer:
             # Data generation step
             if first_round:
                 # Simulate initial data
-                logger.info(f'Simulating initial {sim_per_round} data sets...')
+                logger.info(f'Simulating initial {sim_per_round} data sets for training...')
                 simulations_dict = self._forward_inference(sim_per_round, configure=False, **kwargs)
                 first_round = False
             else:
                 # Simulate further data
                 logger.info(f'Simulating new {sim_per_round} data sets and appending to previous...')
-                logger.info(f'New total number of simulated data sets: {sim_per_round * r}')
+                logger.info(f'New total number of simulated data sets for training: {sim_per_round * r}')
                 simulations_dict_r = self._forward_inference(sim_per_round, configure=False, **kwargs)
 
                 # Attempt to concatenate data sets
@@ -797,14 +855,33 @@ class Trainer:
                         simulations_dict[k] = np.concatenate((simulations_dict[k], simulations_dict_r[k]), axis=0)
 
             # Train offline with generated stuff
-            _ = self.train_offline(
-                simulations_dict, epochs, batch_size, save_checkpoint, reuse_optimizer=True, 
-                optional_stopping=optional_stopping, use_autograph=use_autograph, **kwargs)
+            _ = self.train_offline(simulations_dict, epochs, batch_size, save_checkpoint, 
+                reuse_optimizer=True, optional_stopping=optional_stopping, use_autograph=use_autograph, 
+                validation_sims=validation_sims, **kwargs)
 
         # Remove optimizer reference, if not set as persistent
         if not reuse_optimizer:
             self.optimizer = None
         return self.loss_history.get_plottable()
+
+    def _config_validation(self, validation_sims, **kwargs):
+        """Helper method to prepare validation set based on user input."""
+
+        logger = logging.getLogger()
+        if validation_sims is None:
+            return None
+        if type(validation_sims) is dict:
+            return validation_sims
+        if type(validation_sims) is int:
+            if self.generative_model is not None:
+                vals = self.generative_model(validation_sims, **kwargs)
+                logger.info(f'Generated {validation_sims} simulations for validation.')
+                return vals
+            else:
+                logger.warn('Validation simulations can only be generated if the Trainer is initialized ' + 
+                            'with a generative model.')
+                return None
+        logger.warn('Type of argument "validation_sims" not understood. No validation simulations were created.')
 
     def _setup_optimizer(self, optimizer, epochs, iterations_per_epoch):
         """Helper method to prepare optimizer based on user input."""
@@ -837,6 +914,14 @@ class Trainer:
             if self.simulation_memory is not None:
                 self.simulation_memory.save_to_file(file_path=self.checkpoint_path)
 
+    def _validation(self, ep, validation_sims, **kwargs):
+        """Helper method to take care of computing the validation loss(es)."""
+
+        if validation_sims is not None:
+            conf = self.configurator(validation_sims,  **kwargs.pop('val_conf_args', {}))
+            val_loss = self.amortizer.compute_loss(conf, **kwargs.pop('net_args', {}))
+            self.loss_history.add_val_entry(ep, val_loss)
+
     def _check_optional_stopping(self):
         """Helper method for checking optional stopping. Resets the adjuster
         if a stopping recommendation is issued. 
@@ -847,7 +932,6 @@ class Trainer:
         if self.lr_adjuster.stopping_issued:
             self.lr_adjuster.reset()
             logger = logging.getLogger()
-            logger.setLevel(logging.INFO)
             logger.info('Optional stopping triggered.')
             return True
         return False
