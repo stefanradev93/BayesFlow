@@ -69,7 +69,8 @@ def _create_training_setup(mode):
 
 @pytest.mark.parametrize("mode", ['posterior', 'likelihood'])
 @pytest.mark.parametrize("reuse_optimizer", [True, False])
-def test_train_online(mode, reuse_optimizer):
+@pytest.mark.parametrize("validation_sims", [20, None])
+def test_train_online(mode, reuse_optimizer, validation_sims):
     """Tests the online training functionality."""
 
     # Create trainer and train online
@@ -80,8 +81,7 @@ def test_train_online(mode, reuse_optimizer):
         batch_size=8, 
         use_autograph=False,
         reuse_optimizer=reuse_optimizer,
-        skip_checks=True,
-        memory=False,
+        validation_sims=validation_sims
     )
 
     # Assert (non)-existence of optimizer
@@ -90,22 +90,28 @@ def test_train_online(mode, reuse_optimizer):
     else:
         assert trainer.optimizer is None
 
-    # Assert type of history is data frame, meaning
-    # losses were stored in the correct format
-    assert type(h) is DataFrame
+    # Ensure losses were stored in the correct format
+    if validation_sims is None:
+        assert type(h) is DataFrame
+    else:
+        assert type(h) is dict
+        assert type(h['train_losses']) is DataFrame
+        assert type(h['val_losses']) is DataFrame
 
 
 @pytest.mark.parametrize("mode", ['posterior', 'joint'])
 @pytest.mark.parametrize("reuse_optimizer", [True, False])
-def test_train_experience_replay(mode, reuse_optimizer):
+@pytest.mark.parametrize("validation_sims", [20, None])
+def test_train_experience_replay(mode, reuse_optimizer, validation_sims):
     """Tests the experience replay training functionality."""
 
     # Create trainer and train with experience replay
     trainer = _create_training_setup(mode)
     h = trainer.train_experience_replay(
         epochs=3, 
-        iterations_per_epoch=2, 
+        iterations_per_epoch=4, 
         batch_size=8, 
+        validation_sims=validation_sims,
         reuse_optimizer=reuse_optimizer
     )
 
@@ -115,14 +121,19 @@ def test_train_experience_replay(mode, reuse_optimizer):
     else:
         assert trainer.optimizer is None
 
-    # Assert type of history is data frame, meaning
-    # losses were stored in the correct format
-    assert type(h) is DataFrame
+    # Ensure losses were stored in the correct format
+    if validation_sims is None:
+        assert type(h) is DataFrame
+    else:
+        assert type(h) is dict
+        assert type(h['train_losses']) is DataFrame
+        assert type(h['val_losses']) is DataFrame
 
 
 @pytest.mark.parametrize("mode", ['likelihood', 'joint'])
 @pytest.mark.parametrize("reuse_optimizer", [True, False])
-def test_train_offline(mode, reuse_optimizer):
+@pytest.mark.parametrize("validation_sims", [20, None])
+def test_train_offline(mode, reuse_optimizer, validation_sims):
     """Tests the offline training functionality."""
 
     # Create trainer and data and train offline
@@ -133,6 +144,7 @@ def test_train_offline(mode, reuse_optimizer):
         epochs=2, 
         batch_size=16,
         use_autograph=True,
+        validation_sims=validation_sims,
         reuse_optimizer=reuse_optimizer,
     )
 
@@ -142,14 +154,19 @@ def test_train_offline(mode, reuse_optimizer):
     else:
         assert trainer.optimizer is None
 
-    # Assert type of history is data frame, meaning
-    # losses were stored in the correct format
-    assert type(h) is DataFrame
+    # Ensure losses were stored in the correct format
+    if validation_sims is None:
+        assert type(h) is DataFrame
+    else:
+        assert type(h) is dict
+        assert type(h['train_losses']) is DataFrame
+        assert type(h['val_losses']) is DataFrame
 
 
 @pytest.mark.parametrize("mode", ['likelihood', 'posterior'])
 @pytest.mark.parametrize("reuse_optimizer", [True, False])
-def test_train_rounds(mode, reuse_optimizer):
+@pytest.mark.parametrize("validation_sims", [20, None])
+def test_train_rounds(mode, reuse_optimizer, validation_sims):
     """Tests the offline training functionality."""
 
     # Create trainer and data and train offline
@@ -159,6 +176,7 @@ def test_train_rounds(mode, reuse_optimizer):
         sim_per_round=32,
         epochs=2, 
         batch_size=8, 
+        validation_sims=validation_sims,
         reuse_optimizer=reuse_optimizer,
     )
 
@@ -168,6 +186,10 @@ def test_train_rounds(mode, reuse_optimizer):
     else:
         assert trainer.optimizer is None
 
-    # Assert type of history is data frame, meaning
-    # losses were stored in the correct format
-    assert type(h) is DataFrame
+    # Ensure losses were stored in the correct format
+    if validation_sims is None:
+        assert type(h) is DataFrame
+    else:
+        assert type(h) is dict
+        assert type(h['train_losses']) is DataFrame
+        assert type(h['val_losses']) is DataFrame
