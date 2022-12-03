@@ -29,7 +29,7 @@ class SummaryStatsError(Exception):
 
 
 class LossError(Exception):
-    """ Class for error in applying loss. """
+    """Class for error in applying loss. """
     pass
 
 
@@ -39,7 +39,7 @@ class ShapeError(Exception):
 
 
 class ConfigurationError(Exception):
-    """ Class for error in model configuration, e.g. in meta dict"""
+    """Class for error in model configuration, e.g. in meta dict"""
     pass
 
 
@@ -50,6 +50,6 @@ class InferenceError(Exception):
 
 class OperationNotSupportedError(Exception):
     """Class for error that occurs when an operation is demanded but not supported,
-    e.g. when a trainer is initialized without generative model but the user demands it to simulate data.
+    e.g., when a trainer is initialized without generative model but the user demands it to simulate data.
     """
     pass
