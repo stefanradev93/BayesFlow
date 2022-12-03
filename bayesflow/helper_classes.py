@@ -305,18 +305,69 @@ class LossHistory:
 
     def __init__(self):
         self.history = {}
+        self.val_history = {}
         self.loss_names = []
+        self.val_loss_names = []
+        self.latest = 0
         self._current_run = 0
         self._total_loss = []
-        self.latest = 0
+        self._total_val_loss = []
 
     @property
     def total_loss(self):
         return np.array(self._total_loss)
 
+    @property
+    def total_val_loss(self):
+        return np.array(self._total_val_loss)
+
     def start_new_run(self):
         self._current_run += 1
         self.history[f'Run {self._current_run}'] = {}
+        self.val_history[f'Run {self._current_run}'] = {}
+
+    def add_val_entry(self, epoch, val_loss):
+        """Add validation entry to loss structure. Assume ``loss_names`` already exists
+        as an attribute, so no attempt will be made to create names.
+        """
+
+        # Add epoch key, if specified
+        if self.val_history[f'Run {self._current_run}'].get(f'Epoch {epoch}') is None:
+            self.val_history[f'Run {self._current_run}'][f'Epoch {epoch}'] = []
+
+        # Handle dict loss output
+        if type(val_loss) is dict:
+            # Store keys, if none existing
+            if self.val_loss_names == []:
+                self.val_loss_names = ['Val.' + k for k in val_loss.keys()]
+
+            # Create and store entry
+            entry = [v.numpy() if type(v) is not np.ndarray else v for v in val_loss.values()]
+            self.val_history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(entry)
+
+            # Add entry to total loss
+            self._total_val_loss.append(sum(entry))
+
+        # Handle tuple or list loss output
+        elif type(val_loss) is tuple or type(val_loss) is list:
+            entry = [v.numpy() if type(v) is not np.ndarray else v for v in val_loss]
+            self.val_history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(entry)
+            # Store keys, if none existing
+            if self.val_loss_names == []:
+                self.val_loss_names = [f'Val.Loss.{l}' for l in range(1, len(entry)+1)]
+
+            # Add entry to total loss
+            self._total_val_loss.append(sum(entry))
+
+        # Assume scalar loss output
+        else:
+            self.val_history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(val_loss.numpy())
+            # Store keys, if none existing
+            if self.val_loss_names == []:
+                self.val_loss_names.append('Default.Val.Loss')
+
+            # Add entry to total loss
+            self._total_val_loss.append(val_loss.numpy())
 
     def add_entry(self, epoch, current_loss):
         """Adds loss entry for current epoch into internal memory data structure."""
@@ -330,7 +381,7 @@ class LossHistory:
             # Store keys, if none existing
             if self.loss_names == []:
                 self.loss_names = [k for k in current_loss.keys()]
-            
+
             # Create and store entry
             entry = [v.numpy() if type(v) is not np.ndarray else v for v in current_loss.values()]
             self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(entry)
@@ -348,14 +399,14 @@ class LossHistory:
 
             # Add entry to total loss
             self._total_loss.append(sum(entry))
-        
+
         # Assume scalar loss output
         else:
             self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(current_loss.numpy())
             # Store keys, if none existing
             if self.loss_names == []:
                 self.loss_names.append('Default.Loss')
-            
+
             # Add entry to total loss
             self._total_loss.append(current_loss.numpy())
 
@@ -373,57 +424,65 @@ class LossHistory:
 
         # Assume equal lengths per epoch and run
         try:
-            losses_list = [pd.melt(pd.DataFrame.from_dict(self.history[r], orient='index').T) for r in self.history]
-            losses_list = pd.concat(losses_list, axis=0).value.to_list()
-            losses_list = [l for l in losses_list if l is not None]
-            losses_df = pd.DataFrame(losses_list, columns=self.loss_names)
+            losses_df = self._to_data_frame(self.history)
+            if self.val_history:
+                val_losses_df = self._to_data_frame(self.val_history)
+                return {'train_losses': losses_df, 'val_losses': val_losses_df}
             return losses_df
         # Handle unequal lengths or problems when user kills training with an interrupt
         except ValueError as ve:
+            if self.val_history:
+                {'train_losses': losses_df, 'val_losses': val_losses_df}
             return self.history
         except TypeError as te:
+            if self.val_history:
+                {'train_losses': losses_df, 'val_losses': val_losses_df}
             return self.history
 
     def flush(self):
-        """Returns current history and removes all existing loss history."""
+        """Returns current history and removes all existing loss history, but keeps loss names."""
 
-        h = self.history
+        history = self.history
+        val_history = self.val_history
         self.history = {}
+        self.val_history = {}
+        self._total_loss = []
+        self._total_val_loss = []
         self._current_run = 0
-        return h
+        return history, val_history
 
     def get_copy(self):
         return deepcopy(self.history)
-    
+
     def save_to_file(self, file_path, max_to_keep):
         """Saves a `LossHistory` object to a pickled dictionary in file_path.
          If max_to_keep saved loss history files are found in file_path, the oldest is deleted before a new one is saved.
          """
-        
+
         # Increment history index
         self.latest += 1
-        
+
         # Path to history
         history_path = os.path.join(file_path, f'{LossHistory.file_name}_{self.latest}.pkl')
-        
+
         # Prepare full history dict 
         full_history_dict = self.get_copy()
         full_history_dict['loss_names'] = self.loss_names
         full_history_dict['_current_run'] = self._current_run
         full_history_dict['_total_loss'] = self._total_loss
-        
+
         # Pickle current
         with open(history_path, 'wb') as f:
             pickle.dump(full_history_dict, f)
-        
+
         # Get list of history checkpoints
         history_checkpoints_list = [l for l in os.listdir(file_path) if 'history' in l]
-            
+
         # Determine the oldest saved loss history and remove it
         if len(history_checkpoints_list) > max_to_keep:
             oldest_history_path = os.path.join(file_path, f'history_{self.latest-max_to_keep}.pkl')
             os.remove(oldest_history_path)
-            
+
     def load_from_file(self, file_path):
         """Loads the most recent saved `LossHistory` object from `file_path`."""
 
@@ -436,7 +495,7 @@ class LossHistory:
             history_checkpoints_list = [l for l in os.listdir(file_path) if LossHistory.file_name in l]
         else:
             history_checkpoints_list = []
-        
+
         # Case history list is not empty
         if len(history_checkpoints_list) > 0:
             
@@ -445,24 +504,33 @@ class LossHistory:
             latest_file = history_checkpoints_list[np.argmax(file_numbers)]
             latest_number = np.max(file_numbers)
             latest_path = os.path.join(file_path, latest_file)
-            
+
             # Load dictionary
             with open(latest_path, 'rb') as f:
                 full_history_dict = pickle.load(f)
-                
+
             # Fill entries
             self.latest = latest_number
             self._total_loss = full_history_dict['_total_loss']
             self._current_run = full_history_dict['_current_run']
             self.loss_names = full_history_dict['loss_names']
             self.history = {k:v for k, v in full_history_dict.items() if k not in ['_total_loss', '_current_run', 'loss_names']}
-            
+
             # Verbose
             logger.info(f"Loaded loss history from {latest_path}")
 
         # Case history list is empty
         else:
             logger.info("Initialized empty loss history.")
+
+    def _to_data_frame(self, history):
+        """Helper function to convert a history dict into a DataFrame."""
+
+        losses_list = [pd.melt(pd.DataFrame.from_dict(history[r], orient='index').T) for r in history]
+        losses_list = pd.concat(losses_list, axis=0).value.to_list()
+        losses_list = [l for l in losses_list if l is not None]
+        losses_df = pd.DataFrame(losses_list, columns=self.loss_names)
+        return losses_df
 
 
 class SimulationMemory:
