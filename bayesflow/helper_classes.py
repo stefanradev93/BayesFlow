@@ -420,23 +420,25 @@ class LossHistory:
             return {'Avg.' + k: v for k, v in zip(self.loss_names, means)}
 
     def get_plottable(self):
-        """Returns the losses as a nicely formatted pandas DataFrame."""
+        """Returns the losses as a nicely formatted pandas DataFrame, in case
+        only train losses were collected, otherwise a dict of data frames.
+        """
 
         # Assume equal lengths per epoch and run
         try:
             losses_df = self._to_data_frame(self.history)
-            if self.val_history:
+            if any([v for v in self.val_history.values()]):
                 val_losses_df = self._to_data_frame(self.val_history)
                 return {'train_losses': losses_df, 'val_losses': val_losses_df}
             return losses_df
         # Handle unequal lengths or problems when user kills training with an interrupt
         except ValueError as ve:
-            if self.val_history:
-                {'train_losses': losses_df, 'val_losses': val_losses_df}
+            if any([v for v in self.val_history.values()]):
+                return {'train_losses': losses_df, 'val_losses': val_losses_df}
             return self.history
         except TypeError as te:
-            if self.val_history:
-                {'train_losses': losses_df, 'val_losses': val_losses_df}
+            if any([v for v in self.val_history.values()]):
+                return {'train_losses': losses_df, 'val_losses': val_losses_df}
             return self.history
 
     def flush(self):
