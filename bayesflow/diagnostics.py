@@ -30,7 +30,6 @@ import logging
 logging.basicConfig()
 
 from bayesflow.computational_utilities import expected_calibration_error, simultaneous_ecdf_bands
-from bayesflow.helper_classes import LossHistory
 from bayesflow.helper_functions import check_posterior_prior_shapes
 
 
@@ -75,11 +74,11 @@ def plot_recovery(post_samples, prior_samples, point_agg=np.median, uncertainty_
     metric_fontsize   : int, optional, default: 16
         The font size of the goodness-of-fit metric (if provided)
     add_corr          : bool, optional, default: True
-        A flag for adding correlation between true and estimates to the plot.
+        A flag for adding correlation between true and estimates to the plot
     add_r2            : bool, optional, default: True
-        A flag for adding R^2 between true and estimates to the plot.
+        A flag for adding R^2 between true and estimates to the plot
     color             : str, optional, default: '#8f2727'
-        The color for the true vs. estimated scatter points and errobars.
+        The color for the true vs. estimated scatter points and errobars
         
     Returns
     -------
@@ -325,7 +324,7 @@ def plot_sbc_histograms(post_samples, prior_samples, param_names=None, fig_size=
     param_names       : list or None, optional, default: None
         The parameter names for nice plot titles. Inferred if None
     fig_size          : tuple or None, optional, default : None
-        The figure size passed to the matplotlib constructor. Inferred if None.
+        The figure size passed to the matplotlib constructor. Inferred if None
     num_bins          : int, optional, default: 10
         The number of bins to use for each marginal histogram
     binomial_interval : float in (0, 1), optional, default: 0.95
@@ -425,18 +424,18 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
         will be used.
     param_names       : list or None, optional, default: None
         The parameter names for nice plot titles. Inferred if None
-    height            : float, optional, default: 3.
-        The height of the pairplot.
+    height            : float, optional, default: 3
+        The height of the pairplot
     legend_fontsize   : int, optional, default: 14
-        The font size of the legend text.
+        The font size of the legend text
     post_color        : str, optional, default: '#8f2727'
-        The color for the posterior histograms and KDEs.
+        The color for the posterior histograms and KDEs
     priors_color      : str, optional, default: gray
-        The color for the optional prior histograms and KDEs.
+        The color for the optional prior histograms and KDEs
     post_alpha        : float in [0, 1], optonal, default: 0.9
-        The opacity of the posterior plots.
+        The opacity of the posterior plots
     prior_alpha       : float in [0, 1], optonal, default: 0.7
-        The opacity of the prior plots.
+        The opacity of the prior plots
 
     Returns
     -------
@@ -464,7 +463,7 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
     # Otherwise, keep as is (prior_draws either filled or None)
     else:
         pass
-    
+
     # Attempt to determine parameter names
     if param_names is None:
         if hasattr(prior, 'param_names'):
@@ -509,51 +508,99 @@ def plot_posterior_2d(posterior_draws, prior=None, prior_draws=None, param_names
     return g.fig
 
 
-def plot_losses(history, fig_size=None, color='#8f2727', label_fontsize=14, title_fontsize=16):
+def plot_losses(train_losses, val_losses=None, fig_size=None, train_color='#8f2727', val_color='black',
+                lw_train=2, lw_val=3, grid_alpha=0.5, legend_fontsize=14, label_fontsize=14, title_fontsize=16):
     """A generic helper function to plot the losses of a series of training epochs and runs.
-    
+
     Parameters
     ----------
-    
-    history : pd.DataFrame or bayesflow.LossHistory object
-        The (plottable) history as returned by a train_[...] method of a `Trainer` instance.
-        
+
+    train_losses      : pd.DataFrame
+        The (plottable) history as returned by a train_[...] method of a ``Trainer`` instance.
+        Alternatively, you can just pass a data frame of validation losses instead of train losses,
+        if you only want to plot the validation loss.
+    val_losses        : pd.DataFrame or None, optional, default: None
+        The (plottable) validation history as returned by a train_[...] method of a ``Trainer`` instance.
+        If left ``None``, only train losses are plotted. Should have the same number of columns
+        as ``train_losses``.
+    fig_size          : tuple or None, optional, default: None
+        The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
+    train_color       : str, optional, default: '#8f2727'
+        The color for the train loss trajectory
+    val_color         : str, optional, default: black
+        The color for the optional validation loss trajectory
+    lw_train          : int, optional, default: 2
+        The linewidth for the training loss curve
+    lw_val            : int, optional, default: 3
+        The linewidth for the validation loss curve
+    grid_alpha        : float, optional, default 0.5
+        The opacity factor for the background gridlines
+    legend_fontsize   : int, optional, default: 14
+        The font size of the legend text
+    label_fontsize    : int, optional, default: 14
+        The font size of the y-label text
+    title_fontsize    : int, optional, default: 16
+        The font size of the title text
+
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
+
+    Raises
+    ------
+    AssertionError
+        If the number of columns in ``train_losses`` does not match the
+        number of columns in ``val_losses``.
     """
 
-    # Handle non-pd.DataFrame type
-    if type(history) is LossHistory:
-        history = history.get_plottable()
-    
+
+    # Sanity check for number of columns
+    if val_losses is not None:
+        assert train_losses.shape[1] == val_losses.shape[1], "Data frames should have the same number of columns!"
+
     # Determine the number of rows for plot
-    n_row = len(history.columns)
-    
+    n_row = len(train_losses.columns)
+
     # Initialize figure
     if fig_size is None:
         fig_size = (16, int(4 * n_row))
     f, axarr = plt.subplots(n_row, 1, figsize=fig_size)
-    
+
     # Get the number of steps as an array
-    step_index = np.arange(1, len(history)+1)
-    
+    train_step_index = np.arange(1, len(train_losses)+1)
+    if val_losses is not None:
+        val_step = int(np.floor(len(train_losses) / len(val_losses)))
+        val_step_index = np.arange(val_step, len(train_losses)+1, step=val_step)
+        # Fix time step, if kernel has been interrupted
+        if val_step_index.shape[0] > val_losses.shape[1]:
+            val_step_index = val_step_index[:-1]
+
     # Loop through loss entries and populate plot
     looper = [axarr] if n_row == 1 else axarr.flat
     for i, ax in enumerate(looper):
-        ax.plot(step_index, history.iloc[:, i], color=color, lw=2)
+        # Plot train curve
+        ax.plot(train_step_index, train_losses.iloc[:, i], color=train_color, lw=lw_train, 
+                alpha=0.9, label='Training')
+        # Plot optional val curve
+        if val_losses is not None:
+            ax.plot(val_step_index, val_losses.iloc[:, i], linestyle='--', marker='o', 
+                    color=val_color, lw=lw_val, label='Validation')
+        # Schmuck
         ax.set_xlabel('Training step #', fontsize=label_fontsize)
         ax.set_ylabel('Loss value', fontsize=label_fontsize)
         sns.despine(ax=ax)
-        ax.grid(alpha=0.5)
-        ax.set_title(history.columns[i], fontsize=title_fontsize)
+        ax.grid(alpha=grid_alpha)
+        ax.set_title(train_losses.columns[i], fontsize=title_fontsize)
+        # Only add legend if there is a validation curve
+        if val_losses is not None:
+            ax.legend(fontsize=legend_fontsize)
     f.tight_layout()
     return f
 
 
 def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color='#8f2727', **kwargs):
     """Creates pairplots for a given joint prior.
-    
+
     Parameters
     ----------
     prior       : callable 
@@ -659,7 +706,7 @@ def plot_latent_space_2d(z_samples, height=2.5, color='#8f2727', **kwargs):
 
 def plot_calibration_curves(m_true, m_pred, model_names=None, n_bins=10, font_size=12, fig_size=(12, 4)):
     """ Plots the calibration curves and the ECE for a model comparison problem. Depends on the
-    `expected_calibration_error` function for computing the ECE.
+    ``expected_calibration_error`` function for computing the ECE.
 
 
     Parameters
