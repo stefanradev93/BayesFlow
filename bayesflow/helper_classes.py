@@ -304,11 +304,11 @@ class LossHistory:
     file_name = 'history'
 
     def __init__(self):
+        self.latest = 0
         self.history = {}
         self.val_history = {}
         self.loss_names = []
         self.val_loss_names = []
-        self.latest = 0
         self._current_run = 0
         self._total_loss = []
         self._total_val_loss = []
@@ -451,9 +451,6 @@ class LossHistory:
         self._current_run = 0
         return history, val_history
 
-    def get_copy(self):
-        return deepcopy(self.history)
-
     def save_to_file(self, file_path, max_to_keep):
         """Saves a `LossHistory` object to a pickled dictionary in file_path.
          If max_to_keep saved loss history files are found in file_path, the oldest is deleted before a new one is saved.
@@ -465,15 +462,20 @@ class LossHistory:
         # Path to history
         history_path = os.path.join(file_path, f'{LossHistory.file_name}_{self.latest}.pkl')
 
-        # Prepare full history dict 
-        full_history_dict = self.get_copy()
-        full_history_dict['loss_names'] = self.loss_names
-        full_history_dict['_current_run'] = self._current_run
-        full_history_dict['_total_loss'] = self._total_loss
+        # Prepare full history dict
+        pickle_dict = {
+            'history'        : self.history,
+            'val_history'    : self.val_history,
+            'loss_names'     : self.loss_names,
+            'val_loss_names' : self.val_loss_names,
+            '_current_run'   : self._current_run,
+            '_total_loss'    : self._total_loss,
+            '_total_val_loss': self._total_val_loss
+        }
 
         # Pickle current
         with open(history_path, 'wb') as f:
-            pickle.dump(full_history_dict, f)
+            pickle.dump(pickle_dict, f)
 
         # Get list of history checkpoints
         history_checkpoints_list = [l for l in os.listdir(file_path) if 'history' in l]
@@ -507,17 +509,22 @@ class LossHistory:
 
             # Load dictionary
             with open(latest_path, 'rb') as f:
-                full_history_dict = pickle.load(f)
+                loaded_history_dict = pickle.load(f)
 
-            # Fill entries
+            # Fill public entries
             self.latest = latest_number
-            self._total_loss = full_history_dict['_total_loss']
-            self._current_run = full_history_dict['_current_run']
-            self.loss_names = full_history_dict['loss_names']
-            self.history = {k:v for k, v in full_history_dict.items() if k not in ['_total_loss', '_current_run', 'loss_names']}
+            self.history = loaded_history_dict.get('history', {})
+            self.val_history = loaded_history_dict.get('val_history', {})
+            self.loss_names = loaded_history_dict.get('loss_names', [])
+            self.val_loss_names = loaded_history_dict.get('val_loss_names', [])
+
+            # Fill private entries
+            self._current_run = loaded_history_dict.get('_current_run', 0)
+            self._total_loss = loaded_history_dict.get('_total_loss', [])
+            self._total_val_loss = loaded_history_dict.get('_total_val_loss', [])
 
             # Verbose
-            logger.info(f"Loaded loss history from {latest_path}")
+            logger.info(f"Loaded loss history from {latest_path}.")
 
         # Case history list is empty
         else:
