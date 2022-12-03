@@ -570,10 +570,11 @@ def plot_losses(train_losses, val_losses=None, fig_size=None, train_color='#8f27
     train_step_index = np.arange(1, len(train_losses)+1)
     if val_losses is not None:
         val_step = int(np.floor(len(train_losses) / len(val_losses)))
-        val_step_index = np.arange(val_step, len(train_losses)+1, step=val_step)
-        # Fix time step, if kernel has been interrupted
-        if val_step_index.shape[0] > val_losses.shape[1]:
-            val_step_index = val_step_index[:-1]
+        val_step_index = train_step_index[(val_step-1)::val_step]
+
+        # If unequal length due to some reason, attempt a fix
+        if val_step_index.shape[0] > val_losses.shape[0]:
+            val_step_index = val_step_index[:val_losses.shape[0]]
 
     # Loop through loss entries and populate plot
     looper = [axarr] if n_row == 1 else axarr.flat
