@@ -249,7 +249,7 @@ class DefaultModelComparisonConfigurator:
         else:
             self.config = config
         self.default_float_type = default_float_type
-        
+    
     def __call__(self, forward_dict):
         """ Convert all variables to arrays and combines them for inference into a dictionary with
         the following keys, if DEFAULT_KEYS dictionary unchanged:
