@@ -432,7 +432,7 @@ class MultiConv1D(tf.keras.Model):
     """Implements an inception-inspired 1D convolutional layer using different kernel sizes."""
 
     def __init__(self, meta, **kwargs):
-        """ Creates an inception-like Conv1D layer
+        """Creates an inception-like Conv1D layer
 
         Parameters
         ----------
@@ -441,7 +441,7 @@ class MultiConv1D(tf.keras.Model):
         """
 
         super().__init__(**kwargs)
-        
+
         # Create a list of Conv1D layers with different kernel sizes
         # ranging from 'min_kernel_size' to 'max_kernel_size'
         self.convs = [
@@ -468,7 +468,7 @@ class MultiConv1D(tf.keras.Model):
         out : tf.Tensor
             Output of shape (batch_size, n_time_steps, n_filters)
         """
-        
+
         out = self._multi_conv(x, **kwargs)
         out = self.dim_red(out, **kwargs)
         return out
