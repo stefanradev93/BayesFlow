@@ -84,6 +84,58 @@ class SimulationDataset:
         return map(self, self.data)
 
 
+class EarlyStopper:
+    """This class will track the total validation loss and trigger an early stopping
+    recommendation based on its hyperparameters."""
+
+    def __init__(self, patience=5, tolerance=0.1):
+        """
+
+        patience          : int, optional, default: 5
+            How many successive times the tolerance value is reached before triggering
+            an early stopping recommendation.
+        tolerance         : float, optional, default: 0.05
+            The minimum reduction of validation loss to be considered significant.
+        """
+
+        self.history = []
+        self.patience = patience
+        self.tolerance = tolerance
+        self._patience_counter = 0
+
+    def update_and_recommend(self, current_val_loss):
+        """Adds loss to history and check difference between sequential losses."""
+
+        self.history.append(current_val_loss)
+        rec = self._check_patience()
+        return rec
+
+    def _check_patience(self):
+        """Check whether the patience has been surpassed or not.
+        Assumes current_val_loss has previously been added to the internal
+        history, so it has at least one element.
+        """
+
+        # Still not enough history, no recommendation
+        if len(self.history) <= 1:
+            return False
+        
+        # Significant increase according to tolerance, reset patience
+        if (self.history[-2] - self.history[-1]) >= self.tolerance:
+            self._patience_counter = 0
+            return False
+        # Not a signifcant increase, check counter
+        else:
+            # Still no stop recommendation, but increase counter
+            if self._patience_counter < self.patience:
+                self._patience_counter += 1
+                return False
+            # Reset counter and recommend stop
+            else:
+                self._patience_counter = 0
+                return True
+
+
 class RegressionLRAdjuster:
     """This class will compute the slope of the loss trajectory and inform learning rate decay."""
     
@@ -320,6 +372,12 @@ class LossHistory:
     @property
     def total_val_loss(self):
         return np.array(self._total_val_loss)
+
+    def last_total_loss(self):
+        return self._total_loss[-1]
+
+    def last_total_val_loss(self):
+        return self._total_val_loss[-1]
 
     def start_new_run(self):
         self._current_run += 1

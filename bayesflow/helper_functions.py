@@ -107,6 +107,7 @@ def format_loss_string(ep, it, loss, avg_dict, slope=None, lr=None,
                        ep_str="Epoch", it_str='Iter', scalar_loss_str='Loss'):
     """Prepare loss string for displaying on progress bar."""
 
+    # Prepare info part
     disp_str = f"{ep_str}: {ep}, {it_str}: {it}"
     if type(loss) is dict:
         for k, v in loss.items():
@@ -123,6 +124,20 @@ def format_loss_string(ep, it, loss, avg_dict, slope=None, lr=None,
         disp_str += f",LR: {lr:.2E}"
     return disp_str
 
+
+def loss_to_string(ep, loss, ep_str='Epoch', scalar_loss_str='Loss'):
+    """Converts output from an amortizer into a string. 
+    For instance, if a ``dict`` is provided, it will be converted as, e.g.,:
+    dictionary = {k1: v1, k2: v2} -> 'k1: v1, k2: v2'   
+    """
+
+    disp_str = f'Validation, {ep_str}: {ep}'
+    if type(loss) is dict:
+        for k, v in loss.items():
+            disp_str += f", {k}: {v.numpy():.3f}"
+    else:
+        disp_str  += f", {scalar_loss_str}: {loss.numpy():.3f}"
+    return disp_str
 
 def backprop_step(input_dict, amortizer, optimizer, **kwargs):
     """Computes the loss of the provided amortizer given an input dictionary and applies gradients.

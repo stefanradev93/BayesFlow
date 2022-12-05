@@ -24,7 +24,6 @@ from pickle import load as pickle_load
 from tqdm.autonotebook import tqdm
 
 import logging
-
 logging.basicConfig()
 
 import tensorflow as tf
@@ -32,8 +31,10 @@ import tensorflow as tf
 from bayesflow.simulation import GenerativeModel, MultiGenerativeModel
 from bayesflow.configuration import *
 from bayesflow.exceptions import SimulationError
-from bayesflow.helper_functions import format_loss_string, extract_current_lr, backprop_step
-from bayesflow.helper_classes import SimulationDataset, LossHistory, SimulationMemory, MemoryReplayBuffer
+from bayesflow.helper_functions import (format_loss_string, loss_to_string, 
+                                        extract_current_lr, backprop_step)
+from bayesflow.helper_classes import (SimulationDataset, LossHistory, SimulationMemory, 
+                                      MemoryReplayBuffer, EarlyStopper)
 from bayesflow.default_settings import DEFAULT_KEYS, OPTIMIZER_DEFAULTS
 from bayesflow.amortizers import (AmortizedLikelihood, AmortizedPosterior, 
                                   AmortizedPosteriorLikelihood, AmortizedModelComparison)
@@ -302,7 +303,7 @@ class Trainer:
         return status
 
     def train_online(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, 
-                     optimizer=None, reuse_optimizer=False, optional_stopping=True, use_autograph=True, 
+                     optimizer=None, reuse_optimizer=False, early_stopping=False, use_autograph=True, 
                      validation_sims=None, **kwargs):
         """Trains an amortizer via online learning. Additional keyword arguments
         are passed to the generative mode, configurator, and amortizer.
@@ -326,8 +327,9 @@ class Trainer:
             A flag indicating whether the optimizer instance should be treated as persistent or not.
             If ``False``, the optimizer and its states are not stored after training has finished. 
             Otherwise, the optimizer will be stored as ``self.optimizer` and re-used in further training runs.
-        optional_stopping    : bool, optional, default: False
+        early_stopping       : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
+            Only works if ``validation_sims is not None``, i.e., validation data has been provided.
         use_autograph        : bool, optional, default: True
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
             could also be harder to debug.
@@ -342,15 +344,16 @@ class Trainer:
             If ``None`` (default), no validation set will be used.
         **kwargs             : dict, optional
             Optional keyword arguments, which can be:
-            ``model_args``     - optional kwargs passed to the generative model
-            ``val_model_args`` - optional kwargs passed to the generative model
-                                 for generating validation data. Only useful if 
-                                 ``type(validation_sims) is int``.
-            ``conf_args``      - optional kwargs passed to the configurator
-                                 before each backprop (update) step.
-            ``val_conf_args``  - optional kwargs passed to the configurator 
-                                 then configuring the validation data.
-            ``net_args``       - optional kwargs passed to the amortizer
+            ``model_args``          - optional kwargs passed to the generative model
+            ``val_model_args``      - optional kwargs passed to the generative model
+                                      for generating validation data. Only useful if 
+                                      ``type(validation_sims) is int``.
+            ``conf_args``           - optional kwargs passed to the configurator
+                                      before each backprop (update) step.
+            ``val_conf_args``       - optional kwargs passed to the configurator 
+                                      then configuring the validation data.
+            ``net_args``            - optional kwargs passed to the amortizer
+            ``early_stopping_args`` - optional kwargs passed to the ``EarlyStopper``
 
         Returns
         -------
@@ -370,6 +373,11 @@ class Trainer:
         self._setup_optimizer(optimizer, epochs, iterations_per_epoch)
         self.loss_history.start_new_run()
         validation_sims = self._config_validation(validation_sims, **kwargs.pop('val_model_args', {}))
+
+        # Create early stopper, if conditions met, otherwise None returned
+        early_stopper = self._config_early_stopping(early_stopping, validation_sims, **kwargs)
+
+        # Loop through training epochs
         for ep in range(1, epochs + 1):
             with tqdm(total=iterations_per_epoch, desc=f'Training epoch {ep}') as p_bar:
                 for it in range(1, iterations_per_epoch + 1):
@@ -397,13 +405,17 @@ class Trainer:
             self._save_trainer(save_checkpoint)
             self._validation(ep, validation_sims, **kwargs)
 
+            # Check early stopping, if specified
+            if self._check_early_stopping(early_stopper):
+                break
+
         # Remove optimizer reference, if not set as persistent
         if not reuse_optimizer:
             self.optimizer = None
         return self.loss_history.get_plottable()
-    
+
     def train_offline(self, simulations_dict, epochs, batch_size, save_checkpoint=True, 
-                      optimizer=None, reuse_optimizer=False, optional_stopping=True, 
+                      optimizer=None, reuse_optimizer=False, early_stopping=False, 
                       validation_sims=None, use_autograph=True, **kwargs):
         """Trains an amortizer via offline learning. Assume parameters, data and optional 
         context have already been simulated (i.e., forward inference has been performed).
@@ -428,8 +440,9 @@ class Trainer:
             A flag indicating whether the optimizer instance should be treated as persistent or not.
             If ``False``, the optimizer and its states are not stored after training has finished. 
             Otherwise, the optimizer will be stored as ``self.optimizer`` and re-used in further training runs.
-        optional_stopping : bool, optional, default: False
+        early_stopping    : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
+            Only works if ``validation_sims is not None``, i.e., validation data has been provided.
         use_autograph     : bool, optional, default: True
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
             could also be harder to debug.
@@ -444,15 +457,15 @@ class Trainer:
             If ``None`` (default), no validation set will be used.
         **kwargs             : dict, optional
             Optional keyword arguments, which can be:
-            ``model_args``     - optional kwargs passed to the generative model
-            ``val_model_args`` - optional kwargs passed to the generative model
-                                 for generating validation data. Only useful if 
-                                 ``type(validation_sims) is int``.
-            ``conf_args``      - optional kwargs passed to the configurator
-                                 before each backprop (update) step.
-            ``val_conf_args``  - optional kwargs passed to the configurator 
-                                 then configuring the validation data.
-            ``net_args``       - optional kwargs passed to the amortizer
+            ``val_model_args``      - optional kwargs passed to the generative model
+                                      for generating validation data. Only useful if 
+                                      ``type(validation_sims) is int``.
+            ``conf_args``           - optional kwargs passed to the configurator
+                                      before each backprop (update) step.
+            ``val_conf_args``       - optional kwargs passed to the configurator 
+                                      then configuring the validation data.
+            ``net_args``            - optional kwargs passed to the amortizer
+            ``early_stopping_args`` - optional kwargs passed to the ``EarlyStopper``
 
         Returns
         -------
@@ -471,6 +484,10 @@ class Trainer:
         self._setup_optimizer(optimizer, epochs, len(data_set.data))
         self.loss_history.start_new_run()
         validation_sims = self._config_validation(validation_sims, **kwargs.pop('val_model_args', {}))
+
+        # Create early stopper, if conditions met, otherwise None returned
+        early_stopper = self._config_early_stopping(early_stopping, validation_sims, **kwargs)
+
         # Loop through epochs
         for ep in range(1, epochs+1):
             with tqdm(total=len(data_set.data), desc='Training epoch {}'.format(ep)) as p_bar:
@@ -501,14 +518,18 @@ class Trainer:
             self._save_trainer(save_checkpoint)
             self._validation(ep, validation_sims, **kwargs)
 
+            # Check early stopping, if specified
+            if self._check_early_stopping(early_stopper):
+                break
+
         # Remove optimizer reference, if not set as persistent
         if not reuse_optimizer:
             self.optimizer = None
         return self.loss_history.get_plottable()
 
     def train_from_presimulation(self, presimulation_path, optimizer, save_checkpoint=True, max_epochs=None, 
-                                 reuse_optimizer=False, custom_loader=None, optional_stopping=True, use_autograph=True,
-                                 **kwargs):
+                                 reuse_optimizer=False, custom_loader=None, early_stopping=False, validation_sims=None,
+                                 use_autograph=True, **kwargs):
         """Trains an amortizer via a modified form of offline training. 
 
         Like regular offline training, it assumes that parameters, data and optional context have already
@@ -555,7 +576,7 @@ class Trainer:
             - ``sim_batchable_context``,
             - ``sim_data``. 
             ``prior_draws`` and ``sim_data`` must have actual data as values, the rest are optional.
-        optional_stopping    : bool, optional, default: False
+        early_stopping       : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
         use_autograph        : bool, optional, default: True
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
@@ -571,6 +592,8 @@ class Trainer:
             A dictionary or a data frame storing the losses across epochs and iterations
         """
 
+        self.optimizer = optimizer
+
         # Compile update function, if specified
         if use_autograph:
             _backprop_step = tf.function(backprop_step, reduce_retracing=True)
@@ -581,9 +604,12 @@ class Trainer:
         if custom_loader is None:
             custom_loader = self._default_loader
 
-        # Init loss history and optimizer
+        # Inits
         self.loss_history.start_new_run()
-        self.optimizer = optimizer
+        validation_sims = self._config_validation(validation_sims, **kwargs.pop('val_model_args', {}))
+
+        # Create early stopper, if conditions met, otherwise None returned
+        early_stopper = self._config_early_stopping(early_stopping, validation_sims, **kwargs)
 
         # Loop over the presimulated dataset.
         file_list = os.listdir(presimulation_path)
@@ -635,13 +661,19 @@ class Trainer:
             # Store after each epoch, if specified
             self._save_trainer(save_checkpoint)
 
+            self._validation(ep, validation_sims, **kwargs)
+
+            # Check early stopping, if specified
+            if self._check_early_stopping(early_stopper):
+                break
+
         # Remove reference to optimizer, if not set to persistent
         if not reuse_optimizer:
             self.optimizer = None
         return self.loss_history.get_plottable()
 
     def train_experience_replay(self, epochs, iterations_per_epoch, batch_size, save_checkpoint=True, 
-                                optimizer=None, reuse_optimizer=False, buffer_capacity=1000, optional_stopping=True, 
+                                optimizer=None, reuse_optimizer=False, buffer_capacity=1000, early_stopping=False, 
                                 use_autograph=True, validation_sims=None, **kwargs):
         """Trains the network(s) via experience replay using a memory replay buffer, as utilized
         in reinforcement learning. Additional keyword arguments are passed to the generative mode, 
@@ -671,8 +703,9 @@ class Trainer:
             and ``capacity_in_batches=1000``, then the buffer will hold a maximum of
             32 * 1000 = 32000 simulations. Be careful with memory!
             Important! Argument will be ignored if buffer has previously been initialized!
-        optional_stopping    : bool, optional, default: True
+        early_stopping       : bool, optional, default: True
             Whether to use optional stopping or not during training. Could speed up training.
+            Only works if ``validation_sims is not None``, i.e., validation data has been provided.
         use_autograph        : bool, optional, default: True
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
             could also be harder to debug.
@@ -687,15 +720,16 @@ class Trainer:
             If ``None`` (default), no validation set will be used.
         **kwargs             : dict, optional, default: {}
             Optional keyword arguments, which can be:
-            ``model_args``     - optional kwargs passed to the generative model
-            ``val_model_args`` - optional kwargs passed to the generative model
-                                 for generating validation data. Only useful if 
-                                 ``type(validation_sims) is int``.
-            ``conf_args``      - optional kwargs passed to the configurator
-                                 before each backprop (update) step.
-            ``val_conf_args``  - optional kwargs passed to the configurator 
-                                 then configuring the validation data.
-            ``net_args``       - optional kwargs passed to the amortizer
+            ``model_args``          - optional kwargs passed to the generative model
+            ``val_model_args``      - optional kwargs passed to the generative model
+                                      for generating validation data. Only useful if 
+                                      ``type(validation_sims) is int``.
+            ``conf_args``           - optional kwargs passed to the configurator
+                                      before each backprop (update) step.
+            ``val_conf_args``       - optional kwargs passed to the configurator 
+                                      then configuring the validation data.
+            ``net_args``            - optional kwargs passed to the amortizer
+            ``early_stopping_args`` - optional kwargs passed to the ``EarlyStopper``
 
         Returns
         -------
@@ -717,6 +751,10 @@ class Trainer:
         if self.replay_buffer is None:
             self.replay_buffer = MemoryReplayBuffer(buffer_capacity)
         validation_sims = self._config_validation(validation_sims)
+
+        # Create early stopper, if conditions met, otherwise None returned
+        early_stopper = self._config_early_stopping(early_stopping, validation_sims, **kwargs) 
+
         # Loop through epochs
         for ep in range(1, epochs + 1):
             with tqdm(total=iterations_per_epoch, desc=f'Training epoch {ep}') as p_bar:
@@ -753,13 +791,17 @@ class Trainer:
             self._save_trainer(save_checkpoint)
             self._validation(ep, validation_sims, **kwargs)
 
+            # Check early stopping, if specified
+            if self._check_early_stopping(early_stopper):
+                break
+
         # Remove optimizer reference, if not set as persistent
         if not reuse_optimizer:
             self.optimizer = None
         return self.loss_history.get_plottable()
 
     def train_rounds(self, rounds, sim_per_round, epochs, batch_size, save_checkpoint=True, 
-                     optimizer=None, reuse_optimizer=False, optional_stopping=True, use_autograph=True,
+                     optimizer=None, reuse_optimizer=False, early_stopping=False, use_autograph=True,
                      validation_sims=None, **kwargs):
         """Trains an amortizer via round-based learning. In each round, ``sim_per_round`` data sets
         are simulated from the generative model and added to the data sets simulated in previous 
@@ -790,8 +832,10 @@ class Trainer:
             A flag indicating whether the optimizer instance should be treated as persistent or not.
             If ``False``, the optimizer and its states are not stored after training has finished. 
             Otherwise, the optimizer will be stored as ``self.optimizer`` and re-used in further training runs.
-        optional_stopping    : bool, optional, default: False
+        early_stopping       : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
+            Only works if ``validation_sims is not None``, i.e., validation data has been provided.
+            Will be performed within rounds, not between rounds!
         use_autograph        : bool, optional, default: True
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
             could also be harder to debug.
@@ -806,15 +850,16 @@ class Trainer:
             If ``None`` (default), no validation set will be used.
         **kwargs             : dict, optional
             Optional keyword arguments, which can be:
-            ``model_args``     - optional kwargs passed to the generative model
-            ``val_model_args`` - optional kwargs passed to the generative model
-                                 for generating validation data. Only useful if 
-                                 ``type(validation_sims) is int``.
-            ``conf_args``      - optional kwargs passed to the configurator
-                                 before each backprop (update) step.
-            ``val_conf_args``  - optional kwargs passed to the configurator 
-                                 then configuring the validation data.
-            ``net_args``       - optional kwargs passed to the amortizer
+            ``model_args``          - optional kwargs passed to the generative model
+            ``val_model_args``      - optional kwargs passed to the generative model
+                                      for generating validation data. Only useful if 
+                                      ``type(validation_sims) is int``.
+            ``conf_args``           - optional kwargs passed to the configurator
+                                      before each backprop (update) step.
+            ``val_conf_args``       - optional kwargs passed to the configurator 
+                                      then configuring the validation data.
+            ``net_args``            - optional kwargs passed to the amortizer
+            ``early_stopping_args`` - optional kwargs passed to the ``EarlyStopper``
 
         Returns
         -------
@@ -856,7 +901,7 @@ class Trainer:
 
             # Train offline with generated stuff
             _ = self.train_offline(simulations_dict, epochs, batch_size, save_checkpoint, 
-                reuse_optimizer=True, optional_stopping=optional_stopping, use_autograph=use_autograph, 
+                reuse_optimizer=True, early_stopping=early_stopping, use_autograph=use_autograph, 
                 validation_sims=validation_sims, **kwargs)
 
         # Remove optimizer reference, if not set as persistent
@@ -882,6 +927,19 @@ class Trainer:
                             'with a generative model.')
                 return None
         logger.warn('Type of argument "validation_sims" not understood. No validation simulations were created.')
+
+    def _config_early_stopping(self, early_stopping, validation_sims, **kwargs):
+        """Helper method to configure early stopping or warn user for."""
+
+        if early_stopping:
+            if validation_sims is not None:
+                early_stopper = EarlyStopper(**kwargs.pop('early_stopping_args', {}))
+            else:
+                logger = logging.getLogger()
+                logger.warn('No early stopping will be used, since validation_sims were not provided.')
+                early_stopper = None
+            return early_stopper
+        return None 
 
     def _setup_optimizer(self, optimizer, epochs, iterations_per_epoch):
         """Helper method to prepare optimizer based on user input."""
@@ -921,19 +979,18 @@ class Trainer:
             conf = self.configurator(validation_sims,  **kwargs.pop('val_conf_args', {}))
             val_loss = self.amortizer.compute_loss(conf, **kwargs.pop('net_args', {}))
             self.loss_history.add_val_entry(ep, val_loss)
-
-    def _check_optional_stopping(self):
-        """Helper method for checking optional stopping. Resets the adjuster
-        if a stopping recommendation is issued. 
-        """
-
-        if self.lr_adjuster is None:
-            return False
-        if self.lr_adjuster.stopping_issued:
-            self.lr_adjuster.reset()
+            val_loss_str = loss_to_string(ep, val_loss)
             logger = logging.getLogger()
-            logger.info('Optional stopping triggered.')
-            return True
+            logger.info(val_loss_str)
+
+    def _check_early_stopping(self, early_stopper):
+        """Helper method to check improvement in validation loss."""
+
+        if early_stopper is not None:
+            if early_stopper.update_and_recommend(self.loss_history.last_total_val_loss()):
+                logger = logging.getLogger()
+                logger.info('Early stopping triggered.')
+                return True
         return False
 
     def _train_step(self, batch_size, update_step, input_dict=None, **kwargs):
