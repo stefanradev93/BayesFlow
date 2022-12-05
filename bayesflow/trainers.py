@@ -165,9 +165,6 @@ class Trainer:
         self.optimizer = None
         self.default_lr = default_lr
 
-        # Currently unused attribute
-        self.lr_adjuster = None
-
         # Checkpoint and helper classes settings
         self.max_to_keep = max_to_keep
         if checkpoint_path is not None:
@@ -967,8 +964,6 @@ class Trainer:
         if self.manager is not None and save_checkpoint:
             self.manager.save()
             self.loss_history.save_to_file(file_path=self.checkpoint_path, max_to_keep=self.max_to_keep)
-            if self.lr_adjuster is not None:
-                self.lr_adjuster.save_to_file(file_path=self.checkpoint_path)
             if self.simulation_memory is not None:
                 self.simulation_memory.save_to_file(file_path=self.checkpoint_path)
 
