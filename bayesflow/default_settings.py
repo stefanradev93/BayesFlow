@@ -78,7 +78,7 @@ DEFAULT_SETTING_MULTI_CONV = {
 
 DEFAULT_SETTING_DENSE_INVARIANT = {
     'units': 64,
-    'activation': 'swish',  
+    'activation': 'relu',  
     'kernel_initializer': 'glorot_uniform'
 }
 
@@ -86,14 +86,14 @@ DEFAULT_SETTING_DENSE_INVARIANT = {
 DEFAULT_SETTING_DENSE_EVIDENTIAL = {
     'units': 128,
     'kernel_initializer': 'glorot_uniform',
-    'activation': 'swish',
+    'activation': 'elu',
 }
 
 
 DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
     meta_dict={
         't_args': {
-            'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='swish'),
+            'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='tanh'),
             'num_dense': 2,
             'spec_norm': False,
             'mc_dropout': False,
@@ -101,7 +101,7 @@ DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
             'dropout_prob': 0.1
         },
         's_args': {
-            'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='swish'),
+            'dense_args': dict(units=128, kernel_initializer='glorot_uniform', activation='tanh'),
             'num_dense': 2,
             'spec_norm': False,
             'mc_dropout': False,
