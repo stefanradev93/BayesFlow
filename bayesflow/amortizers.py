@@ -83,7 +83,8 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
 
     def __init__(self, inference_net, summary_net=None, latent_dist=None, latent_is_dynamic=False, 
                  summary_loss_fun=None, **kwargs):
-        """Initializes a composite neural network to represent an amortized approximate posterior.
+        """Initializes a composite neural network to represent an amortized approximate posterior
+        for a Bayesian generative model.
 
         Parameters
         ----------
@@ -95,25 +96,26 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
             The latent distribution towards which to optimize the networks. Defaults to
             a multivariate unit Gaussian.
         latent_is_dynamic : bool, optional, default: False
-            If set to `True`, assumes that `latent_dist` is a function of the condtion and takes 
+            If set to `True`, assumes that ``latent_dist`` is a function of the condtion and takes 
             a different shape depending on the condition. Useful for more expressive transforms
-            of complex distributions, such as fat-tailed or highly-multimodal distros. 
+            of complex distributions, such as fat-tailed or highly-multimodal distributions. 
             
             Important: In the case of dynamic latents, the user is responsible that the
-            latent is appropriately parameterized! If not using `tensorflow_probability`,
-            the `latent_dist` object needs to implement the following methods:
-            - `latent_dist(x).log_prob(z)` and
-            - `latent_dist(x).sample(n_samples)`
-
-        summary_loss_fun  : callable or None, optional, default: None
-            The loss function which accepts the outputs of the summary network. If None, no loss is provided.
-        **kwargs          : dict, optional
-            Additional keyword arguments passed to the __init__ method of a tf.keras.Model instance.
+            latent is appropriately parameterized! If not using ``tensorflow_probability``,
+            the ``latent_dist`` object needs to implement the following methods:
+            - ``latent_dist(x).log_prob(z)`` and
+            - ``latent_dist(x).sample(n_samples)``
+        summary_loss_fun  : callable, str, or None, optional, default: None
+            The loss function which accepts the outputs of the summary network. If ``None``, no loss is provided
+            and the summary space will not be shaped according to a known distribution (see [2]).
+            If ``summary_loss_fun='MMD'``, the default loss from [2] will be used.
+        **kwargs          : dict, optional, default: {}
+            Additional keyword arguments passed to the ``__init__`` method of a ``tf.keras.Model`` instance.
 
         Important
         ----------
-        - If no `summary_net` is provided, then the output dictionary of your generative model should not contain
-        any `sumamry_conditions`, i.e., `summary_conditions` should be set to None, otherwise these will be ignored.
+        - If no ``summary_net`` is provided, then the output dictionary of your generative model should not contain
+        any ``summary_conditions``, i.e., ``summary_conditions`` should be set to ``None``, otherwise these will be ignored.
         """
 
         tf.keras.Model.__init__(self, **kwargs)
@@ -126,24 +128,27 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         self.latent_dist = self._determine_latent_dist(latent_dist)
 
     def call(self, input_dict, return_summary=False, **kwargs):
-        """Performs a forward pass through the summary and inference network.
+        """Performs a forward pass through the summary and inference network given an input dictionary.
 
         Parameters
         ----------
         input_dict     : dict  
-            Input dictionary containing the following mandatory keys, if DEFAULT keys unchanged:
-            `parameters`         - the latent model parameters over which a condition density is learned
-            `summary_conditions` - the conditioning variables (including data) that are first passed through a summary network
-            `direct_conditions`  - the conditioning variables that the directly passed to the inference network
+            Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
+            ``parameters``         - the latent model parameters over which a condition density is learned
+            ``summary_conditions`` - the conditioning variables (including data) that are first passed through a summary network
+            ``direct_conditions``  - the conditioning variables that the directly passed to the inference network
         return_summary : bool, optional, default: False
             A flag which determines whether the learnable data summaries (representations) are returned or not.
+        **kwargs       : dict, optional, default: {}
+            Additional keyword arguments passed to the networks
+            For instance, ``kwargs={'training': True}`` is passed automatically during training.
 
         Returns
         -------
         net_out or (net_out, summary_out) : tuple of tf.Tensor
             the outputs of ``inference_net(theta, summary_net(x, c_s), c_d)``, usually a latent variable and
-            log(det(Jacobian)), that is a tuple ``(z, log_det_J) or (sum_outputs, (z, log_det_J)) if
-            return_summary is set to True and a summary network is defined.``
+            log(det(Jacobian)), that is a tuple ``(z, log_det_J) or (sum_outputs, (z, log_det_J))`` if
+            ``return_summary`` is set to True and a summary network is defined.``
         """
 
         # Concatenate conditions, if given
@@ -162,15 +167,19 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         return net_out
 
     def compute_loss(self, input_dict, **kwargs):
-        """Computes the loss of the posterior amortizer given an input dictionary.
+        """Computes the loss of the posterior amortizer given an input dictionary, which will
+        typically be the output of a Bayesian ``GenerativeModel`` instance.
 
         Parameters
         ----------
         input_dict : dict  
-            Input dictionary containing the following mandatory keys: 
-            `parameters`         - the latent model parameters over which a condition density is learned
-            `summary_conditions` - the conditioning variables that are first passed through a summary network
-            `direct_conditions`  - the conditioning variables that the directly passed to the inference network
+            Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
+            ``parameters``         - the latent model parameters over which a condition density is learned
+            ``summary_conditions`` - the conditioning variables that are first passed through a summary network
+            ``direct_conditions``  - the conditioning variables that the directly passed to the inference network
+        **kwargs   : dict, optional, default: {}
+            Additional keyword arguments passed to the networks
+            For instance, ``kwargs={'training': True}`` is passed automatically during training.
 
         Returns
         -------
@@ -207,12 +216,14 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
 
         Parameters
         ----------
-        input_list     : list of dicts, where each dict contains the following mandatory keys, if DEFAULT keys unchanged: 
-            `parameters`         - the latent model parameters over which a condition density is learned
-            `summary_conditions` - the conditioning variables (including data) that are first passed through a summary network
-            `direct_conditions`  - the conditioning variables that the directly passed to the inference network
+        input_list     : list of dicts, where each dict contains the following mandatory keys, if ``DEFAULT_KEYS`` unchanged: 
+            ``parameters``         - the latent model parameters over which a condition density is learned
+            ``summary_conditions`` - the conditioning variables (including data) that are first passed through a summary network
+            ``direct_conditions``  - the conditioning variables that the directly passed to the inference network
         return_summary : bool, optional, default: False
             A flag which determines whether the learnable data summaries (representations) are returned or not.
+        **kwargs       : dict, optional, default: {}
+            Additional keyword arguments passed to the networks
 
         Returns
         -------
@@ -234,21 +245,20 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         Parameters
         ----------
         input_dict  : dict  
-            Input dictionary containing the following mandatory keys, if DEFAULT KEYS unchanged: 
-            `summary_conditions` : the conditioning variables (including data) that are first passed through a summary network
-            `direct_conditions`  : the conditioning variables that the directly passed to the inference network
+            Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged: 
+            ``summary_conditions`` : the conditioning variables (including data) that are first passed through a summary network
+            ``direct_conditions``  : the conditioning variables that the directly passed to the inference network
         n_samples   : int
             The number of posterior draws (samples) to obtain from the approximate posterior
         to_numpy    : bool, optional, default: True
-            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`.
-        
-        **kwargs    : dict, optional
+            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``tf.Tensor``.
+        **kwargs    : dict, optional, default: {}
             Additional keyword arguments passed to the networks
 
         Returns
         -------
         post_samples : tf.Tensor or np.ndarray of shape (n_data_sets, n_samples, n_params)
-            the sampled parameters per data set
+            The sampled parameters from the approximate posterior of each data set
         """
 
         # Compute learnable summaries, if appropriate
@@ -290,20 +300,20 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
 
         Parameters
         ----------
-        input_list  : list of dictionaries, each dictionary having the following mandatory keys, if DEFAULT KEYS unchanged: 
-            `summary_conditions` : the conditioning variables (including data) that are first passed through a summary network
-            `direct_conditions`  : the conditioning variables that the directly passed to the inference network
+        input_list  : list of dictionaries, each dictionary having the following mandatory keys, if ``DEFAULT_KEYS`` unchanged: 
+            ``summary_conditions`` : the conditioning variables (including data) that are first passed through a summary network
+            ``direct_conditions``  : the conditioning variables that the directly passed to the inference network
         n_samples   : int
             The number of posterior draws (samples) to obtain from the approximate posterior
         to_numpy    : bool, optional, default: True
-            Flag indicating whether to return the samples as a `np.darray` or a `tf.Tensor`
-        **kwargs    : dict, optional
+            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``tf.Tensor``
+        **kwargs    : dict, optional, default: {}
             Additional keyword arguments passed to the networks
 
         Returns
         -------
         post_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, n_params)
-            the sampled parameters per data set
+            The sampled parameters from the approximate posterior of each data set
         """
 
         post_samples = []
@@ -320,16 +330,18 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         Parameters
         ----------
         input_dict : dict  
-            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged: 
-            `parameters`         : the latent model parameters over which a conditional density (i.e., a posterior) is learned
-            `summary_conditions` : the conditioning variables (including data) that are first passed through a summary network
-            `direct_conditions`  : the conditioning variables that are directly passed to the inference network
-        to_numpy  : bool, optional, default: True
-            Flag indicating whether to return the lpdf values as a `np.array` or a `tf.Tensor`
+            Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged: 
+            ``parameters``         : the latent model parameters over which a conditional density (i.e., a posterior) is learned
+            ``summary_conditions`` : the conditioning variables (including data) that are first passed through a summary network
+            ``direct_conditions``  : the conditioning variables that are directly passed to the inference network
+        to_numpy   : bool, optional, default: True
+            Flag indicating whether to return the lpdf values as a ``np.ndarray`` or a ``tf.Tensor``
+        **kwargs   : dict, optional, default: {}
+            Additional keyword arguments passed to the networks
 
         Returns
         -------
-        log_post  : tf.Tensor of shape (batch_size, n_obs)
+        log_post   : tf.Tensor or np.ndarray of shape (batch_size, n_obs)
             the approximate log-posterior density of each each parameter 
         """
 
@@ -383,8 +395,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         return sum_condition, full_cond
 
     def _determine_latent_dist(self, latent_dist):
-        """Determines which latent distribution to use and defaults to unit normal if none provided.
-        """
+        """Determines which latent distribution to use and defaults to unit normal if None provided."""
 
         if latent_dist is None:
             return tfp.distributions.MultivariateNormalDiag(loc=[0.]*self.latent_dim)
@@ -392,8 +403,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
             return latent_dist
 
     def _determine_summary_loss(self, loss_fun):
-        """Determines which summary loss to use if default `None` argument provided, otherwise return identity.
-        """
+        """Determines which summary loss to use if default `None` argument provided, otherwise return identity."""
 
         # If callable, return provided loss
         if loss_fun is None or callable(loss_fun):
@@ -412,7 +422,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
 
 class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
     """An interface for a surrogate model of a simulator, or an implicit likelihood
-    ``p(data | parameters, context).``
+    ``p(data | parameters, context)``.
     """
 
     def __init__(self, surrogate_net, latent_dist=None, **kwargs):
@@ -426,6 +436,8 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
         latent_dist       : callable or None, optional, default: None
             The latent distribution towards which to optimize the surrogate network outputs. Defaults to
             a multivariate unit Gaussian.
+        **kwargs          : dict, optional, default: {}
+            Additional keyword arguments passed to the ``__init__`` method of a ``tf.keras.Model`` instance.
         """
 
         tf.keras.Model.__init__(self, **kwargs)
@@ -440,9 +452,12 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
         Parameters
         ----------
         input_dict  : dict 
-            Input dictionary containing the following mandatory keys: 
-            `observables` - the observables over which a condition density is learned (i.e., the data)
-            `conditions`  - the conditioning variables that the directly passed to the inference network
+            Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
+            ``observables`` - the observables over which a condition density is learned (i.e., the data)
+            ``conditions``  - the conditioning variables that the directly passed to the inference network
+        **kwargs    : dict, optional, default: {}
+            Additional keyword arguments passed to the network
+            For instance, ``kwargs={'training': True}`` is passed automatically during training.
             
         Returns
         -------
@@ -465,9 +480,11 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
 
         Parameters
         ----------
-        input_list     : list of dicts, where each dict contains the following mandatory keys, if DEFAULT keys unchanged: 
-            `observables` - the observables over which a condition density is learned (i.e., the data)
-            `conditions`  - the conditioning variables that the directly passed to the inference network
+        input_list  : list of dicts, where each dict contains the following mandatory keys, if ``DEFAULT_KEYS`` unchanged: 
+            ``observables`` - the observables over which a condition density is learned (i.e., the data)
+            ``conditions``  - the conditioning variables that the directly passed to the inference network
+        **kwargs    : dict, optional, default: {}
+            Additional keyword arguments passed to the network
 
         Returns
         -------
@@ -488,18 +505,20 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
         Parameters
         ----------
 
-        input_dict   : dict  
-            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged: 
-            `conditions` - the conditioning variables that the directly passed to the inference network
-        n_samples    : int
+        input_dict  : dict  
+            Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged: 
+            ``conditions`` - the conditioning variables that are directly passed to the surrogate network
+        n_samples   : int
             The number of posterior samples to obtain from the approximate posterior
-        to_numpy  : bool, optional, default: True
-            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+        to_numpy    : bool, optional, default: True
+            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``tf.Tensor``
+        **kwargs    : dict, optional, default: {}
+            Additional keyword arguments passed to the network
 
         Returns
         -------
         lik_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, None)
-            Simulated batch of observables from the surrogate likelihood.
+            A simulated batch of observables from the surrogate likelihood.
         """
 
         # Extract condition
@@ -528,14 +547,14 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
 
         Parameters
         ----------
-        input_list   : list of dictionaries, each dictionary having the following mandatory keys, if DEFAULT KEYS unchanged: 
-            `conditions` - the conditioning variables that the directly passed to the inference network
+        input_list   : list of dictionaries, each dictionary having the following mandatory keys, if ``DEFAULT_KEYS`` unchanged: 
+            ``conditions`` - the conditioning variables that the directly passed to the surrogate network
         n_samples    : int
             The number of posterior draws (samples) to obtain from the approximate posterior
         to_numpy     : bool, optional, default: True
             Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
-        **kwargs     : dict, optional
-            Additional keyword arguments passed to the networks
+        **kwargs     : dict, optional, default: {}
+            Additional keyword arguments passed to the network
 
         Returns
         -------
@@ -557,15 +576,17 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
         Parameters
         ----------
         input_dict : dict  
-            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged: 
-            `observables` - the variables over which a condition density is learned (i.e., the observables)
-            `conditions`  - the conditioning variables that the directly passed to the inference network
+            Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged: 
+            ``observables`` - the variables over which a condition density is learned (i.e., the observables)
+            ``conditions``  - the conditioning variables that the directly passed to the inference network
         to_numpy   : bool, optional, default: True
-            Boolean flag indicating whether to return the log-lik values as a `np.array` or a `tf.Tensor`
+            Boolean flag indicating whether to return the log-lik values as a ``np.ndarray`` or a ``tf.Tensor``
+        **kwargs   : dict, optional, default: {}
+            Additional keyword arguments passed to the network
 
         Returns
         -------
-        log_lik    : tf.Tensor of shape (batch_size, n_obs)
+        log_lik    : tf.Tensor or np.ndarray of shape (batch_size, n_obs)
             the approximate log-likelihood of each data point in each data set
         """
 
@@ -595,8 +616,11 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
         ----------
         input_dict  : dict 
             Input dictionary containing the following mandatory keys: 
-            `data`        - the observables over which a condition density is learned (i.e., the observables)
-            `conditions`  - the conditioning variables that the directly passed to the inference network
+            ``data``        - the observables over which a condition density is learned (i.e., the observables)
+            ``conditions``  - the conditioning variables that the directly passed to the surrogate network
+        **kwargs    : dict, optional, default: {}
+            Additional keyword arguments passed to the network
+            For instance, ``kwargs={'training': True}`` is passed automatically during simulation-based training.
 
         Returns
         -------
@@ -608,8 +632,7 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
         return loss
 
     def _determine_latent_dist(self, latent_dist):
-        """Determines which latent distribution to use and defaults to unit normal if `None` provided.
-        """
+        """Determines which latent distribution to use and defaults to unit normal if ``None`` provided."""
 
         if latent_dist is None:
             return tfp.distributions.MultivariateNormalDiag(loc=[0.]*self.latent_dim)
