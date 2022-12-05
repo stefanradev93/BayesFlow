@@ -179,12 +179,11 @@ class MCDropout(tf.keras.Model):
     def __init__(self, dropout_prob=0.1, **kwargs):
         """Creates a custom instance of an MC Dropout layer. Will be used both
         during training and inference.
-        
+
         Parameters
         ----------
         dropout_prob  : float, optional, default: 0.1
-            The dropout rate to be passed to ``tf.nn.experimental.stateless_dropout()``.
-            
+            The dropout rate to be passed to ``tf.keras.layers.Dropout()``.
         """
 
         super().__init__(**kwargs)
@@ -219,7 +218,7 @@ class ActNorm(tf.keras.Model):
         a Scale (s) and Bias (b) vector [1].
             y = s * x + b (forward)
             x = (y - b)/s (inverse)
-        
+
         The scale and bias can be data dependent initalized, such that the
         output has a mean of zero and standard deviation of one [1,2]. 
         Alternatively, it is initialized with vectors of ones (scale) and 
@@ -271,7 +270,6 @@ class ActNorm(tf.keras.Model):
         (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
             v shape: (batch_size, inp_dim), log_det_J shape: (,)
-
         target          :  tf.Tensor
             If inverse=True: The inversly transformed targets, shape == target.shape
 
@@ -341,12 +339,12 @@ class ActNorm(tf.keras.Model):
 
 class InvariantModule(tf.keras.Model):
     """Implements an invariant module performing a permutation-invariant transform. 
-    
+
     For details and rationale, see:
-    
+
     https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
     """
-    
+
     def __init__(self, meta):
         super().__init__()
         
@@ -387,7 +385,7 @@ class InvariantModule(tf.keras.Model):
 
 class EquivariantModule(tf.keras.Model):
     """Implements an equivariant module performing an equivariant transform. 
-    
+
     For details and justification, see:
 
     https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
@@ -401,12 +399,12 @@ class EquivariantModule(tf.keras.Model):
 
     def call(self, x):
         """Performs the forward pass of a learnable equivariant transform.
-        
+
         Parameters
         ----------
-        x : tf.Tensor
+        x   : tf.Tensor
             Input of shape (batch_size, N, x_dim)
-        
+
         Returns
         -------
         out : tf.Tensor
@@ -462,9 +460,9 @@ class MultiConv1D(tf.keras.Model):
 
         Parameters
         ----------
-        x : tf.Tensor
+        x   : tf.Tensor
             Input of shape (batch_size, n_time_steps, n_time_series)
-        
+
         Returns
         -------
         out : tf.Tensor
