@@ -286,7 +286,7 @@ class ActNorm(tf.keras.Model):
 
     @tf.function
     def _forward(self, target):
-        """Performs a forward pass through the `ActNorm` layer."""
+        """Performs a forward pass through the ``ActNorm`` layer."""
 
         z = self.scale * target + self.bias
         ldj = tf.math.reduce_sum(tf.math.log(tf.math.abs(self.scale)), axis=-1)
@@ -342,6 +342,9 @@ class InvariantModule(tf.keras.Model):
 
     For details and rationale, see:
 
+    [1] Bloem-Reddy, B., & Teh, Y. W. (2020). 
+    Probabilistic Symmetries and Invariant Neural Networks. 
+    J. Mach. Learn. Res., 21, 90-1.
     https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
     """
 
@@ -366,12 +369,12 @@ class InvariantModule(tf.keras.Model):
 
     def call(self, x):
         """Performs the forward pass of a learnable invariant transform.
-        
+
         Parameters
         ----------
         x : tf.Tensor
             Input of shape (batch_size, N, x_dim)
-        
+
         Returns
         -------
         out : tf.Tensor
@@ -388,6 +391,9 @@ class EquivariantModule(tf.keras.Model):
 
     For details and justification, see:
 
+    [1] Bloem-Reddy, B., & Teh, Y. W. (2020). 
+    Probabilistic Symmetries and Invariant Neural Networks. 
+    J. Mach. Learn. Res., 21, 90-1.
     https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
     """
     
