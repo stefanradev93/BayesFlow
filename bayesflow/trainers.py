@@ -196,9 +196,9 @@ class Trainer:
         
         Parameters
         ----------
-        inputs : None, list or dict, optional (default - None)
+        inputs   : None, list, or dict, optional, default: None
             The optional inputs to use 
-        **kwargs             : dict, optional
+        **kwargs : dict, optional, default: {}
             Optional keyword arguments, which could be:
             ``conf_args``  - optional keyword arguments passed to the configurator
             ``net_args``   - optional keyword arguments passed to the amortizer
@@ -206,8 +206,8 @@ class Trainer:
 
         Returns
         -------
-        losses : dict(ep_num : list(losses))
-            A dictionary storing the losses across epochs and iterations
+        fig      : plt.Figure
+            The figure object which can be readily saved to disk using ``fig.savefig()``.
         """
 
         if type(self.amortizer) is AmortizedPosterior:
@@ -238,12 +238,12 @@ class Trainer:
         
         Parameters
         ----------
-        inputs    : None, list or dict, optional (default - None)
+        inputs    : None, list or dict, optional, default: None
             The optional inputs to use 
-        n_samples : int, optional (default - None)
+        n_samples : int or None, optional, default: None
             The number of posterior samples to draw for each simulated data set.
             If None, the number will be heuristically determined so n_sim / n_draws ~= 20
-        **kwargs  : dict, optional
+        **kwargs  : dict, optional, default: {}
             Optional keyword arguments, which could be:
             ``conf_args``  - optional keyword arguments passed to the configurator
             `net_args``   - optional keyword arguments passed to the amortizer
@@ -251,8 +251,8 @@ class Trainer:
 
         Returns
         -------
-        losses : dict(ep_num : list(losses))
-            A dictionary storing the losses across epochs and iterations
+        fig       : plt.Figure
+            The figure object which can be readily saved to disk using ``fig.savefig()``.
         """
 
         if type(self.amortizer) is AmortizedPosterior:
@@ -291,8 +291,7 @@ class Trainer:
             raise NotImplementedError("SBC diagnostics are only available for type AmortizedPosterior!")
         
     def load_pretrained_network(self):
-        """Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.
-        """
+        """Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists."""
 
         if self.manager is None or self.checkpoint is None:
             return False
