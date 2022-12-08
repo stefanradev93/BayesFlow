@@ -520,8 +520,7 @@ class GenerativeModel:
             self._test()
 
     def __call__(self, batch_size, *args, **kwargs):
-        """ Carries out forward inference 'batch_size' times.
-        """
+        """Carries out forward inference 'batch_size' times."""
 
         # Forward inference
         prior_out = self.prior(batch_size, *args, **kwargs)
@@ -540,8 +539,7 @@ class GenerativeModel:
         return out_dict
 
     def _config_custom_simulator(self, sim_fun, is_batched):
-        """ Only called if user has provided a custom simulator not using the Simulator wrapper.
-        """
+        """Only called if user has provided a custom simulator not using the Simulator wrapper."""
 
         if is_batched is None:
             raise ConfigurationError('Since you are not using the Simulator wrapper, please set ' +
@@ -553,35 +551,35 @@ class GenerativeModel:
             return Simulator(simulator_fun=sim_fun)
 
     def plot_pushforward(self, parameter_draws=None, funcs_list=None, funcs_labels=None, batch_size=1000, show_raw_sims=True):
-        """ Creates simulations from parameter_draws (generated from self.prior if they are not passed as an argument)
-            and plots visualizations for them.
+        """Creates simulations from parameter_draws (generated from self.prior if they are not passed as an argument)
+        and plots visualizations for them.
 
-            Parameters
-            ----------
-            parameter_draws     : np.ndarray of shape (batch_size, num_parameters)
-                A sample of parameters. May be drawn from either the prior (which is also the default behavior if no input is specified)
-                or from the posterior to do a prior/posterior pushforward.
-            funcs_list          : list of callable
-                A list of functions that can be used to aggregate simulation data (map a single simulation to a single real value). 
-                The default behavior without user input is to use numpy's mean and standard deviation functions.
-            funcs_labels        : list of str
-                A list of labels for the functions in funcs_list.
-                The default behavior without user input is to call the functions "Aggregator function 1, Aggregator function 2, etc."
-            batch_size          : int
-                The number of prior draws to generate (and then create and visualizes simulations from)
-            show_raw_sims       : bool
-                Flag determining whether or not a plot of 49 raw (i.e. unaggregated) simulations is generated. 
-                Useful for very general data exploration. 
+        Parameters
+        ----------
+        parameter_draws     : np.ndarray of shape (batch_size, num_parameters)
+            A sample of parameters. May be drawn from either the prior (which is also the default behavior if no input is specified)
+            or from the posterior to do a prior/posterior pushforward.
+        funcs_list          : list of callable
+            A list of functions that can be used to aggregate simulation data (map a single simulation to a single real value). 
+            The default behavior without user input is to use numpy's mean and standard deviation functions.
+        funcs_labels        : list of str
+            A list of labels for the functions in funcs_list.
+            The default behavior without user input is to call the functions "Aggregator function 1, Aggregator function 2, etc."
+        batch_size          : int
+            The number of prior draws to generate (and then create and visualizes simulations from)
+        show_raw_sims       : bool
+            Flag determining whether or not a plot of 49 raw (i.e. unaggregated) simulations is generated. 
+            Useful for very general data exploration. 
 
-            Returns
-            -------
-            parameters_draws    : np.ndarray
-                The parameters provided by the user or generated internally.
-            simulations         : np.ndarray
-                The simulations generated from parameter_draws (or prior draws generated on the fly)
-            aggregated_data     : list of np.ndarray
-                Arrays generated from the simulations with the functions in funcs_list
-            """
+        Returns
+        -------
+        parameters_draws    : np.ndarray
+            The parameters provided by the user or generated internally.
+        simulations         : np.ndarray
+            The simulations generated from parameter_draws (or prior draws generated on the fly)
+        aggregated_data     : list of np.ndarray
+            Arrays generated from the simulations with the functions in funcs_list
+        """
        
         if parameter_draws is None:
             parameter_draws = self.prior(batch_size=batch_size)['prior_draws']
@@ -674,28 +672,30 @@ class GenerativeModel:
                                     f'Please re-examine model components!\n {err}')
         
     def presimulate_and_save(self, batch_size, folder_path, total_iterations=None, memory_limit=None, 
-                             iterations_per_epoch = None, epochs = None, extend_from=0):
+                             iterations_per_epoch=None, epochs=None, extend_from=0):
 
-        """ Simulates a dataset for single-pass offline training (called via the train_from_presimulation method 
+        """Simulates a dataset for single-pass offline training (called via the train_from_presimulation method 
         of the Trainer class in the trainers.py script).
 
         Parameters
         ----------
         batch_size           : int
-            Number of simulations which will be used in each backpropagation step of training.
-        total_iterations     : int
+            Number of simulations which will be used in each backprop step of training.
+        folder_path          : str
+            The folder in which to save the presimulated data.
+        total_iterations     : int or None, optional, default: None
             Total number of iterations to perform during training. If total_iterations divided by epochs is not an integer, it
             will be increased so that said division does result in an integer.
-        memory_limit         : int
+        memory_limit         : int or None, optional, default: None
             Upper bound on the size of individual files (in Mb); can be useful to avoid running out of RAM during training.
-        iterations_per_epoch : int
-            Number of batch simulations to perform per epoch file. If iterations_per_epoch batches per file lead to files
-            exceeding the memory_limit, iterations_per_epoch will be lowered so that the memory_limit can be enforced.
-        epochs               : int
+        iterations_per_epoch : int or None, optional, default: None
+            Number of batch simulations to perform per epoch file. If ``iterations_per_epoch`` batches per file lead to files
+            exceeding the memory_limit, ``iterations_per_epoch`` will be lowered so that the memory_limit can be enforced.
+        epochs               : int or None, optional, default: None
             Number of epoch files to generate. A higher number will be generated if the memory_limit for individual files requires it.
-        extend_from          : int
-            If folder_path already contains presimulations and the user wishes to add further simulations to these, 
-            extend_from must provide the number of the last presimulation file in folder_path.
+        extend_from          : int, optional, default: 0
+            If ``folder_path`` already contains simulations and the user wishes to add further simulations to these, 
+            extend_from must provide the number of the last presimulation file in ``folder_path``.
         
         Important
         ----------
@@ -706,7 +706,7 @@ class GenerativeModel:
         - (total_iterations, epochs)
 
         Providing all three of the parameters in these pairs leads to a consistency check, since incompatible combinations are possible. 
-      """
+        """
         
         # Ensure that the combination of parameters provided is sufficient to perform presimulation and does not contain internal contradictions
         if total_iterations is not None and iterations_per_epoch is not None and epochs is not None:
@@ -761,13 +761,13 @@ class GenerativeModel:
             extension = ''
         logging.warn(f"The presimulated dataset {extension} will take up {required_space} Mb of disk space.")
         user_choice = input("Are you sure you want to perform presimulation? (y/n)")
-        
+
         if user_choice.find('y') != -1 or user_choice.find('Y') != -1:
             logging.info("Performing presimulation...")
         else:
             logging.info("Presimulation aborted.")
             return None
-        
+
         if extend_from > 0:
             if not os.path.isdir(folder_path):
                 logging.warn(f"Cannot extend dataset in {folder_path} - folder does not exist. Creating folder and saving presimulated dataset extension inside.")
@@ -775,7 +775,7 @@ class GenerativeModel:
                 already_simulated = len(os.listdir(folder_path))
                 if already_simulated != extend_from:
                     logging.warn(f"The parameter you provided for extend_from does not match the actual number of files found in {folder_path}. File numbering may now prove erroneous.")
-            
+
         # Choose a number of batches per file as specified via iterations_per_epoch unless
         # the memory_limit per file forces a smaller choice, in which case the highest permissible
         # value is chosen.
@@ -785,13 +785,13 @@ class GenerativeModel:
             batches_per_file = min(int(memory_limit/batch_space), iterations_per_epoch)
             if batches_per_file < iterations_per_epoch:
                 logging.warn(f"Number of iterations per epoch was reduced to {batches_per_file} to ensure that the memory limit per file is not exceeded.")
-        
+
         file_space = batches_per_file*batch_space
-        
+
         # If folder_path does not exist yet, create it
         if not os.path.isdir(folder_path):
             os.mkdir(folder_path)
-        
+
         # Compute as many priors as would have been computed when generating the original dataset.
         # If a fixed random seed was used, this will move it forward, and computational cost is neglible (under 1/200000 of simulation time)
         if extend_from > 0:
@@ -818,8 +818,8 @@ class GenerativeModel:
                 with open(folder_path+'presim_file_'+str(file_counter+1)+'.pkl', 'wb+') as f:
                     pickle.dump(file_list, f)
                 file_counter +=1
-                
         logging.info(f"Presimulation {extension} complete. Generated {total_files} files.")    
+
 
 class MultiGenerativeModel:
     """Basic interface for multiple generative models in a simulation-based context.
