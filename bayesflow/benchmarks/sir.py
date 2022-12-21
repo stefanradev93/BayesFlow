@@ -66,34 +66,37 @@ def _deriv(x, t, N, beta, gamma):
     return dS, dI, dR
 
 
-def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000, rng=None):
+def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000, 
+              scale_by_total=True, rng=None):
     """Runs a basic SIR model simulation for T time steps and returns `subsample` evenly spaced
     points from the simulated trajectory, given disease parameters (contact and recovery rate) `theta`.
 
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.9. 
 
     Note, that the simulator will scale the outputs between 0 and 1.
-    
+
     Parameters
     ----------
-    theta       : np.ndarray of shape (2,)
+    theta          : np.ndarray of shape (2,)
         The 2-dimensional vector of disease parameters.
-    N           : float, optional, default: 1e6 = 1 000 000
+    N              : float, optional, default: 1e6 = 1 000 000
         The size of the simulated population.
-    T           : T, optional, default: 160
+    T              : T, optional, default: 160
         The duration (time horizon) of the simulation.
-    I0          : float, optional, default: 1.
+    I0             : float, optional, default: 1.
         The number of initially infected individuals.
-    R0          : float, optional, default: 0.
+    R0             : float, optional, default: 0.
         The number of initially recovered individuals.
-    subsample   : int or None, optional, default: 10
+    subsample      : int or None, optional, default: 10
         The number of evenly spaced time points to return. If None,
         no subsampling will be performed and all T timepoints will be returned.
-    total_count : int, optional, default: 1000
+    total_count    : int, optional, default: 1000
         The N parameter of the binomial noise distribution. Used just
         for scaling the data and magnifying the effect of noise, such that
-        max infected = total_count.
-    rng         : np.random.Generator or None, default: None
+        max infected == total_count.
+    scale_by_total : bool, optional, default: True
+        Scales the outputs by ``total_count`` if set to True.
+    rng            : np.random.Generator or None, default: None
         An optional random number generator to use.
 
     Returns
@@ -126,8 +129,10 @@ def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000,
     # Truncate irt, so that small underflow below zero becomes zero
     irt = np.maximum(irt, 0.)
 
-    # Add noise, scale and return
-    x = rng.binomial(n=total_count, p=irt/N) / total_count
+    # Add noise and scale, if indicated
+    x = rng.binomial(n=total_count, p=irt/N)
+    if scale_by_total:
+        x /= total_count
     return x
 
 
