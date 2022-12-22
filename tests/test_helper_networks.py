@@ -46,9 +46,9 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
 @pytest.mark.parametrize("input_dim", [3, 16])
 @pytest.mark.parametrize("meta", [
     dict(dense_args={'units': 32, 'activation': 'elu'}, spec_norm=True, dropout=True, dropout_prob=0.2, num_dense=1),
-    dict(dense_args={'units': 64}, spec_norm=True, mc_dropout=True, dropout_prob=0.1, num_dense=2),
+    dict(dense_args={'units': 64}, spec_norm=True, mc_dropout=True, dropout_prob=0.1, num_dense=2, residual=True),
     dict(dense_args={'units': 32, 'activation': 'relu'}, spec_norm=False, num_dense=1),
-    dict(dense_args={'units': 64}, spec_norm=False, num_dense=2)
+    dict(dense_args={'units': 64}, spec_norm=False, num_dense=2, residual=True)
 ])
 @pytest.mark.parametrize("condition", [False, True])
 def test_dense_coupling_net(input_dim, meta, condition):
@@ -69,13 +69,18 @@ def test_dense_coupling_net(input_dim, meta, condition):
     out = dense(inp, cond_inp).numpy()
 
     # Test number of layers
-    # 2 Hidden + 2 Dropouts + 1 Out
+    # 2 Hidden + 2 Dropouts
     if meta.get('dropout') or meta.get('mc_dropout'):
-        assert len(dense.fc.layers) == 2*meta['num_dense'] + 1
+        if meta.get('residual'):
+            assert len(dense.fc.layers) == 2*meta['num_dense'] + 1
+        else:
+            assert len(dense.fc.layers) == 2*meta['num_dense']
     # 2 Hidden + 1 Out
     else:
-        assert len(dense.fc.layers) == meta['num_dense'] + 1
-    # Shapes should be the same (i.e., bijection)
+        if meta.get('residual'):
+            assert len(dense.fc.layers) == meta['num_dense'] + 1
+        else:
+            assert len(dense.fc.layers) == meta['num_dense']
     assert out.shape == inp.shape
 
 
