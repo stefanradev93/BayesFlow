@@ -78,9 +78,15 @@ class DenseCouplingNet(tf.keras.Model):
             else:
                 pass
 
-        # Create network output head
-        self.fc.add(Dense(n_out, kernel_initializer='zeros'))
-        self.fc.build(input_shape=()) 
+        # Set residual flag
+        if meta.get('residual'):
+            self.residual = True
+            self.fc.add(Dense(n_out, **{k : v for k, v in meta['dense_args'].items() if k != 'units'}))
+        else:
+            self.residual = False
+
+        self.output_layer = Dense(n_out, kernel_initializer='zeros')
+        self.fc.build(input_shape=())
 
     def call(self, target, condition, **kwargs):
         """Concatenates target and condition and performs a forward pass through the coupling net.
@@ -95,7 +101,10 @@ class DenseCouplingNet(tf.keras.Model):
 
         # Handle case no condition
         if condition is None:
-            return self.fc(target, **kwargs)
+            if self.residual:
+                return self.output_layer(self.fc(target, **kwargs) + target, **kwargs)
+            else:
+                return self.output_layer(self.fc(target, **kwargs), **kwargs)
 
         # Handle 3D case for a set-flow and repeat condition over
         # the second `time` or `n_observations` axis of `target``
@@ -105,6 +114,11 @@ class DenseCouplingNet(tf.keras.Model):
             condition = tf.tile(condition, [1, shape[1], 1])
         inp = tf.concat((target, condition), axis=-1)
         out = self.fc(inp, **kwargs)
+
+        if self.residual:
+            out = self.output_layer(target + out, **kwargs)
+        else:
+            out = self.output_layer(out, **kwargs)
         return out
 
 
@@ -424,7 +438,7 @@ class EquivariantModule(tf.keras.Model):
         out_inv = self.invariant_module(x)
 
         out_inv = tf.expand_dims(out_inv, 1)
-        out_inv_rep= tf.tile(out_inv, [1, shape[1], 1])
+        out_inv_rep = tf.tile(out_inv, [1, shape[1], 1])
 
         # Concatenate each x with the repeated invariant embedding
         out_c = tf.concat([x, out_inv_rep], axis=-1)
