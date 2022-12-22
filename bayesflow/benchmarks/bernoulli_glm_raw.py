@@ -82,9 +82,9 @@ def simulator(theta, T=100, rng=None):
 
     Returns
     -------
-    x : np.ndarray of shape (T,)
-        The full simulated set of Bernoulli draws. Should be configured with an additional trailing
-        dimension if the data is (properly) to be treated as a set.
+    x : np.ndarray of shape (T, 10)
+        The full simulated set of Bernoulli draws and design matrix. 
+        Should be configured with an additional trailing dimension if the data is (properly) to be treated as a set.
     """
 
     # Use default RNG, if None provided
@@ -98,10 +98,11 @@ def simulator(theta, T=100, rng=None):
     V = rng.normal(size=(9, T))
 
     # Draw from Bernoulli GLM and return
-    return rng.binomial(n=1, p=expit(V.T @ f + beta))
+    z = rng.binomial(n=1, p=expit(V.T @ f + beta))
+    return np.c_[np.expand_dims(z, axis=-1), V.T]
 
 
-def configurator(forward_dict, mode='posterior', as_summary_condition=False):
+def configurator(forward_dict, mode='posterior', as_summary_condition=True):
     """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
@@ -130,7 +131,7 @@ def _config_posterior(forward_dict, as_summary_condition):
     input_dict = {}
     input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
     if as_summary_condition:
-        input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32)[:, :, np.newaxis]
+        input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32)
     else:
         input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
     return input_dict
@@ -140,6 +141,15 @@ def _config_likelihood(forward_dict):
     """Helper function for likelihood configuration."""
 
     input_dict = {}
-    input_dict['observables'] = forward_dict['sim_data'].astype(np.float32)
-    input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
+
+    # Create observables (adding a dummy var)
+    obs = forward_dict['sim_data'][:, :, 0]
+    obs_dummy = np.random.randn(obs.shape[0], obs.shape[1])
+    input_dict['observables'] = np.stack([obs, obs_dummy], axis=2).astype(np.float32)
+
+    # Create condition (repeating param draws)
+    design = forward_dict['sim_data'][:, :, 1:]
+    T = design.shape[1]
+    params_rep = np.stack([forward_dict['prior_draws']]*T, axis=1)
+    input_dict['conditions'] = np.concatenate([design, params_rep], axis=-1).astype(np.float32)
     return input_dict
