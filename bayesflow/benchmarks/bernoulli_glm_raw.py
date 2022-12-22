@@ -102,7 +102,7 @@ def simulator(theta, T=100, rng=None):
     return np.c_[np.expand_dims(z, axis=-1), V.T]
 
 
-def configurator(forward_dict, mode='posterior', as_summary_condition=True):
+def configurator(forward_dict, mode='posterior', as_summary_condition=False):
     """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
@@ -130,10 +130,14 @@ def _config_posterior(forward_dict, as_summary_condition):
 
     input_dict = {}
     input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+    # Return 3D output
     if as_summary_condition:
         input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32)
+    # Flatten along 2nd and 3rd axis
     else:
-        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
+        x = forward_dict['sim_data']
+        x = x.reshape(x.shape[0], -1)
+        input_dict['direct_conditions'] = x.astype(np.float32)
     return input_dict
 
 
