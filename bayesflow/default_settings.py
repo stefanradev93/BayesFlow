@@ -66,7 +66,7 @@ DEFAULT_SETTING_INVARIANT_NET = MetaDictSetting(
 
 DEFAULT_SETTING_MULTI_CONV = {
     'layer_args': {
-        'activation': 'swish',
+        'activation': 'relu',
         'filters': 32,
         'strides': 1,
         'padding': 'causal'
@@ -98,6 +98,7 @@ DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
             'spec_norm': False,
             'mc_dropout': False,
             'dropout': False,
+            'residual': False,
             'dropout_prob': 0.1
         },
         's_args': {
@@ -106,6 +107,7 @@ DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
             'spec_norm': False,
             'mc_dropout': False,
             'dropout': False,
+            'residual': False,
             'dropout_prob': 0.1
         },
     },
