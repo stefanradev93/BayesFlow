@@ -43,7 +43,6 @@ Install BayesFlow from GitHub via
 
    pip install git+https://github.com/stefanradev93/bayesflow
 
-
 If you want to work with the latest development version (which may however be unstable), instead use
 
 .. code-block:: bash
