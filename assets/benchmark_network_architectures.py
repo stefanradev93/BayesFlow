@@ -79,7 +79,7 @@ NETWORK_SETTINGS = {
             'coupling_net_settings': COUPLING_SETTINGS_TEST
         },
         'likelihood': {
-            'num_params': 100,
+            'num_params': 2,
             'num_coupling_layers': 2,
             'coupling_net_settings': COUPLING_SETTINGS_TEST
         }
