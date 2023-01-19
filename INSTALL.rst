@@ -5,6 +5,19 @@ Requirements
 ------------
 
 This package requires Python 3.9 or later.
+A simple installation is possible via `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_,
+e.g. (on Linux)
+
+.. code-block:: bash
+
+   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+   bash Miniconda3-latest-Linux-x86_64.sh
+
+Having installed and activated conda, optionally a local environment can be created via
+
+.. code-block:: bash
+
+   conda create -y -n bayesflow python=3.10
 
 Install from GitHub
 -------------------
