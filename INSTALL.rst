@@ -22,13 +22,13 @@ Thereafter, activate the conda environment via
    eval "$($CONDA_DIR/bin/conda shell.bash hook)"
 
 (Run ``conda init`` once to automatically load conda in interactive shells.)
-Having installed and activated conda, optionally a local environment can be created via
+Having installed and activated conda, optionally you can create a local environment via
 
 .. code-block:: bash
 
    conda create -y -n bf python=3.10
 
-and activated via
+and activate via
 
 .. code-block:: bash
 
