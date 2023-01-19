@@ -25,6 +25,10 @@ overview of neurally bootstrapped Bayesian inference.
 
 <img src="img/high_level_framework.png" width=80% height=80%>
 
+## Install
+
+See [INSTALL.rst](INSTALL.rst) for installation instructions.
+
 ## Getting Started: Parameter Estimation
 
 The core functionality of BayesFlow is amortized Bayesian posterior estimation, as described in our paper:
