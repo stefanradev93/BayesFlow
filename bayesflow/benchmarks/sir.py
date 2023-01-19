@@ -132,7 +132,7 @@ def simulator(theta, N=1e6, T=160, I0=1., R0=0., subsample=10, total_count=1000,
     # Add noise and scale, if indicated
     x = rng.binomial(n=total_count, p=irt/N)
     if scale_by_total:
-        x /= total_count
+        x = x / total_count
     return x
 
 
