@@ -10,15 +10,29 @@ e.g. (on Linux)
 
 .. code-block:: bash
 
-   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-   bash Miniconda3-latest-Linux-x86_64.sh
-   rm Miniconda3-latest-Linux-x86_64.sh
+   CONDA_DIR=$PWD/miniconda3
+   wget -O Miniconda3.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+   bash Miniconda3.sh -b -p $CONDA_DIR
+   rm Miniconda3.sh
 
+Thereafter, activate the conda environment via
+
+.. code-block:: bash
+
+   eval "$($CONDA_DIR/bin/conda shell.bash hook)"
+
+(Run ``conda init`` once to automatically load conda in interactive shells.)
 Having installed and activated conda, optionally a local environment can be created via
 
 .. code-block:: bash
 
-   conda create -y -n bayesflow python=3.10
+   conda create -y -n bf python=3.10
+
+and activated via
+
+.. code-block:: bash
+
+   conda activate bf
 
 Install from GitHub
 -------------------
