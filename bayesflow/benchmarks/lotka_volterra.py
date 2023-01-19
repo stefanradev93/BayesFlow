@@ -65,7 +65,7 @@ def _deriv(x, t, alpha, beta, gamma, delta):
     return dX, dY 
 
 
-def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True, rng=None):
+def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True, obs_noise=0.1, rng=None):
     """Runs a Lotka-Volterra simulation for T time steps and returns `subsample` evenly spaced
     points from the simulated trajectory, given contact parameters `theta`.
 
@@ -87,6 +87,8 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True, rng=None):
     flatten     : bool, optional, default: True
         A flag to indicate whather a 1D (`flatten=True`) or a 2D (`flatten=False`)
         representation of the simulated data is returned.
+    obs_noise   : float, optional, default: 0.1
+        The standard deviation of the log-normal likelihood.
     rng         : np.random.Generator or None, default: None
         An optional random number generator to use.
 
@@ -118,10 +120,10 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True, rng=None):
         pp = pp[::(T // subsample)]
 
     # Ensure minimum count is 0, which will later pass by log(0 + 1)
-    pp[pp<0] = 0
+    pp[pp<0] = 0.
     
     # Add noise, decide whether to flatten and return
-    x = rng.lognormal(np.log1p(pp), sigma=0.1)
+    x = rng.lognormal(np.log1p(pp), sigma=obs_noise)
     if flatten:
         return x.flatten()
     return x
