@@ -9,7 +9,7 @@
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
@@ -18,10 +18,10 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -64,7 +64,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <h1>Source code for bayesflow.trainers</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
 
@@ -103,7 +103,7 @@
 <span class="kn">from</span> <span class="nn">bayesflow.helper_functions</span> <span class="kn">import</span> <span class="n">format_loss_string</span><span class="p">,</span> <span class="n">extract_current_lr</span><span class="p">,</span> <span class="n">backprop_step</span>
 <span class="kn">from</span> <span class="nn">bayesflow.helper_classes</span> <span class="kn">import</span> <span class="n">SimulationDataset</span><span class="p">,</span> <span class="n">LossHistory</span><span class="p">,</span> <span class="n">SimulationMemory</span><span class="p">,</span> <span class="n">MemoryReplayBuffer</span>
 <span class="kn">from</span> <span class="nn">bayesflow.default_settings</span> <span class="kn">import</span> <span class="n">DEFAULT_KEYS</span><span class="p">,</span> <span class="n">OPTIMIZER_DEFAULTS</span>
-<span class="kn">from</span> <span class="nn">bayesflow.amortizers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">AmortizedLikelihood</span><span class="p">,</span> <span class="n">AmortizedPosterior</span><span class="p">,</span> 
+<span class="kn">from</span> <span class="nn">bayesflow.amortizers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">AmortizedLikelihood</span><span class="p">,</span> <span class="n">AmortizedPosterior</span><span class="p">,</span>
                                   <span class="n">AmortizedPosteriorLikelihood</span><span class="p">,</span> <span class="n">AmortizedModelComparison</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">bayesflow.diagnostics</span> <span class="kn">import</span> <span class="n">plot_sbc_histograms</span><span class="p">,</span> <span class="n">plot_latent_space_2d</span>
 
@@ -163,7 +163,7 @@
 <span class="sd">    such as Bayesian optimization.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amortizer</span><span class="p">,</span> <span class="n">generative_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">configurator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amortizer</span><span class="p">,</span> <span class="n">generative_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">configurator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">max_to_keep</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">default_lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">skip_checks</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates a trainer which will use a generative model (or data simulated from it) to optimize</span>
 <span class="sd">        a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.</span>
@@ -201,7 +201,7 @@
         <span class="c1"># Set-up logging</span>
         <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">amortizer</span> <span class="o">=</span> <span class="n">amortizer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">generative_model</span> <span class="o">=</span> <span class="n">generative_model</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generative_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -213,7 +213,7 @@
         <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">amortizer</span><span class="p">)</span> <span class="ow">is</span> <span class="n">AmortizedModelComparison</span><span class="p">:</span>
             <span class="n">_num_models</span> <span class="o">=</span> <span class="n">amortizer</span><span class="o">.</span><span class="n">num_models</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">_num_models</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;num_models&#39;</span><span class="p">)</span> 
+            <span class="n">_num_models</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;num_models&#39;</span><span class="p">)</span>
 
         <span class="c1"># Set-up configurator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">configurator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manage_configurator</span><span class="p">(</span><span class="n">configurator</span><span class="p">,</span> <span class="n">num_models</span><span class="o">=</span><span class="n">_num_models</span><span class="p">)</span>
@@ -289,7 +289,7 @@
                     <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation_memory</span><span class="o">.</span><span class="n">get_memory</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurator</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;conf_args&#39;</span><span class="p">,</span> <span class="p">{}))</span>
-            
+
             <span class="c1"># Do inference</span>
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
                 <span class="n">z</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">amortizer</span><span class="o">.</span><span class="n">call_loop</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;net_args&#39;</span><span class="p">,</span> <span class="p">{}))</span>
@@ -342,7 +342,7 @@
                     <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_sim</span> <span class="o">/</span> <span class="mi">20</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">20</span><span class="p">))</span>
-                
+
             <span class="c1"># Do inference</span>
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
                 <span class="n">post_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">amortizer</span><span class="o">.</span><span class="n">sample_loop</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;net_args&#39;</span><span class="p">,</span> <span class="p">{}))</span>
@@ -355,11 +355,11 @@
             <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;plot_args&#39;</span><span class="p">,</span> <span class="p">{})</span>
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generative_model</span><span class="p">)</span> <span class="ow">is</span> <span class="n">GenerativeModel</span> <span class="ow">and</span> <span class="n">plot_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;param_names&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;param_names&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generative_model</span><span class="o">.</span><span class="n">param_names</span>
-            
+
             <span class="k">return</span> <span class="n">plot_sbc_histograms</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;SBC diagnostics are only available for type AmortizedPosterior!&quot;</span><span class="p">)</span></div>
-        
+
 <div class="viewcode-block" id="Trainer.load_pretrained_network"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.Trainer.load_pretrained_network">[docs]</a>    <span class="k">def</span> <span class="nf">load_pretrained_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -369,8 +369,8 @@
         <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">latest_checkpoint</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">status</span></div>
 
-<div class="viewcode-block" id="Trainer.train_online"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.Trainer.train_online">[docs]</a>    <span class="k">def</span> <span class="nf">train_online</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
-                     <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reuse_optimizer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">optional_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_autograph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+<div class="viewcode-block" id="Trainer.train_online"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.Trainer.train_online">[docs]</a>    <span class="k">def</span> <span class="nf">train_online</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reuse_optimizer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">optional_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_autograph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Trains an amortizer via online learning. Additional keyword arguments</span>
 <span class="sd">        are passed to the generative mode, configurator, and amortizer.</span>
@@ -416,7 +416,7 @@
             <span class="n">_backprop_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">backprop_step</span><span class="p">,</span> <span class="n">reduce_retracing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_backprop_step</span> <span class="o">=</span> <span class="n">_backprop_step</span>
-         
+
         <span class="c1"># Create new optimizer and initialize loss history</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_history</span><span class="o">.</span><span class="n">start_new_run</span><span class="p">()</span>
@@ -450,9 +450,9 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">reuse_optimizer</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_history</span><span class="o">.</span><span class="n">get_plottable</span><span class="p">()</span></div>
-    
-<div class="viewcode-block" id="Trainer.train_offline"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.Trainer.train_offline">[docs]</a>    <span class="k">def</span> <span class="nf">train_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulations_dict</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
-                      <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reuse_optimizer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">optional_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+
+<div class="viewcode-block" id="Trainer.train_offline"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.Trainer.train_offline">[docs]</a>    <span class="k">def</span> <span class="nf">train_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulations_dict</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reuse_optimizer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">optional_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                       <span class="n">use_autograph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Trains an amortizer via offline learning. Assume parameters, data and optional </span>
 <span class="sd">        context have already been simulated (i.e., forward inference has been performed).</span>
@@ -541,7 +541,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_history</span><span class="o">.</span><span class="n">get_plottable</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Trainer.train_from_presimulation"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.Trainer.train_from_presimulation">[docs]</a>    <span class="k">def</span> <span class="nf">train_from_presimulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">presimulation_path</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_epochs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+<div class="viewcode-block" id="Trainer.train_from_presimulation"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.Trainer.train_from_presimulation">[docs]</a>    <span class="k">def</span> <span class="nf">train_from_presimulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">presimulation_path</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_epochs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                  <span class="n">reuse_optimizer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">custom_loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">optional_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_autograph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Trains an amortizer via a modified form of offline training. </span>
@@ -622,7 +622,7 @@
 
         <span class="c1"># Loop over the presimulated dataset.</span>
         <span class="n">file_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">presimulation_path</span><span class="p">)</span>
-        
+
         <span class="c1"># Limit number of epochs to max_epochs</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_epochs</span><span class="p">:</span>
             <span class="n">file_list</span> <span class="o">=</span> <span class="n">file_list</span><span class="p">[:</span><span class="n">max_epochs</span><span class="p">]</span>
@@ -632,12 +632,12 @@
             <span class="c1"># Read single file into memory as a dictionary or list</span>
             <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">presimulation_path</span><span class="p">,</span> <span class="n">current_filename</span><span class="p">)</span>
             <span class="n">epoch_data</span> <span class="o">=</span> <span class="n">custom_loader</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-            
+
             <span class="c1"># For each epoch, the number of iterations is inferred from the presimulated dictionary or list used for that epoch</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">epoch_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">epoch_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="n">index_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">epoch_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">epoch_data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">index_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">epoch_data</span><span class="p">))</span>    
+                <span class="n">index_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">epoch_data</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading a simulation file resulted in a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">epoch_data</span><span class="p">)</span><span class="si">}</span><span class="s2">. Must be a dictionary or a list!&quot;</span><span class="p">)</span>
 
@@ -675,8 +675,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_history</span><span class="o">.</span><span class="n">get_plottable</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Trainer.train_experience_replay"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.Trainer.train_experience_replay">[docs]</a>    <span class="k">def</span> <span class="nf">train_experience_replay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
-                                <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reuse_optimizer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">buffer_capacity</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">optional_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+<div class="viewcode-block" id="Trainer.train_experience_replay"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.Trainer.train_experience_replay">[docs]</a>    <span class="k">def</span> <span class="nf">train_experience_replay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reuse_optimizer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">buffer_capacity</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">optional_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                 <span class="n">use_autograph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Trains the network(s) via experience replay using a memory replay buffer, as utilized</span>
 <span class="sd">        in reinforcement learning. Additional keyword arguments are passed to the generative mode, </span>
@@ -739,9 +739,9 @@
         <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">epochs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">iterations_per_epoch</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Training epoch </span><span class="si">{</span><span class="n">ep</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p_bar</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">iterations_per_epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                    
+
                     <span class="c1"># Simulate a batch of data and store into buffer</span>
-                    <span class="n">input_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_inference</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> 
+                    <span class="n">input_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_inference</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;conf_args&#39;</span><span class="p">,</span> <span class="p">{}),</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;model_args&#39;</span><span class="p">,</span> <span class="p">{}))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">replay_buffer</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">input_dict</span><span class="p">)</span>
 
@@ -775,7 +775,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_history</span><span class="o">.</span><span class="n">get_plottable</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Trainer.train_rounds"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.Trainer.train_rounds">[docs]</a>    <span class="k">def</span> <span class="nf">train_rounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rounds</span><span class="p">,</span> <span class="n">sim_per_round</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+<div class="viewcode-block" id="Trainer.train_rounds"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.trainers.Trainer.train_rounds">[docs]</a>    <span class="k">def</span> <span class="nf">train_rounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rounds</span><span class="p">,</span> <span class="n">sim_per_round</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                      <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reuse_optimizer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">optional_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_autograph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Trains an amortizer via round-based learning. In each round, ``sim_per_round`` data sets</span>
@@ -856,7 +856,7 @@
 
             <span class="c1"># Train offline with generated stuff</span>
             <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span>
-                <span class="n">simulations_dict</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="p">,</span> <span class="n">reuse_optimizer</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                <span class="n">simulations_dict</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="p">,</span> <span class="n">reuse_optimizer</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">optional_stopping</span><span class="o">=</span><span class="n">optional_stopping</span><span class="p">,</span> <span class="n">use_autograph</span><span class="o">=</span><span class="n">use_autograph</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Remove optimizer reference, if not set as persistent</span>
@@ -882,7 +882,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>   
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
 
     <span class="k">def</span> <span class="nf">_save_trainer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_checkpoint</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Helper method to take care of IO operations.&quot;&quot;&quot;</span>
@@ -992,7 +992,7 @@
             <span class="c1"># Model comparison amortizer</span>
             <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amortizer</span><span class="p">)</span> <span class="ow">is</span> <span class="n">AmortizedModelComparison</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;num_models&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s1">&#39;Either your generative model or amortizer should have &quot;num_models&quot; attribute, or &#39;</span> <span class="o">+</span> 
+                    <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s1">&#39;Either your generative model or amortizer should have &quot;num_models&quot; attribute, or &#39;</span> <span class="o">+</span>
                                              <span class="s1">&#39;you need initialize Trainer with num_models explicitly!&#39;</span><span class="p">)</span>
                 <span class="n">default_config</span> <span class="o">=</span> <span class="n">DefaultModelComparisonConfigurator</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;num_models&#39;</span><span class="p">))</span>
             <span class="c1"># Unknown raises an error</span>
@@ -1015,14 +1015,14 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generative_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_n_sim</span> <span class="o">=</span> <span class="mi">2</span>
-            <span class="k">try</span><span class="p">:</span> 
+            <span class="k">try</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Performing a consistency check with provided components...&#39;</span><span class="p">)</span>
                 <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">amortizer</span><span class="o">.</span><span class="n">compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configurator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generative_model</span><span class="p">(</span><span class="n">_n_sim</span><span class="p">)))</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Done.&#39;</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s2">&quot;Could not carry out computations of generative_model -&gt;&quot;</span> <span class="o">+</span>
                                          <span class="sa">f</span><span class="s2">&quot;configurator -&gt; amortizer -&gt; loss! Error trace:</span><span class="se">\n</span><span class="s2"> </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    
+
     <span class="k">def</span> <span class="nf">_default_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Uses pickle to load as a default.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -1043,7 +1043,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -1054,7 +1054,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

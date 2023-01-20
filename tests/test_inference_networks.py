@@ -19,15 +19,14 @@
 # SOFTWARE.
 
 import numpy as np
-
 import pytest
 
-from bayesflow.inference_networks import InvertibleNetwork
-from bayesflow.helper_functions import build_meta_dict
 from bayesflow.default_settings import DEFAULT_SETTING_INVERTIBLE_NET
+from bayesflow.helper_functions import build_meta_dict
+from bayesflow.inference_networks import InvertibleNetwork
 
 
-@pytest.mark.parametrize("input_shape", ['2d', '3d'])
+@pytest.mark.parametrize("input_shape", ["2d", "3d"])
 @pytest.mark.parametrize("condition", [True, False])
 @pytest.mark.parametrize("use_act_norm", [True, False])
 @pytest.mark.parametrize("use_soft_flow", [True, False])
@@ -42,36 +41,38 @@ def test_invertible_network(input_shape, condition, use_act_norm, use_soft_flow,
 
     # Create settings dictionaries and network
     dense_net_settings = {
-        't_args': {
-            'dense_args': dict(units=units_t, kernel_initializer='glorot_uniform', activation='elu'),
-            'num_dense': 1,
-            'spec_norm': True
+        "t_args": {
+            "dense_args": dict(units=units_t, kernel_initializer="glorot_uniform", activation="elu"),
+            "num_dense": 1,
+            "spec_norm": True,
         },
-        's_args': {
-            'dense_args': dict(units=units_s, kernel_initializer='glorot_normal', activation='relu'),
-            'num_dense': 2,
-            'spec_norm': False
+        "s_args": {
+            "dense_args": dict(units=units_s, kernel_initializer="glorot_normal", activation="relu"),
+            "num_dense": 2,
+            "spec_norm": False,
         },
     }
-    settings = build_meta_dict(user_dict={
-        'coupling_net_settings': dense_net_settings,
-        'use_act_norm': use_act_norm,
-        'use_soft_flow': use_soft_flow,
-        'num_coupling_layers': num_coupling_layers,
-        'num_params': input_dim
-    },
-    default_setting=DEFAULT_SETTING_INVERTIBLE_NET)
+    settings = build_meta_dict(
+        user_dict={
+            "coupling_net_settings": dense_net_settings,
+            "use_act_norm": use_act_norm,
+            "use_soft_flow": use_soft_flow,
+            "num_coupling_layers": num_coupling_layers,
+            "num_params": input_dim,
+        },
+        default_setting=DEFAULT_SETTING_INVERTIBLE_NET,
+    )
 
     network = InvertibleNetwork(**settings)
 
     # Create randomized input and output conditions
     batch_size = np.random.randint(low=1, high=32)
-    if input_shape == '2d':
+    if input_shape == "2d":
         inp = np.random.normal(size=(batch_size, input_dim)).astype(np.float32)
     else:
         n_obs = np.random.randint(low=1, high=32)
         inp = np.random.normal(size=(batch_size, n_obs, input_dim)).astype(np.float32)
-    if condition :
+    if condition:
         condition_dim = np.random.randint(low=1, high=32)
         condition = np.random.normal(size=(batch_size, condition_dim)).astype(np.float32)
     else:
@@ -101,7 +102,7 @@ def test_invertible_network(input_shape, condition, use_act_norm, use_soft_flow,
     # Test shapes (bijectivity)
     assert z.shape == inp.shape
     assert z.shape[-1] == input_dim
-    if input_shape == '2d':
+    if input_shape == "2d":
         assert ldj.shape[0] == inp.shape[0]
     else:
         assert ldj.shape[0] == inp.shape[0] and ldj.shape[1] == inp.shape[1]

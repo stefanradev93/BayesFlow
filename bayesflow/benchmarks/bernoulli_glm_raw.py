@@ -23,11 +23,10 @@
 import numpy as np
 from scipy.special import expit
 
-
 bayesflow_benchmark_info = {
-    'simulator_is_batched': False,
-    'parameter_names': [r'$\beta$'] + [r'$f_{}$'.format(i) for i in range(1, 10)],
-    'configurator_info': 'posterior'
+    "simulator_is_batched": False,
+    "parameter_names": [r"$\beta$"] + [r"$f_{}$".format(i) for i in range(1, 10)],
+    "configurator_info": "posterior",
 }
 
 # Global covariance matrix computed once for efficiency
@@ -35,10 +34,10 @@ F = np.zeros((9, 9))
 for i in range(9):
     F[i, i] = 1 + np.sqrt(i / 9)
     if i >= 1:
-        F[i, i-1] = -2
+        F[i, i - 1] = -2
     if i >= 2:
-        F[i, i-2] = 1
-Cov = np.linalg.inv(F.T@F)
+        F[i, i - 2] = 1
+Cov = np.linalg.inv(F.T @ F)
 
 
 def prior(rng=None):
@@ -57,13 +56,13 @@ def prior(rng=None):
     theta : np.ndarray of shape (10,)
         A single draw from the prior.
     """
-    
+
     if rng is None:
         rng = np.random.default_rng()
     beta = rng.normal(0, 2)
     f = rng.multivariate_normal(np.zeros(9), Cov)
     return np.append(beta, f)
-    
+
 
 def simulator(theta, T=100, rng=None):
     """Simulates data from the custom Bernoulli GLM likelihood, see:
@@ -83,7 +82,7 @@ def simulator(theta, T=100, rng=None):
     Returns
     -------
     x : np.ndarray of shape (T, 10)
-        The full simulated set of Bernoulli draws and design matrix. 
+        The full simulated set of Bernoulli draws and design matrix.
         Should be configured with an additional trailing dimension if the data is (properly) to be treated as a set.
     """
 
@@ -102,22 +101,22 @@ def simulator(theta, T=100, rng=None):
     return np.c_[np.expand_dims(z, axis=-1), V.T]
 
 
-def configurator(forward_dict, mode='posterior', as_summary_condition=False):
+def configurator(forward_dict, mode="posterior", as_summary_condition=False):
     """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
-    if mode == 'posterior':
+    if mode == "posterior":
         input_dict = _config_posterior(forward_dict, as_summary_condition)
 
     # Case only likelihood configuration
-    elif mode == 'likelihood':
+    elif mode == "likelihood":
         input_dict = _config_likelihood(forward_dict)
 
     # Case posterior and likelihood configuration
-    elif mode == 'joint':
+    elif mode == "joint":
         input_dict = {}
-        input_dict['posterior_inputs'] = _config_posterior(forward_dict, as_summary_condition)
-        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict)
+        input_dict["posterior_inputs"] = _config_posterior(forward_dict, as_summary_condition)
+        input_dict["likelihood_inputs"] = _config_likelihood(forward_dict)
 
     # Throw otherwise
     else:
@@ -129,15 +128,15 @@ def _config_posterior(forward_dict, as_summary_condition):
     """Helper function for posterior configuration."""
 
     input_dict = {}
-    input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict["parameters"] = forward_dict["prior_draws"].astype(np.float32)
     # Return 3D output
     if as_summary_condition:
-        input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32)
+        input_dict["summary_conditions"] = forward_dict["sim_data"].astype(np.float32)
     # Flatten along 2nd and 3rd axis
     else:
-        x = forward_dict['sim_data']
+        x = forward_dict["sim_data"]
         x = x.reshape(x.shape[0], -1)
-        input_dict['direct_conditions'] = x.astype(np.float32)
+        input_dict["direct_conditions"] = x.astype(np.float32)
     return input_dict
 
 
@@ -147,13 +146,13 @@ def _config_likelihood(forward_dict):
     input_dict = {}
 
     # Create observables (adding a dummy var)
-    obs = forward_dict['sim_data'][:, :, 0]
+    obs = forward_dict["sim_data"][:, :, 0]
     obs_dummy = np.random.randn(obs.shape[0], obs.shape[1])
-    input_dict['observables'] = np.stack([obs, obs_dummy], axis=2).astype(np.float32)
+    input_dict["observables"] = np.stack([obs, obs_dummy], axis=2).astype(np.float32)
 
     # Create condition (repeating param draws)
-    design = forward_dict['sim_data'][:, :, 1:]
+    design = forward_dict["sim_data"][:, :, 1:]
     T = design.shape[1]
-    params_rep = np.stack([forward_dict['prior_draws']]*T, axis=1)
-    input_dict['conditions'] = np.concatenate([design, params_rep], axis=-1).astype(np.float32)
+    params_rep = np.stack([forward_dict["prior_draws"]] * T, axis=1)
+    input_dict["conditions"] = np.concatenate([design, params_rep], axis=-1).astype(np.float32)
     return input_dict

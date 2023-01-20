@@ -19,10 +19,9 @@
 # SOFTWARE.
 
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 from bayesflow.computational_utilities import maximum_mean_discrepancy
-
-import tensorflow_probability as tfp
 
 
 def kl_latent_space_gaussian(z, log_det_J):
@@ -70,13 +69,13 @@ def kl_latent_space_student(v, z, log_det_J):
     loss : tf.Tensor
         A single scalar value representing the KL loss, shape (,)
     """
-    
+
     d = z.shape[-1]
-    loss = 0.
-    loss -= d * tf.math.lgamma(0.5*(v + 1))
-    loss += d * tf.math.lgamma(0.5*v + 1e-15)
-    loss += (0.5*d) * tf.math.log(v + 1e-15)
-    loss += 0.5*(v+1) * tf.reduce_sum(tf.math.log1p(z**2 / tf.expand_dims(v, axis=-1)), axis=-1)
+    loss = 0.0
+    loss -= d * tf.math.lgamma(0.5 * (v + 1))
+    loss += d * tf.math.lgamma(0.5 * v + 1e-15)
+    loss += (0.5 * d) * tf.math.log(v + 1e-15)
+    loss += 0.5 * (v + 1) * tf.reduce_sum(tf.math.log1p(z**2 / tf.expand_dims(v, axis=-1)), axis=-1)
     loss -= log_det_J
     mean_loss = tf.reduce_mean(loss)
     return mean_loss
@@ -107,15 +106,18 @@ def kl_dirichlet(model_indices, alpha):
     alpha0 = tf.reduce_sum(alpha, axis=1, keepdims=True)
 
     # Computation of KL
-    kl = tf.reduce_sum((alpha - beta) * (tf.math.digamma(alpha) - tf.math.digamma(alpha0)), axis=1, keepdims=True) + \
-        tf.math.lgamma(alpha0) - tf.reduce_sum(tf.math.lgamma(alpha), axis=1, keepdims=True) + \
-        tf.reduce_sum(tf.math.lgamma(beta), axis=1, keepdims=True) - tf.math.lgamma(
-        tf.reduce_sum(beta, axis=1, keepdims=True))
+    kl = (
+        tf.reduce_sum((alpha - beta) * (tf.math.digamma(alpha) - tf.math.digamma(alpha0)), axis=1, keepdims=True)
+        + tf.math.lgamma(alpha0)
+        - tf.reduce_sum(tf.math.lgamma(alpha), axis=1, keepdims=True)
+        + tf.reduce_sum(tf.math.lgamma(beta), axis=1, keepdims=True)
+        - tf.math.lgamma(tf.reduce_sum(beta, axis=1, keepdims=True))
+    )
     loss = tf.reduce_mean(kl)
     return loss
 
 
-def mmd_summary_space(summary_outputs, z_dist=tf.random.normal, kernel='gaussian'):
+def mmd_summary_space(summary_outputs, z_dist=tf.random.normal, kernel="gaussian"):
     """Computes the MMD(p(summary_otuputs) | z_dist) to re-shape the summary network outputs in
     an information-preserving manner.
 
@@ -129,12 +131,12 @@ def mmd_summary_space(summary_outputs, z_dist=tf.random.normal, kernel='gaussian
         The kernel function to use for MMD computation.
     """
 
-    z_samples = z_dist(summary_outputs.shape) 
+    z_samples = z_dist(summary_outputs.shape)
     mmd_loss = maximum_mean_discrepancy(summary_outputs, z_samples, kernel)
     return mmd_loss
 
 
-def log_loss(model_indices, alpha, label_smoothing=.01):
+def log_loss(model_indices, alpha, label_smoothing=0.01):
     """Computes the logloss given output probs and true model indices m_true.
 
     Parameters
@@ -155,8 +157,8 @@ def log_loss(model_indices, alpha, label_smoothing=.01):
     # Apply label smoothing to indices, if specified
     if label_smoothing is not None:
         num_models = tf.cast(tf.shape(model_indices)[1], dtype=tf.float32)
-        model_indices *= (1. - label_smoothing)
-        model_indices += (label_smoothing / num_models)
+        model_indices *= 1.0 - label_smoothing
+        model_indices += label_smoothing / num_models
 
     # Obtain probs
     model_probs = alpha / tf.reduce_sum(alpha, axis=1, keepdims=True)

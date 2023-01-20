@@ -28,8 +28,7 @@ from bayesflow.exceptions import ConfigurationError, ShapeError
 
 
 def merge_left_into_right(left_dict, right_dict):
-    """Function to merge nested dict `left_dict` into nested dict `right_dict`.
-    """
+    """Function to merge nested dict `left_dict` into nested dict `right_dict`."""
     for k, v in left_dict.items():
         if isinstance(v, dict):
             if right_dict.get(k) is not None:
@@ -103,8 +102,9 @@ def extract_current_lr(optimizer):
     return current_lr
 
 
-def format_loss_string(ep, it, loss, avg_dict, slope=None, lr=None, 
-                       ep_str="Epoch", it_str='Iter', scalar_loss_str='Loss'):
+def format_loss_string(
+    ep, it, loss, avg_dict, slope=None, lr=None, ep_str="Epoch", it_str="Iter", scalar_loss_str="Loss"
+):
     """Prepare loss string for displaying on progress bar."""
 
     # Prepare info part
@@ -113,7 +113,7 @@ def format_loss_string(ep, it, loss, avg_dict, slope=None, lr=None,
         for k, v in loss.items():
             disp_str += f",{k}: {v.numpy():.3f}"
     else:
-        disp_str  += f",{scalar_loss_str}: {loss.numpy():.3f}"
+        disp_str += f",{scalar_loss_str}: {loss.numpy():.3f}"
     # Add running
     if avg_dict is not None:
         for k, v in avg_dict.items():
@@ -125,19 +125,20 @@ def format_loss_string(ep, it, loss, avg_dict, slope=None, lr=None,
     return disp_str
 
 
-def loss_to_string(ep, loss, ep_str='Epoch', scalar_loss_str='Loss'):
-    """Converts output from an amortizer into a string. 
+def loss_to_string(ep, loss, ep_str="Epoch", scalar_loss_str="Loss"):
+    """Converts output from an amortizer into a string.
     For instance, if a ``dict`` is provided, it will be converted as, e.g.,:
-    dictionary = {k1: v1, k2: v2} -> 'k1: v1, k2: v2'   
+    dictionary = {k1: v1, k2: v2} -> 'k1: v1, k2: v2'
     """
 
-    disp_str = f'Validation, {ep_str}: {ep}'
+    disp_str = f"Validation, {ep_str}: {ep}"
     if type(loss) is dict:
         for k, v in loss.items():
             disp_str += f", {k}: {v.numpy():.3f}"
     else:
-        disp_str  += f", {scalar_loss_str}: {loss.numpy():.3f}"
+        disp_str += f", {scalar_loss_str}: {loss.numpy():.3f}"
     return disp_str
+
 
 def backprop_step(input_dict, amortizer, optimizer, **kwargs):
     """Computes the loss of the provided amortizer given an input dictionary and applies gradients.
@@ -152,7 +153,7 @@ def backprop_step(input_dict, amortizer, optimizer, **kwargs):
         The optimizer used to update the amortizer's parameters.
     **kwargs    : dict
         Optional keyword arguments passed to the network's compute_loss method
-        
+
     Returns
     -------
     loss : dict
@@ -174,9 +175,9 @@ def backprop_step(input_dict, amortizer, optimizer, **kwargs):
             reg = tf.add_n(amortizer.losses)
             _loss += reg
             if type(loss) is dict:
-                loss['W.Decay'] = reg
+                loss["W.Decay"] = reg
             else:
-                loss = {'Loss': loss, 'W.Decay': reg}
+                loss = {"Loss": loss, "W.Decay": reg}
     # One step backprop and return loss
     gradients = tape.gradient(_loss, amortizer.trainable_variables)
     optimizer.apply_gradients(zip(gradients, amortizer.trainable_variables))
@@ -186,7 +187,7 @@ def backprop_step(input_dict, amortizer, optimizer, **kwargs):
 def check_posterior_prior_shapes(post_samples, prior_samples):
     """Checks requirements for the shapes of posterior and prior draws as
     necessitated by most diagnostic functions.
-    
+
     Parameters
     ----------
     post_samples      : np.ndarray of shape (n_data_sets, n_post_draws, n_params)
@@ -196,26 +197,34 @@ def check_posterior_prior_shapes(post_samples, prior_samples):
 
     Raises
     ------
-    ShapeError 
+    ShapeError
         If there is a deviation form the expected shapes of `post_samples` and `prior_samples`.
     """
 
     if len(post_samples.shape) != 3:
-        raise ShapeError(f'post_samples should be a 3-dimensional array, with the ' +
-                         f'first dimension being the number of (simulated) data sets, ' + 
-                         f'the second dimension being the number of posterior draws per data set, ' + 
-                         f'and the third dimension being the number of parameters (marginal distributions), ' +  
-                         f'but your input has dimensions {len(post_samples.shape)}')
+        raise ShapeError(
+            f"post_samples should be a 3-dimensional array, with the "
+            + f"first dimension being the number of (simulated) data sets, "
+            + f"the second dimension being the number of posterior draws per data set, "
+            + f"and the third dimension being the number of parameters (marginal distributions), "
+            + f"but your input has dimensions {len(post_samples.shape)}"
+        )
     elif len(prior_samples.shape) != 2:
-        raise ShapeError(f'prior_samples should be a 2-dimensional array, with the ' +  
-                         f'first dimension being the number of (simulated) data sets / prior draws ' + 
-                         f'and the second dimension being the number of parameters (marginal distributions), ' +  
-                         f'but your input has dimensions {len(prior_samples.shape)}')
+        raise ShapeError(
+            f"prior_samples should be a 2-dimensional array, with the "
+            + f"first dimension being the number of (simulated) data sets / prior draws "
+            + f"and the second dimension being the number of parameters (marginal distributions), "
+            + f"but your input has dimensions {len(prior_samples.shape)}"
+        )
     elif post_samples.shape[0] != prior_samples.shape[0]:
-        raise ShapeError(f'The number of elements over the first dimension of post_samples and prior_samples' + 
-                         f'should match, but post_samples has {post_samples.shape[0]} and prior_samples has ' +
-                         f'{prior_samples.shape[0]} elements, respectively.')
+        raise ShapeError(
+            f"The number of elements over the first dimension of post_samples and prior_samples"
+            + f"should match, but post_samples has {post_samples.shape[0]} and prior_samples has "
+            + f"{prior_samples.shape[0]} elements, respectively."
+        )
     elif post_samples.shape[-1] != prior_samples.shape[-1]:
-        raise ShapeError(f'The number of elements over the last dimension of post_samples and prior_samples' + 
-                         f'should match, but post_samples has {post_samples.shape[1]} and prior_samples has ' +
-                         f'{prior_samples.shape[-1]} elements, respectively.')
+        raise ShapeError(
+            f"The number of elements over the last dimension of post_samples and prior_samples"
+            + f"should match, but post_samples has {post_samples.shape[1]} and prior_samples has "
+            + f"{prior_samples.shape[-1]} elements, respectively."
+        )

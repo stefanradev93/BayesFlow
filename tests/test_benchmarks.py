@@ -19,17 +19,16 @@
 # SOFTWARE.
 
 import copy
+
 import numpy as np
+import pytest
 import tensorflow as tf
 
-import pytest
-
-from bayesflow import benchmarks
-from bayesflow.trainers import Trainer
-from bayesflow.networks import InvertibleNetwork
-from bayesflow.amortizers import AmortizedPosterior, AmortizedLikelihood, AmortizedPosteriorLikelihood
-
 from assets.benchmark_network_architectures import NETWORK_SETTINGS
+from bayesflow import benchmarks
+from bayesflow.amortizers import AmortizedLikelihood, AmortizedPosterior, AmortizedPosteriorLikelihood
+from bayesflow.networks import InvertibleNetwork
+from bayesflow.trainers import Trainer
 
 
 def _get_trainer_configuration(benchmark_name, mode):
@@ -42,34 +41,33 @@ def _get_trainer_configuration(benchmark_name, mode):
     benchmark = benchmarks.Benchmark(benchmark_name, mode=mode)
 
     # Setup posterior amortizer
-    if mode == 'posterior':
-        amortizer = AmortizedPosterior(
-            InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name][mode]))
-    elif mode == 'likelihood':
-        amortizer = AmortizedLikelihood(
-            InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name][mode]))
+    if mode == "posterior":
+        amortizer = AmortizedPosterior(InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name][mode]))
+    elif mode == "likelihood":
+        amortizer = AmortizedLikelihood(InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name][mode]))
     else:
         amortizer = AmortizedPosteriorLikelihood(
-            amortized_posterior=AmortizedPosterior(
-                InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name]['posterior'])),
+            amortized_posterior=AmortizedPosterior(InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name]["posterior"])),
             amortized_likelihood=AmortizedLikelihood(
-                InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name]['likelihood']))
+                InvertibleNetwork(**NETWORK_SETTINGS[benchmark_name]["likelihood"])
+            ),
         )
     trainer = Trainer(
         amortizer=amortizer,
         generative_model=benchmark.generative_model,
         learning_rate=0.0001,
         configurator=benchmark.configurator,
-        memory=False
+        memory=False,
     )
     return trainer
 
+
 @pytest.mark.parametrize("benchmark_name", benchmarks.available_benchmarks)
-@pytest.mark.parametrize("mode", ['posterior', 'likelihood', 'joint'])
+@pytest.mark.parametrize("mode", ["posterior", "likelihood", "joint"])
 def test_posterior(benchmark_name, mode):
-    """This test will run posterior, likelihood, and joint estimation on all benchmarks. It will create a 
-    minimal ``Trainer`` instance and test whether the weights change after a couple of backpropagation updates. 
-    
+    """This test will run posterior, likelihood, and joint estimation on all benchmarks. It will create a
+    minimal ``Trainer`` instance and test whether the weights change after a couple of backpropagation updates.
+
     Implicitly, the functuion will test wtheter the coupling GenerativeModel -> configurator -> Amortizer -> Trainer works.
     """
 

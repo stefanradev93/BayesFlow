@@ -18,12 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
+import re
 from copy import deepcopy
+
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import os
-import re
 
 try:
     import cPickle as pickle
@@ -31,6 +32,7 @@ except:
     import pickle
 
 import logging
+
 logging.basicConfig()
 
 from sklearn.linear_model import HuberRegressor
@@ -39,25 +41,22 @@ from bayesflow.default_settings import DEFAULT_KEYS
 
 
 class SimulationDataset:
-    """Helper class to create a tensorflow.data.Dataset which parses simulation dictionaries 
+    """Helper class to create a tensorflow.data.Dataset which parses simulation dictionaries
     and returns simulation dictionaries as expected by BayesFlow amortizers.
     """
-    
+
     def __init__(self, forward_dict, batch_size, buffer_size=1024):
         """Creates a tensorfow.data.Dataset from forward inference outputs and determines format."""
-        
+
         slices, keys_used, keys_none, n_sim = self._determine_slices(forward_dict)
-        self.data = tf.data.Dataset\
-                .from_tensor_slices(tuple(slices))\
-                .shuffle(buffer_size)\
-                .batch(batch_size)
+        self.data = tf.data.Dataset.from_tensor_slices(tuple(slices)).shuffle(buffer_size).batch(batch_size)
         self.keys_used = keys_used
         self.keys_none = keys_none
         self.n_sim = n_sim
-        
+
     def _determine_slices(self, forward_dict):
         """Determine slices for a tensorflow Dataset."""
-        
+
         keys_used = []
         keys_none = []
         slices = []
@@ -67,19 +66,19 @@ class SimulationDataset:
                 keys_used.append(k)
             else:
                 keys_none.append(k)
-        n_sim = forward_dict[DEFAULT_KEYS['sim_data']].shape[0]
+        n_sim = forward_dict[DEFAULT_KEYS["sim_data"]].shape[0]
         return slices, keys_used, keys_none, n_sim
-    
+
     def __call__(self, batch_in):
         """Convert output of tensorflow.data.Dataset to dict."""
-        
+
         forward_dict = {}
         for key_used, batch_stuff in zip(self.keys_used, batch_in):
             forward_dict[key_used] = batch_stuff.numpy()
         for key_none in zip(self.keys_none):
             forward_dict[key_none] = None
         return forward_dict
-    
+
     def __iter__(self):
         return map(self, self.data)
 
@@ -119,7 +118,7 @@ class EarlyStopper:
         # Still not enough history, no recommendation
         if len(self.history) <= 1:
             return False
-        
+
         # Significant increase according to tolerance, reset patience
         if (self.history[-2] - self.history[-1]) >= self.tolerance:
             self._patience_counter = 0
@@ -138,15 +137,25 @@ class EarlyStopper:
 
 class RegressionLRAdjuster:
     """This class will compute the slope of the loss trajectory and inform learning rate decay."""
-    
-    file_name = 'lr_adjuster'
-    
-    def __init__(self, optimizer, period=1000, wait_between_fits=10, patience=10, tolerance=-0.05, 
-                 reduction_factor=0.25, cooldown_factor=2, num_resets=3, **kwargs):
-        """Creates an instance with given hyperparameters which will track the slope of the 
+
+    file_name = "lr_adjuster"
+
+    def __init__(
+        self,
+        optimizer,
+        period=1000,
+        wait_between_fits=10,
+        patience=10,
+        tolerance=-0.05,
+        reduction_factor=0.25,
+        cooldown_factor=2,
+        num_resets=3,
+        **kwargs,
+    ):
+        """Creates an instance with given hyperparameters which will track the slope of the
         loss trajectory according to specified hyperparameters and then issue an optional
         stopping suggestion.
-        
+
         Parameters
         ----------
 
@@ -170,7 +179,7 @@ class RegressionLRAdjuster:
         **kwargs          : dict, optional, default {}
             Additional keyword arguments passed to the `HuberRegression` class.
         """
-        
+
         self.optimizer = optimizer
         self.period = period
         self.wait_between_periods = wait_between_fits
@@ -182,10 +191,7 @@ class RegressionLRAdjuster:
         self.reduction_factor = reduction_factor
         self.stopping_issued = False
         self.cooldown_factor = cooldown_factor
-        self._history = {
-            'iteration'    : [], 
-            'learning_rate': []
-        }
+        self._history = {"iteration": [], "learning_rate": []}
         self._reset_counter = 0
         self._patience_counter = 0
         self._cooldown_counter = 0
@@ -193,12 +199,12 @@ class RegressionLRAdjuster:
         self._slope = None
         self._is_waiting = False
         self._in_cooldown = False
-        
+
     def get_slope(self, losses):
         """Fits a Huber regression on the provided loss trajectory or returns `None` if
         not enough data points present.
         """
-        
+
         # Return None if not enough loss values present
         if losses.shape[0] < self.period:
             return None
@@ -206,14 +212,14 @@ class RegressionLRAdjuster:
         # Increment counter
         if self._in_cooldown:
             self._cooldown_counter += 1
-        
+
         # Check if still in a waiting phase and return old slope
         # if still waiting, otherwise refit Huber regression
         wait = self._check_waiting()
         if wait:
             return self._slope
         else:
-            self.regressor.fit(self.t_vector, losses[-self.period:])
+            self.regressor.fit(self.t_vector, losses[-self.period :])
             self._slope = self.regressor.coef_[0]
             self._check_patience()
             return self._slope
@@ -233,21 +239,21 @@ class RegressionLRAdjuster:
         """Saves the state parameters of a RegressionLRAdjuster object to a pickled dictionary in file_path."""
 
         # Create path to memory
-        memory_path = os.path.join(file_path, f'{RegressionLRAdjuster.file_name}.pkl')
-        
+        memory_path = os.path.join(file_path, f"{RegressionLRAdjuster.file_name}.pkl")
+
         # Prepare attributes
         states_dict = {}
-        states_dict['_history'] = self._history
-        states_dict['_reset_counter'] = self._reset_counter
-        states_dict['_patience_counter'] = self._patience_counter
-        states_dict['_cooldown_counter'] = self._cooldown_counter
-        states_dict['_wait_counter'] = self._wait_counter
-        states_dict['_slope'] = self._slope
-        states_dict['_is_waiting'] = self._is_waiting
-        states_dict['_in_cooldown'] = self._in_cooldown
-        
+        states_dict["_history"] = self._history
+        states_dict["_reset_counter"] = self._reset_counter
+        states_dict["_patience_counter"] = self._patience_counter
+        states_dict["_cooldown_counter"] = self._cooldown_counter
+        states_dict["_wait_counter"] = self._wait_counter
+        states_dict["_slope"] = self._slope
+        states_dict["_is_waiting"] = self._is_waiting
+        states_dict["_in_cooldown"] = self._in_cooldown
+
         # Dump as pickle object
-        with open(memory_path, 'wb') as f:
+        with open(memory_path, "wb") as f:
             pickle.dump(states_dict, f)
 
     def load_from_file(self, file_path):
@@ -258,23 +264,23 @@ class RegressionLRAdjuster:
         logger.setLevel(logging.INFO)
 
         # Create path to memory
-        memory_path = os.path.join(file_path, f'{RegressionLRAdjuster.file_name}.pkl')
+        memory_path = os.path.join(file_path, f"{RegressionLRAdjuster.file_name}.pkl")
 
         # Case memory file exists
         if os.path.exists(memory_path):
 
             # Load pickle and fill in attributes
-            with open(memory_path, 'rb') as f:
+            with open(memory_path, "rb") as f:
                 states_dict = pickle.load(f)
 
-            self._history = states_dict['_history']
-            self._reset_counter = states_dict['_reset_counter']
-            self._patience_counter = states_dict['_patience_counter']
-            self._cooldown_counter = states_dict['_cooldown_counter']
-            self._wait_counter = states_dict['_wait_counter']
-            self._slope = states_dict['_slope']
-            self._is_waiting = states_dict['_is_waiting']
-            self._in_cooldown = states_dict['_in_cooldown']
+            self._history = states_dict["_history"]
+            self._reset_counter = states_dict["_reset_counter"]
+            self._patience_counter = states_dict["_patience_counter"]
+            self._cooldown_counter = states_dict["_cooldown_counter"]
+            self._wait_counter = states_dict["_wait_counter"]
+            self._slope = states_dict["_slope"]
+            self._is_waiting = states_dict["_is_waiting"]
+            self._in_cooldown = states_dict["_in_cooldown"]
 
             logger.info(f"Loaded RegressionLRAdjuster from {memory_path}")
 
@@ -287,7 +293,7 @@ class RegressionLRAdjuster:
 
         # Do nothing, if still in cooldown period
         if self._in_cooldown and self._cooldown_counter < int(self.cooldown_factor * self.period):
-            return 
+            return
         # Otherwise set cooldown flag to False and reset counter
         else:
             self._in_cooldown = False
@@ -321,11 +327,11 @@ class RegressionLRAdjuster:
             self._reset_counter += 1
 
             # Store iteration and learning rate
-            self._history['iteration'].append(self.optimizer.iterations.numpy())
-            self._history['learning_rate'].append(old_lr)
+            self._history["iteration"].append(self.optimizer.iterations.numpy())
+            self._history["learning_rate"].append(old_lr)
 
             # Verbose info to user
-            logger.info(f'Reducing learning rate from {old_lr:.8f} to: {new_lr:.8f} and entering cooldown...')
+            logger.info(f"Reducing learning rate from {old_lr:.8f} to: {new_lr:.8f} and entering cooldown...")
 
             # Set cooldown flag to avoid reset for some time given by self.period
             self._in_cooldown = True
@@ -353,7 +359,7 @@ class RegressionLRAdjuster:
 class LossHistory:
     """Helper class to keep track of losses during training."""
 
-    file_name = 'history'
+    file_name = "history"
 
     def __init__(self):
         self.latest = 0
@@ -381,8 +387,8 @@ class LossHistory:
 
     def start_new_run(self):
         self._current_run += 1
-        self.history[f'Run {self._current_run}'] = {}
-        self.val_history[f'Run {self._current_run}'] = {}
+        self.history[f"Run {self._current_run}"] = {}
+        self.val_history[f"Run {self._current_run}"] = {}
 
     def add_val_entry(self, epoch, val_loss):
         """Add validation entry to loss structure. Assume ``loss_names`` already exists
@@ -390,18 +396,18 @@ class LossHistory:
         """
 
         # Add epoch key, if specified
-        if self.val_history[f'Run {self._current_run}'].get(f'Epoch {epoch}') is None:
-            self.val_history[f'Run {self._current_run}'][f'Epoch {epoch}'] = []
+        if self.val_history[f"Run {self._current_run}"].get(f"Epoch {epoch}") is None:
+            self.val_history[f"Run {self._current_run}"][f"Epoch {epoch}"] = []
 
         # Handle dict loss output
         if type(val_loss) is dict:
             # Store keys, if none existing
             if self.val_loss_names == []:
-                self.val_loss_names = ['Val.' + k for k in val_loss.keys()]
+                self.val_loss_names = ["Val." + k for k in val_loss.keys()]
 
             # Create and store entry
             entry = [v.numpy() if type(v) is not np.ndarray else v for v in val_loss.values()]
-            self.val_history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(entry)
+            self.val_history[f"Run {self._current_run}"][f"Epoch {epoch}"].append(entry)
 
             # Add entry to total loss
             self._total_val_loss.append(sum(entry))
@@ -409,20 +415,20 @@ class LossHistory:
         # Handle tuple or list loss output
         elif type(val_loss) is tuple or type(val_loss) is list:
             entry = [v.numpy() if type(v) is not np.ndarray else v for v in val_loss]
-            self.val_history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(entry)
+            self.val_history[f"Run {self._current_run}"][f"Epoch {epoch}"].append(entry)
             # Store keys, if none existing
             if self.val_loss_names == []:
-                self.val_loss_names = [f'Val.Loss.{l}' for l in range(1, len(entry)+1)]
+                self.val_loss_names = [f"Val.Loss.{l}" for l in range(1, len(entry) + 1)]
 
             # Add entry to total loss
             self._total_val_loss.append(sum(entry))
 
         # Assume scalar loss output
         else:
-            self.val_history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(val_loss.numpy())
+            self.val_history[f"Run {self._current_run}"][f"Epoch {epoch}"].append(val_loss.numpy())
             # Store keys, if none existing
             if self.val_loss_names == []:
-                self.val_loss_names.append('Default.Val.Loss')
+                self.val_loss_names.append("Default.Val.Loss")
 
             # Add entry to total loss
             self._total_val_loss.append(val_loss.numpy())
@@ -431,8 +437,8 @@ class LossHistory:
         """Adds loss entry for current epoch into internal memory data structure."""
 
         # Add epoch key, if specified
-        if self.history[f'Run {self._current_run}'].get(f'Epoch {epoch}') is None:
-            self.history[f'Run {self._current_run}'][f'Epoch {epoch}'] = []
+        if self.history[f"Run {self._current_run}"].get(f"Epoch {epoch}") is None:
+            self.history[f"Run {self._current_run}"][f"Epoch {epoch}"] = []
 
         # Handle dict loss output
         if type(current_loss) is dict:
@@ -442,7 +448,7 @@ class LossHistory:
 
             # Create and store entry
             entry = [v.numpy() if type(v) is not np.ndarray else v for v in current_loss.values()]
-            self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(entry)
+            self.history[f"Run {self._current_run}"][f"Epoch {epoch}"].append(entry)
 
             # Add entry to total loss
             self._total_loss.append(sum(entry))
@@ -450,20 +456,20 @@ class LossHistory:
         # Handle tuple or list loss output
         elif type(current_loss) is tuple or type(current_loss) is list:
             entry = [v.numpy() if type(v) is not np.ndarray else v for v in current_loss]
-            self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(entry)
+            self.history[f"Run {self._current_run}"][f"Epoch {epoch}"].append(entry)
             # Store keys, if none existing
             if self.loss_names == []:
-                self.loss_names = [f'Loss.{l}' for l in range(1, len(entry)+1)]
+                self.loss_names = [f"Loss.{l}" for l in range(1, len(entry) + 1)]
 
             # Add entry to total loss
             self._total_loss.append(sum(entry))
 
         # Assume scalar loss output
         else:
-            self.history[f'Run {self._current_run}'][f'Epoch {epoch}'].append(current_loss.numpy())
+            self.history[f"Run {self._current_run}"][f"Epoch {epoch}"].append(current_loss.numpy())
             # Store keys, if none existing
             if self.loss_names == []:
-                self.loss_names.append('Default.Loss')
+                self.loss_names.append("Default.Loss")
 
             # Add entry to total loss
             self._total_loss.append(current_loss.numpy())
@@ -471,11 +477,11 @@ class LossHistory:
     def get_running_losses(self, epoch):
         """Compute and return running means of the losses for current epoch."""
 
-        means = np.atleast_1d(np.mean(self.history[f'Run {self._current_run}'][f'Epoch {epoch}'], axis=0))
-        if means.shape[0] == 1:    
-            return {'Avg.Loss': means[0]}
+        means = np.atleast_1d(np.mean(self.history[f"Run {self._current_run}"][f"Epoch {epoch}"], axis=0))
+        if means.shape[0] == 1:
+            return {"Avg.Loss": means[0]}
         else:
-            return {'Avg.' + k: v for k, v in zip(self.loss_names, means)}
+            return {"Avg." + k: v for k, v in zip(self.loss_names, means)}
 
     def get_plottable(self):
         """Returns the losses as a nicely formatted pandas DataFrame, in case
@@ -487,16 +493,16 @@ class LossHistory:
             losses_df = self._to_data_frame(self.history)
             if any([v for v in self.val_history.values()]):
                 val_losses_df = self._to_data_frame(self.val_history)
-                return {'train_losses': losses_df, 'val_losses': val_losses_df}
+                return {"train_losses": losses_df, "val_losses": val_losses_df}
             return losses_df
         # Handle unequal lengths or problems when user kills training with an interrupt
         except ValueError as ve:
             if any([v for v in self.val_history.values()]):
-                return {'train_losses': losses_df, 'val_losses': val_losses_df}
+                return {"train_losses": losses_df, "val_losses": val_losses_df}
             return self.history
         except TypeError as te:
             if any([v for v in self.val_history.values()]):
-                return {'train_losses': losses_df, 'val_losses': val_losses_df}
+                return {"train_losses": losses_df, "val_losses": val_losses_df}
             return self.history
 
     def flush(self):
@@ -513,36 +519,36 @@ class LossHistory:
 
     def save_to_file(self, file_path, max_to_keep):
         """Saves a `LossHistory` object to a pickled dictionary in file_path.
-         If max_to_keep saved loss history files are found in file_path, the oldest is deleted before a new one is saved.
-         """
+        If max_to_keep saved loss history files are found in file_path, the oldest is deleted before a new one is saved.
+        """
 
         # Increment history index
         self.latest += 1
 
         # Path to history
-        history_path = os.path.join(file_path, f'{LossHistory.file_name}_{self.latest}.pkl')
+        history_path = os.path.join(file_path, f"{LossHistory.file_name}_{self.latest}.pkl")
 
         # Prepare full history dict
         pickle_dict = {
-            'history'        : self.history,
-            'val_history'    : self.val_history,
-            'loss_names'     : self.loss_names,
-            'val_loss_names' : self.val_loss_names,
-            '_current_run'   : self._current_run,
-            '_total_loss'    : self._total_loss,
-            '_total_val_loss': self._total_val_loss
+            "history": self.history,
+            "val_history": self.val_history,
+            "loss_names": self.loss_names,
+            "val_loss_names": self.val_loss_names,
+            "_current_run": self._current_run,
+            "_total_loss": self._total_loss,
+            "_total_val_loss": self._total_val_loss,
         }
 
         # Pickle current
-        with open(history_path, 'wb') as f:
+        with open(history_path, "wb") as f:
             pickle.dump(pickle_dict, f)
 
         # Get list of history checkpoints
-        history_checkpoints_list = [l for l in os.listdir(file_path) if 'history' in l]
+        history_checkpoints_list = [l for l in os.listdir(file_path) if "history" in l]
 
         # Determine the oldest saved loss history and remove it
         if len(history_checkpoints_list) > max_to_keep:
-            oldest_history_path = os.path.join(file_path, f'history_{self.latest-max_to_keep}.pkl')
+            oldest_history_path = os.path.join(file_path, f"history_{self.latest-max_to_keep}.pkl")
             os.remove(oldest_history_path)
 
     def load_from_file(self, file_path):
@@ -560,28 +566,28 @@ class LossHistory:
 
         # Case history list is not empty
         if len(history_checkpoints_list) > 0:
-            
+
             # Determine which file contains the latest LossHistory and load it
-            file_numbers = [int(re.findall(r'\d+', h)[0]) for h in history_checkpoints_list]
+            file_numbers = [int(re.findall(r"\d+", h)[0]) for h in history_checkpoints_list]
             latest_file = history_checkpoints_list[np.argmax(file_numbers)]
             latest_number = np.max(file_numbers)
             latest_path = os.path.join(file_path, latest_file)
 
             # Load dictionary
-            with open(latest_path, 'rb') as f:
+            with open(latest_path, "rb") as f:
                 loaded_history_dict = pickle.load(f)
 
             # Fill public entries
             self.latest = latest_number
-            self.history = loaded_history_dict.get('history', {})
-            self.val_history = loaded_history_dict.get('val_history', {})
-            self.loss_names = loaded_history_dict.get('loss_names', [])
-            self.val_loss_names = loaded_history_dict.get('val_loss_names', [])
+            self.history = loaded_history_dict.get("history", {})
+            self.val_history = loaded_history_dict.get("val_history", {})
+            self.loss_names = loaded_history_dict.get("loss_names", [])
+            self.val_loss_names = loaded_history_dict.get("val_loss_names", [])
 
             # Fill private entries
-            self._current_run = loaded_history_dict.get('_current_run', 0)
-            self._total_loss = loaded_history_dict.get('_total_loss', [])
-            self._total_val_loss = loaded_history_dict.get('_total_val_loss', [])
+            self._current_run = loaded_history_dict.get("_current_run", 0)
+            self._total_loss = loaded_history_dict.get("_total_loss", [])
+            self._total_val_loss = loaded_history_dict.get("_total_val_loss", [])
 
             # Verbose
             logger.info(f"Loaded loss history from {latest_path}.")
@@ -593,7 +599,7 @@ class LossHistory:
     def _to_data_frame(self, history):
         """Helper function to convert a history dict into a DataFrame."""
 
-        losses_list = [pd.melt(pd.DataFrame.from_dict(history[r], orient='index').T) for r in history]
+        losses_list = [pd.melt(pd.DataFrame.from_dict(history[r], orient="index").T) for r in history]
         losses_list = pd.concat(losses_list, axis=0).value.to_list()
         losses_list = [l for l in losses_list if l is not None]
         losses_df = pd.DataFrame(losses_list, columns=self.loss_names)
@@ -603,7 +609,7 @@ class LossHistory:
 class SimulationMemory:
     """Helper class to keep track of a pre-determined number of simulations during training."""
 
-    file_name = 'memory'
+    file_name = "memory"
 
     def __init__(self, stores_raw=True, capacity_in_batches=50):
         self.stores_raw = stores_raw
@@ -626,7 +632,7 @@ class SimulationMemory:
             self._buffer[self._idx] = forward_dict
             self._idx += 1
             self.size_in_batches += 1
-    
+
     def get_memory(self):
         return deepcopy(self._buffer)
 
@@ -636,23 +642,23 @@ class SimulationMemory:
         if self._idx >= self._capacity:
             return True
         return False
-    
+
     def save_to_file(self, file_path):
         """Saves a `SimulationMemory` object to a pickled dictionary in file_path."""
 
         # Create path to memory
-        memory_path = os.path.join(file_path, f'{SimulationMemory.file_name}.pkl')
-        
+        memory_path = os.path.join(file_path, f"{SimulationMemory.file_name}.pkl")
+
         # Prepare attributes
         full_memory_dict = {}
-        full_memory_dict['stores_raw'] = self.stores_raw
-        full_memory_dict['_capacity'] = self._capacity
-        full_memory_dict['_buffer'] = self._buffer
-        full_memory_dict['_idx'] = self._idx
-        full_memory_dict['_size_in_batches'] = self.size_in_batches
-        
+        full_memory_dict["stores_raw"] = self.stores_raw
+        full_memory_dict["_capacity"] = self._capacity
+        full_memory_dict["_buffer"] = self._buffer
+        full_memory_dict["_idx"] = self._idx
+        full_memory_dict["_size_in_batches"] = self.size_in_batches
+
         # Dump as pickle object
-        with open(memory_path, 'wb') as f:
+        with open(memory_path, "wb") as f:
             pickle.dump(full_memory_dict, f)
 
     def load_from_file(self, file_path):
@@ -663,20 +669,20 @@ class SimulationMemory:
         logger.setLevel(logging.INFO)
 
         # Create path to memory
-        memory_path = os.path.join(file_path, f'{SimulationMemory.file_name}.pkl')
+        memory_path = os.path.join(file_path, f"{SimulationMemory.file_name}.pkl")
 
         # Case memory file exists
         if os.path.exists(file_path):
 
             # Load pickle and fill in attributes
-            with open(memory_path, 'rb') as f:
+            with open(memory_path, "rb") as f:
                 full_memory_dict = pickle.load(f)
 
-            self.stores_raw = full_memory_dict['stores_raw']
-            self._capacity = full_memory_dict['_capacity']
-            self._buffer = full_memory_dict['_buffer']
-            self._idx = full_memory_dict['_idx']
-            self.size_in_batches = full_memory_dict['_size_in_batches']
+            self.stores_raw = full_memory_dict["stores_raw"]
+            self._capacity = full_memory_dict["_capacity"]
+            self._buffer = full_memory_dict["_buffer"]
+            self._idx = full_memory_dict["_idx"]
+            self.size_in_batches = full_memory_dict["_size_in_batches"]
             logger.info(f"Loaded simulation memory from {memory_path}")
 
         # Case memory file does not exist
@@ -689,7 +695,7 @@ class MemoryReplayBuffer:
 
     def __init__(self, capacity_in_batches=500):
         """Creates a circular buffer following the logic of experience replay.
-        
+
         Parameters
         ----------
         capacity_in_batches : int, optional, default: 50
@@ -715,7 +721,7 @@ class MemoryReplayBuffer:
         # If full, overwrite at index
         if self._is_full:
             self._overwrite(forward_dict)
-        
+
         # Otherwise still capacity to append
         else:
             # Add to internal list
@@ -728,7 +734,7 @@ class MemoryReplayBuffer:
             # Check whether buffer is full and set flag if thats the case
             if self._idx == self._capacity:
                 self._is_full = True
-            
+
     def sample(self):
         """Samples `batch_size` number of parameter vectors and simulations from buffer.
 
@@ -737,7 +743,7 @@ class MemoryReplayBuffer:
         forward_dict : dict
             The (raw or configured) outputs of the forward model.
         """
-        
+
         rand_idx = np.random.default_rng().integers(low=0, high=self._size_in_batches)
         return self._buffer[rand_idx]
 

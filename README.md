@@ -3,12 +3,12 @@
 [![Actions Status](https://github.com/stefanradev93/bayesflow/workflows/Tests/badge.svg)](https://github.com/stefanradev93/bayesflow/actions)
 [![Licence](https://img.shields.io/github/license/stefanradev93/BayesFlow)](https://img.shields.io/github/license/stefanradev93/BayesFlow)
 
-Welcome to our BayesFlow library for efficient simulation-based Bayesian workflows! Our library enables users to create specialized neural networks for *amortized Bayesian inference*, which repays users with rapid statistical inference after a potentially longer simulation-based training phase. 
+Welcome to our BayesFlow library for efficient simulation-based Bayesian workflows! Our library enables users to create specialized neural networks for *amortized Bayesian inference*, which repays users with rapid statistical inference after a potentially longer simulation-based training phase.
 
 For starters, check out some of our walk-through notebooks:
 
-1. [Basic amortized posterior estimation](docs/source/tutorial_notebooks/Intro_Amortized_Posterior_Estimation.ipynb) 
-2. [Intermediate posterior estimation](docs/source/tutorial_notebooks/Covid19_Initial_Posterior_Estimation.ipynb) 
+1. [Basic amortized posterior estimation](docs/source/tutorial_notebooks/Intro_Amortized_Posterior_Estimation.ipynb)
+2. [Intermediate posterior estimation](docs/source/tutorial_notebooks/Covid19_Initial_Posterior_Estimation.ipynb)
 3. [Posterior estimation for ODEs](docs/source/tutorial_notebooks/Linear%20ODE%20system.ipynb)
 
 ## Project Documentation
@@ -57,7 +57,7 @@ which are our only model parameters in this example:
 ```python
 def simulator(theta, n_obs=50, scale=1.0):
     return np.random.default_rng().normal(loc=theta, scale=scale, size=(n_obs, theta.shape[0]))
-    
+
 def prior(D=2, mu=0., sigma=1.0):
     return np.random.default_rng().normal(loc=mu, scale=sigma, size=D)
 ```
@@ -82,15 +82,15 @@ Finally, we connect the networks with the generative model via a `Trainer` insta
 trainer = bf.trainers.Trainer(amortizer=amortizer, generative_model=generative_model)
 ```
 
-We are now ready to train an amortized posterior approximator. For instance, 
+We are now ready to train an amortized posterior approximator. For instance,
 to run online training, we simply call:
 
 ```python
 losses = trainer.train_online(epochs=10, iterations_per_epoch=500, batch_size=32)
 ```
 
-Before inference, we can use simulation-based calibration (SBC, 
-https://arxiv.org/abs/1804.06788) to check the computational faithfulness of 
+Before inference, we can use simulation-based calibration (SBC,
+https://arxiv.org/abs/1804.06788) to check the computational faithfulness of
 the model-amortizer combination:
 
 ```python
@@ -104,7 +104,7 @@ well-calibrated inference algorithms as indicated by the shaded gray areas.
 Accordingly, our amortizer seems to have converged to the intended target.
 
 Amortized inference on new (real or simulated) data is then easy and fast.
-For example, we can simulate 200 new data sets and generate 500 posterior draws 
+For example, we can simulate 200 new data sets and generate 500 posterior draws
 per data set:
 
 ```python
@@ -121,7 +121,7 @@ fig = bf.diagnostics.plot_recovery(posterior_draws, new_sims['parameters'])
 
 <img src="img/showcase_recovery.png" width=65% height=65%>
 
-For any individual data set, we can also compare the parameters' posteriors with 
+For any individual data set, we can also compare the parameters' posteriors with
 their corresponding priors:
 
 ```python
@@ -140,14 +140,14 @@ BayesFlow: Learning complex stochastic models with invertible neural networks.
 <em>IEEE Transactions on Neural Networks and Learning Systems</em>, available
 for free at: https://arxiv.org/abs/2003.06281.
 
-- Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., & Köthe, U. (2021). 
+- Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., & Köthe, U. (2021).
 OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks and its application to the COVID-19 pandemics in Germany. <em>PLoS computational biology</em>, 17(10), e1009472.
 
-- Bieringer, S., Butter, A., Heimel, T., Höche, S., Köthe, U., Plehn, T., & Radev, S. T. (2021). 
+- Bieringer, S., Butter, A., Heimel, T., Höche, S., Köthe, U., Plehn, T., & Radev, S. T. (2021).
 Measuring QCD splittings with invertible networks. <em>SciPost Physics</em>, 10(6), 126.
 
-- von Krause, M., Radev, S. T., & Voss, A. (2022). 
-Mental speed is high until age 60 as revealed by analysis of over a million participants. 
+- von Krause, M., Radev, S. T., & Voss, A. (2022).
+Mental speed is high until age 60 as revealed by analysis of over a million participants.
 <em>Nature Human Behaviour</em>, 6(5), 700-708.
 
 ## Model Misspecification
@@ -159,7 +159,7 @@ Gaussian and reliably detects model misspecification during inference time.
 
 ![](docs/source/images/model_misspecification_amortized_sbi.png?raw=true)
 
-In order to use this method, you should only provide the `summary_loss_fun` argument 
+In order to use this method, you should only provide the `summary_loss_fun` argument
 to the `AmortizedPosterior` instance:
 
 ```python
@@ -185,8 +185,8 @@ C. (2021). Amortized Bayesian Model Comparison with Evidental Deep Learning.
 <em>IEEE Transactions on Neural Networks and Learning Systems</em>.
 doi:10.1109/TNNLS.2021.3124052 available for free at: https://arxiv.org/abs/2004.10629
 
-- Schmitt, M., Radev, S. T., & Bürkner, P. C. (2022). Meta-Uncertainty in 
-Bayesian Model Comparison. <em>ArXiv preprint</em>, available for free at: 
+- Schmitt, M., Radev, S. T., & Bürkner, P. C. (2022). Meta-Uncertainty in
+Bayesian Model Comparison. <em>ArXiv preprint</em>, available for free at:
 https://arxiv.org/abs/2210.07278
 
 ## Likelihood emulation

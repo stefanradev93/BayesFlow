@@ -19,13 +19,12 @@
 # SOFTWARE.
 
 import tensorflow as tf
-
 from numpy import pi as PI_CONST
 
 from bayesflow import default_settings
-from bayesflow.helper_networks import Permutation, ActNorm, DenseCouplingNet
-from bayesflow.helper_functions import build_meta_dict
 from bayesflow.exceptions import ConfigurationError
+from bayesflow.helper_functions import build_meta_dict
+from bayesflow.helper_networks import ActNorm, DenseCouplingNet, Permutation
 
 
 class AffineCouplingLayer(tf.keras.Model):
@@ -44,60 +43,63 @@ class AffineCouplingLayer(tf.keras.Model):
         super().__init__()
 
         # Coupling net hyperparams
-        self.alpha = meta['alpha']
-        self.latent_dim = meta['latent_dim']
+        self.alpha = meta["alpha"]
+        self.latent_dim = meta["latent_dim"]
         self.n_out1 = self.latent_dim // 2
         self.n_out2 = self.latent_dim // 2 if self.latent_dim % 2 == 0 else self.latent_dim // 2 + 1
 
         # Custom coupling net and settings
-        if callable(meta['coupling_design']):
-            coupling_type = meta['coupling_design']
-            if meta.get('coupling_net_settings') is None:
+        if callable(meta["coupling_design"]):
+            coupling_type = meta["coupling_design"]
+            if meta.get("coupling_net_settings") is None:
                 raise ConfigurationError("You need to provide 'coupling_net_settings' for a custom coupling type!")
-            coupling_net_settings = meta['coupling_net_settings']
+            coupling_net_settings = meta["coupling_net_settings"]
 
         # String type of dense or attention
-        elif type(meta['coupling_design']) is str:
+        elif type(meta["coupling_design"]) is str:
             # Settings type
-            if meta.get('coupling_net_settings') is None:
+            if meta.get("coupling_net_settings") is None:
                 user_dict = {}
-            elif type(meta.get('coupling_net_settings')) is dict:
-                user_dict = meta.get('coupling_net_settings')
+            elif type(meta.get("coupling_net_settings")) is dict:
+                user_dict = meta.get("coupling_net_settings")
             else:
                 raise ConfigurationError("coupling_net_settings not understood")
 
             # Dense
-            if meta['coupling_design'] == 'dense':
+            if meta["coupling_design"] == "dense":
                 coupling_type = DenseCouplingNet
                 coupling_net_settings = build_meta_dict(
-                    user_dict=user_dict, default_setting=default_settings.DEFAULT_SETTING_DENSE_COUPLING)
+                    user_dict=user_dict, default_setting=default_settings.DEFAULT_SETTING_DENSE_COUPLING
+                )
             else:
                 raise NotImplementedError('String coupling_design should be one of ["dense"].')
         else:
-            raise NotImplementedError('coupling_design argument not understood. Should either be a callable generator or ' +
-                                      'a string in ["dense"].')
-      
-        self.s1 = coupling_type(coupling_net_settings['s_args'], self.n_out1)
-        self.t1 = coupling_type(coupling_net_settings['t_args'], self.n_out1)
-        self.s2 = coupling_type(coupling_net_settings['s_args'], self.n_out2)
-        self.t2 = coupling_type(coupling_net_settings['t_args'], self.n_out2)
+            raise NotImplementedError(
+                "coupling_design argument not understood. Should either be a callable generator or "
+                + 'a string in ["dense"].'
+            )
+
+        self.s1 = coupling_type(coupling_net_settings["s_args"], self.n_out1)
+        self.t1 = coupling_type(coupling_net_settings["t_args"], self.n_out1)
+        self.s2 = coupling_type(coupling_net_settings["s_args"], self.n_out2)
+        self.t2 = coupling_type(coupling_net_settings["t_args"], self.n_out2)
 
         # Optional permutation
-        if meta['use_permutation']:
+        if meta["use_permutation"]:
             self.permutation = Permutation(self.latent_dim)
             self.permutation.trainable = False
         else:
             self.permutation = None
 
         # Optional activation normalization
-        if meta['use_act_norm']:
+        if meta["use_act_norm"]:
             self.act_norm = ActNorm(meta)
         else:
             self.act_norm = None
 
     def call(self, target_or_z, condition, inverse=False, **kwargs):
         """Performs one pass through a the affine coupling layer (either inverse or forward).
-        
+
         Parameters
         ----------
         target_or_z      : tf.Tensor
@@ -107,7 +109,7 @@ class AffineCouplingLayer(tf.keras.Model):
             If `condition is None`, then the layer recuces to an unconditional ACL.
         inverse          : bool, optional, default: False
             Flag indicating whether to run the block forward or backward.
-        
+
         Returns
         -------
         (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
@@ -122,7 +124,7 @@ class AffineCouplingLayer(tf.keras.Model):
         If ``inverse=False``, the return is ``(z, log_det_J)``.\n
         If ``inverse=True``, the return is ``target``
         """
-        
+
         if not inverse:
             return self.forward(target_or_z, condition, **kwargs)
         return self.inverse(target_or_z, condition, **kwargs)
@@ -130,7 +132,7 @@ class AffineCouplingLayer(tf.keras.Model):
     @tf.function
     def forward(self, target, condition, **kwargs):
         """Performs a forward pass through a coupling layer with an optinal `Permutation` and `ActNorm` layers.
-        
+
         Parameters
         ----------
         target     : tf.Tensor
@@ -147,7 +149,7 @@ class AffineCouplingLayer(tf.keras.Model):
 
         # Initialize log_det_Js accumulator
         log_det_Js = tf.zeros(1)
-        
+
         # Normalize activation, if specified
         if self.act_norm is not None:
             target, log_det_J_act = self.act_norm(target)
@@ -166,7 +168,7 @@ class AffineCouplingLayer(tf.keras.Model):
     @tf.function
     def inverse(self, z, condition, **kwargs):
         """Performs an inverse pass through a coupling layer with an optinal `Permutation` and `ActNorm` layers.
-        
+
         Parameters
         ----------
         z          : tf.Tensor
@@ -187,7 +189,7 @@ class AffineCouplingLayer(tf.keras.Model):
         # Pass through optional permutation
         if self.permutation is not None:
             target = self.permutation(target, inverse=True)
-        
+
         # Pass through activation normalization
         if self.act_norm is not None:
             target = self.act_norm(target, inverse=True)
@@ -218,7 +220,7 @@ class AffineCouplingLayer(tf.keras.Model):
         s1 = self.s1(u2, condition, **kwargs)
         # Clamp s1 if specified
         if self.alpha is not None:
-            s1 = (2. * self.alpha / PI_CONST) * tf.math.atan(s1 / self.alpha)
+            s1 = (2.0 * self.alpha / PI_CONST) * tf.math.atan(s1 / self.alpha)
         t1 = self.t1(u2, condition, **kwargs)
         v1 = u1 * tf.exp(s1) + t1
 
@@ -226,14 +228,14 @@ class AffineCouplingLayer(tf.keras.Model):
         s2 = self.s2(v1, condition, **kwargs)
         # Clamp s2 if specified
         if self.alpha is not None:
-            s2 = (2. * self.alpha / PI_CONST) * tf.math.atan(s2 / self.alpha)
+            s2 = (2.0 * self.alpha / PI_CONST) * tf.math.atan(s2 / self.alpha)
         t2 = self.t2(v1, condition, **kwargs)
         v2 = u2 * tf.exp(s2) + t2
         v = tf.concat((v1, v2), axis=-1)
 
         # Compute ldj, # log|J| = log(prod(diag(J))) -> according to inv architecture
         log_det_J = tf.reduce_sum(s1, axis=-1) + tf.reduce_sum(s2, axis=-1)
-        return v, log_det_J 
+        return v, log_det_J
 
     @tf.function
     def _inverse(self, z, condition, **kwargs):
@@ -259,14 +261,14 @@ class AffineCouplingLayer(tf.keras.Model):
         s2 = self.s2(v1, condition, **kwargs)
         # Clamp s2 if specified
         if self.alpha is not None:
-            s2 = (2. * self.alpha / PI_CONST) * tf.math.atan(s2 / self.alpha)
+            s2 = (2.0 * self.alpha / PI_CONST) * tf.math.atan(s2 / self.alpha)
         u2 = (v2 - self.t2(v1, condition, **kwargs)) * tf.exp(-s2)
 
         # Pre-Compute s1
         s1 = self.s1(u2, condition, **kwargs)
         # Clamp s1 if specified
         if self.alpha is not None:
-            s1 = (2. * self.alpha / PI_CONST) * tf.math.atan(s1 / self.alpha)
+            s1 = (2.0 * self.alpha / PI_CONST) * tf.math.atan(s1 / self.alpha)
         u1 = (v1 - self.t1(u2, condition, **kwargs)) * tf.exp(-s1)
         u = tf.concat((u1, u2), axis=-1)
 

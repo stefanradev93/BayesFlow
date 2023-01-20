@@ -22,19 +22,18 @@
 
 import numpy as np
 
-
 bayesflow_benchmark_info = {
-    'simulator_is_batched': False,
-    'parameter_names': [r'$\theta_{}$'.format(i) for i in range(1, 6)],
-    'configurator_info': 'posterior'
+    "simulator_is_batched": False,
+    "parameter_names": [r"$\theta_{}$".format(i) for i in range(1, 6)],
+    "configurator_info": "posterior",
 }
 
 
-def prior(lower_bound=-3., upper_bound=3., rng=None):
-    """Generates a random draw from a 5-dimensional uniform prior bounded between 
+def prior(lower_bound=-3.0, upper_bound=3.0, rng=None):
+    """Generates a random draw from a 5-dimensional uniform prior bounded between
     `lower_bound` and `upper_bound` which represents the 5 parameters of the SLCP
     simulator.
-    
+
     Parameters
     ----------
     lower_bound : float, optional, default : -3
@@ -43,7 +42,7 @@ def prior(lower_bound=-3., upper_bound=3., rng=None):
         The upper bound of the uniform prior.
     rng         : np.random.Generator or None, default: None
         An optional random number generator to use.
-        
+
     Returns
     -------
     theta : np.ndarray of shape (5, )
@@ -56,11 +55,11 @@ def prior(lower_bound=-3., upper_bound=3., rng=None):
 
 
 def simulator(theta, n_obs=4, flatten=True, rng=None):
-    """Generates data from the SLCP model designed as a benchmark for a simple likelihood 
+    """Generates data from the SLCP model designed as a benchmark for a simple likelihood
     and a complex posterior due to a non-linear pushforward theta -> x.
 
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.3
-    
+
     Parameters
     ----------
     theta   : np.ndarray of shape (theta, D)
@@ -76,7 +75,7 @@ def simulator(theta, n_obs=4, flatten=True, rng=None):
     Returns
     -------
     x : np.ndarray of shape (n_obs*2, ) or (n_obs, 2), as indictated by the `flatten`
-        boolean flag. The sample of simulated data from the SLCP model. 
+        boolean flag. The sample of simulated data from the SLCP model.
     """
 
     # Use default RNG, if None specified
@@ -90,7 +89,7 @@ def simulator(theta, n_obs=4, flatten=True, rng=None):
     s1 = theta[2] ** 2
     s2 = theta[3] ** 2
     rho = np.tanh(theta[4])
-    cov = rho*s1*s2
+    cov = rho * s1 * s2
     S_theta = np.array([[s1**2, cov], [cov, s2**2]])
 
     # Obtain given number of draws from the MVN likelihood
@@ -100,22 +99,22 @@ def simulator(theta, n_obs=4, flatten=True, rng=None):
     return x
 
 
-def configurator(forward_dict, mode='posterior', scale_data=30., as_summary_condition=False):
+def configurator(forward_dict, mode="posterior", scale_data=30.0, as_summary_condition=False):
     """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
-    if mode == 'posterior':
+    if mode == "posterior":
         input_dict = _config_posterior(forward_dict, scale_data, as_summary_condition)
 
     # Case only likelihood configuration
-    elif mode == 'likelihood':
+    elif mode == "likelihood":
         input_dict = _config_likelihood(forward_dict, scale_data)
 
     # Case posterior and likelihood configuration
-    elif mode == 'joint':
+    elif mode == "joint":
         input_dict = {}
-        input_dict['posterior_inputs'] = _config_posterior(forward_dict, scale_data, as_summary_condition)
-        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict, scale_data)
+        input_dict["posterior_inputs"] = _config_posterior(forward_dict, scale_data, as_summary_condition)
+        input_dict["likelihood_inputs"] = _config_likelihood(forward_dict, scale_data)
 
     # Throw otherwise
     else:
@@ -127,11 +126,11 @@ def _config_posterior(forward_dict, scale_data, as_summary_condition):
     """Helper function for posterior configuration."""
 
     input_dict = {}
-    input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict["parameters"] = forward_dict["prior_draws"].astype(np.float32)
     if as_summary_condition:
-        input_dict['summary_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        input_dict["summary_conditions"] = forward_dict["sim_data"].astype(np.float32) / scale_data
     else:
-        input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+        input_dict["direct_conditions"] = forward_dict["sim_data"].astype(np.float32) / scale_data
     return input_dict
 
 
@@ -139,6 +138,6 @@ def _config_likelihood(forward_dict, scale_data):
     """Helper function for likelihood configuration."""
 
     input_dict = {}
-    input_dict['observables'] = forward_dict['sim_data'].astype(np.float32) / scale_data
-    input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
+    input_dict["observables"] = forward_dict["sim_data"].astype(np.float32) / scale_data
+    input_dict["conditions"] = forward_dict["prior_draws"].astype(np.float32)
     return input_dict

@@ -19,7 +19,6 @@
 # SOFTWARE.
 
 import numpy as np
-
 import tensorflow as tf
 
 from bayesflow import default_settings
@@ -30,32 +29,43 @@ from bayesflow.helper_functions import build_meta_dict
 class InvertibleNetwork(tf.keras.Model):
     """Implements a chain of conditional invertible coupling layers for conditional density estimation."""
 
-    def __init__(self, num_params, num_coupling_layers=4, coupling_net_settings=None, 
-                 coupling_design='dense', soft_clamping=1.9, use_permutation=True, use_act_norm=True, 
-                 act_norm_init=None, use_soft_flow=False, soft_flow_bounds=(1e-3, 5e-2), **kwargs):
+    def __init__(
+        self,
+        num_params,
+        num_coupling_layers=4,
+        coupling_net_settings=None,
+        coupling_design="dense",
+        soft_clamping=1.9,
+        use_permutation=True,
+        use_act_norm=True,
+        act_norm_init=None,
+        use_soft_flow=False,
+        soft_flow_bounds=(1e-3, 5e-2),
+        **kwargs,
+    ):
         """Creates a chain of coupling layers with optional `ActNorm` layers in-between. Implements ideas from:
 
-        [1] Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020). 
-        BayesFlow: Learning complex stochastic models with invertible neural networks. 
+        [1] Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020).
+        BayesFlow: Learning complex stochastic models with invertible neural networks.
         IEEE Transactions on Neural Networks and Learning Systems.
 
-        [2] Kim, H., Lee, H., Kang, W. H., Lee, J. Y., & Kim, N. S. (2020). 
-        Softflow: Probabilistic framework for normalizing flow on manifolds. 
+        [2] Kim, H., Lee, H., Kang, W. H., Lee, J. Y., & Kim, N. S. (2020).
+        Softflow: Probabilistic framework for normalizing flow on manifolds.
         Advances in Neural Information Processing Systems, 33, 16388-16397.
 
-        [3] Ardizzone, L., Kruse, J., Lüth, C., Bracher, N., Rother, C., & Köthe, U. (2020). 
-        Conditional invertible neural networks for diverse image-to-image translation. 
+        [3] Ardizzone, L., Kruse, J., Lüth, C., Bracher, N., Rother, C., & Köthe, U. (2020).
+        Conditional invertible neural networks for diverse image-to-image translation.
         In DAGM German Conference on Pattern Recognition (pp. 373-387). Springer, Cham.
 
-        [4] Kingma, D. P., & Dhariwal, P. (2018). 
-        Glow: Generative flow with invertible 1x1 convolutions. 
+        [4] Kingma, D. P., & Dhariwal, P. (2018).
+        Glow: Generative flow with invertible 1x1 convolutions.
         Advances in Neural Information Processing Systems, 31.
 
         Parameters
         ----------
         num_params            : int
             The number of parameters to perform inference on. Equivalently, the dimensionality of the
-            latent space. 
+            latent space.
         num_coupling_layers   : int, optional, default: 4
             The number of coupling layers to use as defined in [1] and [2]. In general, more coupling layers
             will give you more expressive power, but will be slower and may need more simulations to train.
@@ -75,7 +85,7 @@ class InvertibleNetwork(tf.keras.Model):
             Whether to use activation normalization after each coupling layer, as used in [4].
             Recommended to keep default.
         act_norm_init         : np.ndarray of shape (num_simulations, num_params) or None, optional, default: None
-            Optional data-dependent initialization for the internal `ActNorm` layers, as done in [4]. Could be helpful 
+            Optional data-dependent initialization for the internal `ActNorm` layers, as done in [4]. Could be helpful
             for deep invertible networks.
         use_soft_flow         : bool, optional, default: False
             Whether to perturb the taregt distribution (i.e., parameters) with small amount of independent
@@ -97,7 +107,7 @@ class InvertibleNetwork(tf.keras.Model):
             use_permutation=use_permutation,
             use_act_norm=use_act_norm,
             act_norm_init=act_norm_init,
-            alpha=soft_clamping
+            alpha=soft_clamping,
         )
 
         # Create sequence of coupling layers and store reference to dimensionality
@@ -108,7 +118,7 @@ class InvertibleNetwork(tf.keras.Model):
         self.soft_low = soft_flow_bounds[0]
         self.soft_high = soft_flow_bounds[1]
         self.use_permutation = use_permutation
-        self.use_act_norm = use_act_norm 
+        self.use_act_norm = use_act_norm
         self.latent_dim = num_params
 
     def call(self, targets, condition, inverse=False, **kwargs):
@@ -150,9 +160,11 @@ class InvertibleNetwork(tf.keras.Model):
         # not in call(), since methods are public
         if self.soft_flow and condition is not None:
             # Needs to be concatinable with condition
-            shape_scale = (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
+            shape_scale = (
+                (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
+            )
             # Case training mode
-            if kwargs.get('training'):
+            if kwargs.get("training"):
                 noise_scale = tf.random.uniform(shape=shape_scale, minval=self.soft_low, maxval=self.soft_high)
             # Case inference mode
             else:
@@ -185,8 +197,10 @@ class InvertibleNetwork(tf.keras.Model):
         if self.soft_flow and condition is not None:
 
             # Needs to be concatinable with condition
-            shape_scale = (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
-            noise_scale = tf.zeros(shape=shape_scale) + 2.*self.soft_low
+            shape_scale = (
+                (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
+            )
+            noise_scale = tf.zeros(shape=shape_scale) + 2.0 * self.soft_low
 
             # Augment condition with noise scale variate
             condition = tf.concat((condition, noise_scale), axis=-1)
@@ -198,11 +212,10 @@ class InvertibleNetwork(tf.keras.Model):
 
     @classmethod
     def create_config(cls, **kwargs):
-        """"Used to create the settings dictionary for the internal networks of the invertible
-        network. Will fill in missing """
+        """ "Used to create the settings dictionary for the internal networks of the invertible
+        network. Will fill in missing"""
 
-        settings = build_meta_dict(user_dict=kwargs,
-                                   default_setting=default_settings.DEFAULT_SETTING_INVERTIBLE_NET)
+        settings = build_meta_dict(user_dict=kwargs, default_setting=default_settings.DEFAULT_SETTING_INVERTIBLE_NET)
         return settings
 
 
@@ -210,17 +223,17 @@ class EvidentialNetwork(tf.keras.Model):
     """Implements a network whose outputs are the concentration parameters of a Dirichlet density.
 
     Follows ideas from:
-    
-    [1] Radev, S. T., D'Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., & Bürkner, P. C. (2021). 
-    Amortized Bayesian model comparison with evidential deep learning. 
+
+    [1] Radev, S. T., D'Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., & Bürkner, P. C. (2021).
+    Amortized Bayesian model comparison with evidential deep learning.
     IEEE Transactions on Neural Networks and Learning Systems.
 
-    [2] Sensoy, M., Kaplan, L., & Kandemir, M. (2018). 
-    Evidential deep learning to quantify classification uncertainty. 
+    [2] Sensoy, M., Kaplan, L., & Kandemir, M. (2018).
+    Evidential deep learning to quantify classification uncertainty.
     Advances in neural information processing systems, 31.
     """
 
-    def __init__(self, num_models, dense_args=None, num_dense=3, output_activation='softplus', **kwargs):
+    def __init__(self, num_models, dense_args=None, num_dense=3, output_activation="softplus", **kwargs):
         """Creates an instance of an evidential network for amortized model comparison.
 
         Parameters
@@ -230,9 +243,9 @@ class EvidentialNetwork(tf.keras.Model):
         dense_args        : dict or None, optional, default: None
             The arguments for a tf.keras.layers.Dense layer. If None, defaults will be used.
         num_dense         : int, optional, default: 3
-            The number of dense layers for the main network part. 
+            The number of dense layers for the main network part.
         output_activation : str or callable, optional, default: 'softplus'
-            The activation function to use for the network outputs. 
+            The activation function to use for the network outputs.
             Important: needs to have positive outputs.
         **kwargs          : dict, optional, default: {}
             Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.
@@ -244,20 +257,19 @@ class EvidentialNetwork(tf.keras.Model):
             dense_args = default_settings.DEFAULT_SETTING_DENSE_EVIDENTIAL
 
         # A network to increase representation power
-        self.dense = tf.keras.Sequential([
-            tf.keras.layers.Dense(**dense_args)
-            for _ in range(num_dense)
-        ])
+        self.dense = tf.keras.Sequential([tf.keras.layers.Dense(**dense_args) for _ in range(num_dense)])
 
         # The layer to output model evidences
         self.alpha_layer = tf.keras.layers.Dense(
-            num_models, activation=output_activation, 
-            **{k: v for k, v in dense_args.items() if k != 'units' and k != 'activation'})
+            num_models,
+            activation=output_activation,
+            **{k: v for k, v in dense_args.items() if k != "units" and k != "activation"},
+        )
 
         self.num_models = num_models
 
     def call(self, condition, **kwargs):
-        """Computes evidences for model comparison given a batch of data and optional concatenated context, 
+        """Computes evidences for model comparison given a batch of data and optional concatenated context,
         typically passed through a summayr network.
 
         Parameters
@@ -276,7 +288,7 @@ class EvidentialNetwork(tf.keras.Model):
     def evidence(self, condition, **kwargs):
         rep = self.dense(condition, **kwargs)
         alpha = self.alpha_layer(rep, **kwargs)
-        evidence = alpha + 1.
+        evidence = alpha + 1.0
         return evidence
 
     def sample(self, condition, n_samples, **kwargs):
@@ -298,14 +310,14 @@ class EvidentialNetwork(tf.keras.Model):
         alpha = self.evidence(condition, **kwargs)
         n_datasets = alpha.shape[0]
         pm_samples = np.stack(
-            [np.default_rng().dirichlet(alpha[n, :], size=n_samples) for n in range(n_datasets)], axis=1)
+            [np.default_rng().dirichlet(alpha[n, :], size=n_samples) for n in range(n_datasets)], axis=1
+        )
         return pm_samples
 
     @classmethod
     def create_config(cls, **kwargs):
-        """"Used to create the settings dictionary for the internal networks of the invertible
-        network. Will fill in missing """
+        """ "Used to create the settings dictionary for the internal networks of the invertible
+        network. Will fill in missing"""
 
-        settings = build_meta_dict(user_dict=kwargs,
-                                   default_setting=default_settings.DEFAULT_SETTING_EVIDENTIAL_NET)
+        settings = build_meta_dict(user_dict=kwargs, default_setting=default_settings.DEFAULT_SETTING_EVIDENTIAL_NET)
         return settings

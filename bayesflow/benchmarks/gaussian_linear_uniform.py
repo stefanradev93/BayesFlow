@@ -22,19 +22,14 @@
 
 import numpy as np
 
-
-bayesflow_benchmark_info = {
-    'simulator_is_batched': True,
-    'parameter_names': None,
-    'configurator_info': 'posterior'
-}
+bayesflow_benchmark_info = {"simulator_is_batched": True, "parameter_names": None, "configurator_info": "posterior"}
 
 
-def prior(D=10, lower_bound=-1., upper_bound=1., rng=None):
-    """Generates a random draw from a D-dimensional uniform prior bounded between 
+def prior(D=10, lower_bound=-1.0, upper_bound=1.0, rng=None):
+    """Generates a random draw from a D-dimensional uniform prior bounded between
     `lower_bound` and `upper_bound` which represents the location vector of
     a (conjugate) Gaussian likelihood.
-    
+
     Parameters
     ----------
     D           : int, optional, default : 10
@@ -58,10 +53,10 @@ def prior(D=10, lower_bound=-1., upper_bound=1., rng=None):
 
 
 def simulator(theta, n_obs=None, scale=0.1, rng=None):
-    """Generates batched draws from a D-dimenional Gaussian distributions given a batch of 
-    location (mean) parameters of D dimensions. Assumes a spherical convariance matrix given 
-    by scale * I_D. 
-    
+    """Generates batched draws from a D-dimenional Gaussian distributions given a batch of
+    location (mean) parameters of D dimensions. Assumes a spherical convariance matrix given
+    by scale * I_D.
+
     Parameters
     ----------
     theta : np.ndarray of shape (theta, D)
@@ -91,22 +86,22 @@ def simulator(theta, n_obs=None, scale=0.1, rng=None):
     return np.transpose(x, (1, 0, 2))
 
 
-def configurator(forward_dict, mode='posterior'):
+def configurator(forward_dict, mode="posterior"):
     """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
-    if mode == 'posterior':
+    if mode == "posterior":
         input_dict = _config_posterior(forward_dict)
 
     # Case only likelihood configuration
-    elif mode == 'likelihood':
+    elif mode == "likelihood":
         input_dict = _config_likelihood(forward_dict)
 
     # Case posterior and likelihood configuration (i.e., joint inference)
-    elif mode == 'joint':
+    elif mode == "joint":
         input_dict = {}
-        input_dict['posterior_inputs'] = _config_posterior(forward_dict)
-        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict)
+        input_dict["posterior_inputs"] = _config_posterior(forward_dict)
+        input_dict["likelihood_inputs"] = _config_likelihood(forward_dict)
 
     # Throw otherwise
     else:
@@ -118,8 +113,8 @@ def _config_posterior(forward_dict):
     """Helper function for posterior configuration."""
 
     input_dict = {}
-    input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
-    input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
+    input_dict["parameters"] = forward_dict["prior_draws"].astype(np.float32)
+    input_dict["direct_conditions"] = forward_dict["sim_data"].astype(np.float32)
     return input_dict
 
 
@@ -127,6 +122,6 @@ def _config_likelihood(forward_dict):
     """Helper function for likelihood configuration."""
 
     input_dict = {}
-    input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
-    input_dict['observables'] = forward_dict['sim_data'].astype(np.float32)
+    input_dict["conditions"] = forward_dict["prior_draws"].astype(np.float32)
+    input_dict["observables"] = forward_dict["sim_data"].astype(np.float32)
     return input_dict

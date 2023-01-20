@@ -35,21 +35,20 @@ from functools import partial
 
 import numpy as np
 
-from bayesflow.simulation import GenerativeModel, Prior
 from bayesflow.exceptions import ConfigurationError
-
+from bayesflow.simulation import GenerativeModel, Prior
 
 available_benchmarks = [
-    'gaussian_linear',
-    'gaussian_linear_uniform',
-    'slcp',
-    'slcp_distractors',
-    'bernoulli_glm',
-    'bernoulli_glm_raw',
-    'gaussian_mixture',
-    'two_moons',
-    'sir',
-    'lotka_volterra'
+    "gaussian_linear",
+    "gaussian_linear_uniform",
+    "slcp",
+    "slcp_distractors",
+    "bernoulli_glm",
+    "bernoulli_glm_raw",
+    "gaussian_mixture",
+    "two_moons",
+    "sir",
+    "lotka_volterra",
 ]
 
 
@@ -59,7 +58,7 @@ def get_benchmark_module(benchmark_name):
     """
 
     try:
-        benchmark_module = importlib.import_module(f'bayesflow.benchmarks.{benchmark_name}')
+        benchmark_module = importlib.import_module(f"bayesflow.benchmarks.{benchmark_name}")
         return benchmark_module
     except ModuleNotFoundError:
         raise ConfigurationError(f"You need to provide a valid name from: {available_benchmarks}")
@@ -67,7 +66,8 @@ def get_benchmark_module(benchmark_name):
 
 class Benchmark:
     """Interface class for a benchmark."""
-    def __init__(self, name, mode='joint', seed=None, **kwargs):
+
+    def __init__(self, name, mode="joint", seed=None, **kwargs):
         """Creates a benchmark generative model by using the blueprint contained
         in a benchmark file.
 
@@ -87,25 +87,23 @@ class Benchmark:
         self.benchmark_name = name
         self._rng = np.random.default_rng(seed)
         self.benchmark_module = get_benchmark_module(self.benchmark_name)
-        self.benchmark_info = getattr(self.benchmark_module, 'bayesflow_benchmark_info')
+        self.benchmark_info = getattr(self.benchmark_module, "bayesflow_benchmark_info")
 
         # Prepare partial simulator function with optioal keyword arguments
-        if kwargs.get('sim_kwargs') is not None:
-            _simulator = partial(getattr(self.benchmark_module, 'simulator'), 
-                                 rng=self._rng, **kwargs.get('sim_kwargs'))
+        if kwargs.get("sim_kwargs") is not None:
+            _simulator = partial(getattr(self.benchmark_module, "simulator"), rng=self._rng, **kwargs.get("sim_kwargs"))
         else:
-            _simulator = partial(getattr(self.benchmark_module, 'simulator'), 
-                                 rng=self._rng)
+            _simulator = partial(getattr(self.benchmark_module, "simulator"), rng=self._rng)
 
         # Prepare generative model
         self.generative_model = GenerativeModel(
             prior=Prior(
-                prior_fun=partial(getattr(self.benchmark_module, 'prior'), rng=self._rng),
-                param_names=self.benchmark_info['parameter_names']
+                prior_fun=partial(getattr(self.benchmark_module, "prior"), rng=self._rng),
+                param_names=self.benchmark_info["parameter_names"],
             ),
             simulator=_simulator,
-            simulator_is_batched=self.benchmark_info['simulator_is_batched'],
-            name=self.benchmark_name, 
+            simulator_is_batched=self.benchmark_info["simulator_is_batched"],
+            name=self.benchmark_name,
         )
-        self.configurator = getattr(self.benchmark_module, 'configurator')
+        self.configurator = getattr(self.benchmark_module, "configurator")
         self.configurator = partial(self.configurator, mode=mode)

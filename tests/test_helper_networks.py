@@ -19,9 +19,8 @@
 # SOFTWARE.
 
 import numpy as np
-import tensorflow as tf
-
 import pytest
+import tensorflow as tf
 
 from bayesflow.helper_networks import *
 
@@ -31,11 +30,17 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
     max dimensions for each axis are given by ``low`` and ``high``."""
 
     # Randomize batch data
-    x = np.random.default_rng().normal(size=(
-        np.random.randint(low=low, high=high+1), 
-        np.random.randint(low=low, high=high+1), 
-        np.random.randint(low=low, high=high+1))
-    ).astype(dtype)
+    x = (
+        np.random.default_rng()
+        .normal(
+            size=(
+                np.random.randint(low=low, high=high + 1),
+                np.random.randint(low=low, high=high + 1),
+                np.random.randint(low=low, high=high + 1),
+            )
+        )
+        .astype(dtype)
+    )
 
     # Random permutation along first axis
     perm = np.random.default_rng().permutation(x.shape[1])
@@ -44,12 +49,17 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
 
 
 @pytest.mark.parametrize("input_dim", [3, 16])
-@pytest.mark.parametrize("meta", [
-    dict(dense_args={'units': 32, 'activation': 'elu'}, spec_norm=True, dropout=True, dropout_prob=0.2, num_dense=1),
-    dict(dense_args={'units': 64}, spec_norm=True, mc_dropout=True, dropout_prob=0.1, num_dense=2, residual=True),
-    dict(dense_args={'units': 32, 'activation': 'relu'}, spec_norm=False, num_dense=1),
-    dict(dense_args={'units': 64}, spec_norm=False, num_dense=2, residual=True)
-])
+@pytest.mark.parametrize(
+    "meta",
+    [
+        dict(
+            dense_args={"units": 32, "activation": "elu"}, spec_norm=True, dropout=True, dropout_prob=0.2, num_dense=1
+        ),
+        dict(dense_args={"units": 64}, spec_norm=True, mc_dropout=True, dropout_prob=0.1, num_dense=2, residual=True),
+        dict(dense_args={"units": 32, "activation": "relu"}, spec_norm=False, num_dense=1),
+        dict(dense_args={"units": 64}, spec_norm=False, num_dense=2, residual=True),
+    ],
+)
 @pytest.mark.parametrize("condition", [False, True])
 def test_dense_coupling_net(input_dim, meta, condition):
     """Tests the fidelity of the ``DenseCouplingNet`` using different configurations."""
@@ -70,27 +80,27 @@ def test_dense_coupling_net(input_dim, meta, condition):
 
     # Test number of layers
     # 2 Hidden + 2 Dropouts
-    if meta.get('dropout') or meta.get('mc_dropout'):
-        if meta.get('residual'):
-            assert len(dense.fc.layers) == 2*meta['num_dense'] + 1
+    if meta.get("dropout") or meta.get("mc_dropout"):
+        if meta.get("residual"):
+            assert len(dense.fc.layers) == 2 * meta["num_dense"] + 1
         else:
-            assert len(dense.fc.layers) == 2*meta['num_dense']
+            assert len(dense.fc.layers) == 2 * meta["num_dense"]
     # 2 Hidden + 1 Out
     else:
-        if meta.get('residual'):
-            assert len(dense.fc.layers) == meta['num_dense'] + 1
+        if meta.get("residual"):
+            assert len(dense.fc.layers) == meta["num_dense"] + 1
         else:
-            assert len(dense.fc.layers) == meta['num_dense']
+            assert len(dense.fc.layers) == meta["num_dense"]
     assert out.shape == inp.shape
 
 
 @pytest.mark.parametrize("input_dim", [3, 8])
-@pytest.mark.parametrize("shape", ['2d', '3d'])
+@pytest.mark.parametrize("shape", ["2d", "3d"])
 def test_permutation(input_dim, shape):
     """Tests the fixed ``Permutation`` layer in terms of invertibility and input-output fidelity."""
 
     # Create randomized input
-    if shape == '2d':
+    if shape == "2d":
         x = tf.random.normal((np.random.randint(low=1, high=32), input_dim))
     else:
         x = tf.random.normal((np.random.randint(low=1, high=32), np.random.randint(low=1, high=32), input_dim))
@@ -104,18 +114,18 @@ def test_permutation(input_dim, shape):
 
 
 @pytest.mark.parametrize("input_dim", [2, 5])
-@pytest.mark.parametrize("shape", ['2d', '3d'])
+@pytest.mark.parametrize("shape", ["2d", "3d"])
 def test_actnorm(input_dim, shape):
     """Tests the ``ActNorm`` layer in terms of invertibility and shape integrity."""
-    
+
     # Create randomized input
-    if shape == '2d':
+    if shape == "2d":
         x = tf.random.normal((np.random.randint(low=1, high=32), input_dim))
     else:
         x = tf.random.normal((np.random.randint(low=1, high=32), np.random.randint(low=1, high=32), input_dim))
-    
+
     # Create ActNorm layer
-    actnorm = ActNorm({'latent_dim': input_dim})
+    actnorm = ActNorm({"latent_dim": input_dim})
 
     # Forward - inverse
     z, _ = actnorm(x)
@@ -134,15 +144,15 @@ def test_invariant_module(n_dense_s1, n_dense_s2, output_dim):
 
     # Prepare settings for invariant module and create it
     meta = {
-        'dense_s1_args': dict(units=8, activation='elu'),
-        'dense_s2_args': dict(units=output_dim, activation='relu'),
-        'num_dense_s1': n_dense_s1,
-        'num_dense_s2': n_dense_s2,
-        'pooling_fun': 'mean'
+        "dense_s1_args": dict(units=8, activation="elu"),
+        "dense_s2_args": dict(units=output_dim, activation="relu"),
+        "num_dense_s1": n_dense_s1,
+        "num_dense_s2": n_dense_s2,
+        "pooling_fun": "mean",
     }
     inv_module = InvariantModule(meta)
 
-    # Create input and permuted version with randomized shapes 
+    # Create input and permuted version with randomized shapes
     x, x_perm, _ = _gen_randomized_3d_data()
 
     # Pass unpermuted and permuted inputs
@@ -166,17 +176,17 @@ def test_equivariant_module(n_dense_s3, output_dim):
 
     # Prepare settings for equivariant module and create it
     meta = {
-        'dense_s1_args': dict(units=8, activation='elu'),
-        'dense_s2_args': dict(units=2, activation='relu'),
-        'dense_s3_args': dict(units=output_dim),
-        'num_dense_s1': 1,
-        'num_dense_s2': 1,
-        'num_dense_s3': n_dense_s3,
-        'pooling_fun': 'max'
+        "dense_s1_args": dict(units=8, activation="elu"),
+        "dense_s2_args": dict(units=2, activation="relu"),
+        "dense_s3_args": dict(units=output_dim),
+        "num_dense_s1": 1,
+        "num_dense_s2": 1,
+        "num_dense_s3": n_dense_s3,
+        "pooling_fun": "max",
     }
     equiv_module = EquivariantModule(meta)
 
-    # Create input and permuted version with randomized shapes 
+    # Create input and permuted version with randomized shapes
     x, x_perm, perm = _gen_randomized_3d_data()
 
     # Pass unpermuted and permuted inputs
@@ -200,14 +210,9 @@ def test_multi_conv1d(filters, max_kernel_size):
 
     # Create settings and network
     meta = {
-        'layer_args': {
-            'activation': 'relu',
-            'filters': filters,
-            'strides': 1,
-            'padding': 'causal'
-        },
-        'min_kernel_size': 1,
-        'max_kernel_size': max_kernel_size
+        "layer_args": {"activation": "relu", "filters": filters, "strides": 1, "padding": "causal"},
+        "min_kernel_size": 1,
+        "max_kernel_size": max_kernel_size,
     }
     conv = MultiConv1D(meta)
 

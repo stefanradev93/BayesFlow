@@ -19,7 +19,6 @@
 # SOFTWARE.
 
 import numpy as np
-
 import pytest
 
 from bayesflow.summary_networks import InvariantNetwork, SequentialNetwork
@@ -30,11 +29,17 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
     max dimensions for each axis are given by ``low`` and ``high``."""
 
     # Randomize batch data
-    x = np.random.default_rng().normal(size=(
-        np.random.randint(low=low, high=high+1), 
-        np.random.randint(low=low, high=high+1), 
-        np.random.randint(low=low, high=high+1))
-    ).astype(dtype)
+    x = (
+        np.random.default_rng()
+        .normal(
+            size=(
+                np.random.randint(low=low, high=high + 1),
+                np.random.randint(low=low, high=high + 1),
+                np.random.randint(low=low, high=high + 1),
+            )
+        )
+        .astype(dtype)
+    )
 
     # Random permutation along first axis
     perm = np.random.default_rng().permutation(x.shape[1])
@@ -49,13 +54,10 @@ def test_invariant_network(num_equiv, summary_dim):
     configurations w.r.t. permutation invariance and output dimensions."""
 
     # Prepare settings for invariant network
-    settings = {
-        'num_equiv': num_equiv,
-        'summary_dim': summary_dim
-    }
+    settings = {"num_equiv": num_equiv, "summary_dim": summary_dim}
     inv_net = InvariantNetwork(**settings)
 
-    # Create input and permuted version with randomized shapes 
+    # Create input and permuted version with randomized shapes
     x, x_perm, _ = _gen_randomized_3d_data()
 
     # Pass unpermuted and permuted inputs
@@ -81,9 +83,9 @@ def test_sequential_network(num_conv_layers, lstm_units):
 
     # Create settings dict and network
     settings = {
-        'summary_dim': np.random.randint(low=1, high=32),
-        'num_conv_layers': num_conv_layers,
-        'lstm_units': lstm_units,
+        "summary_dim": np.random.randint(low=1, high=32),
+        "num_conv_layers": num_conv_layers,
+        "lstm_units": lstm_units,
     }
     net = SequentialNetwork(**settings)
 
@@ -94,6 +96,6 @@ def test_sequential_network(num_conv_layers, lstm_units):
     # Test shape 2d
     assert len(out.shape) == 2
     # Test summary stats equal default
-    assert out.shape[1] == settings['summary_dim']
+    assert out.shape[1] == settings["summary_dim"]
     # Test first dimension unaltered
     assert out.shape[0] == x.shape[0]
