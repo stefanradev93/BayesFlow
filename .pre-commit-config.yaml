@@ -9,6 +9,8 @@
 # When adding new hooks, it may make sense to once run
 # `pre-commit run --all-files` as by default only changed files are checked
 
+# Automatically run before every commit via once running `pre-commit install`
+
 repos:
 - repo: https://github.com/psf/black
   rev: 22.12.0
