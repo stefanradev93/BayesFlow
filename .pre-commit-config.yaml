@@ -1,0 +1,52 @@
+############################
+# Pre-commit configuration #
+############################
+
+# Install via `pip install pre-commit`
+
+# This is run as a precondition to commits, run manually via `pre-commit run`
+
+# When adding new hooks, it may make sense to once run
+# `pre-commit run --all-files` as by default only changed files are checked
+
+repos:
+- repo: https://github.com/psf/black
+  rev: 22.12.0
+  hooks:
+  - id: black
+    description: The uncompromising code formatter
+- repo: https://github.com/pycqa/isort
+  rev: 5.11.4
+  hooks:
+  - id: isort
+    name: isort (python)
+  - id: isort
+    name: isort (cython)
+    types: [cython]
+  - id: isort
+    name: isort (pyi)
+    types: [pyi]
+- repo: https://github.com/nbQA-dev/nbQA
+  rev: 1.2.3
+  hooks:
+    - id: nbqa-black
+    - id: nbqa-pyupgrade
+      args: [--py36-plus]
+    - id: nbqa-isort
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.2.0
+  hooks:
+  - id: check-yaml
+    description: Check yaml files for parseable syntax
+  - id: check-added-large-files
+    description: Prevent large files from being committed
+  - id: check-merge-conflict
+    description: Check for files that contain merge conflict strings
+  - id: check-symlinks
+    description: Check for symlinks which do not point to anything
+  - id: trailing-whitespace
+    description: Trim trailing whitespaces
+  - id: end-of-file-fixer
+    description: Fix empty lines at ends of files
+  - id: detect-private-key
+    description: Detects the presence of private keys
