@@ -22,7 +22,7 @@ import tensorflow as tf
 
 
 class SpectralNormalization(tf.keras.layers.Wrapper):
-    """ Performs spectral normalization on neural network weights. Adapted from:
+    """Performs spectral normalization on neural network weights. Adapted from:
 
     https://www.tensorflow.org/addons/api_docs/python/tfa/layers/SpectralNormalization
 
@@ -36,14 +36,13 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
         super(SpectralNormalization, self).__init__(layer, **kwargs)
         if power_iterations <= 0:
             raise ValueError(
-                "`power_iterations` should be greater than zero, got "
-                "`power_iterations={}`".format(power_iterations)
+                "`power_iterations` should be greater than zero, got " "`power_iterations={}`".format(power_iterations)
             )
         self.power_iterations = power_iterations
         self._initialized = False
 
     def build(self, input_shape):
-        """ Build `Layer`"""
+        """Build `Layer`"""
 
         # Register input shape
         super().build(input_shape)
@@ -55,8 +54,7 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
             self.w = self.layer.embeddings
         else:
             raise AttributeError(
-                "{} object has no attribute 'kernel' nor "
-                "'embeddings'".format(type(self.layer).__name__)
+                "{} object has no attribute 'kernel' nor " "'embeddings'".format(type(self.layer).__name__)
             )
 
         self.w_shape = self.w.shape.as_list()
@@ -70,8 +68,8 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
         )
 
     def call(self, inputs, training=False):
-        """ Call `Layer`
-        
+        """Call `Layer`
+
         Parameters
         ----------
 
@@ -102,9 +100,7 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
             v = tf.stop_gradient(v)
             sigma = tf.matmul(tf.matmul(v, w), u, transpose_b=True)
             self.u.assign(tf.cast(u, self.u.dtype))
-            self.w.assign(
-                tf.cast(tf.reshape(self.w / sigma, self.w_shape), self.w.dtype)
-            )
+            self.w.assign(tf.cast(tf.reshape(self.w / sigma, self.w_shape), self.w.dtype))
 
     def get_config(self):
         config = {"power_iterations": self.power_iterations}

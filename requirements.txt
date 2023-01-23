@@ -3,7 +3,7 @@ numpy==1.23
 pandas==1.4
 scikit-learn==1.1
 scipy==1.9
-aesara==2.8.7 
+aesara==2.8.7
 seaborn==0.12
 tensorflow-macos==2.10; sys_platform == 'darwin' and platform_machine == 'arm64'
 tensorflow==2.10.1; sys_platform != 'darwin' or platform_machine != 'arm64'

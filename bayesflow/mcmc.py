@@ -18,9 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import aesara.tensor as at
 import numpy as np
 import tensorflow as tf
-import aesara.tensor as at
 
 from bayesflow.default_settings import DEFAULT_KEYS
 
@@ -32,8 +32,7 @@ class MCMCSurrogateLikelihood:
     """
 
     @tf.function
-    def __init__(self, amortized_likelihood, configurator=None, likelihood_postprocessor=None,
-                 grad_postprocessor=None):
+    def __init__(self, amortized_likelihood, configurator=None, likelihood_postprocessor=None, grad_postprocessor=None):
         """Creates in instance of the surrogate likelihood using a pre-trained ``AmortizedLikelihood`` instance.
 
         Parameters
@@ -123,12 +122,13 @@ class MCMCSurrogateLikelihood:
         """
 
         input_dict = self.configurator(*args, **kwargs)
-        observables = tf.constant(np.float32(input_dict[DEFAULT_KEYS['observables']]), dtype=np.float32)
-        conditions = tf.Variable(np.float32(input_dict[DEFAULT_KEYS['conditions']]), dtype=np.float32)
-        return self.grad_postprocessor(self._log_likelihood_grad({
-            DEFAULT_KEYS['observables']: observables,
-            DEFAULT_KEYS['conditions']: conditions
-        }, **kwargs))
+        observables = tf.constant(np.float32(input_dict[DEFAULT_KEYS["observables"]]), dtype=np.float32)
+        conditions = tf.Variable(np.float32(input_dict[DEFAULT_KEYS["conditions"]]), dtype=np.float32)
+        return self.grad_postprocessor(
+            self._log_likelihood_grad(
+                {DEFAULT_KEYS["observables"]: observables, DEFAULT_KEYS["conditions"]: conditions}, **kwargs
+            )
+        )
 
     @tf.function
     def _log_likelihood_grad(self, input_dict, **kwargs):
@@ -147,10 +147,8 @@ class MCMCSurrogateLikelihood:
         """
 
         with tf.GradientTape() as t:
-            log_lik = tf.reduce_sum(self.amortized_likelihood.log_likelihood(
-                input_dict, to_numpy=False, **kwargs
-            ))
-        return t.gradient(log_lik, {'p': input_dict[DEFAULT_KEYS['conditions']]})['p']
+            log_lik = tf.reduce_sum(self.amortized_likelihood.log_likelihood(input_dict, to_numpy=False, **kwargs))
+        return t.gradient(log_lik, {"p": input_dict[DEFAULT_KEYS["conditions"]]})["p"]
 
 
 class _LogLikGrad(at.Op):
@@ -208,8 +206,16 @@ class PyMCSurrogateLikelihood(at.Op, MCMCSurrogateLikelihood):
     itypes = [at.dvector]  # expects a vector of parameter values when called
     otypes = [at.dscalar]  # outputs a single scalar value (the log likelihood)
 
-    def __init__(self, amortized_likelihood, observables, configurator=None, likelihood_postprocessor=None,
-                 grad_postprocessor=None, default_pymc_type=np.float64, default_tf_type=np.float32):
+    def __init__(
+        self,
+        amortized_likelihood,
+        observables,
+        configurator=None,
+        likelihood_postprocessor=None,
+        grad_postprocessor=None,
+        default_pymc_type=np.float64,
+        default_tf_type=np.float32,
+    ):
         """A custom surrogate likelihood function for integration with ``PyMC3``, to be used with pymc.Potential
 
         Parameters
@@ -244,7 +250,7 @@ class PyMCSurrogateLikelihood(at.Op, MCMCSurrogateLikelihood):
             amortized_likelihood=amortized_likelihood,
             configurator=configurator,
             likelihood_postprocessor=likelihood_postprocessor,
-            grad_postprocessor=grad_postprocessor
+            grad_postprocessor=grad_postprocessor,
         )
 
         self.observables = observables
@@ -256,9 +262,9 @@ class PyMCSurrogateLikelihood(at.Op, MCMCSurrogateLikelihood):
     def _default_configurator(self, obs, params):
         return {
             # add axis (corresponds to batch_size=1)
-            'observables': obs[tf.newaxis],
+            "observables": obs[tf.newaxis],
             # expand conditions to match number of observables and add axis
-            'conditions': tf.tile(params[tf.newaxis, :], [obs.shape[0], 1])[tf.newaxis]
+            "conditions": tf.tile(params[tf.newaxis, :], [obs.shape[0], 1])[tf.newaxis],
         }
 
     @tf.function
@@ -268,7 +274,7 @@ class PyMCSurrogateLikelihood(at.Op, MCMCSurrogateLikelihood):
 
     def perform(self, node, inputs, outputs):
         """Computes the log-likelihood of ``inputs`` (typically the parameter vector of a model).
-        
+
         Parameters
         ----------
         node      : The symbolic ``aesara.graph.basic.Apply`` node that represents this computation.
@@ -285,7 +291,7 @@ class PyMCSurrogateLikelihood(at.Op, MCMCSurrogateLikelihood):
 
     def grad(self, inputs, output_grads):
         """Aggregates gradients with respect to ``inputs`` (typically the parameter vector)
-        
+
         Parameters
         ----------
         inputs        : The input variables.

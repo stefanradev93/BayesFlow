@@ -22,16 +22,15 @@
 
 import numpy as np
 
-
 bayesflow_benchmark_info = {
-    'simulator_is_batched': False,
-    'parameter_names': [r'$\mu_1$', r'$\mu_2$'],
-    'configurator_info': 'posterior'
+    "simulator_is_batched": False,
+    "parameter_names": [r"$\mu_1$", r"$\mu_2$"],
+    "configurator_info": "posterior",
 }
 
 
-def prior(lower_bound=-10., upper_bound=10., D=2, rng=None):
-    """Generates a random draw from a 2-dimensional uniform prior bounded between 
+def prior(lower_bound=-10.0, upper_bound=10.0, D=2, rng=None):
+    """Generates a random draw from a 2-dimensional uniform prior bounded between
     `lower_bound` and `upper_bound` representing the common mean of a 2D Gaussian
     mixture model (GMM).
 
@@ -57,12 +56,12 @@ def prior(lower_bound=-10., upper_bound=10., D=2, rng=None):
     return rng.uniform(low=lower_bound, high=upper_bound, size=D)
 
 
-def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01, rng=None):
+def simulator(theta, prob=0.5, scale_c1=1.0, scale_c2=0.01, rng=None):
     """Simulates data from the Gaussian mixture model (GMM) with
     shared location vector. For more details, see
-    
+
     https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.7
-    
+
     Parameters
     ----------
     theta    : np.ndarray of shape (D,)
@@ -91,26 +90,26 @@ def simulator(theta, prob=0.5, scale_c1=1., scale_c2=0.01, rng=None):
 
     # Draw 2D-Gaussian sample according to component index
     if idx == 0:
-        return scale_c1*rng.normal(loc=theta)
-    return scale_c2*rng.normal(loc=theta)
+        return scale_c1 * rng.normal(loc=theta)
+    return scale_c2 * rng.normal(loc=theta)
 
 
-def configurator(forward_dict, mode='posterior', scale_data=12):
+def configurator(forward_dict, mode="posterior", scale_data=12):
     """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
-    if mode == 'posterior':
+    if mode == "posterior":
         input_dict = _config_posterior(forward_dict, scale_data)
 
     # Case only likelihood configuration
-    elif mode == 'likelihood':
+    elif mode == "likelihood":
         input_dict = _config_likelihood(forward_dict, scale_data)
 
     # Case posterior and likelihood configuration
-    elif mode == 'joint':
+    elif mode == "joint":
         input_dict = {}
-        input_dict['posterior_inputs'] = _config_posterior(forward_dict, scale_data)
-        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict, scale_data)
+        input_dict["posterior_inputs"] = _config_posterior(forward_dict, scale_data)
+        input_dict["likelihood_inputs"] = _config_likelihood(forward_dict, scale_data)
 
     # Throw otherwise
     else:
@@ -122,8 +121,8 @@ def _config_posterior(forward_dict, scale_data):
     """Helper function for posterior configuration."""
 
     input_dict = {}
-    input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
-    input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+    input_dict["parameters"] = forward_dict["prior_draws"].astype(np.float32)
+    input_dict["direct_conditions"] = forward_dict["sim_data"].astype(np.float32) / scale_data
     return input_dict
 
 
@@ -131,6 +130,6 @@ def _config_likelihood(forward_dict, scale_data):
     """Helper function for likelihood configuration."""
 
     input_dict = {}
-    input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
-    input_dict['observables'] = forward_dict['sim_data'].astype(np.float32) / scale_data
+    input_dict["conditions"] = forward_dict["prior_draws"].astype(np.float32)
+    input_dict["observables"] = forward_dict["sim_data"].astype(np.float32) / scale_data
     return input_dict

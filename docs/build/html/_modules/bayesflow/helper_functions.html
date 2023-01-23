@@ -9,7 +9,7 @@
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
@@ -18,10 +18,10 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -64,7 +64,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <h1>Source code for bayesflow.helper_functions</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
 
@@ -171,7 +171,7 @@
     <span class="k">return</span> <span class="n">current_lr</span></div>
 
 
-<div class="viewcode-block" id="format_loss_string"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helper_functions.format_loss_string">[docs]</a><span class="k">def</span> <span class="nf">format_loss_string</span><span class="p">(</span><span class="n">ep</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">avg_dict</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+<div class="viewcode-block" id="format_loss_string"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helper_functions.format_loss_string">[docs]</a><span class="k">def</span> <span class="nf">format_loss_string</span><span class="p">(</span><span class="n">ep</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">avg_dict</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">ep_str</span><span class="o">=</span><span class="s2">&quot;Epoch&quot;</span><span class="p">,</span> <span class="n">it_str</span><span class="o">=</span><span class="s1">&#39;Iter&#39;</span><span class="p">,</span> <span class="n">scalar_loss_str</span><span class="o">=</span><span class="s1">&#39;Loss&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Prepare loss string for displaying on progress bar.&quot;&quot;&quot;</span>
 
@@ -255,21 +255,21 @@
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">post_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ShapeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;post_samples should be a 3-dimensional array, with the &#39;</span> <span class="o">+</span>
-                         <span class="sa">f</span><span class="s1">&#39;first dimension being the number of (simulated) data sets, &#39;</span> <span class="o">+</span> 
-                         <span class="sa">f</span><span class="s1">&#39;the second dimension being the number of posterior draws per data set, &#39;</span> <span class="o">+</span> 
-                         <span class="sa">f</span><span class="s1">&#39;and the third dimension being the number of parameters (marginal distributions), &#39;</span> <span class="o">+</span>  
+                         <span class="sa">f</span><span class="s1">&#39;first dimension being the number of (simulated) data sets, &#39;</span> <span class="o">+</span>
+                         <span class="sa">f</span><span class="s1">&#39;the second dimension being the number of posterior draws per data set, &#39;</span> <span class="o">+</span>
+                         <span class="sa">f</span><span class="s1">&#39;and the third dimension being the number of parameters (marginal distributions), &#39;</span> <span class="o">+</span>
                          <span class="sa">f</span><span class="s1">&#39;but your input has dimensions </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">post_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">prior_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">ShapeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;prior_samples should be a 2-dimensional array, with the &#39;</span> <span class="o">+</span>  
-                         <span class="sa">f</span><span class="s1">&#39;first dimension being the number of (simulated) data sets / prior draws &#39;</span> <span class="o">+</span> 
-                         <span class="sa">f</span><span class="s1">&#39;and the second dimension being the number of parameters (marginal distributions), &#39;</span> <span class="o">+</span>  
+        <span class="k">raise</span> <span class="n">ShapeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;prior_samples should be a 2-dimensional array, with the &#39;</span> <span class="o">+</span>
+                         <span class="sa">f</span><span class="s1">&#39;first dimension being the number of (simulated) data sets / prior draws &#39;</span> <span class="o">+</span>
+                         <span class="sa">f</span><span class="s1">&#39;and the second dimension being the number of parameters (marginal distributions), &#39;</span> <span class="o">+</span>
                          <span class="sa">f</span><span class="s1">&#39;but your input has dimensions </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">prior_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">post_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">prior_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="n">ShapeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The number of elements over the first dimension of post_samples and prior_samples&#39;</span> <span class="o">+</span> 
+        <span class="k">raise</span> <span class="n">ShapeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The number of elements over the first dimension of post_samples and prior_samples&#39;</span> <span class="o">+</span>
                          <span class="sa">f</span><span class="s1">&#39;should match, but post_samples has </span><span class="si">{</span><span class="n">post_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> and prior_samples has &#39;</span> <span class="o">+</span>
                          <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prior_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> elements, respectively.&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">post_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">prior_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="n">ShapeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The number of elements over the last dimension of post_samples and prior_samples&#39;</span> <span class="o">+</span> 
+        <span class="k">raise</span> <span class="n">ShapeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The number of elements over the last dimension of post_samples and prior_samples&#39;</span> <span class="o">+</span>
                          <span class="sa">f</span><span class="s1">&#39;should match, but post_samples has </span><span class="si">{</span><span class="n">post_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1"> and prior_samples has &#39;</span> <span class="o">+</span>
                          <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prior_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1"> elements, respectively.&#39;</span><span class="p">)</span></div>
 </pre></div>
@@ -287,7 +287,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -298,7 +298,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

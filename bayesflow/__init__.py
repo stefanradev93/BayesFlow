@@ -22,14 +22,9 @@ import logging
 
 # Add easy access imports
 try:
-    from bayesflow import default_settings
-    from bayesflow import amortizers
-    from bayesflow import networks
-    from bayesflow import diagnostics
-    from bayesflow import trainers
-    from bayesflow import losses
+    from bayesflow import amortizers, default_settings, diagnostics, losses, networks, trainers
 except ImportError as err:
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
-    logger.warn('Some dependencies failed to load. BayesFlow modules may not work properly!')
+    logger.warn("Some dependencies failed to load. BayesFlow modules may not work properly!")
     logger.warn(str(err))

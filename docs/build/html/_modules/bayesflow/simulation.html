@@ -9,7 +9,7 @@
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
@@ -18,10 +18,10 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -64,7 +64,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <h1>Source code for bayesflow.simulation</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
 
@@ -214,7 +214,7 @@
         <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">non_batchable_context</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_non_batchable_for_batchable</span><span class="p">:</span>
-            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batchable_context</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> 
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batchable_context</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span>
             <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batchable_context</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -234,7 +234,7 @@
 <span class="sd">    - context_generator.non_batchable_context()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_prior_fun</span> <span class="p">:</span> <span class="n">callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">prior_fun</span> <span class="p">:</span> <span class="n">callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_prior_fun</span> <span class="p">:</span> <span class="n">callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">prior_fun</span> <span class="p">:</span> <span class="n">callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">context_generator</span> <span class="p">:</span> <span class="n">callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span> <span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Instantiates a prior generator which will draw random parameter configurations from a user-informed prior</span>
@@ -302,33 +302,33 @@
                 <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batched_prior</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)])</span>
-        
+
         <span class="c1"># Only batchable context</span>
         <span class="k">elif</span> <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_batched</span><span class="p">:</span>
                 <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batched_prior</span><span class="p">(</span><span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]],</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span> 
-                <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]][</span><span class="n">b</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> 
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]][</span><span class="n">b</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)])</span>
-            
+
         <span class="c1"># Only non-batchable context</span>
         <span class="k">elif</span> <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_batched</span><span class="p">:</span>
                 <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batched_prior</span><span class="p">(</span><span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> 
+                <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)])</span>
 
         <span class="c1"># Both batchable and non_batchable context</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_batched</span><span class="p">:</span>
                 <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">batched_prior</span><span class="p">(</span><span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]],</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">batched_prior</span><span class="p">(</span><span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]],</span>
                                <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>    
+            <span class="k">else</span><span class="p">:</span>
                 <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]][</span><span class="n">b</span><span class="p">],</span> 
-                               <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]][</span><span class="n">b</span><span class="p">],</span>
+                               <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)])</span>
 
         <span class="k">return</span> <span class="n">out_dict</span>
@@ -376,7 +376,7 @@
 
 <div class="viewcode-block" id="Prior.logpdf"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.simulation.Prior.logpdf">[docs]</a>    <span class="k">def</span> <span class="nf">logpdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prior_draws</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Prior density computation is under construction!&#39;</span><span class="p">)</span></div></div>
-            
+
 
 <div class="viewcode-block" id="Simulator"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.simulation.Simulator">[docs]</a><span class="k">class</span> <span class="nc">Simulator</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Basic interface for a simulation module responsible for generating randomized simulations given a prior</span>
@@ -416,15 +416,15 @@
 
         <span class="k">if</span> <span class="p">(</span><span class="n">batch_simulator_fun</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="p">(</span><span class="n">simulator_fun</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s1">&#39;Either batch_simulator_fun or simulator_fun should be provided, but not both!&#39;</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">is_batched</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">batch_simulator_fun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span>
-        
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_batched</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="o">=</span> <span class="n">batch_simulator_fun</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="o">=</span> <span class="n">simulator_fun</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">context_gen</span> <span class="o">=</span> <span class="n">context_generator</span>
-        
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Generates simulated data given param draws and optional context variables generated internally.</span>
 <span class="sd">        </span>
@@ -441,88 +441,88 @@
 <span class="sd">            `non_batchable_context` : value</span>
 <span class="sd">            `batchable_context` : value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="c1"># Always assume first dimension is batch dimension</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        
+
         <span class="c1"># Prepare placeholder dictionary</span>
         <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]</span> <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]</span> <span class="p">:</span> <span class="kc">None</span>
         <span class="p">}</span>
-        
+
         <span class="c1"># Populate dictionary with context or leave at None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_gen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">context_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_gen</span><span class="o">.</span><span class="n">generate_context</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">context_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]]</span>
             <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">context_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]]</span>
-        
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_batched</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulate_batched</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">out_dict</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulate_non_batched</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">out_dict</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        
+
     <span class="k">def</span> <span class="nf">_simulate_batched</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">out_dict</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Assumes a batched simulator accepting batched contexts and priors.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="c1"># No context type</span>
         <span class="k">if</span> <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            
+
         <span class="c1"># Only batchable context</span>
         <span class="k">elif</span> <span class="n">out_dict</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> 
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">,</span>
                                                   <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Only non-batchable context</span>
         <span class="k">elif</span> <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> 
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">,</span>
                                                   <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        
+
         <span class="c1"># Both batchable and non-batchable context</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> 
-                                                  <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]],</span> 
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">,</span>
+                                                  <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]],</span>
                                                   <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">out_dict</span>
-    
+
     <span class="k">def</span> <span class="nf">_simulate_non_batched</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">out_dict</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Assumes a non-batched simulator accepting batched contexts and priors.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="c1"># Extract batch size</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        
+
         <span class="c1"># No context type</span>
         <span class="k">if</span> <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">b</span><span class="p">],</span>  <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)])</span>
-            
+
         <span class="c1"># Only batchable context</span>
         <span class="k">elif</span> <span class="n">out_dict</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">b</span><span class="p">],</span> 
-                                                            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]][</span><span class="n">b</span><span class="p">],</span> 
-                                                            <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> 
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">b</span><span class="p">],</span>
+                                                            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]][</span><span class="n">b</span><span class="p">],</span>
+                                                            <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                                              <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)])</span>
-            
+
         <span class="c1"># Only non-batchable context</span>
         <span class="k">elif</span> <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">b</span><span class="p">],</span> 
-                                                            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span> 
-                                                            <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> 
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">b</span><span class="p">],</span>
+                                                            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span>
+                                                            <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                                              <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)])</span>
-            
+
         <span class="c1"># Both batchable and non_batchable context</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">b</span><span class="p">],</span> 
-                                                            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]][</span><span class="n">b</span><span class="p">],</span> 
-                                                            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span> 
-                                                            <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> 
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">b</span><span class="p">],</span>
+                                                            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;batchable_context&#39;</span><span class="p">]][</span><span class="n">b</span><span class="p">],</span>
+                                                            <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;non_batchable_context&#39;</span><span class="p">]],</span>
+                                                            <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                                              <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)])</span>
 
         <span class="k">return</span> <span class="n">out_dict</span></div>
-                
+
 
 <div class="viewcode-block" id="GenerativeModel"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.simulation.GenerativeModel">[docs]</a><span class="k">class</span> <span class="nc">GenerativeModel</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Basic interface for a generative model in a simulation-based context.</span>
@@ -532,9 +532,9 @@
 <span class="sd">    - Simulator : A function which transforms the parameters into observables in a non-deterministic manner.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_N_SIM_TEST</span> <span class="o">=</span> <span class="mi">2</span> 
-    
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prior</span><span class="p">:</span> <span class="n">callable</span><span class="p">,</span> <span class="n">simulator</span><span class="p">:</span> <span class="n">callable</span><span class="p">,</span> <span class="n">skip_test</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> 
+    <span class="n">_N_SIM_TEST</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prior</span><span class="p">:</span> <span class="n">callable</span><span class="p">,</span> <span class="n">simulator</span><span class="p">:</span> <span class="n">callable</span><span class="p">,</span> <span class="n">skip_test</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="n">prior_is_batched</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">simulator_is_batched</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;anonymous&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Instantiates a generative model responsible for drawing generating params, data, and optional context.</span>
 <span class="sd">        </span>
@@ -562,7 +562,7 @@
 <span class="sd">        wrapped internally. In addition, you need to indicate whether your simulator operates on batched of</span>
 <span class="sd">        parameters or on single parameter vectors via tha `simulator_is_batched` argument.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">prior</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Prior</span><span class="p">:</span>
             <span class="n">prior_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;batch_prior_fun&#39;</span><span class="p">:</span> <span class="n">prior</span><span class="p">}</span> <span class="k">if</span> <span class="n">prior_is_batched</span> <span class="k">else</span> <span class="p">{</span><span class="s1">&#39;prior_fun&#39;</span><span class="p">:</span> <span class="n">prior</span><span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Prior</span><span class="p">(</span><span class="o">**</span><span class="n">prior_args</span><span class="p">)</span>
@@ -583,7 +583,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">param_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">param_names</span>
-        
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_test</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_test</span><span class="p">()</span>
 
@@ -651,10 +651,10 @@
 <span class="sd">                Arrays generated from the simulations with the functions in funcs_list</span>
 
 <span class="sd">            &quot;&quot;&quot;</span>
-       
+
         <span class="k">if</span> <span class="n">parameter_draws</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameter_draws</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]</span>
-        
+
         <span class="n">simulations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">parameter_draws</span><span class="p">)[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">funcs_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">funcs_labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -666,7 +666,7 @@
 
         <span class="k">if</span> <span class="n">show_raw_sims</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulations</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Cannot plot raw simulations since they are not one-dimensional.&quot;</span><span class="p">)</span> 
+                <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Cannot plot raw simulations since they are not one-dimensional.&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">k</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">batch_size</span><span class="p">))),</span><span class="mi">7</span><span class="p">)</span>
                 <span class="n">f</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
@@ -678,7 +678,7 @@
                     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Raw Data for </span><span class="si">{</span><span class="n">k</span><span class="o">*</span><span class="n">k</span><span class="si">}</span><span class="s2"> Simulations&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-            
+
         <span class="n">funcs_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">funcs_list</span><span class="p">)</span>
         <span class="n">g</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">funcs_count</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
         <span class="n">aggregated_data</span> <span class="o">=</span> <span class="p">[]</span>
@@ -694,10 +694,10 @@
         <span class="n">g</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
         <span class="n">output_dict</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;parameter_draws&#39;</span><span class="p">:</span> <span class="n">parameter_draws</span><span class="p">,</span> 
-            <span class="s1">&#39;simulations&#39;</span><span class="p">:</span> <span class="n">simulations</span><span class="p">,</span> 
-            <span class="s1">&#39;aggregated_data&#39;</span><span class="p">:</span> <span class="n">aggregated_data</span><span class="p">,</span> 
-            <span class="s1">&#39;functions_used&#39;</span><span class="p">:</span> <span class="n">funcs_list</span><span class="p">,</span> 
+            <span class="s1">&#39;parameter_draws&#39;</span><span class="p">:</span> <span class="n">parameter_draws</span><span class="p">,</span>
+            <span class="s1">&#39;simulations&#39;</span><span class="p">:</span> <span class="n">simulations</span><span class="p">,</span>
+            <span class="s1">&#39;aggregated_data&#39;</span><span class="p">:</span> <span class="n">aggregated_data</span><span class="p">,</span>
+            <span class="s1">&#39;functions_used&#39;</span><span class="p">:</span> <span class="n">funcs_list</span><span class="p">,</span>
             <span class="s1">&#39;function_names&#39;</span><span class="p">:</span> <span class="n">funcs_labels</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">output_dict</span></div>
@@ -717,10 +717,10 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Performing </span><span class="si">{</span><span class="n">_n_sim</span><span class="si">}</span><span class="s1"> pilot runs with the </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> model...&#39;</span><span class="p">)</span>
             <span class="c1"># Format strings</span>
-            <span class="n">p_shape_str</span> <span class="o">=</span> <span class="s2">&quot;(batch_size = </span><span class="si">{}</span><span class="s2">, -</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> 
+            <span class="n">p_shape_str</span> <span class="o">=</span> <span class="s2">&quot;(batch_size = </span><span class="si">{}</span><span class="s2">, -</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                                          <span class="n">out</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_draws&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
             <span class="n">p_shape_str</span> <span class="o">=</span> <span class="n">p_shape_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-(&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,)&#39;</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
-            <span class="n">d_shape_str</span> <span class="o">=</span> <span class="s2">&quot;(batch_size = </span><span class="si">{}</span><span class="s2">, -</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> 
+            <span class="n">d_shape_str</span> <span class="o">=</span> <span class="s2">&quot;(batch_size = </span><span class="si">{}</span><span class="s2">, -</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                                          <span class="n">out</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
             <span class="n">d_shape_str</span> <span class="o">=</span> <span class="n">d_shape_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-(&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,)&#39;</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
 
@@ -742,8 +742,8 @@
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s1">&#39;Could not run forward inference with specified generative model...&#39;</span> <span class="o">+</span>
                                     <span class="sa">f</span><span class="s1">&#39;Please re-examine model components!</span><span class="se">\n</span><span class="s1"> </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        
-<div class="viewcode-block" id="GenerativeModel.presimulate_and_save"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.simulation.GenerativeModel.presimulate_and_save">[docs]</a>    <span class="k">def</span> <span class="nf">presimulate_and_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">folder_path</span><span class="p">,</span> <span class="n">total_iterations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">memory_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+
+<div class="viewcode-block" id="GenerativeModel.presimulate_and_save"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.simulation.GenerativeModel.presimulate_and_save">[docs]</a>    <span class="k">def</span> <span class="nf">presimulate_and_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">folder_path</span><span class="p">,</span> <span class="n">total_iterations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">memory_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                              <span class="n">iterations_per_epoch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">epochs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">extend_from</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot;Simulates a dataset for single-pass offline training (called via the train_from_presimulation method </span>
@@ -759,7 +759,7 @@
 <span class="sd">        incompatible combinations are possible. </span>
 <span class="sd">        `memory_limit` is an upper bound on the size of individual files; this can be useful to avoid running out of RAM during training.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="c1"># Ensure that the combination of parameters provided is sufficient to perform presimulation and does not contain internal contradictions</span>
         <span class="k">if</span> <span class="n">total_iterations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">iterations_per_epoch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">epochs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">iterations_per_epoch</span><span class="o">*</span><span class="n">epochs</span> <span class="o">!=</span> <span class="n">total_iterations</span><span class="p">:</span>
@@ -808,13 +808,13 @@
             <span class="n">extension</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The presimulated dataset </span><span class="si">{</span><span class="n">extension</span><span class="si">}</span><span class="s2"> will take up </span><span class="si">{</span><span class="n">required_space</span><span class="si">}</span><span class="s2"> Mb of disk space.&quot;</span><span class="p">)</span>
         <span class="n">user_choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Are you sure you want to perform presimulation? (y/n)&quot;</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="n">user_choice</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">user_choice</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Performing presimulation...&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Presimulation aborted.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
-        
+
         <span class="k">if</span> <span class="n">extend_from</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">folder_path</span><span class="p">):</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot extend dataset in </span><span class="si">{</span><span class="n">folder_path</span><span class="si">}</span><span class="s2"> - folder does not exist. Creating folder and saving presimulated dataset extension inside.&quot;</span><span class="p">)</span>
@@ -822,7 +822,7 @@
                 <span class="n">already_simulated</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folder_path</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">already_simulated</span> <span class="o">!=</span> <span class="n">extend_from</span><span class="p">:</span>
                     <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The parameter you provided for extend_from does not match the actual number of files found in </span><span class="si">{</span><span class="n">folder_path</span><span class="si">}</span><span class="s2">. File numbering may now prove erroneous.&quot;</span><span class="p">)</span>
-            
+
         <span class="c1"># Choose a number of batches per file as specified via iterations_per_epoch unless</span>
         <span class="c1"># the memory_limit per file forces a smaller choice, in which case the highest permissible</span>
         <span class="c1"># value is chosen.</span>
@@ -830,13 +830,13 @@
             <span class="n">batches_per_file</span> <span class="o">=</span> <span class="n">iterations_per_epoch</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">batches_per_file</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">memory_limit</span><span class="o">/</span><span class="n">batch_space</span><span class="p">),</span> <span class="n">iterations_per_epoch</span><span class="p">)</span>
-        
+
         <span class="n">file_space</span> <span class="o">=</span> <span class="n">batches_per_file</span><span class="o">*</span><span class="n">batch_space</span>
-        
+
         <span class="c1"># If folder_path does not exist yet, create it</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">folder_path</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">folder_path</span><span class="p">)</span>
-        
+
         <span class="c1"># Compute as many priors as would have been computed when generating the original dataset.</span>
         <span class="c1"># If a fixed random seed was used, this will move it forward, and computational cost is neglible (under 1/200000 of simulation time)</span>
         <span class="k">if</span> <span class="n">extend_from</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -868,7 +868,7 @@
                 <span class="n">total_files</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">total_files</span><span class="p">)</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating </span><span class="si">{}</span><span class="s2"> files of size </span><span class="si">{}</span><span class="s2"> Mb containing </span><span class="si">{}</span><span class="s2"> batches each.&quot;</span>\
                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">total_files</span><span class="p">,</span> <span class="n">file_space</span><span class="p">,</span> <span class="n">batches_per_file</span><span class="p">))</span>
-            
+
             <span class="c1"># Generate all files but one</span>
             <span class="n">file_counter</span> <span class="o">=</span> <span class="n">extend_from</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total_files</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
@@ -890,7 +890,7 @@
                     <span class="n">p_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">folder_path</span><span class="o">+</span><span class="s1">&#39;presim_file_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">file_counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">file_list</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-                
+
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Presimulation </span><span class="si">{</span><span class="n">extension</span><span class="si">}</span><span class="s2"> complete. Generated </span><span class="si">{</span><span class="n">total_files</span><span class="si">}</span><span class="s2"> files.&quot;</span><span class="p">)</span>    </div></div>
 
 
@@ -923,15 +923,15 @@
         <span class="k">if</span> <span class="n">model_probs</span> <span class="o">==</span> <span class="s1">&#39;equal&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="k">lambda</span> <span class="n">b</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_models</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">b</span><span class="p">)</span>
         <span class="k">return</span> <span class="k">lambda</span> <span class="n">b</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_models</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">model_probs</span><span class="p">)</span>
-        
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        
+
         <span class="c1"># Prepare placeholders</span>
         <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;model_outputs&#39;</span><span class="p">]:</span> <span class="p">[],</span>
             <span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;model_indices&#39;</span><span class="p">]:</span> <span class="p">[]</span>
         <span class="p">}</span>
-        
+
         <span class="c1"># Sample model indices</span>
         <span class="n">model_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_prior</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
 
@@ -945,7 +945,7 @@
             <span class="n">model_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generative_models</span><span class="p">[</span><span class="n">m_idx</span><span class="p">](</span><span class="n">n</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;model_outputs&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_out</span><span class="p">)</span>
             <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;model_indices&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_idx</span><span class="p">)</span>
-        
+
         <span class="k">return</span> <span class="n">out_dict</span></div>
 </pre></div>
 
@@ -962,7 +962,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -973,7 +973,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>
