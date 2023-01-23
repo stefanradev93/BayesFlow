@@ -13,7 +13,11 @@ For starters, check out some of our walk-through notebooks:
 
 ## Project Documentation
 
-The project documentation is available at <http://bayesflow.readthedocs.io>
+The project documentation is available at <https://bayesflow.readthedocs.io>
+
+## Installation
+
+See [INSTALL.rst](INSTALL.rst) for installation instructions.
 
 ## Conceptual Overview
 
@@ -24,10 +28,6 @@ complex to be described analytically. The figure below presents a higher-level
 overview of neurally bootstrapped Bayesian inference.
 
 <img src="img/high_level_framework.png" width=80% height=80%>
-
-## Install
-
-See [INSTALL.rst](INSTALL.rst) for installation instructions.
 
 ## Getting Started: Parameter Estimation
 
