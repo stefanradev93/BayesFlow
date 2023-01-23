@@ -547,25 +547,25 @@ class GenerativeModel:
 
         Parameters
         ----------
-        prior                : callable or bayesflow.forward_inference.Prior instance
+        prior                : callable or a ``bayesflow.simulation.Prior`` instance
             A function returning random draws from the prior parameter distribution. Should encode
-            prior knowledge about plausible parameter ranges;
-        simulator            : callable or bayesflow.forward_inference.Simulator instance
+            prior knowledge about plausible parameter ranges
+        simulator            : callable or a ``bayesflow.simulation.Simulator`` instance
             A function accepting parameter draws, optional context, and optional arguments as input
-            and returning obseravble data;
+            and returning obseravble data
         skip_test            : bool (default - False)
             If True, a forward inference pass will be performed.
         prior_is_batched     : bool (default - False), only relevant and mandatory if providing a custom prior without
-            the Prior wrapper.
+            the ``Prior`` wrapper.  
         simulator_is_batched : bool (default - False), only relevant and mandatory if providing a custom simulator without
-            the Simulator wrapper.
+            the ``Simulator`` wrapper. 
         name                 : str (default - "anonoymous")
             An optional name for the generative model. If kept default (None), 'anonymous' is set as name.
 
         Important
         ----------
-        If you are not using the provided Prior and Simulator wrappers for your prior and data generator,
-        only functions returning a np.ndarray in the correct format will be accepted, since these will be
+        If you are not using the provided ``Prior`` and ``Simulator`` wrappers for your prior and data generator,
+        only functions returning a ``np.ndarray`` in the correct format will be accepted, since these will be
         wrapped internally. In addition, you need to indicate whether your simulator operates on batched of
         parameters or on single parameter vectors via tha `simulator_is_batched` argument.
         """
@@ -652,12 +652,13 @@ class GenerativeModel:
 
         Returns
         -------
-        parameters_draws    : np.ndarray
-            The parameters provided by the user or generated internally.
-        simulations         : np.ndarray
-            The simulations generated from parameter_draws (or prior draws generated on the fly)
-        aggregated_data     : list of np.ndarray
-            Arrays generated from the simulations with the functions in funcs_list
+        A dictionary with the following keys:
+            - parameter_draws     : np.ndarray
+                The parameters provided by the user or generated internally.
+            - simulations         : np.ndarray
+                The simulations generated from parameter_draws (or prior draws generated on the fly)
+            - aggregated_data     : list of np.ndarray
+                Arrays generated from the simulations with the functions in funcs_list
         """
 
         if parameter_draws is None:
