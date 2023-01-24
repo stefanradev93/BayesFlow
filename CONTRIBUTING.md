@@ -13,7 +13,7 @@ Create an own branch or use a fork, where you can implement your changes. To mer
 1. Create a pull request to the ``Development`` branch with a short summary of the code changes;
 2. Check that code changes are covered by tests, and all tests pass;
 3. Check that the documentation is up-to-date;
-4. Request a code review from the main developers;
+4. Request a code review from the main developers.
 
 Environment
 -----------
@@ -27,9 +27,9 @@ Tox
 
 Second, this installs the virtual testing tool `tox`
 <https://tox.readthedocs.io/en/latest/>, which we use for all tests, formatting and quality checks. Its configuration is specified in ``tox.ini``.
-To run it locally, simply execute::
+To run it locally, simply execute:
 
-    tox [-e flake8,doc]
+    tox [-e flake8]
 
 with an optional ``-e`` flag specifying the environments to run. See ``tox.ini`` for more details.
 
