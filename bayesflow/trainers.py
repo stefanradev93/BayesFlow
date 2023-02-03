@@ -579,7 +579,9 @@ class Trainer:
         been simulated (i.e., forward inference has been performed).
 
         Also like regular offline training, it is faster than online training in scenarios where simulations are slow.
-        Unlike regular offline training, it uses each batch from the presimulated dataset only once during training.
+        Unlike regular offline training, it uses each batch from the presimulated dataset only once during training,
+        if not otherwise specified by a higher maximal number of epochs. Then, presimulated data is reused in a cyclic
+        manner to achieve the desired number of epochs.
         A larger presimulated dataset is therefore required than for offline training, and the increase in speed
         gained by loading simulations instead of generating them on the fly comes at a cost:
         a large presimulated dataset takes up a large amount of hard drive space.
@@ -604,7 +606,8 @@ class Trainer:
             Determines whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
         max_epochs           : int or None, optional, default: None
-            An optional parameter to limit the number of epochs.
+            An optional parameter to limit or extend the number of epochs. If number of epochs is larger than the files
+            of the dataset, presimulations will be reused.
         reuse_optimizer      : bool, optional, default: False
             A flag indicating whether the optimizer instance should be treated as persistent or not.
             If ``False``, the optimizer and its states are not stored after training has finished.
@@ -621,6 +624,15 @@ class Trainer:
             ``prior_draws`` and ``sim_data`` must have actual data as values, the rest are optional.
         early_stopping       : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
+        validation_sims      : dict, int, or None, optional, default: None
+            Simulations used as a "validation set".
+            If ``dict``, will assume it's the output of a generative model and try
+            ``amortizer.compute_loss(configurator(validation_sims))''
+            after each epoch.
+            If ``int``, will assume it's the number of sims to generate from the generative
+            model before starting training. Only considered if a generative model has been
+            provided during initialization.
+            If ``None`` (default), no validation set will be used.
         use_autograph        : bool, optional, default: True
             Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
             could also be harder to debug.
@@ -643,10 +655,6 @@ class Trainer:
         else:
             _backprop_step = backprop_step
 
-        # Use default loading function if none is provided
-        if custom_loader is None:
-            custom_loader = self._default_loader
-
         # Inits
         self.loss_history.start_new_run()
         validation_sims = self._config_validation(validation_sims, **kwargs.pop("val_model_args", {}))
@@ -657,9 +665,20 @@ class Trainer:
         # Loop over the presimulated dataset.
         file_list = os.listdir(presimulation_path)
 
-        # Limit number of epochs to max_epochs
-        if len(file_list) > max_epochs:
-            file_list = file_list[:max_epochs]
+        # Use default loading function if none is provided
+        if custom_loader is None:
+            custom_loader = self._default_loader
+            # Remove non-pickle files from the list
+            file_list = [f for f in file_list if f.endswith(".pkl")]
+
+        if max_epochs is not None:
+            # Limit number of epochs to max_epochs
+            if len(file_list) > max_epochs:
+                file_list = file_list[:max_epochs]
+            # If the number of files is smaller than the number of epochs, repeat the files until max_epochs is reached
+            elif len(file_list) < max_epochs:
+                file_list = file_list * int(np.ceil(max_epochs / len(file_list)))
+                file_list = file_list[:max_epochs]
 
         for ep, current_filename in enumerate(file_list, start=1):
 
