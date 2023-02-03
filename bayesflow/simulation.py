@@ -766,6 +766,7 @@ class GenerativeModel:
         iterations_per_epoch=None,
         epochs=None,
         extend_from=0,
+        disable_user_input=False,
     ):
 
         """Simulates a dataset for single-pass offline training (called via the train_from_presimulation method
@@ -790,6 +791,8 @@ class GenerativeModel:
         extend_from          : int, optional, default: 0
             If ``folder_path`` already contains simulations and the user wishes to add further simulations to these,
             extend_from must provide the number of the last presimulation file in ``folder_path``.
+        disable_user_input: bool, optional, default: False
+            If True, user will not be asked if memory space is sufficient for presimulation.
 
         Important
         ----------
@@ -841,9 +844,9 @@ class GenerativeModel:
         if total_iterations is None:
             total_iterations = iterations_per_epoch * epochs
         elif iterations_per_epoch is None:
-            iterations_per_epoch = total_iterations / epochs
-            if int(iterations_per_epoch) < total_iterations / epochs:
-                iterations_per_epoch = int(iterations_per_epoch) + 1
+            iterations_per_epoch = int(total_iterations / epochs)
+            if iterations_per_epoch < total_iterations / epochs:
+                iterations_per_epoch = iterations_per_epoch + 1
                 total_iterations = iterations_per_epoch * epochs
                 logging.info(
                     f"Setting number of iterations per epoch to {iterations_per_epoch} and upping total number of iterations to {total_iterations} \
@@ -862,13 +865,13 @@ class GenerativeModel:
         else:
             extension = ""
         logging.warn(f"The presimulated dataset {extension} will take up {required_space} Mb of disk space.")
-        user_choice = input("Are you sure you want to perform presimulation? (y/n)")
+        if not disable_user_input:
+            user_choice = input("Are you sure you want to perform presimulation? (y/n)")
 
-        if user_choice.find("y") != -1 or user_choice.find("Y") != -1:
-            logging.info("Performing presimulation...")
-        else:
-            logging.info("Presimulation aborted.")
-            return None
+            if user_choice.find("y") == -1 and user_choice.find("Y") == -1:
+                logging.info("Presimulation aborted.")
+                return None
+        logging.info("Performing presimulation...")
 
         if extend_from > 0:
             if not os.path.isdir(folder_path):
