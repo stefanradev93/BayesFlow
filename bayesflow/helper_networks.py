@@ -178,6 +178,60 @@ class Permutation(tf.keras.Model):
         return tf.gather(target, self.inv_permutation, axis=-1)
 
 
+class Orthogonal(tf.keras.Model):
+    def __init__(self, input_dim):
+        """Creates an invertible orthogonal transformation (generalized permutation)
+
+        Parameters
+        ----------
+        input_dim  : int
+            Ihe dimensionality of the input to the (conditional) coupling layer.
+        """
+
+        super().__init__()
+
+        self.W = tf.Variable(
+            shape=(input_dim, input_dim), 
+            trainable=True, 
+            initializer=tf.keras.initializers.Orthogonal()
+        )
+
+    def call(self, target, inverse=False):
+        """Transforms a batch of target vectors over the last axis.
+
+        Parameters
+        ----------
+        target   : tf.Tensor of shape (batch_size, ...)
+            The target vector to be rotated over its last axis.
+        inverse  : bool, optional, default: False
+            Controls if the current pass is forward (``inverse=False``) or inverse (``inverse=True``).
+
+        Returns
+        -------
+        out      : tf.Tensor of the same shape as `target`.
+            The (un-)rotated target vector.
+        """
+
+        if not inverse:
+            return self._forward(target)
+        else:
+            return self._inverse(target)
+
+    @tf.function
+    def _forward(self, target):
+        z = tf.math.matmul(target, self.W)
+        log_det = tf.math.log(tf.math.abs(tf.linalg.det(self.W)))
+        shape = tf.shape(target)
+        if len(shape) == 3:
+            log_det = shape[1] * log_det 
+        return z, log_det
+
+    @tf.function
+    def _inverse(self, z):
+        W_inv = tf.linalg.inv(self.W)
+        return tf.math.matmul(z, W_inv)
+
+
 class MCDropout(tf.keras.Model):
     """Implements Monte Carlo Dropout as a Bayesian approximation according to [1].
 
