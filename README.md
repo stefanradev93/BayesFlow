@@ -1,5 +1,7 @@
 # BayesFlow
 
+<img src="img/bayesflow_hex.png" width=20% height=20%>
+
 [![Actions Status](https://github.com/stefanradev93/bayesflow/workflows/Tests/badge.svg)](https://github.com/stefanradev93/bayesflow/actions)
 [![Licence](https://img.shields.io/github/license/stefanradev93/BayesFlow)](https://img.shields.io/github/license/stefanradev93/BayesFlow)
 
