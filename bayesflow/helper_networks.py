@@ -80,12 +80,12 @@ class DenseCouplingNet(tf.keras.Model):
 
         # Set residual flag
         if meta.get("residual"):
-            self.residual = True
             self.fc.add(Dense(n_out, **{k: v for k, v in meta["dense_args"].items() if k != "units"}))
+            self.residual_output = Dense(n_out, kernel_initializer="zeros")
         else:
-            self.residual = False
+            self.fc.add(Dense(n_out, kernel_initializer="zeros"))
+            self.residual_output = None
 
-        self.output_layer = Dense(n_out, kernel_initializer="zeros")
         self.fc.build(input_shape=())
 
     def call(self, target, condition, **kwargs):
@@ -101,10 +101,10 @@ class DenseCouplingNet(tf.keras.Model):
 
         # Handle case no condition
         if condition is None:
-            if self.residual:
-                return self.output_layer(self.fc(target, **kwargs) + target, **kwargs)
+            if self.residual_output is not None:
+                return self.residual_output(self.fc(target, **kwargs) + target, **kwargs)
             else:
-                return self.output_layer(self.fc(target, **kwargs), **kwargs)
+                return self.fc(target, **kwargs)
 
         # Handle 3D case for a set-flow and repeat condition over
         # the second `time` or `n_observations` axis of `target``
@@ -115,10 +115,8 @@ class DenseCouplingNet(tf.keras.Model):
         inp = tf.concat((target, condition), axis=-1)
         out = self.fc(inp, **kwargs)
 
-        if self.residual:
-            out = self.output_layer(target + out, **kwargs)
-        else:
-            out = self.output_layer(out, **kwargs)
+        if self.residual_output is not None:
+            out = self.residual_output(out + target, **kwargs)
         return out
 
 
