@@ -22,16 +22,15 @@
 
 import numpy as np
 
-
 bayesflow_benchmark_info = {
-    'simulator_is_batched': False,
-    'parameter_names': [r'$\theta_1$', r'$\theta_2$'],
-    'configurator_info': 'posterior'
+    "simulator_is_batched": False,
+    "parameter_names": [r"$\theta_1$", r"$\theta_2$"],
+    "configurator_info": "posterior",
 }
 
 
-def prior(lower_bound=-1., upper_bound=1., rng=None):
-    """Generates a random draw from a 2-dimensional uniform prior bounded between 
+def prior(lower_bound=-1.0, upper_bound=1.0, rng=None):
+    """Generates a random draw from a 2-dimensional uniform prior bounded between
     `lower_bound` and `upper_bound` which represents the two parameters of the two moons simulator.
 
     Parameters
@@ -55,9 +54,9 @@ def prior(lower_bound=-1., upper_bound=1., rng=None):
 
 
 def simulator(theta, rng=None):
-    """ Implements data generation from the two-moons model with a bimodal posterior.
+    """Implements data generation from the two-moons model with a bimodal posterior.
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.8
-    
+
     Parameters
     ----------
     theta   : np.ndarray of shape (2,)
@@ -76,38 +75,32 @@ def simulator(theta, rng=None):
         rng = np.random.default_rng()
 
     # Generate noise
-    alpha = rng.uniform(low=-0.5*np.pi, high=0.5*np.pi)
+    alpha = rng.uniform(low=-0.5 * np.pi, high=0.5 * np.pi)
     r = rng.normal(loc=0.1, scale=0.01)
 
     # Forward process
-    rhs1 = np.array([
-        r*np.cos(alpha) + 0.25, 
-        r*np.sin(alpha)
-    ])
-    rhs2 = np.array([
-        -np.abs(theta[0] + theta[1]) / np.sqrt(2.),
-        (-theta[0] + theta[1]) / np.sqrt(2.)
-    ])
+    rhs1 = np.array([r * np.cos(alpha) + 0.25, r * np.sin(alpha)])
+    rhs2 = np.array([-np.abs(theta[0] + theta[1]) / np.sqrt(2.0), (-theta[0] + theta[1]) / np.sqrt(2.0)])
 
     return rhs1 + rhs2
 
 
-def configurator(forward_dict, mode='posterior'):
+def configurator(forward_dict, mode="posterior"):
     """Configures simulator outputs for use in BayesFlow training."""
 
     # Case only posterior configuration
-    if mode == 'posterior':
+    if mode == "posterior":
         input_dict = _config_posterior(forward_dict)
 
     # Case only plikelihood configuration
-    elif mode == 'likelihood':
+    elif mode == "likelihood":
         input_dict = _config_likelihood(forward_dict)
 
     # Case posterior and likelihood configuration (i.e., joint inference)
-    elif mode == 'joint':
+    elif mode == "joint":
         input_dict = {}
-        input_dict['posterior_inputs'] = _config_posterior(forward_dict)
-        input_dict['likelihood_inputs'] = _config_likelihood(forward_dict)
+        input_dict["posterior_inputs"] = _config_posterior(forward_dict)
+        input_dict["likelihood_inputs"] = _config_likelihood(forward_dict)
 
     # Throw otherwise
     else:
@@ -119,8 +112,8 @@ def _config_posterior(forward_dict):
     """Helper function for posterior configuration."""
 
     input_dict = {}
-    input_dict['parameters'] = forward_dict['prior_draws'].astype(np.float32)
-    input_dict['direct_conditions'] = forward_dict['sim_data'].astype(np.float32)
+    input_dict["parameters"] = forward_dict["prior_draws"].astype(np.float32)
+    input_dict["direct_conditions"] = forward_dict["sim_data"].astype(np.float32)
     return input_dict
 
 
@@ -128,6 +121,6 @@ def _config_likelihood(forward_dict):
     """Helper function for likelihood configuration."""
 
     input_dict = {}
-    input_dict['conditions'] = forward_dict['prior_draws'].astype(np.float32)
-    input_dict['observables'] = forward_dict['sim_data'].astype(np.float32)
+    input_dict["conditions"] = forward_dict["prior_draws"].astype(np.float32)
+    input_dict["observables"] = forward_dict["sim_data"].astype(np.float32)
     return input_dict

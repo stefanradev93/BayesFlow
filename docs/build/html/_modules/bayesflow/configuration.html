@@ -9,7 +9,7 @@
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
@@ -18,10 +18,10 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -64,7 +64,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <h1>Source code for bayesflow.configuration</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
 
@@ -124,7 +124,7 @@
         <span class="n">input_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine</span><span class="p">(</span><span class="n">forward_dict</span><span class="p">)</span>
 
         <span class="c1"># Convert everything to default type or fail gently</span>
-        <span class="n">input_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span> <span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_float_type</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">v</span> 
+        <span class="n">input_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span> <span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_float_type</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">v</span>
                       <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">input_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="k">return</span> <span class="n">input_dict</span>
 
@@ -140,7 +140,7 @@
         <span class="k">if</span> <span class="n">forward_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> \
            <span class="n">forward_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
-           <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Either </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> 
+           <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Either </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span>
                                     <span class="s2">&quot; should be present as keys in the forward_dict.&quot;</span><span class="p">)</span>
 
         <span class="c1"># If only simulated or observed data present, all good</span>
@@ -148,10 +148,10 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">forward_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">])</span>
         <span class="k">elif</span> <span class="n">forward_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">forward_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">])</span>
-        
+
         <span class="c1"># Else if neither &#39;sim_data&#39; nor &#39;obs_data&#39; present, throw again</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Either </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> 
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Either </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span>
                                     <span class="s2">&quot; should be present as keys in the forward_dict.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Extract targets and conditions</span>
@@ -192,7 +192,7 @@
 <span class="sd">            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS dictionary unchanged: </span>
 <span class="sd">            # TODO</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="c1"># Prepare placeholder</span>
         <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]:</span> <span class="kc">None</span><span class="p">,</span>
@@ -208,7 +208,7 @@
         <span class="k">if</span> <span class="n">forward_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> \
            <span class="n">forward_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
-           <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Either </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> 
+           <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Either </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span>
                                     <span class="s2">&quot; should be present as keys in the forward_dict, but not both!&quot;</span><span class="p">)</span>
 
         <span class="c1"># If only simulated or observed data present, all good</span>
@@ -216,10 +216,10 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">forward_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">])</span>
         <span class="k">elif</span> <span class="n">forward_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">forward_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">])</span>
-        
+
         <span class="c1"># Else if neither &#39;sim_data&#39; nor &#39;obs_data&#39; present, throw again</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Either </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> 
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Either </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;obs_data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span>
                                     <span class="s2">&quot; should be present as keys in the forward_dict.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Handle simulated or observed data or throw if the data could not be converted to an array </span>
@@ -230,7 +230,7 @@
                 <span class="n">summary_conditions</span> <span class="o">=</span> <span class="n">data</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s2">&quot;Could not convert input data to array...&quot;</span><span class="p">)</span>
-        
+
         <span class="c1"># Handle prior batchable context or throw if error encountered</span>
         <span class="k">if</span> <span class="n">forward_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_batchable_context&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -240,7 +240,7 @@
                     <span class="n">pbc_as_array</span> <span class="o">=</span> <span class="n">forward_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;prior_batchable_context&#39;</span><span class="p">]]</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s2">&quot;Could not convert prior batchable context to array.&quot;</span><span class="p">)</span>
-                
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">summary_conditions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">summary_conditions</span><span class="p">,</span> <span class="n">pbc_as_array</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -256,14 +256,14 @@
                     <span class="n">sbc_as_array</span> <span class="o">=</span> <span class="n">forward_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_batchable_context&#39;</span><span class="p">]]</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s2">&quot;Could not convert simulation batchable context to array!&quot;</span><span class="p">)</span>
-                
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">summary_conditions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">summary_conditions</span><span class="p">,</span> <span class="n">sbc_as_array</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not concatenate data (+optional prior context) and&quot;</span> <span class="o">+</span>
-                                         <span class="sa">f</span><span class="s2">&quot; simulation batchable context. Shape mismatch:&quot;</span> <span class="o">+</span> 
+                                         <span class="sa">f</span><span class="s2">&quot; simulation batchable context. Shape mismatch:&quot;</span> <span class="o">+</span>
                                          <span class="sa">f</span><span class="s2">&quot; data - </span><span class="si">{</span><span class="n">summary_conditions</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, prior_batchable_context - </span><span class="si">{</span><span class="n">sbc_as_array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        
+
         <span class="c1"># Add summary conditions to output dict</span>
         <span class="n">out_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;summary_conditions&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">summary_conditions</span>
 
@@ -310,14 +310,14 @@
     <span class="sd">&quot;&quot;&quot;Fallback class for a default configurator for amortized model comparison.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_models</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">default_float_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">n_models</span> <span class="o">=</span> <span class="n">n_models</span>
         <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">DefaultPosteriorConfigurator</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_float_type</span> <span class="o">=</span> <span class="n">default_float_type</span>
-        
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_dict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Convert all variables to arrays and combines them for inference into a dictionary with</span>
 <span class="sd">        the following keys, if DEFAULT_KEYS dictionary unchanged:</span>
@@ -338,7 +338,7 @@
         <span class="n">model_indices</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Loop through outputs of individual models</span>
-        <span class="k">for</span> <span class="n">m_idx</span><span class="p">,</span> <span class="n">dict_m</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">forward_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;model_indices&#39;</span><span class="p">]],</span> 
+        <span class="k">for</span> <span class="n">m_idx</span><span class="p">,</span> <span class="n">dict_m</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">forward_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;model_indices&#39;</span><span class="p">]],</span>
                                  <span class="n">forward_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;model_outputs&#39;</span><span class="p">]]):</span>
             <span class="c1"># Configure individual model outputs</span>
             <span class="n">conf_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">dict_m</span><span class="p">)</span>
@@ -373,7 +373,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -384,7 +384,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

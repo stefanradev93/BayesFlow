@@ -9,7 +9,7 @@
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
@@ -18,10 +18,10 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -64,7 +64,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <h1>Source code for bayesflow.computational_utilities</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
 
@@ -174,9 +174,9 @@
 <span class="sd">        The statistically biased squared maximum mean discrepancy (MMD) value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>  
-    <span class="n">loss</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>  
-    <span class="n">loss</span> <span class="o">-=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>  
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+    <span class="n">loss</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+    <span class="n">loss</span> <span class="o">-=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">loss</span></div>
 
 
@@ -200,9 +200,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>  
-    <span class="n">loss</span> <span class="o">+=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>  
-    <span class="n">loss</span> <span class="o">-=</span> <span class="p">(</span><span class="mf">2.0</span><span class="o">/</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">n</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>  
+    <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+    <span class="n">loss</span> <span class="o">+=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+    <span class="n">loss</span> <span class="o">-=</span> <span class="p">(</span><span class="mf">2.0</span><span class="o">/</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">n</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">loss</span></div>
 
 
@@ -229,10 +229,10 @@
 
     <span class="c1"># Convert tf.Tensors to numpy, if passed</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">m_true</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="n">m_true</span> <span class="o">=</span> <span class="n">m_true</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> 
+        <span class="n">m_true</span> <span class="o">=</span> <span class="n">m_true</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">m_pred</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">m_pred</span> <span class="o">=</span> <span class="n">m_pred</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-    
+
     <span class="c1"># Extract number of models and prepare containers</span>
     <span class="n">n_models</span> <span class="o">=</span> <span class="n">m_true</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">cal_errs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -301,7 +301,7 @@
 <span class="sd">    u  : np.ndarray of shape (num_simulations, num_samples)</span>
 <span class="sd">        The matrix of simulated draws (samples) from U(0, 1)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">N</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">F_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">z</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">u</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">bin1</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">binom</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">N</span><span class="o">*</span><span class="n">F_m</span><span class="p">)</span>
@@ -310,7 +310,7 @@
     <span class="k">return</span> <span class="n">gamma</span></div>
 
 
-<div class="viewcode-block" id="simultaneous_ecdf_bands"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.computational_utilities.simultaneous_ecdf_bands">[docs]</a><span class="k">def</span> <span class="nf">simultaneous_ecdf_bands</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">num_points</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_simulations</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> 
+<div class="viewcode-block" id="simultaneous_ecdf_bands"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.computational_utilities.simultaneous_ecdf_bands">[docs]</a><span class="k">def</span> <span class="nf">simultaneous_ecdf_bands</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">num_points</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_simulations</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
                             <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">max_num_points</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Computes the simultaneous ECDF bands through simulation according to</span>
 <span class="sd">    the algorithm described in Section 2.2:</span>
@@ -341,7 +341,7 @@
 <span class="sd">    (alpha, z, L, U) - tuple of scalar and three arrays of size (num_samples,) containing the confidence level as well as</span>
 <span class="sd">                       the evaluation points, the lower, and the upper confidence bands, respectively.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="c1"># Use shorter var names throughout</span>
     <span class="n">N</span> <span class="o">=</span> <span class="n">num_samples</span>
     <span class="k">if</span> <span class="n">num_points</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -349,19 +349,19 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">K</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">num_points</span><span class="p">,</span> <span class="n">max_num_points</span><span class="p">)</span>
     <span class="n">M</span> <span class="o">=</span> <span class="n">num_simulations</span>
-    
+
     <span class="c1"># Specify evaluation points</span>
     <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="o">+</span><span class="n">eps</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
-    
+
     <span class="c1"># Simulate M samples of size N</span>
     <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
-    
+
     <span class="c1"># Get alpha</span>
     <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">confidence</span>
-    
+
     <span class="c1"># Compute minimal coverage probabilities</span>
     <span class="n">gammas</span> <span class="o">=</span> <span class="n">get_coverage_probs</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
-    
+
     <span class="c1"># Use insights from paper to compute lower and upper confidence interval</span>
     <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">gammas</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">alpha</span><span class="p">)</span>
     <span class="n">L</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">binom</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">gamma</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
@@ -382,7 +382,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -393,7 +393,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

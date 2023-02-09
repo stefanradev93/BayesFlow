@@ -18,8 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 from scipy import stats
 from sklearn.calibration import calibration_curve
 
@@ -50,7 +50,7 @@ def gaussian_kernel_matrix(x, y, sigmas=None):
     if sigmas is None:
         sigmas = MMD_BANDWIDTH_LIST
     norm = lambda v: tf.reduce_sum(tf.square(v), 1)
-    beta = 1. / (2. * (tf.expand_dims(sigmas, 1)))
+    beta = 1.0 / (2.0 * (tf.expand_dims(sigmas, 1)))
     dist = tf.transpose(norm(tf.expand_dims(x, 2) - tf.transpose(y)))
     s = tf.matmul(beta, tf.reshape(dist, (1, -1)))
     kernel = tf.reshape(tf.reduce_sum(tf.exp(-s), 0), tf.shape(dist))
@@ -88,8 +88,8 @@ def inverse_multiquadratic_kernel_matrix(x, y, sigmas=None):
 def mmd_kernel(x, y, kernel):
     """Computes the estimator of the Maximum Mean Discrepancy (MMD) between two samples: x and y.
 
-    Maximum Mean Discrepancy (MMD) is a distance-measure between random draws from 
-    the distributions `x ~ P` and `y ~ Q`. 
+    Maximum Mean Discrepancy (MMD) is a distance-measure between random draws from
+    the distributions `x ~ P` and `y ~ Q`.
 
     Parameters
     ----------
@@ -97,7 +97,7 @@ def mmd_kernel(x, y, kernel):
         An array of `N` random draws from the "source" distribution `x ~ P`.
     y      : tf.Tensor of shape (M, num_features)
         An array of `M` random draws from the "target" distribution `y ~ Q`.
-    kernel : callable 
+    kernel : callable
         A function which computes the distance between pairs of samples.
 
     Returns
@@ -106,9 +106,9 @@ def mmd_kernel(x, y, kernel):
         The statistically biased squared maximum mean discrepancy (MMD) value.
     """
 
-    loss = tf.reduce_mean(kernel(x, x))  
-    loss += tf.reduce_mean(kernel(y, y))  
-    loss -= 2 * tf.reduce_mean(kernel(x, y))  
+    loss = tf.reduce_mean(kernel(x, x))
+    loss += tf.reduce_mean(kernel(y, y))
+    loss -= 2 * tf.reduce_mean(kernel(x, y))
     return loss
 
 
@@ -132,9 +132,9 @@ def mmd_kernel_unbiased(x, y, kernel):
     """
 
     m, n = x.shape[0], y.shape[0]
-    loss = (1.0/(m*(m+1))) * tf.reduce_sum(kernel(x, x))  
-    loss += (1.0/(n*(n+1))) * tf.reduce_sum(kernel(y, y))  
-    loss -= (2.0/(m*n)) * tf.reduce_sum(kernel(x, y))  
+    loss = (1.0 / (m * (m + 1))) * tf.reduce_sum(kernel(x, x))
+    loss += (1.0 / (n * (n + 1))) * tf.reduce_sum(kernel(y, y))
+    loss -= (2.0 / (m * n)) * tf.reduce_sum(kernel(x, y))
     return loss
 
 
@@ -161,10 +161,10 @@ def expected_calibration_error(m_true, m_pred, n_bins=15):
 
     # Convert tf.Tensors to numpy, if passed
     if type(m_true) is not np.ndarray:
-        m_true = m_true.numpy() 
+        m_true = m_true.numpy()
     if type(m_pred) is not np.ndarray:
         m_pred = m_pred.numpy()
-    
+
     # Extract number of models and prepare containers
     n_models = m_true.shape[1]
     cal_errs = []
@@ -183,7 +183,7 @@ def expected_calibration_error(m_true, m_pred, n_bins=15):
     return cal_errs, probs
 
 
-def maximum_mean_discrepancy(source_samples, target_samples, kernel='gaussian', mmd_weight=1., minimum=0.):
+def maximum_mean_discrepancy(source_samples, target_samples, kernel="gaussian", mmd_weight=1.0, minimum=0.0):
     """Computes the MMD given a particular choice of kernel.
 
     For details, consult Gretton et al. (2012):
@@ -225,7 +225,7 @@ def maximum_mean_discrepancy(source_samples, target_samples, kernel='gaussian', 
 def get_coverage_probs(z, u):
     """Vectorized function to compute the minimal coverage probability for uniform
     ECDFs given evaluation points z and a sample of samples u.
-    
+
     Parameters
     ----------
     z  : np.ndarray of shape (num_points, )
@@ -233,22 +233,23 @@ def get_coverage_probs(z, u):
     u  : np.ndarray of shape (num_simulations, num_samples)
         The matrix of simulated draws (samples) from U(0, 1)
     """
-    
+
     N = u.shape[1]
-    F_m = np.sum((z[:, np.newaxis] >= u[:, np.newaxis, :] ), axis=-1) / u.shape[1]
-    bin1 = stats.binom(N, z).cdf(N*F_m)
-    bin2 = stats.binom(N, z).cdf(N*F_m - 1)
-    gamma = 2*np.min(np.min(np.stack([bin1, 1 - bin2], axis=-1), axis=-1), axis=-1)
+    F_m = np.sum((z[:, np.newaxis] >= u[:, np.newaxis, :]), axis=-1) / u.shape[1]
+    bin1 = stats.binom(N, z).cdf(N * F_m)
+    bin2 = stats.binom(N, z).cdf(N * F_m - 1)
+    gamma = 2 * np.min(np.min(np.stack([bin1, 1 - bin2], axis=-1), axis=-1), axis=-1)
     return gamma
 
 
-def simultaneous_ecdf_bands(num_samples, num_points=None, num_simulations=1000, 
-                            confidence=0.95, eps=1e-5, max_num_points=1000):
+def simultaneous_ecdf_bands(
+    num_samples, num_points=None, num_simulations=1000, confidence=0.95, eps=1e-5, max_num_points=1000
+):
     """Computes the simultaneous ECDF bands through simulation according to
     the algorithm described in Section 2.2:
-    
+
     https://link.springer.com/content/pdf/10.1007/s11222-022-10090-6.pdf
-    
+
     Depends on the vectorized utility function `get_coverage_probs(z, u)`.
 
     Parameters
@@ -257,7 +258,7 @@ def simultaneous_ecdf_bands(num_samples, num_points=None, num_simulations=1000,
         The sample size used for computing the ECDF. Will equal to the number of posterior
         samples when used for calibrarion. Corresponds to `N` in the paper above.
     num_points      : int, optional, default: None
-        The number of evaluation points on the interval (0, 1). Defaults to `num_points = num_samples` if 
+        The number of evaluation points on the interval (0, 1). Defaults to `num_points = num_samples` if
         not explicitly specified. Correspond to `K` in the paper above.
     num_simulations : int, optional, default: 1000
         The number of samples of size `n_samples` to simulate for determining the simultaneous CIs.
@@ -273,7 +274,7 @@ def simultaneous_ecdf_bands(num_samples, num_points=None, num_simulations=1000,
     (alpha, z, L, U) - tuple of scalar and three arrays of size (num_samples,) containing the confidence level as well as
                        the evaluation points, the lower, and the upper confidence bands, respectively.
     """
-    
+
     # Use shorter var names throughout
     N = num_samples
     if num_points is None:
@@ -281,21 +282,21 @@ def simultaneous_ecdf_bands(num_samples, num_points=None, num_simulations=1000,
     else:
         K = min(num_points, max_num_points)
     M = num_simulations
-    
+
     # Specify evaluation points
-    z = np.linspace(0+eps, 1-eps, K)
-    
+    z = np.linspace(0 + eps, 1 - eps, K)
+
     # Simulate M samples of size N
     u = np.random.uniform(size=(M, N))
-    
+
     # Get alpha
     alpha = 1 - confidence
-    
+
     # Compute minimal coverage probabilities
     gammas = get_coverage_probs(z, u)
-    
+
     # Use insights from paper to compute lower and upper confidence interval
-    gamma = np.percentile(gammas, 100*alpha)
+    gamma = np.percentile(gammas, 100 * alpha)
     L = stats.binom(N, z).ppf(gamma / 2) / N
     U = stats.binom(N, z).ppf(1 - gamma / 2) / N
     return alpha, z, L, U

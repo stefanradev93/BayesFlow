@@ -9,7 +9,7 @@
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
@@ -18,10 +18,10 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -64,7 +64,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <h1>Source code for bayesflow.diagnostics</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
 
@@ -102,11 +102,11 @@
 <span class="kn">from</span> <span class="nn">bayesflow.helper_functions</span> <span class="kn">import</span> <span class="n">check_posterior_prior_shapes</span>
 
 
-<div class="viewcode-block" id="plot_recovery"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_recovery">[docs]</a><span class="k">def</span> <span class="nf">plot_recovery</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">point_agg</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">uncertainty_agg</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">,</span> 
+<div class="viewcode-block" id="plot_recovery"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_recovery">[docs]</a><span class="k">def</span> <span class="nf">plot_recovery</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">point_agg</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">uncertainty_agg</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">,</span>
                   <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">title_fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-                  <span class="n">metric_fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">add_corr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_r2</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#8f2727&#39;</span><span class="p">,</span> 
+                  <span class="n">metric_fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">add_corr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_r2</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#8f2727&#39;</span><span class="p">,</span>
                   <span class="n">n_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_row</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    
+
     <span class="sd">&quot;&quot;&quot;Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.</span>
 <span class="sd">    The point estimate can be controlled with the `point_agg` argument, and the uncertainty estimate</span>
 <span class="sd">    can be controlled with the `uncertainty_agg` argument.</span>
@@ -159,17 +159,17 @@
 
     <span class="c1"># Sanity check</span>
     <span class="n">check_posterior_prior_shapes</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">)</span>
-    
+
     <span class="c1"># Compute point estimates and uncertainties</span>
     <span class="n">est</span> <span class="o">=</span> <span class="n">point_agg</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">uncertainty_agg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">u</span> <span class="o">=</span> <span class="n">uncertainty_agg</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    
+
     <span class="c1"># Determine n params and param names if None given</span>
     <span class="n">n_params</span> <span class="o">=</span> <span class="n">prior_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">param_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$p_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">$&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_params</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
-        
+
     <span class="c1"># Determine number of rows and columns for subplots based on inputs</span>
     <span class="k">if</span> <span class="n">n_row</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">n_col</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">n_row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_params</span> <span class="o">/</span> <span class="mi">6</span><span class="p">))</span>
@@ -178,8 +178,8 @@
         <span class="n">n_row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_params</span> <span class="o">/</span> <span class="n">n_col</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">n_row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">n_col</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">n_col</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_params</span> <span class="o">/</span> <span class="n">n_row</span><span class="p">))</span>
-        
-    
+
+
     <span class="c1"># Initialize figure</span>
     <span class="k">if</span> <span class="n">fig_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fig_size</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">n_col</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">n_row</span><span class="p">))</span>
@@ -206,10 +206,10 @@
         <span class="n">upper</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">prior_samples</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">est</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
         <span class="n">eps</span> <span class="o">=</span> <span class="p">(</span><span class="n">upper</span> <span class="o">-</span> <span class="n">lower</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.1</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">lower</span> <span class="o">-</span> <span class="n">eps</span><span class="p">,</span> <span class="n">upper</span> <span class="o">+</span> <span class="n">eps</span><span class="p">])</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="n">lower</span> <span class="o">-</span> <span class="n">eps</span><span class="p">,</span> <span class="n">upper</span> <span class="o">+</span> <span class="n">eps</span><span class="p">])</span> 
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">1</span><span class="p">]],</span> 
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="n">lower</span> <span class="o">-</span> <span class="n">eps</span><span class="p">,</span> <span class="n">upper</span> <span class="o">+</span> <span class="n">eps</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">1</span><span class="p">]],</span>
                  <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">)</span>
-        
+
         <span class="c1"># Add labels, optional metrics and title</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Ground truth&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">label_fontsize</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Estimated&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">label_fontsize</span><span class="p">)</span>
@@ -218,17 +218,17 @@
             <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="s1">&#39;$R^2$ = </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r2</span><span class="p">),</span>
                      <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                      <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
-                     <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> 
+                     <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
                      <span class="n">size</span><span class="o">=</span><span class="n">metric_fontsize</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">add_corr</span><span class="p">:</span>
             <span class="n">corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">prior_samples</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">est</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="s1">&#39;$r$ = </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">corr</span><span class="p">),</span>
                          <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                          <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
-                         <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> 
+                         <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
                          <span class="n">size</span><span class="o">=</span><span class="n">metric_fontsize</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">param_names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">title_fontsize</span><span class="p">)</span>
-        
+
         <span class="c1"># Prettify</span>
         <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -236,8 +236,8 @@
     <span class="k">return</span> <span class="n">f</span></div>
 
 
-<div class="viewcode-block" id="plot_sbc_ecdf"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_sbc_ecdf">[docs]</a><span class="k">def</span> <span class="nf">plot_sbc_ecdf</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">difference</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-                  <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">title_fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> 
+<div class="viewcode-block" id="plot_sbc_ecdf"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_sbc_ecdf">[docs]</a><span class="k">def</span> <span class="nf">plot_sbc_ecdf</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">difference</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">title_fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
                   <span class="n">rank_ecdf_color</span><span class="o">=</span><span class="s1">&#39;#a34f4f&#39;</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Creates the empirical CDFs for each marginal rank distribution and plots it against</span>
 <span class="sd">    a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform. Inspired by:</span>
@@ -293,10 +293,10 @@
 
     <span class="c1"># Store reference to number of parameters</span>
     <span class="n">n_params</span> <span class="o">=</span> <span class="n">post_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    
+
     <span class="c1"># Compute fractional ranks (using broadcasting)    </span>
     <span class="n">ranks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">post_samples</span> <span class="o">&lt;</span> <span class="n">prior_samples</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">post_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    
+
     <span class="c1"># Prepare figure</span>
     <span class="k">if</span> <span class="n">stacked</span><span class="p">:</span>
         <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">fig_size</span><span class="p">)</span>
@@ -308,13 +308,13 @@
         <span class="c1"># Determine fig_size dynamically, if None</span>
         <span class="k">if</span> <span class="n">fig_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fig_size</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">n_col</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">n_row</span><span class="p">))</span>
-        
+
         <span class="c1"># Initialize figure</span>
         <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">n_row</span><span class="p">,</span> <span class="n">n_col</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">fig_size</span><span class="p">)</span>
-    
+
     <span class="c1"># Plot individual ecdf of parameters</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ranks</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-        
+
         <span class="n">ecdf_single</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">ranks</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span>
         <span class="n">xx</span> <span class="o">=</span> <span class="n">ecdf_single</span>
         <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">xx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">xx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -322,15 +322,15 @@
         <span class="c1"># Difference, if specified</span>
         <span class="k">if</span> <span class="n">difference</span><span class="p">:</span>
             <span class="n">yy</span> <span class="o">-=</span> <span class="n">xx</span>
-        
+
         <span class="k">if</span> <span class="n">stacked</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">rank_ecdf_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Rank ECDFs&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">rank_ecdf_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span> 
+        <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">rank_ecdf_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Rank ECDF&#39;</span><span class="p">)</span>
-       
+
     <span class="c1"># Compute uniform ECDF and bands</span>
     <span class="n">alpha</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="n">simultaneous_ecdf_bands</span><span class="p">(</span><span class="n">post_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;ecdf_bands_kwargs&#39;</span><span class="p">,</span> <span class="p">{}))</span>
 
@@ -353,7 +353,7 @@
 
     <span class="k">for</span> <span class="n">_ax</span><span class="p">,</span> <span class="n">title</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">titles</span><span class="p">):</span>
         <span class="n">_ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">fr</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">int</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span><span class="si">}</span><span class="s1">$\%$ Confidence Bands&#39;</span><span class="p">)</span>
-        
+
         <span class="c1"># Prettify plot</span>
         <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">_ax</span><span class="p">)</span>
         <span class="n">_ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.35</span><span class="p">)</span>
@@ -370,7 +370,7 @@
     <span class="k">return</span> <span class="n">f</span></div>
 
 
-<div class="viewcode-block" id="plot_sbc_histograms"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_sbc_histograms">[docs]</a><span class="k">def</span> <span class="nf">plot_sbc_histograms</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_bins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+<div class="viewcode-block" id="plot_sbc_histograms"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_sbc_histograms">[docs]</a><span class="k">def</span> <span class="nf">plot_sbc_histograms</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_bins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
              <span class="n">binomial_interval</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="n">label_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">title_fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">hist_color</span><span class="o">=</span><span class="s1">&#39;#a34f4f&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Creates and plots publication-ready histograms of rank statistics for simulation-based calibration </span>
 <span class="sd">    (SBC) checks according to:</span>
@@ -424,7 +424,7 @@
     <span class="k">if</span> <span class="n">ratio</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
         <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The ratio of simulations / posterior draws should be &gt; 20 &#39;</span> <span class="o">+</span> 
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The ratio of simulations / posterior draws should be &gt; 20 &#39;</span> <span class="o">+</span>
                     <span class="sa">f</span><span class="s1">&#39;for reliable variance reduction, but your ratio is </span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s1">.</span><span class="se">\</span>
 <span class="s1">                    Confidence intervals might be unreliable!&#39;</span><span class="p">)</span>
 
@@ -438,11 +438,11 @@
     <span class="c1"># Determine n params and param names if None given</span>
     <span class="k">if</span> <span class="n">param_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$p_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">$&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_params</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
-        
+
     <span class="c1"># Determine n_subplots dynamically</span>
     <span class="n">n_row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_params</span> <span class="o">/</span> <span class="mi">6</span><span class="p">))</span>
     <span class="n">n_col</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_params</span> <span class="o">/</span> <span class="n">n_row</span><span class="p">))</span>
-    
+
     <span class="c1"># Initialize figure</span>
     <span class="k">if</span> <span class="n">fig_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fig_size</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">n_col</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">n_row</span><span class="p">))</span>
@@ -477,8 +477,8 @@
     <span class="k">return</span> <span class="n">f</span></div>
 
 
-<div class="viewcode-block" id="plot_posterior_2d"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_posterior_2d">[docs]</a><span class="k">def</span> <span class="nf">plot_posterior_2d</span><span class="p">(</span><span class="n">posterior_draws</span><span class="p">,</span> <span class="n">prior</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prior_draws</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
-                      <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">post_color</span><span class="o">=</span><span class="s1">&#39;#8f2727&#39;</span><span class="p">,</span> <span class="n">prior_color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">post_alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> 
+<div class="viewcode-block" id="plot_posterior_2d"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.diagnostics.plot_posterior_2d">[docs]</a><span class="k">def</span> <span class="nf">plot_posterior_2d</span><span class="p">(</span><span class="n">posterior_draws</span><span class="p">,</span> <span class="n">prior</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prior_draws</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                      <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">post_color</span><span class="o">=</span><span class="s1">&#39;#8f2727&#39;</span><span class="p">,</span> <span class="n">prior_color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">post_alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
                       <span class="n">prior_alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generates a bivariate pairplot given posterior draws and optional prior or prior draws.</span>
 
@@ -513,10 +513,10 @@
 <span class="sd">    AssertionError</span>
 <span class="sd">        If the shape of posterior_draws is not 2-dimensional.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="c1"># Ensure correct shape</span>
     <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">posterior_draws</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Shape of `posterior_samples` for a single data set should be 2 dimensional!&#39;</span>
-    
+
     <span class="c1"># Obtain n_draws and n_params</span>
     <span class="n">n_draws</span><span class="p">,</span> <span class="n">n_params</span> <span class="o">=</span> <span class="n">posterior_draws</span><span class="o">.</span><span class="n">shape</span>
 
@@ -530,7 +530,7 @@
     <span class="c1"># Otherwise, keep as is (prior_draws either filled or None)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">pass</span>
-    
+
     <span class="c1"># Attempt to determine parameter names</span>
     <span class="k">if</span> <span class="n">param_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">prior</span><span class="p">,</span> <span class="s1">&#39;param_names&#39;</span><span class="p">):</span>
@@ -570,7 +570,7 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_params</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_params</span><span class="p">):</span>
             <span class="n">g</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-    
+
     <span class="n">g</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">g</span><span class="o">.</span><span class="n">fig</span></div>
 
@@ -592,18 +592,18 @@
     <span class="c1"># Handle non-pd.DataFrame type</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">history</span><span class="p">)</span> <span class="ow">is</span> <span class="n">LossHistory</span><span class="p">:</span>
         <span class="n">history</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">get_plottable</span><span class="p">()</span>
-    
+
     <span class="c1"># Determine the number of rows for plot</span>
     <span class="n">n_row</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-    
+
     <span class="c1"># Initialize figure</span>
     <span class="k">if</span> <span class="n">fig_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fig_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">n_row</span><span class="p">))</span>
     <span class="n">f</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">n_row</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">fig_size</span><span class="p">)</span>
-    
+
     <span class="c1"># Get the number of steps as an array</span>
     <span class="n">step_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">history</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-    
+
     <span class="c1"># Loop through loss entries and populate plot</span>
     <span class="n">looper</span> <span class="o">=</span> <span class="p">[</span><span class="n">axarr</span><span class="p">]</span> <span class="k">if</span> <span class="n">n_row</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">axarr</span><span class="o">.</span><span class="n">flat</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">looper</span><span class="p">):</span>
@@ -639,7 +639,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    f : plt.Figure - the figure instance for optional saving</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="c1"># Generate prior draws</span>
     <span class="n">prior_samples</span> <span class="o">=</span> <span class="n">prior</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
 
@@ -668,7 +668,7 @@
         <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;KDE failed due to the following exception:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">+</span><span class="nb">repr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Substituting scatter plot.&quot;</span><span class="p">)</span>
         <span class="n">g</span><span class="o">.</span><span class="n">map_lower</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
     <span class="n">g</span><span class="o">.</span><span class="n">map_upper</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
-    
+
     <span class="c1"># Add grids</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">):</span>
@@ -697,7 +697,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    f : plt.Figure - the figure instance for optional saving</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="c1"># Try to convert z_samples, if eventually tf.Tensor is passed</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">z_samples</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">z_samples</span> <span class="o">=</span> <span class="n">z_samples</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
@@ -795,7 +795,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -806,7 +806,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

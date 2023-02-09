@@ -9,7 +9,7 @@
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
@@ -18,10 +18,10 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -64,7 +64,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <h1>Source code for bayesflow.helper_classes</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
 
@@ -110,10 +110,10 @@
     <span class="sd">&quot;&quot;&quot;Helper class to create a tensorflow.data.Dataset which parses simulation dictionaries </span>
 <span class="sd">    and returns simulation dictionaries as expected by BayesFlow amortizers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_dict</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates a tensorfow.data.Dataset from forward inference outputs and determines format.&quot;&quot;&quot;</span>
-        
+
         <span class="n">slices</span><span class="p">,</span> <span class="n">keys_used</span><span class="p">,</span> <span class="n">keys_none</span><span class="p">,</span> <span class="n">n_sim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_slices</span><span class="p">(</span><span class="n">forward_dict</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span>\
                 <span class="o">.</span><span class="n">from_tensor_slices</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slices</span><span class="p">))</span>\
@@ -122,10 +122,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">keys_used</span> <span class="o">=</span> <span class="n">keys_used</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keys_none</span> <span class="o">=</span> <span class="n">keys_none</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_sim</span> <span class="o">=</span> <span class="n">n_sim</span>
-        
+
     <span class="k">def</span> <span class="nf">_determine_slices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_dict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Determine slices for a tensorflow Dataset.&quot;&quot;&quot;</span>
-        
+
         <span class="n">keys_used</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">keys_none</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">slices</span> <span class="o">=</span> <span class="p">[]</span>
@@ -137,27 +137,27 @@
                 <span class="n">keys_none</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
         <span class="n">n_sim</span> <span class="o">=</span> <span class="n">forward_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s1">&#39;sim_data&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">slices</span><span class="p">,</span> <span class="n">keys_used</span><span class="p">,</span> <span class="n">keys_none</span><span class="p">,</span> <span class="n">n_sim</span>
-    
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_in</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert output of tensorflow.data.Dataset to dict.&quot;&quot;&quot;</span>
-        
+
         <span class="n">forward_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">key_used</span><span class="p">,</span> <span class="n">batch_stuff</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys_used</span><span class="p">,</span> <span class="n">batch_in</span><span class="p">):</span>
             <span class="n">forward_dict</span><span class="p">[</span><span class="n">key_used</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_stuff</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">key_none</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys_none</span><span class="p">):</span>
             <span class="n">forward_dict</span><span class="p">[</span><span class="n">key_none</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">forward_dict</span>
-    
+
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RegressionLRAdjuster"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helper_classes.RegressionLRAdjuster">[docs]</a><span class="k">class</span> <span class="nc">RegressionLRAdjuster</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;This class will compute the slope of the loss trajectory and inform learning rate decay.&quot;&quot;&quot;</span>
-    
+
     <span class="n">file_name</span> <span class="o">=</span> <span class="s1">&#39;lr_adjuster&#39;</span>
-    
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">wait_between_fits</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span> 
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">wait_between_fits</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span>
                  <span class="n">reduction_factor</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">cooldown_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_resets</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates an instance with given hyperparameters which will track the slope of the </span>
 <span class="sd">        loss trajectory according to specified hyperparameters and then issue an optional</span>
@@ -186,7 +186,7 @@
 <span class="sd">        **kwargs          : dict, optional, default {}</span>
 <span class="sd">            Additional keyword arguments passed to the `HuberRegression` class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="n">period</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wait_between_periods</span> <span class="o">=</span> <span class="n">wait_between_fits</span>
@@ -199,7 +199,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">stopping_issued</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cooldown_factor</span> <span class="o">=</span> <span class="n">cooldown_factor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;iteration&#39;</span>    <span class="p">:</span> <span class="p">[],</span> 
+            <span class="s1">&#39;iteration&#39;</span>    <span class="p">:</span> <span class="p">[],</span>
             <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="p">[]</span>
         <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset_counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -209,12 +209,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_waiting</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_cooldown</span> <span class="o">=</span> <span class="kc">False</span>
-        
+
 <div class="viewcode-block" id="RegressionLRAdjuster.get_slope"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helper_classes.RegressionLRAdjuster.get_slope">[docs]</a>    <span class="k">def</span> <span class="nf">get_slope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">losses</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Fits a Huber regression on the provided loss trajectory or returns `None` if</span>
 <span class="sd">        not enough data points present.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="c1"># Return None if not enough loss values present</span>
         <span class="k">if</span> <span class="n">losses</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -222,7 +222,7 @@
         <span class="c1"># Increment counter</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_cooldown</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cooldown_counter</span> <span class="o">+=</span> <span class="mi">1</span>
-        
+
         <span class="c1"># Check if still in a waiting phase and return old slope</span>
         <span class="c1"># if still waiting, otherwise refit Huber regression</span>
         <span class="n">wait</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_waiting</span><span class="p">()</span>
@@ -250,7 +250,7 @@
 
         <span class="c1"># Create path to memory</span>
         <span class="n">memory_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">RegressionLRAdjuster</span><span class="o">.</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">)</span>
-        
+
         <span class="c1"># Prepare attributes</span>
         <span class="n">states_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">states_dict</span><span class="p">[</span><span class="s1">&#39;_history&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span>
@@ -261,7 +261,7 @@
         <span class="n">states_dict</span><span class="p">[</span><span class="s1">&#39;_slope&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span>
         <span class="n">states_dict</span><span class="p">[</span><span class="s1">&#39;_is_waiting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_waiting</span>
         <span class="n">states_dict</span><span class="p">[</span><span class="s1">&#39;_in_cooldown&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_cooldown</span>
-        
+
         <span class="c1"># Dump as pickle object</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">memory_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">states_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
@@ -303,7 +303,7 @@
 
         <span class="c1"># Do nothing, if still in cooldown period</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_cooldown</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cooldown_counter</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cooldown_factor</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">):</span>
-            <span class="k">return</span> 
+            <span class="k">return</span>
         <span class="c1"># Otherwise set cooldown flag to False and reset counter</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_in_cooldown</span> <span class="o">=</span> <span class="kc">False</span>
@@ -398,7 +398,7 @@
             <span class="c1"># Store keys, if none existing</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_names</span> <span class="o">==</span> <span class="p">[]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">loss_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">current_loss</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
-            
+
             <span class="c1"># Create and store entry</span>
             <span class="n">entry</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="k">else</span> <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">current_loss</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Run </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_run</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
@@ -416,14 +416,14 @@
 
             <span class="c1"># Add entry to total loss</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_total_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">entry</span><span class="p">))</span>
-        
+
         <span class="c1"># Assume scalar loss output</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Run </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_run</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_loss</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
             <span class="c1"># Store keys, if none existing</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_names</span> <span class="o">==</span> <span class="p">[]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">loss_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Default.Loss&#39;</span><span class="p">)</span>
-            
+
             <span class="c1"># Add entry to total loss</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_total_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_loss</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span></div>
 
@@ -431,7 +431,7 @@
         <span class="sd">&quot;&quot;&quot;Compute and return running means of the losses for current epoch.&quot;&quot;&quot;</span>
 
         <span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Run </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_run</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">means</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>    
+        <span class="k">if</span> <span class="n">means</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;Avg.Loss&#39;</span><span class="p">:</span> <span class="n">means</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;Avg.&#39;</span> <span class="o">+</span> <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_names</span><span class="p">,</span> <span class="n">means</span><span class="p">)}</span></div>
@@ -462,36 +462,36 @@
 
 <div class="viewcode-block" id="LossHistory.get_copy"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helper_classes.LossHistory.get_copy">[docs]</a>    <span class="k">def</span> <span class="nf">get_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span></div>
-    
+
 <div class="viewcode-block" id="LossHistory.save_to_file"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helper_classes.LossHistory.save_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">save_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Saves a `LossHistory` object to a pickled dictionary in file_path.</span>
 <span class="sd">         If max_to_keep saved loss history files are found in file_path, the oldest is deleted before a new one is saved.</span>
 <span class="sd">         &quot;&quot;&quot;</span>
-        
+
         <span class="c1"># Increment history index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">latest</span> <span class="o">+=</span> <span class="mi">1</span>
-        
+
         <span class="c1"># Path to history</span>
         <span class="n">history_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">LossHistory</span><span class="o">.</span><span class="n">file_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">latest</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">)</span>
-        
+
         <span class="c1"># Prepare full history dict </span>
         <span class="n">full_history_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_copy</span><span class="p">()</span>
         <span class="n">full_history_dict</span><span class="p">[</span><span class="s1">&#39;loss_names&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_names</span>
         <span class="n">full_history_dict</span><span class="p">[</span><span class="s1">&#39;_current_run&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_run</span>
         <span class="n">full_history_dict</span><span class="p">[</span><span class="s1">&#39;_total_loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_loss</span>
-        
+
         <span class="c1"># Pickle current</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">history_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">full_history_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-        
+
         <span class="c1"># Get list of history checkpoints</span>
         <span class="n">history_checkpoints_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;history&#39;</span> <span class="ow">in</span> <span class="n">l</span><span class="p">]</span>
-            
+
         <span class="c1"># Determine the oldest saved loss history and remove it</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">history_checkpoints_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_to_keep</span><span class="p">:</span>
             <span class="n">oldest_history_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;history_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">latest</span><span class="o">-</span><span class="n">max_to_keep</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">)</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">oldest_history_path</span><span class="p">)</span></div>
-            
+
 <div class="viewcode-block" id="LossHistory.load_from_file"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helper_classes.LossHistory.load_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Loads the most recent saved `LossHistory` object from `file_path`.&quot;&quot;&quot;</span>
 
@@ -504,27 +504,27 @@
             <span class="n">history_checkpoints_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">LossHistory</span><span class="o">.</span><span class="n">file_name</span> <span class="ow">in</span> <span class="n">l</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">history_checkpoints_list</span> <span class="o">=</span> <span class="p">[]</span>
-        
+
         <span class="c1"># Case history list is not empty</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">history_checkpoints_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            
+
             <span class="c1"># Determine which file contains the latest LossHistory and load it</span>
             <span class="n">file_numbers</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">h</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">history_checkpoints_list</span><span class="p">]</span>
             <span class="n">latest_file</span> <span class="o">=</span> <span class="n">history_checkpoints_list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">file_numbers</span><span class="p">)]</span>
             <span class="n">latest_number</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">file_numbers</span><span class="p">)</span>
             <span class="n">latest_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">latest_file</span><span class="p">)</span>
-            
+
             <span class="c1"># Load dictionary</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">latest_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">full_history_dict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-                
+
             <span class="c1"># Fill entries</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">latest</span> <span class="o">=</span> <span class="n">latest_number</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_total_loss</span> <span class="o">=</span> <span class="n">full_history_dict</span><span class="p">[</span><span class="s1">&#39;_total_loss&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_current_run</span> <span class="o">=</span> <span class="n">full_history_dict</span><span class="p">[</span><span class="s1">&#39;_current_run&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">loss_names</span> <span class="o">=</span> <span class="n">full_history_dict</span><span class="p">[</span><span class="s1">&#39;loss_names&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">full_history_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;_total_loss&#39;</span><span class="p">,</span> <span class="s1">&#39;_current_run&#39;</span><span class="p">,</span> <span class="s1">&#39;loss_names&#39;</span><span class="p">]}</span>
-            
+
             <span class="c1"># Verbose</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded loss history from </span><span class="si">{</span><span class="n">latest_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -559,7 +559,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">forward_dict</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">size_in_batches</span> <span class="o">+=</span> <span class="mi">1</span></div>
-    
+
 <div class="viewcode-block" id="SimulationMemory.get_memory"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helper_classes.SimulationMemory.get_memory">[docs]</a>    <span class="k">def</span> <span class="nf">get_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">)</span></div>
 
@@ -569,13 +569,13 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capacity</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="kc">False</span></div>
-    
+
 <div class="viewcode-block" id="SimulationMemory.save_to_file"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helper_classes.SimulationMemory.save_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">save_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Saves a `SimulationMemory` object to a pickled dictionary in file_path.&quot;&quot;&quot;</span>
 
         <span class="c1"># Create path to memory</span>
         <span class="n">memory_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">SimulationMemory</span><span class="o">.</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">)</span>
-        
+
         <span class="c1"># Prepare attributes</span>
         <span class="n">full_memory_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">full_memory_dict</span><span class="p">[</span><span class="s1">&#39;stores_raw&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stores_raw</span>
@@ -583,7 +583,7 @@
         <span class="n">full_memory_dict</span><span class="p">[</span><span class="s1">&#39;_buffer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span>
         <span class="n">full_memory_dict</span><span class="p">[</span><span class="s1">&#39;_idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span>
         <span class="n">full_memory_dict</span><span class="p">[</span><span class="s1">&#39;_size_in_batches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_in_batches</span>
-        
+
         <span class="c1"># Dump as pickle object</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">memory_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">full_memory_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
@@ -648,7 +648,7 @@
         <span class="c1"># If full, overwrite at index</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_full</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_overwrite</span><span class="p">(</span><span class="n">forward_dict</span><span class="p">)</span>
-        
+
         <span class="c1"># Otherwise still capacity to append</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Add to internal list</span>
@@ -661,7 +661,7 @@
             <span class="c1"># Check whether buffer is full and set flag if thats the case</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capacity</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_is_full</span> <span class="o">=</span> <span class="kc">True</span></div>
-            
+
 <div class="viewcode-block" id="MemoryReplayBuffer.sample"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.helper_classes.MemoryReplayBuffer.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Samples `batch_size` number of parameter vectors and simulations from buffer.</span>
 
@@ -670,7 +670,7 @@
 <span class="sd">        forward_dict : dict</span>
 <span class="sd">            The (raw or configured) outputs of the forward model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="n">rand_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_size_in_batches</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">rand_idx</span><span class="p">]</span></div>
 
@@ -701,7 +701,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -712,7 +712,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

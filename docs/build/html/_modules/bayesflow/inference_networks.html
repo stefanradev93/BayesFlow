@@ -9,7 +9,7 @@
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
@@ -18,10 +18,10 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -64,7 +64,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <h1>Source code for bayesflow.inference_networks</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
 
@@ -98,8 +98,8 @@
 <div class="viewcode-block" id="InvertibleNetwork"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.InvertibleNetwork">[docs]</a><span class="k">class</span> <span class="nc">InvertibleNetwork</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Implements a chain of conditional invertible coupling layers for conditional density estimation.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_params</span><span class="p">,</span> <span class="n">num_coupling_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">coupling_net_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-                 <span class="n">coupling_design</span><span class="o">=</span><span class="s1">&#39;dense&#39;</span><span class="p">,</span> <span class="n">soft_clamping</span><span class="o">=</span><span class="mf">1.9</span><span class="p">,</span> <span class="n">use_permutation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_act_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_params</span><span class="p">,</span> <span class="n">num_coupling_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">coupling_net_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">coupling_design</span><span class="o">=</span><span class="s1">&#39;dense&#39;</span><span class="p">,</span> <span class="n">soft_clamping</span><span class="o">=</span><span class="mf">1.9</span><span class="p">,</span> <span class="n">use_permutation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_act_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">act_norm_init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_soft_flow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">soft_flow_bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">5e-2</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates a chain of coupling layers with optional `ActNorm` layers in-between. Implements ideas from:</span>
 
@@ -177,7 +177,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">soft_low</span> <span class="o">=</span> <span class="n">soft_flow_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">soft_high</span> <span class="o">=</span> <span class="n">soft_flow_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_permutation</span> <span class="o">=</span> <span class="n">use_permutation</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_act_norm</span> <span class="o">=</span> <span class="n">use_act_norm</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_act_norm</span> <span class="o">=</span> <span class="n">use_act_norm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim</span> <span class="o">=</span> <span class="n">num_params</span>
 
 <div class="viewcode-block" id="InvertibleNetwork.call"><a class="viewcode-back" href="../../bayesflow.html#bayesflow.inference_networks.InvertibleNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -320,7 +320,7 @@
 
         <span class="c1"># The layer to output model evidences</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alpha_layer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
-            <span class="n">num_models</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">output_activation</span><span class="p">,</span> 
+            <span class="n">num_models</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">output_activation</span><span class="p">,</span>
             <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">dense_args</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;units&#39;</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;activation&#39;</span><span class="p">})</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">num_models</span> <span class="o">=</span> <span class="n">num_models</span>
@@ -393,7 +393,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -404,7 +404,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

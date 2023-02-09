@@ -19,36 +19,47 @@
 # SOFTWARE.
 
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, LSTM
+from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.models import Sequential
 
-from bayesflow.helper_networks import InvariantModule, EquivariantModule, MultiConv1D
 from bayesflow import default_settings as defaults
+from bayesflow.helper_networks import EquivariantModule, InvariantModule, MultiConv1D
 
 
 class InvariantNetwork(tf.keras.Model):
     """Implements a deep permutation-invariant network according to [1] and [2].
 
-    [1] Zaheer, M., Kottur, S., Ravanbakhsh, S., Poczos, B., Salakhutdinov, R. R., & Smola, A. J. (2017). 
+    [1] Zaheer, M., Kottur, S., Ravanbakhsh, S., Poczos, B., Salakhutdinov, R. R., & Smola, A. J. (2017).
     Deep sets. Advances in neural information processing systems, 30.
 
-    [2] Bloem-Reddy, B., & Teh, Y. W. (2020). 
-    Probabilistic Symmetries and Invariant Neural Networks. 
+    [2] Bloem-Reddy, B., & Teh, Y. W. (2020).
+    Probabilistic Symmetries and Invariant Neural Networks.
     J. Mach. Learn. Res., 21, 90-1.
     """
 
-    def __init__(self, summary_dim=10, num_dense_s1=2, num_dense_s2=2, num_dense_s3=2, num_equiv=2, 
-                 dense_s1_args=None, dense_s2_args=None, dense_s3_args=None, pooling_fun='mean', **kwargs):
+    def __init__(
+        self,
+        summary_dim=10,
+        num_dense_s1=2,
+        num_dense_s2=2,
+        num_dense_s3=2,
+        num_equiv=2,
+        dense_s1_args=None,
+        dense_s2_args=None,
+        dense_s3_args=None,
+        pooling_fun="mean",
+        **kwargs,
+    ):
         """Creates a stack of 'num_equiv' equivariant layers followed by a final invariant layer.
-        
+
         Parameters
         ----------
         summary_dim   : int, optional, default: 10
-            The number of learned summary statistics. 
+            The number of learned summary statistics.
         num_dense_s1  : int, optional, default: 2
             The number of dense layers in the inner function of a deep set.
         num_dense_s2  : int, optional, default: 2
-            The number of dense layers in the outer function of a deep set.    
+            The number of dense layers in the outer function of a deep set.
         num_dense_s3  : int, optional, default: 2
             The number of dense layers in an equivariant layer.
         num_equiv     : int, optional, default: 2
@@ -79,13 +90,10 @@ class InvariantNetwork(tf.keras.Model):
             num_dense_s1=num_dense_s1,
             num_dense_s2=num_dense_s2,
             num_dense_s3=num_dense_s3,
-            dense_s1_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT\
-                if dense_s1_args is None else dense_s1_args,
-            dense_s2_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT\
-                if dense_s2_args is None else dense_s2_args,
-            dense_s3_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT\
-                if dense_s3_args is None else dense_s3_args,
-            pooling_fun=pooling_fun
+            dense_s1_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT if dense_s1_args is None else dense_s1_args,
+            dense_s2_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT if dense_s2_args is None else dense_s2_args,
+            dense_s3_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT if dense_s3_args is None else dense_s3_args,
+            pooling_fun=pooling_fun,
         )
 
         # Create equivariant layers and final invariant layer
@@ -93,18 +101,18 @@ class InvariantNetwork(tf.keras.Model):
         self.inv = InvariantModule(settings)
 
         # Output layer to output "summary_dim" learned summary statistics
-        self.out_layer = Dense(summary_dim, activation='linear')
+        self.out_layer = Dense(summary_dim, activation="linear")
         self.summary_dim = summary_dim
 
     def call(self, x):
         """Performs the forward pass of a learnable deep invariant transformation consisting of
         a sequence of equivariant transforms followed by an invariant transform.
-        
+
         Parameters
         ----------
         x : tf.Tensor
             Input of shape (batch_size, n_obs, data_dim)
-        
+
         Returns
         -------
         out : tf.Tensor
@@ -114,20 +122,20 @@ class InvariantNetwork(tf.keras.Model):
         # Pass through series of augmented equivariant transforms
         out_equiv = self.equiv_layers(x)
 
-        # Pass through final invariant layer 
+        # Pass through final invariant layer
         out = self.out_layer(self.inv(out_equiv))
 
         return out
 
 
 class SequentialNetwork(tf.keras.Model):
-    """Implements a sequence of `MultiConv1D` layers followed by an LSTM network. 
-    
+    """Implements a sequence of `MultiConv1D` layers followed by an LSTM network.
+
     For details and rationale, see [1]:
 
-    [1] Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., & Köthe, U. (2021). 
-    OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks 
-    and its application to the COVID-19 pandemics in Germany. 
+    [1] Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., & Köthe, U. (2021).
+    OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks
+    and its application to the COVID-19 pandemics in Germany.
     PLoS computational biology, 17(10), e1009472.
 
     https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472
@@ -140,9 +148,9 @@ class SequentialNetwork(tf.keras.Model):
         Parameters
         ----------
         summary_dim     : int, optional, default: 10
-            The number of learned summary statistics. 
+            The number of learned summary statistics.
         num_conv_layers : int, optional, default: 2
-            The number of convolutional layers to use. 
+            The number of convolutional layers to use.
         lstm_units      : int, optional, default: 128
             The number of hidden LSTM units.
         conv_settings   : dict or None, optional, default: None
@@ -162,30 +170,27 @@ class SequentialNetwork(tf.keras.Model):
         if conv_settings is None:
             conv_settings = defaults.DEFAULT_SETTING_MULTI_CONV
 
-        self.net = Sequential([
-            MultiConv1D(conv_settings)
-            for _ in range(num_conv_layers)
-        ])
-        
+        self.net = Sequential([MultiConv1D(conv_settings) for _ in range(num_conv_layers)])
+
         self.lstm = LSTM(lstm_units)
-        self.out_layer = Dense(summary_dim, activation='linear')
+        self.out_layer = Dense(summary_dim, activation="linear")
         self.summary_dim = summary_dim
 
     def call(self, x, **kwargs):
-        """Performs a forward pass through the network by first passing `x` through the sequence of 
+        """Performs a forward pass through the network by first passing `x` through the sequence of
         multi-convolutional layers and then applying the LSTM network.
 
         Parameters
         ----------
         x : tf.Tensor
             Input of shape (batch_size, n_time_steps, n_time_series)
-        
+
         Returns
         -------
         out : tf.Tensor
             Output of shape (batch_size, summary_dim)
         """
-        
+
         out = self.net(x, **kwargs)
         out = self.lstm(out, **kwargs)
         out = self.out_layer(out, **kwargs)
@@ -209,7 +214,7 @@ class SplitNetwork(tf.keras.Model):
             Function that takes the arguments `i` and `x` where `i` is the index of the
             network and `x` are the inputs to the `SplitNetwork`. Should return the input
             for the corresponding network.
-            
+
             For example, to achieve a network with is permutation-invariant both
             vertically (i.e., across rows)  and horizontally (i.e., across columns), one could to:
             `def split(i, x):
@@ -251,5 +256,5 @@ class SplitNetwork(tf.keras.Model):
         """
 
         out = [self.networks[i](self.split_data_configurator(i, x)) for i in range(self.num_splits)]
-        out = tf.concat(out, axis = -1)
+        out = tf.concat(out, axis=-1)
         return out

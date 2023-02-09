@@ -19,16 +19,15 @@
 # SOFTWARE.
 
 import numpy as np
-
 import pytest
 
-from bayesflow.networks import InvertibleNetwork, InvariantNetwork
+from bayesflow.amortizers import AmortizedLikelihood, AmortizedPosterior, AmortizedPosteriorLikelihood
 from bayesflow.default_settings import DEFAULT_KEYS
-from bayesflow.amortizers import AmortizedPosterior, AmortizedLikelihood, AmortizedPosteriorLikelihood
+from bayesflow.networks import InvariantNetwork, InvertibleNetwork
 
 
-@pytest.mark.parametrize("cond_shape", ['2d', '3d'])
-@pytest.mark.parametrize("summary_loss", ['MMD', None])
+@pytest.mark.parametrize("cond_shape", ["2d", "3d"])
+@pytest.mark.parametrize("summary_loss", ["MMD", None])
 @pytest.mark.parametrize("soft", [True, False])
 def test_amortized_posterior(cond_shape, summary_loss, soft):
     """Tests the `AmortizedPosterior` instance with relevant configurations."""
@@ -42,27 +41,25 @@ def test_amortized_posterior(cond_shape, summary_loss, soft):
 
     # Create settings dictionaries for inference network
     dense_net_settings = {
-        't_args': {
-            'dense_args': dict(units=units_t, kernel_initializer='glorot_uniform', activation='elu'),
-            'num_dense': 1,
-            'spec_norm': True
+        "t_args": {
+            "dense_args": dict(units=units_t, kernel_initializer="glorot_uniform", activation="elu"),
+            "num_dense": 1,
+            "spec_norm": True,
         },
-        's_args': {
-            'dense_args': dict(units=units_s, kernel_initializer='glorot_uniform', activation='elu'),
-            'num_dense': 2,
-            'spec_norm': False
+        "s_args": {
+            "dense_args": dict(units=units_s, kernel_initializer="glorot_uniform", activation="elu"),
+            "num_dense": 2,
+            "spec_norm": False,
         },
     }
 
     # Create inference network instance
-    inference_network = InvertibleNetwork(**{
-        'num_params': inp_dim, 
-        'use_soft_flow': soft,
-        'coupling_net_settings': dense_net_settings
-    })
+    inference_network = InvertibleNetwork(
+        **{"num_params": inp_dim, "use_soft_flow": soft, "coupling_net_settings": dense_net_settings}
+    )
 
     # Create summary network and condition
-    if cond_shape == '3d':
+    if cond_shape == "3d":
         n_obs = np.random.randint(low=1, high=32)
         condition = np.random.normal(size=(batch_size, n_obs, cond_dim)).astype(np.float32)
         summary_network = InvariantNetwork()
@@ -77,11 +74,11 @@ def test_amortized_posterior(cond_shape, summary_loss, soft):
     amortizer = AmortizedPosterior(inference_network, summary_network, summary_loss_fun=summary_loss)
 
     # Prepare input
-    if cond_shape == '3d':
-        inp_dict = {DEFAULT_KEYS['parameters']: target, DEFAULT_KEYS['summary_conditions']: condition}
+    if cond_shape == "3d":
+        inp_dict = {DEFAULT_KEYS["parameters"]: target, DEFAULT_KEYS["summary_conditions"]: condition}
     else:
-        inp_dict = {DEFAULT_KEYS['parameters']: target, DEFAULT_KEYS['direct_conditions']: condition}
-    
+        inp_dict = {DEFAULT_KEYS["parameters"]: target, DEFAULT_KEYS["direct_conditions"]: condition}
+
     # Pass through network
     out = amortizer(inp_dict)
     z, ldj = out
@@ -106,7 +103,7 @@ def test_amortized_posterior(cond_shape, summary_loss, soft):
     # Test attributes
     assert amortizer.latent_is_dynamic is False
     assert amortizer.latent_dim == inp_dim
-    if cond_shape == '3d':
+    if cond_shape == "3d":
         assert amortizer.summary_net is not None
     else:
         assert amortizer.summary_net is None
@@ -133,7 +130,7 @@ def test_amortized_posterior(cond_shape, summary_loss, soft):
         assert samples.shape[2] == inp_dim
 
 
-@pytest.mark.parametrize("inp_shape", ['2d', '3d'])
+@pytest.mark.parametrize("inp_shape", ["2d", "3d"])
 @pytest.mark.parametrize("soft", [True, False])
 def test_amortized_likelihood(inp_shape, soft):
     """Tests the `AmortizedLikelihood` instance with relevant configurations."""
@@ -147,27 +144,25 @@ def test_amortized_likelihood(inp_shape, soft):
 
     # Create settings dictionaries for inference network
     dense_net_settings = {
-        't_args': {
-            'dense_args': dict(units=units_t, kernel_initializer='glorot_uniform', activation='elu'),
-            'num_dense': 1,
-            'spec_norm': False
+        "t_args": {
+            "dense_args": dict(units=units_t, kernel_initializer="glorot_uniform", activation="elu"),
+            "num_dense": 1,
+            "spec_norm": False,
         },
-        's_args': {
-            'dense_args': dict(units=units_s, kernel_initializer='glorot_uniform', activation='elu'),
-            'num_dense': 2,
-            'spec_norm': True
-        }
+        "s_args": {
+            "dense_args": dict(units=units_s, kernel_initializer="glorot_uniform", activation="elu"),
+            "num_dense": 2,
+            "spec_norm": True,
+        },
     }
 
     # Create inference network instance
-    surrogate_network = InvertibleNetwork(**{
-        'num_params': inp_dim, 
-        'use_soft_flow': soft,
-        'coupling_net_settings': dense_net_settings
-    })
+    surrogate_network = InvertibleNetwork(
+        **{"num_params": inp_dim, "use_soft_flow": soft, "coupling_net_settings": dense_net_settings}
+    )
 
     # Create input and condition
-    if inp_shape == '3d':
+    if inp_shape == "3d":
         n_obs = np.random.randint(low=1, high=32)
         inp = np.random.normal(size=(batch_size, n_obs, inp_dim)).astype(np.float32)
     else:
@@ -178,7 +173,7 @@ def test_amortized_likelihood(inp_shape, soft):
     amortizer = AmortizedLikelihood(surrogate_network)
 
     # Create input dictionary
-    inp_dict = {DEFAULT_KEYS['observables']: inp, DEFAULT_KEYS['conditions']: condition}
+    inp_dict = {DEFAULT_KEYS["observables"]: inp, DEFAULT_KEYS["conditions"]: condition}
 
     # Pass through network
     out = amortizer(inp_dict)
@@ -200,7 +195,7 @@ def test_amortized_likelihood(inp_shape, soft):
     assert z.shape[0] == batch_size
     assert ldj.shape[0] == batch_size
 
-    if inp_shape == '3d':
+    if inp_shape == "3d":
         assert z.shape[1] == n_obs
         assert z.shape[2] == inp_dim
         assert ldj.shape[1] == n_obs
@@ -216,7 +211,7 @@ def test_amortized_likelihood(inp_shape, soft):
     # Test log posterior and lpdf shapes
     assert log_lik.shape[0] == batch_size
     assert lpdf.shape[0] == batch_size
-    if inp_shape == '3d':
+    if inp_shape == "3d":
         assert log_lik.shape[1] == n_obs
         assert lpdf.shape[1] == n_obs
 
@@ -239,7 +234,7 @@ def test_amortized_likelihood(inp_shape, soft):
 @pytest.mark.parametrize("params_dim", [4, 8])
 def test_joint_amortizer(data_dim, params_dim):
     """Tests the `JointAmortizer` instance with relevant configurations."""
-    
+
     # Randomize input
     batch_size = np.random.randint(low=1, high=32)
     units_t = np.random.randint(low=2, high=32)
@@ -247,36 +242,38 @@ def test_joint_amortizer(data_dim, params_dim):
 
     # Create settings dictionaries for inference network
     dense_net_settings = {
-        't_args': {
-            'dense_args': dict(units=units_t, kernel_initializer='glorot_uniform', activation='elu'),
-            'num_dense': 1,
-            'spec_norm': True
+        "t_args": {
+            "dense_args": dict(units=units_t, kernel_initializer="glorot_uniform", activation="elu"),
+            "num_dense": 1,
+            "spec_norm": True,
         },
-        's_args': {
-            'dense_args': dict(units=units_s, kernel_initializer='glorot_uniform', activation='elu'),
-            'num_dense': 2,
-            'spec_norm': False
-        }
+        "s_args": {
+            "dense_args": dict(units=units_s, kernel_initializer="glorot_uniform", activation="elu"),
+            "num_dense": 2,
+            "spec_norm": False,
+        },
     }
 
     # Create amortizers
-    p_amortizer = AmortizedPosterior(InvertibleNetwork(
-        **{'num_params': params_dim, 'coupling_net_settings': dense_net_settings}))
-    l_amortizer = AmortizedLikelihood(InvertibleNetwork(
-        **{'num_params': data_dim, 'coupling_net_settings': dense_net_settings}))
+    p_amortizer = AmortizedPosterior(
+        InvertibleNetwork(**{"num_params": params_dim, "coupling_net_settings": dense_net_settings})
+    )
+    l_amortizer = AmortizedLikelihood(
+        InvertibleNetwork(**{"num_params": data_dim, "coupling_net_settings": dense_net_settings})
+    )
     amortizer = AmortizedPosteriorLikelihood(p_amortizer, l_amortizer)
 
     # Create inputs and format into a dictionary
     params = np.random.normal(size=(batch_size, params_dim)).astype(np.float32)
     data = np.random.normal(size=(batch_size, data_dim)).astype(np.float32)
     inp_dict = {}
-    inp_dict[DEFAULT_KEYS['posterior_inputs']] = {
-        DEFAULT_KEYS['parameters'] : params,
-        DEFAULT_KEYS['direct_conditions'] : data
+    inp_dict[DEFAULT_KEYS["posterior_inputs"]] = {
+        DEFAULT_KEYS["parameters"]: params,
+        DEFAULT_KEYS["direct_conditions"]: data,
     }
-    inp_dict[DEFAULT_KEYS['likelihood_inputs']] = {
-        DEFAULT_KEYS['observables'] : data,
-        DEFAULT_KEYS['conditions'] : params
+    inp_dict[DEFAULT_KEYS["likelihood_inputs"]] = {
+        DEFAULT_KEYS["observables"]: data,
+        DEFAULT_KEYS["conditions"]: params,
     }
 
     # Compute lpdf

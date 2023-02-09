@@ -19,40 +19,42 @@
 # SOFTWARE.
 
 import numpy as np
+import pytest
 from pandas import DataFrame
 
-import pytest
-
-from bayesflow.networks import InvertibleNetwork, InvariantNetwork
+from bayesflow.amortizers import AmortizedLikelihood, AmortizedPosterior, AmortizedPosteriorLikelihood
+from bayesflow.networks import InvariantNetwork, InvertibleNetwork
 from bayesflow.simulation import GenerativeModel
 from bayesflow.trainers import Trainer
-from bayesflow.amortizers import AmortizedPosterior, AmortizedLikelihood, AmortizedPosteriorLikelihood
 
-def _prior(D=2, mu=0., sigma=1.0):
+
+def _prior(D=2, mu=0.0, sigma=1.0):
     """Helper minimal prior function."""
     return np.random.default_rng().normal(loc=mu, scale=sigma, size=D)
+
 
 def _simulator(theta, n_obs=10, scale=1.0):
     """Helper minimal simulator function."""
     return np.random.default_rng().normal(loc=theta, scale=scale, size=(n_obs, theta.shape[0]))
 
+
 def _create_training_setup(mode):
     """Helper function to create a relevant training setup."""
-    
+
     # Create a generative model
-    model = GenerativeModel(_prior, _simulator, name='test')
+    model = GenerativeModel(_prior, _simulator, name="test")
 
     # Case posterior inference
-    if mode == 'posterior':
+    if mode == "posterior":
         summary_net = InvariantNetwork()
         inference_net = InvertibleNetwork(num_params=2, num_coupling_layers=2)
         amortizer = AmortizedPosterior(inference_net, summary_net)
-    
+
     # Case likelihood inference
-    elif mode == 'likelihood':
+    elif mode == "likelihood":
         surrogate_net = InvertibleNetwork(num_params=2, num_coupling_layers=2)
         amortizer = AmortizedLikelihood(surrogate_net)
-    
+
     # Case joint inference
     else:
         summary_net = InvariantNetwork()
@@ -67,7 +69,7 @@ def _create_training_setup(mode):
     return trainer
 
 
-@pytest.mark.parametrize("mode", ['posterior', 'likelihood'])
+@pytest.mark.parametrize("mode", ["posterior", "likelihood"])
 @pytest.mark.parametrize("reuse_optimizer", [True, False])
 @pytest.mark.parametrize("validation_sims", [20, None])
 def test_train_online(mode, reuse_optimizer, validation_sims):
@@ -76,12 +78,12 @@ def test_train_online(mode, reuse_optimizer, validation_sims):
     # Create trainer and train online
     trainer = _create_training_setup(mode)
     h = trainer.train_online(
-        epochs=2, 
-        iterations_per_epoch=3, 
-        batch_size=8, 
+        epochs=2,
+        iterations_per_epoch=3,
+        batch_size=8,
         use_autograph=False,
         reuse_optimizer=reuse_optimizer,
-        validation_sims=validation_sims
+        validation_sims=validation_sims,
     )
 
     # Assert (non)-existence of optimizer
@@ -95,11 +97,11 @@ def test_train_online(mode, reuse_optimizer, validation_sims):
         assert type(h) is DataFrame
     else:
         assert type(h) is dict
-        assert type(h['train_losses']) is DataFrame
-        assert type(h['val_losses']) is DataFrame
+        assert type(h["train_losses"]) is DataFrame
+        assert type(h["val_losses"]) is DataFrame
 
 
-@pytest.mark.parametrize("mode", ['posterior', 'joint'])
+@pytest.mark.parametrize("mode", ["posterior", "joint"])
 @pytest.mark.parametrize("reuse_optimizer", [True, False])
 @pytest.mark.parametrize("validation_sims", [20, None])
 def test_train_experience_replay(mode, reuse_optimizer, validation_sims):
@@ -108,11 +110,7 @@ def test_train_experience_replay(mode, reuse_optimizer, validation_sims):
     # Create trainer and train with experience replay
     trainer = _create_training_setup(mode)
     h = trainer.train_experience_replay(
-        epochs=3, 
-        iterations_per_epoch=4, 
-        batch_size=8, 
-        validation_sims=validation_sims,
-        reuse_optimizer=reuse_optimizer
+        epochs=3, iterations_per_epoch=4, batch_size=8, validation_sims=validation_sims, reuse_optimizer=reuse_optimizer
     )
 
     # Assert (non)-existence of optimizer
@@ -126,11 +124,11 @@ def test_train_experience_replay(mode, reuse_optimizer, validation_sims):
         assert type(h) is DataFrame
     else:
         assert type(h) is dict
-        assert type(h['train_losses']) is DataFrame
-        assert type(h['val_losses']) is DataFrame
+        assert type(h["train_losses"]) is DataFrame
+        assert type(h["val_losses"]) is DataFrame
 
 
-@pytest.mark.parametrize("mode", ['likelihood', 'joint'])
+@pytest.mark.parametrize("mode", ["likelihood", "joint"])
 @pytest.mark.parametrize("reuse_optimizer", [True, False])
 @pytest.mark.parametrize("validation_sims", [20, None])
 def test_train_offline(mode, reuse_optimizer, validation_sims):
@@ -141,7 +139,7 @@ def test_train_offline(mode, reuse_optimizer, validation_sims):
     simulations = trainer.generative_model(100)
     h = trainer.train_offline(
         simulations_dict=simulations,
-        epochs=2, 
+        epochs=2,
         batch_size=16,
         use_autograph=True,
         validation_sims=validation_sims,
@@ -159,11 +157,11 @@ def test_train_offline(mode, reuse_optimizer, validation_sims):
         assert type(h) is DataFrame
     else:
         assert type(h) is dict
-        assert type(h['train_losses']) is DataFrame
-        assert type(h['val_losses']) is DataFrame
+        assert type(h["train_losses"]) is DataFrame
+        assert type(h["val_losses"]) is DataFrame
 
 
-@pytest.mark.parametrize("mode", ['likelihood', 'posterior'])
+@pytest.mark.parametrize("mode", ["likelihood", "posterior"])
 @pytest.mark.parametrize("reuse_optimizer", [True, False])
 @pytest.mark.parametrize("validation_sims", [20, None])
 def test_train_rounds(mode, reuse_optimizer, validation_sims):
@@ -174,8 +172,8 @@ def test_train_rounds(mode, reuse_optimizer, validation_sims):
     h = trainer.train_rounds(
         rounds=2,
         sim_per_round=32,
-        epochs=2, 
-        batch_size=8, 
+        epochs=2,
+        batch_size=8,
         validation_sims=validation_sims,
         reuse_optimizer=reuse_optimizer,
     )
@@ -191,5 +189,5 @@ def test_train_rounds(mode, reuse_optimizer, validation_sims):
         assert type(h) is DataFrame
     else:
         assert type(h) is dict
-        assert type(h['train_losses']) is DataFrame
-        assert type(h['val_losses']) is DataFrame
+        assert type(h["train_losses"]) is DataFrame
+        assert type(h["val_losses"]) is DataFrame
