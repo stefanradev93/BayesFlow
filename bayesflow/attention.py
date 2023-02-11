@@ -220,7 +220,6 @@ class InducedSelfAttentionBlock(tf.keras.Model):
 
         batch_size = x.shape[0]
         h = self.mab0(tf.stack([self.I] * batch_size), x, **kwargs)
-        print(h.shape)
         return self.mab1(x, h, **kwargs)
 
 
