@@ -20,4 +20,9 @@
 
 """Meta-module for easy access of different neural network architecture interfaces"""
 from bayesflow.inference_networks import EvidentialNetwork, InvertibleNetwork
-from bayesflow.summary_networks import InvariantNetwork, SequentialNetwork
+from bayesflow.summary_networks import (
+    InvariantNetwork, 
+    SequentialNetwork, 
+    DeepSet, 
+    SetTransformer
+)
