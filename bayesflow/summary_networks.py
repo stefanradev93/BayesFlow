@@ -47,7 +47,7 @@ class SetTransformer(tf.keras.Model):
         num_dense_fc=2,
         summary_dim=10, 
         num_attention_blocks=2, 
-        num_inducing_points=None,
+        num_inducing_points=32,
         num_seeds=1,
         **kwargs
     ):
@@ -87,9 +87,11 @@ class SetTransformer(tf.keras.Model):
             The dimensionality of the learned permutation-invariant representation.
         num_attention_blocks : int, optional, default: 2
             The number of self-attention blocks to use before pooling.
-        num_inducing_points  : int or None, optional, default: None
+        num_inducing_points  : int or None, optional, default: 32
             The number of inducing points. Should be lower than the smallest set size. 
-            If ``None`` selected, a vanilla self-attenion block (SAB) will be used.
+            If ``None`` selected, a vanilla self-attenion block (SAB) will be used, otherwise
+            ISAB blocks will be used. For ``num_attention_blocks > 1``, we currently recommend
+            always using some number of inducing points.
         num_seeds            : int, optional, default: 1
             The number of "seed vectors" to use. Each seed vector represents a permutation-invariant
             summary of the entire set. If you use ``num_seeds > 1``, the resulting seeds will be flattened
