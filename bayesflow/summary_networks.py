@@ -18,15 +18,123 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from warnings import warn
+
 import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.models import Sequential
 
 from bayesflow import default_settings as defaults
 from bayesflow.helper_networks import EquivariantModule, InvariantModule, MultiConv1D
+from bayesflow.attention import SelfAttentionBlock, InducedSelfAttentionBlock, PoolingWithAttention
 
 
-class InvariantNetwork(tf.keras.Model):
+class SetTransformer(tf.keras.Model):
+    """Implements the set transformer architecture from [1] which ultimately represents
+    a learnable permutation-invariant function.
+
+    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., & Teh, Y. W. (2019). 
+        Set transformer: A framework for attention-based permutation-invariant neural networks. 
+        In International conference on machine learning (pp. 3744-3753). PMLR.
+    """
+
+    def __init__(
+        self,
+        input_dim,
+        attention_settings,
+        dense_settings,
+        use_layer_norm=True, 
+        num_dense_fc=2,
+        summary_dim=10, 
+        num_attention_blocks=2, 
+        num_inducing_points=None,
+        num_seeds=1,
+        **kwargs
+    ):
+        """Creates a set transformer architecture according to [1] which will extract permutation-invariant
+        features from an input set using a set of seed vectors (typically one for a single summary) with ``summary_dim`` 
+        output dimensions.
+
+        Parameters
+        ----------
+        input_dim            : int
+            The dimensionality of the input data (last axis).
+        attention_settings   : dict
+            A dictionary which will be unpacked as the arguments for the ``MultiHeadAttention`` layer
+            For instance, to use an attention block with 4 heads and key dimension 32, you can do:
+    
+            ``attention_settings=dict(num_heads=4, key_dim=32)``
+
+            You may also want to include dropout regularization in small-to-medium data regimes:
+
+            ``attention_settings=dict(num_heads=4, key_dim=32, dropout=0.1)``
+
+            For more details and arguments, see:
+            https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention
+        dense_settings       : dict
+            A dictionary which will be unpacked as the arguments for the ``Dense`` layer.
+            For instance, to use hidden layers with 32 units and a relu activation, you can do:
+
+            ``dict(units=32, activation='relu')
+
+            For more details and arguments, see:
+            https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense
+        use_layer_norm       : boolean, optional, default: True 
+            Whether layer normalization before and after attention + feedforward
+        num_dense_fc         : int, optional, default: 2
+            The number of hidden layers for the internal feedforward network
+        summary_dim          : int
+            The dimensionality of the learned permutation-invariant representation.
+        num_attention_blocks : int, optional, default: 2
+            The number of self-attention blocks to use before pooling.
+        num_inducing_points  : int or None, optional, default: None
+            The number of inducing points. Should be lower than the smallest set size. 
+            If ``None`` selected, a vanilla self-attenion block (SAB) will be used.
+        num_seeds            : int, optional, default: 1
+            The number of "seed vectors" to use. Each seed vector represents a permutation-invariant
+            summary of the entire set. If you use ``num_seeds > 1``, the resulting seeds will be flattened
+            into a 2-dimensional output, which will have a dimensionality of ``num_seeds * summary_dim``.
+        **kwargs             : dict, optional, default: {}
+            Optional keyword arguments passed to the __init__() method of tf.keras.Model
+        """
+
+        super().__init__(**kwargs)
+
+        # Construct a series of self-attention blocks
+        self.attention_blocks = Sequential()
+        for _ in range(num_attention_blocks):
+            if num_inducing_points is not None:
+                block = InducedSelfAttentionBlock(input_dim, attention_settings, num_dense_fc,
+                    dense_settings, use_layer_norm, num_inducing_points)
+            else:
+                block = SelfAttentionBlock(input_dim, attention_settings, num_dense_fc,
+                    dense_settings, use_layer_norm)
+                self.attention_blocks.add(block)
+
+        # Pooler will be applied to the representations learned through self-attention
+        self.pooler = PoolingWithAttention(summary_dim, attention_settings, num_dense_fc,
+                dense_settings, use_layer_norm, num_seeds)
+
+    def call(self, x, **kwargs):
+        """Performs the forward pass through the set-transformer.
+
+        Parameters
+        ----------
+        x   : tf.Tensor
+            Input of shape (batch_size, set_size, input_dim)
+
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, summary_dim * num_seeds)
+        """
+
+        out = self.attention_blocks(x, **kwargs)
+        out = self.pooler(out, **kwargs)
+        return out
+
+
+class DeepSet(tf.keras.Model):
     """Implements a deep permutation-invariant network according to [1] and [2].
 
     [1] Zaheer, M., Kottur, S., Ravanbakhsh, S., Poczos, B., Salakhutdinov, R. R., & Smola, A. J. (2017).
@@ -126,6 +234,26 @@ class InvariantNetwork(tf.keras.Model):
         out = self.out_layer(self.inv(out_equiv))
 
         return out
+
+
+class InvariantNetwork(DeepSet):
+    """Deprecated class for ``InvariantNetwork``."""
+
+    def __init_subclass__(cls, **kwargs):
+        warn(
+            f"{cls.__name__} will be deprecated at some point. Use ``DeepSet`` instead.", 
+            DeprecationWarning, 
+            stacklevel=2
+        )
+        super().__init_subclass__(**kwargs)
+
+    def __init__(self, *args, **kwargs):
+        warn(
+            f"{self.__class__.__name__} will be deprecated. at some point. Use ``DeepSet`` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
 
 
 class SequentialNetwork(tf.keras.Model):
