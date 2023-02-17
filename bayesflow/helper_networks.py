@@ -33,13 +33,14 @@ class DenseCouplingNet(tf.keras.Model):
     """Implements a conditional version of a standard fully connected (FC) network.
     Would also work as an unconditional estimator."""
 
-    def __init__(self, meta, n_out, **kwargs):
+    def __init__(self, settings, n_out, **kwargs):
         """Creates a conditional coupling net (FC neural network).
 
         Parameters
         ----------
-        meta     : dict
-            A dictionary which holds arguments for a dense layer.
+        settings : dict
+            A dictionary holding arguments for a dense layer.
+            See https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense
         n_out    : int
             Number of outputs of the coupling net
         **kwargs : dict, optional, default: {}
@@ -50,42 +51,42 @@ class DenseCouplingNet(tf.keras.Model):
 
         # Create network body (input and hidden layers)
         self.fc = Sequential()
-        for _ in range(meta["num_dense"]):
+        for _ in range(settings["num_dense"]):
 
             # Create dense layer with dict kwargs
-            layer = Dense(**meta["dense_args"])
+            layer = Dense(**settings["dense_args"])
 
             # Wrap in spectral normalization, if specified
-            if meta.get("spec_norm") is True:
+            if settings.get("spec_norm") is True:
                 layer = SpectralNormalization(layer)
             self.fc.add(layer)
 
             # Figure out which dropout to use, MC has precedence over standard
             # Fails gently, if no dropout_prob is specified
             # Case both specified, MC wins
-            if meta.get("dropout") and meta.get("mc_dropout"):
-                self.fc.add(MCDropout(dropout_prob=meta["dropout_prob"]))
+            if settings.get("dropout") and settings.get("mc_dropout"):
+                self.fc.add(MCDropout(dropout_prob=settings["dropout_prob"]))
 
             # Case only dropout, use standard
-            elif meta.get("dropout") and not meta.get("mc_dropout"):
-                self.fc.add(Dropout(rate=meta["dropout_prob"]))
+            elif settings.get("dropout") and not settings.get("mc_dropout"):
+                self.fc.add(Dropout(rate=settings["dropout_prob"]))
 
             # Case only MC, use MC
-            elif not meta.get("dropout") and meta.get("mc_dropout"):
-                self.fc.add(MCDropout(dropout_prob=meta["dropout_prob"]))
+            elif not settings.get("dropout") and settings.get("mc_dropout"):
+                self.fc.add(MCDropout(dropout_prob=settings["dropout_prob"]))
 
             # No dropout
             else:
                 pass
 
         # Set residual flag
-        if meta.get("residual"):
-            self.residual = True
-            self.fc.add(Dense(n_out, **{k: v for k, v in meta["dense_args"].items() if k != "units"}))
+        if settings.get("residual"):
+            self.fc.add(Dense(n_out, **{k: v for k, v in settings["dense_args"].items() if k != "units"}))
+            self.residual_output = Dense(n_out, kernel_initializer="zeros")
         else:
-            self.residual = False
+            self.fc.add(Dense(n_out, kernel_initializer="zeros"))
+            self.residual_output = None
 
-        self.output_layer = Dense(n_out, kernel_initializer="zeros")
         self.fc.build(input_shape=())
 
     def call(self, target, condition, **kwargs):
@@ -101,10 +102,10 @@ class DenseCouplingNet(tf.keras.Model):
 
         # Handle case no condition
         if condition is None:
-            if self.residual:
-                return self.output_layer(self.fc(target, **kwargs) + target, **kwargs)
+            if self.residual_output is not None:
+                return self.residual_output(self.fc(target, **kwargs) + target, **kwargs)
             else:
-                return self.output_layer(self.fc(target, **kwargs), **kwargs)
+                return self.fc(target, **kwargs)
 
         # Handle 3D case for a set-flow and repeat condition over
         # the second `time` or `n_observations` axis of `target``
@@ -115,10 +116,8 @@ class DenseCouplingNet(tf.keras.Model):
         inp = tf.concat((target, condition), axis=-1)
         out = self.fc(inp, **kwargs)
 
-        if self.residual:
-            out = self.output_layer(target + out, **kwargs)
-        else:
-            out = self.output_layer(out, **kwargs)
+        if self.residual_output is not None:
+            out = self.residual_output(out + target, **kwargs)
         return out
 
 
@@ -178,6 +177,67 @@ class Permutation(tf.keras.Model):
         return tf.gather(target, self.inv_permutation, axis=-1)
 
 
+class Orthogonal(tf.keras.Model):
+    """Imeplements a learnable orthogonal transformation according to [1]. Can be
+    used as an alternative to a fixed ``Permutation`` layer.
+
+    [1] Kingma, D. P., & Dhariwal, P. (2018). Glow: Generative flow with invertible 1x1 
+    convolutions. Advances in neural information processing systems, 31.
+    """
+
+    def __init__(self, input_dim):
+        """Creates an invertible orthogonal transformation (generalized permutation)
+
+        Parameters
+        ----------
+        input_dim  : int
+            Ihe dimensionality of the input to the (conditional) coupling layer.
+        """
+
+        super().__init__()
+
+        self.W = tf.Variable(
+            shape=(input_dim, input_dim), 
+            trainable=True, 
+            initializer=tf.keras.initializers.Orthogonal()
+        )
+
+    def call(self, target, inverse=False):
+        """Transforms a batch of target vectors over the last axis.
+
+        Parameters
+        ----------
+        target   : tf.Tensor of shape (batch_size, ...)
+            The target vector to be rotated over its last axis.
+        inverse  : bool, optional, default: False
+            Controls if the current pass is forward (``inverse=False``) or inverse (``inverse=True``).
+
+        Returns
+        -------
+        out      : tf.Tensor of the same shape as `target`.
+            The (un-)rotated target vector.
+        """
+
+        if not inverse:
+            return self._forward(target)
+        else:
+            return self._inverse(target)
+
+    @tf.function
+    def _forward(self, target):
+        z = tf.math.matmul(target, self.W)
+        log_det = tf.math.log(tf.math.abs(tf.linalg.det(self.W)))
+        shape = tf.shape(target)
+        if len(shape) == 3:
+            log_det = shape[1] * log_det 
+        return z, log_det
+
+    @tf.function
+    def _inverse(self, z):
+        W_inv = tf.linalg.inv(self.W)
+        return tf.math.matmul(z, W_inv)
+
+
 class MCDropout(tf.keras.Model):
     """Implements Monte Carlo Dropout as a Bayesian approximation according to [1].
 
@@ -223,7 +283,7 @@ class MCDropout(tf.keras.Model):
 class ActNorm(tf.keras.Model):
     """Implements an Activation Normalization (ActNorm) Layer."""
 
-    def __init__(self, meta, **kwargs):
+    def __init__(self, settings, **kwargs):
         """Creates an instance of an ActNorm Layer as proposed by [1].
 
         Activation Normalization is learned invertible normalization, using
@@ -248,19 +308,19 @@ class ActNorm(tf.keras.Model):
 
         Parameters
         ----------
-        meta : dict
+        settings : dict
             Contains initialization settings for the `ActNorm` layer.
         """
 
         super().__init__(**kwargs)
 
         # Initialize scale and bias with zeros and ones if no batch for initalization was provided.
-        if meta.get("act_norm_init") is None:
-            self.scale = tf.Variable(tf.ones((meta["latent_dim"],)), trainable=True, name="act_norm_scale")
+        if settings.get("act_norm_init") is None:
+            self.scale = tf.Variable(tf.ones((settings["latent_dim"],)), trainable=True, name="act_norm_scale")
 
-            self.bias = tf.Variable(tf.zeros((meta["latent_dim"],)), trainable=True, name="act_norm_bias")
+            self.bias = tf.Variable(tf.zeros((settings["latent_dim"],)), trainable=True, name="act_norm_bias")
         else:
-            self._initalize_parameters_data_dependent(meta["act_norm_init"])
+            self._initalize_parameters_data_dependent(settings["act_norm_init"])
 
     def call(self, target, inverse=False):
         """Performs one pass through the actnorm layer (either inverse or forward) and normalizes
@@ -313,8 +373,8 @@ class ActNorm(tf.keras.Model):
         layer output has a mean of zero and a standard deviation of one.
 
         [1] - Salimans, Tim, and Durk P. Kingma.
-        "Weight normalization: A simple reparameterization to accelerate
-        training of deep neural networks."
+        Weight normalization: A simple reparameterization to accelerate
+        training of deep neural networks.
         Advances in neural information processing systems 29
         (2016): 901-909.
 
@@ -352,27 +412,36 @@ class InvariantModule(tf.keras.Model):
 
     For details and rationale, see:
 
-    [1] Bloem-Reddy, B., & Teh, Y. W. (2020).
-    Probabilistic Symmetries and Invariant Neural Networks.
-    J. Mach. Learn. Res., 21, 90-1.
-    https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
+    [1] Bloem-Reddy, B., & Teh, Y. W. (2020). Probabilistic Symmetries and Invariant Neural Networks.
+    J. Mach. Learn. Res., 21, 90-1. https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
     """
 
-    def __init__(self, meta):
-        super().__init__()
+    def __init__(self, settings, **kwargs):
+        """Creates an invariant module according to [1] which represents a learnable permutation-invariant
+        function with an option for learnable pooling.
+
+        Parameters
+        ----------
+        settings : dict
+            A dictionary holding the configuration settings for the module.
+        **kwargs : dict, optional, default: {}
+            Optional keyword arguments passed to the `tf.keras.Model` constructor.
+        """
+
+        super().__init__(**kwargs)
 
         # Create internal functions
-        self.s1 = Sequential([Dense(**meta["dense_s1_args"]) for _ in range(meta["num_dense_s1"])])
-        self.s2 = Sequential([Dense(**meta["dense_s2_args"]) for _ in range(meta["num_dense_s2"])])
+        self.s1 = Sequential([Dense(**settings["dense_s1_args"]) for _ in range(settings["num_dense_s1"])])
+        self.s2 = Sequential([Dense(**settings["dense_s2_args"]) for _ in range(settings["num_dense_s2"])])
 
         # Pick pooling function
-        if meta["pooling_fun"] == "mean":
+        if settings["pooling_fun"] == "mean":
             pooling_fun = partial(tf.reduce_mean, axis=1)
-        elif meta["pooling_fun"] == "max":
+        elif settings["pooling_fun"] == "max":
             pooling_fun = partial(tf.reduce_max, axis=1)
         else:
-            if callable(meta["pooling_fun"]):
-                pooling_fun = meta["pooling_fun"]
+            if callable(settings["pooling_fun"]):
+                pooling_fun = settings["pooling_fun"]
             else:
                 raise ConfigurationError("pooling_fun argument not understood!")
         self.pooler = pooling_fun
@@ -401,17 +470,26 @@ class EquivariantModule(tf.keras.Model):
 
     For details and justification, see:
 
-    [1] Bloem-Reddy, B., & Teh, Y. W. (2020).
-    Probabilistic Symmetries and Invariant Neural Networks.
-    J. Mach. Learn. Res., 21, 90-1.
-    https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
+    [1] Bloem-Reddy, B., & Teh, Y. W. (2020). Probabilistic Symmetries and Invariant Neural Networks.
+    J. Mach. Learn. Res., 21, 90-1. https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
     """
 
-    def __init__(self, meta):
-        super().__init__()
+    def __init__(self, settings, **kwargs):
+        """Creates an equivariant module according to [1] which combines equivariant transforms
+        with nested invariant transforms, thereby enabling interactions between set members.
 
-        self.invariant_module = InvariantModule(meta)
-        self.s3 = Sequential([Dense(**meta["dense_s3_args"]) for _ in range(meta["num_dense_s3"])])
+        Parameters
+        ----------
+        settings : dict
+            A dictionary holding the configuration settings for the module.
+        **kwargs : dict, optional, default: {}
+            Optional keyword arguments passed to the ``tf.keras.Model`` constructor.
+        """
+
+        super().__init__(**kwargs)
+
+        self.invariant_module = InvariantModule(settings)
+        self.s3 = Sequential([Dense(**settings["dense_s3_args"]) for _ in range(settings["num_dense_s3"])])
 
     def call(self, x):
         """Performs the forward pass of a learnable equivariant transform.
@@ -447,13 +525,13 @@ class EquivariantModule(tf.keras.Model):
 class MultiConv1D(tf.keras.Model):
     """Implements an inception-inspired 1D convolutional layer using different kernel sizes."""
 
-    def __init__(self, meta, **kwargs):
+    def __init__(self, settings, **kwargs):
         """Creates an inception-like Conv1D layer
 
         Parameters
         ----------
-        meta  : dict
-            A dictionary which holds the arguments for the internal `Conv1D` layers.
+        settings  : dict
+            A dictionary which holds the arguments for the internal ``Conv1D`` layers.
         """
 
         super().__init__(**kwargs)
@@ -461,11 +539,12 @@ class MultiConv1D(tf.keras.Model):
         # Create a list of Conv1D layers with different kernel sizes
         # ranging from 'min_kernel_size' to 'max_kernel_size'
         self.convs = [
-            Conv1D(kernel_size=f, **meta["layer_args"]) for f in range(meta["min_kernel_size"], meta["max_kernel_size"])
+            Conv1D(kernel_size=f, **settings["layer_args"]) 
+            for f in range(settings["min_kernel_size"], settings["max_kernel_size"])
         ]
 
         # Create final Conv1D layer for dimensionalitiy reduction
-        dim_red_args = {k: v for k, v in meta["layer_args"].items() if k not in ["kernel_size", "strides"]}
+        dim_red_args = {k: v for k, v in settings["layer_args"].items() if k not in ["kernel_size", "strides"]}
         dim_red_args["kernel_size"] = 1
         dim_red_args["strides"] = 1
         self.dim_red = Conv1D(**dim_red_args)

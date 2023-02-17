@@ -87,7 +87,7 @@ class EarlyStopper:
     """This class will track the total validation loss and trigger an early stopping
     recommendation based on its hyperparameters."""
 
-    def __init__(self, patience=5, tolerance=0.1):
+    def __init__(self, patience=5, tolerance=0.05):
         """
 
         patience          : int, optional, default: 5

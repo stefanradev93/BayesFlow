@@ -99,7 +99,6 @@ class InvertibleNetwork(tf.keras.Model):
 
         super().__init__(**kwargs)
 
-        # Create settings dict for coupling layer
         settings = dict(
             latent_dim=num_params,
             coupling_net_settings=coupling_net_settings,
@@ -109,11 +108,7 @@ class InvertibleNetwork(tf.keras.Model):
             act_norm_init=act_norm_init,
             alpha=soft_clamping,
         )
-
-        # Create sequence of coupling layers and store reference to dimensionality
         self.coupling_layers = [AffineCouplingLayer(settings) for _ in range(num_coupling_layers)]
-
-        # Store attributes
         self.soft_flow = use_soft_flow
         self.soft_low = soft_flow_bounds[0]
         self.soft_high = soft_flow_bounds[1]

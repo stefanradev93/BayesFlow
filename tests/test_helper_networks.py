@@ -81,18 +81,18 @@ def test_dense_coupling_net(input_dim, meta, condition):
     # Test number of layers
     # 2 Hidden + 2 Dropouts
     if meta.get("dropout") or meta.get("mc_dropout"):
-        if meta.get("residual"):
-            assert len(dense.fc.layers) == 2 * meta["num_dense"] + 1
-        else:
-            assert len(dense.fc.layers) == 2 * meta["num_dense"]
+        assert len(dense.fc.layers) == 2 * meta["num_dense"] + 1
+
     # 2 Hidden + 1 Out
     else:
-        if meta.get("residual"):
-            assert len(dense.fc.layers) == meta["num_dense"] + 1
-        else:
-            assert len(dense.fc.layers) == meta["num_dense"]
+        assert len(dense.fc.layers) == meta["num_dense"] + 1
     assert out.shape == inp.shape
 
+    # Test residual
+    if meta.get('residual'):
+        assert dense.residual_output is not None
+    else:
+        assert dense.residual_output is None
 
 @pytest.mark.parametrize("input_dim", [3, 8])
 @pytest.mark.parametrize("shape", ["2d", "3d"])
