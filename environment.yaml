@@ -1,3 +1,5 @@
+# Read the docs
+
 # run: conda env create --file environment.yaml
 
 name: bf
@@ -5,4 +7,4 @@ dependencies:
   - python==3.9
   - pip
   - pip:
-    - -r requirements.txt
+    - .[docs]
