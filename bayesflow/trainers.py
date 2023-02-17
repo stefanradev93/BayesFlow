@@ -112,7 +112,7 @@ class Trainer:
         **kwargs,
     ):
         """Creates a trainer which will use a generative model (or data simulated from it) to optimize
-        a neural arhcitecture (amortizer) for amortized posterior inference, likelihood inference, or both.
+        a neural architecture (amortizer) for amortized posterior inference, likelihood inference, or both.
 
         Parameters
         ----------
@@ -404,7 +404,6 @@ class Trainer:
         for ep in range(1, epochs + 1):
             with tqdm(total=iterations_per_epoch, desc=f"Training epoch {ep}") as p_bar:
                 for it in range(1, iterations_per_epoch + 1):
-
                     # Perform one training step and obtain current loss value
                     loss = self._train_step(batch_size, update_step=_backprop_step, **kwargs)
 
@@ -526,7 +525,6 @@ class Trainer:
             with tqdm(total=len(data_set.data), desc="Training epoch {}".format(ep)) as p_bar:
                 # Loop through dataset
                 for bi, forward_dict in enumerate(data_set, start=1):
-
                     # Perform one training step and obtain current loss value
                     input_dict = self.configurator(forward_dict, **kwargs.pop("conf_args", {}))
                     loss = self._train_step(batch_size, _backprop_step, input_dict, **kwargs)
@@ -662,7 +660,6 @@ class Trainer:
             file_list = file_list[:max_epochs]
 
         for ep, current_filename in enumerate(file_list, start=1):
-
             # Read single file into memory as a dictionary or list
             file_path = os.path.join(presimulation_path, current_filename)
             epoch_data = custom_loader(file_path)
@@ -679,7 +676,6 @@ class Trainer:
 
             with tqdm(total=len(index_list), desc=f"Training epoch {ep}") as p_bar:
                 for it, index in enumerate(index_list, start=1):
-
                     # Perform one training step and obtain current loss value
                     input_dict = self.configurator(epoch_data[index])
 
@@ -815,7 +811,6 @@ class Trainer:
         for ep in range(1, epochs + 1):
             with tqdm(total=iterations_per_epoch, desc=f"Training epoch {ep}") as p_bar:
                 for it in range(1, iterations_per_epoch + 1):
-
                     # Simulate a batch of data and store into buffer
                     input_dict = self._forward_inference(
                         batch_size, **kwargs.pop("conf_args", {}), **kwargs.pop("model_args", {})
