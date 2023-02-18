@@ -20,28 +20,20 @@
 
 
 import tensorflow as tf
+from tensorflow.keras.layers import Dense, LayerNormalization, MultiHeadAttention
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, MultiHeadAttention, LayerNormalization
 
 
 class MultiHeadAttentionBlock(tf.keras.Model):
     """Implements the MAB block from [1] which represents learnable cross-attention.
 
-    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., & Teh, Y. W. (2019). 
-        Set transformer: A framework for attention-based permutation-invariant neural networks. 
+    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., & Teh, Y. W. (2019).
+        Set transformer: A framework for attention-based permutation-invariant neural networks.
         In International conference on machine learning (pp. 3744-3753). PMLR.
     """
 
-    def __init__(
-        self,
-        input_dim,
-        attention_settings, 
-        num_dense_fc,
-        dense_settings, 
-        use_layer_norm,
-        **kwargs
-    ):
-        """Creates a multihead attention block which will typically be used as part of a 
+    def __init__(self, input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm, **kwargs):
+        """Creates a multihead attention block which will typically be used as part of a
         set transformer architecture according to [1].
 
         Parameters
@@ -97,21 +89,13 @@ class MultiHeadAttentionBlock(tf.keras.Model):
 class SelfAttentionBlock(tf.keras.Model):
     """Implements the SAB block from [1] which represents learnable self-attention.
 
-    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., & Teh, Y. W. (2019). 
-        Set transformer: A framework for attention-based permutation-invariant neural networks. 
+    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., & Teh, Y. W. (2019).
+        Set transformer: A framework for attention-based permutation-invariant neural networks.
         In International conference on machine learning (pp. 3744-3753). PMLR.
     """
 
-    def __init__(
-        self, 
-        input_dim, 
-        attention_settings, 
-        num_dense_fc, 
-        dense_settings, 
-        use_layer_norm, 
-        **kwargs
-    ):
-        """Creates a self-attention attention block which will typically be used as part of a 
+    def __init__(self, input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm, **kwargs):
+        """Creates a self-attention attention block which will typically be used as part of a
         set transformer architecture according to [1].
 
         Parameters
@@ -131,11 +115,9 @@ class SelfAttentionBlock(tf.keras.Model):
             Optional keyword arguments passed to the __init__() method of tf.keras.Model
         """
 
-
         super().__init__(**kwargs)
 
-        self.mab = MultiHeadAttentionBlock(
-            input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm)
+        self.mab = MultiHeadAttentionBlock(input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm)
 
     def call(self, x, **kwargs):
         """Performs the forward pass through the self-attention layer.
@@ -157,23 +139,16 @@ class SelfAttentionBlock(tf.keras.Model):
 class InducedSelfAttentionBlock(tf.keras.Model):
     """Implements the ISAB block from [1] which represents learnable self-attention specifically
     designed to deal with large sets via a learnable set of "inducing points".
-    
-    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., & Teh, Y. W. (2019). 
-        Set transformer: A framework for attention-based permutation-invariant neural networks. 
+
+    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., & Teh, Y. W. (2019).
+        Set transformer: A framework for attention-based permutation-invariant neural networks.
         In International conference on machine learning (pp. 3744-3753). PMLR.
     """
 
     def __init__(
-        self, 
-        input_dim, 
-        attention_settings, 
-        num_dense_fc,
-        dense_settings, 
-        use_layer_norm, 
-        num_inducing_points, 
-        **kwargs
+        self, input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm, num_inducing_points, **kwargs
     ):
-        """Creates a self-attention attention block with inducing points (ISAB) which will typically 
+        """Creates a self-attention attention block with inducing points (ISAB) which will typically
         be used as part of a set transformer architecture according to [1].
 
         Parameters
@@ -196,13 +171,11 @@ class InducedSelfAttentionBlock(tf.keras.Model):
         """
 
         super().__init__(**kwargs)
-        
+
         init = tf.keras.initializers.GlorotUniform()
-        self.I = tf.Variable(init(shape=(num_inducing_points, input_dim)), name='I', trainable=True)
-        self.mab0 = MultiHeadAttentionBlock(
-            input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm)
-        self.mab1 = MultiHeadAttentionBlock(
-            input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm)
+        self.I = tf.Variable(init(shape=(num_inducing_points, input_dim)), name="I", trainable=True)
+        self.mab0 = MultiHeadAttentionBlock(input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm)
+        self.mab1 = MultiHeadAttentionBlock(input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm)
 
     def call(self, x, **kwargs):
         """Performs the forward pass through the self-attention layer.
@@ -224,23 +197,16 @@ class InducedSelfAttentionBlock(tf.keras.Model):
 
 
 class PoolingWithAttention(tf.keras.Model):
-    """Implements the pooling with multihead attention (PMA) block from [1] which represents 
+    """Implements the pooling with multihead attention (PMA) block from [1] which represents
     a permutation-invariant encoder for set-based inputs.
-    
-    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., & Teh, Y. W. (2019). 
-        Set transformer: A framework for attention-based permutation-invariant neural networks. 
+
+    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., & Teh, Y. W. (2019).
+        Set transformer: A framework for attention-based permutation-invariant neural networks.
         In International conference on machine learning (pp. 3744-3753). PMLR.
     """
 
     def __init__(
-        self,
-        summary_dim, 
-        attention_settings,
-        num_dense_fc,
-        dense_settings,
-        use_layer_norm, 
-        num_seeds=1,
-        **kwargs
+        self, summary_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm, num_seeds=1, **kwargs
     ):
         """Creates a multihead attention block (MAB) which will perform cross-attention between an input set
         and a set of seed vectors (typically one for a single summary) with summary_dim output dimensions.
@@ -271,7 +237,7 @@ class PoolingWithAttention(tf.keras.Model):
         super().__init__(**kwargs)
 
         self.mab = MultiHeadAttentionBlock(
-            summary_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm,  **kwargs
+            summary_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm, **kwargs
         )
         init = tf.keras.initializers.GlorotUniform()
         self.seed_vec = init(shape=(num_seeds, summary_dim))
