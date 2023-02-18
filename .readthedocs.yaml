@@ -1,9 +1,17 @@
-# Required
+# .readthedocs.yaml
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Format version
 version: 2
 
+# Build documentation with Sphinx
 sphinx:
    configuration: docs/source/conf.py
 
+# Additional build formats
 formats: all
+
+# Configure conda environment
 conda:
   environment: environment.yaml
