@@ -21,12 +21,139 @@
 from warnings import warn
 
 import tensorflow as tf
-from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.layers import GRU, LSTM, Dense
 from tensorflow.keras.models import Sequential
 
 from bayesflow import default_settings as defaults
-from bayesflow.attention import InducedSelfAttentionBlock, PoolingWithAttention, SelfAttentionBlock
+from bayesflow.attention import (
+    InducedSelfAttentionBlock,
+    MultiHeadAttentionBlock,
+    PoolingWithAttention,
+    SelfAttentionBlock,
+)
 from bayesflow.helper_networks import EquivariantModule, InvariantModule, MultiConv1D
+
+
+class TimeSeriesTransformer(tf.keras.Model):
+    """Implements a many-to-one transformer architecture for time series encoding.
+    Some ideas can be found in [1]:
+
+    [1] Wen, Q., Zhou, T., Zhang, C., Chen, W., Ma, Z., Yan, J., & Sun, L. (2022).
+    Transformers in time series: A survey. arXiv preprint arXiv:2202.07125.
+    https://arxiv.org/abs/2202.07125
+    """
+
+    def __init__(
+        self,
+        input_dim,
+        attention_settings,
+        dense_settings,
+        use_layer_norm=True,
+        num_dense_fc=2,
+        summary_dim=10,
+        num_attention_blocks=2,
+        template_type="lstm",
+        template_dim=64,
+        **kwargs,
+    ):
+        """Creates a transformer architecture for encoding time series data into fixed size vectors given by
+        ``summary_dim``. It features a recurrent network given by ``template_type`` which is responsible for
+        providing a single summary of the time series which then attends to each point in the time series pro-
+        cessed via a series of ``num_attention_blocks`` self-attention layers.
+
+        Important: Assumes that positional encodings have been appended to the input time series.
+
+        Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate
+        during training, e.g., setting ``default_lr=1e-5`` in a ``Trainer`` instance.
+
+        Parameters
+        ----------
+        input_dim            : int
+            The dimensionality of the input data (last axis).
+        attention_settings   : dict
+            A dictionary which will be unpacked as the arguments for the ``MultiHeadAttention`` layer
+            For instance, to use an attention block with 4 heads and key dimension 32, you can do:
+
+            ``attention_settings=dict(num_heads=4, key_dim=32)``
+
+            You may also want to include dropout regularization in small-to-medium data regimes:
+
+            ``attention_settings=dict(num_heads=4, key_dim=32, dropout=0.1)``
+
+            For more details and arguments, see:
+            https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention
+        dense_settings       : dict
+            A dictionary which will be unpacked as the arguments for the ``Dense`` layer.
+            For instance, to use hidden layers with 32 units and a relu activation, you can do:
+
+            ``dict(units=32, activation='relu')
+
+            For more details and arguments, see:
+            https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense
+        use_layer_norm       : boolean, optional, default: True
+            Whether layer normalization before and after attention + feedforward
+        num_dense_fc         : int, optional, default: 2
+            The number of hidden layers for the internal feedforward network
+        summary_dim          : int
+            The dimensionality of the learned permutation-invariant representation.
+        num_attention_blocks : int, optional, default: 2
+            The number of self-attention blocks to use before pooling.
+        template_type        : str or callable, optional, default: 'lstm'
+            The many-to-one (learnable) transformation of the time series.
+            if ``lstm``, an LSTM network will be used.
+            if ``gru``, a GRU unit will be used.
+            if callable, a reference to ``template_type`` will be stored as an attribute.
+        template_dim         : int, optional, default: 64
+            Only used if ``template_type`` in ['lstm', 'gru']. The number of hidden
+            units (equiv. output dimensions) of the recurrent network.
+        **kwargs             : dict, optional, default: {}
+            Optional keyword arguments passed to the __init__() method of tf.keras.Model
+        """
+
+        super().__init__(**kwargs)
+
+        # Construct a series of self-attention blocks
+        self.attention_blocks = Sequential()
+        for _ in range(num_attention_blocks):
+            block = SelfAttentionBlock(input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm)
+            self.attention_blocks.add(block)
+        self.output_attention = MultiHeadAttentionBlock(
+            template_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm
+        )
+
+        # Dynamic many-to-one template
+        if template_type.upper() == "LSTM":
+            self.template_net = LSTM(template_dim)
+        elif template_type.upper() == "GRU":
+            self.template_net = LSTM(template_dim)
+        else:
+            assert callable(template_type), "Argument `template_dim` should be callable or in ['lstm', 'gru']"
+            self.template_net = template_type
+
+        # Final output laters reduces representation
+        # into a vector with summary_dim dimensions
+        self.output_layer = Dense(summary_dim)
+
+    def call(self, x, **kwargs):
+        """Performs the forward pass through the transformer.
+
+        Parameters
+        ----------
+        x   : tf.Tensor
+            Time series input of shape (batch_size, num_time_points, input_dim)
+
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, summary_dim)
+        """
+
+        rep = self.attention_blocks(x, **kwargs)
+        template = self.template_net(x, **kwargs)
+        rep = self.output_attention(tf.expand_dims(template, axis=1), rep, **kwargs)
+        rep = tf.squeeze(rep, axis=1)
+        out = self.output_layer(rep)
+        return out
 
 
 class SetTransformer(tf.keras.Model):
@@ -54,6 +181,9 @@ class SetTransformer(tf.keras.Model):
         """Creates a set transformer architecture according to [1] which will extract permutation-invariant
         features from an input set using a set of seed vectors (typically one for a single summary) with ``summary_dim``
         output dimensions.
+
+        Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate
+        during training, e.g., setting ``default_lr=1e-5`` in a ``Trainer`` instance.
 
         Parameters
         ----------
@@ -124,7 +254,7 @@ class SetTransformer(tf.keras.Model):
         Parameters
         ----------
         x   : tf.Tensor
-            Input of shape (batch_size, set_size, input_dim)
+            The input set of shape (batch_size, set_size, input_dim)
 
         Returns
         -------
