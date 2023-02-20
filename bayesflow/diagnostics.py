@@ -307,6 +307,9 @@ def plot_sbc_ecdf(
     if difference:
         L -= z
         H -= z
+        ylab = "ECDF difference"
+    else:
+            ylab = "ECDF"
 
     # Add simultaneous bounds
     if stacked:
@@ -327,13 +330,23 @@ def plot_sbc_ecdf(
         sns.despine(ax=_ax)
         _ax.grid(alpha=0.35)
         _ax.legend(fontsize=legend_fontsize)
-        _ax.set_xlabel("Fractional rank statistic", fontsize=label_fontsize)
-        if difference:
-            ylab = "ECDF difference"
-        else:
-            ylab = "ECDF"
-        _ax.set_ylabel(ylab, fontsize=label_fontsize)
         _ax.set_title(title, fontsize=title_fontsize)
+
+        # only add x-labels to the bottom row
+        bottom_row = ax if n_row == 1 else ax[0] if n_col == 1 else ax[n_row - 1, :]
+        for _ax in bottom_row:
+            _ax.set_xlabel("Fractional rank statistic", fontsize=label_fontsize)
+
+        # only add y-labels to right left-most row
+        if n_row == 1:  # if there is only one row, the ax array is 1D
+            ax[0].set_ylabel(ylab, fontsize=label_fontsize)
+        else:  # if there is more than one row, the ax array is 2D
+            for _ax in ax[:, 0]:
+                _ax.set_ylabel(ylab, fontsize=label_fontsize)
+
+    # remove unused axes entirely
+    for _ax in axes[n_params:]:
+        _ax.remove()
 
     f.tight_layout()
     return f
