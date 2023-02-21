@@ -52,7 +52,6 @@ class DenseCouplingNet(tf.keras.Model):
         # Create network body (input and hidden layers)
         self.fc = Sequential()
         for _ in range(settings["num_dense"]):
-
             # Create dense layer with dict kwargs
             layer = Dense(**settings["dense_args"])
 
@@ -181,7 +180,7 @@ class Orthogonal(tf.keras.Model):
     """Imeplements a learnable orthogonal transformation according to [1]. Can be
     used as an alternative to a fixed ``Permutation`` layer.
 
-    [1] Kingma, D. P., & Dhariwal, P. (2018). Glow: Generative flow with invertible 1x1 
+    [1] Kingma, D. P., & Dhariwal, P. (2018). Glow: Generative flow with invertible 1x1
     convolutions. Advances in neural information processing systems, 31.
     """
 
@@ -196,14 +195,12 @@ class Orthogonal(tf.keras.Model):
 
         super().__init__()
 
-        self.W = tf.Variable(
-            shape=(input_dim, input_dim), 
-            trainable=True, 
-            initializer=tf.keras.initializers.Orthogonal()
-        )
+        init = tf.keras.initializers.Orthogonal()
+        self.W = init(shape=(input_dim, input_dim))
 
     def call(self, target, inverse=False):
-        """Transforms a batch of target vectors over the last axis.
+        """Transforms a batch of target vectors over the last axis through an approximately
+        orthogonal transform.
 
         Parameters
         ----------
@@ -225,17 +222,27 @@ class Orthogonal(tf.keras.Model):
 
     @tf.function
     def _forward(self, target):
-        z = tf.math.matmul(target, self.W)
-        log_det = tf.math.log(tf.math.abs(tf.linalg.det(self.W)))
+        """Performs a learnable generalized permutation over the last axis."""
+
         shape = tf.shape(target)
-        if len(shape) == 3:
-            log_det = shape[1] * log_det 
+        rank = len(shape)
+        log_det = tf.math.log(tf.math.abs(tf.linalg.det(self.W)))
+        if rank == 2:
+            z = tf.linalg.matmul(target, self.W)
+        else:
+            z = tf.tensordot(target, self.W, [[rank - 1], [0]])
+            log_det = tf.cast(shape[1], tf.float32) * log_det
         return z, log_det
 
     @tf.function
     def _inverse(self, z):
+        """Un-does the learnable permutation over the last axis."""
+
         W_inv = tf.linalg.inv(self.W)
-        return tf.math.matmul(z, W_inv)
+        rank = len(tf.shape(z))
+        if rank == 2:
+            return tf.linalg.matmul(z, W_inv)
+        return tf.tensordot(z, W_inv, [[rank - 1], [0]])
 
 
 class MCDropout(tf.keras.Model):
@@ -354,7 +361,7 @@ class ActNorm(tf.keras.Model):
 
     @tf.function
     def _forward(self, target):
-        """Performs a forward pass through the ``ActNorm`` layer."""
+        """Performs a forward pass through the layer."""
 
         z = self.scale * target + self.bias
         ldj = tf.math.reduce_sum(tf.math.log(tf.math.abs(self.scale)), axis=-1)
@@ -362,7 +369,7 @@ class ActNorm(tf.keras.Model):
 
     @tf.function
     def _inverse(self, target):
-        """Performs an inverse pass through the `ActNorm` layer."""
+        """Performs an inverse pass through the layer."""
 
         return (target - self.bias) / self.scale
 
@@ -539,7 +546,7 @@ class MultiConv1D(tf.keras.Model):
         # Create a list of Conv1D layers with different kernel sizes
         # ranging from 'min_kernel_size' to 'max_kernel_size'
         self.convs = [
-            Conv1D(kernel_size=f, **settings["layer_args"]) 
+            Conv1D(kernel_size=f, **settings["layer_args"])
             for f in range(settings["min_kernel_size"], settings["max_kernel_size"])
         ]
 

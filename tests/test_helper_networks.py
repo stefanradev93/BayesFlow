@@ -89,10 +89,11 @@ def test_dense_coupling_net(input_dim, meta, condition):
     assert out.shape == inp.shape
 
     # Test residual
-    if meta.get('residual'):
+    if meta.get("residual"):
         assert dense.residual_output is not None
     else:
         assert dense.residual_output is None
+
 
 @pytest.mark.parametrize("input_dim", [3, 8])
 @pytest.mark.parametrize("shape", ["2d", "3d"])
@@ -107,6 +108,25 @@ def test_permutation(input_dim, shape):
 
     # Create permutation layer and apply P_inv * P(input)
     perm = Permutation(input_dim)
+    x_rec = perm(perm(x), inverse=True).numpy()
+
+    # Inverse should recover input regardless of input dim or shape
+    assert np.allclose(x, x_rec)
+
+
+@pytest.mark.parametrize("input_dim", [3, 8])
+@pytest.mark.parametrize("shape", ["2d", "3d"])
+def test_orthogonal(input_dim, shape):
+    """Tests the learnable ``Orthogonal`` layer in terms of invertibility and input-output fidelity."""
+
+    # Create randomized input
+    if shape == "2d":
+        x = tf.random.normal((np.random.randint(low=1, high=32), input_dim))
+    else:
+        x = tf.random.normal((np.random.randint(low=1, high=32), np.random.randint(low=1, high=32), input_dim))
+
+    # Create permutation layer and apply P_inv * P(input)
+    perm = Orthogonal(input_dim)[0]
     x_rec = perm(perm(x), inverse=True).numpy()
 
     # Inverse should recover input regardless of input dim or shape
