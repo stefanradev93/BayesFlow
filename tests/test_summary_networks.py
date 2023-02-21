@@ -111,7 +111,7 @@ def test_set_transformer(summary_dim, num_seeds, num_attention_blocks, num_induc
     configurations w.r.t. permutation invariance and output dimensions."""
 
     # Prepare settings for transformer
-    att_dict = {"num_head": 2, "key_dim": 16}
+    att_dict = {"num_heads": 2, "key_dim": 16}
     dense_dict = {"units": 16, "activation": "relu"}
 
     # Create input and permuted version with randomized shapes
