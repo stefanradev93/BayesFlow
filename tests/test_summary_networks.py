@@ -51,8 +51,8 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
 @pytest.mark.parametrize("num_equiv", [1, 3])
 @pytest.mark.parametrize("summary_dim", [13, 2])
 def test_deep_set(num_equiv, summary_dim):
-    """This function tests the fidelity of the ``DeepSet`` with a couple of relevant
-    configurations w.r.t. permutation invariance and output dimensions."""
+    """Tests the fidelity of the ``DeepSet`` with relevant configurations
+    w.r.t. permutation invariance and shape integrity."""
 
     # Prepare settings for the deep set
     settings = {"num_equiv": num_equiv, "summary_dim": summary_dim}
@@ -79,7 +79,7 @@ def test_deep_set(num_equiv, summary_dim):
 @pytest.mark.parametrize("num_conv_layers", [1, 3])
 @pytest.mark.parametrize("lstm_units", [16, 32])
 def test_sequential_network(num_conv_layers, lstm_units):
-    """This function tests the fidelity of the ``SequentialNetwork`` w.r.t. output dimensions
+    """Tests the fidelity of the ``SequentialNetwork`` w.r.t. shape integrity
     using a number of relevant configurations."""
 
     # Create settings dict and network
@@ -107,12 +107,12 @@ def test_sequential_network(num_conv_layers, lstm_units):
 @pytest.mark.parametrize("num_attention_blocks", [1, 2])
 @pytest.mark.parametrize("num_inducing_points", [None, 4])
 def test_set_transformer(summary_dim, num_seeds, num_attention_blocks, num_inducing_points):
-    """This function tests the fidelity of the ``SetTransformer`` with a couple of relevant
-    configurations w.r.t. permutation invariance and output dimensions."""
+    """Tests the fidelity of the ``SetTransformer`` with relevant configurations w.r.t.
+    permutation invariance and shape integrity."""
 
     # Prepare settings for transformer
-    att_dict = {"num_heads": 2, "key_dim": 16}
-    dense_dict = {"units": 16, "activation": "relu"}
+    att_dict = dict(num_heads=2, key_dim=16)
+    dense_dict = dict(units=8, activation="elu")
 
     # Create input and permuted version with randomized shapes
     x, x_perm, _ = _gen_randomized_3d_data()
@@ -147,3 +147,41 @@ def test_set_transformer(summary_dim, num_seeds, num_attention_blocks, num_induc
             assert type(block) is SelfAttentionBlock
         else:
             assert type(block) is InducedSelfAttentionBlock
+
+
+@pytest.mark.parametrize("summary_dim", [2, 9])
+@pytest.mark.parametrize("template_dim", [4, 8])
+@pytest.mark.parametrize("num_attention_blocks", [1, 2])
+def test_time_series_transformer(summary_dim, template_dim, num_attention_blocks):
+    """Tests the fidelity of the ``TimeSeriesTransformer`` w.r.t. shape integrity
+    using a number of relevant configurations."""
+
+    # Create test 3d data
+    inp, inp_perm, _ = _gen_randomized_3d_data()
+
+    # Prepare settings for transformer and create instance
+    att_dict = dict(num_heads=3, key_dim=10)
+    dense_dict = dict(units=4, activation="relu")
+    transformer = TimeSeriesTransformer(
+        input_dim=inp.shape[2],
+        attention_settings=att_dict,
+        dense_settings=dense_dict,
+        summary_dim=summary_dim,
+        template_dim=template_dim,
+        num_attention_blocks=num_attention_blocks,
+    )
+
+    # Process original and permuted input
+    out = transformer(inp).numpy()
+    out_perm = transformer(inp_perm).numpy()
+
+    # Test shape integrity
+    assert len(out.shape) == 2
+    assert len(out_perm.shape) == 2
+    assert out.shape[1] == summary_dim
+    assert out_perm.shape[1] == summary_dim
+    assert out.shape[0] == inp.shape[0]
+    assert len(transformer.attention_blocks.layers) == num_attention_blocks
+
+    # Test non-permutation invariant
+    assert not np.allclose(out, out_perm, atol=1e-5)
