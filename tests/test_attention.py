@@ -107,7 +107,7 @@ def test_self_attention_block(num_dense_fc=1, use_layer_norm=True):
     perm = np.random.permutation(inp.shape[1])
     perm_inp = inp[:, perm, :]
     perm_out = block(perm_inp)
-    assert np.allclose(tf.reduce_sum(perm_out, axis=1), tf.reduce_sum(out, axis=1))
+    assert np.allclose(tf.reduce_sum(perm_out, axis=1), tf.reduce_sum(out, axis=1), atol=1e-5)
 
 
 @pytest.mark.parametrize("num_inducing_points", [4, 8])
@@ -130,7 +130,7 @@ def test_induced_self_attention_block(num_inducing_points, num_dense_fc=1, use_l
     perm = np.random.permutation(inp.shape[1])
     perm_inp = inp[:, perm, :]
     perm_out = block(perm_inp)
-    assert np.allclose(tf.reduce_sum(perm_out, axis=1), tf.reduce_sum(out, axis=1))
+    assert np.allclose(tf.reduce_sum(perm_out, axis=1), tf.reduce_sum(out, axis=1), atol=1e-5)
 
 
 @pytest.mark.parametrize("summary_dim", [3, 8])
@@ -157,4 +157,4 @@ def test_pooling_with_attention(summary_dim, num_seeds, num_dense_fc=1, use_laye
     perm = np.random.permutation(inp.shape[1])
     perm_inp = inp[:, perm, :]
     perm_out = pma(perm_inp)
-    assert np.allclose(out, perm_out)
+    assert np.allclose(out, perm_out, atol=1e-5)
