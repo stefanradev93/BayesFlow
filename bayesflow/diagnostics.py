@@ -41,16 +41,16 @@ def plot_recovery(
     uncertainty_agg=median_abs_deviation,
     param_names=None,
     fig_size=None,
-    label_fontsize=14,
-    title_fontsize=16,
+    label_fontsize=16,
+    title_fontsize=18,
     metric_fontsize=16,
+    tick_fontsize=12,
     add_corr=True,
     add_r2=True,
     color="#8f2727",
     n_col=None,
     n_row=None,
 ):
-
     """Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
     The point estimate can be controlled with the ``point_agg`` argument, and the uncertainty estimate
     can be controlled with the ``uncertainty_agg`` argument.
@@ -86,6 +86,8 @@ def plot_recovery(
         The font size of the title text
     metric_fontsize   : int, optional, default: 16
         The font size of the goodness-of-fit metric (if provided)
+    tick_fontsize     : int, optional, default: 12
+        The font size of the axis ticklabels
     add_corr          : bool, optional, default: True
         A flag for adding correlation between true and estimates to the plot
     add_r2            : bool, optional, default: True
@@ -114,7 +116,7 @@ def plot_recovery(
     # Determine n params and param names if None given
     n_params = prior_samples.shape[-1]
     if param_names is None:
-        param_names = [f"$p_{i}$" for i in range(1, n_params + 1)]
+        param_names = [f"$\\theta_{{{i}}}$" for i in range(1, n_params + 1)]
 
     # Determine number of rows and columns for subplots based on inputs
     if n_row is None and n_col is None:
@@ -131,20 +133,20 @@ def plot_recovery(
     f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
     # turn axarr into 1D list
     if n_col > 1 or n_row > 1:
-        axarr = axarr.flat
+        axarr_it = axarr.flat
     else:
         # for 1x1, axarr is not a list -> turn it into one for use with enumerate
-        axarr = [axarr]
+        axarr_it = [axarr]
 
-    for i, ax in enumerate(axarr):
+    for i, ax in enumerate(axarr_it):
         if i >= n_params:
             break
 
         # Add scatter and errorbars
         if uncertainty_agg is not None:
-            im = ax.errorbar(prior_samples[:, i], est[:, i], yerr=u[:, i], fmt="o", alpha=0.5, color=color)
+            _ = ax.errorbar(prior_samples[:, i], est[:, i], yerr=u[:, i], fmt="o", alpha=0.5, color=color)
         else:
-            im = ax.scatter(prior_samples[:, i], est[:, i], alpha=0.5, color=color)
+            _ = ax.scatter(prior_samples[:, i], est[:, i], alpha=0.5, color=color)
 
         # Make plots quadratic to avoid visual illusions
         lower = min(prior_samples[:, i].min(), est[:, i].min())
@@ -160,9 +162,7 @@ def plot_recovery(
             linestyle="dashed",
         )
 
-        # Add labels, optional metrics and title
-        ax.set_xlabel("Ground truth", fontsize=label_fontsize)
-        ax.set_ylabel("Estimated", fontsize=label_fontsize)
+        # Add optional metrics and title
         if add_r2:
             r2 = r2_score(prior_samples[:, i], est[:, i])
             ax.text(
@@ -190,6 +190,26 @@ def plot_recovery(
         # Prettify
         sns.despine(ax=ax)
         ax.grid(alpha=0.5)
+        ax.tick_params(axis="both", which="major", labelsize=tick_fontsize)
+        ax.tick_params(axis="both", which="minor", labelsize=tick_fontsize)
+
+    # Only add x-labels to the bottom row
+    bottom_row = axarr if n_row == 1 else axarr[0] if n_col == 1 else axarr[n_row - 1, :]
+    for _ax in bottom_row:
+        _ax.set_xlabel("Ground truth", fontsize=label_fontsize)
+
+    # Only add y-labels to right left-most row
+    if n_row == 1:  # if there is only one row, the ax array is 1D
+        axarr[0].set_ylabel("Estimated", fontsize=label_fontsize)
+    # If there is more than one row, the ax array is 2D
+    else:
+        for _ax in axarr[:, 0]:
+            _ax.set_ylabel("Estimated", fontsize=label_fontsize)
+
+    # Remove unused axes entirely
+    for _ax in axarr_it[n_params:]:
+        _ax.remove()
+
     f.tight_layout()
     return f
 
@@ -201,22 +221,24 @@ def plot_sbc_ecdf(
     stacked=False,
     fig_size=None,
     param_names=None,
-    label_fontsize=14,
+    label_fontsize=16,
     legend_fontsize=14,
-    title_fontsize=16,
+    title_fontsize=18,
+    tick_fontsize=12,
     rank_ecdf_color="#a34f4f",
     fill_color="grey",
     **kwargs,
 ):
     """Creates the empirical CDFs for each marginal rank distribution and plots it against
-    a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform. Inspired by:
+    a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform,
+    as proposed by [1].
+
+    For models with many parameters, use `stacked=True` to obtain an idea of the overall calibration
+    of a posterior approximator.
 
     [1] Säilynoja, T., Bürkner, P. C., & Vehtari, A. (2022). Graphical test for discrete uniformity and
     its applications in goodness-of-fit evaluation and multiple sample comparison. Statistics and Computing,
     32(2), 1-21. https://arxiv.org/abs/2103.10522
-
-    For models with many parameters, use `stacked=True` to obtain an idea of the overall calibration
-    of a posterior approximator.
 
     Parameters
     ----------
@@ -239,13 +261,15 @@ def plot_sbc_ecdf(
         The font size of the legend text
     title_fontsize    : int, optional, default: 16
         The font size of the title text. Only relevant if `stacked=False`
+    tick_fontsize     : int, optional, default: 12
+        The font size of the axis ticklabels
     rank_ecdf_color   : str, optional, default: '#a34f4f'
         The color to use for the rank ECDFs
     fill_color        : str, optional, default: 'grey'
         The color of the fill arguments.
     **kwargs          : dict, optional, default: {}
         Keyword arguments can be passed to control the behavior of ECDF simultaneous band computation
-        through the `ecdf_bands_kwargs` dictionary. See `simultaneous_ecdf_bands` for keyword arguments
+        through the ``ecdf_bands_kwargs`` dictionary. See `simultaneous_ecdf_bands` for keyword arguments
 
     Returns
     -------
@@ -283,7 +307,6 @@ def plot_sbc_ecdf(
 
     # Plot individual ecdf of parameters
     for j in range(ranks.shape[-1]):
-
         ecdf_single = np.sort(ranks[:, j])
         xx = ecdf_single
         yy = np.arange(1, xx.shape[-1] + 1) / float(xx.shape[-1])
@@ -309,17 +332,16 @@ def plot_sbc_ecdf(
         H -= z
         ylab = "ECDF difference"
     else:
-            ylab = "ECDF"
+        ylab = "ECDF"
 
     # Add simultaneous bounds
     if stacked:
         titles = [None]
         axes = [ax]
-
     else:
         axes = ax.flat
         if param_names is None:
-            titles = [f"$p_{i}$" for i in range(1, n_params + 1)]
+            titles = [f"$\\theta_{{{i}}}$" for i in range(1, n_params + 1)]
         else:
             titles = param_names
 
@@ -331,20 +353,22 @@ def plot_sbc_ecdf(
         _ax.grid(alpha=0.35)
         _ax.legend(fontsize=legend_fontsize)
         _ax.set_title(title, fontsize=title_fontsize)
+        _ax.tick_params(axis="both", which="major", labelsize=tick_fontsize)
+        _ax.tick_params(axis="both", which="minor", labelsize=tick_fontsize)
 
-        # only add x-labels to the bottom row
-        bottom_row = ax if n_row == 1 else ax[0] if n_col == 1 else ax[n_row - 1, :]
-        for _ax in bottom_row:
-            _ax.set_xlabel("Fractional rank statistic", fontsize=label_fontsize)
+    # Only add x-labels to the bottom row
+    bottom_row = ax if n_row == 1 else ax[0] if n_col == 1 else ax[n_row - 1, :]
+    for _ax in bottom_row:
+        _ax.set_xlabel("Fractional rank statistic", fontsize=label_fontsize)
 
-        # only add y-labels to right left-most row
-        if n_row == 1:  # if there is only one row, the ax array is 1D
-            ax[0].set_ylabel(ylab, fontsize=label_fontsize)
-        else:  # if there is more than one row, the ax array is 2D
-            for _ax in ax[:, 0]:
-                _ax.set_ylabel(ylab, fontsize=label_fontsize)
+    # Only add y-labels to right left-most row
+    if n_row == 1:  # if there is only one row, the ax array is 1D
+        ax[0].set_ylabel(ylab, fontsize=label_fontsize)
+    else:  # if there is more than one row, the ax array is 2D
+        for _ax in ax[:, 0]:
+            _ax.set_ylabel(ylab, fontsize=label_fontsize)
 
-    # remove unused axes entirely
+    # Remove unused axes entirely
     for _ax in axes[n_params:]:
         _ax.remove()
 
@@ -359,19 +383,20 @@ def plot_sbc_histograms(
     fig_size=None,
     num_bins=None,
     binomial_interval=0.99,
-    label_fontsize=14,
-    title_fontsize=16,
+    label_fontsize=16,
+    title_fontsize=18,
+    tick_fontsize=12,
     hist_color="#a34f4f",
 ):
     """Creates and plots publication-ready histograms of rank statistics for simulation-based calibration
-    (SBC) checks according to:
+    (SBC) checks according to [1].
+
+    Any deviation from uniformity indicates miscalibration and thus poor convergence
+    of the networks or poor combination between generative model / networks.
 
     [1] Talts, S., Betancourt, M., Simpson, D., Vehtari, A., & Gelman, A. (2018).
     Validating Bayesian inference algorithms with simulation-based calibration.
     arXiv preprint arXiv:1804.06788.
-
-    Any deviation from uniformity indicates miscalibration and thus poor convergence
-    of the networks or poor combination between generative model / networks.
 
     Parameters
     ----------
@@ -391,6 +416,8 @@ def plot_sbc_histograms(
         The font size of the y-label text
     title_fontsize    : int, optional, default: 16
         The font size of the title text
+    tick_fontsize     : int, optional, default: 12
+        The font size of the axis ticklabels
     hist_color        : str, optional, default '#a34f4f'
         The color to use for the histogram body
 
@@ -430,7 +457,7 @@ def plot_sbc_histograms(
 
     # Determine n params and param names if None given
     if param_names is None:
-        param_names = [f"$p_{i}$" for i in range(1, n_params + 1)]
+        param_names = [f"$\\theta_{{{i}}}$" for i in range(1, n_params + 1)]
 
     # Determine n_subplots dynamically
     n_row = int(np.ceil(n_params / 6))
@@ -463,9 +490,20 @@ def plot_sbc_histograms(
         ax[j].set_title(param_names[j], fontsize=title_fontsize)
         ax[j].spines["right"].set_visible(False)
         ax[j].spines["top"].set_visible(False)
-        ax[j].set_xlabel("Rank statistic", fontsize=label_fontsize)
         ax[j].get_yaxis().set_ticks([])
         ax[j].set_ylabel("")
+        ax[j].tick_params(axis="both", which="major", labelsize=tick_fontsize)
+        ax[j].tick_params(axis="both", which="minor", labelsize=tick_fontsize)
+
+    # Only add x-labels to the bottom row
+    bottom_row = axarr if n_row == 1 else axarr[0] if n_col == 1 else axarr[n_row - 1, :]
+    for _ax in bottom_row:
+        _ax.set_xlabel("Rank statistic", fontsize=label_fontsize)
+
+    # Remove unused axes entirely
+    for _ax in axarr[n_params:]:
+        _ax.remove()
+
     f.tight_layout()
     return f
 
@@ -541,9 +579,9 @@ def plot_posterior_2d(
             if prior.param_names is not None:
                 param_names = prior.param_names
             else:
-                param_names = [f"$p_{i}$" for i in range(1, n_params + 1)]
+                param_names = [f"$\\theta_{{{i}}}$" for i in range(1, n_params + 1)]
         else:
-            param_names = [f"$p_{i}$" for i in range(1, n_params + 1)]
+            param_names = [f"$\\theta_{{{i}}}$" for i in range(1, n_params + 1)]
 
     # Pack posterior draws into a dataframe
     posterior_draws_df = pd.DataFrame(posterior_draws, columns=param_names)
@@ -798,7 +836,6 @@ def plot_calibration_curves(m_true, m_pred, model_names=None, n_bins=10, font_si
     """Plots the calibration curves and the ECE for a model comparison problem. Depends on the
     ``expected_calibration_error`` function for computing the ECE.
 
-
     Parameters
     ----------
     TODO
@@ -825,7 +862,6 @@ def plot_calibration_curves(m_true, m_pred, model_names=None, n_bins=10, font_si
     else:
         ax = axarr
     for j in range(n_models):
-
         # Plot calibration curve
         ax[j].plot(cal_probs[j][0], cal_probs[j][1])
 
