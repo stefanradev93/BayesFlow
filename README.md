@@ -72,7 +72,7 @@ generative_model = bf.simulation.GenerativeModel(prior, simulator)
 Next, we create our BayesFlow setup consisting of a summary and an inference network:
 
 ```python
-summary_net = bf.networks.InvariantNetwork()
+summary_net = bf.networks.DeepSet()
 inference_net = bf.networks.InvertibleNetwork(num_params=2)
 amortizer = bf.amortizers.AmortizedPosterior(inference_net, summary_net)
 ```
