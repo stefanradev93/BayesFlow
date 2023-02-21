@@ -112,26 +112,29 @@ class TimeSeriesTransformer(tf.keras.Model):
 
         super().__init__(**kwargs)
 
-        # Construct a series of self-attention blocks
+        # Construct a series of self-attention blocks, these will process
+        # the time series in a many-to-many fashion
         self.attention_blocks = Sequential()
         for _ in range(num_attention_blocks):
             block = SelfAttentionBlock(input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm)
             self.attention_blocks.add(block)
+
+        # Construct final attention layer, which will perform cross-attention
+        # between the outputs ot the self-attention layers and the dynamic template
         self.output_attention = MultiHeadAttentionBlock(
             template_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm
         )
 
-        # Dynamic many-to-one template
+        # A recurrent network will learn the dynamic many-to-one template
         if template_type.upper() == "LSTM":
             self.template_net = LSTM(template_dim)
         elif template_type.upper() == "GRU":
-            self.template_net = LSTM(template_dim)
+            self.template_net = GRU(template_dim)
         else:
             assert callable(template_type), "Argument `template_dim` should be callable or in ['lstm', 'gru']"
             self.template_net = template_type
 
-        # Final output laters reduces representation
-        # into a vector with summary_dim dimensions
+        # Final output reduces representation into a vector of length summary_dim
         self.output_layer = Dense(summary_dim)
 
     def call(self, x, **kwargs):
