@@ -126,8 +126,8 @@ def test_orthogonal(input_dim, shape):
         x = tf.random.normal((np.random.randint(low=1, high=32), np.random.randint(low=1, high=32), input_dim))
 
     # Create permutation layer and apply P_inv * P(input)
-    perm = Orthogonal(input_dim)[0]
-    x_rec = perm(perm(x), inverse=True).numpy()
+    perm = Orthogonal(input_dim)
+    x_rec = perm(perm(x)[0], inverse=True).numpy()
 
     # Inverse should recover input regardless of input dim or shape
     assert np.allclose(x, x_rec)
