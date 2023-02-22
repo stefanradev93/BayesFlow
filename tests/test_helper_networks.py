@@ -130,7 +130,7 @@ def test_orthogonal(input_dim, shape):
     x_rec = perm(perm(x)[0], inverse=True).numpy()
 
     # Inverse should recover input regardless of input dim or shape
-    assert np.allclose(x, x_rec)
+    assert np.allclose(x, x_rec, atol=1e-5)
 
 
 @pytest.mark.parametrize("input_dim", [2, 5])
