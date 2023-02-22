@@ -227,7 +227,8 @@ def plot_z_score_contraction(
     n_row=None,
 ):
     """Implements a graphical check for global inferential adequacy by plotting the posterior
-    z-score over the posterior contraction for each set of posterior samples according to [1].
+    z-score over the posterior contraction for each set of posterior samples in ``post_samples``
+    according to [1].
 
     - The definition of the posterior z-score is:
 
@@ -243,6 +244,8 @@ def plot_z_score_contraction(
     replacing the prior with the posterior. The ideal posterior contraction tends to 1.
     Contraction near zero indicates that the posterior variance is almost identical to
     the prior variance for the particular marginal parameter distribution.
+
+    Note: Means and variances will be estimated vie their sample-based estimators.
 
     [1] Schad, D. J., Betancourt, M., & Vasishth, S. (2021).
     Toward a principled Bayesian workflow in cognitive science.
@@ -332,7 +335,7 @@ def plot_z_score_contraction(
         ax.grid(alpha=0.5)
         ax.tick_params(axis="both", which="major", labelsize=tick_fontsize)
         ax.tick_params(axis="both", which="minor", labelsize=tick_fontsize)
-        ax.set_ylim([-0.05, 1.05])
+        ax.set_xlim([-0.05, 1.05])
 
     # Only add x-labels to the bottom row
     bottom_row = axarr if n_row == 1 else axarr[0] if n_col == 1 else axarr[n_row - 1, :]
@@ -626,7 +629,7 @@ def plot_sbc_histograms(
         ax = axarr
     for j in range(len(param_names)):
         ax[j].axhspan(endpoints[0], endpoints[1], facecolor="gray", alpha=0.3)
-        ax[j].axhline(mean, color="gray", zorder=0, alpha=0.5)
+        ax[j].axhline(mean, color="gray", zorder=0, alpha=0.9)
         sns.histplot(ranks[:, j], kde=False, ax=ax[j], color=hist_color, bins=num_bins, alpha=0.95)
         ax[j].set_title(param_names[j], fontsize=title_fontsize)
         ax[j].spines["right"].set_visible(False)
