@@ -18,15 +18,259 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from warnings import warn
+
 import tensorflow as tf
-from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.layers import GRU, LSTM, Dense
 from tensorflow.keras.models import Sequential
 
 from bayesflow import default_settings as defaults
+from bayesflow.attention import (
+    InducedSelfAttentionBlock,
+    MultiHeadAttentionBlock,
+    PoolingWithAttention,
+    SelfAttentionBlock,
+)
 from bayesflow.helper_networks import EquivariantModule, InvariantModule, MultiConv1D
 
 
-class InvariantNetwork(tf.keras.Model):
+class TimeSeriesTransformer(tf.keras.Model):
+    """Implements a many-to-one transformer architecture for time series encoding.
+    Some ideas can be found in [1]:
+
+    [1] Wen, Q., Zhou, T., Zhang, C., Chen, W., Ma, Z., Yan, J., & Sun, L. (2022).
+    Transformers in time series: A survey. arXiv preprint arXiv:2202.07125.
+    https://arxiv.org/abs/2202.07125
+    """
+
+    def __init__(
+        self,
+        input_dim,
+        attention_settings,
+        dense_settings,
+        use_layer_norm=True,
+        num_dense_fc=2,
+        summary_dim=10,
+        num_attention_blocks=2,
+        template_type="lstm",
+        template_dim=64,
+        **kwargs,
+    ):
+        """Creates a transformer architecture for encoding time series data into fixed size vectors given by
+        ``summary_dim``. It features a recurrent network given by ``template_type`` which is responsible for
+        providing a single summary of the time series which then attends to each point in the time series pro-
+        cessed via a series of ``num_attention_blocks`` self-attention layers.
+
+        Important: Assumes that positional encodings have been appended to the input time series.
+
+        Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate
+        during training, e.g., setting ``default_lr=1e-5`` in a ``Trainer`` instance.
+
+        Parameters
+        ----------
+        input_dim            : int
+            The dimensionality of the input data (last axis).
+        attention_settings   : dict
+            A dictionary which will be unpacked as the arguments for the ``MultiHeadAttention`` layer
+            For instance, to use an attention block with 4 heads and key dimension 32, you can do:
+
+            ``attention_settings=dict(num_heads=4, key_dim=32)``
+
+            You may also want to include dropout regularization in small-to-medium data regimes:
+
+            ``attention_settings=dict(num_heads=4, key_dim=32, dropout=0.1)``
+
+            For more details and arguments, see:
+            https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention
+        dense_settings       : dict
+            A dictionary which will be unpacked as the arguments for the ``Dense`` layer.
+            For instance, to use hidden layers with 32 units and a relu activation, you can do:
+
+            ``dict(units=32, activation='relu')
+
+            For more details and arguments, see:
+            https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense
+        use_layer_norm       : boolean, optional, default: True
+            Whether layer normalization before and after attention + feedforward
+        num_dense_fc         : int, optional, default: 2
+            The number of hidden layers for the internal feedforward network
+        summary_dim          : int
+            The dimensionality of the learned permutation-invariant representation.
+        num_attention_blocks : int, optional, default: 2
+            The number of self-attention blocks to use before pooling.
+        template_type        : str or callable, optional, default: 'lstm'
+            The many-to-one (learnable) transformation of the time series.
+            if ``lstm``, an LSTM network will be used.
+            if ``gru``, a GRU unit will be used.
+            if callable, a reference to ``template_type`` will be stored as an attribute.
+        template_dim         : int, optional, default: 64
+            Only used if ``template_type`` in ['lstm', 'gru']. The number of hidden
+            units (equiv. output dimensions) of the recurrent network.
+        **kwargs             : dict, optional, default: {}
+            Optional keyword arguments passed to the __init__() method of tf.keras.Model
+        """
+
+        super().__init__(**kwargs)
+
+        # Construct a series of self-attention blocks, these will process
+        # the time series in a many-to-many fashion
+        self.attention_blocks = Sequential()
+        for _ in range(num_attention_blocks):
+            block = SelfAttentionBlock(input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm)
+            self.attention_blocks.add(block)
+
+        # Construct final attention layer, which will perform cross-attention
+        # between the outputs ot the self-attention layers and the dynamic template
+        self.output_attention = MultiHeadAttentionBlock(
+            template_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm
+        )
+
+        # A recurrent network will learn the dynamic many-to-one template
+        if template_type.upper() == "LSTM":
+            self.template_net = LSTM(template_dim)
+        elif template_type.upper() == "GRU":
+            self.template_net = GRU(template_dim)
+        else:
+            assert callable(template_type), "Argument `template_dim` should be callable or in ['lstm', 'gru']"
+            self.template_net = template_type
+
+        # Final output reduces representation into a vector of length summary_dim
+        self.output_layer = Dense(summary_dim)
+
+    def call(self, x, **kwargs):
+        """Performs the forward pass through the transformer.
+
+        Parameters
+        ----------
+        x   : tf.Tensor
+            Time series input of shape (batch_size, num_time_points, input_dim)
+
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, summary_dim)
+        """
+
+        rep = self.attention_blocks(x, **kwargs)
+        template = self.template_net(x, **kwargs)
+        rep = self.output_attention(tf.expand_dims(template, axis=1), rep, **kwargs)
+        rep = tf.squeeze(rep, axis=1)
+        out = self.output_layer(rep)
+        return out
+
+
+class SetTransformer(tf.keras.Model):
+    """Implements the set transformer architecture from [1] which ultimately represents
+    a learnable permutation-invariant function.
+
+    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., & Teh, Y. W. (2019).
+        Set transformer: A framework for attention-based permutation-invariant neural networks.
+        In International conference on machine learning (pp. 3744-3753). PMLR.
+    """
+
+    def __init__(
+        self,
+        input_dim,
+        attention_settings,
+        dense_settings,
+        use_layer_norm=True,
+        num_dense_fc=2,
+        summary_dim=10,
+        num_attention_blocks=2,
+        num_inducing_points=32,
+        num_seeds=1,
+        **kwargs,
+    ):
+        """Creates a set transformer architecture according to [1] which will extract permutation-invariant
+        features from an input set using a set of seed vectors (typically one for a single summary) with ``summary_dim``
+        output dimensions.
+
+        Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate
+        during training, e.g., setting ``default_lr=1e-5`` in a ``Trainer`` instance.
+
+        Parameters
+        ----------
+        input_dim            : int
+            The dimensionality of the input data (last axis).
+        attention_settings   : dict
+            A dictionary which will be unpacked as the arguments for the ``MultiHeadAttention`` layer
+            For instance, to use an attention block with 4 heads and key dimension 32, you can do:
+
+            ``attention_settings=dict(num_heads=4, key_dim=32)``
+
+            You may also want to include dropout regularization in small-to-medium data regimes:
+
+            ``attention_settings=dict(num_heads=4, key_dim=32, dropout=0.1)``
+
+            For more details and arguments, see:
+            https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention
+        dense_settings       : dict
+            A dictionary which will be unpacked as the arguments for the ``Dense`` layer.
+            For instance, to use hidden layers with 32 units and a relu activation, you can do:
+
+            ``dict(units=32, activation='relu')
+
+            For more details and arguments, see:
+            https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense
+        use_layer_norm       : boolean, optional, default: True
+            Whether layer normalization before and after attention + feedforward
+        num_dense_fc         : int, optional, default: 2
+            The number of hidden layers for the internal feedforward network
+        summary_dim          : int
+            The dimensionality of the learned permutation-invariant representation.
+        num_attention_blocks : int, optional, default: 2
+            The number of self-attention blocks to use before pooling.
+        num_inducing_points  : int or None, optional, default: 32
+            The number of inducing points. Should be lower than the smallest set size.
+            If ``None`` selected, a vanilla self-attenion block (SAB) will be used, otherwise
+            ISAB blocks will be used. For ``num_attention_blocks > 1``, we currently recommend
+            always using some number of inducing points.
+        num_seeds            : int, optional, default: 1
+            The number of "seed vectors" to use. Each seed vector represents a permutation-invariant
+            summary of the entire set. If you use ``num_seeds > 1``, the resulting seeds will be flattened
+            into a 2-dimensional output, which will have a dimensionality of ``num_seeds * summary_dim``.
+        **kwargs             : dict, optional, default: {}
+            Optional keyword arguments passed to the __init__() method of tf.keras.Model
+        """
+
+        super().__init__(**kwargs)
+
+        # Construct a series of self-attention blocks
+        self.attention_blocks = Sequential()
+        for _ in range(num_attention_blocks):
+            if num_inducing_points is not None:
+                block = InducedSelfAttentionBlock(
+                    input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm, num_inducing_points
+                )
+            else:
+                block = SelfAttentionBlock(input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm)
+            self.attention_blocks.add(block)
+
+        # Pooler will be applied to the representations learned through self-attention
+        self.pooler = PoolingWithAttention(
+            summary_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm, num_seeds
+        )
+
+    def call(self, x, **kwargs):
+        """Performs the forward pass through the set-transformer.
+
+        Parameters
+        ----------
+        x   : tf.Tensor
+            The input set of shape (batch_size, set_size, input_dim)
+
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, summary_dim * num_seeds)
+        """
+
+        out = self.attention_blocks(x, **kwargs)
+        out = self.pooler(out, **kwargs)
+        return out
+
+
+class DeepSet(tf.keras.Model):
     """Implements a deep permutation-invariant network according to [1] and [2].
 
     [1] Zaheer, M., Kottur, S., Ravanbakhsh, S., Poczos, B., Salakhutdinov, R. R., & Smola, A. J. (2017).
@@ -126,6 +370,26 @@ class InvariantNetwork(tf.keras.Model):
         out = self.out_layer(self.inv(out_equiv))
 
         return out
+
+
+class InvariantNetwork(DeepSet):
+    """Deprecated class for ``InvariantNetwork``."""
+
+    def __init_subclass__(cls, **kwargs):
+        warn(
+            f"{cls.__name__} will be deprecated at some point. Use ``DeepSet`` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init_subclass__(**kwargs)
+
+    def __init__(self, *args, **kwargs):
+        warn(
+            f"{self.__class__.__name__} will be deprecated. at some point. Use ``DeepSet`` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
 
 
 class SequentialNetwork(tf.keras.Model):

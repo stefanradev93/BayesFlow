@@ -30,7 +30,7 @@ from bayesflow.networks import InvariantNetwork, InvertibleNetwork
 @pytest.mark.parametrize("summary_loss", ["MMD", None])
 @pytest.mark.parametrize("soft", [True, False])
 def test_amortized_posterior(cond_shape, summary_loss, soft):
-    """Tests the `AmortizedPosterior` instance with relevant configurations."""
+    """Tests the ``AmortizedPosterior`` instance with relevant configurations."""
 
     # Randomize input
     batch_size = np.random.randint(low=1, high=32)
@@ -133,7 +133,7 @@ def test_amortized_posterior(cond_shape, summary_loss, soft):
 @pytest.mark.parametrize("inp_shape", ["2d", "3d"])
 @pytest.mark.parametrize("soft", [True, False])
 def test_amortized_likelihood(inp_shape, soft):
-    """Tests the `AmortizedLikelihood` instance with relevant configurations."""
+    """Tests the ``AmortizedLikelihood`` instance with relevant configurations."""
 
     # Randomize input
     batch_size = np.random.randint(low=1, high=32)
@@ -233,7 +233,7 @@ def test_amortized_likelihood(inp_shape, soft):
 @pytest.mark.parametrize("data_dim", [12, 3])
 @pytest.mark.parametrize("params_dim", [4, 8])
 def test_joint_amortizer(data_dim, params_dim):
-    """Tests the `JointAmortizer` instance with relevant configurations."""
+    """Tests the ``JointAmortizer`` instance with relevant configurations."""
 
     # Randomize input
     batch_size = np.random.randint(low=1, high=32)
