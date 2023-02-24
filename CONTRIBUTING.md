@@ -20,7 +20,7 @@ Environment
 
 If you want to contribute to the development of BayesFlow, you need to install developer requirements via:
 
-    pip install -r requirements-dev.txt
+    pip install -r requirements_dev.txt
 
 Tox
 ---
