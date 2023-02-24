@@ -55,7 +55,8 @@ def plot_recovery(
     The point estimate can be controlled with the ``point_agg`` argument, and the uncertainty estimate
     can be controlled with the ``uncertainty_agg`` argument.
 
-    This plot yields the same information as the "posterior z-score":
+    This plot yields similar information as the "posterior z-score", but allows for generic
+    point and uncertainty estimates:
 
     https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html
 
@@ -226,7 +227,7 @@ def plot_z_score_contraction(
     n_col=None,
     n_row=None,
 ):
-    """Implements a graphical check for global inferential adequacy by plotting the posterior
+    """Implements a graphical check for global model sensitivity by plotting the posterior
     z-score over the posterior contraction for each set of posterior samples in ``post_samples``
     according to [1].
 
