@@ -437,6 +437,7 @@ def plot_sbc_ecdf(
 
     # Prepare figure
     if stacked:
+        n_row, n_col = 1, 1
         f, ax = plt.subplots(1, 1, figsize=fig_size)
     else:
         # Determine n_subplots dynamically
@@ -502,15 +503,15 @@ def plot_sbc_ecdf(
         _ax.tick_params(axis="both", which="minor", labelsize=tick_fontsize)
 
     # Only add x-labels to the bottom row
-    bottom_row = ax if n_row == 1 else ax[0] if n_col == 1 else ax[n_row - 1, :]
+    bottom_row = axes if n_row == 1 else axes[0] if n_col == 1 else ax[n_row - 1, :]
     for _ax in bottom_row:
         _ax.set_xlabel("Fractional rank statistic", fontsize=label_fontsize)
 
     # Only add y-labels to right left-most row
     if n_row == 1:  # if there is only one row, the ax array is 1D
-        ax[0].set_ylabel(ylab, fontsize=label_fontsize)
+        axes[0].set_ylabel(ylab, fontsize=label_fontsize)
     else:  # if there is more than one row, the ax array is 2D
-        for _ax in ax[:, 0]:
+        for _ax in axes[:, 0]:
             _ax.set_ylabel(ylab, fontsize=label_fontsize)
 
     # Remove unused axes entirely
@@ -659,7 +660,9 @@ def plot_posterior_2d(
     prior_draws=None,
     param_names=None,
     height=3,
-    legend_fontsize=14,
+    label_fontsize=14,
+    legend_fontsize=16,
+    tick_fontsize=12,
     post_color="#8f2727",
     prior_color="gray",
     post_alpha=0.9,
@@ -678,8 +681,12 @@ def plot_posterior_2d(
         The parameter names for nice plot titles. Inferred if None
     height            : float, optional, default: 3
         The height of the pairplot
-    legend_fontsize   : int, optional, default: 14
+    label_fontsize    : int, optional, default: 14
+        The font size of the x and y-label texts (parameter names)
+    legend_fontsize   : int, optional, default: 16
         The font size of the legend text
+    tick_fontsize     : int, optional, default: 12
+        The font size of the axis ticklabels
     post_color        : str, optional, default: '#8f2727'
         The color for the posterior histograms and KDEs
     priors_color      : str, optional, default: gray
@@ -754,6 +761,16 @@ def plot_posterior_2d(
     # Remove upper axis
     for i, j in zip(*np.triu_indices_from(g.axes, 1)):
         g.axes[i, j].axis("off")
+
+    # Modify tick sizes
+    for i, j in zip(*np.tril_indices_from(g.axes, 1)):
+        g.axes[i, j].tick_params(axis="both", which="major", labelsize=tick_fontsize)
+        g.axes[i, j].tick_params(axis="both", which="minor", labelsize=tick_fontsize)
+
+    # Add nice labels
+    for i, param_name in enumerate(param_names):
+        g.axes[i, 0].set_ylabel(param_name, fontsize=label_fontsize)
+        g.axes[len(param_names) - 1, i].set_xlabel(param_name, fontsize=label_fontsize)
 
     # Add grids
     for i in range(n_params):
