@@ -65,7 +65,6 @@ class DefaultLikelihoodConfigurator:
 
         # Determine whether simulated or observed data available, throw if None present
         if forward_dict.get(DEFAULT_KEYS["sim_data"]) is None and forward_dict.get(DEFAULT_KEYS["obs_data"]) is None:
-
             raise ConfigurationError(
                 f"Either {DEFAULT_KEYS['sim_data']} or {DEFAULT_KEYS['obs_data']}"
                 + " should be present as keys in the forward_dict."
@@ -95,7 +94,6 @@ class DefaultPosteriorConfigurator:
     """Fallback class for a generic configrator for amortized posterior approximation."""
 
     def __init__(self, default_float_type=np.float32):
-
         self.default_float_type = default_float_type
 
     def __call__(self, forward_dict):
@@ -135,7 +133,6 @@ class DefaultPosteriorConfigurator:
 
         # Determine whether simulated or observed data available, throw if None present
         if forward_dict.get(DEFAULT_KEYS["sim_data"]) is None and forward_dict.get(DEFAULT_KEYS["obs_data"]) is None:
-
             raise ConfigurationError(
                 f"Either {DEFAULT_KEYS['sim_data']} or {DEFAULT_KEYS['obs_data']}"
                 + " should be present as keys in the forward_dict, but not both!"
@@ -249,9 +246,8 @@ class DefaultPosteriorConfigurator:
 class DefaultModelComparisonConfigurator:
     """Fallback class for a default configurator for amortized model comparison."""
 
-    def __init__(self, n_models, config=None, default_float_type=np.float32):
-
-        self.n_models = n_models
+    def __init__(self, num_models, config=None, default_float_type=np.float32):
+        self.num_models = num_models
         if config is None:
             self.config = DefaultPosteriorConfigurator()
         else:
@@ -291,7 +287,7 @@ class DefaultModelComparisonConfigurator:
                 direct_conditions.append(conf_out[DEFAULT_KEYS["direct_conditions"]])
             # Extract model indices as one-hot
             n_draws = dict_m[DEFAULT_KEYS["prior_draws"]].shape[0]
-            model_indices.append(to_categorical([m_idx] * n_draws, self.n_models))
+            model_indices.append(to_categorical([m_idx] * n_draws, self.num_models))
 
         # At this point, all elements of the input_dicts should be arrays with identical keys
         out_dict[DEFAULT_KEYS["summary_conditions"]] = (
