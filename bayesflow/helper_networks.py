@@ -443,9 +443,9 @@ class InvariantModule(tf.keras.Model):
 
         # Pick pooling function
         if settings["pooling_fun"] == "mean":
-            pooling_fun = partial(tf.reduce_mean, axis=1)
+            pooling_fun = partial(tf.reduce_mean, axis=-2)
         elif settings["pooling_fun"] == "max":
-            pooling_fun = partial(tf.reduce_max, axis=1)
+            pooling_fun = partial(tf.reduce_max, axis=-2)
         else:
             if callable(settings["pooling_fun"]):
                 pooling_fun = settings["pooling_fun"]
@@ -459,12 +459,12 @@ class InvariantModule(tf.keras.Model):
         Parameters
         ----------
         x : tf.Tensor
-            Input of shape (batch_size, N, x_dim)
+            Input of shape (batch_size,..., x_dim)
 
         Returns
         -------
         out : tf.Tensor
-            Output of shape (batch_size, out_dim)
+            Output of shape (batch_size,..., out_dim)
         """
 
         x_reduced = self.pooler(self.s1(x))
@@ -504,22 +504,23 @@ class EquivariantModule(tf.keras.Model):
         Parameters
         ----------
         x   : tf.Tensor
-            Input of shape (batch_size, N, x_dim)
+            Input of shape (batch_size, ..., x_dim)
 
         Returns
         -------
         out : tf.Tensor
-            Output of shape (batch_size, N, equiv_dim)
+            Output of shape (batch_size, ..., equiv_dim)
         """
 
-        # Store shape of x, will be (batch_size, N, some_dim)
+        # Store shape of x, will be (batch_size, ..., some_dim)
         shape = tf.shape(x)
 
-        # Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
+        # Example: Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
         out_inv = self.invariant_module(x)
-
-        out_inv = tf.expand_dims(out_inv, 1)
-        out_inv_rep = tf.tile(out_inv, [1, shape[1], 1])
+        out_inv = tf.expand_dims(out_inv, -2)
+        tiler = [1] * out_inv.ndim
+        tiler[-2] = shape[-2]
+        out_inv_rep = tf.tile(out_inv, tiler)
 
         # Concatenate each x with the repeated invariant embedding
         out_c = tf.concat([x, out_inv_rep], axis=-1)

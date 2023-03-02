@@ -19,6 +19,7 @@
 # SOFTWARE.
 
 from abc import ABC, abstractmethod
+from functools import partial
 from warnings import warn
 
 import numpy as np
@@ -27,7 +28,8 @@ import tensorflow_probability as tfp
 
 from bayesflow.default_settings import DEFAULT_KEYS
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
-from bayesflow.losses import kl_dirichlet, log_loss, mmd_summary_space
+from bayesflow.losses import log_loss, mmd_summary_space
+from bayesflow.networks import EvidentialNetwork
 
 
 class AmortizedTarget(ABC):
@@ -853,54 +855,48 @@ class AmortizedPosteriorLikelihood(tf.keras.Model, AmortizedTarget):
 
 class AmortizedModelComparison(tf.keras.Model):
     """An interface to connect an evidential network for Bayesian model comparison with an optional summary network,
-    as described in the original paper on evidential neural networks for model comparison:
+    as described in the original paper on evidential neural networks for model comparison according to [1, 2]:
 
     [1] Radev, S. T., D'Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., & Bürkner, P. C. (2021).
     Amortized bayesian model comparison with evidential deep learning.
     IEEE Transactions on Neural Networks and Learning Systems.
 
-    Note: the original paper does not distinguish between the summary and the evidential networks, but
+    [2] Elsemüller, L., Schnuerch, M., Bürkner, P. C., & Radev, S. T. (2023).
+    A Deep Learning Method for Comparing Bayesian Hierarchical Models.
+    arXiv preprint arXiv:2301.11873.
+
+    Note: the original paper [1] does not distinguish between the summary and the evidential networks, but
     treats them as a whole, with the appropriate architetcure dictated by the model application. For the
     sake of consistency, the BayesFlow library distinguisahes the two modules.
     """
 
-    def __init__(self, evidence_net, summary_net=None, loss_fun=None, kl_weight=None):
+    def __init__(self, inference_net, summary_net=None, loss_fun=None):
         """Initializes a composite neural architecture for amortized bayesian model comparison.
 
         Parameters
         ----------
-        evidence_net      : tf.keras.Model
+        inference_net     : tf.keras.Model
             A neural network which outputs model evidences.
         summary_net       : tf.keras.Model or None, optional, default: None
             An optional summary network
         loss_fun          : callable or None, optional, default: None
             The loss function which accepts the outputs of the amortizer. If None, the loss will be the log-loss.
-        kl_weight         : callable or None, optional, defult: None
-            The weight of the KL regularization, if None, no regualrization will be used.
 
         Important
         ----------
-        - If no `summary_net` is provided, then the output dictionary of your generative model should not contain
-        any `sumamry_conditions`, i.e., `summary_conditions` should be set to None, otherwise these will be ignored.
+        - If no ``summary_net`` is provided, then the output dictionary of your generative model should not contain
+        any `sumamry_conditions`, i.e., ``summary_conditions`` should be set to None, otherwise these will be ignored.
 
-        - If no custom `loss_fun` is provided, the loss function will be the log loss for the means of a Dirichlet
-        distribution, as described in:
-
-        Radev, S. T., D'Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., & Bürkner, P. C. (2021).
-        Amortized bayesian model comparison with evidential deep learning.
-        IEEE Transactions on Neural Networks and Learning Systems.
-
-        - If no `kl_weight` is provided, no regularization (ground-trith preserving prior) will be used
-        for detecting implausible observables during inference.
+        - If no custom ``loss_fun`` is provided, the loss function will be the log loss for the means of a Dirichlet
+        distribution or softmax outputs.
         """
 
         super().__init__()
 
-        self.evidence_net = evidence_net
+        self.inference_net = inference_net
         self.summary_net = summary_net
         self.loss = self._determine_loss(loss_fun)
-        self.kl_weight = kl_weight
-        self.num_models = self.evidence_net.num_models
+        self.num_models = self.inference_net.num_models
 
     def call(self, input_dict, return_summary=False, **kwargs):
         """Performs a forward pass through both networks.
@@ -928,7 +924,7 @@ class AmortizedModelComparison(tf.keras.Model):
             **kwargs,
         )
 
-        net_out = self.evidence_net(full_cond, **kwargs)
+        net_out = self.inference_net(full_cond, **kwargs)
 
         if not return_summary:
             return net_out
@@ -947,63 +943,12 @@ class AmortizedModelComparison(tf.keras.Model):
 
         Returns
         -------
-        total_loss  : tf.Tensor of shape (1,) - the total computed loss given input variables
+        loss  : tf.Tensor of shape (1,) - the total computed loss given input variables
         """
 
-        alphas = self(input_dict, **kwargs)
-        loss = self.loss(input_dict[DEFAULT_KEYS["model_indices"]], alphas)
-        if self.kl_weight is None:
-            return loss
-        else:
-            kl = self.kl_weight * kl_dirichlet(input_dict[DEFAULT_KEYS["model_indices"]], alphas)
-            return loss + kl
-
-    def sample(self, input_dict, to_numpy=True, **kwargs):
-        """Samples posterior model probabilities from the higher order Dirichlet density.
-
-        Parameters
-        ----------
-        input_dict : dict
-            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged
-            `summary_conditions` - the conditioning variables that are first passed through a summary network
-            `direct_conditions`  - the conditioning variables that the directly passed to the evidential network
-            `model_indices`      - the ground-truth, one-hot encoded model indices sampled from the model prior
-        n_samples  : int
-            Number of samples to obtain from the approximate posterior
-        to_numpy   : bool, default: True
-            Flag indicating whether to return the samples as a np.array or a tf.Tensor
-
-        Returns
-        -------
-        pm_samples : tf.Tensor or np.array
-            The posterior draws from the Dirichlet distribution, shape (num_samples, num_batch, num_models)
-        """
-
-        _, full_cond = self._compute_summary_condition(
-            input_dict.get(DEFAULT_KEYS["summary_conditions"]),
-            input_dict.get(DEFAULT_KEYS["direct_conditions"]),
-            **kwargs,
-        )
-
-        return self.evidence_net.sample(full_cond, to_numpy, **kwargs)
-
-    def evidence(self, input_dict, to_numpy=True, **kwargs):
-        """Computes the evidence for the competing models given the data sets
-        contained in `input_dict`."""
-
-        alphas = self(input_dict, **kwargs)
-        if to_numpy:
-            return alphas.numpy()
-        return alphas
-
-    def uncertainty_score(self, input_dict, to_numpy=True, **kwargs):
-        """Computes the uncertainy score according to sum(alphas) / num_models."""
-
-        alphas = self(input_dict, **kwargs)
-        u = tf.reduce_sum(alphas, axis=-1) / self.evidence_net.num_models
-        if to_numpy:
-            return u.numpy()
-        return u
+        preds = self(input_dict, **kwargs)
+        loss = self.loss(input_dict[DEFAULT_KEYS["model_indices"]], preds)
+        return loss
 
     def _compute_summary_condition(self, summary_conditions, direct_conditions, **kwargs):
         """Determines how to concatenate the provided conditions."""
@@ -1029,7 +974,7 @@ class AmortizedModelComparison(tf.keras.Model):
         """Helper method to determine loss function to use."""
 
         if loss_fun is None:
-            return log_loss
+            return partial(log_loss, evidential=isinstance(self.inference_net, EvidentialNetwork))
         elif callable(loss_fun):
             return loss_fun
         else:
