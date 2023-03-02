@@ -518,7 +518,7 @@ class EquivariantModule(tf.keras.Model):
         # Example: Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
         out_inv = self.invariant_module(x)
         out_inv = tf.expand_dims(out_inv, -2)
-        tiler = [1] * out_inv.ndim
+        tiler = [1] * len(shape)
         tiler[-2] = shape[-2]
         out_inv_rep = tf.tile(out_inv, tiler)
 
