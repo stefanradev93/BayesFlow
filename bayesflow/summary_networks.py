@@ -522,3 +522,54 @@ class SplitNetwork(tf.keras.Model):
         out = [self.networks[i](self.split_data_configurator(i, x)) for i in range(self.num_splits)]
         out = tf.concat(out, axis=-1)
         return out
+
+
+class HierarchicalNetwork(tf.keras.Model):
+    """Implements a hierarchical summary network according to [1].
+
+    [1] Elsemüller, L., Schnuerch, M., Bürkner, P. C., & Radev, S. T. (2023).
+        A Deep Learning Method for Comparing Bayesian Hierarchical Models.
+        arXiv preprint arXiv:2301.11873.
+    """
+
+    def __init__(self, networks_list, **kwargs):
+        """Creates a hierarchical network consisting of stacked summary networks (one for each hierarchical level)
+        that are aligned with the probabilistic structure of the processed data.
+
+        Note: The networks will start processing from the lowest hierarchical level (e.g., observational level)
+        up to the highest hierarchical level.
+
+        Example: For two-level hierarchical models with the assumption of temporal dependencies on the lowest
+        hierarchical level (e.g., observational level) and exchangeable units at the higher level
+        (e.g., group level), a list of [SequentialNetwork(), DeepSet()] could be passed.
+
+        ----------
+
+        Parameters:
+        networks_list : list of tf.keras.Model:
+            The list of summary networks (one per hierarchical level), starting from the lowest hierarchical level
+        """
+
+        super().__init__(**kwargs)
+        self.networks = networks_list
+
+    def call(self, x):
+        """Performs the forward pass through the hierarchical network,
+        transforming the nested input into learned summary statistics.
+
+        Parameters
+        ----------
+        x : tf.Tensor
+            Input of variable shape - (batch_size, ..., x_dim)
+            Example, hierarchical data sets with two levels:
+            (batch_size, num_units_l2, num_units_l1, x_dim)
+
+        Returns
+        -------
+        out : tf.Tensor
+            Output of shape (batch_size, out_dim)
+        """
+
+        for net in self.networks:
+            x = net(x)
+        return x
