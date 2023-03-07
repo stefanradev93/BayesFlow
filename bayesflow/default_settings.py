@@ -81,6 +81,13 @@ DEFAULT_SETTING_DENSE_EVIDENTIAL = {
 }
 
 
+DEFAULT_SETTING_DENSE_PMP = {
+    "units": 64,
+    "kernel_initializer": "glorot_uniform",
+    "activation": "elu",
+}
+
+
 DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
     meta_dict={
         "t_args": {
@@ -127,6 +134,16 @@ DEFAULT_SETTING_EVIDENTIAL_NET = MetaDictSetting(
         "dense_args": dict(units=128, kernel_initializer="glorot_uniform", activation="relu"),
         "num_dense": 3,
         "output_activation": "softplus",
+    },
+    mandatory_fields=["num_models"],
+)
+
+
+DEFAULT_SETTING_PMP_NET = MetaDictSetting(
+    meta_dict={
+        "dense_args": dict(units=64, kernel_initializer="glorot_uniform", activation="relu"),
+        "num_dense": 3,
+        "output_activation": "softmax",
     },
     mandatory_fields=["num_models"],
 )

@@ -190,7 +190,6 @@ class InvertibleNetwork(tf.keras.Model):
         # Add noise to target if using SoftFlow, use explicitly
         # not in call(), since methods are public
         if self.soft_flow and condition is not None:
-
             # Needs to be concatinable with condition
             shape_scale = (
                 (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
@@ -315,4 +314,75 @@ class EvidentialNetwork(tf.keras.Model):
         network. Will fill in missing"""
 
         settings = build_meta_dict(user_dict=kwargs, default_setting=default_settings.DEFAULT_SETTING_EVIDENTIAL_NET)
+        return settings
+
+
+class PMPNetwork(tf.keras.Model):
+    """Implements a network that approximates posterior model probabilities (PMPs) as employed in [1].
+
+    [1] Elsemüller, L., Schnuerch, M., Bürkner, P. C., & Radev, S. T. (2023).
+        A Deep Learning Method for Comparing Bayesian Hierarchical Models.
+        arXiv preprint arXiv:2301.11873.
+    """
+
+    def __init__(self, num_models, dense_args=None, num_dense=3, output_activation="softmax", **kwargs):
+        """Creates an instance of a PMP network for amortized model comparison.
+
+        Parameters
+        ----------
+        num_models        : int
+            The number of candidate (competing models) for the comparison scenario.
+        dense_args        : dict or None, optional, default: None
+            The arguments for a tf.keras.layers.Dense layer. If None, defaults will be used.
+        num_dense         : int, optional, default: 3
+            The number of dense layers for the main network part.
+        output_activation : str or callable, optional, default: 'softmax'
+            The activation function to use for the network outputs.
+            Important: Needs to have positive outputs and be bounded between 0 and 1.
+        **kwargs          : dict, optional, default: {}
+            Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.
+        """
+
+        super().__init__(**kwargs)
+
+        if dense_args is None:
+            dense_args = default_settings.DEFAULT_SETTING_DENSE_PMP
+
+        # A network to increase representation power
+        self.dense = tf.keras.Sequential([tf.keras.layers.Dense(**dense_args) for _ in range(num_dense)])
+
+        # The layer to output posterior model probabilities
+        self.output_layer = tf.keras.layers.Dense(
+            num_models,
+            activation=output_activation,
+            **{k: v for k, v in dense_args.items() if k != "units" and k != "activation"},
+        )
+
+        self.num_models = num_models
+
+    def call(self, condition, **kwargs):
+        """Forward pass through the network. Computes approximated PMPs given a batch of data
+        and optional concatenated context, typically passed through a summary network.
+
+        Parameters
+        ----------
+        condition  : tf.Tensor of shape (batch_size, ...)
+            The input variables used for determining ``p(model | condition)``
+
+        Returns
+        -------
+        pmps       : tf.Tensor of shape (batch_size, num_models)
+            The approximated PMPs.
+        """
+
+        rep = self.dense(condition, **kwargs)
+        pmps = self.output_layer(rep)
+        return pmps
+
+    @classmethod
+    def create_config(cls, **kwargs):
+        """Used to create the settings dictionary for the internal networks of the
+        network. Will fill in missing."""
+
+        settings = build_meta_dict(user_dict=kwargs, default_setting=default_settings.DEFAULT_SETTING_PMP_NET)
         return settings
