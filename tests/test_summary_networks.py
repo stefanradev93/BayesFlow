@@ -22,7 +22,13 @@ import numpy as np
 import pytest
 
 from bayesflow.attention import InducedSelfAttentionBlock, SelfAttentionBlock
-from bayesflow.summary_networks import DeepSet, SequentialNetwork, SetTransformer, TimeSeriesTransformer
+from bayesflow.summary_networks import (
+    DeepSet,
+    HierarchicalNetwork,
+    SequentialNetwork,
+    SetTransformer,
+    TimeSeriesTransformer,
+)
 
 
 def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
@@ -46,6 +52,32 @@ def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
     perm = np.random.default_rng().permutation(x.shape[1])
     x_perm = x[:, perm, :]
     return x, x_perm, perm
+
+
+def _gen_randomized_4d_data(low=1, high=32, dtype=np.float32):
+    """Helper function to generate randomized 4d data for hierarchical summary modules,
+    min and max dimensions for each axis are given by ``low`` and ``high``."""
+
+    # Randomize batch data
+    x = (
+        np.random.default_rng()
+        .normal(
+            size=(
+                np.random.randint(low=low, high=high + 1),
+                np.random.randint(low=low, high=high + 1),
+                np.random.randint(low=low, high=high + 1),
+                np.random.randint(low=low, high=high + 1),
+            )
+        )
+        .astype(dtype)
+    )
+
+    # Random permutation on both hierarchical levels
+    perm_l2 = np.random.default_rng().permutation(x.shape[1])
+    perm_l1 = np.random.default_rng().permutation(x.shape[2])
+    x_perm = x[:, perm_l2, :, :]
+    x_perm = x_perm[:, :, perm_l1, :]
+    return x, x_perm, [perm_l2, perm_l1]
 
 
 @pytest.mark.parametrize("num_equiv", [1, 3])
@@ -185,3 +217,32 @@ def test_time_series_transformer(summary_dim, template_dim, num_attention_blocks
 
     # Test non-permutation invariant
     assert not np.allclose(out, out_perm, atol=1e-5)
+
+
+@pytest.mark.parametrize("summary_dim", [13, 2])
+def test_hierarchical_network(summary_dim):
+    """Tests the fidelity of the ``HierarchicalNetwork`` with relevant configurations
+    w.r.t. permutation invariance and shape integrity (only for two hierarchical levels
+    and DeepSets at the moment)."""
+
+    # Prepare settings for the summary networks and create hierarchical network
+    settings = {"summary_dim": summary_dim}
+    networks_list = [DeepSet(**settings), DeepSet(**settings)]
+    hierarchical_net = HierarchicalNetwork(networks_list=networks_list)
+
+    # Create input and permuted version with randomized shapes
+    x, x_perm, _ = _gen_randomized_4d_data()
+
+    # Pass unpermuted and permuted inputs
+    out = hierarchical_net(x).numpy()
+    out_perm = hierarchical_net(x_perm).numpy()
+
+    # Assert number of summary networks correct
+    assert len(hierarchical_net.networks) == len(networks_list)
+    # Assert outputs equal
+    assert np.allclose(out, out_perm, atol=1e-5)
+    # Assert shape 2d
+    assert len(out.shape) == 2 and len(out_perm.shape) == 2
+    # Assert batch and last dimension equals output dimension
+    assert x.shape[0] == out.shape[0] and x_perm.shape[0] == out.shape[0]
+    assert out.shape[1] == summary_dim and out_perm.shape[1] == summary_dim
