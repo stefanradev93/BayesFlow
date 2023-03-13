@@ -119,7 +119,7 @@ DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
         "coupling_net_settings": None,
         "coupling_design": "dense",
         "soft_clamping": 1.9,
-        "use_permutation": True,
+        "permutation": "fixed",
         "use_act_norm": True,
         "act_norm_init": None,
         "use_soft_flow": False,
