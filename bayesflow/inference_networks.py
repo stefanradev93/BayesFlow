@@ -36,7 +36,7 @@ class InvertibleNetwork(tf.keras.Model):
         coupling_net_settings=None,
         coupling_design="dense",
         soft_clamping=1.9,
-        use_permutation=True,
+        permutation="fixed",
         use_act_norm=True,
         act_norm_init=None,
         use_soft_flow=False,
@@ -79,8 +79,9 @@ class InvertibleNetwork(tf.keras.Model):
             the `coupling_net_settings` will be passed as a first argument to the callable.
         soft_clamping         : float, optional, default: 1.9
             The soft clamping parameter `alpha` in [3]. Typically you would not touch this.
-        use_permutation       : bool, optional, default: True
-            Whether to use fixed permutations between coupling layers. Highly recommended.
+        permutation           : str or None, optional, default: 'fixed'
+            Whether to use permutations between coupling layers. Highly recommended if ``num_coupling_layers > 1``
+            Important: Must be in ['fixed', 'learnable', None]
         use_act_norm          : bool, optional, default: True
             Whether to use activation normalization after each coupling layer, as used in [4].
             Recommended to keep default.
@@ -103,7 +104,7 @@ class InvertibleNetwork(tf.keras.Model):
             latent_dim=num_params,
             coupling_net_settings=coupling_net_settings,
             coupling_design=coupling_design,
-            use_permutation=use_permutation,
+            permutation=permutation,
             use_act_norm=use_act_norm,
             act_norm_init=act_norm_init,
             alpha=soft_clamping,
@@ -112,7 +113,7 @@ class InvertibleNetwork(tf.keras.Model):
         self.soft_flow = use_soft_flow
         self.soft_low = soft_flow_bounds[0]
         self.soft_high = soft_flow_bounds[1]
-        self.use_permutation = use_permutation
+        self.permutation = permutation
         self.use_act_norm = use_act_norm
         self.latent_dim = num_params
 
@@ -325,7 +326,9 @@ class PMPNetwork(tf.keras.Model):
         arXiv preprint arXiv:2301.11873.
     """
 
-    def __init__(self, num_models, dense_args=None, num_dense=3, output_activation=tf.nn.softmax, **kwargs):
+    def __init__(
+        self, num_models, dense_args=None, num_dense=3, dropout_prob=0.05, output_activation=tf.nn.softmax, **kwargs
+    ):
         """Creates an instance of a PMP network for amortized model comparison.
 
         Parameters
@@ -336,11 +339,13 @@ class PMPNetwork(tf.keras.Model):
             The arguments for a tf.keras.layers.Dense layer. If None, defaults will be used.
         num_dense         : int, optional, default: 3
             The number of dense layers for the main network part.
+        dropout_prob      : float or None, optional, default: 0.05
+            Whether to apply dropout regularization. Advisable, if training offline.
         output_activation : callable, optional, default: tf.nn.softmax
-            The activation function to use for the network outputs.
+            The activation function to apply to the network outputs.
             Important: Needs to have positive outputs and be bounded between 0 and 1.
         **kwargs          : dict, optional, default: {}
-            Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.
+            Optional keyword arguments (e.g., name) passed to the ``tf.keras.Model`` __init__ method.
         """
 
         super().__init__(**kwargs)
@@ -349,7 +354,11 @@ class PMPNetwork(tf.keras.Model):
             dense_args = default_settings.DEFAULT_SETTING_DENSE_PMP
 
         # A network to increase representation power
-        self.dense = tf.keras.Sequential([tf.keras.layers.Dense(**dense_args) for _ in range(num_dense)])
+        self.dense = tf.keras.Sequential()
+        for _ in range(num_dense):
+            self.dense.add(tf.keras.layers.Dense(**dense_args))
+            if dropout_prob:
+                self.dense.add(tf.keras.layers.Dropout(dropout_prob))
 
         # The layer to output posterior model probabilities
         self.output_layer = tf.keras.layers.Dense(num_models)

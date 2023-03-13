@@ -511,7 +511,7 @@ def plot_sbc_ecdf(
     if n_row == 1:  # if there is only one row, the ax array is 1D
         axes[0].set_ylabel(ylab, fontsize=label_fontsize)
     else:  # if there is more than one row, the ax array is 2D
-        for _ax in axes[:, 0]:
+        for _ax in ax[:, 0]:
             _ax.set_ylabel(ylab, fontsize=label_fontsize)
 
     # Remove unused axes entirely

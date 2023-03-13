@@ -24,7 +24,7 @@ from numpy import pi as PI_CONST
 from bayesflow import default_settings
 from bayesflow.exceptions import ConfigurationError
 from bayesflow.helper_functions import build_meta_dict
-from bayesflow.helper_networks import ActNorm, DenseCouplingNet, Permutation
+from bayesflow.helper_networks import ActNorm, DenseCouplingNet, Orthogonal, Permutation
 
 
 class AffineCouplingLayer(tf.keras.Model):
@@ -85,9 +85,11 @@ class AffineCouplingLayer(tf.keras.Model):
         self.t2 = coupling_type(coupling_net_settings["t_args"], self.n_out2)
 
         # Optional permutation
-        if meta["use_permutation"]:
+        if meta["permutation"] == "fixed":
             self.permutation = Permutation(self.latent_dim)
             self.permutation.trainable = False
+        elif meta["permutation"] == "learnable":
+            self.permutation = Orthogonal(self.latent_dim)
         else:
             self.permutation = None
 
@@ -158,6 +160,9 @@ class AffineCouplingLayer(tf.keras.Model):
         # Permute, if indicated
         if self.permutation is not None:
             target = self.permutation(target)
+        if self.permutation.trainable:
+            target, log_det_J_p = target
+            log_det_Js += log_det_J_p
 
         # Pass through coupling layer
         z, log_det_J_c = self._forward(target, condition, **kwargs)
