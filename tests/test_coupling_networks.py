@@ -22,11 +22,12 @@ import numpy as np
 import pytest
 
 from bayesflow.coupling_networks import AffineCouplingLayer
+from bayesflow.helper_networks import Orthogonal, Permutation
 
 
 @pytest.mark.parametrize("condition", [True, False])
 @pytest.mark.parametrize("spec_norm", [True, False])
-@pytest.mark.parametrize("use_perm", [True, False])
+@pytest.mark.parametrize("use_perm", ["fixed", "learnable"])
 @pytest.mark.parametrize("use_act_norm", [True, False])
 @pytest.mark.parametrize("input_shape", ["2d", "3d"])
 def test_coupling_layer(condition, spec_norm, use_perm, use_act_norm, input_shape):
@@ -52,7 +53,7 @@ def test_coupling_layer(condition, spec_norm, use_perm, use_act_norm, input_shap
     }
     settings = {
         "coupling_net_settings": dense_net_settings,
-        "use_permutation": use_perm,
+        "permutation": use_perm,
         "use_act_norm": use_act_norm,
         "latent_dim": input_dim,
         "alpha": 1.9,
@@ -80,10 +81,12 @@ def test_coupling_layer(condition, spec_norm, use_perm, use_act_norm, input_shap
     inp_rec = network(z, condition, inverse=True).numpy()
 
     # Test attributes
-    if use_perm:
-        assert network.permutation is not None
+    if use_perm == "fixed":
+        assert not network.permutation.trainable
+        assert isinstance(network.permutation, Permutation)
     else:
-        assert network.permutation is None
+        assert isinstance(network.permutation, Orthogonal)
+        assert network.permutation.trainable
     if use_act_norm:
         assert network.act_norm is not None
     else:
