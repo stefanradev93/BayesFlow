@@ -325,7 +325,7 @@ class PMPNetwork(tf.keras.Model):
         arXiv preprint arXiv:2301.11873.
     """
 
-    def __init__(self, num_models, dense_args=None, num_dense=3, output_activation="softmax", **kwargs):
+    def __init__(self, num_models, dense_args=None, num_dense=3, output_activation=tf.nn.softmax, **kwargs):
         """Creates an instance of a PMP network for amortized model comparison.
 
         Parameters
@@ -336,7 +336,7 @@ class PMPNetwork(tf.keras.Model):
             The arguments for a tf.keras.layers.Dense layer. If None, defaults will be used.
         num_dense         : int, optional, default: 3
             The number of dense layers for the main network part.
-        output_activation : str or callable, optional, default: 'softmax'
+        output_activation : callable, optional, default: tf.nn.softmax
             The activation function to use for the network outputs.
             Important: Needs to have positive outputs and be bounded between 0 and 1.
         **kwargs          : dict, optional, default: {}
@@ -352,32 +352,67 @@ class PMPNetwork(tf.keras.Model):
         self.dense = tf.keras.Sequential([tf.keras.layers.Dense(**dense_args) for _ in range(num_dense)])
 
         # The layer to output posterior model probabilities
-        self.output_layer = tf.keras.layers.Dense(
-            num_models,
-            activation=output_activation,
-            **{k: v for k, v in dense_args.items() if k != "units" and k != "activation"},
-        )
+        self.output_layer = tf.keras.layers.Dense(num_models)
+        self.output_activation = output_activation
 
         self.num_models = num_models
 
-    def call(self, condition, **kwargs):
+    def call(self, condition, return_probs=True, **kwargs):
         """Forward pass through the network. Computes approximated PMPs given a batch of data
         and optional concatenated context, typically passed through a summary network.
 
         Parameters
         ----------
-        condition  : tf.Tensor of shape (batch_size, ...)
+        condition    : tf.Tensor of shape (batch_size, ...)
+            The input variables used for determining ``p(model | condition)``
+        return_probs : bool, optional, default: True
+            Whether to return probabilities or logits (pre-activation, unnormalized)
+
+        Returns
+        -------
+        out          : tf.Tensor of shape (batch_size, ..., num_models)
+            The approximated PMPs (post-activation) or logits (pre-activation)
+        """
+
+        rep = self.dense(condition, **kwargs)
+        logits = self.output_layer(rep, **kwargs)
+        if return_probs:
+            return self.output_activation(logits)
+        return logits
+
+    def posterior_probs(self, condition, **kwargs):
+        """Shortcut function to obtain posterior probabilities given a
+        condition tensor (e.g., summary statistics of data sets).
+
+        Parameters
+        ----------
+        condition : tf.Tensor of shape (batch_size, ...)
             The input variables used for determining ``p(model | condition)``
 
         Returns
         -------
-        pmps       : tf.Tensor of shape (batch_size, num_models)
-            The approximated PMPs.
+        out       : tf.Tensor of shape (batch_size, ..., num_models)
+            The approximated PMPs
         """
 
-        rep = self.dense(condition, **kwargs)
-        pmps = self.output_layer(rep)
-        return pmps
+        return self(condition, return_probs=True, **kwargs)
+
+    def logits(self, condition, **kwargs):
+        """Shortcut function to obtain logits given a condition tensor
+        (e.g., summary statistics of data sets).
+
+        Parameters
+        ----------
+        condition : tf.Tensor of shape (batch_size, ...)
+            The input variables used for determining ``p(model | condition)``
+
+        Returns
+        -------
+        out       : tf.Tensor of shape (batch_size, ..., num_models)
+            The approximated PMPs
+        """
+
+        return self(condition, return_probs=False, **kwargs)
 
     @classmethod
     def create_config(cls, **kwargs):

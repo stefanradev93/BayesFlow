@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 """Meta-module for easy access of different neural network architecture interfaces"""
-from bayesflow.inference_networks import EvidentialNetwork, InvertibleNetwork
+from bayesflow.inference_networks import EvidentialNetwork, InvertibleNetwork, PMPNetwork
 from bayesflow.summary_networks import (
     DeepSet,
     InvariantNetwork,

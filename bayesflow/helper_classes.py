@@ -46,13 +46,29 @@ class SimulationDataset:
     """
 
     def __init__(self, forward_dict, batch_size, buffer_size=1024):
-        """Creates a tensorfow.data.Dataset from forward inference outputs and determines format."""
+        """Creates a wrapper holding a ``tf.data.Dataset`` instance for
+        offline training in an amortized estimation context.
+
+        Parameters
+        ----------
+        forward_dict : dict
+            The outputs from a ``GenerativeModel`` or a custom function,
+            stored in a dictionary with at least the following keys:
+            ``sim_data``    - an array representing the batched output of the model
+            ``prior_draws`` - an array with prior generated from the model's prior
+        batch_size   : int
+            The total number of simulations from all models in a given batch.
+            The batch size per model will be calculated as ``batch_size // num_models``
+        buffer_size  : int, optional, default: 1024
+            The buffer size for shuffling elements in a ``tf.data.Dataset``
+        """
 
         slices, keys_used, keys_none, n_sim = self._determine_slices(forward_dict)
         self.data = tf.data.Dataset.from_tensor_slices(tuple(slices)).shuffle(buffer_size).batch(batch_size)
         self.keys_used = keys_used
         self.keys_none = keys_none
         self.n_sim = n_sim
+        self.num_batches = len(self.data)
 
     def _determine_slices(self, forward_dict):
         """Determine slices for a tensorflow Dataset."""
@@ -81,6 +97,59 @@ class SimulationDataset:
 
     def __iter__(self):
         return map(self, self.data)
+
+
+class MultiSimulationDataset:
+    """Helper class for model comparison training with multiple generative models.
+
+    Will create multiple ``SimulationDataset`` instances, each parsing their own
+    simulation dictionaries and returning these as expected by BayesFlow amortizers.
+    """
+
+    def __init__(self, forward_dict, batch_size, buffer_size=1024):
+        """Creates a wrapper holding multiple ``tf.data.Dataset`` instances for
+        offline training in an amortized model comparison context.
+
+        Parameters
+        ----------
+        forward_dict : dict
+            The outputs from a ``MultiGenerativeModel`` or a custom function,
+            stored in a dictionary with at least the following keys:
+            ``model_outputs`` - a list with length equal to the number of models,
+            each element representing a batched output of a single model
+            ``model_indices`` - a list with integer model indices, which will
+            later be one-hot-encoded for the model comparison learning problem.
+        batch_size   : int
+            The total number of simulations from all models in a given batch.
+            The batch size per model will be calculated as ``batch_size // num_models``
+        buffer_size  : int, optional, default: 1024
+            The buffer size for shuffling elements in a ``tf.data.Dataset``
+        """
+
+        self.model_indices = forward_dict[DEFAULT_KEYS["model_indices"]]
+        self.num_models = len(self.model_indices)
+        self.per_model_batch_size = batch_size // self.num_models
+        self.datasets = [
+            SimulationDataset(out, self.per_model_batch_size, buffer_size)
+            for out in forward_dict[DEFAULT_KEYS["model_outputs"]]
+        ]
+        self.current_it = 0
+        self.num_batches = min([d.num_batches for d in self.datasets])
+        self.iters = [iter(d) for d in self.datasets]
+        self.batch_size = batch_size
+
+    def __next__(self):
+        if self.current_it < self.num_batches:
+            outputs = [next(d) for d in self.iters]
+            output_dict = {DEFAULT_KEYS["model_outputs"]: outputs, DEFAULT_KEYS["model_indices"]: self.model_indices}
+            self.current_it += 1
+            return output_dict
+        self.current_it = 0
+        self.iters = [iter(d) for d in self.datasets]
+        raise StopIteration
+
+    def __iter__(self):
+        return self
 
 
 class EarlyStopper:
@@ -268,7 +337,6 @@ class RegressionLRAdjuster:
 
         # Case memory file exists
         if os.path.exists(memory_path):
-
             # Load pickle and fill in attributes
             with open(memory_path, "rb") as f:
                 states_dict = pickle.load(f)
@@ -566,7 +634,6 @@ class LossHistory:
 
         # Case history list is not empty
         if len(history_checkpoints_list) > 0:
-
             # Determine which file contains the latest LossHistory and load it
             file_numbers = [int(re.findall(r"\d+", h)[0]) for h in history_checkpoints_list]
             latest_file = history_checkpoints_list[np.argmax(file_numbers)]
@@ -673,7 +740,6 @@ class SimulationMemory:
 
         # Case memory file exists
         if os.path.exists(file_path):
-
             # Load pickle and fill in attributes
             with open(memory_path, "rb") as f:
                 full_memory_dict = pickle.load(f)

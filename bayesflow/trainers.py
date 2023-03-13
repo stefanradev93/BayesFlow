@@ -39,7 +39,14 @@ from bayesflow.configuration import *
 from bayesflow.default_settings import DEFAULT_KEYS, OPTIMIZER_DEFAULTS
 from bayesflow.diagnostics import plot_latent_space_2d, plot_sbc_histograms
 from bayesflow.exceptions import SimulationError
-from bayesflow.helper_classes import EarlyStopper, LossHistory, MemoryReplayBuffer, SimulationDataset, SimulationMemory
+from bayesflow.helper_classes import (
+    EarlyStopper,
+    LossHistory,
+    MemoryReplayBuffer,
+    MultiSimulationDataset,
+    SimulationDataset,
+    SimulationMemory,
+)
 from bayesflow.helper_functions import backprop_step, extract_current_lr, format_loss_string, loss_to_string
 from bayesflow.simulation import GenerativeModel, MultiGenerativeModel
 
@@ -512,8 +519,11 @@ class Trainer:
             _backprop_step = backprop_step
 
         # Inits
-        data_set = SimulationDataset(simulations_dict, batch_size)
-        self._setup_optimizer(optimizer, epochs, len(data_set.data))
+        if isinstance(self.amortizer, AmortizedModelComparison):
+            data_set = MultiSimulationDataset(simulations_dict, batch_size)
+        else:
+            data_set = SimulationDataset(simulations_dict, batch_size)
+        self._setup_optimizer(optimizer, epochs, data_set.num_batches)
         self.loss_history.start_new_run()
         validation_sims = self._config_validation(validation_sims, **kwargs.pop("val_model_args", {}))
 
@@ -522,7 +532,7 @@ class Trainer:
 
         # Loop through epochs
         for ep in range(1, epochs + 1):
-            with tqdm(total=len(data_set.data), desc="Training epoch {}".format(ep)) as p_bar:
+            with tqdm(total=data_set.num_batches, desc="Training epoch {}".format(ep)) as p_bar:
                 # Loop through dataset
                 for bi, forward_dict in enumerate(data_set, start=1):
                     # Perform one training step and obtain current loss value
