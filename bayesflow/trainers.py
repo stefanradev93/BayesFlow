@@ -1161,19 +1161,19 @@ class Trainer:
         # If None of something else (default), infer default config based on amortizer type
         else:
             # Amortized posterior
-            if type(self.amortizer) is AmortizedPosterior:
+            if isinstance(self.amortizer, AmortizedPosterior):
                 default_config = DefaultPosteriorConfigurator()
 
             # Amortized lieklihood
-            elif type(self.amortizer) is AmortizedLikelihood:
+            elif isinstance(self.amortizer, AmortizedLikelihood):
                 default_config = DefaultLikelihoodConfigurator()
 
             # Joint amortizer
-            elif type(self.amortizer) is AmortizedPosteriorLikelihood:
+            elif isinstance(self.amortizer, AmortizedPosteriorLikelihood):
                 default_config = DefaultJointConfigurator()
 
             # Model comparison amortizer
-            elif type(self.amortizer) is AmortizedModelComparison:
+            elif isinstance(self.amortizer, AmortizedModelComparison):
                 if kwargs.get("num_models") is None:
                     raise ConfigurationError(
                         'Either your generative model or amortizer should have "num_models" attribute, or '

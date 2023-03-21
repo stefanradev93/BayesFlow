@@ -90,46 +90,16 @@ class DefaultLikelihoodConfigurator:
         return out_dict
 
 
-class DefaultPosteriorConfigurator:
-    """Fallback class for a generic configrator for amortized posterior approximation."""
-
-    def __init__(self, default_float_type=np.float32):
-        self.default_float_type = default_float_type
+class DefaultCombiner:
+    """Fallback class for a generic combiner of conditions."""
 
     def __call__(self, forward_dict):
-        """Processes the forward dict to configure the input to an amortizer."""
+        """Converts all condition-related variables or fails."""
 
-        # Combine inputs
-        input_dict = self._combine(forward_dict)
-
-        # Convert everything to default type or fail gently
-        input_dict = {k: v.astype(self.default_float_type) if v is not None else v for k, v in input_dict.items()}
-        return input_dict
-
-    def _combine(self, forward_dict):
-        """Converts all variables to arrays and combines them for inference into a dictionary with
-        the following keys, if DEFAULT_KEYS dictionary unchanged:
-
-        `parameters`         - the latent model parameters over which a condition density is learned
-        `summary_conditions` - the conditioning variables that are first passed through a summary network
-        `direct_conditions`  - the conditioning variables that the directly passed to the inference network
-
-        Parameters
-        ----------
-        forward_dict : dict
-            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS dictionary unchanged:
-            # TODO
-        """
-
-        # Prepare placeholder
         out_dict = {
-            DEFAULT_KEYS["parameters"]: None,
             DEFAULT_KEYS["summary_conditions"]: None,
             DEFAULT_KEYS["direct_conditions"]: None,
         }
-
-        # Pushforward target are the parameters
-        out_dict[DEFAULT_KEYS["parameters"]] = forward_dict[DEFAULT_KEYS["prior_draws"]]
 
         # Determine whether simulated or observed data available, throw if None present
         if forward_dict.get(DEFAULT_KEYS["sim_data"]) is None and forward_dict.get(DEFAULT_KEYS["obs_data"]) is None:
@@ -243,32 +213,51 @@ class DefaultPosteriorConfigurator:
         return out_dict
 
 
+class DefaultPosteriorConfigurator:
+    """Fallback class for a generic configrator for amortized posterior approximation."""
+
+    def __init__(self, default_float_type=np.float32):
+        self.default_float_type = default_float_type
+        self.combiner = DefaultCombiner()
+
+    def __call__(self, forward_dict):
+        """Processes the forward dict to configure the input to an amortizer."""
+
+        # Combine inputs (conditionals)
+        input_dict = self.combiner(forward_dict)
+        input_dict[DEFAULT_KEYS["parameters"]] = forward_dict[DEFAULT_KEYS["prior_draws"]]
+
+        # Convert everything to default type or fail gently
+        input_dict = {k: v.astype(self.default_float_type) if v is not None else v for k, v in input_dict.items()}
+        return input_dict
+
+
 class DefaultModelComparisonConfigurator:
     """Fallback class for a default configurator for amortized model comparison."""
 
-    def __init__(self, num_models, config=None, default_float_type=np.float32):
+    def __init__(self, num_models, combiner=None, default_float_type=np.float32):
         self.num_models = num_models
-        if config is None:
-            self.config = DefaultPosteriorConfigurator()
+        if combiner is None:
+            self.combiner = DefaultCombiner()
         else:
-            self.config = config
+            self.combiner = combiner
         self.default_float_type = default_float_type
 
     def __call__(self, forward_dict):
         """Convert all variables to arrays and combines them for inference into a dictionary with
         the following keys, if DEFAULT_KEYS dictionary unchanged:
 
-        `model_indices`      - the latent model parameters over which a condition density is learned
-        `summary_conditions` - the conditioning variables that are first passed through a summary network
-        `direct_conditions`  - the conditioning variables that the directly passed to the inference network
+        `model_indices`      - a list of model indices, e.g., if two models, then [0, 1]
+        `model_outputs`      - a list of dictionaries, e.g., if two models, then [dict0, dict1]
         """
 
         # Prepare placeholders
-        out_dict = {
+        input_dict = {
             DEFAULT_KEYS["summary_conditions"]: None,
             DEFAULT_KEYS["direct_conditions"]: None,
             DEFAULT_KEYS["model_indices"]: None,
         }
+
         summary_conditions = []
         direct_conditions = []
         model_indices = []
@@ -278,22 +267,27 @@ class DefaultModelComparisonConfigurator:
             forward_dict[DEFAULT_KEYS["model_indices"]], forward_dict[DEFAULT_KEYS["model_outputs"]]
         ):
             # Configure individual model outputs
-            conf_out = self.config(dict_m)
+            conf_out = self.combiner(dict_m)
+
             # Extract summary conditions
             if conf_out.get(DEFAULT_KEYS["summary_conditions"]) is not None:
                 summary_conditions.append(conf_out[DEFAULT_KEYS["summary_conditions"]])
+                num_draws_m = conf_out[DEFAULT_KEYS["summary_conditions"]].shape[0]
+
             # Extract direct conditions
             if conf_out.get(DEFAULT_KEYS["direct_conditions"]) is not None:
                 direct_conditions.append(conf_out[DEFAULT_KEYS["direct_conditions"]])
-            # Extract model indices as one-hot
-            n_draws = dict_m[DEFAULT_KEYS["prior_draws"]].shape[0]
-            model_indices.append(to_categorical([m_idx] * n_draws, self.num_models))
+                num_draws_m = conf_out[DEFAULT_KEYS["direct_conditions"]].shape[0]
+
+            model_indices.append(to_categorical([m_idx] * num_draws_m, self.num_models))
 
         # At this point, all elements of the input_dicts should be arrays with identical keys
-        out_dict[DEFAULT_KEYS["summary_conditions"]] = (
+        input_dict[DEFAULT_KEYS["summary_conditions"]] = (
             np.concatenate(summary_conditions) if summary_conditions else None
         )
-        out_dict[DEFAULT_KEYS["direct_conditions"]] = np.concatenate(direct_conditions) if direct_conditions else None
-        out_dict[DEFAULT_KEYS["model_indices"]] = np.concatenate(model_indices).astype(self.default_float_type)
+        input_dict[DEFAULT_KEYS["direct_conditions"]] = np.concatenate(direct_conditions) if direct_conditions else None
+        input_dict[DEFAULT_KEYS["model_indices"]] = np.concatenate(model_indices)
 
-        return out_dict
+        # Convert to default types
+        input_dict = {k: v.astype(self.default_float_type) if v is not None else v for k, v in input_dict.items()}
+        return input_dict
