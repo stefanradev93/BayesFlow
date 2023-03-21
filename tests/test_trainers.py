@@ -42,7 +42,7 @@ def _create_training_setup(mode):
     """Helper function to create a relevant training setup."""
 
     # Create a generative model
-    model = GenerativeModel(_prior, _simulator, name="test")
+    model = GenerativeModel(_prior, _simulator, name="test", simulator_is_batched=False)
 
     # Case posterior inference
     if mode == "posterior":
