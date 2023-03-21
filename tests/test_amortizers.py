@@ -130,26 +130,18 @@ def test_amortized_likelihood(inp_shape, soft):
     batch_size = np.random.randint(low=1, high=32)
     inp_dim = np.random.randint(low=2, high=32)
     cond_dim = np.random.randint(low=2, high=32)
-    units_t = np.random.randint(low=2, high=32)
-    units_s = np.random.randint(low=2, high=32)
+    units = np.random.randint(low=2, high=32)
 
     # Create settings dictionaries for inference network
     dense_net_settings = {
-        "t_args": {
-            "dense_args": dict(units=units_t, kernel_initializer="glorot_uniform", activation="elu"),
-            "num_dense": 1,
-            "spec_norm": False,
-        },
-        "s_args": {
-            "dense_args": dict(units=units_s, kernel_initializer="glorot_uniform", activation="elu"),
-            "num_dense": 2,
-            "spec_norm": True,
-        },
+        "dense_args": dict(units=units, kernel_initializer="glorot_uniform", activation="elu"),
+        "num_dense": 1,
+        "spec_norm": False,
     }
 
     # Create inference network instance
     surrogate_network = InvertibleNetwork(
-        **{"num_params": inp_dim, "use_soft_flow": soft, "coupling_net_settings": dense_net_settings}
+        **{"num_params": inp_dim, "use_soft_flow": soft, "coupling_settings": dense_net_settings}
     )
 
     # Create input and condition
@@ -228,29 +220,21 @@ def test_joint_amortizer(data_dim, params_dim):
 
     # Randomize input
     batch_size = np.random.randint(low=1, high=32)
-    units_t = np.random.randint(low=2, high=32)
-    units_s = np.random.randint(low=2, high=32)
+    units = np.random.randint(low=2, high=32)
 
     # Create settings dictionaries for inference network
     dense_net_settings = {
-        "t_args": {
-            "dense_args": dict(units=units_t, kernel_initializer="glorot_uniform", activation="elu"),
-            "num_dense": 1,
-            "spec_norm": True,
-        },
-        "s_args": {
-            "dense_args": dict(units=units_s, kernel_initializer="glorot_uniform", activation="elu"),
-            "num_dense": 2,
-            "spec_norm": False,
-        },
+        "dense_args": dict(units=units, activation="elu"),
+        "num_dense": 1,
+        "spec_norm": True,
     }
 
     # Create amortizers
     p_amortizer = AmortizedPosterior(
-        InvertibleNetwork(**{"num_params": params_dim, "coupling_net_settings": dense_net_settings})
+        InvertibleNetwork(**{"num_params": params_dim, "coupling_settings": dense_net_settings})
     )
     l_amortizer = AmortizedLikelihood(
-        InvertibleNetwork(**{"num_params": data_dim, "coupling_net_settings": dense_net_settings})
+        InvertibleNetwork(**{"num_params": data_dim, "coupling_settings": dense_net_settings})
     )
     amortizer = AmortizedPosteriorLikelihood(p_amortizer, l_amortizer)
 
