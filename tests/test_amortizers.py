@@ -36,26 +36,17 @@ def test_amortized_posterior(cond_shape, summary_loss, soft):
     batch_size = np.random.randint(low=1, high=32)
     inp_dim = np.random.randint(low=2, high=32)
     cond_dim = np.random.randint(low=2, high=32)
-    units_t = np.random.randint(low=2, high=32)
-    units_s = np.random.randint(low=2, high=32)
 
     # Create settings dictionaries for inference network
     dense_net_settings = {
-        "t_args": {
-            "dense_args": dict(units=units_t, kernel_initializer="glorot_uniform", activation="elu"),
-            "num_dense": 1,
-            "spec_norm": True,
-        },
-        "s_args": {
-            "dense_args": dict(units=units_s, kernel_initializer="glorot_uniform", activation="elu"),
-            "num_dense": 2,
-            "spec_norm": False,
-        },
+        "dense_args": dict(units=8, activation="elu"),
+        "num_dense": 1,
+        "spec_norm": True,
     }
 
     # Create inference network instance
     inference_network = InvertibleNetwork(
-        **{"num_params": inp_dim, "use_soft_flow": soft, "coupling_net_settings": dense_net_settings}
+        **{"num_params": inp_dim, "use_soft_flow": soft, "coupling_settings": dense_net_settings}
     )
 
     # Create summary network and condition
