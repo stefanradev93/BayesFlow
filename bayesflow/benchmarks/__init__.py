@@ -49,6 +49,7 @@ available_benchmarks = [
     "two_moons",
     "sir",
     "lotka_volterra",
+    "inverse_kinematics",
 ]
 
 
@@ -80,8 +81,13 @@ class Benchmark:
         seed           : int or None, optional, default: None
             The seed to use if reproducibility is required. Will be passed to a numpy RNG.
         **kwargs       : dict
-            Optional keyword arguments. If 'sim_kwargs' is present, key-value pairs will be
-            interpreted as arguments for the simulator and propagated accordingly.
+            Optional keyword arguments.
+
+            If 'sim_kwargs' is present, key-value pairs will be interpreted as arguments for the simulator
+            and propagated accordingly.
+
+            If 'prior_kwargs' is present, key-value pairs will be interpreted as arguments for the prior
+            and propagated accordingly.
         """
 
         self.benchmark_name = name
@@ -89,16 +95,22 @@ class Benchmark:
         self.benchmark_module = get_benchmark_module(self.benchmark_name)
         self.benchmark_info = getattr(self.benchmark_module, "bayesflow_benchmark_info")
 
-        # Prepare partial simulator function with optioal keyword arguments
+        # Prepare partial simulator function with optional keyword arguments
         if kwargs.get("sim_kwargs") is not None:
             _simulator = partial(getattr(self.benchmark_module, "simulator"), rng=self._rng, **kwargs.get("sim_kwargs"))
         else:
             _simulator = partial(getattr(self.benchmark_module, "simulator"), rng=self._rng)
 
+        # Prepare partial prior function with optional keyword arguments
+        if kwargs.get("sim_kwargs") is not None:
+            _prior = partial(getattr(self.benchmark_module, "prior"), rng=self._rng, **kwargs.get("prior_kwargs"))
+        else:
+            _prior = partial(getattr(self.benchmark_module, "prior"), rng=self._rng)
+
         # Prepare generative model
         self.generative_model = GenerativeModel(
             prior=Prior(
-                prior_fun=partial(getattr(self.benchmark_module, "prior"), rng=self._rng),
+                prior_fun=_prior,
                 param_names=self.benchmark_info["parameter_names"],
             ),
             simulator=_simulator,

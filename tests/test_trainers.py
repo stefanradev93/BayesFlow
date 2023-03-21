@@ -23,7 +23,7 @@ import pytest
 from pandas import DataFrame
 
 from bayesflow.amortizers import AmortizedLikelihood, AmortizedPosterior, AmortizedPosteriorLikelihood
-from bayesflow.networks import InvariantNetwork, InvertibleNetwork
+from bayesflow.networks import DeepSet, InvertibleNetwork
 from bayesflow.simulation import GenerativeModel
 from bayesflow.trainers import Trainer
 
@@ -46,7 +46,7 @@ def _create_training_setup(mode):
 
     # Case posterior inference
     if mode == "posterior":
-        summary_net = InvariantNetwork()
+        summary_net = DeepSet()
         inference_net = InvertibleNetwork(num_params=2, num_coupling_layers=2)
         amortizer = AmortizedPosterior(inference_net, summary_net)
 
@@ -57,7 +57,7 @@ def _create_training_setup(mode):
 
     # Case joint inference
     else:
-        summary_net = InvariantNetwork()
+        summary_net = DeepSet()
         inference_net = InvertibleNetwork(num_params=2, num_coupling_layers=2)
         p_amortizer = AmortizedPosterior(inference_net, summary_net)
         surrogate_net = InvertibleNetwork(num_params=2, num_coupling_layers=2)

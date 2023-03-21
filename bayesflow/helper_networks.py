@@ -33,16 +33,20 @@ class DenseCouplingNet(tf.keras.Model):
     """Implements a conditional version of a standard fully connected (FC) network.
     Would also work as an unconditional estimator."""
 
-    def __init__(self, settings, n_out, **kwargs):
+    def __init__(self, settings, dim_out, **kwargs):
         """Creates a conditional coupling net (FC neural network).
 
         Parameters
         ----------
         settings : dict
-            A dictionary holding arguments for a dense layer.
+            A dictionary holding arguments for a dense layer:
             See https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense
-        n_out    : int
-            Number of outputs of the coupling net
+
+            As well as custom arguments for settings such as residual networks,
+            dropout, and spectral normalization.
+        dim_out  : int
+            Number of outputs of the coupling net. Determined internally by the
+            consumer classes.
         **kwargs : dict, optional, default: {}
             Optional keyword arguments passed to the `tf.keras.Model` constructor.
         """
@@ -80,10 +84,10 @@ class DenseCouplingNet(tf.keras.Model):
 
         # Set residual flag
         if settings.get("residual"):
-            self.fc.add(Dense(n_out, **{k: v for k, v in settings["dense_args"].items() if k != "units"}))
-            self.residual_output = Dense(n_out, kernel_initializer="zeros")
+            self.fc.add(Dense(dim_out, **{k: v for k, v in settings["dense_args"].items() if k != "units"}))
+            self.residual_output = Dense(dim_out, kernel_initializer="zeros")
         else:
-            self.fc.add(Dense(n_out, kernel_initializer="zeros"))
+            self.fc.add(Dense(dim_out, kernel_initializer="zeros"))
             self.residual_output = None
 
         self.fc.build(input_shape=())
@@ -165,12 +169,10 @@ class Permutation(tf.keras.Model):
         else:
             return self._inverse(target)
 
-    @tf.function
     def _forward(self, target):
         """Performs a fixed permutation over the last axis."""
         return tf.gather(target, self.permutation, axis=-1)
 
-    @tf.function
     def _inverse(self, target):
         """Un-does the fixed permutation over the last axis."""
         return tf.gather(target, self.inv_permutation, axis=-1)
@@ -220,7 +222,6 @@ class Orthogonal(tf.keras.Model):
         else:
             return self._inverse(target)
 
-    @tf.function
     def _forward(self, target):
         """Performs a learnable generalized permutation over the last axis."""
 
@@ -234,7 +235,6 @@ class Orthogonal(tf.keras.Model):
             log_det = tf.cast(shape[1], tf.float32) * log_det
         return z, log_det
 
-    @tf.function
     def _inverse(self, z):
         """Un-does the learnable permutation over the last axis."""
 
@@ -288,46 +288,49 @@ class MCDropout(tf.keras.Model):
 
 
 class ActNorm(tf.keras.Model):
-    """Implements an Activation Normalization (ActNorm) Layer."""
+    """Implements an Activation Normalization (ActNorm) Layer.
+    Activation Normalization is learned invertible normalization, using
+    a Scale (s) and Bias (b) vector [1].
+        y = s * x + b (forward)
+        x = (y - b)/s (inverse)
 
-    def __init__(self, settings, **kwargs):
+    The scale and bias can be data dependent initalized, such that the
+    output has a mean of zero and standard deviation of one [1,2].
+    Alternatively, it is initialized with vectors of ones (scale) and
+    zeros (bias).
+
+    [1] - Kingma, Diederik P., and Prafulla Dhariwal.
+            "Glow: Generative flow with invertible 1x1 convolutions."
+            arXiv preprint arXiv:1807.03039 (2018).
+
+    [2] - Salimans, Tim, and Durk P. Kingma.
+            "Weight normalization: A simple reparameterization to accelerate
+            training of deep neural networks."
+            Advances in neural information processing systems 29
+            (2016): 901-909.
+    """
+
+    def __init__(self, latent_dim, act_norm_init, **kwargs):
         """Creates an instance of an ActNorm Layer as proposed by [1].
-
-        Activation Normalization is learned invertible normalization, using
-        a Scale (s) and Bias (b) vector [1].
-            y = s * x + b (forward)
-            x = (y - b)/s (inverse)
-
-        The scale and bias can be data dependent initalized, such that the
-        output has a mean of zero and standard deviation of one [1,2].
-        Alternatively, it is initialized with vectors of ones (scale) and
-        zeros (bias).
-
-        [1] - Kingma, Diederik P., and Prafulla Dhariwal.
-              "Glow: Generative flow with invertible 1x1 convolutions."
-               arXiv preprint arXiv:1807.03039 (2018).
-
-        [2] - Salimans, Tim, and Durk P. Kingma.
-              "Weight normalization: A simple reparameterization to accelerate
-               training of deep neural networks."
-              Advances in neural information processing systems 29
-              (2016): 901-909.
 
         Parameters
         ----------
-        settings : dict
-            Contains initialization settings for the `ActNorm` layer.
+        latent_dim            : int
+            The dimensionality of the latent space (equal to the dimensionality of the target variable)
+        act_norm_init         : np.ndarray of shape (num_simulations, num_params) or None, optional, default: None
+            Optional data-dependent initialization for the internal ``ActNorm`` layers, as done in [1]. Could be helpful
+            for deep invertible networks.
         """
 
         super().__init__(**kwargs)
 
         # Initialize scale and bias with zeros and ones if no batch for initalization was provided.
-        if settings.get("act_norm_init") is None:
-            self.scale = tf.Variable(tf.ones((settings["latent_dim"],)), trainable=True, name="act_norm_scale")
+        if act_norm_init is None:
+            self.scale = tf.Variable(tf.ones((latent_dim,)), trainable=True, name="act_norm_scale")
 
-            self.bias = tf.Variable(tf.zeros((settings["latent_dim"],)), trainable=True, name="act_norm_bias")
+            self.bias = tf.Variable(tf.zeros((latent_dim,)), trainable=True, name="act_norm_bias")
         else:
-            self._initalize_parameters_data_dependent(settings["act_norm_init"])
+            self._initalize_parameters_data_dependent(act_norm_init)
 
     def call(self, target, inverse=False):
         """Performs one pass through the actnorm layer (either inverse or forward) and normalizes
@@ -359,7 +362,6 @@ class ActNorm(tf.keras.Model):
         else:
             return self._inverse(target)
 
-    @tf.function
     def _forward(self, target):
         """Performs a forward pass through the layer."""
 
@@ -367,7 +369,6 @@ class ActNorm(tf.keras.Model):
         ldj = tf.math.reduce_sum(tf.math.log(tf.math.abs(self.scale)), axis=-1)
         return z, ldj
 
-    @tf.function
     def _inverse(self, target):
         """Performs an inverse pass through the layer."""
 
@@ -453,7 +454,7 @@ class InvariantModule(tf.keras.Model):
                 raise ConfigurationError("pooling_fun argument not understood!")
         self.pooler = pooling_fun
 
-    def call(self, x):
+    def call(self, x, **kwargs):
         """Performs the forward pass of a learnable invariant transform.
 
         Parameters
@@ -467,8 +468,8 @@ class InvariantModule(tf.keras.Model):
             Output of shape (batch_size,..., out_dim)
         """
 
-        x_reduced = self.pooler(self.s1(x))
-        out = self.s2(x_reduced)
+        x_reduced = self.pooler(self.s1(x, **kwargs))
+        out = self.s2(x_reduced, **kwargs)
         return out
 
 
@@ -498,7 +499,7 @@ class EquivariantModule(tf.keras.Model):
         self.invariant_module = InvariantModule(settings)
         self.s3 = Sequential([Dense(**settings["dense_s3_args"]) for _ in range(settings["num_dense_s3"])])
 
-    def call(self, x):
+    def call(self, x, **kwargs):
         """Performs the forward pass of a learnable equivariant transform.
 
         Parameters
@@ -516,7 +517,7 @@ class EquivariantModule(tf.keras.Model):
         shape = tf.shape(x)
 
         # Example: Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
-        out_inv = self.invariant_module(x)
+        out_inv = self.invariant_module(x, **kwargs)
         out_inv = tf.expand_dims(out_inv, -2)
         tiler = [1] * len(shape)
         tiler[-2] = shape[-2]
@@ -526,7 +527,7 @@ class EquivariantModule(tf.keras.Model):
         out_c = tf.concat([x, out_inv_rep], axis=-1)
 
         # Pass through equivariant func
-        out = self.s3(out_c)
+        out = self.s3(out_c, **kwargs)
         return out
 
 
@@ -575,7 +576,6 @@ class MultiConv1D(tf.keras.Model):
         out = self.dim_red(out, **kwargs)
         return out
 
-    @tf.function
     def _multi_conv(self, x, **kwargs):
         """Applies the convolutions with different sizes and concatenates outputs."""
 

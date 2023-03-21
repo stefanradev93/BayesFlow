@@ -540,25 +540,25 @@ class GenerativeModel:
         simulator: callable,
         skip_test: bool = False,
         prior_is_batched: bool = False,
-        simulator_is_batched: bool = False,
+        simulator_is_batched: bool = None,
         name: str = "anonymous",
     ):
         """Instantiates a generative model responsible for drawing generating params, data, and optional context.
 
         Parameters
         ----------
-        prior                : callable or a ``bayesflow.simulation.Prior`` instance
+        prior                : callable or bayesflow.simulation.Prior
             A function returning random draws from the prior parameter distribution. Should encode
             prior knowledge about plausible parameter ranges
-        simulator            : callable or a ``bayesflow.simulation.Simulator`` instance
+        simulator            : callable or bayesflow.simulation.Simulator
             A function accepting parameter draws, optional context, and optional arguments as input
             and returning obseravble data
-        skip_test            : bool (default - False)
+        skip_test            : bool, optional, default: False
             If True, a forward inference pass will be performed.
-        prior_is_batched     : bool (default - False), only relevant and mandatory if providing a custom prior without
-            the ``Prior`` wrapper.  
-        simulator_is_batched : bool (default - False), only relevant and mandatory if providing a custom simulator without
-            the ``Simulator`` wrapper. 
+        prior_is_batched     : bool, optional, default: False
+            Only relevant and mandatory if providing a custom prior without the ``Prior`` wrapper.
+        simulator_is_batched : bool or None, optional, default: None
+            Only relevant and mandatory if providing a custom simulator without he ``Simulator`` wrapper.
         name                 : str (default - "anonoymous")
             An optional name for the generative model. If kept default (None), 'anonymous' is set as name.
 
@@ -768,7 +768,6 @@ class GenerativeModel:
         extend_from=0,
         disable_user_input=False,
     ):
-
         """Simulates a dataset for single-pass offline training (called via the train_from_presimulation method
         of the Trainer class in the trainers.py script).
 
@@ -967,7 +966,6 @@ class MultiGenerativeModel:
         return lambda b: np.random.default_rng().choice(self.num_models, size=b, p=model_probs)
 
     def __call__(self, batch_size, **kwargs):
-
         # Prepare placeholders
         out_dict = {DEFAULT_KEYS["model_outputs"]: [], DEFAULT_KEYS["model_indices"]: []}
 

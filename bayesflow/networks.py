@@ -22,8 +22,10 @@
 from bayesflow.inference_networks import EvidentialNetwork, InvertibleNetwork, PMPNetwork
 from bayesflow.summary_networks import (
     DeepSet,
+    HierarchicalNetwork,
     InvariantNetwork,
     SequentialNetwork,
     SetTransformer,
+    SplitNetwork,
     TimeSeriesTransformer,
 )

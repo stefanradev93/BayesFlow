@@ -159,7 +159,7 @@ class EarlyStopper:
     def __init__(self, patience=5, tolerance=0.05):
         """
 
-        patience          : int, optional, default: 5
+        patience          : int, optional, default: 4
             How many successive times the tolerance value is reached before triggering
             an early stopping recommendation.
         tolerance         : float, optional, default: 0.05

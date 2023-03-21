@@ -995,26 +995,26 @@ def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
 
 
 def plot_calibration_curves(
-    m_true, m_pred, model_names=None, num_bins=10, font_size=12, fig_size=(12, 4), color="#8f2727"
+    true_models, pred_models, model_names=None, num_bins=10, font_size=12, fig_size=(12, 4), color="#8f2727"
 ):
     """Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities
     for a model comparison problem. Depends on the ``expected_calibration_error`` function for computing the ECE.
 
     Parameters
     ----------
-    m_true      : np.ndarray of shape (num_sim, num_models)
-        The one-hot-encoded true model indices.
-    m_pred      : tf.tensor of shape (num_sim, num_models)
-        The predicted posterior model probabilities.
-    model_names : list or None, optional, default: None
+    true_models  : np.ndarray of shape (num_data_sets, num_models)
+        The one-hot-encoded true model indices per data set.
+    pred_models  : np.ndarray of shape (num_data_sets, num_models)
+        The predicted posterior model probabilities (PMPs) per data set.
+    model_names  : list or None, optional, default: None
         The model names for nice plot titles. Inferred if None.
-    num_bins    : int, optional, default: 10
+    num_bins     : int, optional, default: 10
         The number of bins to use for the calibration curves (and marginal histograms).
-    font_size   : int, optional, default: 12
+    font_size    : int, optional, default: 12
         The font size of the axis label texts.
-    fig_size    : tuple, optional, default: (12, 4)
+    fig_size     : tuple, optional, default: (12, 4)
         The figure size passed to the matplotlib constructor.
-    color       : str, optional, default: '#8f2727'
+    color        : str, optional, default: '#8f2727'
         The color of the plot.
 
     Returns
@@ -1022,7 +1022,7 @@ def plot_calibration_curves(
     f : plt.Figure - the figure instance for optional saving
     """
 
-    num_models = m_pred.shape[-1]
+    num_models = true_models.shape[-1]
     if model_names is None:
         model_names = [rf"$M_{{{m}}}$" for m in range(1, num_models + 1)]
 
@@ -1030,7 +1030,7 @@ def plot_calibration_curves(
     n_row = int(np.ceil(num_models / 6))
     n_col = int(np.ceil(num_models / n_row))
 
-    cal_errs, cal_probs = expected_calibration_error(m_true, m_pred, num_bins)
+    cal_errs, cal_probs = expected_calibration_error(true_models, pred_models, num_bins)
 
     # Initialize figure
     f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
@@ -1051,8 +1051,8 @@ def plot_calibration_curves(
 
         # Plot PMP distribution over bins
         uniform_bins = np.linspace(0.0, 1.0, num_bins + 1)
-        norm_weights = np.ones_like(m_pred) / float(len(m_pred))  # Normalize bins
-        ax[j].hist(m_pred[:, j], bins=uniform_bins, weights=norm_weights[:, j], color="grey", alpha=0.1)
+        norm_weights = np.ones_like(pred_models) / len(pred_models)
+        ax[j].hist(pred_models[:, j], bins=uniform_bins, weights=norm_weights[:, j], color="grey", alpha=0.1)
 
         # Tweak plot
         ax[j].spines["right"].set_visible(False)

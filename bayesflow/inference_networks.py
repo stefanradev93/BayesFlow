@@ -22,8 +22,9 @@ import numpy as np
 import tensorflow as tf
 
 from bayesflow import default_settings
-from bayesflow.coupling_networks import AffineCouplingLayer
+from bayesflow.coupling_networks import CouplingLayer
 from bayesflow.helper_functions import build_meta_dict
+from bayesflow.helper_networks import MCDropout
 
 
 class InvertibleNetwork(tf.keras.Model):
@@ -32,10 +33,9 @@ class InvertibleNetwork(tf.keras.Model):
     def __init__(
         self,
         num_params,
-        num_coupling_layers=4,
-        coupling_net_settings=None,
-        coupling_design="dense",
-        soft_clamping=1.9,
+        num_coupling_layers=5,
+        coupling_design="affine",
+        coupling_settings=None,
         permutation="fixed",
         use_act_norm=True,
         act_norm_init=None,
@@ -57,7 +57,10 @@ class InvertibleNetwork(tf.keras.Model):
         Conditional invertible neural networks for diverse image-to-image translation.
         In DAGM German Conference on Pattern Recognition (pp. 373-387). Springer, Cham.
 
-        [4] Kingma, D. P., & Dhariwal, P. (2018).
+        [4] Durkan, C., Bekasov, A., Murray, I., & Papamakarios, G. (2019).
+        Neural spline flows. Advances in Neural Information Processing Systems, 32.
+
+        [5] Kingma, D. P., & Dhariwal, P. (2018).
         Glow: Generative flow with invertible 1x1 convolutions.
         Advances in Neural Information Processing Systems, 31.
 
@@ -66,34 +69,58 @@ class InvertibleNetwork(tf.keras.Model):
         num_params            : int
             The number of parameters to perform inference on. Equivalently, the dimensionality of the
             latent space.
-        num_coupling_layers   : int, optional, default: 4
+        num_coupling_layers   : int, optional, default: 5
             The number of coupling layers to use as defined in [1] and [2]. In general, more coupling layers
             will give you more expressive power, but will be slower and may need more simulations to train.
             Typically, between 4 and 10 coupling layers should suffice for most applications.
-        coupling_net_settings : dict or None, optional, default: None
-            The coupling network settings to pass to the internal coupling layers. See `default_settings`
-            for the required entries.
-        coupling_design       : str or callable, optional, default: 'dense'
-            The type of internal coupling network to use. Currently, only 'dense' is understood as a
-            string argument, but you can also pass a callable which constructs a custom network. In that case,
-            the `coupling_net_settings` will be passed as a first argument to the callable.
-        soft_clamping         : float, optional, default: 1.9
-            The soft clamping parameter `alpha` in [3]. Typically you would not touch this.
+        coupling_design       : str or callable, optional, default: 'affine'
+            The type of internal coupling network to use. Must be in ['affine', 'spline'].
+            The former corresponds to the architecture in [3, 5], the latter corresponds to a modified
+            version of [4].
+
+            In general, spline couplings run slower than affine couplings, but require fewers coupling
+            layers. Spline couplings may work best with complex (e.g., multimodal) low-dimensional
+            problems. The difference will become less and less pronounced as we move to higher dimensions.
+
+            Note: This is the first setting you may want to change, if inference does not work as expected!
+        coupling_settings     : dict or None, optional, default: None
+            The coupling network settings to pass to the internal coupling layers. See ``default_settings``
+            for possible settings. Below are two examples.
+
+            Examples:
+
+            1. If using ``coupling_design='affine``, you may want to turn on Monte Carlo Dropout and
+            use an ELU activation function for the internal networks. You can do this by providing:
+            ``
+            coupling_settings={
+                'mc_dropout' : True,
+                'dense_args' : dict(units=128, activation='elu')
+            }
+            ``
+
+            2. If using ``coupling_design='spline'``, you may want to change the number of learnable bins
+            and increase the dropout probability (i.e., more regularization to guard against overfitting):
+            ``
+            coupling_settings={
+                'dropout_prob': 0.2,
+                'bins' : 32,
+            }
+            ``
         permutation           : str or None, optional, default: 'fixed'
             Whether to use permutations between coupling layers. Highly recommended if ``num_coupling_layers > 1``
             Important: Must be in ['fixed', 'learnable', None]
         use_act_norm          : bool, optional, default: True
-            Whether to use activation normalization after each coupling layer, as used in [4].
+            Whether to use activation normalization after each coupling layer, as used in [5].
             Recommended to keep default.
         act_norm_init         : np.ndarray of shape (num_simulations, num_params) or None, optional, default: None
-            Optional data-dependent initialization for the internal `ActNorm` layers, as done in [4]. Could be helpful
+            Optional data-dependent initialization for the internal ``ActNorm`` layers, as done in [5]. Could be helpful
             for deep invertible networks.
         use_soft_flow         : bool, optional, default: False
             Whether to perturb the taregt distribution (i.e., parameters) with small amount of independent
-            noise, as done in [3]. Could be helpful for degenrate distributions.
+            noise, as done in [2]. Could be helpful for degenrate distributions.
         soft_flow_bounds      : tuple(float, float), optional, default: (1e-3, 5e-2)
             The bounds of the continuous uniform distribution from which the noise scale would be sampled
-            at each iteration. Only relevant when `use_soft_flow=True`.
+            at each iteration. Only relevant when ``use_soft_flow=True``.
         **kwargs              : dict
             Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.
         """
@@ -102,14 +129,14 @@ class InvertibleNetwork(tf.keras.Model):
 
         settings = dict(
             latent_dim=num_params,
-            coupling_net_settings=coupling_net_settings,
+            coupling_settings=coupling_settings,
             coupling_design=coupling_design,
             permutation=permutation,
             use_act_norm=use_act_norm,
             act_norm_init=act_norm_init,
-            alpha=soft_clamping,
         )
-        self.coupling_layers = [AffineCouplingLayer(settings) for _ in range(num_coupling_layers)]
+        self.coupling_layers = []
+        self.coupling_layers = [CouplingLayer(**settings) for _ in range(num_coupling_layers)]
         self.soft_flow = use_soft_flow
         self.soft_low = soft_flow_bounds[0]
         self.soft_high = soft_flow_bounds[1]
@@ -148,7 +175,6 @@ class InvertibleNetwork(tf.keras.Model):
             return self.inverse(targets, condition, **kwargs)
         return self.forward(targets, condition, **kwargs)
 
-    @tf.function
     def forward(self, targets, condition, **kwargs):
         """Performs a forward pass though the chain."""
 
@@ -183,7 +209,6 @@ class InvertibleNetwork(tf.keras.Model):
         log_det_J = tf.add_n(log_det_Js)
         return z, log_det_J
 
-    @tf.function
     def inverse(self, z, condition, **kwargs):
         """Performs a reverse pass through the chain. Assumes that it is only used
         in inference mode, so ``**kwargs`` contains ``training=False``."""
@@ -327,7 +352,15 @@ class PMPNetwork(tf.keras.Model):
     """
 
     def __init__(
-        self, num_models, dense_args=None, num_dense=3, dropout_prob=0.05, output_activation=tf.nn.softmax, **kwargs
+        self,
+        num_models,
+        dense_args=None,
+        num_dense=3,
+        dropout=True,
+        mc_dropout=False,
+        dropout_prob=0.05,
+        output_activation=tf.nn.softmax,
+        **kwargs,
     ):
         """Creates an instance of a PMP network for amortized model comparison.
 
@@ -339,8 +372,12 @@ class PMPNetwork(tf.keras.Model):
             The arguments for a tf.keras.layers.Dense layer. If None, defaults will be used.
         num_dense         : int, optional, default: 3
             The number of dense layers for the main network part.
-        dropout_prob      : float or None, optional, default: 0.05
-            Whether to apply dropout regularization. Advisable, if training offline.
+        dropout           : bool, optional, default: True
+            Whether to use dropout in-between the hidden layers.
+        mc_dropout        : bool, optional, default: False
+            Whether to use dropout Monte Carlo dropout (i.e., Bayesian approximation) during inference
+        dropout_prob      : float in (0, 1), optional, default: 0.05
+            The dropout probability. Only has effecft if ``dropout=True`` or ``mc_dropout=True``
         output_activation : callable, optional, default: tf.nn.softmax
             The activation function to apply to the network outputs.
             Important: Needs to have positive outputs and be bounded between 0 and 1.
@@ -350,20 +387,22 @@ class PMPNetwork(tf.keras.Model):
 
         super().__init__(**kwargs)
 
+        # Pick default settings, if None provided
         if dense_args is None:
             dense_args = default_settings.DEFAULT_SETTING_DENSE_PMP
 
-        # A network to increase representation power
-        self.dense = tf.keras.Sequential()
+        # Sequential model with optional (MC) Dropout
+        self.net = tf.keras.Sequential()
         for _ in range(num_dense):
-            self.dense.add(tf.keras.layers.Dense(**dense_args))
-            if dropout_prob:
-                self.dense.add(tf.keras.layers.Dropout(dropout_prob))
-
-        # The layer to output posterior model probabilities
+            self.net.add(tf.keras.layers.Dense(**dense_args))
+            if mc_dropout:
+                self.net.add(MCDropout(dropout_prob))
+            elif dropout:
+                self.net.add(tf.keras.layers.Dropout(dropout_prob))
+            else:
+                pass
         self.output_layer = tf.keras.layers.Dense(num_models)
         self.output_activation = output_activation
-
         self.num_models = num_models
 
     def call(self, condition, return_probs=True, **kwargs):
@@ -383,7 +422,7 @@ class PMPNetwork(tf.keras.Model):
             The approximated PMPs (post-activation) or logits (pre-activation)
         """
 
-        rep = self.dense(condition, **kwargs)
+        rep = self.net(condition, **kwargs)
         logits = self.output_layer(rep, **kwargs)
         if return_probs:
             return self.output_activation(logits)

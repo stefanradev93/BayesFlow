@@ -68,7 +68,8 @@ def test_posterior(benchmark_name, mode):
     """This test will run posterior, likelihood, and joint estimation on all benchmarks. It will create a
     minimal ``Trainer`` instance and test whether the weights change after a couple of backpropagation updates.
 
-    Implicitly, the functuion will test wtheter the coupling GenerativeModel -> configurator -> Amortizer -> Trainer works.
+    Implicitly, the function will test if the coupling ``GenerativeModel`` -> ``configurator`` ->
+    ``Amortizer`` -> ``Trainer`` works.
     """
 
     # Default settings for testing

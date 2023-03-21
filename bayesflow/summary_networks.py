@@ -46,8 +46,8 @@ class TimeSeriesTransformer(tf.keras.Model):
     def __init__(
         self,
         input_dim,
-        attention_settings,
-        dense_settings,
+        attention_settings=None,
+        dense_settings=None,
         use_layer_norm=True,
         num_dense_fc=2,
         summary_dim=10,
@@ -70,8 +70,9 @@ class TimeSeriesTransformer(tf.keras.Model):
         ----------
         input_dim            : int
             The dimensionality of the input data (last axis).
-        attention_settings   : dict
-            A dictionary which will be unpacked as the arguments for the ``MultiHeadAttention`` layer
+        attention_settings   : dict or None, optional, default None
+            A dictionary which will be unpacked as the arguments for the ``MultiHeadAttention`` layer.
+            If ``None``, default settings will be used (see ``bayesflow.default_settings``)
             For instance, to use an attention block with 4 heads and key dimension 32, you can do:
 
             ``attention_settings=dict(num_heads=4, key_dim=32)``
@@ -82,7 +83,7 @@ class TimeSeriesTransformer(tf.keras.Model):
 
             For more details and arguments, see:
             https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention
-        dense_settings       : dict
+        dense_settings       : dict or None, optional, default: None
             A dictionary which will be unpacked as the arguments for the ``Dense`` layer.
             For instance, to use hidden layers with 32 units and a relu activation, you can do:
 
@@ -111,6 +112,12 @@ class TimeSeriesTransformer(tf.keras.Model):
         """
 
         super().__init__(**kwargs)
+
+        # Process internal attention settings
+        if attention_settings is None:
+            attention_settings = defaults.DEFAULT_SETTING_ATTENTION
+        if dense_settings is None:
+            dense_settings = defaults.DEFAULT_SETTING_DENSE_ATTENTION
 
         # Construct a series of self-attention blocks, these will process
         # the time series in a many-to-many fashion
@@ -171,8 +178,8 @@ class SetTransformer(tf.keras.Model):
     def __init__(
         self,
         input_dim,
-        attention_settings,
-        dense_settings,
+        attention_settings=None,
+        dense_settings=None,
         use_layer_norm=True,
         num_dense_fc=2,
         summary_dim=10,
@@ -192,7 +199,7 @@ class SetTransformer(tf.keras.Model):
         ----------
         input_dim            : int
             The dimensionality of the input data (last axis).
-        attention_settings   : dict
+        attention_settings   : dict or None, optional, default: None
             A dictionary which will be unpacked as the arguments for the ``MultiHeadAttention`` layer
             For instance, to use an attention block with 4 heads and key dimension 32, you can do:
 
@@ -204,7 +211,7 @@ class SetTransformer(tf.keras.Model):
 
             For more details and arguments, see:
             https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention
-        dense_settings       : dict
+        dense_settings       : dict or None, optional, default: None
             A dictionary which will be unpacked as the arguments for the ``Dense`` layer.
             For instance, to use hidden layers with 32 units and a relu activation, you can do:
 
@@ -234,6 +241,12 @@ class SetTransformer(tf.keras.Model):
         """
 
         super().__init__(**kwargs)
+
+        # Process internal attention settings
+        if attention_settings is None:
+            attention_settings = defaults.DEFAULT_SETTING_ATTENTION
+        if dense_settings is None:
+            dense_settings = defaults.DEFAULT_SETTING_DENSE_ATTENTION
 
         # Construct a series of self-attention blocks
         self.attention_blocks = Sequential()
@@ -553,23 +566,32 @@ class HierarchicalNetwork(tf.keras.Model):
         super().__init__(**kwargs)
         self.networks = networks_list
 
-    def call(self, x):
+    def call(self, x, return_all=False, **kwargs):
         """Performs the forward pass through the hierarchical network,
         transforming the nested input into learned summary statistics.
 
         Parameters
         ----------
-        x : tf.Tensor
-            Input of variable shape - (batch_size, ..., x_dim)
+        data       : tf.Tensor of shape (batch_size, ..., data_dim)
             Example, hierarchical data sets with two levels:
-            (batch_size, num_units_l2, num_units_l1, x_dim)
+            (batch_size, D, L, x_dim) -> reduces to
+        return_all : boolean, optional, default: False
+            Whether to return all intermediate outputs (True) or just
+            the final one (False).
 
         Returns
         -------
         out : tf.Tensor
-            Output of shape (batch_size, out_dim)
+            Output of shape ``(batch_size, out_dim) if return_all=False`` else
         """
 
-        for net in self.networks:
-            x = net(x)
-        return x
+        if return_all:
+            outputs = []
+            for net in self.networks:
+                x = net(x, **kwargs)
+                outputs.append(x)
+            return outputs
+        else:
+            for net in self.networks:
+                x = net(x, **kwargs)
+            return x

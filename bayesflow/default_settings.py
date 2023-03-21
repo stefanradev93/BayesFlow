@@ -74,8 +74,14 @@ DEFAULT_SETTING_MULTI_CONV = {
 DEFAULT_SETTING_DENSE_INVARIANT = {"units": 64, "activation": "relu", "kernel_initializer": "glorot_uniform"}
 
 
+DEFAULT_SETTING_DENSE_RECT = {"units": 256, "activation": "swish", "kernel_initializer": "glorot_uniform"}
+
+
+DEFAULT_SETTING_DENSE_ATTENTION = {"units": 64, "activation": "relu", "kernel_initializer": "glorot_uniform"}
+
+
 DEFAULT_SETTING_DENSE_EVIDENTIAL = {
-    "units": 128,
+    "units": 64,
     "kernel_initializer": "glorot_uniform",
     "activation": "elu",
 }
@@ -88,37 +94,45 @@ DEFAULT_SETTING_DENSE_PMP = {
 }
 
 
-DEFAULT_SETTING_DENSE_COUPLING = MetaDictSetting(
+DEFAULT_SETTING_AFFINE_COUPLING = MetaDictSetting(
     meta_dict={
-        "t_args": {
-            "dense_args": dict(units=128, kernel_initializer="glorot_uniform", activation="tanh"),
-            "num_dense": 2,
-            "spec_norm": False,
-            "mc_dropout": False,
-            "dropout": False,
-            "residual": False,
-            "dropout_prob": 0.1,
-        },
-        "s_args": {
-            "dense_args": dict(units=128, kernel_initializer="glorot_uniform", activation="tanh"),
-            "num_dense": 2,
-            "spec_norm": False,
-            "mc_dropout": False,
-            "dropout": False,
-            "residual": False,
-            "dropout_prob": 0.1,
-        },
+        "dense_args": dict(units=128, activation="tanh"),
+        "num_dense": 2,
+        "spec_norm": False,
+        "mc_dropout": False,
+        "dropout": True,
+        "residual": False,
+        "dropout_prob": 0.01,
+        "soft_clamping": 1.9,
     },
     mandatory_fields=[],
 )
 
 
+DEFAULT_SETTING_SPLINE_COUPLING = MetaDictSetting(
+    meta_dict={
+        "dense_args": dict(units=64, activation="elu"),
+        "num_dense": 1,
+        "spec_norm": False,
+        "mc_dropout": False,
+        "dropout": True,
+        "residual": False,
+        "dropout_prob": 0.1,
+        "bins": 10,
+        "default_domain": (-5.0, 5.0, -5.0, 5.0),
+    },
+    mandatory_fields=[],
+)
+
+
+DEFAULT_SETTING_ATTENTION = {"key_dim": 32, "num_heads": 4, "dropout": 0.01}
+
+
 DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
     meta_dict={
-        "num_coupling_layers": 6,
+        "num_coupling_layers": 5,
         "coupling_net_settings": None,
-        "coupling_design": "dense",
-        "soft_clamping": 1.9,
+        "coupling_design": "affine",
         "permutation": "fixed",
         "use_act_norm": True,
         "act_norm_init": None,
@@ -131,7 +145,7 @@ DEFAULT_SETTING_INVERTIBLE_NET = MetaDictSetting(
 
 DEFAULT_SETTING_EVIDENTIAL_NET = MetaDictSetting(
     meta_dict={
-        "dense_args": dict(units=128, kernel_initializer="glorot_uniform", activation="relu"),
+        "dense_args": dict(units=128, activation="relu"),
         "num_dense": 3,
         "output_activation": "softplus",
     },
@@ -141,7 +155,7 @@ DEFAULT_SETTING_EVIDENTIAL_NET = MetaDictSetting(
 
 DEFAULT_SETTING_PMP_NET = MetaDictSetting(
     meta_dict={
-        "dense_args": dict(units=64, kernel_initializer="glorot_uniform", activation="relu"),
+        "dense_args": dict(units=64, activation="relu"),
         "num_dense": 3,
         "output_activation": "softmax",
     },
@@ -165,7 +179,9 @@ DEFAULT_KEYS = {
     "summary_conditions": "summary_conditions",
     "direct_conditions": "direct_conditions",
     "parameters": "parameters",
+    "hyperparameters": "hyperparameters",
     "observables": "observables",
+    "targets": "targets",
     "conditions": "conditions",
     "posterior_inputs": "posterior_inputs",
     "likelihood_inputs": "likelihood_inputs",

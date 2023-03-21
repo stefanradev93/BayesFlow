@@ -252,7 +252,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         Parameters
         ----------
         input_dict  : dict
-            Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
+            Input dictionary containing at least one of the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
             ``summary_conditions`` : the conditioning variables (including data) that are first passed through a summary network
             ``direct_conditions``  : the conditioning variables that the directly passed to the inference network
         n_samples   : int
@@ -867,7 +867,7 @@ class AmortizedModelComparison(tf.keras.Model):
 
     Note: the original paper [1] does not distinguish between the summary and the evidential networks, but
     treats them as a whole, with the appropriate architetcure dictated by the model application. For the
-    sake of consistency, the BayesFlow library distinguisahes the two modules.
+    sake of consistency and modularity, the BayesFlow library separates the two constructs.
     """
 
     def __init__(self, inference_net, summary_net=None, loss_fun=None):
@@ -915,7 +915,7 @@ class AmortizedModelComparison(tf.keras.Model):
         -------
         net_out : tf.Tensor of shape (batch_size, num_models) or tuple of (net_out (batch_size, num_models),
                   summary_out (batch_size, summary_dim)), the latter being the summary network outputs, if
-                  `return_summary` set to True.
+                  ``return_summary is True``.
         """
 
         summary_out, full_cond = self._compute_summary_condition(
@@ -929,6 +929,34 @@ class AmortizedModelComparison(tf.keras.Model):
         if not return_summary:
             return net_out
         return net_out, summary_out
+
+    def posterior_probs(self, input_dict, to_numpy=True, **kwargs):
+        """Compute posterior model probabilities (PMPs) given a dictionary with observed or
+        simulated data.
+
+        Parameters
+        ----------
+        input_dict  : dict
+            Input dictionary containing at least one of the following mandatory keys, if DEFAULT_KEYS unchanged
+            `summary_conditions` - the conditioning variables that are first passed through a summary network
+            `direct_conditions`  - the conditioning variables that the directly passed to the evidential network
+        to_numpy    : bool, optional, default: True
+            Flag indicating whether to return the PMPs a ``np.ndarray`` or a ``tf.Tensor``
+        Returns
+        -------
+        out       : tf.Tensor of shape (batch_size, ..., num_models)
+            The approximated PMPs
+        """
+
+        _, full_cond = self._compute_summary_condition(
+            input_dict.get(DEFAULT_KEYS["summary_conditions"]),
+            input_dict.get(DEFAULT_KEYS["direct_conditions"]),
+            **kwargs,
+        )
+        pmps = self.inference_net(full_cond, **kwargs)
+        if to_numpy:
+            return pmps.numpy()
+        return pmps
 
     def compute_loss(self, input_dict, **kwargs):
         """Computes the loss of the amortized model comparison instance.
