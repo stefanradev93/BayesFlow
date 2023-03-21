@@ -145,7 +145,7 @@ def test_actnorm(input_dim, shape):
         x = tf.random.normal((np.random.randint(low=1, high=32), np.random.randint(low=1, high=32), input_dim))
 
     # Create ActNorm layer
-    actnorm = ActNorm({"latent_dim": input_dim})
+    actnorm = ActNorm(latent_dim=input_dim, act_norm_init=None)
 
     # Forward - inverse
     z, _ = actnorm(x)
