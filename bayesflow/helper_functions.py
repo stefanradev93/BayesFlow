@@ -27,6 +27,15 @@ from bayesflow import default_settings
 from bayesflow.exceptions import ConfigurationError, ShapeError
 
 
+def check_tensor_sanity(tensor, logger):
+    """Tests for the present of NaNs and Infs in a tensor."""
+
+    if tf.reduce_any(tf.math.is_nan(tensor)):
+        logger.warn("Warning! Returned estimates contain one or multiple nan values!")
+    if tf.reduce_any(tf.math.is_inf(tensor)):
+        logger.warn("Warning! Returned estimates contain one or multiple inf values!")
+
+
 def merge_left_into_right(left_dict, right_dict):
     """Function to merge nested dict `left_dict` into nested dict `right_dict`."""
     for k, v in left_dict.items():

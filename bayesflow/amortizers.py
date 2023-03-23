@@ -18,9 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import logging
 from abc import ABC, abstractmethod
 from functools import partial
 from warnings import warn
+
+logging.basicConfig()
 
 import numpy as np
 import tensorflow as tf
@@ -28,6 +31,7 @@ import tensorflow_probability as tfp
 
 from bayesflow.default_settings import DEFAULT_KEYS
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
+from bayesflow.helper_functions import check_tensor_sanity
 from bayesflow.losses import log_loss, mmd_summary_space
 from bayesflow.networks import EvidentialNetwork
 
@@ -50,12 +54,16 @@ class AmortizedTarget(ABC):
         pass
 
     @abstractmethod
-    def sample(input_dict, **kwargs):
+    def sample(self, input_dict, **kwargs):
         pass
 
     @abstractmethod
-    def log_prob(input_dict, **kwargs):
+    def log_prob(self, input_dict, **kwargs):
         pass
+
+    def _check_output_sanity(self, tensor):
+        logger = logging.getLogger()
+        check_tensor_sanity(tensor, logger)
 
 
 class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
@@ -295,6 +303,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         # Only return 2D array, if first dimensions is 1
         if post_samples.shape[0] == 1:
             post_samples = post_samples[0]
+        self._check_output_sanity(post_samples)
 
         # Return numpy version of tensor or tensor itself
         if to_numpy:
@@ -372,6 +381,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         # Case static latent - marginal samples from z
         else:
             log_post = self.latent_dist.log_prob(z) + log_det_J
+        self._check_output_sanity(log_post)
 
         if to_numpy:
             return log_post.numpy()
@@ -545,6 +555,7 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
         # Only return 2D array, if first dimensions is 1
         if lik_samples.shape[0] == 1:
             lik_samples = lik_samples[0]
+        self._check_output_sanity(lik_samples)
 
         if to_numpy:
             return lik_samples.numpy()
@@ -606,6 +617,7 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
 
         # Compute approximate log likelihood
         log_lik = self.latent_dist.log_prob(z) + log_det_J
+        self._check_output_sanity(log_lik)
 
         # Convert tensor to numpy array, if specified
         if to_numpy:

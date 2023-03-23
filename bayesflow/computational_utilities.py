@@ -26,6 +26,43 @@ from sklearn.calibration import calibration_curve
 from bayesflow.default_settings import MMD_BANDWIDTH_LIST
 
 
+def compute_jacobian_trace(function, inputs, **kwargs):
+    """Computes the exact Jacobian Trace of function with respect to inputs. Suitable for low dimensions (<32)
+
+    Parameters
+    ----------
+    function : callable
+        The function whose Jacobian at inputs will be computed
+    inputs   : tf.Tensor of shape (batch_size, ...)
+        The tensor with respect to which we are computing the Jacobian
+
+    Returns
+    -------
+    outputs  : tf.Tensor of shape (batch_size, ...)
+        The outputs of ``function``
+    trace    : tf.Tensor of shape (batch_size, ...)
+        The trace of the Jacobian at inputs.
+    """
+
+    if len(inputs.shape) == 2:
+        batch_size, dims = inputs.shape
+        trace = tf.zeros((batch_size,))
+    else:
+        batch_size, num_reps, dims = inputs.shape
+        trace = tf.zeros((batch_size, num_reps))
+
+    with tf.GradientTape(persistent=True) as tape:
+        tape.watch(inputs)
+        outputs = function(inputs, **kwargs)
+
+    for step in range(dims):
+        dummy = tf.cast(step * tf.ones(trace.shape), tf.int32)
+        epsilon = tf.one_hot(dummy, dims)
+        vjp = tape.gradient(outputs, inputs, output_gradients=epsilon)
+        trace = trace + tf.reduce_sum(vjp * epsilon, axis=-1)
+    return outputs, trace
+
+
 def gaussian_kernel_matrix(x, y, sigmas=None):
     """Computes a Gaussian radial basis functions (RBFs) between the samples of x and y.
 
@@ -39,7 +76,7 @@ def gaussian_kernel_matrix(x, y, sigmas=None):
         Comprises `num_draws_y` Random draws from the "source" distribution `Q`.
     sigmas  : list(float), optional, default: None
         List which denotes the widths of each of the gaussians in the kernel.
-        If `sigmas is None`, a default range will be used, contained in `bayesflow.default_settings.MMD_BANDWIDTH_LIST`
+        If `sigmas is None`, a default range will be used, contained in ``bayesflow.default_settings.MMD_BANDWIDTH_LIST``
 
     Returns
     -------
