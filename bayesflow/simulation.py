@@ -594,12 +594,12 @@ class GenerativeModel:
         if not skip_test:
             self._test()
 
-    def __call__(self, batch_size, *args, **kwargs):
+    def __call__(self, batch_size, **kwargs):
         """Carries out forward inference 'batch_size' times."""
 
         # Forward inference
-        prior_out = self.prior(batch_size, *args, **kwargs)
-        sim_out = self.simulator(prior_out["prior_draws"], *args, **kwargs)
+        prior_out = self.prior(batch_size, **kwargs.pop("prior_args", {}))
+        sim_out = self.simulator(prior_out["prior_draws"], **kwargs.pop("sim_args", {}))
 
         # Prepare and fill placeholder dict
         out_dict = {
@@ -941,22 +941,34 @@ class MultiGenerativeModel:
     and a prior distribution over candidate models defined by a list of probabilities.
     """
 
-    def __init__(self, generative_models: list, model_probs="equal"):
+    def __init__(self, generative_models: list, model_probs="equal", shared_context_gen=None):
         """Instantiates a multi-generative model responsible for generating parameters, data, and optional context
         from a list of models according to specified prior model probabilities (PMPs).
 
         Parameters
         ----------
-        generative_models : list of GenerativeModel instances
+        generative_models  : list of GenerativeModel instances
             The list of candidate generative models
-        model_probs       : string (default - 'equal') or list of floats with sum(model_probs) == 1.
+        model_probs        : string (default - 'equal') or list of floats with sum(model_probs) == 1.
             The list of model probabilities, should have the same length as the list of
             generative models. Note, that probabilities should sum to one.
+        shared_context_gen : callable or None, optional, default: None
+            An optional function to generate context variables shared across
+            all models and simulations in a given batch.
+
+            For instance, if the number of observations in a data set should
+            vary during training, you need to pass the shared context to the ``MultiGenerativeModel``,
+            and not the individual ``GenerativeModels``, as the latter will result in unequal numbers
+            of observations across the models in a single batch.
+
+            Important: This function should return a dictionary with keys corresponding to the function
+            arguments expected by the simulators.
         """
 
         self.generative_models = generative_models
         self.num_models = len(generative_models)
         self.model_prior = self._determine_model_prior(model_probs)
+        self.shared_context = shared_context_gen
 
     def _determine_model_prior(self, model_probs):
         """Creates the model prior p(M) given user input."""
@@ -966,6 +978,8 @@ class MultiGenerativeModel:
         return lambda b: np.random.default_rng().choice(self.num_models, size=b, p=model_probs)
 
     def __call__(self, batch_size, **kwargs):
+        """Generates a total of ``batch_size`` simulations from all models."""
+
         # Prepare placeholders
         out_dict = {DEFAULT_KEYS["model_outputs"]: [], DEFAULT_KEYS["model_indices"]: []}
 
@@ -976,9 +990,19 @@ class MultiGenerativeModel:
         # create frequency table of model indices
         model_indices, counts = np.unique(model_samples, return_counts=True)
 
+        # Take care of shared context, if provided
+        context_dict = {}
+        if self.shared_context is not None:
+            context_dict = self.shared_context()
+
         # Iterate over each unique model index and create all data sets for that model index
         for m, batch_size_m in zip(model_indices, counts):
-            model_out = self.generative_models[m](batch_size_m, **kwargs)
+            model_out = self.generative_models[m](batch_size_m, sim_args=context_dict, **kwargs)
             out_dict[DEFAULT_KEYS["model_outputs"]].append(model_out)
             out_dict[DEFAULT_KEYS["model_indices"]].append(m)
+
+        # Add shared context variables
+        if context_dict:
+            for k, v in context_dict.items():
+                out_dict[k] = v
         return out_dict
