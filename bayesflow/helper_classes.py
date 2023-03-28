@@ -558,19 +558,21 @@ class LossHistory:
 
         # Assume equal lengths per epoch and run
         try:
-            losses_df = self._to_data_frame(self.history)
+            losses_df = self._to_data_frame(self.history, self.loss_names)
             if any([v for v in self.val_history.values()]):
-                val_losses_df = self._to_data_frame(self.val_history)
+                # Rremove decay
+                names = [name for name in self.loss_names if "Decay" not in name]
+                val_losses_df = self._to_data_frame(self.val_history, names)
                 return {"train_losses": losses_df, "val_losses": val_losses_df}
             return losses_df
         # Handle unequal lengths or problems when user kills training with an interrupt
         except ValueError as ve:
             if any([v for v in self.val_history.values()]):
-                return {"train_losses": losses_df, "val_losses": val_losses_df}
+                return {"train_losses": self.history, "val_losses": self.val_history}
             return self.history
         except TypeError as te:
             if any([v for v in self.val_history.values()]):
-                return {"train_losses": losses_df, "val_losses": val_losses_df}
+                return {"train_losses": self.history, "val_losses": self.val_history}
             return self.history
 
     def flush(self):
@@ -663,13 +665,13 @@ class LossHistory:
         else:
             logger.info("Initialized empty loss history.")
 
-    def _to_data_frame(self, history):
+    def _to_data_frame(self, history, names):
         """Helper function to convert a history dict into a DataFrame."""
 
         losses_list = [pd.melt(pd.DataFrame.from_dict(history[r], orient="index").T) for r in history]
         losses_list = pd.concat(losses_list, axis=0).value.to_list()
         losses_list = [l for l in losses_list if l is not None]
-        losses_df = pd.DataFrame(losses_list, columns=self.loss_names)
+        losses_df = pd.DataFrame(losses_list, columns=names)
         return losses_df
 
 

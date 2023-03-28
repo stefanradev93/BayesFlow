@@ -97,13 +97,15 @@ class Benchmark:
 
         # Prepare partial simulator function with optional keyword arguments
         if kwargs.get("sim_kwargs") is not None:
-            _simulator = partial(getattr(self.benchmark_module, "simulator"), rng=self._rng, **kwargs.get("sim_kwargs"))
+            _simulator = partial(
+                getattr(self.benchmark_module, "simulator"), rng=self._rng, **kwargs.pop("sim_kwargs", {})
+            )
         else:
             _simulator = partial(getattr(self.benchmark_module, "simulator"), rng=self._rng)
 
         # Prepare partial prior function with optional keyword arguments
         if kwargs.get("sim_kwargs") is not None:
-            _prior = partial(getattr(self.benchmark_module, "prior"), rng=self._rng, **kwargs.get("prior_kwargs"))
+            _prior = partial(getattr(self.benchmark_module, "prior"), rng=self._rng, **kwargs.pop("prior_kwargs", {}))
         else:
             _prior = partial(getattr(self.benchmark_module, "prior"), rng=self._rng)
 

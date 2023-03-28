@@ -19,6 +19,9 @@
 # SOFTWARE.
 
 # Corresponds to Task T.7 from the paper https://arxiv.org/pdf/2101.04653.pdf
+# NOTE: The paper description uses variances insteas of scales for the likelihood
+# but the implementation uses scales. Our implmenetation also uses scales for
+# consistency with https://github.com/sbi-benchmark/sbibm/blob/main/sbibm/tasks/gaussian_mixture/task.py
 
 import numpy as np
 
@@ -90,8 +93,8 @@ def simulator(theta, prob=0.5, scale_c1=1.0, scale_c2=0.01, rng=None):
 
     # Draw 2D-Gaussian sample according to component index
     if idx == 0:
-        return scale_c1 * rng.normal(loc=theta)
-    return scale_c2 * rng.normal(loc=theta)
+        return rng.normal(loc=theta, scale=scale_c1)
+    return rng.normal(loc=theta, scale=scale_c2)
 
 
 def configurator(forward_dict, mode="posterior", scale_data=12):

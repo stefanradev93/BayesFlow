@@ -19,6 +19,9 @@
 # SOFTWARE.
 
 # Corresponds to Task T.1 from the paper https://arxiv.org/pdf/2101.04653.pdf
+# NOTE: The paper description uses a variance of 0.1 for the prior and likelihood
+# but the implementation uses scale = 0.1 Our implmenetation uses a default scale
+# of 0.1 for consistency with the implementation.
 
 import numpy as np
 
@@ -27,7 +30,7 @@ bayesflow_benchmark_info = {"simulator_is_batched": True, "parameter_names": Non
 
 def prior(D=10, scale=0.1, rng=None):
     """Generates a random draw from a D-dimensional Gaussian prior distribution with a
-    spherical convariance matrix given by sigma * I_D. Represents the location vector of
+    spherical scale matrix given by sigma * I_D. Represents the location vector of
     a (conjugate) Gaussian likelihood.
 
     Parameters
@@ -79,8 +82,8 @@ def simulator(theta, n_obs=None, scale=0.1, rng=None):
         rng = np.random.default_rng()
     # Generate prior predictive samples, possibly a single if n_obs is None
     if n_obs is None:
-        return scale * rng.normal(loc=theta)
-    x = scale * rng.normal(loc=theta, size=(n_obs, theta.shape[0], theta.shape[1]))
+        return rng.normal(loc=theta, scale=scale)
+    x = rng.normal(loc=theta, scale=scale, size=(n_obs, theta.shape[0], theta.shape[1]))
     return np.transpose(x, (1, 0, 2))
 
 

@@ -192,15 +192,15 @@ class SplineCoupling(tf.keras.Model):
         settings_dict : dict
             The settings for the inner networks. Defaults will use:
             ``settings_dict={
-                "dense_args"     : dict(units=128, kernel_initializer="glorot_uniform", activation="tanh"),
+                "dense_args"     : dict(units=128, activation="tanh"),
                 "num_dense"      : 2,
                 "spec_norm"      : False,
                 "mc_dropout"     : False,
                 "dropout"        : True,
                 "residual"       : False,
                 "dropout_prob"   : 0.05,
-                "bins"           : 16,
-                "default_domain" : (-5., 5., -5., 5.)
+                "bins"           : 10,
+                "default_domain" : (-3., 3., -3., 3.)
             }
             ``
         """

@@ -837,10 +837,6 @@ def plot_losses(
         number of columns in ``val_losses``.
     """
 
-    # Sanity check for number of columns
-    if val_losses is not None:
-        assert train_losses.shape[1] == val_losses.shape[1], "Data frames should have the same number of columns!"
-
     # Determine the number of rows for plot
     n_row = len(train_losses.columns)
 
@@ -866,16 +862,17 @@ def plot_losses(
         ax.plot(train_step_index, train_losses.iloc[:, i], color=train_color, lw=lw_train, alpha=0.9, label="Training")
         # Plot optional val curve
         if val_losses is not None:
-            ax.plot(
-                val_step_index,
-                val_losses.iloc[:, i],
-                linestyle="--",
-                marker="o",
-                color=val_color,
-                lw=lw_val,
-                label="Validation",
-            )
-        # Schmuck
+            if i < val_losses.shape[1]:
+                ax.plot(
+                    val_step_index,
+                    val_losses.iloc[:, i],
+                    linestyle="--",
+                    marker="o",
+                    color=val_color,
+                    lw=lw_val,
+                    label="Validation",
+                )
+            # Schmuck
         ax.set_xlabel("Training step #", fontsize=label_fontsize)
         ax.set_ylabel("Loss value", fontsize=label_fontsize)
         sns.despine(ax=ax)

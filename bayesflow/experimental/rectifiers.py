@@ -18,11 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from functools import partial
 
 import tensorflow as tf
 import tensorflow_probability as tfp
 
 import bayesflow.default_settings as defaults
+from bayesflow.computational_utilities import compute_jacobian_trace
 from bayesflow.exceptions import SummaryStatsError
 from bayesflow.helper_networks import MCDropout
 from bayesflow.losses import mmd_summary_space
@@ -264,7 +266,7 @@ class RectifiedDistribution(tf.keras.Model):
         total_loss = tf.reduce_mean(loss) + sum_loss
         return total_loss
 
-    def sample(self, input_dict, n_samples, to_numpy=True, euler_step=1e-2, **kwargs):
+    def sample(self, input_dict, n_samples, to_numpy=True, step_size=1e-3, **kwargs):
         """Generates random draws from the approximate posterior given a dictionary with conditonal variables.
 
         Parameters
@@ -277,7 +279,7 @@ class RectifiedDistribution(tf.keras.Model):
             The number of posterior draws (samples) to obtain from the approximate posterior
         to_numpy    : bool, optional, default: True
             Flag indicating whether to return the samples as a ``np.ndarray`` or a ``tf.Tensor``
-        euler_step  : float, optional, default: 0.01
+        step_size  : float, optional, default: 0.01
             The step size for the stochastic Euler solver.
         **kwargs    : dict, optional, default: {}
             Additional keyword arguments passed to the networks
@@ -302,7 +304,7 @@ class RectifiedDistribution(tf.keras.Model):
 
         # Replicate conditions and solve ODEs simulatenously
         conditions = tf.stack([conditions] * n_samples, axis=1)
-        post_samples = self._solve_euler(latent_vars, conditions, euler_step, **kwargs)
+        post_samples = self._solve_euler(latent_vars, conditions, step_size, **kwargs)
 
         # Remove trailing first dimension in the single data case
         if n_data_sets == 1:
@@ -313,16 +315,60 @@ class RectifiedDistribution(tf.keras.Model):
             return post_samples.numpy()
         return post_samples
 
-    def _solve_euler(self, latent_vars, condition, dt=1e-2, **kwargs):
+    def log_density(self, input_dict, to_numpy=True, step_size=1e-3, **kwargs):
+        """Computes the log density..."""
+
+        # Compute condition (direct, summary, or both)
+        _, conditions = self._compute_summary_condition(
+            input_dict.get(defaults.DEFAULT_KEYS["summary_conditions"]),
+            input_dict.get(defaults.DEFAULT_KEYS["direct_conditions"]),
+            training=False,
+            **kwargs,
+        )
+
+        # Extract targets
+        target_vars = input_dict[defaults.DEFAULT_KEYS["targets"]]
+
+        # Reverse ODE and log pdf computation with the trace method
+        latents, trace = self._solve_euler_inv(target_vars, conditions, step_size, **kwargs)
+        lpdf = self.latent_dist.log_prob(latents) + trace
+
+        # Return numpy version of tensor or tensor itself
+        if to_numpy:
+            return lpdf.numpy()
+        return lpdf
+
+    def _solve_euler(self, latent_vars, condition, dt=1e-3, **kwargs):
         """Simple stochastic parallel Euler solver."""
 
         num_steps = int(1 / dt)
-        zeros = tf.zeros((tf.shape(latent_vars)[0], tf.shape(latent_vars)[1], 1))
+        time_vec = tf.zeros((tf.shape(latent_vars)[0], tf.shape(latent_vars)[1], 1))
         target = tf.identity(latent_vars)
-        for time in range(num_steps + 1):
-            time_vec = time * dt + zeros
+        for _ in range(num_steps + 1):
             target += self.drift_net.drift(target, time_vec, condition, **kwargs) * dt
+            time_vec += dt
         return target
+
+    def _solve_euler_inv(self, targets, condition, dt=1e-3, **kwargs):
+        """Solves the reverse ODE (negative direction of drift) and returns the trace."""
+
+        def velocity(latents, drift, time_vec, condition, **kwargs):
+            v = drift(latents, time_vec, condition, **kwargs)
+            return v
+
+        batch_size = tf.shape(targets)[0]
+        num_samples = tf.shape(targets)[1]
+        num_steps = int(1 / dt)
+        time_vec = tf.ones((batch_size, num_samples, 1))
+        trace = tf.zeros((batch_size, num_samples))
+        latents = tf.identity(targets)
+        for _ in range(num_steps + 1):
+            f = partial(velocity, drift=self.drift_net.drift, time_vec=time_vec, condition=condition)
+            drift_t, trace_t = compute_jacobian_trace(f, latents, **kwargs)
+            latents -= drift_t * dt
+            trace -= trace_t * dt
+            time_vec -= dt
+        return latents, trace
 
     def _compute_summary_condition(self, summary_conditions, direct_conditions, **kwargs):
         """Determines how to concatenate the provided conditions."""
