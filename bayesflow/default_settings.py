@@ -20,6 +20,8 @@
 
 from abc import ABC, abstractmethod
 
+import tensorflow as tf
+
 
 class Setting(ABC):
     """Abstract base class for settings. It's here to potentially extend the setting functionality in future."""
@@ -96,7 +98,7 @@ DEFAULT_SETTING_DENSE_PMP = {
 
 DEFAULT_SETTING_AFFINE_COUPLING = MetaDictSetting(
     meta_dict={
-        "dense_args": dict(units=128, activation="tanh"),
+        "dense_args": dict(units=128, activation="relu", kernel_regularizer=tf.keras.regularizers.l2(5e-3)),
         "num_dense": 2,
         "spec_norm": False,
         "mc_dropout": False,
@@ -111,15 +113,15 @@ DEFAULT_SETTING_AFFINE_COUPLING = MetaDictSetting(
 
 DEFAULT_SETTING_SPLINE_COUPLING = MetaDictSetting(
     meta_dict={
-        "dense_args": dict(units=64, activation="elu"),
-        "num_dense": 1,
+        "dense_args": dict(units=128, activation="relu", kernel_regularizer=tf.keras.regularizers.l2(5e-3)),
+        "num_dense": 2,
         "spec_norm": False,
         "mc_dropout": False,
         "dropout": True,
         "residual": False,
         "dropout_prob": 0.1,
         "bins": 16,
-        "default_domain": (-3.0, 3.0, -3.0, 3.0),
+        "default_domain": (-10.0, 10.0, -10.0, 10.0),
     },
     mandatory_fields=[],
 )

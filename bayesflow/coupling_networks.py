@@ -200,7 +200,7 @@ class SplineCoupling(tf.keras.Model):
                 "residual"       : False,
                 "dropout_prob"   : 0.05,
                 "bins"           : 10,
-                "default_domain" : (-3., 3., -3., 3.)
+                "default_domain" : (-10., 10., -10., 10.)
             }
             ``
         """
@@ -398,7 +398,6 @@ class SplineCoupling(tf.keras.Model):
 
             if not inverse:
                 result_out = scale_out * target_out[..., None] + shift_out
-
                 # Jacobian for out-of-domain points
                 log_jac_out = tf.math.log(scale_out + 1e-10)
                 log_jac_out = tf.squeeze(log_jac_out, axis=-1)

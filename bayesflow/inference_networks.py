@@ -33,7 +33,7 @@ class InvertibleNetwork(tf.keras.Model):
     def __init__(
         self,
         num_params,
-        num_coupling_layers=5,
+        num_coupling_layers=6,
         coupling_design="affine",
         coupling_settings=None,
         permutation="fixed",
