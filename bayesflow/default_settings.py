@@ -98,7 +98,7 @@ DEFAULT_SETTING_DENSE_PMP = {
 
 DEFAULT_SETTING_AFFINE_COUPLING = MetaDictSetting(
     meta_dict={
-        "dense_args": dict(units=128, activation="relu", kernel_regularizer=tf.keras.regularizers.l2(5e-3)),
+        "dense_args": dict(units=128, activation="relu", kernel_regularizer=tf.keras.regularizers.l2(5e-4)),
         "num_dense": 2,
         "spec_norm": False,
         "mc_dropout": False,
