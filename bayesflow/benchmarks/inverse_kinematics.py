@@ -44,7 +44,7 @@ def prior(scales=None, rng=None):
     Returns
     -------
     theta : np.ndarray of shape (4, )
-        A single draw from the D-dimensional Gaussian prior.
+        A single draw from the 4-dimensional Gaussian prior.
     """
 
     if rng is None:
