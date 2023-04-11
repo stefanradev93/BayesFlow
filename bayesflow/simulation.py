@@ -413,6 +413,7 @@ class TwoLevelPrior:
 
             context = ContextGenerator(non_batchable_context_fun=lambda : np.random.randint(1, 101))
             prior = TwoLevelPrior(draw_hyper, draw_prior, local_context_generator=context)
+            prior_dict = prior(batch_size=32)
         """
 
         self.hyper_prior = hyper_prior_fun
@@ -465,8 +466,8 @@ class TwoLevelPrior:
             out_dict[DEFAULT_KEYS["shared_parameters"]] = np.array(out_dict[DEFAULT_KEYS["shared_parameters"]])
 
         # Add optional context entries
-        out_dict[DEFAULT_KEYS["prior_batchable_context"]] = local_context.get(DEFAULT_KEYS["batchable_context"])
-        out_dict[DEFAULT_KEYS["prior_non_batchable_context"]] = local_context.get(DEFAULT_KEYS["non_batchable_context"])
+        out_dict[DEFAULT_KEYS["batchable_context"]] = local_context.get(DEFAULT_KEYS["batchable_context"])
+        out_dict[DEFAULT_KEYS["non_batchable_context"]] = local_context.get(DEFAULT_KEYS["non_batchable_context"])
 
         return out_dict
 
@@ -566,7 +567,12 @@ class Simulator:
         """
 
         # Always assume first dimension is batch dimension
-        batch_size = params.shape[0]
+        # Handle cases with multiple inputs to simulator
+        if isinstance(params, tuple) or isinstance(params, list):
+            batch_size = params[0].shape[0]
+        # Handle all other cases or fail gently
+        else:
+            batch_size = params.shape[0]
 
         # Prepare placeholder dictionary
         out_dict = {
@@ -1079,6 +1085,163 @@ class GenerativeModel:
                     pickle.dump(file_list, f)
                 file_counter += 1
         logging.info(f"Presimulation {extension} complete. Generated {total_files} files.")
+
+
+class TwoLevelGenerativeModel:
+    """Basic interface for a generative model in a simulation-based context.
+    Generally, a generative model consists of two mandatory components:
+    - MultilevelPrior : A randomized function returning random parameter draws from a two-level prior distribution;
+    - Simulator : A function which transforms the parameters into observables in a non-deterministic manner.
+    """
+
+    _N_SIM_TEST = 2
+
+    def __init__(
+        self,
+        prior: callable,
+        simulator: callable,
+        skip_test: bool = False,
+        simulator_is_batched: bool = None,
+        name: str = "anonymous",
+    ):
+        """Instantiates a generative model responsible for generating parameters, data, and optional context.
+
+        Parameters
+        ----------
+        prior                : callable
+            A function returning random draws from the two-level prior parameter distribution. Should encode
+            prior knowledge about plausible parameter ranges
+        simulator            : callable or bayesflow.simulation.Simulator
+            A function accepting parameter draws, shared parameters, optional context, and optional arguments as input
+            and returning observable data
+        skip_test            : bool, optional, default: False
+            If True, a forward inference pass will be performed.
+        simulator_is_batched : bool or None, optional, default: None
+            Only relevant and mandatory if providing a custom simulator without the ``Simulator`` wrapper.
+        name                 : str (default - "anonymous")
+            An optional name for the generative model.
+
+        Important
+        ----------
+        If you are not using the provided ``TwoLevelPrior`` and ``Simulator`` wrappers for your prior and data
+        generator, only functions returning a ``np.ndarray`` in the correct format will be accepted, since these will be
+        wrapped internally. In addition, you need to indicate whether your simulator operates on batched of
+        parameters or on single parameter vectors via tha `simulator_is_batched` argument.
+        """
+
+        self.prior = prior
+        if type(simulator) is not Simulator:
+            self.simulator = self._config_custom_simulator(simulator, simulator_is_batched)
+        else:
+            self.simulator = simulator
+            self.simulator_is_batched = self.simulator.is_batched
+
+        if name is None:
+            self.name = "anonymous"
+        else:
+            self.name = name
+
+        if not skip_test:
+            self._test()
+
+    def __call__(self, batch_size, **kwargs):
+        """Carries out forward inference ``batch_size`` times."""
+
+        # Draw from prior batch_size times
+        prior_out = self.prior(batch_size, **kwargs.pop("prior_args", {}))
+
+        # Case no shared parameters - first input to simulator
+        # is just the array of local prior draws
+        if prior_out.get(DEFAULT_KEYS["shared_parameters"]) is None:
+            sim_out = self.simulator(prior_out[DEFAULT_KEYS["local_parameters"]], **kwargs.pop("sim_args", {}))
+        # Case shared parameters - first input to simulator
+        # is a tuple (local_parameters, shared_parameters)
+        else:
+            sim_out = sim_out = self.simulator(
+                (prior_out[DEFAULT_KEYS["local_parameters"]], prior_out[DEFAULT_KEYS["shared_parameters"]])
+                ** kwargs.pop("sim_args", {})
+            )
+
+        # Prepare and fill placeholder dict, starting from prior dict
+        out_dict = {
+            DEFAULT_KEYS["sim_data"]: sim_out[DEFAULT_KEYS["sim_data"]],
+            DEFAULT_KEYS["hyper_prior_draws"]: prior_out[DEFAULT_KEYS["hyper_parameters"]],
+            DEFAULT_KEYS["local_prior_draws"]: prior_out[DEFAULT_KEYS["local_parameters"]],
+            DEFAULT_KEYS["shared_prior_draws"]: prior_out.get(DEFAULT_KEYS["shared_parameters"]),
+            DEFAULT_KEYS["sim_batchable_context"]: sim_out.get(DEFAULT_KEYS["batchable_context"]),
+            DEFAULT_KEYS["sim_non_batchable_context"]: sim_out.get(DEFAULT_KEYS["non_batchable_context"]),
+            DEFAULT_KEYS["prior_batchable_context"]: prior_out.get(DEFAULT_KEYS["batchable_context"]),
+            DEFAULT_KEYS["prior_non_batchable_context"]: prior_out.get(DEFAULT_KEYS["non_batchable_context"]),
+        }
+
+        return out_dict
+
+    def _config_custom_simulator(self, sim_fun, is_batched):
+        """Only called if user has provided a custom simulator not using the Simulator wrapper."""
+
+        if is_batched is None:
+            raise ConfigurationError(
+                "Since you are not using the Simulator wrapper, please set "
+                + "simulator_is_batched to True if your simulator operates on batches of parameters, "
+                + "otherwise set it to False."
+            )
+        elif is_batched:
+            return Simulator(batch_simulator_fun=sim_fun)
+        else:
+            return Simulator(simulator_fun=sim_fun)
+
+    def _test(self):
+        """Performs a sanity check on forward inference and some verbose information."""
+
+        # Use minimal n_sim > 1
+        _n_sim = TwoLevelGenerativeModel._N_SIM_TEST
+        out = self(_n_sim)
+        # Logger
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
+        # Attempt to log batch results or fail and warn user
+        try:
+            logger.info(f"Performing {_n_sim} pilot runs with the {self.name} model...")
+            # Format strings
+            p_shape_str = "(batch_size = {}, -{}".format(
+                out[DEFAULT_KEYS["local_prior_draws"]].shape[0], out[DEFAULT_KEYS["local_prior_draws"]].shape[1:]
+            )
+            p_shape_str = p_shape_str.replace("-(", "").replace(",)", ")")
+            d_shape_str = "(batch_size = {}, -{}".format(
+                out[DEFAULT_KEYS["sim_data"]].shape[0], out[DEFAULT_KEYS["sim_data"]].shape[1:]
+            )
+            d_shape_str = d_shape_str.replace("-(", "").replace(",)", ")")
+
+            # Log to default-config
+            logger.info(f"Shape of parameter batch after {_n_sim} pilot simulations: {p_shape_str}")
+            logger.info(f"Shape of simulation batch after {_n_sim} pilot simulations: {d_shape_str}")
+
+            for k, v in out.items():
+                if k.endswith("_prior_draws"):
+                    if v is None:
+                        logger.info(f"No {k} provided.")
+                    else:
+                        p_shape_str = "(batch_size = {}, -{}".format(v.shape[0], v.shape[1:])
+                        p_shape_str = p_shape_str.replace("-(", "").replace(",)", ")")
+                        logger.info(f"Shape of {k} batch after {_n_sim} pilot simulations: {p_shape_str}")
+                if "context" in k:
+                    name = k.replace("_", " ").replace("sim", "simulation").replace("non ", "non-")
+                    if v is None:
+                        logger.info(f"No optional {name} provided.")
+                    else:
+                        try:
+                            logger.info(f"Shape of {name}: {v.shape}")
+                        except Exception as _:
+                            logger.info(
+                                f"Could not determine shape of {name}. Type appears to be non-array: {type(v)},\
+                                    so make sure your input configurator takes care of that!"
+                            )
+        except Exception as err:
+            raise ConfigurationError(
+                "Could not run forward inference with specified generative model..."
+                + f"Please re-examine model components!\n {err}"
+            )
 
 
 class MultiGenerativeModel:
