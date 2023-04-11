@@ -21,6 +21,7 @@
 import logging
 import os
 import pickle
+from datatime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -801,14 +802,16 @@ class GenerativeModel:
         - (total_iterations, iterations_per_epoch)
         - (total_iterations, epochs)
 
-        Providing all three of the parameters in these pairs leads to a consistency check, since incompatible combinations are possible.
+        Providing all three of the parameters in these pairs leads to a consistency check,
+         since incompatible combinations are possible.
         """
-
-        # Ensure that the combination of parameters provided is sufficient to perform presimulation and does not contain internal contradictions
+        # Ensure that the combination of parameters provided is sufficient to perform presimulation
+        # and does not contain internal contradictions
         if total_iterations is not None and iterations_per_epoch is not None and epochs is not None:
             if iterations_per_epoch * epochs != total_iterations:
                 raise ValueError(
-                    "The product of the number of epochs and the number of iterations per epoch provided is not equal to the total number of iterations."
+                    "The product of the number of epochs and the number of iterations per epoch "
+                    "provided is not equal to the total number of iterations."
                 )
         else:
             none_ctr = 0
@@ -817,7 +820,8 @@ class GenerativeModel:
                     none_ctr += 1
             if none_ctr > 1:
                 raise ValueError(
-                    "Missing required parameters. At least two of the following must be provided: total_iterations, iterations_per_epoch and epochs."
+                    "Missing required parameters. At least two of the following must be provided: "
+                    "total_iterations, iterations_per_epoch and epochs."
                 )
 
         # Compute missing epochs parameter if necessary
@@ -826,7 +830,8 @@ class GenerativeModel:
             if int(epochs) < epochs:
                 epochs = int(epochs) + 1
                 logging.info(
-                    f"Setting number of epochs to {epochs} and upping total number of iterations to {epochs*iterations_per_epoch} in order to create files of the same size."
+                    f"Setting number of epochs to {epochs} and upping total number of iterations "
+                    f"to {epochs*iterations_per_epoch} in order to create files of the same size."
                 )
                 total_iterations = epochs * iterations_per_epoch
             else:
@@ -834,10 +839,11 @@ class GenerativeModel:
 
         # Determine the disk space required to save a file containing a single batch
         test_batch = self.__call__(batch_size=batch_size)
-        with open("test_batch.pkl", "wb") as f:
+        test_file = f"test_batch_{datetime.now()}.pkl"
+        with open(test_file, "wb") as f:
             pickle.dump(test_batch, f)
-        batch_space = (10 ** (-6)) * os.path.getsize("test_batch.pkl")
-        os.remove("test_batch.pkl")
+        batch_space = (10 ** (-6)) * os.path.getsize(test_file)
+        os.remove(test_file)
 
         # Compute parameters not given
         if total_iterations is None:
@@ -848,15 +854,18 @@ class GenerativeModel:
                 iterations_per_epoch = iterations_per_epoch + 1
                 total_iterations = iterations_per_epoch * epochs
                 logging.info(
-                    f"Setting number of iterations per epoch to {iterations_per_epoch} and upping total number of iterations to {total_iterations} \
-                    to create files of the same size and ensure that no less than the specified total number of iterations is simulated."
+                    f"Setting number of iterations per epoch to {iterations_per_epoch} "
+                    f"and upping total number of iterations to {total_iterations} "
+                    f"to create files of the same size and ensure that no less than the "
+                    f"specified total number of iterations is simulated."
                 )
 
         # Ensure the folder path is interpreted as a directory and not a file
         if folder_path[-1] != "/":
             folder_path += "/"
 
-        # Compute  the total space requirement and get a prompt from users confirming the start of the presimulation process
+        # Compute the total space requirement
+        # Get a prompt from users confirming the start of the presimulation process
         required_space = total_iterations * batch_space
         if extend_from > 0:
             logging.info("You have chosen to extend an existing dataset.")
@@ -875,13 +884,15 @@ class GenerativeModel:
         if extend_from > 0:
             if not os.path.isdir(folder_path):
                 logging.warn(
-                    f"Cannot extend dataset in {folder_path} - folder does not exist. Creating folder and saving presimulated dataset extension inside."
+                    f"Cannot extend dataset in {folder_path} - folder does not exist. "
+                    f"Creating folder and saving presimulated dataset extension inside."
                 )
             else:
                 already_simulated = len(os.listdir(folder_path))
                 if already_simulated != extend_from:
                     logging.warn(
-                        f"The parameter you provided for extend_from does not match the actual number of files found in {folder_path}. File numbering may now prove erroneous."
+                        f"The parameter you provided for extend_from does not match the actual number of files "
+                        f"found in {folder_path}. File numbering may now prove erroneous."
                     )
 
         # Choose a number of batches per file as specified via iterations_per_epoch unless
@@ -893,7 +904,8 @@ class GenerativeModel:
             batches_per_file = min(int(memory_limit / batch_space), iterations_per_epoch)
             if batches_per_file < iterations_per_epoch:
                 logging.warn(
-                    f"Number of iterations per epoch was reduced to {batches_per_file} to ensure that the memory limit per file is not exceeded."
+                    f"Number of iterations per epoch was reduced to {batches_per_file} to ensure "
+                    f"that the memory limit per file is not exceeded."
                 )
 
         file_space = batches_per_file * batch_space
@@ -903,17 +915,20 @@ class GenerativeModel:
             os.mkdir(folder_path)
 
         # Compute as many priors as would have been computed when generating the original dataset.
-        # If a fixed random seed was used, this will move it forward, and computational cost is neglible (under 1/200000 of simulation time)
+        # If a fixed random seed was used, this will move it forward,
+        # and computational cost is negligible (under 1/200000 of simulation time)
         if extend_from > 0:
             previous_priors = self.prior(batch_size=batch_size * iterations_per_epoch * extend_from)
 
-        # Ensure that the total number of iterations given or inferred is met (or exceeeded) whilst not violating the memory limit
+        # Ensure that the total number of iterations given or inferred is met (or exceeded)
+        # whilst not violating the memory limit
         total_files = total_iterations / batches_per_file
         if int(total_files) < total_files:
             total_files = int(total_files) + 1
             if total_files > epochs:
                 logging.info(
-                    f"Increased number of files (i.e. epochs) to {total_files} to ensure that the memory limit is not exceeded but the total number of iterations is met."
+                    f"Increased number of files (i.e. epochs) to {total_files} "
+                    f"to ensure that the memory limit is not exceeded but the total number of iterations is met."
                 )
         else:
             total_files = int(total_files)
