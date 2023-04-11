@@ -355,6 +355,152 @@ class Prior:
         raise NotImplementedError("Prior density computation is under construction!")
 
 
+class TwoLevelPrior:
+    """Basic interface for a simulation module responsible for generating random draws from a
+    two-level prior distribution.
+
+    The prior functions should return a np.array of simulation parameters which will be internally used
+    by the TwoLevelGenerativeModel interface for simulations.
+
+    An optional context generator (i.e., an instance of ContextGenerator) or a user-defined callable object
+    implementing the following two methods can be provided:
+    - ``context_generator.batchable_context(batch_size)``
+    - ``context_generator.non_batchable_context()``
+    """
+
+    def __init__(
+        self,
+        hyper_prior_fun: callable,
+        local_prior_fun: callable,
+        shared_prior_fun: callable = None,
+        local_context_generator: callable = None,
+    ):
+        """
+        Instantiates a prior generator which will draw random parameter configurations from a joint prior
+        having the general form:
+
+        ``p(local | hyper) p(hyper) p(shared)``
+
+        Such priors are often encountered in two-level hierarchical Bayesian models and allow for modeling
+        nested data.
+        No improper priors are allowed, as these may render the generative scope of a model undefined.
+
+        Parameters
+        ----------
+        hyper_prior_fun         : callable
+            A function (callbale object) which generates random draws from a hyperprior (unconditional)
+        local_prior_fun         : callable
+            A function (callable object) which generates random draws from a conditional prior
+            given hyperparameters sampled from the hyperprior and optional context (e.g., variable number of groups)
+        shared_prior_fun        : callable or None, optional, default: None
+            A function (callable object) which generates random draws from an uncondtional prior.
+            Represents optional shared parameters.
+        local_context_generator : callable or None, optional, default: None
+            An optional function (ideally an instance of ``ContextGenerator``) for generating control variables
+            for the local_prior_fun.
+
+            Example: Varying number of local factors (e.g., groups, participants) between 1 and 100:
+
+            ``
+            def draw_hyper():
+                # Draw location for 2D conditional prior
+                return np.random.normal(size=2)
+
+            def draw_prior(means, num_groups, sigma=1.):
+                # Draw parameter given location from hyperprior
+                dim = means.shape[0]
+                return np.random.normal(means, sigma, size=(num_groups, dim))
+
+            context = ContextGenerator(non_batchable_context_fun=lambda : np.random.randint(1, 101))
+            prior = TwoLevelPrior(draw_hyper, draw_prior, local_context_generator=context)
+        """
+
+        self.hyper_prior = hyper_prior_fun
+        self.local_prior = local_prior_fun
+        self.shared_prior = shared_prior_fun
+        self.local_context_generator = local_context_generator
+
+    def __call__(self, batch_size, **kwargs):
+        """Generates ``batch_size`` draws from the hierarchical prior."""
+
+        out_dict = {
+            DEFAULT_KEYS["hyper_parameters"]: [None] * batch_size,
+            DEFAULT_KEYS["local_parameters"]: [None] * batch_size,
+        }
+        if self.shared_prior is not None:
+            out_dict[DEFAULT_KEYS["shared_parameters"]] = [None] * batch_size
+        if self.local_context_generator is not None:
+            local_context = self.local_context_generator(batch_size)
+        else:
+            local_context = {}
+
+        for b in range(batch_size):
+            # Draw hyper parameters
+            hyper_params = self.draw_hyper_parameters(**kwargs.pop("hyper_kwargs", {}))
+
+            # Determine context types for local parameters
+            if local_context.get(DEFAULT_KEYS["batchable_context"]) is not None:
+                local_batchable_context = local_context[DEFAULT_KEYS["batchable_context"]][b]
+            else:
+                local_batchable_context = None
+            local_non_batchable_context = local_context.get(DEFAULT_KEYS["non_batchable_context"])
+
+            # Draw local parameters
+            local_params = self.draw_local_parameters(
+                hyper_params, local_batchable_context, local_non_batchable_context, **kwargs.pop("local_kwargs", {})
+            )
+
+            out_dict[DEFAULT_KEYS["hyper_parameters"]][b] = hyper_params
+            out_dict[DEFAULT_KEYS["local_parameters"]][b] = local_params
+
+            # Take care of shared prior
+            if self.shared_prior is not None:
+                shared_params = self.draw_shared_parameters(**kwargs.pop("shared_kwargs", {}))
+                out_dict[DEFAULT_KEYS["shared_parameters"]][b] = shared_params
+
+        # Array conversion must work or fail gently
+        out_dict[DEFAULT_KEYS["hyper_parameters"]] = np.array(out_dict[DEFAULT_KEYS["hyper_parameters"]])
+        out_dict[DEFAULT_KEYS["local_parameters"]] = np.array(out_dict[DEFAULT_KEYS["local_parameters"]])
+        if self.shared_prior is not None:
+            out_dict[DEFAULT_KEYS["shared_parameters"]] = np.array(out_dict[DEFAULT_KEYS["shared_parameters"]])
+
+        # Add optional context entries
+        out_dict[DEFAULT_KEYS["prior_batchable_context"]] = local_context.get(DEFAULT_KEYS["batchable_context"])
+        out_dict[DEFAULT_KEYS["prior_non_batchable_context"]] = local_context.get(DEFAULT_KEYS["non_batchable_context"])
+
+        return out_dict
+
+    def draw_hyper_parameters(self, **kwargs):
+        """TODO"""
+
+        params = self.hyper_prior(**kwargs)
+        return params
+
+    def draw_local_parameters(self, hypers, batchable_context=None, non_batchable_context=None, **kwargs):
+        """TODO"""
+
+        # Case no context
+        if batchable_context is None and non_batchable_context is None:
+            return self.local_prior(hypers, **kwargs)
+        # Case only batchable context
+        elif batchable_context is not None and non_batchable_context is None:
+            return self.local_prior(hypers, batchable_context, **kwargs)
+        # Case only non batchable context
+        elif batchable_context is None and non_batchable_context is not None:
+            return self.local_prior(hypers, non_batchable_context, **kwargs)
+        # Case both context types present
+        else:
+            return self.local_prior(hypers, batchable_context, non_batchable_context, **kwargs)
+
+    def draw_shared_parameters(self, **kwargs):
+        """TODO"""
+
+        if self.shared_prior is None:
+            raise Exception("No shared_prior_fun provided during initialization!")
+        params = self.shared_prior(**kwargs)
+        return params
+
+
 class Simulator:
     """Basic interface for a simulation module responsible for generating randomized simulations given a prior
     parameter distribution and optional context variables, given a user-provided simulation function.
