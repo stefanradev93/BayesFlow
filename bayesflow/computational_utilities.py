@@ -364,8 +364,10 @@ def mean_squared_error(x_true, x_pred):
     """
     x_true = np.array(x_true)
     x_pred = np.array(x_pred)
-
-    return np.mean((x_true - x_pred) ** 2)
+    try:
+        return np.mean((x_true[np.newaxis, :] - x_pred) ** 2)
+    except IndexError:
+        return np.mean((x_true - x_pred) ** 2)
 
 
 def root_mean_squared_error(x_true, x_pred):
@@ -399,11 +401,11 @@ def aggregated_error(x_true, x_pred, inner_error_fun=root_mean_squared_error, ou
 
     x_true, x_pred = np.array(x_true), np.array(x_pred)
 
-    N, M = x_pred.shape
+    N = x_pred.shape[0]
     if not N == x_true.shape[0]:
         raise ShapeError
 
-    errors = np.array([inner_error_fun(x_true=x_true[i], x_pred=x_pred[i, :]) for i in range(N)])
+    errors = np.array([inner_error_fun(x_true=x_true[i], x_pred=x_pred[i]) for i in range(N)])
 
     if not N == errors.shape[0]:
         raise ShapeError
