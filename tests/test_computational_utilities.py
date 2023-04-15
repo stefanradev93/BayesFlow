@@ -70,6 +70,17 @@ def test_root_mean_squared_error(x_true, x_pred, output):
                               np.mean,
                               np.mean([4, 1, 9])
                               ),
+                             # test case 5
+                             (
+                                 np.array([[0, 1], [10, 10]]),
+                                 np.array([
+                                     [[1, 1], [0, 0]],
+                                     [[11, 11], [9, 9]]
+                                 ]),
+                                 computational_utilities.mean_squared_error,
+                                 np.mean,
+                                 np.mean([0.5, 1])
+                             )
                          ])
 def test_aggregated_error(x_true, x_pred, inner_error_fun, outer_aggregation_fun, output):
     aggregated_error_result = computational_utilities.aggregated_error(
