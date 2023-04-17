@@ -45,7 +45,7 @@ class TestMisspecificationExperiment:
 
         self.posterior_error, self.summary_mmd = sensitivity.misspecification_experiment(
             trainer=self.trainer,
-            generator_misspecification=_mms_generator_prior,
+            generator=_mms_generator_prior,
             first_config_dict=self.p1_config,
             second_config_dict=self.p2_config,
             n_posterior_samples=50,
