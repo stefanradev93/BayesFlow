@@ -25,7 +25,7 @@ from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
-from tqdm.autonotebook import tqdm
+from tqdm import tqdm
 
 logging.basicConfig()
 
