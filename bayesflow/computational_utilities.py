@@ -411,3 +411,27 @@ def aggregated_error(x_true, x_pred, inner_error_fun=root_mean_squared_error, ou
         raise ShapeError
 
     return outer_aggregation_fun(errors)
+
+
+def aggregated_rmse(x_true, x_pred):
+    """
+    Computes the aggregated RMSE for a matrix of predictions.
+
+    Parameters
+    ----------
+    x_true      : np.ndarray
+    true values, shape (N)
+
+    x_pred      : np.ndarray
+    predicted values, shape (M, N)
+
+    Returns
+    -------
+    aggregated RMSE
+
+    """
+
+    return aggregated_error(x_true=x_true,
+                            x_pred=x_pred,
+                            inner_error_fun=root_mean_squared_error,
+                            outer_aggregation_fun=np.mean)
