@@ -28,12 +28,12 @@ from bayesflow import computational_utilities as utils
 
 def misspecification_experiment(
     trainer,
-    misspecification_generator,
+    generator,
     first_config_dict,
     second_config_dict,
     n_posterior_samples=500,
     n_sim=200,
-    misspecification_configurator=None,
+    configurator=None,
 ):
     """
     Performs a systematic sensitivity analysis with regard to 2 misspecification
@@ -41,22 +41,22 @@ def misspecification_experiment(
 
     Parameters
     ----------
-    trainer                       : bayesflow.trainers.Trainer
+    trainer             : bayesflow.trainers.Trainer
         A ``Trainer`` instance (usually after converged training).
-    misspecification_generator    : callable with signature p1: float, p2, float -> bayesflow.simulation.GenerativeModel
+    generator           : callable with signature p1: float, p2, float -> ``simulation.GenerativeModel``
         A callable that takes two misspecification factors and returns a generative model
-        for forward sampling.
-    first_config_dict             : dict
+        for forward sampling responsible for generating n_sim simulations.
+    first_config_dict   : dict
         Configuration for the first misspecification factor
         fields: name (str), values (1D np.ndarray)
-    second_config_dict            : dict
+    second_config_dict  : dict
         Configuration for the second misspecification factor
         fields: name (str), values (1D np.ndarray)
-    n_posterior_samples           : int, optional, default: 500
+    n_posterior_samples : int, optional, default: 500
         Number of samples from the approximate posterior per data set
-    n_sim                         : int, optional, default: 100
+    n_sim               : int, optional, default: 100
         Number of simulated data sets per configuration
-    misspecification_configurator : callable or None, optional, default: None
+    configurator        : callable or None, optional, default: None
         An optional configurator for the misspecified simulations.
         If ``None`` provided (default), ``Trainer.configurator`` will be used.
     Returns
@@ -77,12 +77,12 @@ def misspecification_experiment(
             # Create and configure simulations from misspecified model
             p1 = P1[i, j]
             p2 = P2[i, j]
-            generative_model_ = misspecification_generator(p1, p2)
+            generative_model_ = generator(p1, p2)
             simulations = generative_model_(n_sim)
-            if misspecification_configurator is None:
+            if configurator is None:
                 simulations = trainer.configurator(simulations)
             else:
-                simulations = misspecification_configurator(simulations)
+                simulations = configurator(simulations)
             true_params = simulations["parameters"]
             param_samples = trainer.amortizer.sample(simulations, n_samples=n_posterior_samples)
 
