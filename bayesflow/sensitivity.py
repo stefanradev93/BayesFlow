@@ -65,20 +65,21 @@ def misspecification_experiment(
     summary_mmd: {P1, P2, values} - dictionary with parameter grid (P1, P2) and summary MMD results (values)
 
     """
-    # setup the grid
-    n1, n2 = len(first_config_dict["values"]), len(second_config_dict["values"])
-    P2, P1 = np.meshgrid(first_config_dict["values"], second_config_dict["values"])
 
+    # Setup the grid and prepare placeholders
+    n1, n2 = len(first_config_dict["values"]), len(second_config_dict["values"])
+    P2, P1 = np.meshgrid(second_config_dict["values"], first_config_dict["values"])
     posterior_error = np.zeros((n1, n2))
     summary_mmd = np.zeros((n1, n2))
 
     for i in tqdm(range(n1)):
         for j in range(n2):
+            # Create and configure simulations from misspecified model
             p1 = P1[i, j]
             p2 = P2[i, j]
             generative_model_ = misspecification_generator(p1, p2)
             simulations = generative_model_(n_sim)
-            if misspecification_generator is None:
+            if misspecification_configurator is None:
                 simulations = trainer.configurator(simulations)
             else:
                 simulations = misspecification_configurator(simulations)
@@ -95,16 +96,13 @@ def misspecification_experiment(
 
             # MMD computation
             sim_trainer = trainer.configurator(trainer.generative_model(n_sim))
-            s_trainer = trainer.amortizer.summary_net(sim_trainer["summary_conditions"])
+            summary_well = trainer.amortizer.summary_net(sim_trainer["summary_conditions"])
+            summary_miss = trainer.amortizer.summary_net(simulations["summary_conditions"])
+            summary_mmd[i, j] = np.sqrt(utils.maximum_mean_discrepancy(summary_miss, summary_well).numpy())
 
-            s_obs = trainer.amortizer.summary_net(simulations["summary_conditions"])
-
-            summary_mmd[i, j] = np.sqrt(utils.maximum_mean_discrepancy(s_obs, s_trainer).numpy())
-
-    # build output dictionaries
+    # Build output dictionaries
     posterior_error_dict = {"P1": P1, "P2": P2, "values": posterior_error, "name": "RMSE"}
     summary_mmd_dict = {"P1": P1, "P2": P2, "values": summary_mmd, "name": "MMD"}
-
     return posterior_error_dict, summary_mmd_dict
 
 
