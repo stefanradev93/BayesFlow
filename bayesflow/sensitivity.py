@@ -158,8 +158,8 @@ def plot_model_misspecification_sensitivity(results_dict, first_config_dict, sec
         vmax=plot_config["vmax"],
         xlabel=first_config_dict["name"],
         ylabel=second_config_dict["name"],
-        hline_location=first_config_dict["well_specified_value"],
-        vline_location=second_config_dict["well_specified_value"],
+        hline_location=second_config_dict["well_specified_value"],
+        vline_location=first_config_dict["well_specified_value"],
         xticks=plot_config["xticks"],
         yticks=plot_config["yticks"],
         cbar_title=plot_config["cbar_title"]
