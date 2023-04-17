@@ -340,12 +340,16 @@ class SplineCoupling(tf.keras.Model):
         result = tf.zeros_like(target)
 
         # Determine which targets are in domain and which are not
-        target_in_domain = tf.logical_and(knots_x[..., 0] < target, target <= knots_x[..., -1])
+        if not inverse:
+            target_in_domain = tf.logical_and(knots_x[..., 0] < target, target <= knots_x[..., -1])
+            higher_indices = tf.searchsorted(knots_x, target[..., None])
+        else:
+            target_in_domain = tf.logical_and(knots_y[..., 0] < target, target <= knots_y[..., -1])
+            higher_indices = tf.searchsorted(knots_y, target[..., None])
         target_in = target[target_in_domain]
         target_in_idx = tf.where(target_in_domain)
         target_out = target[~target_in_domain]
         target_out_idx = tf.where(~target_in_domain)
-        higher_indices = tf.searchsorted(knots_x, target[..., None])
 
         # In-domain computation
         if tf.size(target_in_idx) > 0:
@@ -460,8 +464,8 @@ class SplineCoupling(tf.keras.Model):
         bottom_edge = bottom_edge + self.default_domain[2]
 
         # Compute default widths and heights
-        default_width = self.default_domain[1] - self.default_domain[0]
-        default_height = self.default_domain[3] - self.default_domain[2]
+        default_width = (self.default_domain[1] - self.default_domain[0]) / self.bins
+        default_height = (self.default_domain[3] - self.default_domain[2]) / self.bins
 
         # Compute shifts for softplus function
         xshift = tf.math.log(tf.math.exp(default_width) - 1)
