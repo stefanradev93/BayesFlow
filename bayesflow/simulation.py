@@ -637,8 +637,8 @@ class Simulator:
         # Handle all other cases or fail gently
         else:
             # expand dimension by one to handle both cases in the same way
-            params = [params]
             batch_size = params.shape[0]
+            params = [params]
 
         # No context type
         if (
