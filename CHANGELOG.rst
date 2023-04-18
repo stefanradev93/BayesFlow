@@ -57,4 +57,5 @@ General Improvements:
 1. Improved docstrings and consistent use of keyword arguments vs. configuration dictionaries
 2. Increased focus on transformer-based architectures as summary networks
 3. Figures resulting ``diagnostics.py`` have been improved and prettified
-4. Multiple bugfixes
+4. Added a module ``sensitivity.py`` for testing the sensitivity of neural approximators to model misspecification
+5. Multiple bugfixes

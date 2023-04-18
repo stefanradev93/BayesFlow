@@ -24,6 +24,7 @@ from scipy import stats
 from sklearn.calibration import calibration_curve
 
 from bayesflow.default_settings import MMD_BANDWIDTH_LIST
+from bayesflow.exceptions import ShapeError
 
 
 def compute_jacobian_trace(function, inputs, **kwargs):
@@ -350,3 +351,87 @@ def simultaneous_ecdf_bands(
     L = stats.binom(N, z).ppf(gamma / 2) / N
     U = stats.binom(N, z).ppf(1 - gamma / 2) / N
     return alpha, z, L, U
+
+
+def mean_squared_error(x_true, x_pred):
+    """Computes the mean squared error between a single true value and M estimates thereof.
+
+    x_true      : np.ndarray
+    true values, shape ()
+
+    x_pred      : np.ndarray
+    predicted values, shape (M, )
+    """
+    x_true = np.array(x_true)
+    x_pred = np.array(x_pred)
+    try:
+        return np.mean((x_true[np.newaxis, :] - x_pred) ** 2)
+    except IndexError:
+        return np.mean((x_true - x_pred) ** 2)
+
+
+def root_mean_squared_error(x_true, x_pred):
+    """Computes the mean squared error between a single true value and M estimates thereof.
+    x_true      : np.ndarray
+    true values, shape ()
+
+    x_pred      : np.ndarray
+    predicted values, shape (M, )
+    """
+
+    mse = mean_squared_error(x_true=x_true, x_pred=x_pred)
+    return np.sqrt(mse)
+
+
+def aggregated_error(x_true, x_pred, inner_error_fun=root_mean_squared_error, outer_aggregation_fun=np.mean):
+    """Computes the aggregated error between a vector of N true values and M estimates of each true value.
+
+    x_true      : np.ndarray
+    true values, shape (N)
+
+    x_pred      : np.ndarray
+    predicted values, shape (M, N)
+
+    inner_error_fun: callable, default: root_mean_squared_error
+    computes the error between one true value and M estimates thereof
+
+    outer_aggregation_fun: callable, default: np.mean
+    aggregates N errors to a single aggregated error value
+    """
+
+    x_true, x_pred = np.array(x_true), np.array(x_pred)
+
+    N = x_pred.shape[0]
+    if not N == x_true.shape[0]:
+        raise ShapeError
+
+    errors = np.array([inner_error_fun(x_true=x_true[i], x_pred=x_pred[i]) for i in range(N)])
+
+    if not N == errors.shape[0]:
+        raise ShapeError
+
+    return outer_aggregation_fun(errors)
+
+
+def aggregated_rmse(x_true, x_pred):
+    """
+    Computes the aggregated RMSE for a matrix of predictions.
+
+    Parameters
+    ----------
+    x_true      : np.ndarray
+    true values, shape (N)
+
+    x_pred      : np.ndarray
+    predicted values, shape (M, N)
+
+    Returns
+    -------
+    aggregated RMSE
+
+    """
+
+    return aggregated_error(x_true=x_true,
+                            x_pred=x_pred,
+                            inner_error_fun=root_mean_squared_error,
+                            outer_aggregation_fun=np.mean)

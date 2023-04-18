@@ -22,7 +22,7 @@ import logging
 
 # Add easy access imports
 try:
-    from bayesflow import amortizers, default_settings, diagnostics, losses, networks, trainers
+    from bayesflow import amortizers, default_settings, diagnostics, losses, networks, trainers, sensitivity
 except ImportError as err:
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
