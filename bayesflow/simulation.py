@@ -629,7 +629,15 @@ class Simulator:
         """Assumes a non-batched simulator accepting batched contexts and priors."""
 
         # Extract batch size
-        batch_size = params.shape[0]
+        # Always assume first dimension is batch dimension
+        # Handle cases with multiple inputs to simulator
+        if isinstance(params, tuple) or isinstance(params, list):
+            batch_size = params[0].shape[0]
+        # Handle all other cases or fail gently
+        else:
+            # expand dimension by one to handle both cases in the same way
+            params = [params]
+            batch_size = params.shape[0]
 
         # No context type
         if (
@@ -637,14 +645,16 @@ class Simulator:
             and out_dict[DEFAULT_KEYS["non_batchable_context"]] is None
         ):
             out_dict[DEFAULT_KEYS["sim_data"]] = np.array(
-                [self.simulator(params[b], *args, **kwargs) for b in range(batch_size)]
+                [self.simulator(
+                    [params[i][b] for i in range(len(params))], *args, **kwargs
+                ) for b in range(batch_size)]
             )
 
         # Only batchable context
         elif out_dict["non_batchable_context"] is None:
             out_dict[DEFAULT_KEYS["sim_data"]] = np.array(
                 [
-                    self.simulator(params[b], out_dict[DEFAULT_KEYS["batchable_context"]][b], *args, **kwargs)
+                    self.simulator([params[i][b] for i in range(len(params))], out_dict[DEFAULT_KEYS["batchable_context"]][b], *args, **kwargs)
                     for b in range(batch_size)
                 ]
             )
@@ -653,7 +663,7 @@ class Simulator:
         elif out_dict[DEFAULT_KEYS["batchable_context"]] is None:
             out_dict[DEFAULT_KEYS["sim_data"]] = np.array(
                 [
-                    self.simulator(params[b], out_dict[DEFAULT_KEYS["non_batchable_context"]], *args, **kwargs)
+                    self.simulator([params[i][b] for i in range(len(params))], out_dict[DEFAULT_KEYS["non_batchable_context"]], *args, **kwargs)
                     for b in range(batch_size)
                 ]
             )
@@ -663,7 +673,7 @@ class Simulator:
             out_dict[DEFAULT_KEYS["sim_data"]] = np.array(
                 [
                     self.simulator(
-                        params[b],
+                        [params[i][b] for i in range(len(params))],
                         out_dict[DEFAULT_KEYS["batchable_context"]][b],
                         out_dict[DEFAULT_KEYS["non_batchable_context"]],
                         *args,
@@ -1157,9 +1167,9 @@ class TwoLevelGenerativeModel:
         # Case shared parameters - first input to simulator
         # is a tuple (local_parameters, shared_parameters)
         else:
-            sim_out = sim_out = self.simulator(
-                (prior_out[DEFAULT_KEYS["local_parameters"]], prior_out[DEFAULT_KEYS["shared_parameters"]])
-                ** kwargs.pop("sim_args", {})
+            sim_out = self.simulator(
+                (prior_out[DEFAULT_KEYS["local_parameters"]], prior_out[DEFAULT_KEYS["shared_parameters"]]),
+                **kwargs.pop("sim_args", {})
             )
 
         # Prepare and fill placeholder dict, starting from prior dict
