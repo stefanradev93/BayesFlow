@@ -993,10 +993,11 @@ def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
 
 
 def plot_calibration_curves(
-    true_models, pred_models, model_names=None, num_bins=10, font_size=12, fig_size=(12, 4), color="#8f2727"
+    true_models, pred_models, model_names=None, num_bins=10, font_size=12, fig_size=None, color="#8f2727"
 ):
     """Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities
-    for a model comparison problem. Depends on the ``expected_calibration_error`` function for computing the ECE.
+    for a model comparison problem. The marginal histograms inform about the fraction of predictions in each bin.
+    Depends on the ``expected_calibration_error`` function for computing the ECE.
 
     Parameters
     ----------
@@ -1010,8 +1011,8 @@ def plot_calibration_curves(
         The number of bins to use for the calibration curves (and marginal histograms).
     font_size    : int, optional, default: 12
         The font size of the axis label texts.
-    fig_size     : tuple, optional, default: (12, 4)
-        The figure size passed to the matplotlib constructor.
+    fig_size          : tuple or None, optional, default: None
+        The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
     color        : str, optional, default: '#8f2727'
         The color of the plot.
 
@@ -1027,10 +1028,11 @@ def plot_calibration_curves(
     # Determine n_subplots dynamically
     n_row = int(np.ceil(num_models / 6))
     n_col = int(np.ceil(num_models / n_row))
-
     cal_errs, cal_probs = expected_calibration_error(true_models, pred_models, num_bins)
 
     # Initialize figure
+    if fig_size is None:
+        fig_size = (int(5 * n_col), int(5 * n_row))
     f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
     if n_row > 1:
         ax = axarr.flat
@@ -1050,7 +1052,7 @@ def plot_calibration_curves(
         # Plot PMP distribution over bins
         uniform_bins = np.linspace(0.0, 1.0, num_bins + 1)
         norm_weights = np.ones_like(pred_models) / len(pred_models)
-        ax[j].hist(pred_models[:, j], bins=uniform_bins, weights=norm_weights[:, j], color="grey", alpha=0.1)
+        ax[j].hist(pred_models[:, j], bins=uniform_bins, weights=norm_weights[:, j], color="grey", alpha=0.3)
 
         # Tweak plot
         ax[j].spines["right"].set_visible(False)
