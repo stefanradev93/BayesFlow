@@ -330,14 +330,15 @@ class SplineCoupling(tf.keras.Model):
         # Extract all learnable parameters
         left_edge, bottom_edge, widths, heights, derivatives = spline_params
 
+        # Placeholders for results
+        result = tf.zeros_like(target)
+        log_jac = tf.zeros_like(target)
+
         total_width = tf.reduce_sum(widths, axis=-1, keepdims=True)
         total_height = tf.reduce_sum(heights, axis=-1, keepdims=True)
 
         knots_x = tf.concat([left_edge, left_edge + tf.math.cumsum(widths, axis=-1)], axis=-1)
         knots_y = tf.concat([bottom_edge, bottom_edge + tf.math.cumsum(heights, axis=-1)], axis=-1)
-
-        log_jac = tf.zeros_like(target)
-        result = tf.zeros_like(target)
 
         # Determine which targets are in domain and which are not
         if not inverse:
@@ -353,11 +354,14 @@ class SplineCoupling(tf.keras.Model):
 
         # In-domain computation
         if tf.size(target_in_idx) > 0:
+            # Index crunching
             higher_indices = tf.gather_nd(higher_indices, target_in_idx)
             higher_indices = tf.cast(higher_indices, tf.int32)
             lower_indices = higher_indices - 1
             lower_idx_tuples = tf.concat([tf.cast(target_in_idx, tf.int32), lower_indices], axis=-1)
             higher_idx_tuples = tf.concat([tf.cast(target_in_idx, tf.int32), higher_indices], axis=-1)
+
+            # Spline computation
             dk = tf.gather_nd(derivatives, lower_idx_tuples)
             dkp = tf.gather_nd(derivatives, higher_idx_tuples)
             xk = tf.gather_nd(knots_x, lower_idx_tuples)
@@ -375,10 +379,9 @@ class SplineCoupling(tf.keras.Model):
                 numerator = dy * (sk * xi**2 + dk * xi * (1 - xi))
                 denominator = sk + (dkp + dk - 2 * sk) * xi * (1 - xi)
                 result_in = yk + numerator / denominator
+                # Log Jacobian for in-domain
                 numerator = sk**2 * (dkp * xi**2 + 2 * sk * xi * (1 - xi) + dk * (1 - xi) ** 2)
                 denominator = (sk + (dkp + dk - 2 * sk) * xi * (1 - xi)) ** 2
-
-                # Jacobian for in-domain points
                 log_jac_in = tf.math.log(numerator + 1e-10) - tf.math.log(denominator + 1e-10)
                 log_jac = tf.tensor_scatter_nd_update(log_jac, target_in_idx, log_jac_in)
             # Inverse pass
@@ -402,7 +405,7 @@ class SplineCoupling(tf.keras.Model):
 
             if not inverse:
                 result_out = scale_out * target_out[..., None] + shift_out
-                # Jacobian for out-of-domain points
+                # Log Jacobian for out-of-domain points
                 log_jac_out = tf.math.log(scale_out + 1e-10)
                 log_jac_out = tf.squeeze(log_jac_out, axis=-1)
                 log_jac = tf.tensor_scatter_nd_update(log_jac, target_out_idx, log_jac_out)

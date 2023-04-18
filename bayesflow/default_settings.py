@@ -119,9 +119,9 @@ DEFAULT_SETTING_SPLINE_COUPLING = MetaDictSetting(
         "mc_dropout": False,
         "dropout": True,
         "residual": False,
-        "dropout_prob": 0.1,
+        "dropout_prob": 0.05,
         "bins": 16,
-        "default_domain": (-10.0, 10.0, -10.0, 10.0),
+        "default_domain": (-5.0, 5.0, -5.0, 5.0),
     },
     mandatory_fields=[],
 )
