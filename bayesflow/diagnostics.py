@@ -1091,7 +1091,7 @@ def plot_confusion_matrix(
     cmap=None,
     title=True,
 ):
-    """Plots a confusion matrix for validating a neural network trained on Bayesian model comparison.
+    """Plots a confusion matrix for validating a neural network trained for Bayesian model comparison.
 
     Parameters
     ----------
@@ -1105,15 +1105,15 @@ def plot_confusion_matrix(
         The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
     title_fontsize : int, optional, default: 18
         The font size of the axis label texts.
-    tick_fontsize : int, optional, default: 12
+    tick_fontsize  : int, optional, default: 12
         The font size of the axis label texts.
-    normalize : bool, optional, default: True
+    normalize      : bool, optional, default: True
         A flag for normalization of the confusion matrix.
         If True, each row of the confusion matrix is normalized to sum to 1.
-    cmap : matplotlib.colors.Colormap or str, optional, default: None
+    cmap           : matplotlib.colors.Colormap or str, optional, default: None
         Colormap to be used for the cells. If a str, it should be the name of a registered colormap,
         e.g., 'viridis'. Default colormap matches the BayesFlow defaults by ranging from white to red.
-    title : bool, optional, default True
+    title          : bool, optional, default True
         A flag for adding 'Confusion Matrix' above the matrix.
     """
 
@@ -1130,7 +1130,6 @@ def plot_confusion_matrix(
 
     # Compute confusion matrix
     cm = confusion_matrix(true_models, pred_models)
-
     if normalize:
         cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
 
