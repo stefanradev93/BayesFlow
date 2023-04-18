@@ -28,10 +28,3 @@ except ImportError as err:
     logger.setLevel(logging.WARNING)
     logger.warn("Some dependencies failed to load. BayesFlow modules may not work properly!")
     logger.warn(str(err))
-
-try:
-    from IPython import display
-    vid = display.YouTubeVideo('a3Z7zEc7AXQ', width=800, allow_autoplay=True)
-    display.display(vid)
-except ImportError as e:
-    pass
