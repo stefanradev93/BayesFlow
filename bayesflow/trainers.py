@@ -23,7 +23,7 @@ import os
 from pickle import load as pickle_load
 
 import numpy as np
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 logging.basicConfig()
 
