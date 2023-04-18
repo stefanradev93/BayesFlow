@@ -24,9 +24,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.lines import Line2D
 from scipy.stats import binom, median_abs_deviation
-from sklearn.metrics import r2_score
+from sklearn.metrics import confusion_matrix, r2_score
 
 logging.basicConfig()
 
@@ -1075,3 +1076,81 @@ def plot_calibration_curves(
         ax[j].set_title(model_names[j])
     f.tight_layout()
     return f
+
+
+def plot_confusion_matrix(
+    true_models,
+    pred_models,
+    model_names=None,
+    fig_size=(5, 5),
+    title_fontsize=18,
+    tick_fontsize=12,
+    normalize=True,
+    cmap=None,
+    title=True,
+):
+    """Plots a confusion matrix for validating a neural network trained on Bayesian model comparison.
+
+    Parameters
+    ----------
+    true_models    : np.ndarray of shape (num_data_sets, num_models)
+        The one-hot-encoded true model indices per data set.
+    pred_models    : np.ndarray of shape (num_data_sets, num_models)
+        The predicted posterior model probabilities (PMPs) per data set.
+    model_names    : list or None, optional, default: None
+        The model names for nice plot titles. Inferred if None.
+    fig_size       : tuple or None, optional, default: (5, 5)
+        The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
+    title_fontsize : int, optional, default: 18
+        The font size of the axis label texts.
+    tick_fontsize : int, optional, default: 12
+        The font size of the axis label texts.
+    normalize : bool, optional, default: True
+        A flag for normalization of the confusion matrix.
+        If True, each row of the confusion matrix is normalized to sum to 1.
+    cmap : matplotlib.colors.Colormap or str, optional, default: None
+        Colormap to be used for the cells. If a str, it should be the name of a registered colormap,
+        e.g., 'viridis'. Default colormap matches the BayesFlow defaults by ranging from white to red.
+    title : bool, optional, default True
+        A flag for adding 'Confusion Matrix' above the matrix.
+    """
+
+    if model_names is None:
+        num_models = true_models.shape[-1]
+        model_names = [rf"$M_{{{m}}}$" for m in range(1, num_models + 1)]
+
+    if cmap is None:
+        cmap = LinearSegmentedColormap.from_list("", ["white", "#8f2727"])
+
+    # Flatten input
+    true_models = np.argmax(true_models, axis=1)
+    pred_models = np.argmax(pred_models, axis=1)
+
+    # Compute confusion matrix
+    cm = confusion_matrix(true_models, pred_models)
+
+    if normalize:
+        cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
+
+    # Initialize figure
+    f, ax = plt.subplots(1, 1, figsize=fig_size)
+
+    im = ax.imshow(cm, interpolation="nearest", cmap=cmap)
+    ax.figure.colorbar(im, ax=ax, shrink=0.7)
+
+    ax.set(xticks=np.arange(cm.shape[1]), yticks=np.arange(cm.shape[0]))
+    ax.set_xticklabels(model_names, fontsize=tick_fontsize)
+    ax.set_yticklabels(model_names, fontsize=tick_fontsize)
+    ax.set_xlabel("Predicted model", fontsize=tick_fontsize)
+    ax.set_ylabel("True model", fontsize=tick_fontsize)
+
+    # Loop over data dimensions and create text annotations
+    fmt = ".2f" if normalize else "d"
+    thresh = cm.max() / 2.0
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            ax.text(
+                j, i, format(cm[i, j], fmt), ha="center", va="center", color="white" if cm[i, j] > thresh else "black"
+            )
+    if title:
+        ax.set_title("Confusion Matrix", fontsize=title_fontsize)
