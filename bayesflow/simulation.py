@@ -634,11 +634,13 @@ class Simulator:
         # Handle cases with multiple inputs to simulator
         if isinstance(params, tuple) or isinstance(params, list):
             batch_size = params[0].shape[0]
+            non_batched_params = [[params[i][b] for i in range(len(params))] for b in range(batch_size)]
         # Handle all other cases or fail gently
         else:
             # expand dimension by one to handle both cases in the same way
             batch_size = params.shape[0]
-            params = [params]
+            non_batched_params = params
+
 
         # No context type
         if (
@@ -646,27 +648,22 @@ class Simulator:
             and out_dict[DEFAULT_KEYS["non_batchable_context"]] is None
         ):
             out_dict[DEFAULT_KEYS["sim_data"]] = np.array(
-                [self.simulator(
-                    [params[i][b] for i in range(len(params))], *args, **kwargs
-                ) for b in range(batch_size)]
+                [self.simulator(non_batched_params[b], *args, **kwargs)
+                 for b in range(batch_size)]
             )
 
         # Only batchable context
         elif out_dict["non_batchable_context"] is None:
             out_dict[DEFAULT_KEYS["sim_data"]] = np.array(
-                [
-                    self.simulator([params[i][b] for i in range(len(params))], out_dict[DEFAULT_KEYS["batchable_context"]][b], *args, **kwargs)
-                    for b in range(batch_size)
-                ]
+                [self.simulator(non_batched_params[b], out_dict[DEFAULT_KEYS["batchable_context"]][b], *args, **kwargs)
+                 for b in range(batch_size)]
             )
 
         # Only non-batchable context
         elif out_dict[DEFAULT_KEYS["batchable_context"]] is None:
             out_dict[DEFAULT_KEYS["sim_data"]] = np.array(
-                [
-                    self.simulator([params[i][b] for i in range(len(params))], out_dict[DEFAULT_KEYS["non_batchable_context"]], *args, **kwargs)
-                    for b in range(batch_size)
-                ]
+                [self.simulator(non_batched_params[b], out_dict[DEFAULT_KEYS["non_batchable_context"]], *args, **kwargs)
+                 for b in range(batch_size)]
             )
 
         # Both batchable and non_batchable context
@@ -674,7 +671,7 @@ class Simulator:
             out_dict[DEFAULT_KEYS["sim_data"]] = np.array(
                 [
                     self.simulator(
-                        [params[i][b] for i in range(len(params))],
+                        non_batched_params[b],
                         out_dict[DEFAULT_KEYS["batchable_context"]][b],
                         out_dict[DEFAULT_KEYS["non_batchable_context"]],
                         *args,
