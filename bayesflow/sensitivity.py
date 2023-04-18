@@ -111,7 +111,7 @@ def plot_model_misspecification_sensitivity(results_dict, first_config_dict, sec
 
     Parameters
     ----------
-    results_dict         : dict
+    results_dict        : dict
         The results from :func:`sensitivity.misspecification_experiment`,
         Alternatively, a dictionary with mandatory keys: P1, P2, values
     first_config_dict   : dict
@@ -134,8 +134,14 @@ def plot_model_misspecification_sensitivity(results_dict, first_config_dict, sec
         plot_config = dict()
 
     # merge config dicts
-    default_plot_config = {"xticks": None, "yticks": None, "vmin": 0, "vmax": None, "cmap": "viridis",
-                           'cbar_title': None}
+    default_plot_config = {
+        "xticks": None,
+        "yticks": None,
+        "vmin": 0,
+        "vmax": None,
+        "cmap": "viridis",
+        "cbar_title": None,
+    }
 
     if results_dict["name"].lower() == "posterior_error":
         default_plot_config["cmap"] = "inferno"
@@ -162,16 +168,26 @@ def plot_model_misspecification_sensitivity(results_dict, first_config_dict, sec
         vline_location=first_config_dict["well_specified_value"],
         xticks=plot_config["xticks"],
         yticks=plot_config["yticks"],
-        cbar_title=plot_config["cbar_title"]
+        cbar_title=plot_config["cbar_title"],
     )
     return f
 
 
-def plot_color_grid(x_grid, y_grid, z_grid,
-                    cmap="viridis", vmin=None, vmax=None,
-                    xlabel="x", ylabel="y", cbar_title="z",
-                    xticks=None, yticks=None,
-                    hline_location=None, vline_location=None):
+def plot_color_grid(
+    x_grid,
+    y_grid,
+    z_grid,
+    cmap="viridis",
+    vmin=None,
+    vmax=None,
+    xlabel="x",
+    ylabel="y",
+    cbar_title="z",
+    xticks=None,
+    yticks=None,
+    hline_location=None,
+    vline_location=None,
+):
     """
     Plots a 2-dimensional color grid.
 
@@ -211,16 +227,7 @@ def plot_color_grid(x_grid, y_grid, z_grid,
     """
     # Construct plot
     fig = plt.figure(figsize=(10, 5))
-    plt.pcolor(
-        x_grid,
-        y_grid,
-        z_grid,
-        shading="nearest",
-        rasterized=True,
-        cmap=cmap,
-        vmin=vmin,
-        vmax=vmax
-    )
+    plt.pcolor(x_grid, y_grid, z_grid, shading="nearest", rasterized=True, cmap=cmap, vmin=vmin, vmax=vmax)
     plt.xlabel(xlabel, fontsize=28)
     plt.ylabel(ylabel, fontsize=28)
 
