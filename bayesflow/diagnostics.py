@@ -401,7 +401,7 @@ def plot_sbc_ecdf(
         The parameter names for nice plot titles. Inferred if None. Only relevant if `stacked=False`.
     fig_size          : tuple or None, optional, default: None
         The figure size passed to the matplotlib constructor. Inferred if None.
-    label_fontsize    : int, optional, default: 14
+    label_fontsize    : int, optional, default: 16
         The font size of the y-label and y-label texts
     legend_fontsize   : int, optional, default: 14
         The font size of the legend text
@@ -504,7 +504,10 @@ def plot_sbc_ecdf(
         _ax.tick_params(axis="both", which="minor", labelsize=tick_fontsize)
 
     # Only add x-labels to the bottom row
-    bottom_row = axes if n_row == 1 else axes[0] if n_col == 1 else ax[n_row - 1, :]
+    if stacked:
+        bottom_row = [ax]
+    else:
+        bottom_row = ax if n_row == 1 else ax[-1, :]
     for _ax in bottom_row:
         _ax.set_xlabel("Fractional rank statistic", fontsize=label_fontsize)
 
