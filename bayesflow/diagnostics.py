@@ -996,7 +996,16 @@ def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
 
 
 def plot_calibration_curves(
-    true_models, pred_models, model_names=None, num_bins=10, font_size=12, fig_size=None, color="#8f2727"
+    true_models,
+    pred_models,
+    model_names=None,
+    num_bins=10,
+    label_fontsize=16,
+    legend_fontsize=14,
+    title_fontsize=18,
+    tick_fontsize=12,
+    fig_size=None,
+    color="#8f2727",
 ):
     """Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities
     for a model comparison problem. The marginal histograms inform about the fraction of predictions in each bin.
@@ -1004,20 +1013,26 @@ def plot_calibration_curves(
 
     Parameters
     ----------
-    true_models  : np.ndarray of shape (num_data_sets, num_models)
+    true_models       : np.ndarray of shape (num_data_sets, num_models)
         The one-hot-encoded true model indices per data set.
-    pred_models  : np.ndarray of shape (num_data_sets, num_models)
+    pred_models       : np.ndarray of shape (num_data_sets, num_models)
         The predicted posterior model probabilities (PMPs) per data set.
-    model_names  : list or None, optional, default: None
+    model_names       : list or None, optional, default: None
         The model names for nice plot titles. Inferred if None.
-    num_bins     : int, optional, default: 10
+    num_bins          : int, optional, default: 10
         The number of bins to use for the calibration curves (and marginal histograms).
-    font_size    : int, optional, default: 12
-        The font size of the axis label texts.
+    label_fontsize    : int, optional, default: 16
+        The font size of the y-label and y-label texts
+    legend_fontsize   : int, optional, default: 14
+        The font size of the legend text (ECE value)
+    title_fontsize    : int, optional, default: 16
+        The font size of the title text. Only relevant if `stacked=False`
+    tick_fontsize     : int, optional, default: 12
+        The font size of the axis ticklabels
     fig_size          : tuple or None, optional, default: None
         The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
-    color        : str, optional, default: '#8f2727'
-        The color of the plot.
+    color             : str, optional, default: '#8f2727'
+        The color of the calibration curves
 
     Returns
     -------
@@ -1062,8 +1077,8 @@ def plot_calibration_curves(
         ax[j].spines["top"].set_visible(False)
         ax[j].set_xlim([0, 1])
         ax[j].set_ylim([0, 1])
-        ax[j].set_xlabel("Predicted probability")
-        ax[j].set_ylabel("True probability")
+        ax[j].set_xlabel("Predicted probability", fontsize=label_fontsize)
+        ax[j].set_ylabel("True probability", fontsize=label_fontsize)
         ax[j].set_xticks([0.2, 0.4, 0.6, 0.8, 1.0])
         ax[j].set_yticks([0.2, 0.4, 0.6, 0.8, 1.0])
         ax[j].grid(alpha=0.5)
@@ -1074,11 +1089,13 @@ def plot_calibration_curves(
             horizontalalignment="left",
             verticalalignment="center",
             transform=ax[j].transAxes,
-            size=font_size,
+            size=legend_fontsize,
         )
+        ax[j].tick_params(axis="both", which="major", labelsize=tick_fontsize)
+        ax[j].tick_params(axis="both", which="minor", labelsize=tick_fontsize)
 
         # Set title
-        ax[j].set_title(model_names[j])
+        ax[j].set_title(model_names[j], fontsize=title_fontsize)
     f.tight_layout()
     return f
 
