@@ -1036,7 +1036,7 @@ def plot_calibration_curves(
 
     Returns
     -------
-    f : plt.Figure - the figure instance for optional saving
+    fig : plt.Figure - the figure instance for optional saving
     """
 
     num_models = true_models.shape[-1]
@@ -1051,7 +1051,7 @@ def plot_calibration_curves(
     # Initialize figure
     if fig_size is None:
         fig_size = (int(5 * n_col), int(5 * n_row))
-    f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
+    fig, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
     if n_row > 1:
         ax = axarr.flat
 
@@ -1096,8 +1096,8 @@ def plot_calibration_curves(
 
         # Set title
         ax[j].set_title(model_names[j], fontsize=title_fontsize)
-    f.tight_layout()
-    return f
+    fig.tight_layout()
+    return fig
 
 
 def plot_confusion_matrix(
@@ -1138,7 +1138,7 @@ def plot_confusion_matrix(
 
     Returns
     -------
-    f : plt.Figure - the figure instance for optional saving
+    fig : plt.Figure - the figure instance for optional saving
     """
 
     if model_names is None:
@@ -1158,7 +1158,7 @@ def plot_confusion_matrix(
         cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
 
     # Initialize figure
-    f, ax = plt.subplots(1, 1, figsize=fig_size)
+    fig, ax = plt.subplots(1, 1, figsize=fig_size)
 
     im = ax.imshow(cm, interpolation="nearest", cmap=cmap)
     ax.figure.colorbar(im, ax=ax, shrink=0.7)
