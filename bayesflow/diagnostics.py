@@ -1135,6 +1135,10 @@ def plot_confusion_matrix(
         e.g., 'viridis'. Default colormap matches the BayesFlow defaults by ranging from white to red.
     title          : bool, optional, default True
         A flag for adding 'Confusion Matrix' above the matrix.
+
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
     """
 
     if model_names is None:
@@ -1175,3 +1179,4 @@ def plot_confusion_matrix(
             )
     if title:
         ax.set_title("Confusion Matrix", fontsize=title_fontsize)
+    return fig
