@@ -11,6 +11,8 @@ For starters, check out some of our walk-through notebooks:
 2. [Principled Bayesian workflow for cognitive models](docs/source/tutorial_notebooks/LCA_Model_Posterior_Estimation.ipynb)
 3. [Posterior estimation for ODEs](docs/source/tutorial_notebooks/Linear_ODE_system.ipynb)
 4. [Posterior estimation for SIR-like models](docs/source/tutorial_notebooks/Covid19_Initial_Posterior_Estimation.ipynb)
+5. [Model comparison for cognitive models](docs/source/tutorial_notebooks/Model_Comparison_MPT.ipynb)
+6. [Hierarchical model comparison for cognitive models](docs/source/tutorial_notebooks/Model_Comparison_MPT.ipynb)
 
 ## Project Documentation
 
