@@ -37,9 +37,8 @@ def misspecification_experiment(
     n_sim=200,
     configurator=None,
 ):
-    """
-    Performs a systematic sensitivity analysis with regard to 2 misspecification
-    factors across different values of the factors provided in
+    """Performs a systematic sensitivity analysis with regard to two misspecification
+    factors across different values of the factors provided in the config dictionaries.
 
     Parameters
     ----------
@@ -54,7 +53,7 @@ def misspecification_experiment(
     second_config_dict  : dict
         Configuration for the second misspecification factor
         fields: name (str), values (1D np.ndarray)
-    error_function: callable, default: bayesflow.computational_utilities.aggregated_rmse
+    error_function      : callable, default: bayesflow.computational_utilities.aggregated_rmse
         A callable that computes an error metric on the approximate posterior samples
     n_posterior_samples : int, optional, default: 500
         Number of samples from the approximate posterior per data set
@@ -63,11 +62,11 @@ def misspecification_experiment(
     configurator        : callable or None, optional, default: None
         An optional configurator for the misspecified simulations.
         If ``None`` provided (default), ``Trainer.configurator`` will be used.
+
     Returns
     -------
     posterior_error_dict: {P1, P2, value} - dictionary with misspecification grid (P1, P2) and posterior error results (values)
     summary_mmd: {P1, P2, values} - dictionary with misspecification grid (P1, P2) and summary MMD results (values)
-
     """
 
     # Setup the grid and prepare placeholders
@@ -106,8 +105,7 @@ def misspecification_experiment(
 
 
 def plot_model_misspecification_sensitivity(results_dict, first_config_dict, second_config_dict, plot_config=None):
-    """
-    Visualizes the results from a sensitivity analysis via a colored 2D grid.
+    """Visualizes the results from a sensitivity analysis via a colored 2D grid.
 
     Parameters
     ----------
@@ -127,7 +125,6 @@ def plot_model_misspecification_sensitivity(results_dict, first_config_dict, sec
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
-
     """
 
     if plot_config is None:
@@ -188,50 +185,49 @@ def plot_color_grid(
     hline_location=None,
     vline_location=None,
 ):
-    """
-    Plots a 2-dimensional color grid.
+    """Plots a 2-dimensional color grid.
 
     Parameters
     ----------
-    x_grid: np.ndarray
+    x_grid         : np.ndarray
         meshgrid of x values
-    y_grid: np.ndarray
+    y_grid         : np.ndarray
         meshgrid of y values
-    z_grid: np.ndarray
+    z_grid         : np.ndarray
         meshgrid of z values (coded by color in the plot)
-    cmap: str, default: viridis
+    cmap           : str, default: viridis
         color map for the fill
-    vmin: float, default: None
+    vmin           : float, default: None
         lower limit of the color map, None results in dynamic limit
-    vmax: float, default: None
+    vmax           : float, default: None
         upper limit of the color map, None results in dynamic limit
-    xlabel: str, default: x
-        x label
-    ylabel: str, default: y
-        y label
-    cbar_title: str, default: z
+    xlabel         : str, default: x
+        x label text
+    ylabel         : str, default: y
+        y label text
+    cbar_title     : str, default: z
         title of the color bar legend
-    xticks: list, default: None
+    xticks         : list, default: None
         list of x ticks, None results in dynamic ticks
-    yticks: list, default: None
+    yticks         : list, default: None
         list of y ticks, None results in dynamic ticks
-    hline_location: float, default: None
+    hline_location : float, default: None
         (optional) horizontal dashed line
-    vline_location, float, default: None
+    vline_location : float, default: None
         (optional) vertical dashed line
-
 
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
     """
+
     # Construct plot
     fig = plt.figure(figsize=(10, 5))
     plt.pcolor(x_grid, y_grid, z_grid, shading="nearest", rasterized=True, cmap=cmap, vmin=vmin, vmax=vmax)
     plt.xlabel(xlabel, fontsize=28)
     plt.ylabel(ylabel, fontsize=28)
-
     plt.tick_params(labelsize=24)
+
     if hline_location is not None:
         plt.axhline(y=hline_location, linestyle="--", color="lightgreen", alpha=0.80)
     if vline_location is not None:
