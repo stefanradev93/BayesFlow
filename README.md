@@ -228,7 +228,6 @@ When feeding the data to our trained network, we almost immediately obtain poste
 
 ```python
 sim_preds = amortizer(sim_data)
-sim_preds[0,:]
 ```
 
 How good are these predicted probabilities? We can have a look at the calibration:
@@ -237,11 +236,15 @@ How good are these predicted probabilities? We can have a look at the calibratio
 cal_curves = bf.diagnostics.plot_calibration_curves(sim_indices, sim_preds)
 ```
 
-Our approximator shows excellent calibration, with an expected calibration error (ECE) close to 0 and most predicted probabilities being certain of the model underlying a data set. We can further assess patterns of misclassification with a confusion matrix:
+<img src="img/showcase_calibration_curves.png" width=65% height=65%>
+
+Our approximator shows excellent calibration, with the calibration curve being closely aligned to the diagonal, an expected calibration error (ECE) near 0 and most predicted probabilities being certain of the model underlying a data set. We can further assess patterns of misclassification with a confusion matrix:
 
 ```python
 conf_matrix = bf.diagnostics.plot_confusion_matrix(sim_indices, sim_preds)
 ```
+
+<img src="img/showcase_confusion_matrix.png" width=65% height=65%>
 
 For the vast majority of simulated data sets, the generating model is correctly detected. With these diagnostic results backing us up, we can safely apply our trained network to empirical data.
 
