@@ -244,7 +244,7 @@ Our approximator shows excellent calibration, with the calibration curve being c
 conf_matrix = bf.diagnostics.plot_confusion_matrix(sim_indices, sim_preds)
 ```
 
-<img src="img/showcase_confusion_matrix.png" width=65% height=65%>
+<img src="img/showcase_confusion_matrix.png" width=44% height=44%>
 
 For the vast majority of simulated data sets, the generating model is correctly detected. With these diagnostic results backing us up, we can safely apply our trained network to empirical data.
 
