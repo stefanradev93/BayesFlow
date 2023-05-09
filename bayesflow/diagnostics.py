@@ -1107,6 +1107,8 @@ def plot_confusion_matrix(
     fig_size=(5, 5),
     title_fontsize=18,
     tick_fontsize=12,
+    xtick_rotation=None,
+    ytick_rotation=None,
     normalize=True,
     cmap=None,
     title=True,
@@ -1124,9 +1126,13 @@ def plot_confusion_matrix(
     fig_size       : tuple or None, optional, default: (5, 5)
         The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
     title_fontsize : int, optional, default: 18
-        The font size of the axis label texts.
+        The font size of the title text.
     tick_fontsize  : int, optional, default: 12
-        The font size of the axis label texts.
+        The font size of the axis label and model name texts.
+    xtick_rotation: int, optional, default: None
+        Rotation of x-axis tick labels (helps with long model names).
+    ytick_rotation: int, optional, default: None
+        Rotation of y-axis tick labels (helps with long model names).
     normalize      : bool, optional, default: True
         A flag for normalization of the confusion matrix.
         If True, each row of the confusion matrix is normalized to sum to 1.
@@ -1165,7 +1171,11 @@ def plot_confusion_matrix(
 
     ax.set(xticks=np.arange(cm.shape[1]), yticks=np.arange(cm.shape[0]))
     ax.set_xticklabels(model_names, fontsize=tick_fontsize)
+    if xtick_rotation:
+       plt.xticks(rotation=xtick_rotation, ha="right") 
     ax.set_yticklabels(model_names, fontsize=tick_fontsize)
+    if ytick_rotation:
+       plt.yticks(rotation=ytick_rotation) 
     ax.set_xlabel("Predicted model", fontsize=tick_fontsize)
     ax.set_ylabel("True model", fontsize=tick_fontsize)
 
