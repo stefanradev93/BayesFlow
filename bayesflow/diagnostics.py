@@ -1036,7 +1036,7 @@ def plot_calibration_curves(
 
     Returns
     -------
-    f : plt.Figure - the figure instance for optional saving
+    fig : plt.Figure - the figure instance for optional saving
     """
 
     num_models = true_models.shape[-1]
@@ -1051,7 +1051,7 @@ def plot_calibration_curves(
     # Initialize figure
     if fig_size is None:
         fig_size = (int(5 * n_col), int(5 * n_row))
-    f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
+    fig, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
     if n_row > 1:
         ax = axarr.flat
 
@@ -1096,8 +1096,8 @@ def plot_calibration_curves(
 
         # Set title
         ax[j].set_title(model_names[j], fontsize=title_fontsize)
-    f.tight_layout()
-    return f
+    fig.tight_layout()
+    return fig
 
 
 def plot_confusion_matrix(
@@ -1107,6 +1107,8 @@ def plot_confusion_matrix(
     fig_size=(5, 5),
     title_fontsize=18,
     tick_fontsize=12,
+    xtick_rotation=None,
+    ytick_rotation=None,
     normalize=True,
     cmap=None,
     title=True,
@@ -1124,9 +1126,13 @@ def plot_confusion_matrix(
     fig_size       : tuple or None, optional, default: (5, 5)
         The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
     title_fontsize : int, optional, default: 18
-        The font size of the axis label texts.
+        The font size of the title text.
     tick_fontsize  : int, optional, default: 12
-        The font size of the axis label texts.
+        The font size of the axis label and model name texts.
+    xtick_rotation: int, optional, default: None
+        Rotation of x-axis tick labels (helps with long model names).
+    ytick_rotation: int, optional, default: None
+        Rotation of y-axis tick labels (helps with long model names).
     normalize      : bool, optional, default: True
         A flag for normalization of the confusion matrix.
         If True, each row of the confusion matrix is normalized to sum to 1.
@@ -1135,6 +1141,10 @@ def plot_confusion_matrix(
         e.g., 'viridis'. Default colormap matches the BayesFlow defaults by ranging from white to red.
     title          : bool, optional, default True
         A flag for adding 'Confusion Matrix' above the matrix.
+
+    Returns
+    -------
+    fig : plt.Figure - the figure instance for optional saving
     """
 
     if model_names is None:
@@ -1154,14 +1164,18 @@ def plot_confusion_matrix(
         cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
 
     # Initialize figure
-    f, ax = plt.subplots(1, 1, figsize=fig_size)
+    fig, ax = plt.subplots(1, 1, figsize=fig_size)
 
     im = ax.imshow(cm, interpolation="nearest", cmap=cmap)
     ax.figure.colorbar(im, ax=ax, shrink=0.7)
 
     ax.set(xticks=np.arange(cm.shape[1]), yticks=np.arange(cm.shape[0]))
     ax.set_xticklabels(model_names, fontsize=tick_fontsize)
+    if xtick_rotation:
+       plt.xticks(rotation=xtick_rotation, ha="right")
     ax.set_yticklabels(model_names, fontsize=tick_fontsize)
+    if ytick_rotation:
+       plt.yticks(rotation=ytick_rotation)
     ax.set_xlabel("Predicted model", fontsize=tick_fontsize)
     ax.set_ylabel("True model", fontsize=tick_fontsize)
 
@@ -1175,6 +1189,7 @@ def plot_confusion_matrix(
             )
     if title:
         ax.set_title("Confusion Matrix", fontsize=title_fontsize)
+    return fig
 
 
 def plot_mmd_hypothesis_test(mmd_null,
