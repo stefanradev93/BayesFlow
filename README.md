@@ -169,7 +169,7 @@ to the `AmortizedPosterior` instance:
 amortizer = bf.amortizers.AmortizedPosterior(inference_net, summary_net, summary_loss_fun='MMD')
 ```
 
-The amortizer knows how to combine its losses.
+The amortizer knows how to combine its losses and you can inspect the summary space for outliers during inference.
 
 ### References and Further Reading
 
@@ -179,8 +179,7 @@ preprint</em>, available for free at: https://arxiv.org/abs/2112.08866
 
 ## Model Comparison
 
-BayesFlow can not only be used for parameter estimation, but also to approximate Bayesian model comparison via posterior model probabilities or Bayes factors.
-
+BayesFlow can not only be used for parameter estimation, but also to perform approximate Bayesian model comparison via posterior model probabilities or Bayes factors.
 Let's extend the minimal example from before with a second model $M_2$ that we want to compare with our original model $M_1$:
 
 ```python
@@ -220,20 +219,19 @@ losses = trainer.train_online(epochs=3, iterations_per_epoch=100, batch_size=32)
 Let's simulate data sets from our models to check our networks' performance:
 
 ```python
-sim_data = trainer.configurator(meta_model(5000))
-sim_indices = sim_data["model_indices"]
+sims = trainer.configurator(meta_model(5000))
 ```
 
 When feeding the data to our trained network, we almost immediately obtain posterior model probabilities for each of the 5000 data sets:
 
 ```python
-sim_preds = amortizer(sim_data)
+model_probs = amortizer.posterior_probs(sims)
 ```
 
 How good are these predicted probabilities? We can have a look at the calibration:
 
 ```python
-cal_curves = bf.diagnostics.plot_calibration_curves(sim_indices, sim_preds)
+cal_curves = bf.diagnostics.plot_calibration_curves(sims["model_indices"], model_probs)
 ```
 
 <img src="img/showcase_calibration_curves.png" width=65% height=65%>
@@ -241,12 +239,12 @@ cal_curves = bf.diagnostics.plot_calibration_curves(sim_indices, sim_preds)
 Our approximator shows excellent calibration, with the calibration curve being closely aligned to the diagonal, an expected calibration error (ECE) near 0 and most predicted probabilities being certain of the model underlying a data set. We can further assess patterns of misclassification with a confusion matrix:
 
 ```python
-conf_matrix = bf.diagnostics.plot_confusion_matrix(sim_indices, sim_preds)
+conf_matrix = bf.diagnostics.plot_confusion_matrix(sims["model_indices"], model_probs)
 ```
 
 <img src="img/showcase_confusion_matrix.png" width=44% height=44%>
 
-For the vast majority of simulated data sets, the generating model is correctly detected. With these diagnostic results backing us up, we can safely apply our trained network to empirical data.
+For the vast majority of simulated data sets, the "true" data-generating model is correctly identified. With these diagnostic results backing us up, we can proceed and apply our trained network to empirical data.
 
 BayesFlow is also able to conduct model comparison for hierarchical models. See this [tutorial notebook](docs/source/tutorial_notebooks/Hierarchical_Model_Comparison_MPT.ipynb) for an introduction to the associated workflow.
 
