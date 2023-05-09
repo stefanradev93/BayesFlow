@@ -38,7 +38,7 @@ class LossError(Exception):
 
 
 class ShapeError(Exception):
-    """Class for error in expected shappes."""
+    """Class for error in expected shapes."""
 
     pass
 
@@ -60,4 +60,9 @@ class OperationNotSupportedError(Exception):
     e.g., when a trainer is initialized without generative model but the user demands it to simulate data.
     """
 
+    pass
+
+
+class ArgumentError(Exception):
+    """Class for error that occurs as a result of a function call which is invalid due to the input arguments."""
     pass

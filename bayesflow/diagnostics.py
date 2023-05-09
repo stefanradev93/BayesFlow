@@ -1175,3 +1175,92 @@ def plot_confusion_matrix(
             )
     if title:
         ax.set_title("Confusion Matrix", fontsize=title_fontsize)
+
+
+def plot_mmd_hypothesis_test(mmd_null,
+                             mmd_observed=None,
+                             alpha_level=0.05,
+                             null_color=(0.16407, 0.020171, 0.577478),
+                             observed_color="red",
+                             alpha_color="orange",
+                             truncate_vlines_at_kde=False,
+                             xmin=None,
+                             xmax=None,
+                             bw_factor=1.5):
+    """
+
+    Parameters
+    ----------
+    mmd_null: np.ndarray
+        samples from the MMD sampling distribution under the null hypothesis "the model is well-specified"
+    mmd_observed: float
+        observed MMD value
+    alpha_level: float
+        rejection probability (type I error)
+    null_color: color
+        color for the H0 sampling distribution
+    observed_color: color
+        color for the observed MMD
+    alpha_color: color
+        color for the rejection area
+    truncate_vlines_at_kde: bool
+        true: cut off the vlines at the kde
+        false: continue kde lines across the plot
+    xmin: float
+        lower x axis limit
+    xmax: float
+        upper x axis limit
+    bw_factor: float, default: 1.5
+        bandwidth (aka. smoothing parameter) of the kernel density estimate
+
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
+
+    """
+
+    def draw_vline_to_kde(x, kde_object, color, label=None, **kwargs):
+        kde_x, kde_y = kde_object.lines[0].get_data()
+        idx = np.argmin(np.abs(kde_x - x))
+        plt.vlines(x=x, ymin=0, ymax=kde_y[idx], color=color, linewidth=3, label=label, **kwargs)
+
+    def fill_area_under_kde(kde_object, x_start, x_end=None, **kwargs):
+        kde_x, kde_y = kde_object.lines[0].get_data()
+        if x_end is not None:
+            plt.fill_between(kde_x, kde_y, where=(kde_x >= x_start) & (kde_x <= x_end),
+                             interpolate=True, **kwargs)
+        else:
+            plt.fill_between(kde_x, kde_y, where=(kde_x >= x_start),
+                             interpolate=True, **kwargs)
+
+    f = plt.figure(figsize=(8, 4))
+
+    kde = sns.kdeplot(mmd_null, fill=False, linewidth=0, bw_adjust=bw_factor)
+    sns.kdeplot(mmd_null, fill=True, alpha=.12, color=null_color, bw_adjust=bw_factor)
+
+    if truncate_vlines_at_kde:
+        draw_vline_to_kde(x=mmd_observed, kde_object=kde, color=observed_color, label=r"Observed data")
+    else:
+        plt.vlines(x=mmd_observed, ymin=0, ymax=plt.gca().get_ylim()[1], color=observed_color, linewidth=3,
+                   label=r"Observed data")
+
+    mmd_critical = np.quantile(mmd_null, 1 - alpha_level)
+    fill_area_under_kde(kde, mmd_critical, color=alpha_color, alpha=0.5, label=fr"{int(alpha_level*100)}% rejection area")
+
+    if truncate_vlines_at_kde:
+        draw_vline_to_kde(x=mmd_critical, kde_object=kde, color=alpha_color)
+    else:
+        plt.vlines(x=mmd_critical, color=alpha_color, linewidth=3, ymin=0, ymax=plt.gca().get_ylim()[1])
+
+    sns.kdeplot(mmd_null, fill=False, linewidth=3, color=null_color, label=r"$H_0$", bw_adjust=bw_factor)
+
+    plt.xlabel(r"MMD", fontsize=20)
+    plt.ylabel("")
+    plt.yticks([])
+    plt.xlim(xmin, xmax)
+    plt.tick_params(axis='both', which='major', labelsize=16)
+
+    plt.legend(fontsize=20)
+    sns.despine()
+
+    return f

@@ -38,7 +38,7 @@ from bayesflow.amortizers import (
 from bayesflow.configuration import *
 from bayesflow.default_settings import DEFAULT_KEYS, OPTIMIZER_DEFAULTS
 from bayesflow.diagnostics import plot_latent_space_2d, plot_sbc_histograms
-from bayesflow.exceptions import SimulationError
+from bayesflow.exceptions import SimulationError, ArgumentError
 from bayesflow.helper_classes import (
     EarlyStopper,
     LossHistory,
@@ -49,6 +49,7 @@ from bayesflow.helper_classes import (
 )
 from bayesflow.helper_functions import backprop_step, extract_current_lr, format_loss_string, loss_to_string
 from bayesflow.simulation import GenerativeModel, MultiGenerativeModel
+from bayesflow.computational_utilities import maximum_mean_discrepancy
 
 
 class Trainer:
@@ -1008,6 +1009,72 @@ class Trainer:
         if not reuse_optimizer:
             self.optimizer = None
         return self.loss_history.get_plottable()
+
+    def mmd_hypothesis_test(self,
+                            observed_data,
+                            reference_data=None,
+                            num_reference_simulations=1000,
+                            num_null_samples=100,
+                            bootstrap=False):
+        """
+
+        Parameters
+        ----------
+        observed_data: np.ndarray
+            Observed data, shape (num_observed, ...)
+        reference_data: np.ndarray
+            Reference data representing samples from the "well-specified model", shape (num_reference, ...)
+        num_reference_simulations: int, default: 1000
+            Number of reference simulations (M) simulated from the trainer's generative model
+             if no `reference_data` are provided.
+        num_null_samples: int, default: 100
+            Number of draws from the MMD sampling distribution under the null hypothesis "the trainer's generative
+            model is well-specified"
+        bootstrap: bool, default: False
+            If true, the reference data (see above) are bootstrapped for each sample from the MMD sampling distribution.
+            If false, a new data set is simulated for computing each draw from the MMD sampling distribution.
+
+        Returns
+        -------
+        mmd_null_samples: np.ndarray
+            samples from the H0 sampling distribution ("well-specified model")
+        mmd_observed: float
+            summary MMD estimate for the observed data sets
+        """
+
+        if reference_data is None:
+            if self.generative_model is None:
+                raise ArgumentError("If you do not provide reference data, your trainer must have a generative model!")
+
+            reference_data = self.configurator(self.generative_model(num_reference_simulations))
+
+        if type(reference_data) == dict and 'summary_conditions' in reference_data.keys():
+            reference_summary = self.amortizer.summary_net(reference_data["summary_conditions"])
+        else:
+            reference_summary = self.amortizer.summary_net(reference_data)
+
+        if type(observed_data) == dict and 'summary_conditions' in observed_data.keys():
+            observed_summary = self.amortizer.summary_net(observed_data["summary_conditions"])
+        else:
+            observed_summary = self.amortizer.summary_net(observed_data)
+
+        num_observed = observed_summary.shape[0]
+        num_reference = reference_summary.shape[0]
+
+        mmd_null_samples = np.empty(num_null_samples, dtype=np.float32)
+        for i in tqdm(range(num_null_samples)):
+            if bootstrap:
+                bootstrap_idx = np.random.randint(0, num_reference, size=num_observed)
+                simulated_summary = tf.gather(reference_summary, bootstrap_idx, axis=0)
+            else:
+                simulated_data = self.configurator(self.generative_model(num_observed))
+                simulated_summary = self.amortizer.summary_net(simulated_data["summary_conditions"])
+
+            mmd_null_samples[i] = np.sqrt(maximum_mean_discrepancy(reference_summary, simulated_summary).numpy())
+
+        mmd_observed = np.sqrt(maximum_mean_discrepancy(reference_summary, observed_summary).numpy())
+
+        return mmd_null_samples, mmd_observed
 
     def _config_validation(self, validation_sims, **kwargs):
         """Helper method to prepare validation set based on user input."""
