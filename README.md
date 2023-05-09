@@ -193,7 +193,7 @@ def prior_m2(D=2, mu=2., sigma=1.0):
     return np.random.default_rng().normal(loc=mu, scale=sigma, size=D)
 ```
 
-We create both models as before and use a `MultiGenerativeModel` wrapper to combine them in a `meta_model`:
+For the purpose of this illustration, the two toy models only differ with respect to their prior specification ($M_1: \mu = 0, M_2: \mu = 2$). We create both models as before and use a `MultiGenerativeModel` wrapper to combine them in a `meta_model`:
 
 ```python
 model_m1 = bf.simulation.GenerativeModel(prior_m1, simulator, simulator_is_batched=False)
@@ -228,7 +228,7 @@ When feeding the data to our trained network, we almost immediately obtain poste
 model_probs = amortizer.posterior_probs(sims)
 ```
 
-How good are these predicted probabilities? We can have a look at the calibration:
+How good are these predicted probabilities in the closed world? We can have a look at the calibration:
 
 ```python
 cal_curves = bf.diagnostics.plot_calibration_curves(sims["model_indices"], model_probs)
