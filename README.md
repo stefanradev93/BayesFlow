@@ -8,7 +8,7 @@ Welcome to our BayesFlow library for efficient simulation-based Bayesian workflo
 For starters, check out some of our walk-through notebooks:
 
 1. [Quickstart amortized posterior estimation](docs/source/tutorial_notebooks/Intro_Amortized_Posterior_Estimation.ipynb)
-2. [Detecting model misspecification in posterior inference](docs/source/tutorial_notebooks/Detecting_Model_Misspecification.ipynb)
+2. Detecting model misspecification in posterior inference - COMING SOON
 3. [Principled Bayesian workflow for cognitive models](docs/source/tutorial_notebooks/LCA_Model_Posterior_Estimation.ipynb)
 4. [Posterior estimation for ODEs](docs/source/tutorial_notebooks/Linear_ODE_system.ipynb)
 5. [Posterior estimation for SIR-like models](docs/source/tutorial_notebooks/Covid19_Initial_Posterior_Estimation.ipynb)
