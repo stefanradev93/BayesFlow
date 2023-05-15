@@ -29,8 +29,8 @@ from bayesflow.inference_networks import InvertibleNetwork
 @pytest.mark.parametrize("input_shape", ["2d", "3d"])
 @pytest.mark.parametrize("use_soft_flow", [True, False])
 @pytest.mark.parametrize("permutation", ["learnable", "fixed"])
-@pytest.mark.parametrize("coupling_design", ["affine", "spline"])
-@pytest.mark.parametrize("num_coupling_layers", [2, 8])
+@pytest.mark.parametrize("coupling_design", ["affine", "spline", "interleaved"])
+@pytest.mark.parametrize("num_coupling_layers", [2, 7])
 def test_invertible_network(input_shape, use_soft_flow, permutation, coupling_design, num_coupling_layers):
     """Tests the ``InvertibleNetwork`` core class using a couple of relevant configurations."""
 
@@ -38,12 +38,19 @@ def test_invertible_network(input_shape, use_soft_flow, permutation, coupling_de
     units = np.random.randint(low=2, high=32)
     input_dim = np.random.randint(low=2, high=32)
 
-    # Create settings dictionaries and network
-    coupling_settings = {
-        "dense_args": dict(units=units, activation="elu"),
-        "num_dense": 1,
-    }
+    # Create settings dictionaries
+    if coupling_design in ["affine", "spline"]:
+        coupling_settings = {
+            "dense_args": dict(units=units, activation="elu"),
+            "num_dense": 1,
+        }
+    else:
+        coupling_settings = {
+            "affine": dict(dense_args={"units": units, "activation": "selu"}, num_dense=1),
+            "spline": dict(dense_args={"units": units, "activation": "relu"}, bins=8, num_dense=1),
+        }
 
+    # Create invertible network with test settings
     network = InvertibleNetwork(
         num_params=input_dim,
         num_coupling_layers=num_coupling_layers,
@@ -72,7 +79,7 @@ def test_invertible_network(input_shape, use_soft_flow, permutation, coupling_de
     assert network.latent_dim == input_dim
     assert len(network.coupling_layers) == num_coupling_layers
     # Test layer attributes
-    for l in network.coupling_layers:
+    for idx, l in enumerate(network.coupling_layers):
         # Permutation
         if permutation == "fixed":
             assert isinstance(l.permutation, Permutation)
@@ -85,6 +92,11 @@ def test_invertible_network(input_shape, use_soft_flow, permutation, coupling_de
             assert isinstance(l.net1, AffineCoupling) and isinstance(l.net2, AffineCoupling)
         elif coupling_design == "spline":
             assert isinstance(l.net1, SplineCoupling) and isinstance(l.net2, SplineCoupling)
+        elif coupling_design == "interleaved":
+            if idx % 2 == 0:
+                assert isinstance(l.net1, AffineCoupling) and isinstance(l.net2, AffineCoupling)
+            else:
+                assert isinstance(l.net1, SplineCoupling) and isinstance(l.net2, SplineCoupling)
 
     if use_soft_flow:
         assert network.soft_flow is True
