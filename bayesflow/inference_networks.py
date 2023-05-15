@@ -30,6 +30,8 @@ from bayesflow.helper_networks import MCDropout
 class InvertibleNetwork(tf.keras.Model):
     """Implements a chain of conditional invertible coupling layers for conditional density estimation."""
 
+    available_designs = ("affine", "spline", "interleaved")
+
     def __init__(
         self,
         num_params,
@@ -69,16 +71,17 @@ class InvertibleNetwork(tf.keras.Model):
         num_params            : int
             The number of parameters to perform inference on. Equivalently, the dimensionality of the
             latent space.
-        num_coupling_layers   : int, optional, default: 5
+        num_coupling_layers   : int, optional, default: 6
             The number of coupling layers to use as defined in [1] and [2]. In general, more coupling layers
             will give you more expressive power, but will be slower and may need more simulations to train.
             Typically, between 4 and 10 coupling layers should suffice for most applications.
         coupling_design       : str or callable, optional, default: 'affine'
-            The type of internal coupling network to use. Must be in ['affine', 'spline'].
-            The former corresponds to the architecture in [3, 5], the latter corresponds to a modified
-            version of [4].
+            The type of internal coupling network to use. Must be in ['affine', 'spline', 'interleaved'].
+            The first corresponds to the architecture in [3, 5], the second corresponds to a modified
+            version of [4]. The third option will alternate between affine and spline layers, for example,
+            if num_coupling_layers == 3, the chain will consist of ["affine", "spline", "affine"] layers.
 
-            In general, spline couplings run slower than affine couplings, but require fewers coupling
+            In general, spline couplings run slower than affine couplings, but require fewer coupling
             layers. Spline couplings may work best with complex (e.g., multimodal) low-dimensional
             problems. The difference will become less and less pronounced as we move to higher dimensions.
 
@@ -127,16 +130,15 @@ class InvertibleNetwork(tf.keras.Model):
 
         super().__init__(**kwargs)
 
-        settings = dict(
+        layer_settings = dict(
             latent_dim=num_params,
-            coupling_settings=coupling_settings,
-            coupling_design=coupling_design,
             permutation=permutation,
             use_act_norm=use_act_norm,
             act_norm_init=act_norm_init,
         )
-        self.coupling_layers = []
-        self.coupling_layers = [CouplingLayer(**settings) for _ in range(num_coupling_layers)]
+        self.coupling_layers = self._create_coupling_layers(
+            layer_settings, coupling_settings, coupling_design, num_coupling_layers
+        )
         self.soft_flow = use_soft_flow
         self.soft_low = soft_flow_bounds[0]
         self.soft_high = soft_flow_bounds[1]
@@ -229,6 +231,34 @@ class InvertibleNetwork(tf.keras.Model):
         for layer in reversed(self.coupling_layers):
             target = layer(target, condition, inverse=True, **kwargs)
         return target
+
+    @staticmethod
+    def _create_coupling_layers(settings, coupling_settings, coupling_design, num_coupling_layers):
+        """Helper method to create a list of coupling layers. Takes care
+        of the different options for coupling design.
+        """
+
+        if coupling_design not in InvertibleNetwork.available_designs:
+            raise NotImplementedError("Coupling design should be one of", InvertibleNetwork.available_designs)
+
+        # Case affine or spline
+        if coupling_design != "interleaved":
+            design = coupling_design
+            _coupling_settings = coupling_settings
+            coupling_layers = [
+                CouplingLayer(coupling_design=design, coupling_settings=_coupling_settings, **settings)
+                for _ in range(num_coupling_layers)
+            ]
+        # Case interleaved, starts with affine
+        else:
+            coupling_layers = []
+            designs = (["affine", "spline"] * int(np.ceil(num_coupling_layers / 2)))[:num_coupling_layers]
+            for design in designs:
+                # Fail gently, if neither None, nor a dictionary with keys ("spline", "affine")
+                _coupling_settings = None if coupling_settings is None else coupling_settings[design]
+                layer = CouplingLayer(coupling_design=design, coupling_settings=_coupling_settings, **settings)
+                coupling_layers.append(layer)
+        return coupling_layers
 
     @classmethod
     def create_config(cls, **kwargs):
