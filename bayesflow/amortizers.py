@@ -86,6 +86,10 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
     Tails of lipschitz triangular flows.
     In International Conference on Machine Learning (pp. 4673-4681). PMLR.
 
+    [4] Alexanderson, S., & Henter, G. E. (2020).
+    Robust model training and generalisation with Studentising flows.
+    arXiv preprint arXiv:2006.06599.
+
     Serves as in interface for learning ``p(parameters | data, context).``
     """
 
@@ -662,7 +666,11 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
 
 class AmortizedPosteriorLikelihood(tf.keras.Model, AmortizedTarget):
     """An interface for jointly learning a surrogate model of the simulator and an approximate
-    posterior given a generative model.
+    posterior given a generative model, as proposed by:
+
+    [1] Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P. C. (2023).
+    JANA: Jointly Amortized Neural Approximation of Complex Bayesian Models.
+    arXiv preprint arXiv:2302.09125.
     """
 
     def __init__(self, amortized_posterior, amortized_likelihood, **kwargs):
@@ -671,9 +679,11 @@ class AmortizedPosteriorLikelihood(tf.keras.Model, AmortizedTarget):
         Parameters
         ----------
         amortized_posterior  : an instance of AmortizedPosterior or a custom tf.keras.Model
-            The generative neural posterior approximator.
+            The generative neural posterior approximator
         amortized_likelihood : an instance of AmortizedLikelihood or a custom tf.keras.Model
-            The generative neural likelihood approximator.
+            The generative neural likelihood approximator
+        **kwargs          : dict, optional, default: {}
+            Additional keyword arguments passed to the ``__init__`` method of a ``tf.keras.Model`` instance
         """
 
         tf.keras.Model.__init__(self, **kwargs)
@@ -878,7 +888,7 @@ class AmortizedModelComparison(tf.keras.Model):
     arXiv preprint arXiv:2301.11873.
 
     Note: the original paper [1] does not distinguish between the summary and the evidential networks, but
-    treats them as a whole, with the appropriate architetcure dictated by the model application. For the
+    treats them as a whole, with the appropriate architecture dictated by the model application. For the
     sake of consistency and modularity, the BayesFlow library separates the two constructs.
     """
 
@@ -954,6 +964,9 @@ class AmortizedModelComparison(tf.keras.Model):
             `direct_conditions`  - the conditioning variables that the directly passed to the evidential network
         to_numpy    : bool, optional, default: True
             Flag indicating whether to return the PMPs a ``np.ndarray`` or a ``tf.Tensor``
+        **kwargs    : dict, optional, default: {}
+            Additional keyword arguments passed to the networks
+
         Returns
         -------
         out       : tf.Tensor of shape (batch_size, ..., num_models)
@@ -991,7 +1004,7 @@ class AmortizedModelComparison(tf.keras.Model):
         return loss
 
     def _compute_summary_condition(self, summary_conditions, direct_conditions, **kwargs):
-        """Determines how to concatenate the provided conditions."""
+        """Helper method to determines how to concatenate the provided conditions."""
 
         # Compute learnable summaries, if given
         if self.summary_net is not None:
