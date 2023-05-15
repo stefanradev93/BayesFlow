@@ -40,7 +40,7 @@ Minor
 
 Features:
 1. Added option for ``permutation='learnable'`` when creating an ``InvertibleNetwork``
-2. Added option for ``coupling_design='spline'`` when creating an ``InvertibleNetwork``
+2. Added option for ``coupling_design in ["spline", "interleaved"]`` when creating an ``InvertibleNetwork``
 3. Simplified passing additional settings to the internal networks. For instance, you
 can now simply do
 ``inference_network = InvertibleNetwork(num_params=20, coupling_net_settings={'mc_dropout': True})``
