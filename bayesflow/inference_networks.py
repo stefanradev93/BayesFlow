@@ -183,21 +183,29 @@ class InvertibleNetwork(tf.keras.Model):
         # Add noise to target if using SoftFlow, use explicitly
         # not in call(), since methods are public
         if self.soft_flow and condition is not None:
+            # Extract shapes of tensors
+            target_shape = tf.shape(targets)
+            condition_shape = tf.shape(condition)
+
             # Needs to be concatinable with condition
-            shape_scale = (
-                (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
-            )
+            if len(condition_shape) == 2:
+                shape_scale = (condition_shape[0], 1)
+            else:
+                shape_scale = (condition_shape[0], condition_shape[1], 1)
+
             # Case training mode
             if kwargs.get("training"):
                 noise_scale = tf.random.uniform(shape=shape_scale, minval=self.soft_low, maxval=self.soft_high)
             # Case inference mode
             else:
                 noise_scale = tf.zeros(shape=shape_scale) + self.soft_low
+
             # Perturb data with noise (will broadcast to all dimensions)
-            if len(shape_scale) == 2 and len(targets.shape) == 3:
-                targets += tf.expand_dims(noise_scale, axis=1) * tf.random.normal(shape=targets.shape)
+            if len(shape_scale) == 2 and len(target_shape) == 3:
+                targets += tf.expand_dims(noise_scale, axis=1) * tf.random.normal(shape=target_shape)
             else:
-                targets += noise_scale * tf.random.normal(shape=targets.shape)
+                targets += noise_scale * tf.random.normal(shape=target_shape)
+
             # Augment condition with noise scale variate
             condition = tf.concat((condition, noise_scale), axis=-1)
 
