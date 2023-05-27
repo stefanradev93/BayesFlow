@@ -19,6 +19,7 @@
 # SOFTWARE.
 
 import tensorflow as tf
+from numpy import e as EULER_CONST
 from numpy import pi as PI_CONST
 
 from bayesflow import default_settings
@@ -52,13 +53,13 @@ class AffineCoupling(tf.keras.Model):
         settings_dict : dict
             The settings for the inner networks. Defaults will use:
             ``settings_dict={
-                "dense_args"    : dict(units=128, kernel_initializer="glorot_uniform", activation="tanh"),
+                "dense_args"    : dict(units=128, activation="relu"),
                 "num_dense"     : 2,
                 "spec_norm"     : False,
                 "mc_dropout"    : False,
                 "dropout"       : True,
                 "residual"      : False,
-                "dropout_prob"  : 0.05,
+                "dropout_prob"  : 0.01,
                 "soft_clamping" : 1.9
             }
             ``
@@ -192,15 +193,15 @@ class SplineCoupling(tf.keras.Model):
         settings_dict : dict
             The settings for the inner networks. Defaults will use:
             ``settings_dict={
-                "dense_args"     : dict(units=128, activation="tanh"),
+                "dense_args"     : dict(units=128, activation="relu"),
                 "num_dense"      : 2,
                 "spec_norm"      : False,
                 "mc_dropout"     : False,
                 "dropout"        : True,
                 "residual"       : False,
                 "dropout_prob"   : 0.05,
-                "bins"           : 10,
-                "default_domain" : (-10., 10., -10., 10.)
+                "bins"           : 16,
+                "default_domain" : (-5., 5., -5., 5.)
             }
             ``
         """
@@ -479,7 +480,7 @@ class SplineCoupling(tf.keras.Model):
         heights = tf.math.softplus(heights + yshift)
 
         # Compute spline derivatives
-        shift = tf.math.log(tf.math.exp(1.0) - 1.0)
+        shift = tf.math.log(EULER_CONST - 1.0)
         derivatives = tf.nn.softplus(derivatives + shift)
 
         # Add in edge derivatives
