@@ -27,6 +27,71 @@ from bayesflow.default_settings import MMD_BANDWIDTH_LIST
 from bayesflow.exceptions import ShapeError
 
 
+def posterior_calibration_error(
+    posterior_samples,
+    prior_samples,
+    alpha_resolution=20,
+    aggregator_fun=np.median,
+    min_quantile=0.005,
+    max_quantile=0.995,
+):
+    """Computes an aggregate score for the marginal calibration error over an ensemble of approximate
+    posteriors. The calibration error is given as the aggregate (e.g., median) of the absolute deviation
+    between an alpha-CI and the relative number of inliers from ``prior_samples`` over multiple alphas in
+    (0, 1).
+
+    Note: The function will use posterior quantiles for determining the credibility intervals. An alternative
+    definition of the calibration error is possible using highest density intervals (HDIs).
+
+    Parameters
+    ----------
+    posterior_samples  : np.ndarray of shape (num_datasets, num_draws, num_params)
+        The random draws from the approximate posteriors over ``num_datasets``
+    prior_samples      : np.ndarray of shape (num_datasets, num_params)
+        The corresponding ground-truth values sampled from the prior
+    alpha_resolution   : int, optional, default: 100
+        The number of credibility intervals (CIs) to consider
+    aggregator_fun     : callable or None, optional, default: np.median
+        The function used to aggregate the marginal calibration errors.
+        If ``None`` provided, the per-alpha calibration errors will be returned.
+    min_quantile     : float in (0, 1), optional, default: 0.005
+        The minimum posterior quantile to consider
+    max_quantile     : float in (0, 1), optional, default: 0.995
+        The maximum posterior quantile to consider
+
+    Returns:
+    --------
+    calibration_errors : np.ndarray of shape (num_params, ) or (alpha_resolution, num_params),
+        if ``aggregator_fun is None``.
+        The aggregated calibration error per marginal posterior.
+    """
+
+    num_params = prior_samples.shape[1]
+    alphas = np.linspace(min_quantile, max_quantile, alpha_resolution)
+    absolute_errors = np.zeros((alpha_resolution, num_params))
+
+    for i, alpha in enumerate(alphas):
+        # Find lower and upper bounds of posterior distribution
+        region = 1 - alpha
+        lower = region / 2
+        upper = 1 - (region / 2)
+
+        # Compute percentiles for given alpha using the entire posterior sample
+        quantiles = np.quantile(posterior_samples, [lower, upper], axis=1)
+
+        # Compute the relative number of inliers
+        higher_mask = quantiles[0] <= prior_samples
+        lower_mask = prior_samples <= quantiles[1]
+        inlier_id = np.logical_and(higher_mask, lower_mask)
+        alpha_pred = np.mean(inlier_id, axis=0)
+        absolute_errors[i] = np.abs(alpha_pred - alpha)
+
+    if aggregator_fun is not None:
+        calibration_errors = aggregator_fun(absolute_errors, axis=0)
+        return calibration_errors
+    return absolute_errors
+
+
 def compute_jacobian_trace(function, inputs, **kwargs):
     """Computes the exact Jacobian Trace of function with respect to inputs. Suitable for low dimensions (<32)
 
@@ -320,6 +385,7 @@ def simultaneous_ecdf_bands(
         to avoid edge artefacts. No need to touch this.
     max_num_points  : int, optional, default: 1000
         Upper bound on `num_points`. Saves computation time when `num_samples` is large.
+
     Returns
     -------
     (alpha, z, L, U) - tuple of scalar and three arrays of size (num_samples,) containing the confidence level as well as
@@ -356,12 +422,20 @@ def simultaneous_ecdf_bands(
 def mean_squared_error(x_true, x_pred):
     """Computes the mean squared error between a single true value and M estimates thereof.
 
-    x_true      : np.ndarray
-    true values, shape ()
+    Parameters
+    ----------
 
+    x_true      : float or np.ndarray
+        true values, shape ()
     x_pred      : np.ndarray
-    predicted values, shape (M, )
+        predicted values, shape (M, )
+
+    Returns
+    -------
+    out : float
+        The MSE between ``x_true`` and ``x_pred``
     """
+
     x_true = np.array(x_true)
     x_pred = np.array(x_pred)
     try:
@@ -371,12 +445,20 @@ def mean_squared_error(x_true, x_pred):
 
 
 def root_mean_squared_error(x_true, x_pred):
-    """Computes the mean squared error between a single true value and M estimates thereof.
-    x_true      : np.ndarray
-    true values, shape ()
+    """Computes the root mean squared error (RMSE) between a single true value and M estimates thereof.
 
+    Parameters
+    ----------
+
+    x_true      : float or np.ndarray
+        true values, shape ()
     x_pred      : np.ndarray
-    predicted values, shape (M, )
+        predicted values, shape (M, )
+
+    Returns
+    -------
+    out : float
+        The RMSE between ``x_true`` and ``x_pred``
     """
 
     mse = mean_squared_error(x_true=x_true, x_pred=x_pred)
@@ -428,10 +510,8 @@ def aggregated_rmse(x_true, x_pred):
     Returns
     -------
     aggregated RMSE
-
     """
 
-    return aggregated_error(x_true=x_true,
-                            x_pred=x_pred,
-                            inner_error_fun=root_mean_squared_error,
-                            outer_aggregation_fun=np.mean)
+    return aggregated_error(
+        x_true=x_true, x_pred=x_pred, inner_error_fun=root_mean_squared_error, outer_aggregation_fun=np.mean
+    )
