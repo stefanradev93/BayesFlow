@@ -28,7 +28,8 @@ from bayesflow.exceptions import ConfigurationError, ShapeError
 
 
 def check_tensor_sanity(tensor, logger):
-    """Tests for the present of NaNs and Infs in a tensor."""
+    """Tests for the presence of NaNs and Infs in a tensor."""
+
     if tf.executing_eagerly():
         if tf.reduce_any(tf.math.is_nan(tensor)):
             num_na = tf.reduce_sum(tf.cast(tf.math.is_nan(tensor), tf.int8)).numpy()

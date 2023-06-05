@@ -95,6 +95,9 @@ class SimulationDataset:
             forward_dict[key_none] = None
         return forward_dict
 
+    def __len__(self):
+        return len(self.data)
+
     def __iter__(self):
         return map(self, self.data)
 
