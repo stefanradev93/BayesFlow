@@ -44,9 +44,9 @@ def prior(lower_bound=-10.0, upper_bound=10.0, D=2, rng=None):
     upper_bound : float, optional, default : 10
         The upper bound of the uniform prior.
     D           : int, optional, default: 2
-        The dimensionality of the mixtrue model
+        The dimensionality of the mixture model
     rng         : np.random.Generator or None, default: None
-        An optional random number generator to use.
+        An optional random number generator to use
 
     Returns
     -------
