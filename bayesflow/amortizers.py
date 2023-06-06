@@ -1174,7 +1174,7 @@ class TwoLevelAmortizedPosterior(tf.keras.Model, AmortizedTarget):
         local_summaries, global_summaries = self._get_local_global(input_dict, **kwargs)
 
         # At this point, add globals as conditions
-        num_locals = local_summaries.shape[1]
+        num_locals = tf.shape(local_summaries)[1]
 
         # Add hyper parameters as conditions:
         # p(local_n | data_n, hyper)
