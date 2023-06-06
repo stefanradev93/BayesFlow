@@ -40,7 +40,7 @@ Minor
 
 Features:
 1. Added option for ``permutation='learnable'`` when creating an ``InvertibleNetwork``
-2. Added option for ``coupling_design in ["spline", "interleaved"]`` when creating an ``InvertibleNetwork``
+2. Added option for ``coupling_design in ["affine", "spline", "interleaved"]`` when creating an ``InvertibleNetwork``
 3. Simplified passing additional settings to the internal networks. For instance, you
 can now simply do
 ``inference_network = InvertibleNetwork(num_params=20, coupling_net_settings={'mc_dropout': True})``
@@ -52,10 +52,11 @@ https://arxiv.org/abs/2301.11873
 added to ``diagnostics.py`` and is accessible as ``plot_calibration_curves()``
 7. A new module ``experimental`` has been added currently containing ``rectifiers.py``.
 8. Default settings for transformer-based architectures.
+9. Numerical calibration error using ``posterior_calibration_error()``
 
 General Improvements:
 1. Improved docstrings and consistent use of keyword arguments vs. configuration dictionaries
 2. Increased focus on transformer-based architectures as summary networks
 3. Figures resulting ``diagnostics.py`` have been improved and prettified
 4. Added a module ``sensitivity.py`` for testing the sensitivity of neural approximators to model misspecification
-5. Multiple bugfixes
+5. Multiple bugfixes, including a major bug affecting the saving and loading of learnable permutations
