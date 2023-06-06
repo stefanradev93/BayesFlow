@@ -1180,13 +1180,16 @@ class TwoLevelAmortizedPosterior(tf.keras.Model, AmortizedTarget):
         # p(local_n | data_n, hyper)
         if input_dict.get("hyper_parameters") is not None:
             _params = input_dict.get("hyper_parameters")
-            _conds = tf.stack([_params] * num_locals, axis=1)
+            _params = tf.expand_dims(_params, 1)
+            _conds = tf.tile(_params, [1, num_locals, 1])
             local_summaries = tf.concat([local_summaries, _conds], axis=-1)
+
         # Add shared parameters as conditions:
         # p(local_n | data_n, hyper, shared)
         if input_dict.get("shared_parameters") is not None:
             _params = input_dict.get("shared_parameters")
-            _conds = tf.stack([_params] * num_locals, axis=1)
+            _params = tf.expand_dims(_params, 1)
+            _conds = tf.tile(_params, [1, num_locals, 1])
             local_summaries = tf.concat([local_summaries, _conds], axis=-1)
         return local_summaries, global_summaries
 
