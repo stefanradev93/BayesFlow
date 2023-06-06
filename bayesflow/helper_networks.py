@@ -198,7 +198,9 @@ class Orthogonal(tf.keras.Model):
         super().__init__()
 
         init = tf.keras.initializers.Orthogonal()
-        self.W = init(shape=(input_dim, input_dim))
+        self.W = tf.Variable(
+            initial_value=init(shape=(input_dim, input_dim)), trainable=True, dtype=tf.float32, name="learnable_permute"
+        )
 
     def call(self, target, inverse=False):
         """Transforms a batch of target vectors over the last axis through an approximately
