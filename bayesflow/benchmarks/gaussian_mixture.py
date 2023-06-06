@@ -20,8 +20,7 @@
 
 # Corresponds to Task T.7 from the paper https://arxiv.org/pdf/2101.04653.pdf
 # NOTE: The paper description uses variances insteas of scales for the likelihood
-# but the implementation uses scales. Our implmenetation also uses scales for
-# consistency with https://github.com/sbi-benchmark/sbibm/blob/main/sbibm/tasks/gaussian_mixture/task.py
+# but the implementation uses scales. Our implmenetation uses variances
 
 import numpy as np
 
@@ -40,9 +39,9 @@ def prior(lower_bound=-10.0, upper_bound=10.0, D=2, rng=None):
     Parameters
     ----------
     lower_bound : float, optional, default : -10
-        The lower bound of the uniform prior.
+        The lower bound of the uniform prior
     upper_bound : float, optional, default : 10
-        The upper bound of the uniform prior.
+        The upper bound of the uniform prior
     D           : int, optional, default: 2
         The dimensionality of the mixture model
     rng         : np.random.Generator or None, default: None
@@ -51,7 +50,7 @@ def prior(lower_bound=-10.0, upper_bound=10.0, D=2, rng=None):
     Returns
     -------
     theta : np.ndarray of shape (D, )
-        A single draw from the D-dimensional uniform prior.
+        A single draw from the D-dimensional uniform prior
     """
 
     if rng is None:
@@ -59,11 +58,14 @@ def prior(lower_bound=-10.0, upper_bound=10.0, D=2, rng=None):
     return rng.uniform(low=lower_bound, high=upper_bound, size=D)
 
 
-def simulator(theta, prob=0.5, scale_c1=1.0, scale_c2=0.01, rng=None):
+def simulator(theta, prob=0.5, scale_c1=1.0, scale_c2=0.1, rng=None):
     """Simulates data from the Gaussian mixture model (GMM) with
     shared location vector. For more details, see
 
     https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.7
+
+    Important: The parameterization uses scales, so use sqrt(var),
+    if you want to be working with variances instead of scales.
 
     Parameters
     ----------
@@ -72,11 +74,11 @@ def simulator(theta, prob=0.5, scale_c1=1.0, scale_c2=0.01, rng=None):
     prob     : float, optional, default: 0.5
         The mixture probability (coefficient).
     scale_c1 : float, optional, default: 1.
-        The scale of the first component.
-    scale_c2 : float, optional, default: 0.01
-        The scale of the second component.
+        The scale of the first component
+    scale_c2 : float, optional, default: 0.1
+        The scale of the second component
     rng      : np.random.Generator or None, default: None
-        An optional random number generator to use.
+        An optional random number generator to use
 
     Returns
     -------
