@@ -35,10 +35,11 @@ from bayesflow.amortizers import (
     AmortizedPosterior,
     AmortizedPosteriorLikelihood,
 )
+from bayesflow.computational_utilities import maximum_mean_discrepancy
 from bayesflow.configuration import *
 from bayesflow.default_settings import DEFAULT_KEYS, OPTIMIZER_DEFAULTS
 from bayesflow.diagnostics import plot_latent_space_2d, plot_sbc_histograms
-from bayesflow.exceptions import SimulationError, ArgumentError
+from bayesflow.exceptions import ArgumentError, SimulationError
 from bayesflow.helper_classes import (
     EarlyStopper,
     LossHistory,
@@ -49,7 +50,6 @@ from bayesflow.helper_classes import (
 )
 from bayesflow.helper_functions import backprop_step, extract_current_lr, format_loss_string, loss_to_string
 from bayesflow.simulation import GenerativeModel, MultiGenerativeModel
-from bayesflow.computational_utilities import maximum_mean_discrepancy
 
 
 class Trainer:
@@ -116,7 +116,7 @@ class Trainer:
         max_to_keep=3,
         default_lr=0.0005,
         skip_checks=False,
-        memory=True,
+        memory=False,
         **kwargs,
     ):
         """Creates a trainer which will use a generative model (or data simulated from it) to optimize
@@ -139,7 +139,7 @@ class Trainer:
             The default learning rate to use for default optimizers.
         skip_checks       : bool, optional, default: False
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
-        memory            : bool or bayesflow.SimulationMemory, optional, default: True
+        memory            : bool or bayesflow.SimulationMemory, optional, default: False
             If ``True``, store a pre-defined amount of simulations for later use (validation, etc.).
             If ``SimulationMemory`` instance provided, stores a reference to the instance.
             Otherwise the corresponding attribute will be set to None.
@@ -1010,12 +1010,9 @@ class Trainer:
             self.optimizer = None
         return self.loss_history.get_plottable()
 
-    def mmd_hypothesis_test(self,
-                            observed_data,
-                            reference_data=None,
-                            num_reference_simulations=1000,
-                            num_null_samples=100,
-                            bootstrap=False):
+    def mmd_hypothesis_test(
+        self, observed_data, reference_data=None, num_reference_simulations=1000, num_null_samples=100, bootstrap=False
+    ):
         """
 
         Parameters
@@ -1048,12 +1045,12 @@ class Trainer:
 
             reference_data = self.configurator(self.generative_model(num_reference_simulations))
 
-        if type(reference_data) == dict and 'summary_conditions' in reference_data.keys():
+        if type(reference_data) == dict and "summary_conditions" in reference_data.keys():
             reference_summary = self.amortizer.summary_net(reference_data["summary_conditions"])
         else:
             reference_summary = self.amortizer.summary_net(reference_data)
 
-        if type(observed_data) == dict and 'summary_conditions' in observed_data.keys():
+        if type(observed_data) == dict and "summary_conditions" in observed_data.keys():
             observed_summary = self.amortizer.summary_net(observed_data["summary_conditions"])
         else:
             observed_summary = self.amortizer.summary_net(observed_data)
