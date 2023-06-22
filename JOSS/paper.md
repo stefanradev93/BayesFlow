@@ -102,6 +102,6 @@ When it comes to amortized inference with neural networks, the `sbi` toolkit ena
 
 # Acknowledgments
 
-We acknowledge contributions from Ulf Mertens, Marco D'Alessandro, René Bucchia, The-Gia Leo Nguyen, Jonas Arruda, Lea Zimmermann, and Leonhard Volz for contributing to the GitHub repository. STR was funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy -– EXC-2181 - 390900948 (the Heidelberg Cluster of Excellence STRUCTURES), MS and PCB were supported by the Cyber Valley Research Fund (grant number: CyVy-RF-2021-16) and the DFG EXC-2075 - 390740016 (the Stuttgart Cluster of Excellence SimTech). YS acknowledges support by the Joachim Herz Foundation. UK was supported by the Informatics for Life intiative funded by the Klaus Tschira Foundation.
+We thank Ulf Mertens, Marco D'Alessandro, René Bucchia, The-Gia Leo Nguyen, Jonas Arruda, Lea Zimmermann, and Leonhard Volz for contributing to the GitHub repository. STR was funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy -– EXC-2181 - 390900948 (the Heidelberg Cluster of Excellence STRUCTURES), MS and PCB were supported by the Cyber Valley Research Fund (grant number: CyVy-RF-2021-16) and the DFG EXC-2075 - 390740016 (the Stuttgart Cluster of Excellence SimTech). YS acknowledges support by the Joachim Herz Foundation. UK was supported by the Informatics for Life intiative funded by the Klaus Tschira Foundation.
 
 # References
