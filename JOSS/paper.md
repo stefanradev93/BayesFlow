@@ -1,14 +1,12 @@
 ---
 title: "BayesFlow: Amortized Bayesian Workflows With Neural Networks"
 tags:
-  - "simulation-based inference"
-  - "likelihood-free inference"
+  - simulation-based inference
+  - likelihood-free inference
   - Bayesian inference
+  - amortized Bayesian inference
   - Python
-date: "05 June 2023"
-output:
-  html_document:
-  df_print: paged
+date: "22 June 2023"
 authors:
   - name: Stefan T. Radev
     orcid: "0000-0002-6702-9559"
@@ -19,19 +17,20 @@ authors:
     orcid: "0000-0002-7967-4723"
     equal-contrib: true
     affiliation: 2
-  - name: Valentin Pratz
-    affiliation: 3
-  - name: Yannik Schälte
-    affiliation: 4
     orcid: "0000-0003-1293-820X"
   - name: Lukas Schumacher
-    affiliation: 5
+    affiliation: 3
     orcid: "0000-0003-1512-8288"
   - name: Lasse Elsemüller
-    affiliation: 5
-    orcid: "0000-0003-0368-720X"
-  - name: Ullrich Köthe
     affiliation: 3
+    orcid: "0000-0003-0368-720X"
+  - name: Valentin Pratz
+    affiliation: 4
+  - name: Yannik Schälte
+    affiliation: 5
+    orcid: "0000-0003-1293-820X"
+  - name: Ullrich Köthe
+    affiliation: 4
     orcid: "0000-0001-6036-1287"
     equal-contrib: true
   - name: Paul-Christian Bürkner
@@ -44,22 +43,22 @@ affiliations:
     index: 1
   - name: Cluster of Excellence SimTech, University of Stuttgart, Germany
     index: 2
-  - name: Visual Learning Lab, Heidelberg University, Germany
-    index: 3
-  - name: Life and Medical Sciences (LIMES) Institute, University of Bonn, Germany
-    index: 4
   - name: Institute for Psychology, Heidelberg University, Germany
+    index: 3
+  - name: Visual Learning Lab, Heidelberg University, Germany
+    index: 4
+  - name: Life and Medical Sciences Institute, University of Bonn, Germany
     index: 5
   - name: Department of Statistics, TU Dortmund University, Germany
     index: 6
 ---
 
 # Summary
-Modern Bayesian inference involves a mixture of computational techniques for estimating, validating, and drawing conclusions from probabilistic models as part of principled workflows for data analysis [@burkner_models_2022; @gelman_bayesian_2020; @schad2021toward].  Typical problems in Bayesian workflows are the approximation of intractable posterior distributions for diverse model types and the comparison of competing models of the same process in terms of their predictive or generative performance. However, despite their theoretical appeal and utility, the practical execution of Bayesian workflows is often limited by computational bottlenecks: Obtaining even a single posterior may already take a long time, such that repeated estimation for the purpose of model validation or calibration becomes completely unfeasible.
+Modern Bayesian inference involves a mixture of computational techniques for estimating, validating, and drawing conclusions from probabilistic models as part of principled workflows for data analysis [@burkner_models_2022; @gelman_bayesian_2020; @schad2021toward]. Typical problems in Bayesian workflows are the approximation of intractable posterior distributions for diverse model types and the comparison of competing models of the same process in terms of their complexity and predictive performance. However, despite their theoretical appeal and utility, the practical execution of Bayesian workflows is often limited by computational bottlenecks: Obtaining even a single posterior may already take a long time, such that repeated estimation for the purpose of model validation or calibration becomes completely infeasible.
 
 Our `BayesFlow` software brings *amortized Bayesian inference* (ABI) into the scope of Bayesian workflows by enabling users to train custom-tailored neural networks on model simulations and re-use these networks for any subsequent application of the model. Thus, ABI unlocks the potential of powerful tools for estimation, validation, and comparison of complex models (e.g., models with intractable likelihoods or time-varying parameters) that are often out of reach for standard methods. For instance, testing a model's ability to recover its parameters [@schad2021toward] or validating computational fidelity via calibration methods [@talts2018; @sailynoja2022graphical] may necessitate the estimation of thousands of posterior distributions. This can take days on a compute cluster, but is nearly instantaneous in the context of ABI.
 
-To this end, `BayesFlow` incorporates *simulation-based* training of established neural network architectures, such as transformers [@vaswani2017attention] and normalizing flows [@rezende2015normalizing; @papamakarios2021normalizing] for data compression and inference. The guiding motif behind the design of `BayesFlow` is to abstract away technical details that are not necessarily relevant for practical applications, while providing robust default settings that work well across applications and require minimal need for manual tuning by the user. At the same time, `BayesFlow` implements a modular software architecture, allowing machine learning scientists to modify every component of the pipeline for cutting-edge academic research at the frontier of simulation-based inference.
+To this end, `BayesFlow` incorporates *simulation-based* training of established neural network architectures, such as transformers [@vaswani2017attention] and normalizing flows [@rezende2015normalizing; @papamakarios2021normalizing] for data compression and inference. The guiding motif behind the design of `BayesFlow` is to abstract away technical details that are not necessarily relevant for practical applications, while providing robust default settings that work well across applications and require minimal need for manual tuning by the user. At the same time, `BayesFlow` implements a modular software architecture, allowing machine learning scientists to modify every component of the pipeline for academic research at the frontier of Bayesian inference.
 
 ![`BayesFlow` defines a formal workflow for data generation, neural approximation, and model criticism.\label{fig:figure1}](bayesflow_software_figure1.pdf)
 
@@ -86,7 +85,7 @@ Currently, the software features four key capabilities for enhancing Bayesian wo
 When a non-amortized inference procedure does not create a computational bottleneck, approximate Bayesian computation (ABC) might be an appropriate tool. This is the case when a single data set needs to be analyzed, when an infrastructure for parallel computing is readily available, or when repeated re-fits of a model (e.g., cross validation) are not desired.
 A variety of mature Python packages for ABC exist, such as PyMC [@Salvatier2016], pyABC [@schaelte2022pyabc], or ELFI [@lintusaari2018elfi]. In contrast to these packages, `BayesFlow` focuses on amortized inference, but can also interact with ABC samplers (e.g., using pre-trained summary networks for learned summary statistics in ABC).
 
-When it comes to amortized inference with neural networks, the `sbi` toolkit enables both likelihood and posterior estimation using different inference algorithms, such as Sequential Neural Posterior Estimation [@greenberg2019automatic] and Sequential Neural Likelihood Estimation [@papamakarios2019sequential]. The `Swyft` library focuses on Bayesian parameter inference in physics and astronomy. `Swyft` uses a specific type of simulation-based neural inference techniques, namely, Truncated Marginal Neural Ratio Estimation [@miller2021truncated]. This method improves on standard Markov chain Monte Carlo (MCMC) methods for ABC by learning the likelihood-to-evidence ratio with neural density estimators. Finally, the `Lampe` library provides implementations for a subset of the methods for posterior estimation in the `sbi` library. `Lampe` aims to expose all components (e.g., network architectures, optimizers) in order to provide a flexible and customizable interface for creating neural approximators. All of these libraries are built on top of `PyTorch`.
+When it comes to amortized inference with neural networks, the `sbi` toolkit enables both likelihood and posterior estimation using different inference algorithms, such as Sequential Neural Posterior Estimation [@greenberg2019automatic] and Sequential Neural Likelihood Estimation [@papamakarios2019sequential]. The `Swyft` library focuses on Bayesian parameter inference in physics and astronomy. `Swyft` uses a specific type of simulation-based neural inference techniques, namely, Truncated Marginal Neural Ratio Estimation [@miller2021truncated]. This method improves on standard Markov chain Monte Carlo (MCMC) methods for ABC by learning the likelihood-to-evidence ratio with neural density estimators. Finally, the `Lampe` library provides implementations for a subset of the methods for posterior estimation in the `sbi` library, aiming to expose all components (e.g., network architectures, optimizers) in order to provide a customizable interface for creating neural approximators. All of these libraries are built on top of `PyTorch`.
 
 # Availability, Development, and Documentation
 
@@ -103,6 +102,6 @@ When it comes to amortized inference with neural networks, the `sbi` toolkit ena
 
 # Acknowledgments
 
-We acknowledge contributions from Ulf Mertens and Marco D'Alessandro. The work was partially funded by the Cyber Valley Research Fund (grant number: CyVy-RF-2021-16) and the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy -– EXC-2181 - 390900948 (the Heidelberg Cluster of Excellence STRUCTURES) and EXC-2075 - 390740016 (the Stuttgart Cluster of Excellence SimTech).
+We acknowledge contributions from Ulf Mertens, Marco D'Alessandro, René Bucchia, The-Gia Leo Nguyen, Jonas Arruda, Lea Zimmermann, and Leonhard Volz for contributing to the GitHub repository. STR was funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy -– EXC-2181 - 390900948 (the Heidelberg Cluster of Excellence STRUCTURES), MS and PCB were supported by the Cyber Valley Research Fund (grant number: CyVy-RF-2021-16) and the DFG EXC-2075 - 390740016 (the Stuttgart Cluster of Excellence SimTech). YS acknowledges support by the Joachim Herz Foundation. UK was supported by the Informatics for Life intiative funded by the Klaus Tschira Foundation.
 
 # References
