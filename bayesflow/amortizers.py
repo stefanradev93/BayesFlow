@@ -1107,12 +1107,12 @@ class TwoLevelAmortizedPosterior(tf.keras.Model, AmortizedTarget):
         --------
         samples_dict : dict
             A dictionary with keys `global_samples` and `local_samples`
-            Global samples will hold an array-like of shape (num_samples, num_replicas, num_local)
+            Local samples will hold an array-like of shape (num_replicas, num_samples, num_local)
             and local samples will hold an array-like of shape (num_samples, num_hyper + num_shared),
             if optional shared patameters are present, otherwise (num_samples, num_hyper),
         """
 
-        # Returned shapes will be
+        # Returned shapes will be :
         # local_summaries.shape = (1, num_groups, summary_dim_local)
         # global_summaries.shape = (1, summary_dim_global)
         local_summaries, global_summaries = self._get_local_global(input_dict, **kwargs)
