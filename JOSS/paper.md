@@ -61,11 +61,11 @@ Our `BayesFlow` software brings *amortized Bayesian inference* (ABI) into the sc
 
 To this end, `BayesFlow` incorporates *simulation-based* training of established neural network architectures, such as transformers [@vaswani2017attention] and normalizing flows [@rezende2015normalizing; @papamakarios2021normalizing] for data compression and inference. The guiding motif behind the design of `BayesFlow` is to abstract away technical details that are not necessarily relevant for practical applications, while providing robust default settings that work well across applications and require minimal need for manual tuning by the user. At the same time, `BayesFlow` implements a modular software architecture, allowing machine learning scientists to modify every component of the pipeline for cutting-edge academic research at the frontier of simulation-based inference.
 
+![`BayesFlow` defines a formal workflow for data generation, neural approximation, and model criticism.\label{fig:figure1}](bayesflow_software_figure1.pdf)
+
 # Statement of Need
 
 `BayesFlow` features functionality specifically designed for building and validating amortized Bayesian workflows with the help of neural networks. It is built on top of `TensorFlow` [@abadi2016tensorflow] and thereby enables off-the-shelf support for GPU and TPU acceleration. Furthermore, it can seamlessly interact with TensorFlow Probability [@dillon2017tensorflow] for flexible latent distributions and a variety of joint priors.
-
-![`BayesFlow` defines a formal workflow for data generation, neural approximation, and model criticism.\label{fig:figure1}](https://hackmd.io/_uploads/rJXliqZO2.png)
 
 \autoref{fig:figure1} outlines a typical workflow in the context of amortized posterior and likelihood estimation. A simulator coupled with a prior defines a generative Bayesian model which may depend on various (optional) context variates (e.g., varying numbers of observations, design matrices, positional encodings, etc.). The generative scope of the model, together with the range of context variables, determine the *scope of amortization*, that is, over which types of data the neural approximator(s) can be applied without re-training. The neural approximators interact with model outputs (parameters, data) and context variates through a configurator, which is responsible for carrying out transformations (e.g., input normalization, double-to-float conversion, etc.) that are not part of the model but may facilitate neural network training and convergence. 
 
