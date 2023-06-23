@@ -26,6 +26,7 @@ authors:
     orcid: "0000-0003-0368-720X"
   - name: Valentin Pratz
     affiliation: 4
+    orcid: "0000-0001-8371-3417"
   - name: Yannik Schälte
     affiliation: 5
     orcid: "0000-0003-1293-820X"
