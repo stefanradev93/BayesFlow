@@ -35,7 +35,9 @@ goto end
 
 :github
 mkdir source\_examples
+xcopy /y /s ..\INSTALL.rst source\isntallation.rst
 xcopy /y /s ..\examples source\_examples
+rmdir /q /s source\_examples\in_progress
 %SPHINXBUILD% -M html %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 xcopy /y /s "%BUILDDIR%\html" ..\docs
 xcopy /y .nojekyll ..\docs\.nojekyll

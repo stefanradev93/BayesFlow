@@ -82,7 +82,7 @@ html_title = "BayesFlow: Amortized Bayesian Inference"
 # Add any paths that contain custom _static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin _static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["css/custom.css"]
+# html_static_path = ["css/custom.css"]
 html_show_sourcelink = False
 html_theme_options = {
     "repository_url": "https://github.com/stefanradev93/BayesFlow",
