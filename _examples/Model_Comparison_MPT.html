@@ -1,0 +1,1132 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>6. Model Comparison for Cognitive Models &#8212; BayesFlow: Amortized Bayesian Inference</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_examples/Model_Comparison_MPT';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/_examples/Model_Comparison_MPT.html" />
+    <link rel="shortcut icon" href="../_static/bayesflow_hex.ico"/>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="7. Hierarchical Model Comparison for Cognitive Models" href="Hierarchical_Model_Comparison_MPT.html" />
+    <link rel="prev" title="5. Posterior Estimation for SIR-like Models" href="Covid19_Initial_Posterior_Estimation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">6. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../documentation.html">Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../api/advanced_documentation.html">Advanced documentation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../api/bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.losses.html">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Full Installation Instructions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About us</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/edit/master/_examples/Model_Comparison_MPT.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2F_examples/Model_Comparison_MPT.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/_examples/Model_Comparison_MPT.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Model Comparison for Cognitive Models</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">6.1. Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">6.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#priors">6.2.1. Priors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-simulators">6.2.2. Creating Simulators</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">6.2.3. Prior Predictive Checks</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-neural-approximator">6.3. Defining the Neural Approximator</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-configurator">6.3.1. Defining the Configurator</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-trainer">6.3.2. Defining the Trainer</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-phase">6.4. Training Phase</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-validation">6.5. Network Validation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">6.6. Network Application</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="model-comparison-for-cognitive-models">
+<h1><span class="section-number">6. </span>Model Comparison for Cognitive Models<a class="headerlink" href="#model-comparison-for-cognitive-models" title="Permalink to this heading">#</a></h1>
+<p>Part 1: Non-Hierarchical Model Comparison.</p>
+<p>by Lasse Elsemüller</p>
+<h1>Table of Contents<span class="tocSkip"></span></h1>
+<div class="toc"><ul class="toc-item"><li><span><a href="#Generative-Model-Definition" data-toc-modified-id="Generative-Model-Definition-1">Generative Model Definition</a></span></li><li><span><a href="#Priors" data-toc-modified-id="Priors-2">Priors</a></span></li><li><span><a href="#Creating-Simulators" data-toc-modified-id="Creating-Simulators-3">Creating Simulators</a></span></li><li><span><a href="#Prior-Predictive-Checks" data-toc-modified-id="Prior-Predictive-Checks-4">Prior Predictive Checks</a></span></li><li><span><a href="#Defining-the-Neural-Approximator" data-toc-modified-id="Defining-the-Neural-Approximator-5">Defining the Neural Approximator</a></span></li><li><span><a href="#Defining-the-Configurator" data-toc-modified-id="Defining-the-Configurator-6">Defining the Configurator</a></span></li><li><span><a href="#Defining-the-Trainer" data-toc-modified-id="Defining-the-Trainer-7">Defining the Trainer</a></span></li><li><span><a href="#Training-Phase" data-toc-modified-id="Training-Phase-8">Training Phase</a></span></li><li><span><a href="#Network-Validation" data-toc-modified-id="Network-Validation-9">Network Validation</a></span></li><li><span><a href="#Network-Application" data-toc-modified-id="Network-Application-10">Network Application</a></span></li></ul></div><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+
+<span class="kn">import</span> <span class="nn">bayesflow</span> <span class="k">as</span> <span class="nn">bf</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="introduction">
+<h2><span class="section-number">6.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
+<p>This tutorial series contains workflows for comparing competing probabilistic models via posterior model probabilities (PMPs) or Bayes Factors (BFs) with BayesFlow. We start with non-hierarchical model comparison in this tutorial (part 1), while <a class="reference internal" href="Hierarchical_Model_Comparison_MPT.html"><span class="doc std std-doc">part 2</span></a> will look at the modifications that allow us to compare hierarchical models. To keep the content concise, the focus will be on the model comparison steps themselves. For a comprehensive overview of the different functionalities BayesFlow has to offer, see the <a class="reference internal" href="LCA_Model_Posterior_Estimation.html"><span class="doc std std-doc">“Principled Amortized Bayesian Workflow for Cognitive Modeling”</span></a> tutorial notebook.</p>
+</section>
+<section id="generative-model-definition">
+<h2><span class="section-number">6.2. </span>Generative Model Definition<a class="headerlink" href="#generative-model-definition" title="Permalink to this heading">#</a></h2>
+<p>In this tutorial, we will compare simple Multinomial Processing Tree (MPT) models. They are a popular class of stochastic models in cognitive psychology aiming to explain observed categorical decision data by a branched structure of discrete latent processes. We embed the tutorial within the scenario of an old-new-recognition task. In this task, participants memorize a list of stimulus items (e.g., words) and indicate in a subsequent phase whether a presented stimulus was shown before (‘old’ decision) or is a distractor item (‘new’ decision).</p>
+<p>More specifically, we compare two classic MPT models: The basic one-high-threshold (1HT) model and the popular two-high-threshold (2HT) model.</p>
+<p>The 1HT model can be considered as the simplest model formulation: For old items, it assumes that participants either recognize an item or if they do not, guess whether it is old and new. For new items, it assumes that participant directly initiate a guessing process.</p>
+<p>The 2HT model extends the process assumed for new items by proposing a similar process as for new items, such that participants either recognize a stimulus as new directly and only if they do not enter the guessing process. This model frequently explains categorical decision data much better than the 1HT model.</p>
+<p>For further information on MPT models and the 1HT and 2HT instantiations see <a class="reference external" href="https://psycnet.apa.org/record/2009-21670-002">Erdfelder et al. (2009)</a>.</p>
+<p>By traversing the branches of the trees, we obtain the equations for each outcome category. For these equations, we encode ‘old’ items as 1 and ‘new’ items as 0. Further, the first index of the response probabilities indicates the stimulus type and the second the response. Thus, <span class="math notranslate nohighlight">\(p_{11}\)</span> stands for the probability to correctly recognize a previously presented stimulus, while <span class="math notranslate nohighlight">\(p_{01}\)</span> stands for a false alarm (identifying a distractor item as ‘old’).</p>
+<p>In order to make the 2HT model identifiable, we follow the convention of assuming equal probabilities for recognizing old items and identifying new items.</p>
+<a class="reference internal image-reference" href="../_images/1HT2HT.png"><img alt="../_images/1HT2HT.png" src="../_images/1HT2HT.png" style="width: 1000px; height: 500px;" /></a>
+<p>One-high-threshold (1HT) MPT model:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+p_{11} &amp;= d + (1-d)*g \\
+p_{10} &amp;= (1-d)*(1-g) \\
+p_{01} &amp;= g \\
+p_{00} &amp;= (1-g) \\
+x &amp;\sim \textrm{Multinomial}(p_{11}, p_{10}, p_{01}, p_{00})
+\end{align}
+\end{split}\]</div>
+<p>Two-high-threshold (2HT) MPT model:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+p_{11} &amp;= d + (1-d)*g \\
+p_{10} &amp;= (1-d)*(1-g) \\
+p_{01} &amp;= (1-d)*g \\
+p_{00} &amp;= d + (1-d)*(1-g) \\
+x &amp;\sim \textrm{Multinomial}(p_{11}, p_{10}, p_{01}, p_{00})
+\end{align}
+\end{split}\]</div>
+<section id="priors">
+<h3><span class="section-number">6.2.1. </span>Priors<a class="headerlink" href="#priors" title="Permalink to this heading">#</a></h3>
+<p>Our models only have two parameters: <span class="math notranslate nohighlight">\(d\)</span> for recognition and <span class="math notranslate nohighlight">\(g\)</span> for guessing. As both parameters represent probabilities, we choose moderately informative beta priors with 2 for both shape parameters.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">PARAM_NAMES</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s2">&quot;$d$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$g$&quot;</span><span class="p">]</span>
+<span class="n">RNG</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2023</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">prior_fun</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="s2">&quot;Samples a random parameter configuration from the prior distribution.&quot;</span>
+    <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">g</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The BayesFlow <code class="docutils literal notranslate"><span class="pre">Prior</span></code> wrapper provides us further utilities for inspecting our chosen parameter prior:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prior</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Prior</span><span class="p">(</span><span class="n">prior_fun</span><span class="o">=</span><span class="n">prior_fun</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">PARAM_NAMES</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can sample from the constructed prior, with the argument <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> governing the number of draws. For instance, calling the prior with <code class="docutils literal notranslate"><span class="pre">batch_size=5</span></code> will return a dictionary, containing, among others, an entry <code class="docutils literal notranslate"><span class="pre">prior_draws</span></code> which holds 5 random draws from the prior in the form of a <span class="math notranslate nohighlight">\(5 \times 2\)</span> matrix:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prior</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;prior_draws&#39;: array([[0.20412946, 0.57868044],
+        [0.30434277, 0.54419832],
+        [0.32941418, 0.74166574],
+        [0.96095506, 0.57423711],
+        [0.52095118, 0.15191819]]),
+ &#39;batchable_context&#39;: None,
+ &#39;non_batchable_context&#39;: None}
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note, that the prior also returned some other stuff, which allows for more flexible priors (e.g., parametric priors or prior sensitivity analysis). To inspect whether our chosen prior is sensible, we can conduct some prior predictive checks in the parameter space. The simplest one is to simply visualize our prior draws:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">plot_prior2d</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/b443112de1cd97743850163189187470e07082887b2a10529946dafcf39727f7.png" src="../_images/b443112de1cd97743850163189187470e07082887b2a10529946dafcf39727f7.png" />
+</div>
+</div>
+<p>We see that our beta priors symmetrically concentrate the probability mass around .5, but still consider more extreme parameter values possible.</p>
+</section>
+<section id="creating-simulators">
+<h3><span class="section-number">6.2.2. </span>Creating Simulators<a class="headerlink" href="#creating-simulators" title="Permalink to this heading">#</a></h3>
+<p>Next, we translate the model equations above into a simulator from which we can generate simulated observational data. Since both models are nested, we can use a single simulator function. For non-nested models, we would construct one function for each computational model.</p>
+<p>We will apply BayesFlow to the trial-level data, as this is much more instructive and generalizes to other applications, noting that traditional MPT models use aggregated data. We therefore do not directly implement the multinomial likelihood stated above (which would results in a single row per participant) but decompose it into Bernoulli draws to generate as many rows per participant as trials. As our binary category probabilities add up to 1, we only need the probabilities for old responses, <span class="math notranslate nohighlight">\(p_{11}\)</span> and <span class="math notranslate nohighlight">\(p_{01}\)</span>.</p>
+<p>One could additionally add context variables here to include varying trial numbers for instance (see the <a class="reference external" href="https://github.com/stefanradev93/BayesFlow/blob/master/docs/source/tutorial_notebooks/LCA_Model_Posterior_Estimation.ipynb">“Principled Amortized Bayesian Workflow for Cognitive Modeling”</a> tutorial).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">N_OBS</span> <span class="o">=</span> <span class="mi">100</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">mpt_simulator</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">num_obs</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simulates data from a 1HT or 2HT MPT model, assuming equal proportions of old and new stimuli.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta : np.ndarray of shape (num_parameters)</span>
+<span class="sd">        Contains draws from the prior distribution for each parameter.</span>
+<span class="sd">    model : str, either &quot;1HT&quot; or &quot;2HT&quot;</span>
+<span class="sd">        Decides the model to generate data from.</span>
+<span class="sd">    num_obs : int</span>
+<span class="sd">        The number of observations (trials).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X     : np.ndarray of shape (num_obs, 2)</span>
+<span class="sd">        The generated data set. Contains two columns:</span>
+<span class="sd">            1. Stimulus type (0=&quot;new&quot;, 1=&quot;old&quot;)</span>
+<span class="sd">            2. Response (0=&quot;new&quot;, 1=&quot;old&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+
+    <span class="n">obs_per_condition</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_obs</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="c1"># Compute category probabilities per model</span>
+    <span class="n">d</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="n">theta</span>
+
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;1HT&quot;</span><span class="p">:</span>
+        <span class="n">p_11</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">g</span>
+        <span class="n">p_01</span> <span class="o">=</span> <span class="n">g</span>
+
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;2HT&quot;</span><span class="p">:</span>
+        <span class="n">p_11</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">g</span>
+        <span class="n">p_01</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">g</span>
+
+    <span class="c1"># Create a vector of stimulus types</span>
+    <span class="n">stims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">repeats</span><span class="o">=</span><span class="n">obs_per_condition</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># Simulate responses</span>
+    <span class="n">resp_old_items</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p_11</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">obs_per_condition</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="n">resp_new_items</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p_01</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">obs_per_condition</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">resp_old_items</span><span class="p">,</span> <span class="n">resp_new_items</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Create final data set</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">stims</span><span class="p">,</span> <span class="n">resp</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We now pass our custom prior and simulator functions to the <code class="docutils literal notranslate"><span class="pre">GenerativeModel</span></code> wrapper. Here, we use the <code class="docutils literal notranslate"><span class="pre">partial</span></code> function to provide the arguments for each model. If you provided context variables before, you could use a wrapper for your simulator function beforehand. In this case, specifying <code class="docutils literal notranslate"><span class="pre">simulator_is_batched</span></code> would not be necessary.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_1ht</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">GenerativeModel</span><span class="p">(</span>
+    <span class="n">prior</span><span class="o">=</span><span class="n">prior_fun</span><span class="p">,</span>
+    <span class="n">simulator</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">mpt_simulator</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;1HT&quot;</span><span class="p">,</span> <span class="n">num_obs</span><span class="o">=</span><span class="n">N_OBS</span><span class="p">),</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;1HT&quot;</span><span class="p">,</span>
+    <span class="n">simulator_is_batched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">model_2ht</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">GenerativeModel</span><span class="p">(</span>
+    <span class="n">prior</span><span class="o">=</span><span class="n">prior_fun</span><span class="p">,</span>
+    <span class="n">simulator</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">mpt_simulator</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;2HT&quot;</span><span class="p">,</span> <span class="n">num_obs</span><span class="o">=</span><span class="n">N_OBS</span><span class="p">),</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;2HT&quot;</span><span class="p">,</span>
+    <span class="n">simulator_is_batched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Performing 2 pilot runs with the 1HT model...
+INFO:root:Shape of parameter batch after 2 pilot simulations: (batch_size = 2, 2)
+INFO:root:Shape of simulation batch after 2 pilot simulations: (batch_size = 2, 100, 2)
+INFO:root:No optional prior non-batchable context provided.
+INFO:root:No optional prior batchable context provided.
+INFO:root:No optional simulation non-batchable context provided.
+INFO:root:No optional simulation batchable context provided.
+INFO:root:Performing 2 pilot runs with the 2HT model...
+INFO:root:Shape of parameter batch after 2 pilot simulations: (batch_size = 2, 2)
+INFO:root:Shape of simulation batch after 2 pilot simulations: (batch_size = 2, 100, 2)
+INFO:root:No optional prior non-batchable context provided.
+INFO:root:No optional prior batchable context provided.
+INFO:root:No optional simulation non-batchable context provided.
+INFO:root:No optional simulation batchable context provided.
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can now inspect all the components contained in our finished generative models by calling them:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_output</span> <span class="o">=</span> <span class="n">model_1ht</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">model_output</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dict_keys([&#39;prior_non_batchable_context&#39;, &#39;prior_batchable_context&#39;, &#39;prior_draws&#39;, &#39;sim_non_batchable_context&#39;, &#39;sim_batchable_context&#39;, &#39;sim_data&#39;])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shape of data batch:&quot;</span><span class="p">,</span> <span class="n">model_output</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;First 3 rows in first data set:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">model_output</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Shape of data batch: (5, 100, 2)
+First 3 rows in first data set:
+[[1 1]
+ [1 1]
+ [1 1]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>As a last step that is specific to model comparison, we combine all generative models using the <code class="docutils literal notranslate"><span class="pre">MultiGenerativeModel</span></code> wrapper. This is necessary because during the training process, we want to generate data from not just one, but all candidate models. The wrapper assumes the common case of equal prior model probabilities, but we could also supply other probabilities via the <code class="docutils literal notranslate"><span class="pre">model_probs</span></code> argument.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">generative_models</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">MultiGenerativeModel</span><span class="p">([</span><span class="n">model_1ht</span><span class="p">,</span> <span class="n">model_2ht</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="prior-predictive-checks">
+<h3><span class="section-number">6.2.3. </span>Prior Predictive Checks<a class="headerlink" href="#prior-predictive-checks" title="Permalink to this heading">#</a></h3>
+<p>Now that we fully implemented the generative models as simulators, we can conduct the final model building step by checking the faithfulness of the resulting data patterns. For this, we implement prior predictive checks on the data level in three steps:</p>
+<ol class="arabic simple">
+<li><p>Simulate a large number of data sets (= participants) from each model</p></li>
+<li><p>Compute meaningful summary statistics (here: hit rates and false-alarms rates) for each model</p></li>
+<li><p>Plot the resulting data summaries for each model</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Data simulation</span>
+<span class="n">sim_pfcheck_1ht</span> <span class="o">=</span> <span class="n">model_1ht</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">sim_pfcheck_2ht</span> <span class="o">=</span> <span class="n">model_2ht</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 2. Summary statistics</span>
+<span class="k">def</span> <span class="nf">get_rates</span><span class="p">(</span><span class="n">sim_data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the hit rate and false alarm rate for each data set (= participant) in a batch of data</span>
+<span class="sd">    sets simulating binary decision (recognition) tasks.</span>
+<span class="sd">    Assumes first half of data to cover old items and second half to cover new items.&quot;&quot;&quot;</span>
+
+    <span class="n">obs_per_condition</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">sim_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">hit_rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">sim_data</span><span class="p">[:,</span> <span class="p">:</span><span class="n">obs_per_condition</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fa_rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">sim_data</span><span class="p">[:,</span> <span class="n">obs_per_condition</span><span class="p">:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">hit_rates</span><span class="p">,</span> <span class="n">fa_rates</span>
+
+
+<span class="n">rates_1htm</span> <span class="o">=</span> <span class="n">get_rates</span><span class="p">(</span><span class="n">sim_pfcheck_1ht</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">])</span>
+<span class="n">rates_2htm</span> <span class="o">=</span> <span class="n">get_rates</span><span class="p">(</span><span class="n">sim_pfcheck_2ht</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">])</span>
+<span class="n">rates</span> <span class="o">=</span> <span class="p">[</span><span class="n">rates_1htm</span><span class="p">,</span> <span class="n">rates_2htm</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 3. Plot rates across all data sets</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">constrained_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">subfigs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">subfigures</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">model_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;1HT MPT Model&quot;</span><span class="p">,</span> <span class="s2">&quot;2HT MPT Model&quot;</span><span class="p">]</span>
+<span class="n">num_bins</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">num_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">subfig</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subfigs</span><span class="p">):</span>
+    <span class="n">subfig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">model_names</span><span class="p">[</span><span class="n">row</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+    <span class="n">axs</span> <span class="o">=</span> <span class="n">subfig</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hit Rates&quot;</span>
+    <span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;False Alarm Rates&quot;</span>
+    <span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/c09c08fa4660cadbb654d6704f6609f5430695065130820c2ec6675023afdb60.png" src="../_images/c09c08fa4660cadbb654d6704f6609f5430695065130820c2ec6675023afdb60.png" />
+</div>
+</div>
+<p>Unsurprisingly, we observe similar hit rates for both models, as they assume the same latent processes for old items. Their difference in assumptions concerning new items manifests in the false alarm rates: The symmetric beta prior on the <span class="math notranslate nohighlight">\(g\)</span> parameter directly translates into false alarm rates around ~.5 for the 1HT model. For the 2HT model, the additional recognition stage set before the guessing process lowers the false alarm rate to ~.25.</p>
+</section>
+</section>
+<section id="defining-the-neural-approximator">
+<h2><span class="section-number">6.3. </span>Defining the Neural Approximator<a class="headerlink" href="#defining-the-neural-approximator" title="Permalink to this heading">#</a></h2>
+<p>We assured the faithfulness of our simulator and can move on to building a neural approximator for the Bayesian model comparison task. Our first network is a summary network that reduces the dimensionality of our data.<a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> We assume our data to be independent and identically distributed (iid) and thus choose a <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> network that is aligned to this probabilistic symmetry.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">summary_networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Next, we choose the inference network for our current inference task. For model comparison, we select the <code class="docutils literal notranslate"><span class="pre">PMPNetwork</span></code> which approximates posterior model probabilities (that we could subsequently transform into Bayes factors if desired).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inference_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">inference_networks</span><span class="o">.</span><span class="n">PMPNetwork</span><span class="p">(</span><span class="n">num_models</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Finally, we use the <code class="docutils literal notranslate"><span class="pre">AmortizedModelComparison</span></code> wrapper to connect the two networks.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">amortizer</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">amortizers</span><span class="o">.</span><span class="n">AmortizedModelComparison</span><span class="p">(</span><span class="n">inference_net</span><span class="p">,</span> <span class="n">summary_net</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="defining-the-configurator">
+<h3><span class="section-number">6.3.1. </span>Defining the Configurator<a class="headerlink" href="#defining-the-configurator" title="Permalink to this heading">#</a></h3>
+<p>We can use a configurator to mediate between the simulators and the amortizer containing the networks. It transforms data into a suitable format for the neural networks, which are here two elements: The simulated data sets and the indices of the generating model for each data set. For this, we will simply use the <code class="docutils literal notranslate"><span class="pre">DefaultModelComparisonConfigurator</span></code> which is automatically initialized by the trainer instance (see below). We will also use the configurator later on, when validating the trained network, for convenient data transformations.</p>
+</section>
+<section id="defining-the-trainer">
+<h3><span class="section-number">6.3.2. </span>Defining the Trainer<a class="headerlink" href="#defining-the-trainer" title="Permalink to this heading">#</a></h3>
+<p>Now, we can reward ourselves for our hard work and bring all previous elements of our workflow together. We pass them to the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> class, which handles all aspects of the training process for us. If desired, we could also pass it a <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code> where it regularly saves the trained network so we can reuse it. The consistency check assures us that there should be no major bugs preventing in our training workflow from simulating the data to updating the network weights.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trainer</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">trainers</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span>
+    <span class="n">amortizer</span><span class="o">=</span><span class="n">amortizer</span><span class="p">,</span>
+    <span class="n">generative_model</span><span class="o">=</span><span class="n">generative_models</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Performing a consistency check with provided components...
+INFO:root:Done.
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">summary</span></code> function gives us a quick overview of the network component sizes:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">amortizer</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model: &quot;amortized_model_comparison&quot;
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ pmp_network (PMPNetwork)    multiple                  9154      
+                                                                 
+ deep_set (DeepSet)          multiple                  67466     
+                                                                 
+=================================================================
+Total params: 76,620
+Trainable params: 76,620
+Non-trainable params: 0
+_________________________________________________________________
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="training-phase">
+<h2><span class="section-number">6.4. </span>Training Phase<a class="headerlink" href="#training-phase" title="Permalink to this heading">#</a></h2>
+<p>Our simple simulators are extremly fast, so we can use online training (simulating the data on the fly during training). Here, we use 3 epochs with 500 iterations each and a batch size of 64 simulations. This means that we use <span class="math notranslate nohighlight">\(3 \times 500 \times 64 = 96000\)</span> unique simulations in total for training our neural network.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">losses</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "52ba1fc1399f4c6cb967246f56abf873", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "8dc9df767f6f48149f4abef4db8f096d", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "5c22969ca92b4a71be623364ca1eb44c", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<p>Right after training finishes, we can inspect how the loss evolved over the training duration:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">diag_plot</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">train_losses</span><span class="o">=</span><span class="n">losses</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/d7b228e7f56efd153cfad4d6586c17877b06990fe1f63b9c0c29ebab54aa614e.png" src="../_images/d7b228e7f56efd153cfad4d6586c17877b06990fe1f63b9c0c29ebab54aa614e.png" />
+</div>
+</div>
+<p>We see that the network picked up the important parts of the task very fast and plateaued afterwards, which indicates that we have had more than enough training steps.</p>
+</section>
+<section id="network-validation">
+<h2><span class="section-number">6.5. </span>Network Validation<a class="headerlink" href="#network-validation" title="Permalink to this heading">#</a></h2>
+<p>The ability of our amortized networks to quickly process thousands of simulated data sets opens up new possibilities for validating our method prior to applying it. Let’s first simulate some data from our models and use the configurator to quickly transform it:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate some validation data</span>
+<span class="n">sim_data</span> <span class="o">=</span> <span class="n">generative_models</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+
+<span class="c1"># Use the configurator to transform the data structure</span>
+<span class="n">sim_data_transformed</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">configurator</span><span class="p">(</span><span class="n">sim_data</span><span class="p">)</span>
+
+<span class="c1"># Get true indices and predicted PMPs from the trained network</span>
+<span class="n">sim_indices</span> <span class="o">=</span> <span class="n">sim_data_transformed</span><span class="p">[</span><span class="s2">&quot;model_indices&quot;</span><span class="p">]</span>
+<span class="n">sim_preds</span> <span class="o">=</span> <span class="n">amortizer</span><span class="p">(</span><span class="n">sim_data_transformed</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We first ask the most important question: Do our approximated PMPs correspond to some ground-truth? We can approach this question by looking at the <em>calibration</em>. It measures the closeness of the PMPs to the true underlying probabilities of our simulated data.</p>
+<p>We assess it with <code class="docutils literal notranslate"><span class="pre">plot_calibration_curves</span></code>, which provides us with three important pieces of information for each model:</p>
+<ol class="arabic simple">
+<li><p>The calibration curve, where we bin the predicted PMPs and contrast the bin means with the true probability for the respective model in each bin</p></li>
+<li><p>The marginal histogram of the bins, which tells us how stable the calibration curve is by showing the fraction of predictions in each bin</p></li>
+<li><p>The expected calibration error (ECE), a numerical measure of the calibration curve’s divergence that takes the binning distribution into account</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cal_curves</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_calibration_curves</span><span class="p">(</span><span class="n">true_models</span><span class="o">=</span><span class="n">sim_indices</span><span class="p">,</span> <span class="n">pred_models</span><span class="o">=</span><span class="n">sim_preds</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/fd25bd2f254b49f646d85df8531cec633e0d49bba23441250c23579f6f63befa.png" src="../_images/fd25bd2f254b49f646d85df8531cec633e0d49bba23441250c23579f6f63befa.png" />
+</div>
+</div>
+<p>We observe a close alignment of the calibration curve to the diagonal without systematic over- or underconfidence. The ECE being close 0 also confirms that our neural approximator produces highly calibrated PMPs.
+We can further inspect our approximator by examing the confusion matrix for our simulated data sets:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_confusion_matrix</span><span class="p">(</span><span class="n">true_models</span><span class="o">=</span><span class="n">sim_indices</span><span class="p">,</span> <span class="n">pred_models</span><span class="o">=</span><span class="n">sim_preds</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/9f9f665e59fd251a58e3344208f96bc618ed393ad424b419eb2564848fb1dbdc.png" src="../_images/9f9f665e59fd251a58e3344208f96bc618ed393ad424b419eb2564848fb1dbdc.png" />
+</div>
+</div>
+<p>We see that in ~75% of simulated data sets the underlying model is correctly detected. By increasing the training duration and/or size of the neural networks, we could check whether our classifier is performing suboptimally or we already reached the upper bound performance that our sparse data allow for. The excellent calibration that we observed before suggests the second option here.</p>
+</section>
+<section id="network-application">
+<h2><span class="section-number">6.6. </span>Network Application<a class="headerlink" href="#network-application" title="Permalink to this heading">#</a></h2>
+<p>Finally, we can apply our trained network to our observed data. To demonstrate this, we simulate some data from the 2HT model. We quickly redefine our generating process with a fixed random seed to obtain reproducible outcomes:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fixed_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2023</span><span class="p">)</span>
+<span class="n">prior_fixed</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Prior</span><span class="p">(</span><span class="n">prior_fun</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">prior_fun</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">fixed_rng</span><span class="p">),</span> <span class="n">param_names</span><span class="o">=</span><span class="n">PARAM_NAMES</span><span class="p">)</span>
+<span class="n">fake_data_generator</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">GenerativeModel</span><span class="p">(</span>
+    <span class="n">prior</span><span class="o">=</span><span class="n">prior_fixed</span><span class="p">,</span>
+    <span class="n">simulator</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">mpt_simulator</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;2HT&quot;</span><span class="p">,</span> <span class="n">num_obs</span><span class="o">=</span><span class="n">N_OBS</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">fixed_rng</span><span class="p">),</span>
+    <span class="n">skip_test</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">simulator_is_batched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">fake_data</span> <span class="o">=</span> <span class="n">fake_data_generator</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fake_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(1, 100, 2)
+</pre></div>
+</div>
+</div>
+</div>
+<p>Our simulated data already has the required (number of data sets, number of observations, number of variables) shape, so we can directly proceed and have a look at the hit rate and the false alarm rate of our fake participant:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">get_rates</span><span class="p">(</span><span class="n">fake_data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(array([0.88]), array([0.02]))
+</pre></div>
+</div>
+</div>
+</div>
+<p>Here, we see very low false alarm rate that the 1HT model struggles to explain, so we would expect our neural approximator to assign higher evidence to the 2HT model.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">summary_net</span><span class="p">(</span><span class="n">fake_data</span><span class="p">)</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">inference_net</span><span class="o">.</span><span class="n">posterior_probs</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">preds</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(2,), dtype=float32, numpy=array([0.05307948, 0.9469205 ], dtype=float32)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>As expected, the PMPs are in favor of the 2HT model. We assumed equal prior model probabilities, so the transformation of these results into a Bayes factor is straightforward:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bayes_factor12</span> <span class="o">=</span> <span class="n">preds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">preds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">bayes_factor12</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(), dtype=float32, numpy=0.056054845&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Corresponding to the PMPs, the Bayes factor assigns higher evidence to the 2HT model. Despite only having 100 binary observations at hand, the data are so untypical for the 1HT that the Bayes factor reflects the data being ~20 times more likely under the 2HT model compared to the 1HT model.</p>
+<p>Congratulations, you now know how to conduct amortized Bayesian model comparison with BayesFlow! When you feel ready to find out how to compare hierarchical models, continue with <a class="reference internal" href="Hierarchical_Model_Comparison_MPT.html"><span class="doc std std-doc">part 2</span></a>.</p>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>This is admittedly a slight overkill for our very simple models, since we could compute perfect summary statistics directly here.</p>
+</aside>
+</aside>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Covid19_Initial_Posterior_Estimation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><span class="section-number">5. </span>Posterior Estimation for SIR-like Models</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="Hierarchical_Model_Comparison_MPT.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><span class="section-number">7. </span>Hierarchical Model Comparison for Cognitive Models</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">6.1. Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">6.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#priors">6.2.1. Priors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-simulators">6.2.2. Creating Simulators</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">6.2.3. Prior Predictive Checks</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-neural-approximator">6.3. Defining the Neural Approximator</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-configurator">6.3.1. Defining the Configurator</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-trainer">6.3.2. Defining the Trainer</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-phase">6.4. Training Phase</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-validation">6.5. Network Validation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">6.6. Network Application</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,866 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>bayesflow.helper_networks module &#8212; BayesFlow: Amortized Bayesian Inference</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/bayesflow.helper_networks';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/api/bayesflow.helper_networks.html" />
+    <link rel="shortcut icon" href="../_static/bayesflow_hex.ico"/>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="bayesflow.inference_networks module" href="bayesflow.inference_networks.html" />
+    <link rel="prev" title="bayesflow.helper_functions module" href="bayesflow.helper_functions.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../documentation.html">Documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="advanced_documentation.html">Advanced documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">bayesflow.helper_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.losses.html">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Full Installation Instructions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About us</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/edit/master/api/bayesflow.helper_networks.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2Fapi/bayesflow.helper_networks.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/api/bayesflow.helper_networks.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>bayesflow.helper_networks module</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.ActNorm"><code class="docutils literal notranslate"><span class="pre">ActNorm</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.ActNorm.call"><code class="docutils literal notranslate"><span class="pre">ActNorm.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.DenseCouplingNet"><code class="docutils literal notranslate"><span class="pre">DenseCouplingNet</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.DenseCouplingNet.call"><code class="docutils literal notranslate"><span class="pre">DenseCouplingNet.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.EquivariantModule"><code class="docutils literal notranslate"><span class="pre">EquivariantModule</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.EquivariantModule.call"><code class="docutils literal notranslate"><span class="pre">EquivariantModule.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.InvariantModule"><code class="docutils literal notranslate"><span class="pre">InvariantModule</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.InvariantModule.call"><code class="docutils literal notranslate"><span class="pre">InvariantModule.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.MCDropout"><code class="docutils literal notranslate"><span class="pre">MCDropout</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.MCDropout.call"><code class="docutils literal notranslate"><span class="pre">MCDropout.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.MultiConv1D"><code class="docutils literal notranslate"><span class="pre">MultiConv1D</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.MultiConv1D.call"><code class="docutils literal notranslate"><span class="pre">MultiConv1D.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.Orthogonal"><code class="docutils literal notranslate"><span class="pre">Orthogonal</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.Orthogonal.call"><code class="docutils literal notranslate"><span class="pre">Orthogonal.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.Permutation"><code class="docutils literal notranslate"><span class="pre">Permutation</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.Permutation.call"><code class="docutils literal notranslate"><span class="pre">Permutation.call()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="module-bayesflow.helper_networks">
+<span id="bayesflow-helper-networks-module"></span><h1>bayesflow.helper_networks module<a class="headerlink" href="#module-bayesflow.helper_networks" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.ActNorm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.helper_networks.</span></span><span class="sig-name descname"><span class="pre">ActNorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#ActNorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.ActNorm" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Implements an Activation Normalization (ActNorm) Layer.
+Activation Normalization is learned invertible normalization, using
+a Scale (s) and Bias (b) vector [1].</p>
+<blockquote>
+<div><p>y = s * x + b (forward)
+x = (y - b)/s (inverse)</p>
+</div></blockquote>
+<p>The scale and bias can be data dependent initalized, such that the
+output has a mean of zero and standard deviation of one [1,2].
+Alternatively, it is initialized with vectors of ones (scale) and
+zeros (bias).</p>
+<dl class="simple">
+<dt>[1] - Kingma, Diederik P., and Prafulla Dhariwal.</dt><dd><p>“Glow: Generative flow with invertible 1x1 convolutions.”
+arXiv preprint arXiv:1807.03039 (2018).</p>
+</dd>
+<dt>[2] - Salimans, Tim, and Durk P. Kingma.</dt><dd><p>“Weight normalization: A simple reparameterization to accelerate
+training of deep neural networks.”
+Advances in neural information processing systems 29
+(2016): 901-909.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.ActNorm.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#ActNorm.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.ActNorm.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs one pass through the actnorm layer (either inverse or forward) and normalizes
+the last axis of <cite>target</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>target</strong><span class="classifier">tf.Tensor of shape (batch_size, …)</span></dt><dd><p>the target variables of interest, i.e., parameters for posterior estimation</p>
+</dd>
+<dt><strong>inverse</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Flag indicating whether to run the block forward or backwards</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>(z, log_det_J)</strong><span class="classifier">tuple(tf.Tensor, tf.Tensor)</span></dt><dd><p>If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
+v shape: (batch_size, inp_dim), log_det_J shape: (,)</p>
+</dd>
+<dt><strong>target</strong><span class="classifier">tf.Tensor</span></dt><dd><p>If inverse=True: The inversly transformed targets, shape == target.shape</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.DenseCouplingNet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.helper_networks.</span></span><span class="sig-name descname"><span class="pre">DenseCouplingNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#DenseCouplingNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.DenseCouplingNet" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Implements a conditional version of a standard fully connected (FC) network.
+Would also work as an unconditional estimator.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.DenseCouplingNet.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#DenseCouplingNet.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.DenseCouplingNet.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Concatenates target and condition and performs a forward pass through the coupling net.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>target</strong><span class="classifier">tf.Tensor</span></dt><dd><p>The split estimation quntities, for instance, parameters <span class="math notranslate nohighlight">\(\theta \sim p(\theta)\)</span> of interest, shape (batch_size, …)</p>
+</dd>
+<dt><strong>condition</strong><span class="classifier">tf.Tensor or None</span></dt><dd><p>the conditioning vector of interest, for instance <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">summary(x)</span></code>, shape (batch_size, summary_dim)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.EquivariantModule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.helper_networks.</span></span><span class="sig-name descname"><span class="pre">EquivariantModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#EquivariantModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.EquivariantModule" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Implements an equivariant module performing an equivariant transform.</p>
+<p>For details and justification, see:</p>
+<p>[1] Bloem-Reddy, B., &amp; Teh, Y. W. (2020). Probabilistic Symmetries and Invariant Neural Networks.
+J. Mach. Learn. Res., 21, 90-1. <a class="reference external" href="https://www.jmlr.org/papers/volume21/19-322/19-322.pdf">https://www.jmlr.org/papers/volume21/19-322/19-322.pdf</a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.EquivariantModule.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#EquivariantModule.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.EquivariantModule.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs the forward pass of a learnable equivariant transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">tf.Tensor</span></dt><dd><p>Input of shape (batch_size, …, x_dim)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>out</strong><span class="classifier">tf.Tensor</span></dt><dd><p>Output of shape (batch_size, …, equiv_dim)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.InvariantModule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.helper_networks.</span></span><span class="sig-name descname"><span class="pre">InvariantModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#InvariantModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.InvariantModule" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Implements an invariant module performing a permutation-invariant transform.</p>
+<p>For details and rationale, see:</p>
+<p>[1] Bloem-Reddy, B., &amp; Teh, Y. W. (2020). Probabilistic Symmetries and Invariant Neural Networks.
+J. Mach. Learn. Res., 21, 90-1. <a class="reference external" href="https://www.jmlr.org/papers/volume21/19-322/19-322.pdf">https://www.jmlr.org/papers/volume21/19-322/19-322.pdf</a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.InvariantModule.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#InvariantModule.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.InvariantModule.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs the forward pass of a learnable invariant transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">tf.Tensor</span></dt><dd><p>Input of shape (batch_size,…, x_dim)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>out</strong><span class="classifier">tf.Tensor</span></dt><dd><p>Output of shape (batch_size,…, out_dim)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.MCDropout">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.helper_networks.</span></span><span class="sig-name descname"><span class="pre">MCDropout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#MCDropout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.MCDropout" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Implements Monte Carlo Dropout as a Bayesian approximation according to [1].</p>
+<p>Perhaps not the best approximation, but arguably the cheapest one out there!</p>
+<p>[1] Gal, Y., &amp; Ghahramani, Z. (2016, June). Dropout as a bayesian approximation:
+Representing model uncertainty in deep learning.
+In international conference on machine learning (pp. 1050-1059). PMLR.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.MCDropout.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#MCDropout.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.MCDropout.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Randomly sets elements of <code class="docutils literal notranslate"><span class="pre">inputs</span></code> to zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>inputs</strong><span class="classifier">tf.Tensor</span></dt><dd><p>Input of shape (batch_size, …)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>out</strong><span class="classifier">tf.Tensor</span></dt><dd><p>Output of shape (batch_size, …), same as <code class="docutils literal notranslate"><span class="pre">inputs</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.MultiConv1D">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.helper_networks.</span></span><span class="sig-name descname"><span class="pre">MultiConv1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#MultiConv1D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.MultiConv1D" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Implements an inception-inspired 1D convolutional layer using different kernel sizes.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.MultiConv1D.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#MultiConv1D.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.MultiConv1D.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs a forward pass through the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">tf.Tensor</span></dt><dd><p>Input of shape (batch_size, n_time_steps, n_time_series)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>out</strong><span class="classifier">tf.Tensor</span></dt><dd><p>Output of shape (batch_size, n_time_steps, n_filters)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.Orthogonal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.helper_networks.</span></span><span class="sig-name descname"><span class="pre">Orthogonal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#Orthogonal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.Orthogonal" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Imeplements a learnable orthogonal transformation according to [1]. Can be
+used as an alternative to a fixed <code class="docutils literal notranslate"><span class="pre">Permutation</span></code> layer.</p>
+<p>[1] Kingma, D. P., &amp; Dhariwal, P. (2018). Glow: Generative flow with invertible 1x1
+convolutions. Advances in neural information processing systems, 31.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.Orthogonal.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#Orthogonal.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.Orthogonal.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Transforms a batch of target vectors over the last axis through an approximately
+orthogonal transform.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>target</strong><span class="classifier">tf.Tensor of shape (batch_size, …)</span></dt><dd><p>The target vector to be rotated over its last axis.</p>
+</dd>
+<dt><strong>inverse</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Controls if the current pass is forward (<code class="docutils literal notranslate"><span class="pre">inverse=False</span></code>) or inverse (<code class="docutils literal notranslate"><span class="pre">inverse=True</span></code>).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>out</strong><span class="classifier">tf.Tensor of the same shape as <cite>target</cite>.</span></dt><dd><p>The (un-)rotated target vector.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.Permutation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.helper_networks.</span></span><span class="sig-name descname"><span class="pre">Permutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#Permutation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.Permutation" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Implements a layer to permute the inputs entering a (conditional) coupling layer. Uses
+fixed permutations, as these perform equally well compared to learned permutations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.helper_networks.Permutation.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_networks.html#Permutation.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_networks.Permutation.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Permutes a batch of target vectors over the last axis.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>target</strong><span class="classifier">tf.Tensor of shape (batch_size, …)</span></dt><dd><p>The target vector to be permuted over its last axis.</p>
+</dd>
+<dt><strong>inverse</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Controls if the current pass is forward (<code class="docutils literal notranslate"><span class="pre">inverse=False</span></code>) or inverse (<code class="docutils literal notranslate"><span class="pre">inverse=True</span></code>).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>out</strong><span class="classifier">tf.Tensor of the same shape as <cite>target</cite>.</span></dt><dd><p>The (un-)permuted target vector.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="bayesflow.helper_functions.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">bayesflow.helper_functions module</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="bayesflow.inference_networks.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">bayesflow.inference_networks module</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.ActNorm"><code class="docutils literal notranslate"><span class="pre">ActNorm</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.ActNorm.call"><code class="docutils literal notranslate"><span class="pre">ActNorm.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.DenseCouplingNet"><code class="docutils literal notranslate"><span class="pre">DenseCouplingNet</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.DenseCouplingNet.call"><code class="docutils literal notranslate"><span class="pre">DenseCouplingNet.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.EquivariantModule"><code class="docutils literal notranslate"><span class="pre">EquivariantModule</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.EquivariantModule.call"><code class="docutils literal notranslate"><span class="pre">EquivariantModule.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.InvariantModule"><code class="docutils literal notranslate"><span class="pre">InvariantModule</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.InvariantModule.call"><code class="docutils literal notranslate"><span class="pre">InvariantModule.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.MCDropout"><code class="docutils literal notranslate"><span class="pre">MCDropout</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.MCDropout.call"><code class="docutils literal notranslate"><span class="pre">MCDropout.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.MultiConv1D"><code class="docutils literal notranslate"><span class="pre">MultiConv1D</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.MultiConv1D.call"><code class="docutils literal notranslate"><span class="pre">MultiConv1D.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.Orthogonal"><code class="docutils literal notranslate"><span class="pre">Orthogonal</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.Orthogonal.call"><code class="docutils literal notranslate"><span class="pre">Orthogonal.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.Permutation"><code class="docutils literal notranslate"><span class="pre">Permutation</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_networks.Permutation.call"><code class="docutils literal notranslate"><span class="pre">Permutation.call()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

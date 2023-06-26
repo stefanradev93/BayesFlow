@@ -1,0 +1,1059 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>bayesflow.diagnostics module &#8212; BayesFlow: Amortized Bayesian Inference</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/bayesflow.diagnostics';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/api/bayesflow.diagnostics.html" />
+    <link rel="shortcut icon" href="../_static/bayesflow_hex.ico"/>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="bayesflow.networks module" href="bayesflow.networks.html" />
+    <link rel="prev" title="bayesflow.benchmarks.two_moons module" href="bayesflow.benchmarks.two_moons.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../documentation.html">Documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="advanced_documentation.html">Advanced documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.losses.html">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Full Installation Instructions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About us</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/edit/master/api/bayesflow.diagnostics.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2Fapi/bayesflow.diagnostics.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/api/bayesflow.diagnostics.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>bayesflow.diagnostics module</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_calibration_curves"><code class="docutils literal notranslate"><span class="pre">plot_calibration_curves()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_confusion_matrix"><code class="docutils literal notranslate"><span class="pre">plot_confusion_matrix()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_latent_space_2d"><code class="docutils literal notranslate"><span class="pre">plot_latent_space_2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_losses"><code class="docutils literal notranslate"><span class="pre">plot_losses()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_mmd_hypothesis_test"><code class="docutils literal notranslate"><span class="pre">plot_mmd_hypothesis_test()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_posterior_2d"><code class="docutils literal notranslate"><span class="pre">plot_posterior_2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_prior2d"><code class="docutils literal notranslate"><span class="pre">plot_prior2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_recovery"><code class="docutils literal notranslate"><span class="pre">plot_recovery()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_sbc_ecdf"><code class="docutils literal notranslate"><span class="pre">plot_sbc_ecdf()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_sbc_histograms"><code class="docutils literal notranslate"><span class="pre">plot_sbc_histograms()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_z_score_contraction"><code class="docutils literal notranslate"><span class="pre">plot_z_score_contraction()</span></code></a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="module-bayesflow.diagnostics">
+<span id="bayesflow-diagnostics-module"></span><h1>bayesflow.diagnostics module<a class="headerlink" href="#module-bayesflow.diagnostics" title="Permalink to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_calibration_curves">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_calibration_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_calibration_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_calibration_curves" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities
+for a model comparison problem. The marginal histograms inform about the fraction of predictions in each bin.
+Depends on the <code class="docutils literal notranslate"><span class="pre">expected_calibration_error</span></code> function for computing the ECE.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>true_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The one-hot-encoded true model indices per data set.</p>
+</dd>
+<dt><strong>pred_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The predicted posterior model probabilities (PMPs) per data set.</p>
+</dd>
+<dt><strong>model_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The model names for nice plot titles. Inferred if None.</p>
+</dd>
+<dt><strong>num_bins</strong><span class="classifier">int, optional, default: 10</span></dt><dd><p>The number of bins to use for the calibration curves (and marginal histograms).</p>
+</dd>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the y-label and y-label texts</p>
+</dd>
+<dt><strong>legend_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the legend text (ECE value)</p>
+</dd>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text. Only relevant if <cite>stacked=False</cite></p>
+</dd>
+<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
+</dd>
+<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: None</span></dt><dd><p>The figure size passed to the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> constructor. Inferred if <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color of the calibration curves</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fig</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_confusion_matrix">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_confusion_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xtick_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ytick_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_confusion_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_confusion_matrix" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots a confusion matrix for validating a neural network trained for Bayesian model comparison.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>true_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The one-hot-encoded true model indices per data set.</p>
+</dd>
+<dt><strong>pred_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The predicted posterior model probabilities (PMPs) per data set.</p>
+</dd>
+<dt><strong>model_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The model names for nice plot titles. Inferred if None.</p>
+</dd>
+<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: (5, 5)</span></dt><dd><p>The figure size passed to the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> constructor. Inferred if <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 18</span></dt><dd><p>The font size of the title text.</p>
+</dd>
+<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis label and model name texts.</p>
+</dd>
+<dt><strong>xtick_rotation: int, optional, default: None</strong></dt><dd><p>Rotation of x-axis tick labels (helps with long model names).</p>
+</dd>
+<dt><strong>ytick_rotation: int, optional, default: None</strong></dt><dd><p>Rotation of y-axis tick labels (helps with long model names).</p>
+</dd>
+<dt><strong>normalize</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>A flag for normalization of the confusion matrix.
+If True, each row of the confusion matrix is normalized to sum to 1.</p>
+</dd>
+<dt><strong>cmap</strong><span class="classifier">matplotlib.colors.Colormap or str, optional, default: None</span></dt><dd><p>Colormap to be used for the cells. If a str, it should be the name of a registered colormap,
+e.g., ‘viridis’. Default colormap matches the BayesFlow defaults by ranging from white to red.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">bool, optional, default True</span></dt><dd><p>A flag for adding ‘Confusion Matrix’ above the matrix.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fig</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_latent_space_2d">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_latent_space_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_latent_space_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_latent_space_2d" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates pairplots for the latent space learned by the inference network. Enables
+visual inspection of the the latent space and whether its structrue corresponds to the
+one enforced by the optimization criterion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>z_samples</strong><span class="classifier">np.ndarray or tf.Tensor of shape (n_sim, n_params)</span></dt><dd><p>The latent samples computed through a forward pass of the inference network.</p>
+</dd>
+<dt><strong>height</strong><span class="classifier">float, optional, default: 2.5</span></dt><dd><p>The height of the pair plot.</p>
+</dd>
+<dt><strong>color</strong><span class="classifier">str, optional, defailt</span><span class="classifier">‘#8f2727’</span></dt><dd><p>The color of the plot</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Additional keyword arguments passed to the sns.PairGrid constructor</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_losses">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_losses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_losses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_losses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'black'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lw_train</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lw_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_losses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_losses" title="Permalink to this definition">#</a></dt>
+<dd><p>A generic helper function to plot the losses of a series of training epochs and runs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>train_losses</strong><span class="classifier">pd.DataFrame</span></dt><dd><p>The (plottable) history as returned by a train_[…] method of a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.
+Alternatively, you can just pass a data frame of validation losses instead of train losses,
+if you only want to plot the validation loss.</p>
+</dd>
+<dt><strong>val_losses</strong><span class="classifier">pd.DataFrame or None, optional, default: None</span></dt><dd><p>The (plottable) validation history as returned by a train_[…] method of a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.
+If left <code class="docutils literal notranslate"><span class="pre">None</span></code>, only train losses are plotted. Should have the same number of columns
+as <code class="docutils literal notranslate"><span class="pre">train_losses</span></code>.</p>
+</dd>
+<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: None</span></dt><dd><p>The figure size passed to the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> constructor. Inferred if <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt><strong>train_color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the train loss trajectory</p>
+</dd>
+<dt><strong>val_color</strong><span class="classifier">str, optional, default: black</span></dt><dd><p>The color for the optional validation loss trajectory</p>
+</dd>
+<dt><strong>lw_train</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The linewidth for the training loss curve</p>
+</dd>
+<dt><strong>lw_val</strong><span class="classifier">int, optional, default: 3</span></dt><dd><p>The linewidth for the validation loss curve</p>
+</dd>
+<dt><strong>grid_alpha</strong><span class="classifier">float, optional, default 0.5</span></dt><dd><p>The opacity factor for the background gridlines</p>
+</dd>
+<dt><strong>legend_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the legend text</p>
+</dd>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the y-label text</p>
+</dd>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>AssertionError</dt><dd><p>If the number of columns in <code class="docutils literal notranslate"><span class="pre">train_losses</span></code> does not match the
+number of columns in <code class="docutils literal notranslate"><span class="pre">val_losses</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_mmd_hypothesis_test">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_mmd_hypothesis_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmd_null</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmd_observed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.16407,</span> <span class="pre">0.020171,</span> <span class="pre">0.577478)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observed_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'red'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'orange'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate_vlines_at_kde</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_mmd_hypothesis_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_mmd_hypothesis_test" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>mmd_null: np.ndarray</strong></dt><dd><p>samples from the MMD sampling distribution under the null hypothesis “the model is well-specified”</p>
+</dd>
+<dt><strong>mmd_observed: float</strong></dt><dd><p>observed MMD value</p>
+</dd>
+<dt><strong>alpha_level: float</strong></dt><dd><p>rejection probability (type I error)</p>
+</dd>
+<dt><strong>null_color: color</strong></dt><dd><p>color for the H0 sampling distribution</p>
+</dd>
+<dt><strong>observed_color: color</strong></dt><dd><p>color for the observed MMD</p>
+</dd>
+<dt><strong>alpha_color: color</strong></dt><dd><p>color for the rejection area</p>
+</dd>
+<dt><strong>truncate_vlines_at_kde: bool</strong></dt><dd><p>true: cut off the vlines at the kde
+false: continue kde lines across the plot</p>
+</dd>
+<dt><strong>xmin: float</strong></dt><dd><p>lower x axis limit</p>
+</dd>
+<dt><strong>xmax: float</strong></dt><dd><p>upper x axis limit</p>
+</dd>
+<dt><strong>bw_factor: float, default: 1.5</strong></dt><dd><p>bandwidth (aka. smoothing parameter) of the kernel density estimate</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_posterior_2d">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_posterior_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posterior_draws</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_draws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gray'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_posterior_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_posterior_2d" title="Permalink to this definition">#</a></dt>
+<dd><p>Generates a bivariate pairplot given posterior draws and optional prior or prior draws.</p>
+<dl class="simple">
+<dt>posterior_draws<span class="classifier">np.ndarray of shape (n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained for a SINGLE observed data set.</p>
+</dd>
+<dt>prior<span class="classifier">bayesflow.forward_inference.Prior instance or None, optional, default: None</span></dt><dd><p>The optional prior object having an input-output signature as given by ayesflow.forward_inference.Prior</p>
+</dd>
+<dt>prior_draws<span class="classifier">np.ndarray of shape (n_prior_draws, n_params) or None, optonal (default: None)</span></dt><dd><p>The optional prior draws obtained from the prior. If both prior and prior_draws are provided, prior_draws
+will be used.</p>
+</dd>
+<dt>param_names<span class="classifier">list or None, optional, default: None</span></dt><dd><p>The parameter names for nice plot titles. Inferred if None</p>
+</dd>
+<dt>height<span class="classifier">float, optional, default: 3</span></dt><dd><p>The height of the pairplot</p>
+</dd>
+<dt>label_fontsize<span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the x and y-label texts (parameter names)</p>
+</dd>
+<dt>legend_fontsize<span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the legend text</p>
+</dd>
+<dt>tick_fontsize<span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
+</dd>
+<dt>post_color<span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the posterior histograms and KDEs</p>
+</dd>
+<dt>priors_color<span class="classifier">str, optional, default: gray</span></dt><dd><p>The color for the optional prior histograms and KDEs</p>
+</dd>
+<dt>post_alpha<span class="classifier">float in [0, 1], optonal, default: 0.9</span></dt><dd><p>The opacity of the posterior plots</p>
+</dd>
+<dt>prior_alpha<span class="classifier">float in [0, 1], optonal, default: 0.7</span></dt><dd><p>The opacity of the prior plots</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>AssertionError</dt><dd><p>If the shape of posterior_draws is not 2-dimensional.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_prior2d">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_prior2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_prior2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_prior2d" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates pairplots for a given joint prior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>prior</strong><span class="classifier">callable</span></dt><dd><p>The prior object which takes a single integer argument and generates random draws.</p>
+</dd>
+<dt><strong>param_names</strong><span class="classifier">list of str or None, optional, default None</span></dt><dd><p>An optional list of strings which</p>
+</dd>
+<dt><strong>n_samples</strong><span class="classifier">int, optional, default: 1000</span></dt><dd><p>The number of random draws from the joint prior</p>
+</dd>
+<dt><strong>height</strong><span class="classifier">float, optional, default: 2.5</span></dt><dd><p>The height of the pair plot</p>
+</dd>
+<dt><strong>color</strong><span class="classifier">str, optional, defailt</span><span class="classifier">‘#8f2727’</span></dt><dd><p>The color of the plot</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Additional keyword arguments passed to the sns.PairGrid constructor</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_recovery">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_recovery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_agg=&lt;function</span> <span class="pre">median&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainty_agg=&lt;function</span> <span class="pre">median_abs_deviation&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize=16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize=18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_fontsize=16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize=12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_corr=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_r2=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color='#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_col=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_row=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_recovery"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_recovery" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
+The point estimate can be controlled with the <code class="docutils literal notranslate"><span class="pre">point_agg</span></code> argument, and the uncertainty estimate
+can be controlled with the <code class="docutils literal notranslate"><span class="pre">uncertainty_agg</span></code> argument.</p>
+<p>This plot yields similar information as the “posterior z-score”, but allows for generic
+point and uncertainty estimates:</p>
+<p><a class="reference external" href="https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html">https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html</a></p>
+<p>Important: Posterior aggregates play no special role in Bayesian inference and should only
+be used heuristically. For instanec, in the case of multi-modal posteriors, common point
+estimates, such as mean, (geometric) median, or maximum a posteriori (MAP) mean nothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>post_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained from n_data_sets</p>
+</dd>
+<dt><strong>prior_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_params)</span></dt><dd><p>The prior draws (true parameters) obtained for generating the n_data_sets</p>
+</dd>
+<dt><strong>point_agg</strong><span class="classifier">callable, optional, default: np.median</span></dt><dd><p>The function to apply to the posterior draws to get a point estimate for each marginal.
+The default computes the marginal median for each marginal posterior as a robust
+point estimate.</p>
+</dd>
+<dt><strong>uncertainty_agg</strong><span class="classifier">callable or None, optional, default: scipy.stats.median_abs_deviation</span></dt><dd><p>The function to apply to the posterior draws to get an uncertainty estimate.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> provided, a simple scatter using only <code class="docutils literal notranslate"><span class="pre">point_agg</span></code> will be plotted.</p>
+</dd>
+<dt><strong>param_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The parameter names for nice plot titles. Inferred if None</p>
+</dd>
+<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default</span><span class="classifier">None</span></dt><dd><p>The figure size passed to the matplotlib constructor. Inferred if None.</p>
+</dd>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the y-label text</p>
+</dd>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text</p>
+</dd>
+<dt><strong>metric_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the goodness-of-fit metric (if provided)</p>
+</dd>
+<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
+</dd>
+<dt><strong>add_corr</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>A flag for adding correlation between true and estimates to the plot</p>
+</dd>
+<dt><strong>add_r2</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>A flag for adding R^2 between true and estimates to the plot</p>
+</dd>
+<dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the true vs. estimated scatter points and errobars</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ShapeError</dt><dd><p>If there is a deviation form the expected shapes of <code class="docutils literal notranslate"><span class="pre">post_samples</span></code> and <code class="docutils literal notranslate"><span class="pre">prior_samples</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_sbc_ecdf">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_sbc_ecdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank_ecdf_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#a34f4f'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grey'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_sbc_ecdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_sbc_ecdf" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates the empirical CDFs for each marginal rank distribution and plots it against
+a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform,
+as proposed by [1].</p>
+<p>For models with many parameters, use <cite>stacked=True</cite> to obtain an idea of the overall calibration
+of a posterior approximator.</p>
+<p>[1] Säilynoja, T., Bürkner, P. C., &amp; Vehtari, A. (2022). Graphical test for discrete uniformity and
+its applications in goodness-of-fit evaluation and multiple sample comparison. Statistics and Computing,
+32(2), 1-21. <a class="reference external" href="https://arxiv.org/abs/2103.10522">https://arxiv.org/abs/2103.10522</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>post_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained from n_data_sets</p>
+</dd>
+<dt><strong>prior_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_params)</span></dt><dd><p>The prior draws obtained for generating n_data_sets</p>
+</dd>
+<dt><strong>difference</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>If <cite>True</cite>, plots the ECDF difference. Enables a more dynamic visualization range.</p>
+</dd>
+<dt><strong>stacked</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>If <cite>True</cite>, all ECDFs will be plotted on the same plot. If <cite>False</cite>, each ECDF will
+have its own subplot, similar to the behavior of <cite>plot_sbc_histograms</cite>.</p>
+</dd>
+<dt><strong>param_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The parameter names for nice plot titles. Inferred if None. Only relevant if <cite>stacked=False</cite>.</p>
+</dd>
+<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: None</span></dt><dd><p>The figure size passed to the matplotlib constructor. Inferred if None.</p>
+</dd>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the y-label and y-label texts</p>
+</dd>
+<dt><strong>legend_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the legend text</p>
+</dd>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text. Only relevant if <cite>stacked=False</cite></p>
+</dd>
+<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
+</dd>
+<dt><strong>rank_ecdf_color</strong><span class="classifier">str, optional, default: ‘#a34f4f’</span></dt><dd><p>The color to use for the rank ECDFs</p>
+</dd>
+<dt><strong>fill_color</strong><span class="classifier">str, optional, default: ‘grey’</span></dt><dd><p>The color of the fill arguments.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Keyword arguments can be passed to control the behavior of ECDF simultaneous band computation
+through the <code class="docutils literal notranslate"><span class="pre">ecdf_bands_kwargs</span></code> dictionary. See <cite>simultaneous_ecdf_bands</cite> for keyword arguments</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ShapeError</dt><dd><p>If there is a deviation form the expected shapes of <cite>post_samples</cite> and <cite>prior_samples</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_sbc_histograms">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_sbc_histograms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binomial_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#a34f4f'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_sbc_histograms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_sbc_histograms" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates and plots publication-ready histograms of rank statistics for simulation-based calibration
+(SBC) checks according to [1].</p>
+<p>Any deviation from uniformity indicates miscalibration and thus poor convergence
+of the networks or poor combination between generative model / networks.</p>
+<p>[1] Talts, S., Betancourt, M., Simpson, D., Vehtari, A., &amp; Gelman, A. (2018).
+Validating Bayesian inference algorithms with simulation-based calibration.
+arXiv preprint arXiv:1804.06788.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>post_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained from n_data_sets</p>
+</dd>
+<dt><strong>prior_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_params)</span></dt><dd><p>The prior draws obtained for generating n_data_sets</p>
+</dd>
+<dt><strong>param_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The parameter names for nice plot titles. Inferred if None</p>
+</dd>
+<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default</span><span class="classifier">None</span></dt><dd><p>The figure size passed to the matplotlib constructor. Inferred if None</p>
+</dd>
+<dt><strong>num_bins</strong><span class="classifier">int, optional, default: 10</span></dt><dd><p>The number of bins to use for each marginal histogram</p>
+</dd>
+<dt><strong>binomial_interval</strong><span class="classifier">float in (0, 1), optional, default: 0.95</span></dt><dd><p>The width of the confidence interval for the binomial distribution</p>
+</dd>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the y-label text</p>
+</dd>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text</p>
+</dd>
+<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
+</dd>
+<dt><strong>hist_color</strong><span class="classifier">str, optional, default ‘#a34f4f’</span></dt><dd><p>The color to use for the histogram body</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ShapeError</dt><dd><p>If there is a deviation form the expected shapes of <cite>post_samples</cite> and <cite>prior_samples</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_z_score_contraction">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_z_score_contraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_z_score_contraction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_z_score_contraction" title="Permalink to this definition">#</a></dt>
+<dd><p>Implements a graphical check for global model sensitivity by plotting the posterior
+z-score over the posterior contraction for each set of posterior samples in <code class="docutils literal notranslate"><span class="pre">post_samples</span></code>
+according to [1].</p>
+<ul class="simple">
+<li><p>The definition of the posterior z-score is:</p></li>
+</ul>
+<p>post_z_score = (posterior_mean - true_parameters) / posterior_std</p>
+<p>And the score is adequate if it centers around zero and spreads roughly in the interval [-3, 3]</p>
+<ul class="simple">
+<li><p>The definition of posterior contraction is:</p></li>
+</ul>
+<p>post_contraction = 1 - (posterior_variance / prior_variance)</p>
+<p>In other words, the posterior is a proxy for the reduction in ucnertainty gained by
+replacing the prior with the posterior. The ideal posterior contraction tends to 1.
+Contraction near zero indicates that the posterior variance is almost identical to
+the prior variance for the particular marginal parameter distribution.</p>
+<p>Note: Means and variances will be estimated vie their sample-based estimators.</p>
+<p>[1] Schad, D. J., Betancourt, M., &amp; Vasishth, S. (2021).
+Toward a principled Bayesian workflow in cognitive science.
+Psychological methods, 26(1), 103.</p>
+<p>Also available at <a class="reference external" href="https://arxiv.org/abs/1904.12765">https://arxiv.org/abs/1904.12765</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>post_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained from n_data_sets</p>
+</dd>
+<dt><strong>prior_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_params)</span></dt><dd><p>The prior draws (true parameters) obtained for generating the n_data_sets</p>
+</dd>
+<dt><strong>param_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The parameter names for nice plot titles. Inferred if None</p>
+</dd>
+<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default</span><span class="classifier">None</span></dt><dd><p>The figure size passed to the matplotlib constructor. Inferred if None.</p>
+</dd>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the y-label text</p>
+</dd>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text</p>
+</dd>
+<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
+</dd>
+<dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the true vs. estimated scatter points and errobars</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ShapeError</dt><dd><p>If there is a deviation form the expected shapes of <code class="docutils literal notranslate"><span class="pre">post_samples</span></code> and <code class="docutils literal notranslate"><span class="pre">prior_samples</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="bayesflow.benchmarks.two_moons.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">bayesflow.benchmarks.two_moons module</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="bayesflow.networks.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">bayesflow.networks module</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_calibration_curves"><code class="docutils literal notranslate"><span class="pre">plot_calibration_curves()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_confusion_matrix"><code class="docutils literal notranslate"><span class="pre">plot_confusion_matrix()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_latent_space_2d"><code class="docutils literal notranslate"><span class="pre">plot_latent_space_2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_losses"><code class="docutils literal notranslate"><span class="pre">plot_losses()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_mmd_hypothesis_test"><code class="docutils literal notranslate"><span class="pre">plot_mmd_hypothesis_test()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_posterior_2d"><code class="docutils literal notranslate"><span class="pre">plot_posterior_2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_prior2d"><code class="docutils literal notranslate"><span class="pre">plot_prior2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_recovery"><code class="docutils literal notranslate"><span class="pre">plot_recovery()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_sbc_ecdf"><code class="docutils literal notranslate"><span class="pre">plot_sbc_ecdf()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_sbc_histograms"><code class="docutils literal notranslate"><span class="pre">plot_sbc_histograms()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_z_score_contraction"><code class="docutils literal notranslate"><span class="pre">plot_z_score_contraction()</span></code></a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

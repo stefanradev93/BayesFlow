@@ -1,0 +1,1096 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>7. Hierarchical Model Comparison for Cognitive Models &#8212; BayesFlow: Amortized Bayesian Inference</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_examples/Hierarchical_Model_Comparison_MPT';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/_examples/Hierarchical_Model_Comparison_MPT.html" />
+    <link rel="shortcut icon" href="../_static/bayesflow_hex.ico"/>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Documentation" href="../documentation.html" />
+    <link rel="prev" title="6. Model Comparison for Cognitive Models" href="Model_Comparison_MPT.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../documentation.html">Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../api/advanced_documentation.html">Advanced documentation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../api/bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.losses.html">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Full Installation Instructions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About us</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/edit/master/_examples/Hierarchical_Model_Comparison_MPT.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2F_examples/Hierarchical_Model_Comparison_MPT.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/_examples/Hierarchical_Model_Comparison_MPT.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Hierarchical Model Comparison for Cognitive Models</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">7.1. Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">7.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperpriors-and-priors">7.2.1. Hyperpriors and Priors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-the-simulators">7.2.2. Creating the Simulators</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">7.2.3. Prior Predictive Checks</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-training-validating-the-neural-approximator">7.3. Defining, Training &amp; Validating the Neural Approximator</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">7.4. Network Application</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="hierarchical-model-comparison-for-cognitive-models">
+<h1><span class="section-number">7. </span>Hierarchical Model Comparison for Cognitive Models<a class="headerlink" href="#hierarchical-model-comparison-for-cognitive-models" title="Permalink to this heading">#</a></h1>
+<p>Part 2: Hierarchical Model Comparison</p>
+<p>by Lasse Elsemüller</p>
+<h1>Table of Contents<span class="tocSkip"></span></h1>
+<div class="toc"><ul class="toc-item"><li><span><a href="#Generative-Model-Definition" data-toc-modified-id="Generative-Model-Definition-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>Generative Model Definition</a></span></li><li><span><a href="#Hyperpriors-and-Priors" data-toc-modified-id="Hyperpriors-and-Priors-2"><span class="toc-item-num">2&nbsp;&nbsp;</span>Hyperpriors and Priors</a></span></li><li><span><a href="#Creating-the-Simulators" data-toc-modified-id="Creating-the-Simulators-3"><span class="toc-item-num">3&nbsp;&nbsp;</span>Creating the Simulators</a></span></li><li><span><a href="#Prior-Predictive-Checks" data-toc-modified-id="Prior-Predictive-Checks-4"><span class="toc-item-num">4&nbsp;&nbsp;</span>Prior Predictive Checks</a></span></li><li><span><a href="#Defining,-Training-&amp;-Validating-the-Neural-Approximator" data-toc-modified-id="Defining,-Training-&amp;-Validating-the-Neural-Approximator-5"><span class="toc-item-num">5&nbsp;&nbsp;</span>Defining, Training &amp; Validating the Neural Approximator</a></span></li><li><span><a href="#Network-Application" data-toc-modified-id="Network-Application-6"><span class="toc-item-num">6&nbsp;&nbsp;</span>Network Application</a></span></li></ul></div><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+
+<span class="kn">import</span> <span class="nn">bayesflow</span> <span class="k">as</span> <span class="nn">bf</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Confirm that GPU is available for training</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">list_physical_devices</span><span class="p">(</span><span class="s2">&quot;GPU&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[PhysicalDevice(name=&#39;/physical_device:GPU:0&#39;, device_type=&#39;GPU&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<section id="introduction">
+<h2><span class="section-number">7.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
+<p>This is the second part of the tutorial series covering amortized model comparison with BayesFlow! The general workflow, the scenario and the cognitive models were introduced in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a> and are assumed to be known, so here we will focus on the new elements introduced when comparing hierarchical models.</p>
+<p>In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we only conducted model comparison for a single participant at a time. Let us now consider all participants and their nested observations simultaneously in our model comparison!</p>
+</section>
+<section id="generative-model-definition">
+<h2><span class="section-number">7.2. </span>Generative Model Definition<a class="headerlink" href="#generative-model-definition" title="Permalink to this heading">#</a></h2>
+<p>To extend our MPT models to hierarchical ones, we need to introduce a superordinate level that encodes our assumptions about the relationships between individuals. We use the most popular hierarchical MPT framework, the latent-trait approach by <a class="reference external" href="https://link.springer.com/article/10.1007/s11336-009-9141-0">Klauer (2010)</a>. Here, we replace our non-hierarchical Beta priors by a multivariate normal distribution, which allows us to model correlations between our parameters. We afterwards use the cumulative distribution function of the standard normal distribution, <span class="math notranslate nohighlight">\(\Phi\)</span>, to transform from the real-line to probabilities. Let’s write out our new model components explicitly with <span class="math notranslate nohighlight">\(m \in M\)</span> denoting the participants:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+\left[ \begin{array}{l} d_m' \\ g_m' \end{array} \right] 
+&amp;\sim \mathcal{N} \left( 
+\left[\begin{array}{l} \mu_{d} \\ \mu_{g} \end{array} \right], \Sigma
+\right) \text{ for } m=1,\dots,M\\
+d_m &amp;= \Phi(d_m') \text{ for } m=1,\dots,M\\
+g_m &amp;= \Phi(g_m') \text{ for } m=1,\dots,M\\
+\end{align}
+\end{split}\]</div>
+<section id="hyperpriors-and-priors">
+<h3><span class="section-number">7.2.1. </span>Hyperpriors and Priors<a class="headerlink" href="#hyperpriors-and-priors" title="Permalink to this heading">#</a></h3>
+<p>We now have to define hyperpriors for the parameters of the multivariate normal prior distribution. For the covariance matrix <span class="math notranslate nohighlight">\(\Sigma\)</span>, the latent-trait approach employs a scaled inverse Wishart distribution. The <span class="math notranslate nohighlight">\(Q\)</span> parameter controls the correlation between our parameters <span class="math notranslate nohighlight">\(d\)</span> and <span class="math notranslate nohighlight">\(g\)</span>, while the variances are determined jointly with the scaling parameters <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+\mu_{d} &amp;\sim \mathcal{N}(0, 0.25) \\
+\mu_{g} &amp;\sim \mathcal{N}(0, 0.25) \\
+Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
+\lambda_p &amp;\sim \textrm{Uniform}(0, 3) \text{ for } p= d', g'\\
+\Sigma &amp;= \textrm{Diag}(\lambda_p) Q \textrm{Diag}(\lambda_p)\\
+\end{align}
+\end{split}\]</div>
+<p>Here, we choose our priors to reflect our belief that the hierarchical models should generate data patterns similar to their non-hierarchical counterparts. Remember that Bayesian model comparison penalizes predictive flexibility and expects you to encode your theoretical assumptions in all parts of your models. Therefore, using flat/very weakly informative priors as you may do in parameter estimation won’t give you the results you are looking for here.</p>
+<p>Things can get a little confusing for these hierarchical model formulations, so let’s have a look at the role of our prior choices:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\mu_d\)</span> and <span class="math notranslate nohighlight">\(\mu_g\)</span>: A zero-centered normal distribution on the probit scale translates to participant mean values centered around 0.5 on the probability scale.</p></li>
+<li><p><span class="math notranslate nohighlight">\(Q\)</span>: An inverse Wishart distribution with an identity scale matrix centers the expected correlations between <span class="math notranslate nohighlight">\(d\)</span> and <span class="math notranslate nohighlight">\(g\)</span> at 0, while the 10 degrees of freedom encode our belief that high correlations are rather unlikely (see below for a visualization).</p></li>
+<li><p><span class="math notranslate nohighlight">\(\lambda\)</span>: We keep the values of this auxiliary scaling parameter rather low to limit the amount of variability that we introduce into our models.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Q</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">invwishart</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+<span class="n">corrs</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Q</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">Q</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">corrs</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Inverse Wishart Correlation Prior&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/b420ccb081d6ef916af26a3b3b6336ff8ff0e16acc58be3803f65a52d878b948.png" src="../_images/b420ccb081d6ef916af26a3b3b6336ff8ff0e16acc58be3803f65a52d878b948.png" />
+</div>
+</div>
+<p>We now follow the same steps as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a> to translate our prior into code:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">PARAM_NAMES</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s2">&quot;$\mu_d$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\mu_g$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{00}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{01}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{10}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{11}</span><span class="s2">$&quot;</span><span class="p">]</span>
+<span class="n">RNG</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2023</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">hierarchical_prior_fun</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="s2">&quot;Samples a random parameter configuration from the hierarchical prior distribution.&quot;</span>
+
+    <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+
+    <span class="n">mu_d</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+    <span class="n">mu_g</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">invwishart</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+    <span class="n">lambdas</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">lambdas</span><span class="p">),</span> <span class="n">Q</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">lambdas</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">mu_d</span><span class="p">,</span> <span class="n">mu_g</span><span class="p">],</span> <span class="n">sigma</span><span class="o">.</span><span class="n">flatten</span><span class="p">()])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prior</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Prior</span><span class="p">(</span><span class="n">prior_fun</span><span class="o">=</span><span class="n">hierarchical_prior_fun</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">PARAM_NAMES</span><span class="p">)</span>
+<span class="n">prior</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;prior_draws&#39;: array([[ 0.33133578, -0.15124493,  0.19373801, -0.0171947 , -0.0171947 ,
+          1.20265298]]),
+ &#39;batchable_context&#39;: None,
+ &#39;non_batchable_context&#39;: None}
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-the-simulators">
+<h3><span class="section-number">7.2.2. </span>Creating the Simulators<a class="headerlink" href="#creating-the-simulators" title="Permalink to this heading">#</a></h3>
+<p>At this point, it is important to stress again our new definition of a data set: In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we analyzed participants separately, so each data set contained a single participant. With hierarchical models, we can now take all of our experimental data simultaneously into consideration, so each data set contains several participants with nested observations each. We could also have other hierarchical models, such as students nested into classes or employees nested into organizations, so we refer to the higher order units with the general term <em>groups</em>. For this tutorial, we consider a scenario with 50 participants performing 100 trials each.</p>
+<p>We continue our known workflow by first specifying simulator functions, then creating our generative models with the <code class="docutils literal notranslate"><span class="pre">GenerativeModel</span></code> wrapper and finally combining them with the <code class="docutils literal notranslate"><span class="pre">MultiGenerativeModel</span></code> wrapper.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">N_GROUPS</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">N_OBS</span> <span class="o">=</span> <span class="mi">100</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">hierarchical_mpt_simulator</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">num_groups</span><span class="p">,</span> <span class="n">num_obs</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simulates data from a hierarchical 1HT or 2HT MPT model, assuming equal proportions of old and new stimuli.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta   : np.ndarray of shape (num_parameters)</span>
+<span class="sd">        Contains draws from the prior distribution for each parameter.</span>
+<span class="sd">    model   : str, either &quot;1HT&quot; or &quot;2HT&quot;</span>
+<span class="sd">        Decides the model to generate data from.</span>
+<span class="sd">    num_obs : int</span>
+<span class="sd">        The number of groups (participants).</span>
+<span class="sd">    num_obs : int</span>
+<span class="sd">        The number of observations (trials) per group.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X     : np.ndarray of shape (num_groups, num_obs, 3)</span>
+<span class="sd">        The generated data set. Contains two columns:</span>
+<span class="sd">            1. Stimulus type (0=&quot;new&quot;, 1=&quot;old&quot;)</span>
+<span class="sd">            2. Response (0=&quot;new&quot;, 1=&quot;old&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+
+    <span class="n">obs_per_condition</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_obs</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">mu_d</span><span class="p">,</span> <span class="n">mu_g</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="c1"># Draw vectors containing individual parameters and transform to probabilities</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="n">mu_d</span><span class="p">,</span> <span class="n">mu_g</span><span class="p">],</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_groups</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">params</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Compute category probabilities per model</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;1HT&quot;</span><span class="p">:</span>
+        <span class="n">p_11</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">g</span>
+        <span class="n">p_10</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">g</span><span class="p">)</span>
+        <span class="n">p_01</span> <span class="o">=</span> <span class="n">g</span>
+        <span class="n">p_00</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">g</span>
+
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;2HT&quot;</span><span class="p">:</span>
+        <span class="n">p_11</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">g</span>
+        <span class="n">p_10</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">g</span><span class="p">)</span>
+        <span class="n">p_01</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">g</span>
+        <span class="n">p_00</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">g</span><span class="p">)</span>
+
+    <span class="c1"># Assert that category probabilities sum to 1</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">((</span><span class="n">p_11</span> <span class="o">+</span> <span class="n">p_10</span><span class="p">,</span> <span class="n">p_01</span> <span class="o">+</span> <span class="n">p_00</span><span class="p">),</span> <span class="mi">1</span><span class="p">)),</span> <span class="s2">&quot;Category probabilities do not sum to 1!&quot;</span>
+
+    <span class="c1"># Create vectors of stimulus types</span>
+    <span class="n">stims_single</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">repeats</span><span class="o">=</span><span class="n">obs_per_condition</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># For 1 participant</span>
+    <span class="n">stims_data_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">stims_single</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># For all participants</span>
+
+    <span class="c1"># Simulate responses</span>
+    <span class="n">resp_1</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p_11</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">obs_per_condition</span><span class="p">,</span> <span class="n">num_groups</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">resp_0</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p_01</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">obs_per_condition</span><span class="p">,</span> <span class="n">num_groups</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">resp_1</span><span class="p">,</span> <span class="n">resp_0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Create final data set</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">stims_data_set</span><span class="p">,</span> <span class="n">resp</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_1ht</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">GenerativeModel</span><span class="p">(</span>
+    <span class="n">prior</span><span class="o">=</span><span class="n">prior</span><span class="p">,</span>
+    <span class="n">simulator</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">hierarchical_mpt_simulator</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;1HT&quot;</span><span class="p">,</span> <span class="n">num_groups</span><span class="o">=</span><span class="n">N_GROUPS</span><span class="p">,</span> <span class="n">num_obs</span><span class="o">=</span><span class="n">N_OBS</span><span class="p">),</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;1HT&quot;</span><span class="p">,</span>
+    <span class="n">simulator_is_batched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">model_2ht</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">GenerativeModel</span><span class="p">(</span>
+    <span class="n">prior</span><span class="o">=</span><span class="n">prior</span><span class="p">,</span>
+    <span class="n">simulator</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">hierarchical_mpt_simulator</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;2HT&quot;</span><span class="p">,</span> <span class="n">num_groups</span><span class="o">=</span><span class="n">N_GROUPS</span><span class="p">,</span> <span class="n">num_obs</span><span class="o">=</span><span class="n">N_OBS</span><span class="p">),</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;2HT&quot;</span><span class="p">,</span>
+    <span class="n">simulator_is_batched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Performing 2 pilot runs with the 1HT model...
+INFO:root:Shape of parameter batch after 2 pilot simulations: (batch_size = 2, 6)
+INFO:root:Shape of simulation batch after 2 pilot simulations: (batch_size = 2, 50, 100, 2)
+INFO:root:No optional prior non-batchable context provided.
+INFO:root:No optional prior batchable context provided.
+INFO:root:No optional simulation non-batchable context provided.
+INFO:root:No optional simulation batchable context provided.
+INFO:root:Performing 2 pilot runs with the 2HT model...
+INFO:root:Shape of parameter batch after 2 pilot simulations: (batch_size = 2, 6)
+INFO:root:Shape of simulation batch after 2 pilot simulations: (batch_size = 2, 50, 100, 2)
+INFO:root:No optional prior non-batchable context provided.
+INFO:root:No optional prior batchable context provided.
+INFO:root:No optional simulation non-batchable context provided.
+INFO:root:No optional simulation batchable context provided.
+</pre></div>
+</div>
+</div>
+</div>
+<p>We added the ‘group’-dimension to our data sets, so we now have our data in a 4-dimensional format with the shape (number of data sets, number of groups/participants, number of observations, number of variables):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_output</span> <span class="o">=</span> <span class="n">model_1ht</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shape of data batch:&quot;</span><span class="p">,</span> <span class="n">model_output</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;First 3 rows of first 2 participants in first data set:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">model_output</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Shape of data batch: (5, 50, 100, 2)
+First 3 rows of first 2 participants in first data set:
+[[[1 1]
+  [1 1]
+  [1 0]]
+
+ [[1 0]
+  [1 1]
+  [1 1]]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">meta_model</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">MultiGenerativeModel</span><span class="p">([</span><span class="n">model_1ht</span><span class="p">,</span> <span class="n">model_2ht</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="prior-predictive-checks">
+<h3><span class="section-number">7.2.3. </span>Prior Predictive Checks<a class="headerlink" href="#prior-predictive-checks" title="Permalink to this heading">#</a></h3>
+<p>The interplay between parameters on several levels adds more complexity to the behavior of hierarchical models. Therefore, prior predictive or pushfoward checks become even more crucial for inspecting whether the chosen parametrization matches one’s expectations. Our simulated data sets now contain <code class="docutils literal notranslate"><span class="pre">NUM_GROUPS</span></code> participants and <code class="docutils literal notranslate"><span class="pre">NUM_OBS</span></code> observations each. If we want to simulate 1000 participants as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we now need only 20 simulations from a model, as each data set contains 50 participants. Afterwards, we calculate the hit rates and false alarm rates for each simulated participant as before and plot them.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Data simulation</span>
+<span class="n">sim_pfcheck_1ht</span> <span class="o">=</span> <span class="n">model_1ht</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">sim_pfcheck_2ht</span> <span class="o">=</span> <span class="n">model_2ht</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 2. Summary statistics</span>
+<span class="k">def</span> <span class="nf">get_rates</span><span class="p">(</span><span class="n">sim_data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the hit rate and false alarm rate per participant for each data set in a batch</span>
+<span class="sd">    of hierarchical data sets simulating binary decision (recognition) tasks.</span>
+<span class="sd">    Assumes first half of data to cover old items and second half to cover new items.&quot;&quot;&quot;</span>
+
+    <span class="n">obs_per_condition</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">sim_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">hit_rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">sim_data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">obs_per_condition</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">fa_rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">sim_data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">obs_per_condition</span><span class="p">:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">hit_rates</span><span class="p">,</span> <span class="n">fa_rates</span>
+
+
+<span class="n">rates_1htm</span> <span class="o">=</span> <span class="n">get_rates</span><span class="p">(</span><span class="n">sim_pfcheck_1ht</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">])</span>
+<span class="n">rates_2htm</span> <span class="o">=</span> <span class="n">get_rates</span><span class="p">(</span><span class="n">sim_pfcheck_2ht</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">])</span>
+<span class="n">rates</span> <span class="o">=</span> <span class="p">[</span><span class="n">rates_1htm</span><span class="p">,</span> <span class="n">rates_2htm</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 3a. Plot rates across all data sets</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">constrained_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">subfigs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">subfigures</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">model_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Hierarchical 1HT MPT Model&quot;</span><span class="p">,</span> <span class="s2">&quot;Hierarchical 2HT MPT Model&quot;</span><span class="p">]</span>
+<span class="n">num_bins</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">num_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">subfig</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subfigs</span><span class="p">):</span>
+    <span class="n">subfig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">model_names</span><span class="p">[</span><span class="n">row</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+    <span class="n">axs</span> <span class="o">=</span> <span class="n">subfig</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hit Rates&quot;</span>
+    <span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;False Alarm Rates&quot;</span>
+    <span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/cc76c2a87a0e1524bdf502b2f029d22ecce9212444e6ef5b609871570de2f0d8.png" src="../_images/cc76c2a87a0e1524bdf502b2f029d22ecce9212444e6ef5b609871570de2f0d8.png" />
+</div>
+</div>
+<p>If we plot our 1000 participants over all data sets, we see simular patterns as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>. Let’s additionally take a look at the patterns within the simulated data sets to ensure that the variability between data sets is reasonable:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">__version__</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;0.12.2&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 3b. Plot rates for each data set</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">constrained_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">subfigs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">subfigures</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">palette</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">rates_1htm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">subfig</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subfigs</span><span class="p">):</span>
+    <span class="n">subfig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">model_names</span><span class="p">[</span><span class="n">row</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+    <span class="n">axs</span> <span class="o">=</span> <span class="n">subfig</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="p">[</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axs</span><span class="p">]</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="n">palette</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hit Rates&quot;</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="n">palette</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;False Alarm Rates&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/9d0e970196e7133477480a2c8e987d0c3a97630e831a6ef699ab0609d796d8cc.png" src="../_images/9d0e970196e7133477480a2c8e987d0c3a97630e831a6ef699ab0609d796d8cc.png" />
+</div>
+</div>
+<p>We observe some variability but not completely opposing patterns between our simulated data sets. This matches the expectations that we would have when collecting multiple data sets in the field.</p>
+</section>
+</section>
+<section id="defining-training-validating-the-neural-approximator">
+<h2><span class="section-number">7.3. </span>Defining, Training &amp; Validating the Neural Approximator<a class="headerlink" href="#defining-training-validating-the-neural-approximator" title="Permalink to this heading">#</a></h2>
+<p>We adapt the neural network architecture to this new symmetry by changing only a single part, the summary network. We now use a <code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork</span></code> which we pass one summary network for each level. The majority of hierarchical models in cognitive modeling assume IID data on all levels, so we simply use one <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> network for each level. If would have, for instance, temporal dependencies within each participant, we would exchange the first network to one that is specialized on time series data, such as a <code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer</span></code>.</p>
+<p>After this adjustment, all subsequent elements of the training and validation process stay the same as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">summary_networks</span><span class="o">.</span><span class="n">HierarchicalNetwork</span><span class="p">([</span><span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(),</span> <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">()])</span>
+<span class="n">inference_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">inference_networks</span><span class="o">.</span><span class="n">PMPNetwork</span><span class="p">(</span><span class="n">num_models</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">amortizer</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">amortizers</span><span class="o">.</span><span class="n">AmortizedModelComparison</span><span class="p">(</span><span class="n">inference_net</span><span class="p">,</span> <span class="n">summary_net</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trainer</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">trainers</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span><span class="n">amortizer</span><span class="o">=</span><span class="n">amortizer</span><span class="p">,</span> <span class="n">generative_model</span><span class="o">=</span><span class="n">meta_model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Performing a consistency check with provided components...
+INFO:root:Done.
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note: Online learning will be a bit slow to due slow data generation, but still worth it due to amortization. :-)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">losses</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9a80c0c876d948e58dd6074095605ea2", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "68dc25b988dd4c05ad91cdba00a21625", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "cc3e92b1725247d49046f8f4ea27b297", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">diag_plot</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">train_losses</span><span class="o">=</span><span class="n">losses</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/60dbc832a609c992cc19085c5253f7c9dd24275e3220ffce16ea0e5b5f4bbf04.png" src="../_images/60dbc832a609c992cc19085c5253f7c9dd24275e3220ffce16ea0e5b5f4bbf04.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate some validation data in a list to avoid memory troubles during evaluation</span>
+<span class="n">sim_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">trainer</span><span class="o">.</span><span class="n">configurator</span><span class="p">(</span><span class="n">meta_model</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">)]</span>
+
+<span class="c1"># Get true indices and predicted PMPs from the trained network</span>
+<span class="n">sim_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;model_indices&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sim_data</span><span class="p">])</span>
+
+<span class="c1"># Estimate model probs in a loop</span>
+<span class="n">model_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">amortizer</span><span class="o">.</span><span class="n">posterior_probs</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sim_data</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cal_curves</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_calibration_curves</span><span class="p">(</span><span class="n">sim_indices</span><span class="p">,</span> <span class="n">model_probs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/d32f91f80c6c8a7752406837fa9a24461eb203db7a6c9040c99806db55ceb66b.png" src="../_images/d32f91f80c6c8a7752406837fa9a24461eb203db7a6c9040c99806db55ceb66b.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_confusion_matrix</span><span class="p">(</span><span class="n">sim_indices</span><span class="p">,</span> <span class="n">model_probs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/56e367deec3718a5247e7749d4d1b0a495187a5acad67eba6c6eec857827b6dd.png" src="../_images/56e367deec3718a5247e7749d4d1b0a495187a5acad67eba6c6eec857827b6dd.png" />
+</div>
+</div>
+<p>Our neural network quickly learned to discriminate between the two hierarchical models and shows excellent performance when validated on simulated data. The calibration curves look a bit shaky, but the marginal bin histograms tell us that this is due to the majority of the predicted probabilities being close to 0 or 1, leaving the middle (‘uncertain’) bins quite abandonded.</p>
+</section>
+<section id="network-application">
+<h2><span class="section-number">7.4. </span>Network Application<a class="headerlink" href="#network-application" title="Permalink to this heading">#</a></h2>
+<p>As in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we apply our trained model to a synthetic data set from the 2HT model. We again redefine our simulator with fixed random seeds for reproducible results:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prior_fixed</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Prior</span><span class="p">(</span>
+    <span class="n">prior_fun</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">hierarchical_prior_fun</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2023</span><span class="p">)),</span> <span class="n">param_names</span><span class="o">=</span><span class="n">PARAM_NAMES</span>
+<span class="p">)</span>
+<span class="n">fake_data_generator</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">GenerativeModel</span><span class="p">(</span>
+    <span class="n">prior</span><span class="o">=</span><span class="n">prior_fixed</span><span class="p">,</span>
+    <span class="n">simulator</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span>
+        <span class="n">hierarchical_mpt_simulator</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;2HT&quot;</span><span class="p">,</span> <span class="n">num_groups</span><span class="o">=</span><span class="n">N_GROUPS</span><span class="p">,</span> <span class="n">num_obs</span><span class="o">=</span><span class="n">N_OBS</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2023</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">skip_test</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">simulator_is_batched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">fake_data</span> <span class="o">=</span> <span class="n">fake_data_generator</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fake_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(1, 50, 100, 2)
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can inspect our simulated data set by looking at hit and false alarm rates for each of our 50 participants. This is best done visually:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rates</span> <span class="o">=</span> <span class="n">get_rates</span><span class="p">(</span><span class="n">fake_data</span><span class="p">)</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hit Rates&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;False Alarm Rates&quot;</span>
+<span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/b675e38e6e02c680d3dab96d532d961d4f08a462736a37c12e7a20c7d88c2b93.png" src="../_images/b675e38e6e02c680d3dab96d532d961d4f08a462736a37c12e7a20c7d88c2b93.png" />
+</div>
+</div>
+<p>As in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, our data set contains many participants with low false alarm rates, which are unlikely under the 1HT model. Let’s see the evidence contained in our simulated data:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">summary_net</span><span class="p">(</span><span class="n">fake_data</span><span class="p">)</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">inference_net</span><span class="o">.</span><span class="n">posterior_probs</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">preds</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(2,), dtype=float32, numpy=array([0.00307983, 0.9969202 ], dtype=float32)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bayes_factor12</span> <span class="o">=</span> <span class="n">preds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">preds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">bayes_factor12</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(), dtype=float32, numpy=0.003089342&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Our Bayesian model comparison reveals clear evidence for the 2HT model, much more decisive than in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>. While the unambiguousness of the results depends of course on the model specification and the randomly simulated data, our model comparison now contains 50 times more data by considering all participants simultaneously!</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Model_Comparison_MPT.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><span class="section-number">6. </span>Model Comparison for Cognitive Models</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../documentation.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Documentation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">7.1. Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">7.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperpriors-and-priors">7.2.1. Hyperpriors and Priors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-the-simulators">7.2.2. Creating the Simulators</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">7.2.3. Prior Predictive Checks</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-training-validating-the-neural-approximator">7.3. Defining, Training &amp; Validating the Neural Approximator</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">7.4. Network Application</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

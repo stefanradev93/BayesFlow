@@ -1,0 +1,949 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bayesflow.computational_utilities &#8212; BayesFlow: Amortized Bayesian Inference</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/bayesflow/computational_utilities';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/_modules/bayesflow/computational_utilities.html" />
+    <link rel="shortcut icon" href="../../_static/bayesflow_hex.ico"/>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../documentation.html">Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/advanced_documentation.html">Advanced documentation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../api/bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.losses.html">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Full Installation Instructions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About us</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2F_modules/bayesflow/computational_utilities.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for bayesflow.computational_utilities</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
+
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies or substantial portions of the Software.</span>
+
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="c1"># SOFTWARE.</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">from</span> <span class="nn">sklearn.calibration</span> <span class="kn">import</span> <span class="n">calibration_curve</span>
+
+<span class="kn">from</span> <span class="nn">bayesflow.default_settings</span> <span class="kn">import</span> <span class="n">MMD_BANDWIDTH_LIST</span>
+<span class="kn">from</span> <span class="nn">bayesflow.exceptions</span> <span class="kn">import</span> <span class="n">ShapeError</span>
+
+
+<div class="viewcode-block" id="posterior_calibration_error"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.posterior_calibration_error">[docs]</a><span class="k">def</span> <span class="nf">posterior_calibration_error</span><span class="p">(</span>
+    <span class="n">posterior_samples</span><span class="p">,</span>
+    <span class="n">prior_samples</span><span class="p">,</span>
+    <span class="n">alpha_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">aggregator_fun</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+    <span class="n">min_quantile</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span>
+    <span class="n">max_quantile</span><span class="o">=</span><span class="mf">0.995</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes an aggregate score for the marginal calibration error over an ensemble of approximate</span>
+<span class="sd">    posteriors. The calibration error is given as the aggregate (e.g., median) of the absolute deviation</span>
+<span class="sd">    between an alpha-CI and the relative number of inliers from ``prior_samples`` over multiple alphas in</span>
+<span class="sd">    (0, 1).</span>
+
+<span class="sd">    Note: The function will use posterior quantiles for determining the credibility intervals. An alternative</span>
+<span class="sd">    definition of the calibration error is possible using highest density intervals (HDIs).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    posterior_samples  : np.ndarray of shape (num_datasets, num_draws, num_params)</span>
+<span class="sd">        The random draws from the approximate posteriors over ``num_datasets``</span>
+<span class="sd">    prior_samples      : np.ndarray of shape (num_datasets, num_params)</span>
+<span class="sd">        The corresponding ground-truth values sampled from the prior</span>
+<span class="sd">    alpha_resolution   : int, optional, default: 100</span>
+<span class="sd">        The number of credibility intervals (CIs) to consider</span>
+<span class="sd">    aggregator_fun     : callable or None, optional, default: np.median</span>
+<span class="sd">        The function used to aggregate the marginal calibration errors.</span>
+<span class="sd">        If ``None`` provided, the per-alpha calibration errors will be returned.</span>
+<span class="sd">    min_quantile     : float in (0, 1), optional, default: 0.005</span>
+<span class="sd">        The minimum posterior quantile to consider</span>
+<span class="sd">    max_quantile     : float in (0, 1), optional, default: 0.995</span>
+<span class="sd">        The maximum posterior quantile to consider</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    calibration_errors : np.ndarray of shape (num_params, ) or (alpha_resolution, num_params),</span>
+<span class="sd">        if ``aggregator_fun is None``.</span>
+<span class="sd">        The aggregated calibration error per marginal posterior.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">num_params</span> <span class="o">=</span> <span class="n">prior_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">alphas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_quantile</span><span class="p">,</span> <span class="n">max_quantile</span><span class="p">,</span> <span class="n">alpha_resolution</span><span class="p">)</span>
+    <span class="n">absolute_errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">alpha_resolution</span><span class="p">,</span> <span class="n">num_params</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">alphas</span><span class="p">):</span>
+        <span class="c1"># Find lower and upper bounds of posterior distribution</span>
+        <span class="n">region</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span>
+        <span class="n">lower</span> <span class="o">=</span> <span class="n">region</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">region</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Compute percentiles for given alpha using the entire posterior sample</span>
+        <span class="n">quantiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">posterior_samples</span><span class="p">,</span> <span class="p">[</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Compute the relative number of inliers</span>
+        <span class="n">higher_mask</span> <span class="o">=</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">prior_samples</span>
+        <span class="n">lower_mask</span> <span class="o">=</span> <span class="n">prior_samples</span> <span class="o">&lt;=</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">inlier_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">higher_mask</span><span class="p">,</span> <span class="n">lower_mask</span><span class="p">)</span>
+        <span class="n">alpha_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">inlier_id</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">absolute_errors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">alpha_pred</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">aggregator_fun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">calibration_errors</span> <span class="o">=</span> <span class="n">aggregator_fun</span><span class="p">(</span><span class="n">absolute_errors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">calibration_errors</span>
+    <span class="k">return</span> <span class="n">absolute_errors</span></div>
+
+
+<div class="viewcode-block" id="compute_jacobian_trace"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.compute_jacobian_trace">[docs]</a><span class="k">def</span> <span class="nf">compute_jacobian_trace</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the exact Jacobian Trace of function with respect to inputs. Suitable for low dimensions (&lt;32)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    function : callable</span>
+<span class="sd">        The function whose Jacobian at inputs will be computed</span>
+<span class="sd">    inputs   : tf.Tensor of shape (batch_size, ...)</span>
+<span class="sd">        The tensor with respect to which we are computing the Jacobian</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    outputs  : tf.Tensor of shape (batch_size, ...)</span>
+<span class="sd">        The outputs of ``function``</span>
+<span class="sd">    trace    : tf.Tensor of shape (batch_size, ...)</span>
+<span class="sd">        The trace of the Jacobian at inputs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">batch_size</span><span class="p">,</span> <span class="n">dims</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">batch_size</span><span class="p">,</span> <span class="n">num_reps</span><span class="p">,</span> <span class="n">dims</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">num_reps</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">(</span><span class="n">persistent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
+        <span class="n">tape</span><span class="o">.</span><span class="n">watch</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dims</span><span class="p">):</span>
+        <span class="n">dummy</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">step</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">dummy</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+        <span class="n">vjp</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">output_gradients</span><span class="o">=</span><span class="n">epsilon</span><span class="p">)</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">trace</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">vjp</span> <span class="o">*</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<div class="viewcode-block" id="gaussian_kernel_matrix"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.gaussian_kernel_matrix">[docs]</a><span class="k">def</span> <span class="nf">gaussian_kernel_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sigmas</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes a Gaussian radial basis functions (RBFs) between the samples of x and y.</span>
+
+<span class="sd">    We create a sum of multiple Gaussian kernels each having a width :math:`\sigma_i`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x       :  tf.Tensor of shape (num_draws_x, num_features)</span>
+<span class="sd">        Comprises `num_draws_x` Random draws from the &quot;source&quot; distribution `P`.</span>
+<span class="sd">    y       :  tf.Tensor of shape (num_draws_y, num_features)</span>
+<span class="sd">        Comprises `num_draws_y` Random draws from the &quot;source&quot; distribution `Q`.</span>
+<span class="sd">    sigmas  : list(float), optional, default: None</span>
+<span class="sd">        List which denotes the widths of each of the gaussians in the kernel.</span>
+<span class="sd">        If `sigmas is None`, a default range will be used, contained in ``bayesflow.default_settings.MMD_BANDWIDTH_LIST``</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    kernel  : tf.Tensor of shape (num_draws_x, num_draws_y)</span>
+<span class="sd">        The kernel matrix between pairs from `x` and `y`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">sigmas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sigmas</span> <span class="o">=</span> <span class="n">MMD_BANDWIDTH_LIST</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">sigmas</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">s</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">dist</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">kernel</span></div>
+
+
+<div class="viewcode-block" id="inverse_multiquadratic_kernel_matrix"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.inverse_multiquadratic_kernel_matrix">[docs]</a><span class="k">def</span> <span class="nf">inverse_multiquadratic_kernel_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sigmas</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes an inverse multiquadratic RBF between the samples of x and y.</span>
+
+<span class="sd">    We create a sum of multiple IM-RBF kernels each having a width :math:`\sigma_i`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x       :  tf.Tensor of shape (num_draws_x, num_features)</span>
+<span class="sd">        Comprises `num_draws_x` Random draws from the &quot;source&quot; distribution `P`.</span>
+<span class="sd">    y       :  tf.Tensor of shape (num_draws_y, num_features)</span>
+<span class="sd">        Comprises `num_draws_y` Random draws from the &quot;source&quot; distribution `Q`.</span>
+<span class="sd">    sigmas  : list(float), optional, default: None</span>
+<span class="sd">        List which denotes the widths of each of the gaussians in the kernel.</span>
+<span class="sd">        If `sigmas is None`, a default range will be used, contained in `bayesflow.default_settings.MMD_BANDWIDTH_LIST`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    kernel  : tf.Tensor of shape (num_draws_x, num_draws_y)</span>
+<span class="sd">        The kernel matrix between pairs from `x` and `y`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">sigmas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sigmas</span> <span class="o">=</span> <span class="n">MMD_BANDWIDTH_LIST</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">((</span><span class="n">x</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sigmas</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">sigmas</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">sigmas</span> <span class="o">/</span> <span class="p">(</span><span class="n">dist</span> <span class="o">+</span> <span class="n">sigmas</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mmd_kernel"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.mmd_kernel">[docs]</a><span class="k">def</span> <span class="nf">mmd_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the estimator of the Maximum Mean Discrepancy (MMD) between two samples: x and y.</span>
+
+<span class="sd">    Maximum Mean Discrepancy (MMD) is a distance-measure between random draws from</span>
+<span class="sd">    the distributions `x ~ P` and `y ~ Q`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x      : tf.Tensor of shape (N, num_features)</span>
+<span class="sd">        An array of `N` random draws from the &quot;source&quot; distribution `x ~ P`.</span>
+<span class="sd">    y      : tf.Tensor of shape (M, num_features)</span>
+<span class="sd">        An array of `M` random draws from the &quot;target&quot; distribution `y ~ Q`.</span>
+<span class="sd">    kernel : callable</span>
+<span class="sd">        A function which computes the distance between pairs of samples.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    loss   : tf.Tensor of shape (,)</span>
+<span class="sd">        The statistically biased squared maximum mean discrepancy (MMD) value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+    <span class="n">loss</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+    <span class="n">loss</span> <span class="o">-=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">loss</span></div>
+
+
+<div class="viewcode-block" id="mmd_kernel_unbiased"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.mmd_kernel_unbiased">[docs]</a><span class="k">def</span> <span class="nf">mmd_kernel_unbiased</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the unbiased estimator of the Maximum Mean Discrepancy (MMD) between two samples: x and y.</span>
+<span class="sd">    Maximum Mean Discrepancy (MMD) is a distance-measure between the samples of the distributions `x ~ P` and `y ~ Q`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x      : tf.Tensor of shape (N, num_features)</span>
+<span class="sd">        An array of `N` random draws from the &quot;source&quot; distribution `x ~ P`.</span>
+<span class="sd">    y      : tf.Tensor of shape (M, num_features)</span>
+<span class="sd">        An array of `M` random draws from the &quot;target&quot; distribution `y ~ Q`.</span>
+<span class="sd">    kernel : callable</span>
+<span class="sd">        A function which computes the distance between pairs of random draws from `x` and `y`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    loss   : tf.Tensor of shape (,)</span>
+<span class="sd">        The statistically unbiaserd squared maximum mean discrepancy (MMD) value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="p">(</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+    <span class="n">loss</span> <span class="o">+=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+    <span class="n">loss</span> <span class="o">-=</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="n">n</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">loss</span></div>
+
+
+<div class="viewcode-block" id="expected_calibration_error"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.expected_calibration_error">[docs]</a><span class="k">def</span> <span class="nf">expected_calibration_error</span><span class="p">(</span><span class="n">m_true</span><span class="p">,</span> <span class="n">m_pred</span><span class="p">,</span> <span class="n">num_bins</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimates the expected calibration error (ECE) of a model comparison network according to [1].</span>
+
+<span class="sd">    [1] Naeini, M. P., Cooper, G., &amp; Hauskrecht, M. (2015).</span>
+<span class="sd">        Obtaining well calibrated probabilities using bayesian binning.</span>
+<span class="sd">        In Proceedings of the AAAI conference on artificial intelligence (Vol. 29, No. 1).</span>
+
+<span class="sd">    Important</span>
+<span class="sd">    ---------</span>
+<span class="sd">    Make sure that ``m_true`` are **one-hot encoded** classes!</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    m_true      : np.ndarray of shape (num_sim, num_models)</span>
+<span class="sd">        The one-hot-encoded true model indices.</span>
+<span class="sd">    m_pred      : tf.tensor of shape (num_sim, num_models)</span>
+<span class="sd">        The predicted posterior model probabilities.</span>
+<span class="sd">    num_bins    : int, optional, default: 10</span>
+<span class="sd">        The number of bins to use for the calibration curves (and marginal histograms).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cal_errs    : list of length (num_models)</span>
+<span class="sd">        The ECEs for each model.</span>
+<span class="sd">    probs       : list of length (num_models)</span>
+<span class="sd">        The bin information for constructing the calibration curves.</span>
+<span class="sd">        Each list contains two arrays of length (num_bins) with the predicted and true probabilities for each bin.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert tf.Tensors to numpy, if passed</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">m_true</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">m_true</span> <span class="o">=</span> <span class="n">m_true</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">m_pred</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">m_pred</span> <span class="o">=</span> <span class="n">m_pred</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+    <span class="c1"># Extract number of models and prepare containers</span>
+    <span class="n">n_models</span> <span class="o">=</span> <span class="n">m_true</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">cal_errs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">probs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Loop for each model and compute calibration errs per bin</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_models</span><span class="p">):</span>
+        <span class="n">y_true</span> <span class="o">=</span> <span class="p">(</span><span class="n">m_true</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">y_prob</span> <span class="o">=</span> <span class="n">m_pred</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span>
+        <span class="n">prob_true</span><span class="p">,</span> <span class="n">prob_pred</span> <span class="o">=</span> <span class="n">calibration_curve</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_prob</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="n">num_bins</span><span class="p">)</span>
+
+        <span class="c1"># Compute ECE by weighting bin errors by bin size</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">num_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">binids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">y_prob</span><span class="p">)</span>
+        <span class="n">bin_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">binids</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">))</span>
+        <span class="n">nonzero</span> <span class="o">=</span> <span class="n">bin_total</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="n">cal_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">prob_true</span> <span class="o">-</span> <span class="n">prob_pred</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">bin_total</span><span class="p">[</span><span class="n">nonzero</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)))</span>
+
+        <span class="n">cal_errs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cal_err</span><span class="p">)</span>
+        <span class="n">probs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">prob_true</span><span class="p">,</span> <span class="n">prob_pred</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">cal_errs</span><span class="p">,</span> <span class="n">probs</span></div>
+
+
+<div class="viewcode-block" id="maximum_mean_discrepancy"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.maximum_mean_discrepancy">[docs]</a><span class="k">def</span> <span class="nf">maximum_mean_discrepancy</span><span class="p">(</span><span class="n">source_samples</span><span class="p">,</span> <span class="n">target_samples</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span> <span class="n">mmd_weight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the MMD given a particular choice of kernel.</span>
+
+<span class="sd">    For details, consult Gretton et al. (2012):</span>
+<span class="sd">    https://www.jmlr.org/papers/volume13/gretton12a/gretton12a.pdf</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    source_samples : tf.Tensor of shape (N, num_features)</span>
+<span class="sd">        An array of `N` random draws from the &quot;source&quot; distribution.</span>
+<span class="sd">    target_samples : tf.Tensor of shape  (M, num_features)</span>
+<span class="sd">        An array of `M` random draws from the &quot;target&quot; distribution.</span>
+<span class="sd">    kernel         : str in (&#39;gaussian&#39;, &#39;inverse_multiquadratic&#39;), optional, default: &#39;gaussian&#39;</span>
+<span class="sd">        The kernel to use for computing the distance between pairs of random draws.</span>
+<span class="sd">    mmd_weight     : float, optional, default: 1.0</span>
+<span class="sd">        The weight of the MMD value.</span>
+<span class="sd">    minimum        : float, optional, default: 0.0</span>
+<span class="sd">        The lower bound of the MMD value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    loss_value : tf.Tensor</span>
+<span class="sd">        A scalar Maximum Mean Discrepancy, shape (,)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Determine kernel, fall back to Gaussian if unknown string passed</span>
+    <span class="k">if</span> <span class="n">kernel</span> <span class="o">==</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">:</span>
+        <span class="n">kernel_fun</span> <span class="o">=</span> <span class="n">gaussian_kernel_matrix</span>
+    <span class="k">elif</span> <span class="n">kernel</span> <span class="o">==</span> <span class="s2">&quot;inverse_multiquadratic&quot;</span><span class="p">:</span>
+        <span class="n">kernel_fun</span> <span class="o">=</span> <span class="n">inverse_multiquadratic_kernel_matrix</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kernel_fun</span> <span class="o">=</span> <span class="n">gaussian_kernel_matrix</span>
+
+    <span class="c1"># Compute and return MMD value</span>
+    <span class="n">loss_value</span> <span class="o">=</span> <span class="n">mmd_kernel</span><span class="p">(</span><span class="n">source_samples</span><span class="p">,</span> <span class="n">target_samples</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_fun</span><span class="p">)</span>
+    <span class="n">loss_value</span> <span class="o">=</span> <span class="n">mmd_weight</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">minimum</span><span class="p">,</span> <span class="n">loss_value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loss_value</span></div>
+
+
+<div class="viewcode-block" id="get_coverage_probs"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.get_coverage_probs">[docs]</a><span class="k">def</span> <span class="nf">get_coverage_probs</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vectorized function to compute the minimal coverage probability for uniform</span>
+<span class="sd">    ECDFs given evaluation points z and a sample of samples u.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    z  : np.ndarray of shape (num_points, )</span>
+<span class="sd">        The vector of evaluation points.</span>
+<span class="sd">    u  : np.ndarray of shape (num_simulations, num_samples)</span>
+<span class="sd">        The matrix of simulated draws (samples) from U(0, 1)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">F_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">z</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">u</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">bin1</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">binom</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">F_m</span><span class="p">)</span>
+    <span class="n">bin2</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">binom</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">F_m</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">bin1</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">bin2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">gamma</span></div>
+
+
+<div class="viewcode-block" id="simultaneous_ecdf_bands"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.simultaneous_ecdf_bands">[docs]</a><span class="k">def</span> <span class="nf">simultaneous_ecdf_bands</span><span class="p">(</span>
+    <span class="n">num_samples</span><span class="p">,</span> <span class="n">num_points</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_simulations</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">max_num_points</span><span class="o">=</span><span class="mi">1000</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the simultaneous ECDF bands through simulation according to</span>
+<span class="sd">    the algorithm described in Section 2.2:</span>
+
+<span class="sd">    https://link.springer.com/content/pdf/10.1007/s11222-022-10090-6.pdf</span>
+
+<span class="sd">    Depends on the vectorized utility function `get_coverage_probs(z, u)`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    num_samples     : int</span>
+<span class="sd">        The sample size used for computing the ECDF. Will equal to the number of posterior</span>
+<span class="sd">        samples when used for calibrarion. Corresponds to `N` in the paper above.</span>
+<span class="sd">    num_points      : int, optional, default: None</span>
+<span class="sd">        The number of evaluation points on the interval (0, 1). Defaults to `num_points = num_samples` if</span>
+<span class="sd">        not explicitly specified. Correspond to `K` in the paper above.</span>
+<span class="sd">    num_simulations : int, optional, default: 1000</span>
+<span class="sd">        The number of samples of size `n_samples` to simulate for determining the simultaneous CIs.</span>
+<span class="sd">    confidence      : float in (0, 1), optional, default: 0.95</span>
+<span class="sd">        The confidence level, `confidence = 1 - alpha` specifies the width of the confidence interval.</span>
+<span class="sd">    eps             : float, optional, default: 1e-5</span>
+<span class="sd">        Small number to add to the lower and subtract from the upper bound of the interval [0, 1]</span>
+<span class="sd">        to avoid edge artefacts. No need to touch this.</span>
+<span class="sd">    max_num_points  : int, optional, default: 1000</span>
+<span class="sd">        Upper bound on `num_points`. Saves computation time when `num_samples` is large.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    (alpha, z, L, U) - tuple of scalar and three arrays of size (num_samples,) containing the confidence level as well as</span>
+<span class="sd">                       the evaluation points, the lower, and the upper confidence bands, respectively.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Use shorter var names throughout</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">num_samples</span>
+    <span class="k">if</span> <span class="n">num_points</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">max_num_points</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">num_points</span><span class="p">,</span> <span class="n">max_num_points</span><span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">num_simulations</span>
+
+    <span class="c1"># Specify evaluation points</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span> <span class="o">+</span> <span class="n">eps</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">eps</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="c1"># Simulate M samples of size N</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+
+    <span class="c1"># Get alpha</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">confidence</span>
+
+    <span class="c1"># Compute minimal coverage probabilities</span>
+    <span class="n">gammas</span> <span class="o">=</span> <span class="n">get_coverage_probs</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+
+    <span class="c1"># Use insights from paper to compute lower and upper confidence interval</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">gammas</span><span class="p">,</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">binom</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">gamma</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">binom</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">gamma</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
+    <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">U</span></div>
+
+
+<div class="viewcode-block" id="mean_squared_error"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.mean_squared_error">[docs]</a><span class="k">def</span> <span class="nf">mean_squared_error</span><span class="p">(</span><span class="n">x_true</span><span class="p">,</span> <span class="n">x_pred</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the mean squared error between a single true value and M estimates thereof.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    x_true      : float or np.ndarray</span>
+<span class="sd">        true values, shape ()</span>
+<span class="sd">    x_pred      : np.ndarray</span>
+<span class="sd">        predicted values, shape (M, )</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out : float</span>
+<span class="sd">        The MSE between ``x_true`` and ``x_pred``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_true</span><span class="p">)</span>
+    <span class="n">x_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_pred</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">x_true</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x_pred</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">x_true</span> <span class="o">-</span> <span class="n">x_pred</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="root_mean_squared_error"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.root_mean_squared_error">[docs]</a><span class="k">def</span> <span class="nf">root_mean_squared_error</span><span class="p">(</span><span class="n">x_true</span><span class="p">,</span> <span class="n">x_pred</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the root mean squared error (RMSE) between a single true value and M estimates thereof.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    x_true      : float or np.ndarray</span>
+<span class="sd">        true values, shape ()</span>
+<span class="sd">    x_pred      : np.ndarray</span>
+<span class="sd">        predicted values, shape (M, )</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out : float</span>
+<span class="sd">        The RMSE between ``x_true`` and ``x_pred``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">x_true</span><span class="o">=</span><span class="n">x_true</span><span class="p">,</span> <span class="n">x_pred</span><span class="o">=</span><span class="n">x_pred</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="aggregated_error"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.aggregated_error">[docs]</a><span class="k">def</span> <span class="nf">aggregated_error</span><span class="p">(</span><span class="n">x_true</span><span class="p">,</span> <span class="n">x_pred</span><span class="p">,</span> <span class="n">inner_error_fun</span><span class="o">=</span><span class="n">root_mean_squared_error</span><span class="p">,</span> <span class="n">outer_aggregation_fun</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the aggregated error between a vector of N true values and M estimates of each true value.</span>
+
+<span class="sd">    x_true      : np.ndarray</span>
+<span class="sd">    true values, shape (N)</span>
+
+<span class="sd">    x_pred      : np.ndarray</span>
+<span class="sd">    predicted values, shape (M, N)</span>
+
+<span class="sd">    inner_error_fun: callable, default: root_mean_squared_error</span>
+<span class="sd">    computes the error between one true value and M estimates thereof</span>
+
+<span class="sd">    outer_aggregation_fun: callable, default: np.mean</span>
+<span class="sd">    aggregates N errors to a single aggregated error value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x_true</span><span class="p">,</span> <span class="n">x_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_true</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_pred</span><span class="p">)</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="n">x_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">N</span> <span class="o">==</span> <span class="n">x_true</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="n">ShapeError</span>
+
+    <span class="n">errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">inner_error_fun</span><span class="p">(</span><span class="n">x_true</span><span class="o">=</span><span class="n">x_true</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x_pred</span><span class="o">=</span><span class="n">x_pred</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)])</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">N</span> <span class="o">==</span> <span class="n">errors</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="n">ShapeError</span>
+
+    <span class="k">return</span> <span class="n">outer_aggregation_fun</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="aggregated_rmse"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.aggregated_rmse">[docs]</a><span class="k">def</span> <span class="nf">aggregated_rmse</span><span class="p">(</span><span class="n">x_true</span><span class="p">,</span> <span class="n">x_pred</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the aggregated RMSE for a matrix of predictions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x_true      : np.ndarray</span>
+<span class="sd">    true values, shape (N)</span>
+
+<span class="sd">    x_pred      : np.ndarray</span>
+<span class="sd">    predicted values, shape (M, N)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    aggregated RMSE</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">aggregated_error</span><span class="p">(</span>
+        <span class="n">x_true</span><span class="o">=</span><span class="n">x_true</span><span class="p">,</span> <span class="n">x_pred</span><span class="o">=</span><span class="n">x_pred</span><span class="p">,</span> <span class="n">inner_error_fun</span><span class="o">=</span><span class="n">root_mean_squared_error</span><span class="p">,</span> <span class="n">outer_aggregation_fun</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

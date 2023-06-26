@@ -1,0 +1,741 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bayesflow.mcmc &#8212; BayesFlow: Amortized Bayesian Inference</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/bayesflow/mcmc';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/_modules/bayesflow/mcmc.html" />
+    <link rel="shortcut icon" href="../../_static/bayesflow_hex.ico"/>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../documentation.html">Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/advanced_documentation.html">Advanced documentation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../api/bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.losses.html">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Full Installation Instructions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About us</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2F_modules/bayesflow/mcmc.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for bayesflow.mcmc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
+
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies or substantial portions of the Software.</span>
+
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="c1"># SOFTWARE.</span>
+
+<span class="kn">import</span> <span class="nn">aesara.tensor</span> <span class="k">as</span> <span class="nn">at</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">bayesflow.default_settings</span> <span class="kn">import</span> <span class="n">DEFAULT_KEYS</span>
+
+
+<div class="viewcode-block" id="MCMCSurrogateLikelihood"><a class="viewcode-back" href="../../api/bayesflow.mcmc.html#bayesflow.mcmc.MCMCSurrogateLikelihood">[docs]</a><span class="k">class</span> <span class="nc">MCMCSurrogateLikelihood</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An interface to provide likelihood evaluation and gradient estimation of a pre-trained</span>
+<span class="sd">    ``AmortizedLikelihood`` instance, which can be used in tandem with (HMC)-MCMC, as implemented,</span>
+<span class="sd">    for instance, in ``PyMC3``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amortized_likelihood</span><span class="p">,</span> <span class="n">configurator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">likelihood_postprocessor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grad_postprocessor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates in instance of the surrogate likelihood using a pre-trained ``AmortizedLikelihood`` instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        amortized_likelihood       : bayesflow.amortized_inference.AmortizedLikelihood</span>
+<span class="sd">            A pre-trained (invertible) inference network which processes the outputs of the generative model.</span>
+<span class="sd">        configurator               : callable, optional, default: None</span>
+<span class="sd">            A function that takes the input to the ``log_likelihood`` and ``log_likelihood_grad``</span>
+<span class="sd">            calls and converts them to a dictionary containing the following mandatory keys,</span>
+<span class="sd">            if DEFAULT_KEYS unchanged:</span>
+<span class="sd">                ``observables`` - the variables over which a condition density is learned (i.e., the observables)</span>
+<span class="sd">                ``conditions``  - the conditioning variables that the directly passed to the inference network</span>
+<span class="sd">            default: Return the first parameter - has to be a dicitionary with the mentioned characteristics</span>
+<span class="sd">        likelihood_postprocessor  : callable, optional, default: None</span>
+<span class="sd">            A function that takes the likelihood for each observable as an input. Can be used for aggregation</span>
+<span class="sd">            default: sum all likelihood values and return a single value.</span>
+<span class="sd">        grad_postprocessor        : callable, optional, default: None</span>
+<span class="sd">            A function that takes the gradient for each value in ``conditions`` as returned by the preprocessor</span>
+<span class="sd">            default: Leave the values unchanged.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">amortized_likelihood</span> <span class="o">=</span> <span class="n">amortized_likelihood</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configurator</span> <span class="o">=</span> <span class="n">configurator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">configurator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_configurator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">likelihood_postprocessor</span> <span class="o">=</span> <span class="n">likelihood_postprocessor</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">likelihood_postprocessor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">likelihood_postprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_likelihood_postprocessor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grad_postprocessor</span> <span class="o">=</span> <span class="n">grad_postprocessor</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_postprocessor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grad_postprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_grad_postprocessor</span>
+
+    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">_default_configurator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">input_dict</span>
+
+    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">_default_likelihood_postprocessor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">_default_grad_postprocessor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">values</span>
+
+<div class="viewcode-block" id="MCMCSurrogateLikelihood.log_likelihood"><a class="viewcode-back" href="../../api/bayesflow.mcmc.html#bayesflow.mcmc.MCMCSurrogateLikelihood.log_likelihood">[docs]</a>    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the approximate log-likelihood of targets given conditional variables.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        The parameters as expected by ``configurator``. For the default configurator,</span>
+<span class="sd">        the first parameter has to be a dictionary containing the following mandatory keys,</span>
+<span class="sd">        if DEFAULT_KEYS unchanged:</span>
+<span class="sd">            ``observables`` - the variables over which a condition density is learned (i.e., the observables)</span>
+<span class="sd">            ``conditions``  - the conditioning variables that the directly passed to the inference network</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        out : np.ndarray</span>
+<span class="sd">            The output as returned by ``likelihood_postprocessor``. For the default postprocessor,</span>
+<span class="sd">            this is the total log-likelihood given by the sum of all log-likelihood values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">input_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurator</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">likelihood_postprocessor</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">amortized_likelihood</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">to_numpy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="MCMCSurrogateLikelihood.log_likelihood_grad"><a class="viewcode-back" href="../../api/bayesflow.mcmc.html#bayesflow.mcmc.MCMCSurrogateLikelihood.log_likelihood_grad">[docs]</a>    <span class="k">def</span> <span class="nf">log_likelihood_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the gradient of the surrogate likelihood with respect to</span>
+<span class="sd">        every parameter in ``conditions``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        The parameters as expected by ``configurator``. For the default configurator,</span>
+<span class="sd">        the first parameter has to be a dictionary containing the following mandatory keys,</span>
+<span class="sd">        if ``DEFAULT_KEYS`` unchanged:</span>
+<span class="sd">            ``observables`` - the variables over which a condition density is learned (i.e., the observables)</span>
+<span class="sd">            ``conditions``  - the conditioning variables that the directly passed to the inference network</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        out : np.ndarray</span>
+<span class="sd">            The output as returned by ``grad_postprocessor``. For the default postprocessor,</span>
+<span class="sd">            this is an array containing the derivative with respect to each value in ``conditions``</span>
+<span class="sd">            as returned by ``configurator``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">input_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurator</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">observables</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">input_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;observables&quot;</span><span class="p">]]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">conditions</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">input_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;conditions&quot;</span><span class="p">]]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_postprocessor</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log_likelihood_grad</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;observables&quot;</span><span class="p">]:</span> <span class="n">observables</span><span class="p">,</span> <span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;conditions&quot;</span><span class="p">]:</span> <span class="n">conditions</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">_log_likelihood_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the gradient with respect to every parameter contained in ``input_dict``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_dict : dict</span>
+<span class="sd">            Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:</span>
+<span class="sd">                ``observables`` - tf.constant: the variables over which a condition density is learned (i.e., the observables)</span>
+<span class="sd">                ``conditions``  - tf.Variable: the conditioning variables that the directly passed to the inference network</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        out : tf.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+            <span class="n">log_lik</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amortized_likelihood</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">to_numpy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">log_lik</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="n">input_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;conditions&quot;</span><span class="p">]]})[</span><span class="s2">&quot;p&quot;</span><span class="p">]</span></div>
+
+
+<span class="k">class</span> <span class="nc">_LogLikGrad</span><span class="p">(</span><span class="n">at</span><span class="o">.</span><span class="n">Op</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom log-likelihood operator, based on:</span>
+<span class="sd">    https://www.pymc.io/projects/examples/en/latest/case_studies/blackbox_external_likelihood_numpy.html#aesara-op-with-grad</span>
+
+<span class="sd">    This Op will execute the ``log_lik_grad`` function, supplying the gradient</span>
+<span class="sd">    for the custom surrogate likelihood function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">itypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">dvector</span><span class="p">]</span>
+    <span class="n">otypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">dvector</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_lik_grad</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">default_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize with the gradient function and the observables.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        log_lik_grad  : callable</span>
+<span class="sd">            The object that provides the gradient of the log-likelihood.</span>
+<span class="sd">        observables   : tf.constant, the shape depends on ``log_lik_grad``.</span>
+<span class="sd">            The variables over which a condition density is learned (i.e., the observables).</span>
+<span class="sd">        default_type  : np.dtype, optional, default: np.float64</span>
+<span class="sd">            The default float type to use for the gradient vectors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">observables</span> <span class="o">=</span> <span class="n">observables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_lik_grad</span> <span class="o">=</span> <span class="n">log_lik_grad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_type</span> <span class="o">=</span> <span class="n">default_type</span>
+
+    <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes gradients with respect to ``inputs`` (corresponding to the parameters of a model).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        node      : The symbolic ``aesara.graph.basic.Apply`` node that represents this computation.</span>
+<span class="sd">        inputs    : Immutable sequence of non-symbolic/numeric inputs. These are the values of each</span>
+<span class="sd">                    ``Variable`` in ``node.inputs``.</span>
+<span class="sd">        outputs   : List of mutable single-element lists (do not change the length of these lists).</span>
+<span class="sd">                    Each sub-list corresponds to value of each ``Variable`` in ``node.outputs``.</span>
+<span class="sd">                    The primary purpose of this method is to set the values of these sub-lists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="p">(</span><span class="n">theta</span><span class="p">,)</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_lik_grad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observables</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+        <span class="c1"># Attempt conversion to numpy, if not already an array</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="n">grad</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="c1"># Store grad in-place</span>
+        <span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_type</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PyMCSurrogateLikelihood"><a class="viewcode-back" href="../../api/bayesflow.mcmc.html#bayesflow.mcmc.PyMCSurrogateLikelihood">[docs]</a><span class="k">class</span> <span class="nc">PyMCSurrogateLikelihood</span><span class="p">(</span><span class="n">at</span><span class="o">.</span><span class="n">Op</span><span class="p">,</span> <span class="n">MCMCSurrogateLikelihood</span><span class="p">):</span>
+
+    <span class="n">itypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">dvector</span><span class="p">]</span>  <span class="c1"># expects a vector of parameter values when called</span>
+    <span class="n">otypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">dscalar</span><span class="p">]</span>  <span class="c1"># outputs a single scalar value (the log likelihood)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">amortized_likelihood</span><span class="p">,</span>
+        <span class="n">observables</span><span class="p">,</span>
+        <span class="n">configurator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">likelihood_postprocessor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">grad_postprocessor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">default_pymc_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+        <span class="n">default_tf_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A custom surrogate likelihood function for integration with ``PyMC3``, to be used with pymc.Potential</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        amortized_likelihood      : bayesflow.amortized_inference.AmortizedLikelihood</span>
+<span class="sd">            A pre-trained (invertible) inference network which processes the outputs of the generative model.</span>
+<span class="sd">        observables               :</span>
+<span class="sd">            The &quot;observed&quot; data that will be passed to the configurator.</span>
+<span class="sd">            For the default ``configurator``, an np.array of shape (N, x_dim).</span>
+<span class="sd">        configurator              : callable, optional, default None</span>
+<span class="sd">            A function that takes the input to the log_likelihood and log_likelihood_grad</span>
+<span class="sd">            calls and converts it to a dictionary containing the following mandatory keys,</span>
+<span class="sd">            if DEFAULT_KEYS unchanged:</span>
+<span class="sd">                ``observables`` - the variables over which a condition density is learned (i.e., the observables)</span>
+<span class="sd">                ``conditions``  - the conditioning variables that the directly passed to the inference network</span>
+<span class="sd">            default behavior: convert ``observables`` to shape (1, N, x_dim),</span>
+<span class="sd">                expand parameters of shape (cond_dim) to shape (1, N, cond_dim)</span>
+<span class="sd">        likelihood_postprocessor  : callable, optional, default: None</span>
+<span class="sd">            A function that takes the likelihood for each observable, can be used for aggregation</span>
+<span class="sd">            default behavior: sum all likelihoods and return a single value</span>
+<span class="sd">        grad_postprocessor        : callable, optional, default: None</span>
+<span class="sd">            A function that takes the gradient for each value in ``conditions`` as returned by the preprocessor</span>
+<span class="sd">            default behavior: Reduce shape from (1, N, cond_dim) to (cond_dim) by summing the corresponding values</span>
+<span class="sd">        default_pymc_type         : np.dtype, optional, default: np.float64</span>
+<span class="sd">            The default float type to use for numpy arrays as required by PyMC.</span>
+<span class="sd">        default_tf_type           : np.dtype, optional, default: np.float32</span>
+<span class="sd">            The default float type to use for tensorflow tensors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">MCMCSurrogateLikelihood</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">amortized_likelihood</span><span class="o">=</span><span class="n">amortized_likelihood</span><span class="p">,</span>
+            <span class="n">configurator</span><span class="o">=</span><span class="n">configurator</span><span class="p">,</span>
+            <span class="n">likelihood_postprocessor</span><span class="o">=</span><span class="n">likelihood_postprocessor</span><span class="p">,</span>
+            <span class="n">grad_postprocessor</span><span class="o">=</span><span class="n">grad_postprocessor</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">observables</span> <span class="o">=</span> <span class="n">observables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logpgrad</span> <span class="o">=</span> <span class="n">_LogLikGrad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood_grad</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observables</span><span class="p">,</span> <span class="n">default_type</span><span class="o">=</span><span class="n">default_pymc_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_pymc_type</span> <span class="o">=</span> <span class="n">default_pymc_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_tf_type</span> <span class="o">=</span> <span class="n">default_tf_type</span>
+
+    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">_default_configurator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="c1"># add axis (corresponds to batch_size=1)</span>
+            <span class="s2">&quot;observables&quot;</span><span class="p">:</span> <span class="n">obs</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+            <span class="c1"># expand conditions to match number of observables and add axis</span>
+            <span class="s2">&quot;conditions&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span> <span class="p">[</span><span class="n">obs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">])[</span><span class="n">tf</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+        <span class="p">}</span>
+
+    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">_default_grad_postprocessor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grads</span><span class="p">):</span>
+        <span class="c1"># remove axis added in configurator and undo expansion by summing</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">grads</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PyMCSurrogateLikelihood.perform"><a class="viewcode-back" href="../../api/bayesflow.mcmc.html#bayesflow.mcmc.PyMCSurrogateLikelihood.perform">[docs]</a>    <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes the log-likelihood of ``inputs`` (typically the parameter vector of a model).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        node      : The symbolic ``aesara.graph.basic.Apply`` node that represents this computation.</span>
+<span class="sd">        inputs    : Immutable sequence of non-symbolic/numeric inputs. These are the values of each</span>
+<span class="sd">                    ``Variable`` in ``node.inputs``.</span>
+<span class="sd">        outputs   : List of mutable single-element lists (do not change the length of these lists).</span>
+<span class="sd">                    Each sub-list corresponds to value of each ``Variable`` in ``node.outputs``.</span>
+<span class="sd">                    The primary purpose of this method is to set the values of these sub-lists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="p">(</span><span class="n">theta</span><span class="p">,)</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="n">logl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_tf_type</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+        <span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">logl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_pymc_type</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyMCSurrogateLikelihood.grad"><a class="viewcode-back" href="../../api/bayesflow.mcmc.html#bayesflow.mcmc.PyMCSurrogateLikelihood.grad">[docs]</a>    <span class="k">def</span> <span class="nf">grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">output_grads</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Aggregates gradients with respect to ``inputs`` (typically the parameter vector)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        inputs        : The input variables.</span>
+<span class="sd">        output_grads  : The gradients of the output variables.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        grads         : The gradients with respect to each ``Variable`` in ``inputs``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># the method that calculates the gradients - it actually returns the</span>
+        <span class="c1"># vector-Jacobian product - output_grads[0] is a vector of parameter values</span>
+        <span class="p">(</span><span class="n">theta</span><span class="p">,)</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">output_grads</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">logpgrad</span><span class="p">(</span><span class="n">theta</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">grads</span></div></div>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

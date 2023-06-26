@@ -1,0 +1,633 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bayesflow.default_settings &#8212; BayesFlow: Amortized Bayesian Inference</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/bayesflow/default_settings';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/_modules/bayesflow/default_settings.html" />
+    <link rel="shortcut icon" href="../../_static/bayesflow_hex.ico"/>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../documentation.html">Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/advanced_documentation.html">Advanced documentation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../api/bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.losses.html">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Full Installation Instructions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About us</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2F_modules/bayesflow/default_settings.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for bayesflow.default_settings</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
+
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies or substantial portions of the Software.</span>
+
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="c1"># SOFTWARE.</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+
+<div class="viewcode-block" id="Setting"><a class="viewcode-back" href="../../api/bayesflow.default_settings.html#bayesflow.default_settings.Setting">[docs]</a><span class="k">class</span> <span class="nc">Setting</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for settings. It&#39;s here to potentially extend the setting functionality in future.&quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="MetaDictSetting"><a class="viewcode-back" href="../../api/bayesflow.default_settings.html#bayesflow.default_settings.MetaDictSetting">[docs]</a><span class="k">class</span> <span class="nc">MetaDictSetting</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements an interface for a default meta_dict with optional mandatory fields.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">mandatory_fields</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        meta_dict        : dict</span>
+<span class="sd">            Default dictionary.</span>
+<span class="sd">        mandatory_fields : list, default: []</span>
+<span class="sd">            List of keys in `meta_dict` that need to be provided by the user.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta_dict</span> <span class="o">=</span> <span class="n">meta_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mandatory_fields</span> <span class="o">=</span> <span class="n">mandatory_fields</span></div>
+
+
+<span class="n">DEFAULT_SETTING_INVARIANT_NET</span> <span class="o">=</span> <span class="n">MetaDictSetting</span><span class="p">(</span>
+    <span class="n">meta_dict</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;num_dense_s1&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;num_dense_s2&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;num_dense_s3&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;num_equiv&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;pooling_fun&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dense_s1_args&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;dense_s2_args&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;dense_s3_args&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;summary_dim&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">mandatory_fields</span><span class="o">=</span><span class="p">[],</span>
+<span class="p">)</span>
+
+
+<span class="n">DEFAULT_SETTING_MULTI_CONV</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;layer_args&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;activation&quot;</span><span class="p">:</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;strides&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;padding&quot;</span><span class="p">:</span> <span class="s2">&quot;causal&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;min_kernel_size&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;max_kernel_size&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="n">DEFAULT_SETTING_DENSE_INVARIANT</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s2">&quot;activation&quot;</span><span class="p">:</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="s2">&quot;kernel_initializer&quot;</span><span class="p">:</span> <span class="s2">&quot;glorot_uniform&quot;</span><span class="p">}</span>
+
+
+<span class="n">DEFAULT_SETTING_DENSE_RECT</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span> <span class="s2">&quot;activation&quot;</span><span class="p">:</span> <span class="s2">&quot;swish&quot;</span><span class="p">,</span> <span class="s2">&quot;kernel_initializer&quot;</span><span class="p">:</span> <span class="s2">&quot;glorot_uniform&quot;</span><span class="p">}</span>
+
+
+<span class="n">DEFAULT_SETTING_DENSE_ATTENTION</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s2">&quot;activation&quot;</span><span class="p">:</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="s2">&quot;kernel_initializer&quot;</span><span class="p">:</span> <span class="s2">&quot;glorot_uniform&quot;</span><span class="p">}</span>
+
+
+<span class="n">DEFAULT_SETTING_DENSE_EVIDENTIAL</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+    <span class="s2">&quot;kernel_initializer&quot;</span><span class="p">:</span> <span class="s2">&quot;glorot_uniform&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;activation&quot;</span><span class="p">:</span> <span class="s2">&quot;elu&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="n">DEFAULT_SETTING_DENSE_PMP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+    <span class="s2">&quot;kernel_initializer&quot;</span><span class="p">:</span> <span class="s2">&quot;glorot_uniform&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;activation&quot;</span><span class="p">:</span> <span class="s2">&quot;elu&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="n">DEFAULT_SETTING_AFFINE_COUPLING</span> <span class="o">=</span> <span class="n">MetaDictSetting</span><span class="p">(</span>
+    <span class="n">meta_dict</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;dense_args&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="mf">5e-4</span><span class="p">)),</span>
+        <span class="s2">&quot;num_dense&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;spec_norm&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;mc_dropout&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;dropout&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;residual&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;dropout_prob&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="s2">&quot;soft_clamping&quot;</span><span class="p">:</span> <span class="mf">1.9</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">mandatory_fields</span><span class="o">=</span><span class="p">[],</span>
+<span class="p">)</span>
+
+
+<span class="n">DEFAULT_SETTING_SPLINE_COUPLING</span> <span class="o">=</span> <span class="n">MetaDictSetting</span><span class="p">(</span>
+    <span class="n">meta_dict</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;dense_args&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">)),</span>
+        <span class="s2">&quot;num_dense&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;spec_norm&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;mc_dropout&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;dropout&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;residual&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;dropout_prob&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+        <span class="s2">&quot;bins&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+        <span class="s2">&quot;default_domain&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="n">mandatory_fields</span><span class="o">=</span><span class="p">[],</span>
+<span class="p">)</span>
+
+
+<span class="n">DEFAULT_SETTING_ATTENTION</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;key_dim&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;num_heads&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;dropout&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">}</span>
+
+
+<span class="n">DEFAULT_SETTING_INVERTIBLE_NET</span> <span class="o">=</span> <span class="n">MetaDictSetting</span><span class="p">(</span>
+    <span class="n">meta_dict</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;num_coupling_layers&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s2">&quot;coupling_net_settings&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;coupling_design&quot;</span><span class="p">:</span> <span class="s2">&quot;affine&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;permutation&quot;</span><span class="p">:</span> <span class="s2">&quot;fixed&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;use_act_norm&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;act_norm_init&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;use_soft_flow&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;soft_flow_bounds&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">5e-2</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="n">mandatory_fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;num_params&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+
+<span class="n">DEFAULT_SETTING_EVIDENTIAL_NET</span> <span class="o">=</span> <span class="n">MetaDictSetting</span><span class="p">(</span>
+    <span class="n">meta_dict</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;dense_args&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;num_dense&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s2">&quot;output_activation&quot;</span><span class="p">:</span> <span class="s2">&quot;softplus&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">mandatory_fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;num_models&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+
+<span class="n">DEFAULT_SETTING_PMP_NET</span> <span class="o">=</span> <span class="n">MetaDictSetting</span><span class="p">(</span>
+    <span class="n">meta_dict</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;dense_args&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;num_dense&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s2">&quot;output_activation&quot;</span><span class="p">:</span> <span class="s2">&quot;softmax&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">mandatory_fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;num_models&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+
+<span class="n">OPTIMIZER_DEFAULTS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;global_clipnorm&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+
+
+<span class="n">DEFAULT_KEYS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;prior_draws&quot;</span><span class="p">:</span> <span class="s2">&quot;prior_draws&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;obs_data&quot;</span><span class="p">:</span> <span class="s2">&quot;obs_data&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sim_data&quot;</span><span class="p">:</span> <span class="s2">&quot;sim_data&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;batchable_context&quot;</span><span class="p">:</span> <span class="s2">&quot;batchable_context&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;non_batchable_context&quot;</span><span class="p">:</span> <span class="s2">&quot;non_batchable_context&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;prior_batchable_context&quot;</span><span class="p">:</span> <span class="s2">&quot;prior_batchable_context&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;prior_non_batchable_context&quot;</span><span class="p">:</span> <span class="s2">&quot;prior_non_batchable_context&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;prior_context&quot;</span><span class="p">:</span> <span class="s2">&quot;prior_context&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hyper_prior_draws&quot;</span><span class="p">:</span> <span class="s2">&quot;hyper_prior_draws&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;shared_prior_draws&quot;</span><span class="p">:</span> <span class="s2">&quot;shared_prior_draws&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;local_prior_draws&quot;</span><span class="p">:</span> <span class="s2">&quot;local_prior_draws&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sim_batchable_context&quot;</span><span class="p">:</span> <span class="s2">&quot;sim_batchable_context&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sim_non_batchable_context&quot;</span><span class="p">:</span> <span class="s2">&quot;sim_non_batchable_context&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;summary_conditions&quot;</span><span class="p">:</span> <span class="s2">&quot;summary_conditions&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;direct_conditions&quot;</span><span class="p">:</span> <span class="s2">&quot;direct_conditions&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="s2">&quot;parameters&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hyper_parameters&quot;</span><span class="p">:</span> <span class="s2">&quot;hyper_parameters&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;shared_parameters&quot;</span><span class="p">:</span> <span class="s2">&quot;shared_parameters&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;local_parameters&quot;</span><span class="p">:</span> <span class="s2">&quot;local_parameters&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;observables&quot;</span><span class="p">:</span> <span class="s2">&quot;observables&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;targets&quot;</span><span class="p">:</span> <span class="s2">&quot;targets&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;conditions&quot;</span><span class="p">:</span> <span class="s2">&quot;conditions&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;posterior_inputs&quot;</span><span class="p">:</span> <span class="s2">&quot;posterior_inputs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;likelihood_inputs&quot;</span><span class="p">:</span> <span class="s2">&quot;likelihood_inputs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;model_outputs&quot;</span><span class="p">:</span> <span class="s2">&quot;model_outputs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;model_indices&quot;</span><span class="p">:</span> <span class="s2">&quot;model_indices&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="n">MMD_BANDWIDTH_LIST</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="mf">1e-1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">,</span> <span class="mf">1e4</span><span class="p">,</span> <span class="mf">1e5</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">]</span>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

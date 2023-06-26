@@ -1,0 +1,1029 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bayesflow.summary_networks &#8212; BayesFlow: Amortized Bayesian Inference</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/bayesflow/summary_networks';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/_modules/bayesflow/summary_networks.html" />
+    <link rel="shortcut icon" href="../../_static/bayesflow_hex.ico"/>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_examples/Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../documentation.html">Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/advanced_documentation.html">Advanced documentation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../api/bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.losses.html">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Full Installation Instructions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About us</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2F_modules/bayesflow/summary_networks.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for bayesflow.summary_networks</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2022 The BayesFlow Developers</span>
+
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies or substantial portions of the Software.</span>
+
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="c1"># SOFTWARE.</span>
+
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.layers</span> <span class="kn">import</span> <span class="n">GRU</span><span class="p">,</span> <span class="n">LSTM</span><span class="p">,</span> <span class="n">Dense</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
+
+<span class="kn">from</span> <span class="nn">bayesflow</span> <span class="kn">import</span> <span class="n">default_settings</span> <span class="k">as</span> <span class="n">defaults</span>
+<span class="kn">from</span> <span class="nn">bayesflow.attention</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">InducedSelfAttentionBlock</span><span class="p">,</span>
+    <span class="n">MultiHeadAttentionBlock</span><span class="p">,</span>
+    <span class="n">PoolingWithAttention</span><span class="p">,</span>
+    <span class="n">SelfAttentionBlock</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">bayesflow.helper_networks</span> <span class="kn">import</span> <span class="n">EquivariantModule</span><span class="p">,</span> <span class="n">InvariantModule</span><span class="p">,</span> <span class="n">MultiConv1D</span>
+
+
+<div class="viewcode-block" id="TimeSeriesTransformer"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.TimeSeriesTransformer">[docs]</a><span class="k">class</span> <span class="nc">TimeSeriesTransformer</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a many-to-one transformer architecture for time series encoding.</span>
+<span class="sd">    Some ideas can be found in [1]:</span>
+
+<span class="sd">    [1] Wen, Q., Zhou, T., Zhang, C., Chen, W., Ma, Z., Yan, J., &amp; Sun, L. (2022).</span>
+<span class="sd">    Transformers in time series: A survey. arXiv preprint arXiv:2202.07125.</span>
+<span class="sd">    https://arxiv.org/abs/2202.07125</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_dim</span><span class="p">,</span>
+        <span class="n">attention_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dense_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_layer_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">num_dense_fc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">num_attention_blocks</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">template_type</span><span class="o">=</span><span class="s2">&quot;lstm&quot;</span><span class="p">,</span>
+        <span class="n">template_dim</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a transformer architecture for encoding time series data into fixed size vectors given by</span>
+<span class="sd">        ``summary_dim``. It features a recurrent network given by ``template_type`` which is responsible for</span>
+<span class="sd">        providing a single summary of the time series which then attends to each point in the time series pro-</span>
+<span class="sd">        cessed via a series of ``num_attention_blocks`` self-attention layers.</span>
+
+<span class="sd">        Important: Assumes that positional encodings have been appended to the input time series.</span>
+
+<span class="sd">        Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate</span>
+<span class="sd">        during training, e.g., setting ``default_lr=1e-5`` in a ``Trainer`` instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_dim            : int</span>
+<span class="sd">            The dimensionality of the input data (last axis).</span>
+<span class="sd">        attention_settings   : dict or None, optional, default None</span>
+<span class="sd">            A dictionary which will be unpacked as the arguments for the ``MultiHeadAttention`` layer.</span>
+<span class="sd">            If ``None``, default settings will be used (see ``bayesflow.default_settings``)</span>
+<span class="sd">            For instance, to use an attention block with 4 heads and key dimension 32, you can do:</span>
+
+<span class="sd">            ``attention_settings=dict(num_heads=4, key_dim=32)``</span>
+
+<span class="sd">            You may also want to include dropout regularization in small-to-medium data regimes:</span>
+
+<span class="sd">            ``attention_settings=dict(num_heads=4, key_dim=32, dropout=0.1)``</span>
+
+<span class="sd">            For more details and arguments, see:</span>
+<span class="sd">            https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention</span>
+<span class="sd">        dense_settings       : dict or None, optional, default: None</span>
+<span class="sd">            A dictionary which will be unpacked as the arguments for the ``Dense`` layer.</span>
+<span class="sd">            For instance, to use hidden layers with 32 units and a relu activation, you can do:</span>
+
+<span class="sd">            ``dict(units=32, activation=&#39;relu&#39;)</span>
+
+<span class="sd">            For more details and arguments, see:</span>
+<span class="sd">            https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense</span>
+<span class="sd">        use_layer_norm       : boolean, optional, default: True</span>
+<span class="sd">            Whether layer normalization before and after attention + feedforward</span>
+<span class="sd">        num_dense_fc         : int, optional, default: 2</span>
+<span class="sd">            The number of hidden layers for the internal feedforward network</span>
+<span class="sd">        summary_dim          : int</span>
+<span class="sd">            The dimensionality of the learned permutation-invariant representation.</span>
+<span class="sd">        num_attention_blocks : int, optional, default: 2</span>
+<span class="sd">            The number of self-attention blocks to use before pooling.</span>
+<span class="sd">        template_type        : str or callable, optional, default: &#39;lstm&#39;</span>
+<span class="sd">            The many-to-one (learnable) transformation of the time series.</span>
+<span class="sd">            if ``lstm``, an LSTM network will be used.</span>
+<span class="sd">            if ``gru``, a GRU unit will be used.</span>
+<span class="sd">            if callable, a reference to ``template_type`` will be stored as an attribute.</span>
+<span class="sd">        template_dim         : int, optional, default: 64</span>
+<span class="sd">            Only used if ``template_type`` in [&#39;lstm&#39;, &#39;gru&#39;]. The number of hidden</span>
+<span class="sd">            units (equiv. output dimensions) of the recurrent network.</span>
+<span class="sd">        **kwargs             : dict, optional, default: {}</span>
+<span class="sd">            Optional keyword arguments passed to the __init__() method of tf.keras.Model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Process internal attention settings</span>
+        <span class="k">if</span> <span class="n">attention_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">attention_settings</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_ATTENTION</span>
+        <span class="k">if</span> <span class="n">dense_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dense_settings</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_ATTENTION</span>
+
+        <span class="c1"># Construct a series of self-attention blocks, these will process</span>
+        <span class="c1"># the time series in a many-to-many fashion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attention_blocks</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_attention_blocks</span><span class="p">):</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="n">SelfAttentionBlock</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">attention_settings</span><span class="p">,</span> <span class="n">num_dense_fc</span><span class="p">,</span> <span class="n">dense_settings</span><span class="p">,</span> <span class="n">use_layer_norm</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attention_blocks</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+        <span class="c1"># Construct final attention layer, which will perform cross-attention</span>
+        <span class="c1"># between the outputs ot the self-attention layers and the dynamic template</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_attention</span> <span class="o">=</span> <span class="n">MultiHeadAttentionBlock</span><span class="p">(</span>
+            <span class="n">template_dim</span><span class="p">,</span> <span class="n">attention_settings</span><span class="p">,</span> <span class="n">num_dense_fc</span><span class="p">,</span> <span class="n">dense_settings</span><span class="p">,</span> <span class="n">use_layer_norm</span>
+        <span class="p">)</span>
+
+        <span class="c1"># A recurrent network will learn the dynamic many-to-one template</span>
+        <span class="k">if</span> <span class="n">template_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;LSTM&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template_net</span> <span class="o">=</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">template_dim</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">template_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;GRU&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template_net</span> <span class="o">=</span> <span class="n">GRU</span><span class="p">(</span><span class="n">template_dim</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">callable</span><span class="p">(</span><span class="n">template_type</span><span class="p">),</span> <span class="s2">&quot;Argument `template_dim` should be callable or in [&#39;lstm&#39;, &#39;gru&#39;]&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template_net</span> <span class="o">=</span> <span class="n">template_type</span>
+
+        <span class="c1"># Final output reduces representation into a vector of length summary_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_layer</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">summary_dim</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TimeSeriesTransformer.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.TimeSeriesTransformer.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs the forward pass through the transformer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x   : tf.Tensor</span>
+<span class="sd">            Time series input of shape (batch_size, num_time_points, input_dim)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        out : tf.Tensor</span>
+<span class="sd">            Output of shape (batch_size, summary_dim)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">rep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_blocks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_net</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">rep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_attention</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">rep</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">rep</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">rep</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_layer</span><span class="p">(</span><span class="n">rep</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div></div>
+
+
+<div class="viewcode-block" id="SetTransformer"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SetTransformer">[docs]</a><span class="k">class</span> <span class="nc">SetTransformer</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements the set transformer architecture from [1] which ultimately represents</span>
+<span class="sd">    a learnable permutation-invariant function.</span>
+
+<span class="sd">    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., &amp; Teh, Y. W. (2019).</span>
+<span class="sd">        Set transformer: A framework for attention-based permutation-invariant neural networks.</span>
+<span class="sd">        In International conference on machine learning (pp. 3744-3753). PMLR.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_dim</span><span class="p">,</span>
+        <span class="n">attention_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dense_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_layer_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">num_dense_fc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">num_attention_blocks</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">num_inducing_points</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+        <span class="n">num_seeds</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a set transformer architecture according to [1] which will extract permutation-invariant</span>
+<span class="sd">        features from an input set using a set of seed vectors (typically one for a single summary) with ``summary_dim``</span>
+<span class="sd">        output dimensions.</span>
+
+<span class="sd">        Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate</span>
+<span class="sd">        during training, e.g., setting ``default_lr=1e-5`` in a ``Trainer`` instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_dim            : int</span>
+<span class="sd">            The dimensionality of the input data (last axis).</span>
+<span class="sd">        attention_settings   : dict or None, optional, default: None</span>
+<span class="sd">            A dictionary which will be unpacked as the arguments for the ``MultiHeadAttention`` layer</span>
+<span class="sd">            For instance, to use an attention block with 4 heads and key dimension 32, you can do:</span>
+
+<span class="sd">            ``attention_settings=dict(num_heads=4, key_dim=32)``</span>
+
+<span class="sd">            You may also want to include dropout regularization in small-to-medium data regimes:</span>
+
+<span class="sd">            ``attention_settings=dict(num_heads=4, key_dim=32, dropout=0.1)``</span>
+
+<span class="sd">            For more details and arguments, see:</span>
+<span class="sd">            https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention</span>
+<span class="sd">        dense_settings       : dict or None, optional, default: None</span>
+<span class="sd">            A dictionary which will be unpacked as the arguments for the ``Dense`` layer.</span>
+<span class="sd">            For instance, to use hidden layers with 32 units and a relu activation, you can do:</span>
+
+<span class="sd">            ``dict(units=32, activation=&#39;relu&#39;)</span>
+
+<span class="sd">            For more details and arguments, see:</span>
+<span class="sd">            https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense</span>
+<span class="sd">        use_layer_norm       : boolean, optional, default: True</span>
+<span class="sd">            Whether layer normalization before and after attention + feedforward</span>
+<span class="sd">        num_dense_fc         : int, optional, default: 2</span>
+<span class="sd">            The number of hidden layers for the internal feedforward network</span>
+<span class="sd">        summary_dim          : int</span>
+<span class="sd">            The dimensionality of the learned permutation-invariant representation.</span>
+<span class="sd">        num_attention_blocks : int, optional, default: 2</span>
+<span class="sd">            The number of self-attention blocks to use before pooling.</span>
+<span class="sd">        num_inducing_points  : int or None, optional, default: 32</span>
+<span class="sd">            The number of inducing points. Should be lower than the smallest set size.</span>
+<span class="sd">            If ``None`` selected, a vanilla self-attenion block (SAB) will be used, otherwise</span>
+<span class="sd">            ISAB blocks will be used. For ``num_attention_blocks &gt; 1``, we currently recommend</span>
+<span class="sd">            always using some number of inducing points.</span>
+<span class="sd">        num_seeds            : int, optional, default: 1</span>
+<span class="sd">            The number of &quot;seed vectors&quot; to use. Each seed vector represents a permutation-invariant</span>
+<span class="sd">            summary of the entire set. If you use ``num_seeds &gt; 1``, the resulting seeds will be flattened</span>
+<span class="sd">            into a 2-dimensional output, which will have a dimensionality of ``num_seeds * summary_dim``.</span>
+<span class="sd">        **kwargs             : dict, optional, default: {}</span>
+<span class="sd">            Optional keyword arguments passed to the __init__() method of tf.keras.Model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Process internal attention settings</span>
+        <span class="k">if</span> <span class="n">attention_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">attention_settings</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_ATTENTION</span>
+        <span class="k">if</span> <span class="n">dense_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dense_settings</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_ATTENTION</span>
+
+        <span class="c1"># Construct a series of self-attention blocks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attention_blocks</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_attention_blocks</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">num_inducing_points</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">block</span> <span class="o">=</span> <span class="n">InducedSelfAttentionBlock</span><span class="p">(</span>
+                    <span class="n">input_dim</span><span class="p">,</span> <span class="n">attention_settings</span><span class="p">,</span> <span class="n">num_dense_fc</span><span class="p">,</span> <span class="n">dense_settings</span><span class="p">,</span> <span class="n">use_layer_norm</span><span class="p">,</span> <span class="n">num_inducing_points</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">block</span> <span class="o">=</span> <span class="n">SelfAttentionBlock</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">attention_settings</span><span class="p">,</span> <span class="n">num_dense_fc</span><span class="p">,</span> <span class="n">dense_settings</span><span class="p">,</span> <span class="n">use_layer_norm</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attention_blocks</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+        <span class="c1"># Pooler will be applied to the representations learned through self-attention</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pooler</span> <span class="o">=</span> <span class="n">PoolingWithAttention</span><span class="p">(</span>
+            <span class="n">summary_dim</span><span class="p">,</span> <span class="n">attention_settings</span><span class="p">,</span> <span class="n">num_dense_fc</span><span class="p">,</span> <span class="n">dense_settings</span><span class="p">,</span> <span class="n">use_layer_norm</span><span class="p">,</span> <span class="n">num_seeds</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="SetTransformer.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SetTransformer.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs the forward pass through the set-transformer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x   : tf.Tensor</span>
+<span class="sd">            The input set of shape (batch_size, set_size, input_dim)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        out : tf.Tensor</span>
+<span class="sd">            Output of shape (batch_size, summary_dim * num_seeds)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_blocks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pooler</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div></div>
+
+
+<div class="viewcode-block" id="DeepSet"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.DeepSet">[docs]</a><span class="k">class</span> <span class="nc">DeepSet</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a deep permutation-invariant network according to [1] and [2].</span>
+
+<span class="sd">    [1] Zaheer, M., Kottur, S., Ravanbakhsh, S., Poczos, B., Salakhutdinov, R. R., &amp; Smola, A. J. (2017).</span>
+<span class="sd">    Deep sets. Advances in neural information processing systems, 30.</span>
+
+<span class="sd">    [2] Bloem-Reddy, B., &amp; Teh, Y. W. (2020).</span>
+<span class="sd">    Probabilistic Symmetries and Invariant Neural Networks.</span>
+<span class="sd">    J. Mach. Learn. Res., 21, 90-1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">num_dense_s1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">num_dense_s2</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">num_dense_s3</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">num_equiv</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">dense_s1_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dense_s2_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dense_s3_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">pooling_fun</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a stack of &#39;num_equiv&#39; equivariant layers followed by a final invariant layer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        summary_dim   : int, optional, default: 10</span>
+<span class="sd">            The number of learned summary statistics.</span>
+<span class="sd">        num_dense_s1  : int, optional, default: 2</span>
+<span class="sd">            The number of dense layers in the inner function of a deep set.</span>
+<span class="sd">        num_dense_s2  : int, optional, default: 2</span>
+<span class="sd">            The number of dense layers in the outer function of a deep set.</span>
+<span class="sd">        num_dense_s3  : int, optional, default: 2</span>
+<span class="sd">            The number of dense layers in an equivariant layer.</span>
+<span class="sd">        num_equiv     : int, optional, default: 2</span>
+<span class="sd">            The number of equivariant layers in the network.</span>
+<span class="sd">        dense_s1_args : dict or None, optional, default: None</span>
+<span class="sd">            The arguments for the dense layers of s1 (inner, pre-pooling function). If `None`,</span>
+<span class="sd">            defaults will be used (see `default_settings`). Otherwise, all arguments for a</span>
+<span class="sd">            tf.keras.layers.Dense layer are supported.</span>
+<span class="sd">        dense_s2_args : dict or None, optional, default: None</span>
+<span class="sd">            The arguments for the dense layers of s2 (outer, post-pooling function). If `None`,</span>
+<span class="sd">            defaults will be used (see `default_settings`). Otherwise, all arguments for a</span>
+<span class="sd">            tf.keras.layers.Dense layer are supported.</span>
+<span class="sd">        dense_s3_args : dict or None, optional, default: None</span>
+<span class="sd">            The arguments for the dense layers of s3 (equivariant function). If `None`,</span>
+<span class="sd">            defaults will be used (see `default_settings`). Otherwise, all arguments for a</span>
+<span class="sd">            tf.keras.layers.Dense layer are supported.</span>
+<span class="sd">        pooling_fun   : str of callable, optional, default: &#39;mean&#39;</span>
+<span class="sd">            If string argument provided, should be one in [&#39;mean&#39;, &#39;max&#39;]. In addition, ac actual</span>
+<span class="sd">            neural network can be passed for learnable pooling.</span>
+<span class="sd">        **kwargs      : dict, optional, default: {}</span>
+<span class="sd">            Optional keyword arguments passed to the __init__() method of tf.keras.Model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Prepare settings dictionary</span>
+        <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">num_dense_s1</span><span class="o">=</span><span class="n">num_dense_s1</span><span class="p">,</span>
+            <span class="n">num_dense_s2</span><span class="o">=</span><span class="n">num_dense_s2</span><span class="p">,</span>
+            <span class="n">num_dense_s3</span><span class="o">=</span><span class="n">num_dense_s3</span><span class="p">,</span>
+            <span class="n">dense_s1_args</span><span class="o">=</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_INVARIANT</span> <span class="k">if</span> <span class="n">dense_s1_args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dense_s1_args</span><span class="p">,</span>
+            <span class="n">dense_s2_args</span><span class="o">=</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_INVARIANT</span> <span class="k">if</span> <span class="n">dense_s2_args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dense_s2_args</span><span class="p">,</span>
+            <span class="n">dense_s3_args</span><span class="o">=</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_INVARIANT</span> <span class="k">if</span> <span class="n">dense_s3_args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dense_s3_args</span><span class="p">,</span>
+            <span class="n">pooling_fun</span><span class="o">=</span><span class="n">pooling_fun</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Create equivariant layers and final invariant layer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">equiv_layers</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">([</span><span class="n">EquivariantModule</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_equiv</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inv</span> <span class="o">=</span> <span class="n">InvariantModule</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+
+        <span class="c1"># Output layer to output &quot;summary_dim&quot; learned summary statistics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">summary_dim</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary_dim</span> <span class="o">=</span> <span class="n">summary_dim</span>
+
+<div class="viewcode-block" id="DeepSet.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.DeepSet.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs the forward pass of a learnable deep invariant transformation consisting of</span>
+<span class="sd">        a sequence of equivariant transforms followed by an invariant transform.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : tf.Tensor</span>
+<span class="sd">            Input of shape (batch_size, n_obs, data_dim)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        out : tf.Tensor</span>
+<span class="sd">            Output of shape (batch_size, out_dim)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Pass through series of augmented equivariant transforms</span>
+        <span class="n">out_equiv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">equiv_layers</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># Pass through final invariant layer</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">out_equiv</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">out</span></div></div>
+
+
+<div class="viewcode-block" id="InvariantNetwork"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.InvariantNetwork">[docs]</a><span class="k">class</span> <span class="nc">InvariantNetwork</span><span class="p">(</span><span class="n">DeepSet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated class for ``InvariantNetwork``.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> will be deprecated at some point. Use ``DeepSet`` instead.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> will be deprecated. at some point. Use ``DeepSet`` instead.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SequentialNetwork"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork">[docs]</a><span class="k">class</span> <span class="nc">SequentialNetwork</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a sequence of `MultiConv1D` layers followed by an LSTM network.</span>
+
+<span class="sd">    For details and rationale, see [1]:</span>
+
+<span class="sd">    [1] Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., &amp; Köthe, U. (2021).</span>
+<span class="sd">    OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks</span>
+<span class="sd">    and its application to the COVID-19 pandemics in Germany.</span>
+<span class="sd">    PLoS computational biology, 17(10), e1009472.</span>
+
+<span class="sd">    https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_conv_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">lstm_units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">conv_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a stack of inception-like layers followed by an LSTM network, with the idea</span>
+<span class="sd">        of learning vector representations from multivariate time series data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        summary_dim     : int, optional, default: 10</span>
+<span class="sd">            The number of learned summary statistics.</span>
+<span class="sd">        num_conv_layers : int, optional, default: 2</span>
+<span class="sd">            The number of convolutional layers to use.</span>
+<span class="sd">        lstm_units      : int, optional, default: 128</span>
+<span class="sd">            The number of hidden LSTM units.</span>
+<span class="sd">        conv_settings   : dict or None, optional, default: None</span>
+<span class="sd">            The arguments passed to the `MultiConv1D` internal networks. If `None`,</span>
+<span class="sd">            defaults will be used from `default_settings`. If a dictionary is provided,</span>
+<span class="sd">            it should contain the followin keys:</span>
+<span class="sd">            - layer_args      (dict) : arguments for `tf.keras.layers.Conv1D` without kernel_size</span>
+<span class="sd">            - min_kernel_size (int)  : the minimum kernel size (&gt;= 1)</span>
+<span class="sd">            - max_kernel_size (int)  : the maximum kernel size</span>
+<span class="sd">        **kwargs        : dict</span>
+<span class="sd">            Optional keyword arguments passed to the __init__() method of tf.keras.Model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Take care of None conv_settings</span>
+        <span class="k">if</span> <span class="n">conv_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">conv_settings</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_MULTI_CONV</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">([</span><span class="n">MultiConv1D</span><span class="p">(</span><span class="n">conv_settings</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_conv_layers</span><span class="p">)])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lstm</span> <span class="o">=</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">lstm_units</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">summary_dim</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary_dim</span> <span class="o">=</span> <span class="n">summary_dim</span>
+
+<div class="viewcode-block" id="SequentialNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through the network by first passing `x` through the sequence of</span>
+<span class="sd">        multi-convolutional layers and then applying the LSTM network.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : tf.Tensor</span>
+<span class="sd">            Input of shape (batch_size, n_time_steps, n_time_series)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        out : tf.Tensor</span>
+<span class="sd">            Output of shape (batch_size, summary_dim)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lstm</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div></div>
+
+
+<div class="viewcode-block" id="SplitNetwork"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SplitNetwork">[docs]</a><span class="k">class</span> <span class="nc">SplitNetwork</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a vertical stack of networks and concatenates their individual outputs. Allows for splitting</span>
+<span class="sd">    of data to provide an individual network for each split of the data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_splits</span><span class="p">,</span> <span class="n">split_data_configurator</span><span class="p">,</span> <span class="n">network_type</span><span class="o">=</span><span class="n">InvariantNetwork</span><span class="p">,</span> <span class="n">network_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a composite network of `num_splits` sub-networks of type `network_type`, each with configuration</span>
+<span class="sd">        specified by `meta`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        num_splits              : int</span>
+<span class="sd">            The number if splits for the data, which will equal the number of sub-networks.</span>
+<span class="sd">        split_data_configurator : callable</span>
+<span class="sd">            Function that takes the arguments `i` and `x` where `i` is the index of the</span>
+<span class="sd">            network and `x` are the inputs to the `SplitNetwork`. Should return the input</span>
+<span class="sd">            for the corresponding network.</span>
+
+<span class="sd">            For example, to achieve a network with is permutation-invariant both</span>
+<span class="sd">            vertically (i.e., across rows)  and horizontally (i.e., across columns), one could to:</span>
+<span class="sd">            `def split(i, x):</span>
+<span class="sd">                selector = tf.where(x[:,:,0]==i, 1.0, 0.0)</span>
+<span class="sd">                selected = x[:,:,1] * selector</span>
+<span class="sd">                split_x = tf.stack((selector, selected), axis=-1)</span>
+<span class="sd">                return split_x</span>
+<span class="sd">            `</span>
+<span class="sd">            where `x[:,:,0]` contains an integer indicating which split the data</span>
+<span class="sd">            in `x[:,:,1]` belongs to. All values in `x[:,:,1]` that are not selected</span>
+<span class="sd">            are set to zero. The selector is passed along with the modified data,</span>
+<span class="sd">            indicating which rows belong to the split `i`.</span>
+<span class="sd">        network_type            : callable, optional, default: `InvariantNetowk`</span>
+<span class="sd">            Type of neural network to use.</span>
+<span class="sd">        meta                    : dict, optional, default: {}</span>
+<span class="sd">            A dictionary containing the configuration for the networks.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Optional keyword arguments to be passed to the `tf.keras.Model` superclass.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_splits</span> <span class="o">=</span> <span class="n">num_splits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">split_data_configurator</span> <span class="o">=</span> <span class="n">split_data_configurator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">networks</span> <span class="o">=</span> <span class="p">[</span><span class="n">network_type</span><span class="p">(</span><span class="o">**</span><span class="n">network_kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_splits</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="SplitNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SplitNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through the subnetworks and concatenates their output.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : tf.Tensor</span>
+<span class="sd">            Input of shape (batch_size, n_obs, data_dim)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        out : tf.Tensor</span>
+<span class="sd">            Output of shape (batch_size, out_dim)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">split_data_configurator</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_splits</span><span class="p">)]</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div></div>
+
+
+<div class="viewcode-block" id="HierarchicalNetwork"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.HierarchicalNetwork">[docs]</a><span class="k">class</span> <span class="nc">HierarchicalNetwork</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a hierarchical summary network according to [1].</span>
+
+<span class="sd">    [1] Elsemüller, L., Schnuerch, M., Bürkner, P. C., &amp; Radev, S. T. (2023).</span>
+<span class="sd">        A Deep Learning Method for Comparing Bayesian Hierarchical Models.</span>
+<span class="sd">        arXiv preprint arXiv:2301.11873.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">networks_list</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a hierarchical network consisting of stacked summary networks (one for each hierarchical level)</span>
+<span class="sd">        that are aligned with the probabilistic structure of the processed data.</span>
+
+<span class="sd">        Note: The networks will start processing from the lowest hierarchical level (e.g., observational level)</span>
+<span class="sd">        up to the highest hierarchical level.</span>
+
+<span class="sd">        Example: For two-level hierarchical models with the assumption of temporal dependencies on the lowest</span>
+<span class="sd">        hierarchical level (e.g., observational level) and exchangeable units at the higher level</span>
+<span class="sd">        (e.g., group level), a list of [SequentialNetwork(), DeepSet()] could be passed.</span>
+
+<span class="sd">        ----------</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        networks_list : list of tf.keras.Model:</span>
+<span class="sd">            The list of summary networks (one per hierarchical level), starting from the lowest hierarchical level</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">networks</span> <span class="o">=</span> <span class="n">networks_list</span>
+
+<div class="viewcode-block" id="HierarchicalNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.HierarchicalNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">return_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs the forward pass through the hierarchical network,</span>
+<span class="sd">        transforming the nested input into learned summary statistics.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data       : tf.Tensor of shape (batch_size, ..., data_dim)</span>
+<span class="sd">            Example, hierarchical data sets with two levels:</span>
+<span class="sd">            (batch_size, D, L, x_dim) -&gt; reduces to</span>
+<span class="sd">        return_all : boolean, optional, default: False</span>
+<span class="sd">            Whether to return all intermediate outputs (True) or just</span>
+<span class="sd">            the final one (False).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        out : tf.Tensor</span>
+<span class="sd">            Output of shape ``(batch_size, out_dim) if return_all=False`` else</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">return_all</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">net</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">outputs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">net</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">x</span></div></div>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

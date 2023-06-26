@@ -1,0 +1,1560 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Index &#8212; BayesFlow: Amortized Bayesian Inference</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/genindex.html" />
+    <link rel="shortcut icon" href="_static/bayesflow_hex.ico"/>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_examples/LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_examples/Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_examples/Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_examples/Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_examples/Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="documentation.html">Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/advanced_documentation.html">Advanced documentation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.losses.html">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Full Installation Instructions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About us</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2Fgenindex.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#_"><strong>_</strong></a>
+ | <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#K"><strong>K</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ 
+</div>
+<h2 id="_">_</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.configuration.html#bayesflow.configuration.DefaultCombiner.__call__">__call__() (bayesflow.configuration.DefaultCombiner method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.configuration.html#bayesflow.configuration.DefaultJointConfigurator.__call__">(bayesflow.configuration.DefaultJointConfigurator method)</a>
+</li>
+        <li><a href="api/bayesflow.configuration.html#bayesflow.configuration.DefaultLikelihoodConfigurator.__call__">(bayesflow.configuration.DefaultLikelihoodConfigurator method)</a>
+</li>
+        <li><a href="api/bayesflow.configuration.html#bayesflow.configuration.DefaultModelComparisonConfigurator.__call__">(bayesflow.configuration.DefaultModelComparisonConfigurator method)</a>
+</li>
+        <li><a href="api/bayesflow.configuration.html#bayesflow.configuration.DefaultPosteriorConfigurator.__call__">(bayesflow.configuration.DefaultPosteriorConfigurator method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationDataset.__call__">(bayesflow.helper_classes.SimulationDataset method)</a>
+</li>
+        <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.ContextGenerator.__call__">(bayesflow.simulation.ContextGenerator method)</a>
+</li>
+        <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.GenerativeModel.__call__">(bayesflow.simulation.GenerativeModel method)</a>
+</li>
+        <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.MultiGenerativeModel.__call__">(bayesflow.simulation.MultiGenerativeModel method)</a>
+</li>
+        <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.Prior.__call__">(bayesflow.simulation.Prior method)</a>
+</li>
+        <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.Simulator.__call__">(bayesflow.simulation.Simulator method)</a>
+</li>
+        <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.TwoLevelGenerativeModel.__call__">(bayesflow.simulation.TwoLevelGenerativeModel method)</a>
+</li>
+        <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.TwoLevelPrior.__call__">(bayesflow.simulation.TwoLevelPrior method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.ActNorm">ActNorm (class in bayesflow.helper_networks)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.add_entry">add_entry() (bayesflow.helper_classes.LossHistory method)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.add_val_entry">add_val_entry() (bayesflow.helper_classes.LossHistory method)</a>
+</li>
+      <li><a href="api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.AffineCoupling">AffineCoupling (class in bayesflow.coupling_networks)</a>
+</li>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.aggregated_error">aggregated_error() (in module bayesflow.computational_utilities)</a>
+</li>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.aggregated_rmse">aggregated_rmse() (in module bayesflow.computational_utilities)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedLikelihood">AmortizedLikelihood (class in bayesflow.amortizers)</a>
+</li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedModelComparison">AmortizedModelComparison (class in bayesflow.amortizers)</a>
+</li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosterior">AmortizedPosterior (class in bayesflow.amortizers)</a>
+</li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosteriorLikelihood">AmortizedPosteriorLikelihood (class in bayesflow.amortizers)</a>
+</li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedTarget">AmortizedTarget (class in bayesflow.amortizers)</a>
+</li>
+      <li><a href="api/bayesflow.exceptions.html#bayesflow.exceptions.ArgumentError">ArgumentError</a>
+</li>
+      <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.InvertibleNetwork.available_designs">available_designs (bayesflow.inference_networks.InvertibleNetwork attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_functions.html#bayesflow.helper_functions.backprop_step">backprop_step() (in module bayesflow.helper_functions)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.ContextGenerator.batchable_context">batchable_context() (bayesflow.simulation.ContextGenerator method)</a>
+</li>
+      <li>
+    bayesflow
+
+      <ul>
+        <li><a href="api/advanced_documentation.html#module-bayesflow">module</a>, <a href="api/bayesflow.html#module-bayesflow">[1]</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.amortizers
+
+      <ul>
+        <li><a href="api/bayesflow.amortizers.html#module-bayesflow.amortizers">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.attention
+
+      <ul>
+        <li><a href="api/bayesflow.attention.html#module-bayesflow.attention">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.html#module-bayesflow.benchmarks">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks.bernoulli_glm
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.bernoulli_glm.html#module-bayesflow.benchmarks.bernoulli_glm">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks.bernoulli_glm_raw
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.bernoulli_glm_raw.html#module-bayesflow.benchmarks.bernoulli_glm_raw">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks.gaussian_linear
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.gaussian_linear.html#module-bayesflow.benchmarks.gaussian_linear">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks.gaussian_linear_uniform
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.gaussian_linear_uniform.html#module-bayesflow.benchmarks.gaussian_linear_uniform">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks.gaussian_mixture
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.gaussian_mixture.html#module-bayesflow.benchmarks.gaussian_mixture">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks.inverse_kinematics
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.inverse_kinematics.html#module-bayesflow.benchmarks.inverse_kinematics">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks.lotka_volterra
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.lotka_volterra.html#module-bayesflow.benchmarks.lotka_volterra">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks.sir
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.sir.html#module-bayesflow.benchmarks.sir">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks.slcp
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.slcp.html#module-bayesflow.benchmarks.slcp">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks.slcp_distractors
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.slcp_distractors.html#module-bayesflow.benchmarks.slcp_distractors">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.benchmarks.two_moons
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.two_moons.html#module-bayesflow.benchmarks.two_moons">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.computational_utilities
+
+      <ul>
+        <li><a href="api/bayesflow.computational_utilities.html#module-bayesflow.computational_utilities">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.configuration
+
+      <ul>
+        <li><a href="api/bayesflow.configuration.html#module-bayesflow.configuration">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.coupling_networks
+
+      <ul>
+        <li><a href="api/bayesflow.coupling_networks.html#module-bayesflow.coupling_networks">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    bayesflow.default_settings
+
+      <ul>
+        <li><a href="api/bayesflow.default_settings.html#module-bayesflow.default_settings">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.diagnostics
+
+      <ul>
+        <li><a href="api/bayesflow.diagnostics.html#module-bayesflow.diagnostics">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.exceptions
+
+      <ul>
+        <li><a href="api/bayesflow.exceptions.html#module-bayesflow.exceptions">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.experimental
+
+      <ul>
+        <li><a href="api/bayesflow.experimental.html#module-bayesflow.experimental">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.experimental.rectifiers
+
+      <ul>
+        <li><a href="api/bayesflow.experimental.rectifiers.html#module-bayesflow.experimental.rectifiers">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.helper_classes
+
+      <ul>
+        <li><a href="api/bayesflow.helper_classes.html#module-bayesflow.helper_classes">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.helper_functions
+
+      <ul>
+        <li><a href="api/bayesflow.helper_functions.html#module-bayesflow.helper_functions">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.helper_networks
+
+      <ul>
+        <li><a href="api/bayesflow.helper_networks.html#module-bayesflow.helper_networks">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.inference_networks
+
+      <ul>
+        <li><a href="api/bayesflow.inference_networks.html#module-bayesflow.inference_networks">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.losses
+
+      <ul>
+        <li><a href="api/bayesflow.losses.html#module-bayesflow.losses">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.mcmc
+
+      <ul>
+        <li><a href="api/bayesflow.mcmc.html#module-bayesflow.mcmc">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.networks
+
+      <ul>
+        <li><a href="api/bayesflow.networks.html#module-bayesflow.networks">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.sensitivity
+
+      <ul>
+        <li><a href="api/bayesflow.sensitivity.html#module-bayesflow.sensitivity">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.simulation
+
+      <ul>
+        <li><a href="api/bayesflow.simulation.html#module-bayesflow.simulation">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.summary_networks
+
+      <ul>
+        <li><a href="api/bayesflow.summary_networks.html#module-bayesflow.summary_networks">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.trainers
+
+      <ul>
+        <li><a href="api/bayesflow.trainers.html#module-bayesflow.trainers">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.version
+
+      <ul>
+        <li><a href="api/bayesflow.version.html#module-bayesflow.version">module</a>
+</li>
+      </ul></li>
+      <li>
+    bayesflow.wrappers
+
+      <ul>
+        <li><a href="api/bayesflow.wrappers.html#module-bayesflow.wrappers">module</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.benchmarks.html#bayesflow.benchmarks.Benchmark">Benchmark (class in bayesflow.benchmarks)</a>
+</li>
+      <li><a href="api/bayesflow.wrappers.html#bayesflow.wrappers.SpectralNormalization.build">build() (bayesflow.wrappers.SpectralNormalization method)</a>
+</li>
+      <li><a href="api/bayesflow.helper_functions.html#bayesflow.helper_functions.build_meta_dict">build_meta_dict() (in module bayesflow.helper_functions)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedLikelihood.call">call() (bayesflow.amortizers.AmortizedLikelihood method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedModelComparison.call">(bayesflow.amortizers.AmortizedModelComparison method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosterior.call">(bayesflow.amortizers.AmortizedPosterior method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosteriorLikelihood.call">(bayesflow.amortizers.AmortizedPosteriorLikelihood method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.TwoLevelAmortizedPosterior.call">(bayesflow.amortizers.TwoLevelAmortizedPosterior method)</a>
+</li>
+        <li><a href="api/bayesflow.attention.html#bayesflow.attention.InducedSelfAttentionBlock.call">(bayesflow.attention.InducedSelfAttentionBlock method)</a>
+</li>
+        <li><a href="api/bayesflow.attention.html#bayesflow.attention.MultiHeadAttentionBlock.call">(bayesflow.attention.MultiHeadAttentionBlock method)</a>
+</li>
+        <li><a href="api/bayesflow.attention.html#bayesflow.attention.PoolingWithAttention.call">(bayesflow.attention.PoolingWithAttention method)</a>
+</li>
+        <li><a href="api/bayesflow.attention.html#bayesflow.attention.SelfAttentionBlock.call">(bayesflow.attention.SelfAttentionBlock method)</a>
+</li>
+        <li><a href="api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.AffineCoupling.call">(bayesflow.coupling_networks.AffineCoupling method)</a>
+</li>
+        <li><a href="api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.CouplingLayer.call">(bayesflow.coupling_networks.CouplingLayer method)</a>
+</li>
+        <li><a href="api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.SplineCoupling.call">(bayesflow.coupling_networks.SplineCoupling method)</a>
+</li>
+        <li><a href="api/bayesflow.experimental.rectifiers.html#bayesflow.experimental.rectifiers.DriftNetwork.call">(bayesflow.experimental.rectifiers.DriftNetwork method)</a>
+</li>
+        <li><a href="api/bayesflow.experimental.rectifiers.html#bayesflow.experimental.rectifiers.RectifiedDistribution.call">(bayesflow.experimental.rectifiers.RectifiedDistribution method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.ActNorm.call">(bayesflow.helper_networks.ActNorm method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.DenseCouplingNet.call">(bayesflow.helper_networks.DenseCouplingNet method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.EquivariantModule.call">(bayesflow.helper_networks.EquivariantModule method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.InvariantModule.call">(bayesflow.helper_networks.InvariantModule method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.MCDropout.call">(bayesflow.helper_networks.MCDropout method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.MultiConv1D.call">(bayesflow.helper_networks.MultiConv1D method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.Orthogonal.call">(bayesflow.helper_networks.Orthogonal method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.Permutation.call">(bayesflow.helper_networks.Permutation method)</a>
+</li>
+        <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.EvidentialNetwork.call">(bayesflow.inference_networks.EvidentialNetwork method)</a>
+</li>
+        <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.InvertibleNetwork.call">(bayesflow.inference_networks.InvertibleNetwork method)</a>
+</li>
+        <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.PMPNetwork.call">(bayesflow.inference_networks.PMPNetwork method)</a>
+</li>
+        <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.DeepSet.call">(bayesflow.summary_networks.DeepSet method)</a>
+</li>
+        <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.HierarchicalNetwork.call">(bayesflow.summary_networks.HierarchicalNetwork method)</a>
+</li>
+        <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork.call">(bayesflow.summary_networks.SequentialNetwork method)</a>
+</li>
+        <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.SetTransformer.call">(bayesflow.summary_networks.SetTransformer method)</a>
+</li>
+        <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.SplitNetwork.call">(bayesflow.summary_networks.SplitNetwork method)</a>
+</li>
+        <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.TimeSeriesTransformer.call">(bayesflow.summary_networks.TimeSeriesTransformer method)</a>
+</li>
+        <li><a href="api/bayesflow.wrappers.html#bayesflow.wrappers.SpectralNormalization.call">(bayesflow.wrappers.SpectralNormalization method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedLikelihood.call_loop">call_loop() (bayesflow.amortizers.AmortizedLikelihood method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosterior.call_loop">(bayesflow.amortizers.AmortizedPosterior method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.helper_functions.html#bayesflow.helper_functions.check_posterior_prior_shapes">check_posterior_prior_shapes() (in module bayesflow.helper_functions)</a>
+</li>
+      <li><a href="api/bayesflow.helper_functions.html#bayesflow.helper_functions.check_tensor_sanity">check_tensor_sanity() (in module bayesflow.helper_functions)</a>
+</li>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.compute_jacobian_trace">compute_jacobian_trace() (in module bayesflow.computational_utilities)</a>
+</li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedLikelihood.compute_loss">compute_loss() (bayesflow.amortizers.AmortizedLikelihood method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedModelComparison.compute_loss">(bayesflow.amortizers.AmortizedModelComparison method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosterior.compute_loss">(bayesflow.amortizers.AmortizedPosterior method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosteriorLikelihood.compute_loss">(bayesflow.amortizers.AmortizedPosteriorLikelihood method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedTarget.compute_loss">(bayesflow.amortizers.AmortizedTarget method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.TwoLevelAmortizedPosterior.compute_loss">(bayesflow.amortizers.TwoLevelAmortizedPosterior method)</a>
+</li>
+        <li><a href="api/bayesflow.experimental.rectifiers.html#bayesflow.experimental.rectifiers.RectifiedDistribution.compute_loss">(bayesflow.experimental.rectifiers.RectifiedDistribution method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.exceptions.html#bayesflow.exceptions.ConfigurationError">ConfigurationError</a>
+</li>
+      <li><a href="api/bayesflow.benchmarks.bernoulli_glm.html#bayesflow.benchmarks.bernoulli_glm.configurator">configurator() (in module bayesflow.benchmarks.bernoulli_glm)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.bernoulli_glm_raw.html#bayesflow.benchmarks.bernoulli_glm_raw.configurator">(in module bayesflow.benchmarks.bernoulli_glm_raw)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_linear.html#bayesflow.benchmarks.gaussian_linear.configurator">(in module bayesflow.benchmarks.gaussian_linear)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_linear_uniform.html#bayesflow.benchmarks.gaussian_linear_uniform.configurator">(in module bayesflow.benchmarks.gaussian_linear_uniform)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_mixture.html#bayesflow.benchmarks.gaussian_mixture.configurator">(in module bayesflow.benchmarks.gaussian_mixture)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.inverse_kinematics.html#bayesflow.benchmarks.inverse_kinematics.configurator">(in module bayesflow.benchmarks.inverse_kinematics)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.lotka_volterra.html#bayesflow.benchmarks.lotka_volterra.configurator">(in module bayesflow.benchmarks.lotka_volterra)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.sir.html#bayesflow.benchmarks.sir.configurator">(in module bayesflow.benchmarks.sir)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.slcp.html#bayesflow.benchmarks.slcp.configurator">(in module bayesflow.benchmarks.slcp)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.slcp_distractors.html#bayesflow.benchmarks.slcp_distractors.configurator">(in module bayesflow.benchmarks.slcp_distractors)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.two_moons.html#bayesflow.benchmarks.two_moons.configurator">(in module bayesflow.benchmarks.two_moons)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.ContextGenerator">ContextGenerator (class in bayesflow.simulation)</a>
+</li>
+      <li><a href="api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.CouplingLayer">CouplingLayer (class in bayesflow.coupling_networks)</a>
+</li>
+      <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.EvidentialNetwork.create_config">create_config() (bayesflow.inference_networks.EvidentialNetwork class method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.InvertibleNetwork.create_config">(bayesflow.inference_networks.InvertibleNetwork class method)</a>
+</li>
+        <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.PMPNetwork.create_config">(bayesflow.inference_networks.PMPNetwork class method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.DeepSet">DeepSet (class in bayesflow.summary_networks)</a>
+</li>
+      <li><a href="api/bayesflow.configuration.html#bayesflow.configuration.DefaultCombiner">DefaultCombiner (class in bayesflow.configuration)</a>
+</li>
+      <li><a href="api/bayesflow.configuration.html#bayesflow.configuration.DefaultJointConfigurator">DefaultJointConfigurator (class in bayesflow.configuration)</a>
+</li>
+      <li><a href="api/bayesflow.configuration.html#bayesflow.configuration.DefaultLikelihoodConfigurator">DefaultLikelihoodConfigurator (class in bayesflow.configuration)</a>
+</li>
+      <li><a href="api/bayesflow.configuration.html#bayesflow.configuration.DefaultModelComparisonConfigurator">DefaultModelComparisonConfigurator (class in bayesflow.configuration)</a>
+</li>
+      <li><a href="api/bayesflow.configuration.html#bayesflow.configuration.DefaultPosteriorConfigurator">DefaultPosteriorConfigurator (class in bayesflow.configuration)</a>
+</li>
+      <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.DenseCouplingNet">DenseCouplingNet (class in bayesflow.helper_networks)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.trainers.html#bayesflow.trainers.Trainer.diagnose_latent2d">diagnose_latent2d() (bayesflow.trainers.Trainer method)</a>
+</li>
+      <li><a href="api/bayesflow.trainers.html#bayesflow.trainers.Trainer.diagnose_sbc_histograms">diagnose_sbc_histograms() (bayesflow.trainers.Trainer method)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.TwoLevelPrior.draw_hyper_parameters">draw_hyper_parameters() (bayesflow.simulation.TwoLevelPrior method)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.TwoLevelPrior.draw_local_parameters">draw_local_parameters() (bayesflow.simulation.TwoLevelPrior method)</a>
+</li>
+      <li><a href="api/bayesflow.benchmarks.slcp_distractors.html#bayesflow.benchmarks.slcp_distractors.draw_mixture_student_t">draw_mixture_student_t() (in module bayesflow.benchmarks.slcp_distractors)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.TwoLevelPrior.draw_shared_parameters">draw_shared_parameters() (bayesflow.simulation.TwoLevelPrior method)</a>
+</li>
+      <li><a href="api/bayesflow.experimental.rectifiers.html#bayesflow.experimental.rectifiers.DriftNetwork.drift">drift() (bayesflow.experimental.rectifiers.DriftNetwork method)</a>
+</li>
+      <li><a href="api/bayesflow.experimental.rectifiers.html#bayesflow.experimental.rectifiers.DriftNetwork">DriftNetwork (class in bayesflow.experimental.rectifiers)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.EarlyStopper">EarlyStopper (class in bayesflow.helper_classes)</a>
+</li>
+      <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.EquivariantModule">EquivariantModule (class in bayesflow.helper_networks)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.Prior.estimate_means_and_stds">estimate_means_and_stds() (bayesflow.simulation.Prior method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.EvidentialNetwork.evidence">evidence() (bayesflow.inference_networks.EvidentialNetwork method)</a>
+</li>
+      <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.EvidentialNetwork">EvidentialNetwork (class in bayesflow.inference_networks)</a>
+</li>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.expected_calibration_error">expected_calibration_error() (in module bayesflow.computational_utilities)</a>
+</li>
+      <li><a href="api/bayesflow.helper_functions.html#bayesflow.helper_functions.extract_current_lr">extract_current_lr() (in module bayesflow.helper_functions)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.file_name">file_name (bayesflow.helper_classes.LossHistory attribute)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.RegressionLRAdjuster.file_name">(bayesflow.helper_classes.RegressionLRAdjuster attribute)</a>
+</li>
+        <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationMemory.file_name">(bayesflow.helper_classes.SimulationMemory attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.flush">flush() (bayesflow.helper_classes.LossHistory method)</a>
+</li>
+      <li><a href="api/bayesflow.helper_functions.html#bayesflow.helper_functions.format_loss_string">format_loss_string() (in module bayesflow.helper_functions)</a>
+</li>
+      <li><a href="api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.CouplingLayer.forward">forward() (bayesflow.coupling_networks.CouplingLayer method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.InvertibleNetwork.forward">(bayesflow.inference_networks.InvertibleNetwork method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.gaussian_kernel_matrix">gaussian_kernel_matrix() (in module bayesflow.computational_utilities)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.ContextGenerator.generate_context">generate_context() (bayesflow.simulation.ContextGenerator method)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.GenerativeModel">GenerativeModel (class in bayesflow.simulation)</a>
+</li>
+      <li><a href="api/bayesflow.benchmarks.html#bayesflow.benchmarks.get_benchmark_module">get_benchmark_module() (in module bayesflow.benchmarks)</a>
+</li>
+      <li><a href="api/bayesflow.wrappers.html#bayesflow.wrappers.SpectralNormalization.get_config">get_config() (bayesflow.wrappers.SpectralNormalization method)</a>
+</li>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.get_coverage_probs">get_coverage_probs() (in module bayesflow.computational_utilities)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationMemory.get_memory">get_memory() (bayesflow.helper_classes.SimulationMemory method)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.get_plottable">get_plottable() (bayesflow.helper_classes.LossHistory method)</a>
+</li>
+      <li><a href="api/bayesflow.benchmarks.slcp_distractors.html#bayesflow.benchmarks.slcp_distractors.get_random_student_t">get_random_student_t() (in module bayesflow.benchmarks.slcp_distractors)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.get_running_losses">get_running_losses() (bayesflow.helper_classes.LossHistory method)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.RegressionLRAdjuster.get_slope">get_slope() (bayesflow.helper_classes.RegressionLRAdjuster method)</a>
+</li>
+      <li><a href="api/bayesflow.mcmc.html#bayesflow.mcmc.PyMCSurrogateLikelihood.grad">grad() (bayesflow.mcmc.PyMCSurrogateLikelihood method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.HierarchicalNetwork">HierarchicalNetwork (class in bayesflow.summary_networks)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.attention.html#bayesflow.attention.InducedSelfAttentionBlock">InducedSelfAttentionBlock (class in bayesflow.attention)</a>
+</li>
+      <li><a href="api/bayesflow.exceptions.html#bayesflow.exceptions.InferenceError">InferenceError</a>
+</li>
+      <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.InvariantModule">InvariantModule (class in bayesflow.helper_networks)</a>
+</li>
+      <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.InvariantNetwork">InvariantNetwork (class in bayesflow.summary_networks)</a>
+</li>
+      <li><a href="api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.CouplingLayer.inverse">inverse() (bayesflow.coupling_networks.CouplingLayer method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.InvertibleNetwork.inverse">(bayesflow.inference_networks.InvertibleNetwork method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.inverse_multiquadratic_kernel_matrix">inverse_multiquadratic_kernel_matrix() (in module bayesflow.computational_utilities)</a>
+</li>
+      <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.InvertibleNetwork">InvertibleNetwork (class in bayesflow.inference_networks)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationMemory.is_full">is_full() (bayesflow.helper_classes.SimulationMemory method)</a>
+</li>
+      <li><a href="api/bayesflow.mcmc.html#bayesflow.mcmc.PyMCSurrogateLikelihood.itypes">itypes (bayesflow.mcmc.PyMCSurrogateLikelihood attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.losses.html#bayesflow.losses.kl_dirichlet">kl_dirichlet() (in module bayesflow.losses)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.losses.html#bayesflow.losses.kl_latent_space_gaussian">kl_latent_space_gaussian() (in module bayesflow.losses)</a>
+</li>
+      <li><a href="api/bayesflow.losses.html#bayesflow.losses.kl_latent_space_student">kl_latent_space_student() (in module bayesflow.losses)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.last_total_loss">last_total_loss() (bayesflow.helper_classes.LossHistory method)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.last_total_val_loss">last_total_val_loss() (bayesflow.helper_classes.LossHistory method)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.load_from_file">load_from_file() (bayesflow.helper_classes.LossHistory method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.RegressionLRAdjuster.load_from_file">(bayesflow.helper_classes.RegressionLRAdjuster method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationMemory.load_from_file">(bayesflow.helper_classes.SimulationMemory method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.trainers.html#bayesflow.trainers.Trainer.load_pretrained_network">load_pretrained_network() (bayesflow.trainers.Trainer method)</a>
+</li>
+      <li><a href="api/bayesflow.experimental.rectifiers.html#bayesflow.experimental.rectifiers.RectifiedDistribution.log_density">log_density() (bayesflow.experimental.rectifiers.RectifiedDistribution method)</a>
+</li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedLikelihood.log_likelihood">log_likelihood() (bayesflow.amortizers.AmortizedLikelihood method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_likelihood">(bayesflow.amortizers.AmortizedPosteriorLikelihood method)</a>
+</li>
+        <li><a href="api/bayesflow.mcmc.html#bayesflow.mcmc.MCMCSurrogateLikelihood.log_likelihood">(bayesflow.mcmc.MCMCSurrogateLikelihood method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.mcmc.html#bayesflow.mcmc.MCMCSurrogateLikelihood.log_likelihood_grad">log_likelihood_grad() (bayesflow.mcmc.MCMCSurrogateLikelihood method)</a>
+</li>
+      <li><a href="api/bayesflow.losses.html#bayesflow.losses.log_loss">log_loss() (in module bayesflow.losses)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosterior.log_posterior">log_posterior() (bayesflow.amortizers.AmortizedPosterior method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_posterior">(bayesflow.amortizers.AmortizedPosteriorLikelihood method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedLikelihood.log_prob">log_prob() (bayesflow.amortizers.AmortizedLikelihood method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosterior.log_prob">(bayesflow.amortizers.AmortizedPosterior method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_prob">(bayesflow.amortizers.AmortizedPosteriorLikelihood method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedTarget.log_prob">(bayesflow.amortizers.AmortizedTarget method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.TwoLevelAmortizedPosterior.log_prob">(bayesflow.amortizers.TwoLevelAmortizedPosterior method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.PMPNetwork.logits">logits() (bayesflow.inference_networks.PMPNetwork method)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.Prior.logpdf">logpdf() (bayesflow.simulation.Prior method)</a>
+</li>
+      <li><a href="api/bayesflow.helper_functions.html#bayesflow.helper_functions.loss_to_string">loss_to_string() (in module bayesflow.helper_functions)</a>
+</li>
+      <li><a href="api/bayesflow.exceptions.html#bayesflow.exceptions.LossError">LossError</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory">LossHistory (class in bayesflow.helper_classes)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.maximum_mean_discrepancy">maximum_mean_discrepancy() (in module bayesflow.computational_utilities)</a>
+</li>
+      <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.MCDropout">MCDropout (class in bayesflow.helper_networks)</a>
+</li>
+      <li><a href="api/bayesflow.mcmc.html#bayesflow.mcmc.MCMCSurrogateLikelihood">MCMCSurrogateLikelihood (class in bayesflow.mcmc)</a>
+</li>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.mean_squared_error">mean_squared_error() (in module bayesflow.computational_utilities)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.MemoryReplayBuffer">MemoryReplayBuffer (class in bayesflow.helper_classes)</a>
+</li>
+      <li><a href="api/bayesflow.helper_functions.html#bayesflow.helper_functions.merge_left_into_right">merge_left_into_right() (in module bayesflow.helper_functions)</a>
+</li>
+      <li><a href="api/bayesflow.default_settings.html#bayesflow.default_settings.MetaDictSetting">MetaDictSetting (class in bayesflow.default_settings)</a>
+</li>
+      <li><a href="api/bayesflow.sensitivity.html#bayesflow.sensitivity.misspecification_experiment">misspecification_experiment() (in module bayesflow.sensitivity)</a>
+</li>
+      <li><a href="api/bayesflow.trainers.html#bayesflow.trainers.Trainer.mmd_hypothesis_test">mmd_hypothesis_test() (bayesflow.trainers.Trainer method)</a>
+</li>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.mmd_kernel">mmd_kernel() (in module bayesflow.computational_utilities)</a>
+</li>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.mmd_kernel_unbiased">mmd_kernel_unbiased() (in module bayesflow.computational_utilities)</a>
+</li>
+      <li><a href="api/bayesflow.losses.html#bayesflow.losses.mmd_summary_space">mmd_summary_space() (in module bayesflow.losses)</a>
+</li>
+      <li>
+    module
+
+      <ul>
+        <li><a href="api/advanced_documentation.html#module-bayesflow">bayesflow</a>, <a href="api/bayesflow.html#module-bayesflow">[1]</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#module-bayesflow.amortizers">bayesflow.amortizers</a>
+</li>
+        <li><a href="api/bayesflow.attention.html#module-bayesflow.attention">bayesflow.attention</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.html#module-bayesflow.benchmarks">bayesflow.benchmarks</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.bernoulli_glm.html#module-bayesflow.benchmarks.bernoulli_glm">bayesflow.benchmarks.bernoulli_glm</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.bernoulli_glm_raw.html#module-bayesflow.benchmarks.bernoulli_glm_raw">bayesflow.benchmarks.bernoulli_glm_raw</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_linear.html#module-bayesflow.benchmarks.gaussian_linear">bayesflow.benchmarks.gaussian_linear</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_linear_uniform.html#module-bayesflow.benchmarks.gaussian_linear_uniform">bayesflow.benchmarks.gaussian_linear_uniform</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_mixture.html#module-bayesflow.benchmarks.gaussian_mixture">bayesflow.benchmarks.gaussian_mixture</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.inverse_kinematics.html#module-bayesflow.benchmarks.inverse_kinematics">bayesflow.benchmarks.inverse_kinematics</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.lotka_volterra.html#module-bayesflow.benchmarks.lotka_volterra">bayesflow.benchmarks.lotka_volterra</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.sir.html#module-bayesflow.benchmarks.sir">bayesflow.benchmarks.sir</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.slcp.html#module-bayesflow.benchmarks.slcp">bayesflow.benchmarks.slcp</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.slcp_distractors.html#module-bayesflow.benchmarks.slcp_distractors">bayesflow.benchmarks.slcp_distractors</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.two_moons.html#module-bayesflow.benchmarks.two_moons">bayesflow.benchmarks.two_moons</a>
+</li>
+        <li><a href="api/bayesflow.computational_utilities.html#module-bayesflow.computational_utilities">bayesflow.computational_utilities</a>
+</li>
+        <li><a href="api/bayesflow.configuration.html#module-bayesflow.configuration">bayesflow.configuration</a>
+</li>
+        <li><a href="api/bayesflow.coupling_networks.html#module-bayesflow.coupling_networks">bayesflow.coupling_networks</a>
+</li>
+        <li><a href="api/bayesflow.default_settings.html#module-bayesflow.default_settings">bayesflow.default_settings</a>
+</li>
+        <li><a href="api/bayesflow.diagnostics.html#module-bayesflow.diagnostics">bayesflow.diagnostics</a>
+</li>
+        <li><a href="api/bayesflow.exceptions.html#module-bayesflow.exceptions">bayesflow.exceptions</a>
+</li>
+        <li><a href="api/bayesflow.experimental.html#module-bayesflow.experimental">bayesflow.experimental</a>
+</li>
+        <li><a href="api/bayesflow.experimental.rectifiers.html#module-bayesflow.experimental.rectifiers">bayesflow.experimental.rectifiers</a>
+</li>
+        <li><a href="api/bayesflow.helper_classes.html#module-bayesflow.helper_classes">bayesflow.helper_classes</a>
+</li>
+        <li><a href="api/bayesflow.helper_functions.html#module-bayesflow.helper_functions">bayesflow.helper_functions</a>
+</li>
+        <li><a href="api/bayesflow.helper_networks.html#module-bayesflow.helper_networks">bayesflow.helper_networks</a>
+</li>
+        <li><a href="api/bayesflow.inference_networks.html#module-bayesflow.inference_networks">bayesflow.inference_networks</a>
+</li>
+        <li><a href="api/bayesflow.losses.html#module-bayesflow.losses">bayesflow.losses</a>
+</li>
+        <li><a href="api/bayesflow.mcmc.html#module-bayesflow.mcmc">bayesflow.mcmc</a>
+</li>
+        <li><a href="api/bayesflow.networks.html#module-bayesflow.networks">bayesflow.networks</a>
+</li>
+        <li><a href="api/bayesflow.sensitivity.html#module-bayesflow.sensitivity">bayesflow.sensitivity</a>
+</li>
+        <li><a href="api/bayesflow.simulation.html#module-bayesflow.simulation">bayesflow.simulation</a>
+</li>
+        <li><a href="api/bayesflow.summary_networks.html#module-bayesflow.summary_networks">bayesflow.summary_networks</a>
+</li>
+        <li><a href="api/bayesflow.trainers.html#module-bayesflow.trainers">bayesflow.trainers</a>
+</li>
+        <li><a href="api/bayesflow.version.html#module-bayesflow.version">bayesflow.version</a>
+</li>
+        <li><a href="api/bayesflow.wrappers.html#module-bayesflow.wrappers">bayesflow.wrappers</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.MultiConv1D">MultiConv1D (class in bayesflow.helper_networks)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.MultiGenerativeModel">MultiGenerativeModel (class in bayesflow.simulation)</a>
+</li>
+      <li><a href="api/bayesflow.attention.html#bayesflow.attention.MultiHeadAttentionBlock">MultiHeadAttentionBlock (class in bayesflow.attention)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.MultiSimulationDataset">MultiSimulationDataset (class in bayesflow.helper_classes)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.ContextGenerator.non_batchable_context">non_batchable_context() (bayesflow.simulation.ContextGenerator method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.wrappers.html#bayesflow.wrappers.SpectralNormalization.normalize_weights">normalize_weights() (bayesflow.wrappers.SpectralNormalization method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.exceptions.html#bayesflow.exceptions.OperationNotSupportedError">OperationNotSupportedError</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.Orthogonal">Orthogonal (class in bayesflow.helper_networks)</a>
+</li>
+      <li><a href="api/bayesflow.mcmc.html#bayesflow.mcmc.PyMCSurrogateLikelihood.otypes">otypes (bayesflow.mcmc.PyMCSurrogateLikelihood attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.mcmc.html#bayesflow.mcmc.PyMCSurrogateLikelihood.perform">perform() (bayesflow.mcmc.PyMCSurrogateLikelihood method)</a>
+</li>
+      <li><a href="api/bayesflow.helper_networks.html#bayesflow.helper_networks.Permutation">Permutation (class in bayesflow.helper_networks)</a>
+</li>
+      <li><a href="api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_calibration_curves">plot_calibration_curves() (in module bayesflow.diagnostics)</a>
+</li>
+      <li><a href="api/bayesflow.sensitivity.html#bayesflow.sensitivity.plot_color_grid">plot_color_grid() (in module bayesflow.sensitivity)</a>
+</li>
+      <li><a href="api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_confusion_matrix">plot_confusion_matrix() (in module bayesflow.diagnostics)</a>
+</li>
+      <li><a href="api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_latent_space_2d">plot_latent_space_2d() (in module bayesflow.diagnostics)</a>
+</li>
+      <li><a href="api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_losses">plot_losses() (in module bayesflow.diagnostics)</a>
+</li>
+      <li><a href="api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_mmd_hypothesis_test">plot_mmd_hypothesis_test() (in module bayesflow.diagnostics)</a>
+</li>
+      <li><a href="api/bayesflow.sensitivity.html#bayesflow.sensitivity.plot_model_misspecification_sensitivity">plot_model_misspecification_sensitivity() (in module bayesflow.sensitivity)</a>
+</li>
+      <li><a href="api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_posterior_2d">plot_posterior_2d() (in module bayesflow.diagnostics)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.Prior.plot_prior2d">plot_prior2d() (bayesflow.simulation.Prior method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_prior2d">(in module bayesflow.diagnostics)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.GenerativeModel.plot_pushforward">plot_pushforward() (bayesflow.simulation.GenerativeModel method)</a>
+</li>
+      <li><a href="api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_recovery">plot_recovery() (in module bayesflow.diagnostics)</a>
+</li>
+      <li><a href="api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_sbc_ecdf">plot_sbc_ecdf() (in module bayesflow.diagnostics)</a>
+</li>
+      <li><a href="api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_sbc_histograms">plot_sbc_histograms() (in module bayesflow.diagnostics)</a>
+</li>
+      <li><a href="api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_z_score_contraction">plot_z_score_contraction() (in module bayesflow.diagnostics)</a>
+</li>
+      <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.PMPNetwork">PMPNetwork (class in bayesflow.inference_networks)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.attention.html#bayesflow.attention.PoolingWithAttention">PoolingWithAttention (class in bayesflow.attention)</a>
+</li>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.posterior_calibration_error">posterior_calibration_error() (in module bayesflow.computational_utilities)</a>
+</li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedModelComparison.posterior_probs">posterior_probs() (bayesflow.amortizers.AmortizedModelComparison method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.PMPNetwork.posterior_probs">(bayesflow.inference_networks.PMPNetwork method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.GenerativeModel.presimulate_and_save">presimulate_and_save() (bayesflow.simulation.GenerativeModel method)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.Prior">Prior (class in bayesflow.simulation)</a>
+</li>
+      <li><a href="api/bayesflow.benchmarks.bernoulli_glm.html#bayesflow.benchmarks.bernoulli_glm.prior">prior() (in module bayesflow.benchmarks.bernoulli_glm)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.bernoulli_glm_raw.html#bayesflow.benchmarks.bernoulli_glm_raw.prior">(in module bayesflow.benchmarks.bernoulli_glm_raw)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_linear.html#bayesflow.benchmarks.gaussian_linear.prior">(in module bayesflow.benchmarks.gaussian_linear)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_linear_uniform.html#bayesflow.benchmarks.gaussian_linear_uniform.prior">(in module bayesflow.benchmarks.gaussian_linear_uniform)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_mixture.html#bayesflow.benchmarks.gaussian_mixture.prior">(in module bayesflow.benchmarks.gaussian_mixture)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.inverse_kinematics.html#bayesflow.benchmarks.inverse_kinematics.prior">(in module bayesflow.benchmarks.inverse_kinematics)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.lotka_volterra.html#bayesflow.benchmarks.lotka_volterra.prior">(in module bayesflow.benchmarks.lotka_volterra)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.sir.html#bayesflow.benchmarks.sir.prior">(in module bayesflow.benchmarks.sir)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.slcp.html#bayesflow.benchmarks.slcp.prior">(in module bayesflow.benchmarks.slcp)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.slcp_distractors.html#bayesflow.benchmarks.slcp_distractors.prior">(in module bayesflow.benchmarks.slcp_distractors)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.two_moons.html#bayesflow.benchmarks.two_moons.prior">(in module bayesflow.benchmarks.two_moons)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.mcmc.html#bayesflow.mcmc.PyMCSurrogateLikelihood">PyMCSurrogateLikelihood (class in bayesflow.mcmc)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.experimental.rectifiers.html#bayesflow.experimental.rectifiers.RectifiedDistribution">RectifiedDistribution (class in bayesflow.experimental.rectifiers)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.RegressionLRAdjuster">RegressionLRAdjuster (class in bayesflow.helper_classes)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.RegressionLRAdjuster.reset">reset() (bayesflow.helper_classes.RegressionLRAdjuster method)</a>
+</li>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.root_mean_squared_error">root_mean_squared_error() (in module bayesflow.computational_utilities)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedLikelihood.sample">sample() (bayesflow.amortizers.AmortizedLikelihood method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosterior.sample">(bayesflow.amortizers.AmortizedPosterior method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample">(bayesflow.amortizers.AmortizedPosteriorLikelihood method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedTarget.sample">(bayesflow.amortizers.AmortizedTarget method)</a>
+</li>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.TwoLevelAmortizedPosterior.sample">(bayesflow.amortizers.TwoLevelAmortizedPosterior method)</a>
+</li>
+        <li><a href="api/bayesflow.experimental.rectifiers.html#bayesflow.experimental.rectifiers.RectifiedDistribution.sample">(bayesflow.experimental.rectifiers.RectifiedDistribution method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.MemoryReplayBuffer.sample">(bayesflow.helper_classes.MemoryReplayBuffer method)</a>
+</li>
+        <li><a href="api/bayesflow.inference_networks.html#bayesflow.inference_networks.EvidentialNetwork.sample">(bayesflow.inference_networks.EvidentialNetwork method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample_data">sample_data() (bayesflow.amortizers.AmortizedPosteriorLikelihood method)</a>
+</li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedLikelihood.sample_loop">sample_loop() (bayesflow.amortizers.AmortizedLikelihood method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosterior.sample_loop">(bayesflow.amortizers.AmortizedPosterior method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample_parameters">sample_parameters() (bayesflow.amortizers.AmortizedPosteriorLikelihood method)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.save_to_file">save_to_file() (bayesflow.helper_classes.LossHistory method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.RegressionLRAdjuster.save_to_file">(bayesflow.helper_classes.RegressionLRAdjuster method)</a>
+</li>
+        <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationMemory.save_to_file">(bayesflow.helper_classes.SimulationMemory method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.attention.html#bayesflow.attention.SelfAttentionBlock">SelfAttentionBlock (class in bayesflow.attention)</a>
+</li>
+      <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork">SequentialNetwork (class in bayesflow.summary_networks)</a>
+</li>
+      <li><a href="api/bayesflow.default_settings.html#bayesflow.default_settings.Setting">Setting (class in bayesflow.default_settings)</a>
+</li>
+      <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.SetTransformer">SetTransformer (class in bayesflow.summary_networks)</a>
+</li>
+      <li><a href="api/bayesflow.exceptions.html#bayesflow.exceptions.ShapeError">ShapeError</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationDataset">SimulationDataset (class in bayesflow.helper_classes)</a>
+</li>
+      <li><a href="api/bayesflow.exceptions.html#bayesflow.exceptions.SimulationError">SimulationError</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationMemory">SimulationMemory (class in bayesflow.helper_classes)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.Simulator">Simulator (class in bayesflow.simulation)</a>
+</li>
+      <li><a href="api/bayesflow.benchmarks.bernoulli_glm.html#bayesflow.benchmarks.bernoulli_glm.simulator">simulator() (in module bayesflow.benchmarks.bernoulli_glm)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.benchmarks.bernoulli_glm_raw.html#bayesflow.benchmarks.bernoulli_glm_raw.simulator">(in module bayesflow.benchmarks.bernoulli_glm_raw)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_linear.html#bayesflow.benchmarks.gaussian_linear.simulator">(in module bayesflow.benchmarks.gaussian_linear)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_linear_uniform.html#bayesflow.benchmarks.gaussian_linear_uniform.simulator">(in module bayesflow.benchmarks.gaussian_linear_uniform)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.gaussian_mixture.html#bayesflow.benchmarks.gaussian_mixture.simulator">(in module bayesflow.benchmarks.gaussian_mixture)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.inverse_kinematics.html#bayesflow.benchmarks.inverse_kinematics.simulator">(in module bayesflow.benchmarks.inverse_kinematics)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.lotka_volterra.html#bayesflow.benchmarks.lotka_volterra.simulator">(in module bayesflow.benchmarks.lotka_volterra)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.sir.html#bayesflow.benchmarks.sir.simulator">(in module bayesflow.benchmarks.sir)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.slcp.html#bayesflow.benchmarks.slcp.simulator">(in module bayesflow.benchmarks.slcp)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.slcp_distractors.html#bayesflow.benchmarks.slcp_distractors.simulator">(in module bayesflow.benchmarks.slcp_distractors)</a>
+</li>
+        <li><a href="api/bayesflow.benchmarks.two_moons.html#bayesflow.benchmarks.two_moons.simulator">(in module bayesflow.benchmarks.two_moons)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.simultaneous_ecdf_bands">simultaneous_ecdf_bands() (in module bayesflow.computational_utilities)</a>
+</li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.SingleModelAmortizer">SingleModelAmortizer (class in bayesflow.amortizers)</a>
+</li>
+      <li><a href="api/bayesflow.wrappers.html#bayesflow.wrappers.SpectralNormalization">SpectralNormalization (class in bayesflow.wrappers)</a>
+</li>
+      <li><a href="api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.SplineCoupling">SplineCoupling (class in bayesflow.coupling_networks)</a>
+</li>
+      <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.SplitNetwork">SplitNetwork (class in bayesflow.summary_networks)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.start_new_run">start_new_run() (bayesflow.helper_classes.LossHistory method)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.MemoryReplayBuffer.store">store() (bayesflow.helper_classes.MemoryReplayBuffer method)</a>
+
+      <ul>
+        <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationMemory.store">(bayesflow.helper_classes.SimulationMemory method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/bayesflow.exceptions.html#bayesflow.exceptions.SummaryStatsError">SummaryStatsError</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.summary_networks.html#bayesflow.summary_networks.TimeSeriesTransformer">TimeSeriesTransformer (class in bayesflow.summary_networks)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.total_loss">total_loss (bayesflow.helper_classes.LossHistory property)</a>
+</li>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.total_val_loss">total_val_loss (bayesflow.helper_classes.LossHistory property)</a>
+</li>
+      <li><a href="api/bayesflow.trainers.html#bayesflow.trainers.Trainer.train_experience_replay">train_experience_replay() (bayesflow.trainers.Trainer method)</a>
+</li>
+      <li><a href="api/bayesflow.trainers.html#bayesflow.trainers.Trainer.train_from_presimulation">train_from_presimulation() (bayesflow.trainers.Trainer method)</a>
+</li>
+      <li><a href="api/bayesflow.trainers.html#bayesflow.trainers.Trainer.train_offline">train_offline() (bayesflow.trainers.Trainer method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.trainers.html#bayesflow.trainers.Trainer.train_online">train_online() (bayesflow.trainers.Trainer method)</a>
+</li>
+      <li><a href="api/bayesflow.trainers.html#bayesflow.trainers.Trainer.train_rounds">train_rounds() (bayesflow.trainers.Trainer method)</a>
+</li>
+      <li><a href="api/bayesflow.trainers.html#bayesflow.trainers.Trainer">Trainer (class in bayesflow.trainers)</a>
+</li>
+      <li><a href="api/bayesflow.amortizers.html#bayesflow.amortizers.TwoLevelAmortizedPosterior">TwoLevelAmortizedPosterior (class in bayesflow.amortizers)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.TwoLevelGenerativeModel">TwoLevelGenerativeModel (class in bayesflow.simulation)</a>
+</li>
+      <li><a href="api/bayesflow.simulation.html#bayesflow.simulation.TwoLevelPrior">TwoLevelPrior (class in bayesflow.simulation)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/bayesflow.helper_classes.html#bayesflow.helper_classes.EarlyStopper.update_and_recommend">update_and_recommend() (bayesflow.helper_classes.EarlyStopper method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

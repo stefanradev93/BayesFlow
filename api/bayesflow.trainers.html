@@ -1,0 +1,1085 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>bayesflow.trainers module &#8212; BayesFlow: Amortized Bayesian Inference</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/bayesflow.trainers';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/api/bayesflow.trainers.html" />
+    <link rel="shortcut icon" href="../_static/bayesflow_hex.ico"/>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Advanced documentation" href="advanced_documentation.html" />
+    <link rel="prev" title="bayesflow.simulation module" href="bayesflow.simulation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../documentation.html">Documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">bayesflow.trainers module</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="advanced_documentation.html">Advanced documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.losses.html">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Full Installation Instructions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About us</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/edit/master/api/bayesflow.trainers.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2Fapi/bayesflow.trainers.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/api/bayesflow.trainers.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>bayesflow.trainers module</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.diagnose_latent2d"><code class="docutils literal notranslate"><span class="pre">Trainer.diagnose_latent2d()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.diagnose_sbc_histograms"><code class="docutils literal notranslate"><span class="pre">Trainer.diagnose_sbc_histograms()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.load_pretrained_network"><code class="docutils literal notranslate"><span class="pre">Trainer.load_pretrained_network()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.mmd_hypothesis_test"><code class="docutils literal notranslate"><span class="pre">Trainer.mmd_hypothesis_test()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.train_experience_replay"><code class="docutils literal notranslate"><span class="pre">Trainer.train_experience_replay()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.train_from_presimulation"><code class="docutils literal notranslate"><span class="pre">Trainer.train_from_presimulation()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.train_offline"><code class="docutils literal notranslate"><span class="pre">Trainer.train_offline()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.train_online"><code class="docutils literal notranslate"><span class="pre">Trainer.train_online()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.train_rounds"><code class="docutils literal notranslate"><span class="pre">Trainer.train_rounds()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="module-bayesflow.trainers">
+<span id="bayesflow-trainers-module"></span><h1>bayesflow.trainers module<a class="headerlink" href="#module-bayesflow.trainers" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.trainers.Trainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.trainers.</span></span><span class="sig-name descname"><span class="pre">Trainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amortizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configurator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_lr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_checks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class connects a generative model (or, already simulated data from a model) with
+a configurator and a neural inference architecture for amortized inference (amortizer). A Trainer
+instance is responsible for optimizing the amortizer via various forms of simulation-based training.</p>
+<p>At the very minimum, the trainer must be initialized with an <code class="docutils literal notranslate"><span class="pre">amortizer</span></code> instance, which is capable
+of processing the (configured) outputs of a generative model. A <code class="docutils literal notranslate"><span class="pre">configurator</span></code> will then process
+the outputs of the generative model and convert them into suitable inputs for the amortizer. Users
+can choose from a palette of default configurators or create their own configurators, essentially
+building a modularized pipeline GenerativeModel -&gt; Configurator -&gt; Amortizer. Most complex models
+wtill require custom configurators.</p>
+<p>Currently, the trainer supports the following simulation-based training regimes, based on efficiency
+considerations:</p>
+<ul>
+<li><dl>
+<dt>Online training</dt><dd><p>Usage:
+&gt;&gt;&gt; trainer.train_online(epochs, iterations_per_epoch, batch_size, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs)</p>
+<p>This training regime is optimal for fast generative models which can efficiently simulated data on-the-fly.
+In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than 2-3 seconds.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Experience replay training</dt><dd><p>Usage:
+&gt;&gt;&gt; trainer.train_experience_replay(epochs, iterations_per_epoch, batch_size, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs)</p>
+<p>This training regime is also good for fast generative models capable of efficiently simulating data on-the-fly.
+Compare to pure online training, this training will keep an experience replay buffer from which simulations
+are randomly sampled, so the networks will likely see some simulations multiple times.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Round-based training</dt><dd><p>Usage:
+&gt;&gt;&gt; trainer.train_rounds(rounds, sim_per_round, epochs, batch_size, <a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs)</p>
+<p>This training regime is optimal for slow, but still reasonably performant generative models.
+In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than one 2-3 minutes.</p>
+<p>Important: overfitting presents a danger when using small numbers of simulated data sets, so it is recommended to use
+some amount of regularization for the neural amortizer(s).</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Offline taining</dt><dd><p>Usage:
+&gt;&gt;&gt; trainer.train_offline(simulations_dict, epochs, batch_size, <a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs)</p>
+<p>This training regime is optimal for very slow, external simulators, which take several minutes for a single simulation.
+It assumes that all training data has been already simulated and stored on disk.</p>
+<p>Important: overfitting presents a danger when using a small simulated data set, so it is recommended to use
+some amount of regularization for the neural amortizer(s).</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Note: For extremely slow simulators (i.e., more than an hour of a single simulation), the BayesFlow framework
+might not be the ideal choice and should probably be considered in combination with a black-box surrogate optimization method,
+such as Bayesian optimization.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.trainers.Trainer.diagnose_latent2d">
+<span class="sig-name descname"><span class="pre">diagnose_latent2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer.diagnose_latent2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer.diagnose_latent2d" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs visual pre-inference diagnostics of latent space on either provided validation data
+(new simulations) or internal simulation memory.
+If <code class="docutils literal notranslate"><span class="pre">inputs</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None</span></code>, then diagnostics will be performed on the inputs, regardless
+whether the <code class="docutils literal notranslate"><span class="pre">simulation_memory</span></code> of the trainer is empty or not. If <code class="docutils literal notranslate"><span class="pre">inputs</span> <span class="pre">is</span> <span class="pre">None</span></code>, then
+the trainer will try to access is memory or raise a <code class="docutils literal notranslate"><span class="pre">ConfigurationError</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>inputs</strong><span class="classifier">None, list, or dict, optional, default: None</span></dt><dd><p>The optional inputs to use</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments, which could be:
+<code class="docutils literal notranslate"><span class="pre">conf_args</span></code>  - optional keyword arguments passed to the configurator
+<code class="docutils literal notranslate"><span class="pre">net_args</span></code>   - optional keyword arguments passed to the amortizer
+<code class="docutils literal notranslate"><span class="pre">plot_args</span></code>  - optional keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">plot_latent_space_2d</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fig</strong><span class="classifier">plt.Figure</span></dt><dd><p>The figure object which can be readily saved to disk using <code class="docutils literal notranslate"><span class="pre">fig.savefig()</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.trainers.Trainer.diagnose_sbc_histograms">
+<span class="sig-name descname"><span class="pre">diagnose_sbc_histograms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer.diagnose_sbc_histograms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer.diagnose_sbc_histograms" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs visual pre-inference diagnostics via simulation-based calibration (SBC)
+(new simulations) or internal simulation memory.
+If <code class="docutils literal notranslate"><span class="pre">inputs</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None</span></code>, then diagnostics will be performed on the inputs, regardless
+whether the <code class="docutils literal notranslate"><span class="pre">simulation_memory</span></code> of the trainer is empty or not. If <code class="docutils literal notranslate"><span class="pre">inputs</span> <span class="pre">is</span> <span class="pre">None</span></code>, then
+the trainer will try to access is memory or raise a <code class="docutils literal notranslate"><span class="pre">ConfigurationError</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>inputs</strong><span class="classifier">None, list or dict, optional, default: None</span></dt><dd><p>The optional inputs to use</p>
+</dd>
+<dt><strong>n_samples</strong><span class="classifier">int or None, optional, default: None</span></dt><dd><p>The number of posterior samples to draw for each simulated data set.
+If None, the number will be heuristically determined so n_sim / n_draws ~= 20</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments, which could be:
+<code class="docutils literal notranslate"><span class="pre">conf_args</span></code>  - optional keyword arguments passed to the configurator
+<cite>net_args`</cite>   - optional keyword arguments passed to the amortizer
+<code class="docutils literal notranslate"><span class="pre">plot_args</span></code>  - optional keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">plot_sbc</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fig</strong><span class="classifier">plt.Figure</span></dt><dd><p>The figure object which can be readily saved to disk using <code class="docutils literal notranslate"><span class="pre">fig.savefig()</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.trainers.Trainer.load_pretrained_network">
+<span class="sig-name descname"><span class="pre">load_pretrained_network</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer.load_pretrained_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer.load_pretrained_network" title="Permalink to this definition">#</a></dt>
+<dd><p>Attempts to load a pre-trained network if checkpoint path is provided and a checkpoint manager exists.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.trainers.Trainer.mmd_hypothesis_test">
+<span class="sig-name descname"><span class="pre">mmd_hypothesis_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observed_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_reference_simulations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_null_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer.mmd_hypothesis_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer.mmd_hypothesis_test" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>observed_data: np.ndarray</strong></dt><dd><p>Observed data, shape (num_observed, …)</p>
+</dd>
+<dt><strong>reference_data: np.ndarray</strong></dt><dd><p>Reference data representing samples from the “well-specified model”, shape (num_reference, …)</p>
+</dd>
+<dt><strong>num_reference_simulations: int, default: 1000</strong></dt><dd><dl class="simple">
+<dt>Number of reference simulations (M) simulated from the trainer’s generative model</dt><dd><p>if no <cite>reference_data</cite> are provided.</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>num_null_samples: int, default: 100</strong></dt><dd><p>Number of draws from the MMD sampling distribution under the null hypothesis “the trainer’s generative
+model is well-specified”</p>
+</dd>
+<dt><strong>bootstrap: bool, default: False</strong></dt><dd><p>If true, the reference data (see above) are bootstrapped for each sample from the MMD sampling distribution.
+If false, a new data set is simulated for computing each draw from the MMD sampling distribution.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>mmd_null_samples: np.ndarray</dt><dd><p>samples from the H0 sampling distribution (“well-specified model”)</p>
+</dd>
+<dt>mmd_observed: float</dt><dd><p>summary MMD estimate for the observed data sets</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.trainers.Trainer.train_experience_replay">
+<span class="sig-name descname"><span class="pre">train_experience_replay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations_per_epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stopping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_autograph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_sims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer.train_experience_replay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer.train_experience_replay" title="Permalink to this definition">#</a></dt>
+<dd><p>Trains the network(s) via experience replay using a memory replay buffer, as utilized
+in reinforcement learning. Additional keyword arguments are passed to the generative mode,
+configurator, and amortizer. Read below for signature.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>epochs</strong><span class="classifier">int</span></dt><dd><p>Number of epochs (and number of times a checkpoint is stored)</p>
+</dd>
+<dt><strong>iterations_per_epoch</strong><span class="classifier">int</span></dt><dd><p>Number of batch simulations to perform per epoch</p>
+</dd>
+<dt><strong>batch_size</strong><span class="classifier">int</span></dt><dd><p>Number of simulations to perform at each backpropagation step.</p>
+</dd>
+<dt><strong>save_checkpoint</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>A flag to decide whether to save checkpoints after each epoch,
+if a <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code> provided during initialization, otherwise ignored.</p>
+</dd>
+<dt><strong>optimizer</strong><span class="classifier">tf.keras.optimizer.Optimizer or None</span></dt><dd><p>Optimizer for the neural network. <code class="docutils literal notranslate"><span class="pre">None</span></code> will result in <code class="docutils literal notranslate"><span class="pre">tf.keras.optimizers.Adam</span></code>
+using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
+will override default learning rate and schedule settings.</p>
+</dd>
+<dt><strong>reuse_optimizer</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>A flag indicating whether the optimizer instance should be treated as persistent or not.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the optimizer and its states are not stored after training has finished.
+Otherwise, the optimizer will be stored as <code class="docutils literal notranslate"><span class="pre">self.optimizer</span></code> and re-used in further training runs.</p>
+</dd>
+<dt><strong>buffer_capacity</strong><span class="classifier">int, optional, default: 1000</span></dt><dd><p>Max number of batches to store in buffer. For instance, if <code class="docutils literal notranslate"><span class="pre">batch_size=32</span></code>
+and <code class="docutils literal notranslate"><span class="pre">capacity_in_batches=1000</span></code>, then the buffer will hold a maximum of
+32 * 1000 = 32000 simulations. Be careful with memory!
+Important! Argument will be ignored if buffer has previously been initialized!</p>
+</dd>
+<dt><strong>early_stopping</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Whether to use optional stopping or not during training. Could speed up training.
+Only works if <code class="docutils literal notranslate"><span class="pre">validation_sims</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None</span></code>, i.e., validation data has been provided.</p>
+</dd>
+<dt><strong>use_autograph</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
+could also be harder to debug.</p>
+</dd>
+<dt><strong>validation_sims</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>Simulations used as a “validation set”.
+If <code class="docutils literal notranslate"><span class="pre">dict</span></code>, will assume it’s the output of a generative model and try
+<code class="docutils literal notranslate"><span class="pre">amortizer.compute_loss(configurator(validation_sims))''</span>
+<span class="pre">after</span> <span class="pre">each</span> <span class="pre">epoch.</span>
+<span class="pre">If</span> <span class="pre">``int</span></code>, will assume it’s the number of sims to generate from the generative
+model before starting training. Only considered if a generative model has been
+provided during initialization.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> (default), no validation set will be used.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments, which can be:
+<code class="docutils literal notranslate"><span class="pre">model_args</span></code>          - optional kwargs passed to the generative model
+<code class="docutils literal notranslate"><span class="pre">val_model_args</span></code>      - optional kwargs passed to the generative model</p>
+<blockquote>
+<div><p>for generating validation data. Only useful if
+<code class="docutils literal notranslate"><span class="pre">type(validation_sims)</span> <span class="pre">is</span> <span class="pre">int</span></code>.</p>
+</div></blockquote>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">conf_args</span></code>           - optional kwargs passed to the configurator</dt><dd><p>before each backprop (update) step.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">val_conf_args</span></code>       - optional kwargs passed to the configurator</dt><dd><p>then configuring the validation data.</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">net_args</span></code>            - optional kwargs passed to the amortizer
+<code class="docutils literal notranslate"><span class="pre">early_stopping_args</span></code> - optional kwargs passed to the <code class="docutils literal notranslate"><span class="pre">EarlyStopper</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>losses</strong><span class="classifier"><code class="docutils literal notranslate"><span class="pre">dict</span></code> or <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></span></dt><dd><p>A dictionary or a data frame storing the losses across epochs and iterations.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.trainers.Trainer.train_from_presimulation">
+<span class="sig-name descname"><span class="pre">train_from_presimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">presimulation_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stopping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_sims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_autograph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer.train_from_presimulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer.train_from_presimulation" title="Permalink to this definition">#</a></dt>
+<dd><p>Trains an amortizer via a modified form of offline training.</p>
+<p>Like regular offline training, it assumes that parameters, data and optional context have already
+been simulated (i.e., forward inference has been performed).</p>
+<p>Also like regular offline training, it is faster than online training in scenarios where simulations are slow.
+Unlike regular offline training, it uses each batch from the presimulated dataset only once during training,
+if not otherwise specified by a higher maximal number of epochs. Then, presimulated data is reused in a cyclic
+manner to achieve the desired number of epochs.
+A larger presimulated dataset is therefore required than for offline training, and the increase in speed
+gained by loading simulations instead of generating them on the fly comes at a cost:
+a large presimulated dataset takes up a large amount of hard drive space.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>presimulation_path</strong><span class="classifier">str</span></dt><dd><p>File path to the folder containing the files from the precomputed simulation.
+Ideally generated using a GenerativeModel’s presimulate_and_save method, otherwise must match
+the structure produced by that method:</p>
+<p>Each file contains the data for one epoch (i.e. a number of batches), and must be compatible
+with the custom_loader provided.
+The custom_loader must read each file into a collection (either a dictionary or a list) of simulation_dict objects.
+This is easily achieved with the pickle library: if the files were generated from collections of simulation_dict objects
+using pickle.dump, the _default_loader (default for custom_load) will load them using pickle.load.
+Training parameters like number of iterations and batch size are inferred from the files during training.</p>
+</dd>
+<dt><strong>optimizer</strong><span class="classifier">tf.keras.optimizer.Optimizer</span></dt><dd><p>Optimizer for the neural network training. Since for this training, it is impossible to guess the number of
+iterations beforehead, an optimizer must be provided.</p>
+</dd>
+<dt><strong>save_checkpoint</strong><span class="classifier">bool, optional, default</span><span class="classifier">True</span></dt><dd><p>Determines whether to save checkpoints after each epoch,
+if a checkpoint_path provided during initialization, otherwise ignored.</p>
+</dd>
+<dt><strong>max_epochs</strong><span class="classifier">int or None, optional, default: None</span></dt><dd><p>An optional parameter to limit or extend the number of epochs. If number of epochs is larger than the files
+of the dataset, presimulations will be reused.</p>
+</dd>
+<dt><strong>reuse_optimizer</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>A flag indicating whether the optimizer instance should be treated as persistent or not.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the optimizer and its states are not stored after training has finished.
+Otherwise, the optimizer will be stored as <code class="docutils literal notranslate"><span class="pre">self.optimizer</span></code> and re-used in further training runs.</p>
+</dd>
+<dt><strong>custom_loader</strong><span class="classifier">callable, optional, default: self._default_loader</span></dt><dd><p>Must take a string file_path as an input and output a collection (dictionary or list) of simulation_dict objects.
+A simulation_dict has the keys
+- <code class="docutils literal notranslate"><span class="pre">prior_non_batchable_context</span></code>,
+- <code class="docutils literal notranslate"><span class="pre">prior_batchable_context</span></code>,
+- <code class="docutils literal notranslate"><span class="pre">prior_draws</span></code>,
+- <code class="docutils literal notranslate"><span class="pre">sim_non_batchable_context</span></code>,
+- <code class="docutils literal notranslate"><span class="pre">sim_batchable_context</span></code>,
+- <code class="docutils literal notranslate"><span class="pre">sim_data</span></code>.
+<code class="docutils literal notranslate"><span class="pre">prior_draws</span></code> and <code class="docutils literal notranslate"><span class="pre">sim_data</span></code> must have actual data as values, the rest are optional.</p>
+</dd>
+<dt><strong>early_stopping</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Whether to use optional stopping or not during training. Could speed up training.</p>
+</dd>
+<dt><strong>validation_sims</strong><span class="classifier">dict, int, or None, optional, default: None</span></dt><dd><p>Simulations used as a “validation set”.
+If <code class="docutils literal notranslate"><span class="pre">dict</span></code>, will assume it’s the output of a generative model and try
+<code class="docutils literal notranslate"><span class="pre">amortizer.compute_loss(configurator(validation_sims))''</span>
+<span class="pre">after</span> <span class="pre">each</span> <span class="pre">epoch.</span>
+<span class="pre">If</span> <span class="pre">``int</span></code>, will assume it’s the number of sims to generate from the generative
+model before starting training. Only considered if a generative model has been
+provided during initialization.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> (default), no validation set will be used.</p>
+</dd>
+<dt><strong>use_autograph</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
+could also be harder to debug.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Optional keyword arguments, which can be:
+<code class="docutils literal notranslate"><span class="pre">conf_args</span></code>  - optional keyword arguments passed to the configurator
+<code class="docutils literal notranslate"><span class="pre">net_args</span></code>   - optional keyword arguments passed to the amortizer</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>losses</strong><span class="classifier"><code class="docutils literal notranslate"><span class="pre">dict</span></code> or <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></span></dt><dd><p>A dictionary or a data frame storing the losses across epochs and iterations</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.trainers.Trainer.train_offline">
+<span class="sig-name descname"><span class="pre">train_offline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulations_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stopping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_sims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_autograph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer.train_offline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer.train_offline" title="Permalink to this definition">#</a></dt>
+<dd><p>Trains an amortizer via offline learning. Assume parameters, data and optional
+context have already been simulated (i.e., forward inference has been performed).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>simulations_dict</strong><span class="classifier">dict</span></dt><dd><p>A dictionaty containing the simulated data / context, if using the default keys,
+the method expects at least the mandatory keys <code class="docutils literal notranslate"><span class="pre">sim_data</span></code> and <code class="docutils literal notranslate"><span class="pre">prior_draws</span></code> to be present</p>
+</dd>
+<dt><strong>epochs</strong><span class="classifier">int</span></dt><dd><p>Number of epochs (and number of times a checkpoint is stored)</p>
+</dd>
+<dt><strong>batch_size</strong><span class="classifier">int</span></dt><dd><p>Number of simulations to perform at each backpropagation step</p>
+</dd>
+<dt><strong>save_checkpoint</strong><span class="classifier">bool (default - True)</span></dt><dd><p>Determines whether to save checkpoints after each epoch,
+if a checkpoint_path provided during initialization, otherwise ignored.</p>
+</dd>
+<dt><strong>optimizer</strong><span class="classifier">tf.keras.optimizer.Optimizer or None</span></dt><dd><p>Optimizer for the neural network. <code class="docutils literal notranslate"><span class="pre">None</span></code> will result in <code class="docutils literal notranslate"><span class="pre">tf.keras.optimizers.Adam</span></code>
+using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
+will override default learning rate and schedule settings.</p>
+</dd>
+<dt><strong>reuse_optimizer</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>A flag indicating whether the optimizer instance should be treated as persistent or not.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the optimizer and its states are not stored after training has finished.
+Otherwise, the optimizer will be stored as <code class="docutils literal notranslate"><span class="pre">self.optimizer</span></code> and re-used in further training runs.</p>
+</dd>
+<dt><strong>early_stopping</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Whether to use optional stopping or not during training. Could speed up training.
+Only works if <code class="docutils literal notranslate"><span class="pre">validation_sims</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None</span></code>, i.e., validation data has been provided.</p>
+</dd>
+<dt><strong>use_autograph</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
+could also be harder to debug.</p>
+</dd>
+<dt><strong>validation_sims</strong><span class="classifier">dict, int, or None, optional, default: None</span></dt><dd><p>Simulations used as a “validation set”.
+If <code class="docutils literal notranslate"><span class="pre">dict</span></code>, will assume it’s the output of a generative model and try
+<code class="docutils literal notranslate"><span class="pre">amortizer.compute_loss(configurator(validation_sims))''</span>
+<span class="pre">after</span> <span class="pre">each</span> <span class="pre">epoch.</span>
+<span class="pre">If</span> <span class="pre">``int</span></code>, will assume it’s the number of sims to generate from the generative
+model before starting training. Only considered if a generative model has been
+provided during initialization.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> (default), no validation set will be used.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Optional keyword arguments, which can be:
+<code class="docutils literal notranslate"><span class="pre">val_model_args</span></code>      - optional kwargs passed to the generative model</p>
+<blockquote>
+<div><p>for generating validation data. Only useful if
+<code class="docutils literal notranslate"><span class="pre">type(validation_sims)</span> <span class="pre">is</span> <span class="pre">int</span></code>.</p>
+</div></blockquote>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">conf_args</span></code>           - optional kwargs passed to the configurator</dt><dd><p>before each backprop (update) step.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">val_conf_args</span></code>       - optional kwargs passed to the configurator</dt><dd><p>then configuring the validation data.</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">net_args</span></code>            - optional kwargs passed to the amortizer
+<code class="docutils literal notranslate"><span class="pre">early_stopping_args</span></code> - optional kwargs passed to the <code class="docutils literal notranslate"><span class="pre">EarlyStopper</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>losses</strong><span class="classifier"><code class="docutils literal notranslate"><span class="pre">dict</span></code> or <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></span></dt><dd><p>A dictionary or a data frame storing the losses across epochs and iterations</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.trainers.Trainer.train_online">
+<span class="sig-name descname"><span class="pre">train_online</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations_per_epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stopping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_autograph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_sims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer.train_online"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer.train_online" title="Permalink to this definition">#</a></dt>
+<dd><p>Trains an amortizer via online learning. Additional keyword arguments
+are passed to the generative mode, configurator, and amortizer.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>epochs</strong><span class="classifier">int</span></dt><dd><p>Number of epochs (and number of times a checkpoint is stored)</p>
+</dd>
+<dt><strong>iterations_per_epoch</strong><span class="classifier">int</span></dt><dd><p>Number of batch simulations to perform per epoch</p>
+</dd>
+<dt><strong>batch_size</strong><span class="classifier">int</span></dt><dd><p>Number of simulations to perform at each backprop step</p>
+</dd>
+<dt><strong>save_checkpoint</strong><span class="classifier">bool (default - True)</span></dt><dd><p>A flag to decide whether to save checkpoints after each epoch,
+if a checkpoint_path provided during initialization, otherwise ignored.</p>
+</dd>
+<dt><strong>optimizer</strong><span class="classifier">tf.keras.optimizer.Optimizer or None</span></dt><dd><p>Optimizer for the neural network. <code class="docutils literal notranslate"><span class="pre">None</span></code> will result in <code class="docutils literal notranslate"><span class="pre">tf.keras.optimizers.Adam</span></code>
+using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
+will override default learning rate and schedule settings.</p>
+</dd>
+<dt><strong>reuse_optimizer</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>A flag indicating whether the optimizer instance should be treated as persistent or not.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the optimizer and its states are not stored after training has finished.
+Otherwise, the optimizer will be stored as <a href="#id9"><span class="problematic" id="id10">``</span></a>self.optimizer` and re-used in further training runs.</p>
+</dd>
+<dt><strong>early_stopping</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Whether to use optional stopping or not during training. Could speed up training.
+Only works if <code class="docutils literal notranslate"><span class="pre">validation_sims</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None</span></code>, i.e., validation data has been provided.</p>
+</dd>
+<dt><strong>use_autograph</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
+could also be harder to debug.</p>
+</dd>
+<dt><strong>validation_sims</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>Simulations used as a “validation set”.
+If <code class="docutils literal notranslate"><span class="pre">dict</span></code>, will assume it’s the output of a generative model and try
+<code class="docutils literal notranslate"><span class="pre">amortizer.compute_loss(configurator(validation_sims))''</span>
+<span class="pre">after</span> <span class="pre">each</span> <span class="pre">epoch.</span>
+<span class="pre">If</span> <span class="pre">``int</span></code>, will assume it’s the number of sims to generate from the generative
+model before starting training. Only considered if a generative model has been
+provided during initialization.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> (default), no validation set will be used.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Optional keyword arguments, which can be:
+<code class="docutils literal notranslate"><span class="pre">model_args</span></code>          - optional kwargs passed to the generative model
+<code class="docutils literal notranslate"><span class="pre">val_model_args</span></code>      - optional kwargs passed to the generative model</p>
+<blockquote>
+<div><p>for generating validation data. Only useful if
+<code class="docutils literal notranslate"><span class="pre">type(validation_sims)</span> <span class="pre">is</span> <span class="pre">int</span></code>.</p>
+</div></blockquote>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">conf_args</span></code>           - optional kwargs passed to the configurator</dt><dd><p>before each backprop (update) step.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">val_conf_args</span></code>       - optional kwargs passed to the configurator</dt><dd><p>then configuring the validation data.</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">net_args</span></code>            - optional kwargs passed to the amortizer
+<code class="docutils literal notranslate"><span class="pre">early_stopping_args</span></code> - optional kwargs passed to the <code class="docutils literal notranslate"><span class="pre">EarlyStopper</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>losses</strong><span class="classifier">dict or pandas.DataFrame</span></dt><dd><p>A dictionary storing the losses across epochs and iterations</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.trainers.Trainer.train_rounds">
+<span class="sig-name descname"><span class="pre">train_rounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_per_round</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stopping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_autograph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_sims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer.train_rounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer.train_rounds" title="Permalink to this definition">#</a></dt>
+<dd><p>Trains an amortizer via round-based learning. In each round, <code class="docutils literal notranslate"><span class="pre">sim_per_round</span></code> data sets
+are simulated from the generative model and added to the data sets simulated in previous
+round. Then, the networks are trained for <code class="docutils literal notranslate"><span class="pre">epochs</span></code> on the augmented set of data sets.</p>
+<p>Important: Training time will increase from round to round, since the number of simulations
+increases correspondingly. The final round will then train the networks on <code class="docutils literal notranslate"><span class="pre">rounds</span> <span class="pre">*</span> <span class="pre">sim_per_round</span></code>
+data sets, so make sure this number does not eat up all available memory.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>rounds</strong><span class="classifier">int</span></dt><dd><p>Number of rounds to perform (outer loop)</p>
+</dd>
+<dt><strong>sim_per_round</strong><span class="classifier">int</span></dt><dd><p>Number of simulations per round</p>
+</dd>
+<dt><strong>epochs</strong><span class="classifier">int</span></dt><dd><p>Number of epochs (and number of times a checkpoint is stored, inner loop) within a round.</p>
+</dd>
+<dt><strong>batch_size</strong><span class="classifier">int</span></dt><dd><p>Number of simulations to use at each backpropagation step</p>
+</dd>
+<dt><strong>save_checkpoint</strong><span class="classifier">bool, optional, (default - True)</span></dt><dd><p>A flag to decide whether to save checkpoints after each epoch,
+if a checkpoint_path provided during initialization, otherwise ignored.</p>
+</dd>
+<dt><strong>optimizer</strong><span class="classifier">tf.keras.optimizer.Optimizer or None</span></dt><dd><p>Optimizer for the neural network training. <code class="docutils literal notranslate"><span class="pre">None</span></code> will result in <code class="docutils literal notranslate"><span class="pre">tf.keras.optimizers.Adam</span></code>
+using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
+will override default learning rate and schedule settings.</p>
+</dd>
+<dt><strong>reuse_optimizer</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>A flag indicating whether the optimizer instance should be treated as persistent or not.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the optimizer and its states are not stored after training has finished.
+Otherwise, the optimizer will be stored as <code class="docutils literal notranslate"><span class="pre">self.optimizer</span></code> and re-used in further training runs.</p>
+</dd>
+<dt><strong>early_stopping</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Whether to use optional stopping or not during training. Could speed up training.
+Only works if <code class="docutils literal notranslate"><span class="pre">validation_sims</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None</span></code>, i.e., validation data has been provided.
+Will be performed within rounds, not between rounds!</p>
+</dd>
+<dt><strong>use_autograph</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
+could also be harder to debug.</p>
+</dd>
+<dt><strong>validation_sims</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>Simulations used as a “validation set”.
+If <code class="docutils literal notranslate"><span class="pre">dict</span></code>, will assume it’s the output of a generative model and try
+<code class="docutils literal notranslate"><span class="pre">amortizer.compute_loss(configurator(validation_sims))''</span>
+<span class="pre">after</span> <span class="pre">each</span> <span class="pre">epoch.</span>
+<span class="pre">If</span> <span class="pre">``int</span></code>, will assume it’s the number of sims to generate from the generative
+model before starting training. Only considered if a generative model has been
+provided during initialization.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> (default), no validation set will be used.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Optional keyword arguments, which can be:
+<code class="docutils literal notranslate"><span class="pre">model_args</span></code>          - optional kwargs passed to the generative model
+<code class="docutils literal notranslate"><span class="pre">val_model_args</span></code>      - optional kwargs passed to the generative model</p>
+<blockquote>
+<div><p>for generating validation data. Only useful if
+<code class="docutils literal notranslate"><span class="pre">type(validation_sims)</span> <span class="pre">is</span> <span class="pre">int</span></code>.</p>
+</div></blockquote>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">conf_args</span></code>           - optional kwargs passed to the configurator</dt><dd><p>before each backprop (update) step.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">val_conf_args</span></code>       - optional kwargs passed to the configurator</dt><dd><p>then configuring the validation data.</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">net_args</span></code>            - optional kwargs passed to the amortizer
+<code class="docutils literal notranslate"><span class="pre">early_stopping_args</span></code> - optional kwargs passed to the <code class="docutils literal notranslate"><span class="pre">EarlyStopper</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>losses</strong><span class="classifier"><code class="docutils literal notranslate"><span class="pre">dict</span></code> or <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></span></dt><dd><p>A dictionary or a data frame storing the losses across epochs and iterations</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="bayesflow.simulation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">bayesflow.simulation module</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="advanced_documentation.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Advanced documentation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.diagnose_latent2d"><code class="docutils literal notranslate"><span class="pre">Trainer.diagnose_latent2d()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.diagnose_sbc_histograms"><code class="docutils literal notranslate"><span class="pre">Trainer.diagnose_sbc_histograms()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.load_pretrained_network"><code class="docutils literal notranslate"><span class="pre">Trainer.load_pretrained_network()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.mmd_hypothesis_test"><code class="docutils literal notranslate"><span class="pre">Trainer.mmd_hypothesis_test()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.train_experience_replay"><code class="docutils literal notranslate"><span class="pre">Trainer.train_experience_replay()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.train_from_presimulation"><code class="docutils literal notranslate"><span class="pre">Trainer.train_from_presimulation()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.train_offline"><code class="docutils literal notranslate"><span class="pre">Trainer.train_offline()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.train_online"><code class="docutils literal notranslate"><span class="pre">Trainer.train_online()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.train_rounds"><code class="docutils literal notranslate"><span class="pre">Trainer.train_rounds()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

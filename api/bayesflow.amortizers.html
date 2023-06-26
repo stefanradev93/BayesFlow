@@ -1,0 +1,1380 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>bayesflow.amortizers module &#8212; BayesFlow: Amortized Bayesian Inference</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/bayesflow.amortizers';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/api/bayesflow.amortizers.html" />
+    <link rel="shortcut icon" href="../_static/bayesflow_hex.ico"/>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="bayesflow.benchmarks package" href="bayesflow.benchmarks.html" />
+    <link rel="prev" title="Documentation" href="../documentation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../documentation.html">Documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">bayesflow.amortizers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="advanced_documentation.html">Advanced documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">bayesflow.amortizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.losses.html">bayesflow.losses module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.networks.html">bayesflow.networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.trainers.html">bayesflow.trainers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Full Installation Instructions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About us</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/edit/master/api/bayesflow.amortizers.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2Fapi/bayesflow.amortizers.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/api/bayesflow.amortizers.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>bayesflow.amortizers module</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.call"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.call_loop"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.call_loop()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.compute_loss"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.log_likelihood"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.log_likelihood()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.log_prob"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.log_prob()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.sample"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.sample()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.sample_loop"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.sample_loop()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedModelComparison"><code class="docutils literal notranslate"><span class="pre">AmortizedModelComparison</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedModelComparison.call"><code class="docutils literal notranslate"><span class="pre">AmortizedModelComparison.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedModelComparison.compute_loss"><code class="docutils literal notranslate"><span class="pre">AmortizedModelComparison.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedModelComparison.posterior_probs"><code class="docutils literal notranslate"><span class="pre">AmortizedModelComparison.posterior_probs()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.call"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.call_loop"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.call_loop()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.compute_loss"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.log_posterior"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.log_posterior()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.log_prob"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.log_prob()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.sample"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.sample()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.sample_loop"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.sample_loop()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.call"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.compute_loss"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_likelihood"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.log_likelihood()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_posterior"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.log_posterior()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_prob"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.log_prob()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.sample()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample_data"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.sample_data()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample_parameters"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.sample_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedTarget"><code class="docutils literal notranslate"><span class="pre">AmortizedTarget</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedTarget.compute_loss"><code class="docutils literal notranslate"><span class="pre">AmortizedTarget.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedTarget.log_prob"><code class="docutils literal notranslate"><span class="pre">AmortizedTarget.log_prob()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedTarget.sample"><code class="docutils literal notranslate"><span class="pre">AmortizedTarget.sample()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.SingleModelAmortizer"><code class="docutils literal notranslate"><span class="pre">SingleModelAmortizer</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior"><code class="docutils literal notranslate"><span class="pre">TwoLevelAmortizedPosterior</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.call"><code class="docutils literal notranslate"><span class="pre">TwoLevelAmortizedPosterior.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.compute_loss"><code class="docutils literal notranslate"><span class="pre">TwoLevelAmortizedPosterior.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.log_prob"><code class="docutils literal notranslate"><span class="pre">TwoLevelAmortizedPosterior.log_prob()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.sample"><code class="docutils literal notranslate"><span class="pre">TwoLevelAmortizedPosterior.sample()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="module-bayesflow.amortizers">
+<span id="bayesflow-amortizers-module"></span><h1>bayesflow.amortizers module<a class="headerlink" href="#module-bayesflow.amortizers" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedLikelihood">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.amortizers.</span></span><span class="sig-name descname"><span class="pre">AmortizedLikelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedLikelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedLikelihood" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code>, <a class="reference internal" href="#bayesflow.amortizers.AmortizedTarget" title="bayesflow.amortizers.AmortizedTarget"><code class="xref py py-class docutils literal notranslate"><span class="pre">AmortizedTarget</span></code></a></p>
+<p>An interface for a surrogate model of a simulator, or an implicit likelihood
+<code class="docutils literal notranslate"><span class="pre">p(data</span> <span class="pre">|</span> <span class="pre">parameters,</span> <span class="pre">context)</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedLikelihood.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedLikelihood.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedLikelihood.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs a forward pass through the summary and inference network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:
+<code class="docutils literal notranslate"><span class="pre">observables</span></code> - the observables over which a condition density is learned (i.e., the data)
+<code class="docutils literal notranslate"><span class="pre">conditions</span></code>  - the conditioning variables that the directly passed to the inference network</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the network
+For instance, <code class="docutils literal notranslate"><span class="pre">kwargs={'training':</span> <span class="pre">True}</span></code> is passed automatically during training.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>net_out</dt><dd><p>the outputs of <code class="docutils literal notranslate"><span class="pre">surrogate_net(theta,</span> <span class="pre">summary_net(x,</span> <span class="pre">c_s),</span> <span class="pre">c_d)</span></code>, usually a latent variable and
+log(det(Jacobian)), that is a tuple <code class="docutils literal notranslate"><span class="pre">(z,</span> <span class="pre">log_det_J)</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedLikelihood.call_loop">
+<span class="sig-name descname"><span class="pre">call_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_list</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedLikelihood.call_loop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedLikelihood.call_loop" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs a forward pass through the surrogate network given a list of dicts
+with the appropriate entries (i.e., as used for the standard call method).</p>
+<p>This method is useful when GPU memory is limited or data sets have a different (non-Tensor) structure.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>input_list</strong><span class="classifier">list of dicts, where each dict contains the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">observables</span></code> - the observables over which a condition density is learned (i.e., the data)
+<code class="docutils literal notranslate"><span class="pre">conditions</span></code>  - the conditioning variables that the directly passed to the inference network</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the network</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>net_out or (net_out, summary_out)</strong><span class="classifier">tuple of tf.Tensor</span></dt><dd><p>the outputs of <code class="docutils literal notranslate"><span class="pre">inference_net(theta,</span> <span class="pre">summary_net(x,</span> <span class="pre">c_s),</span> <span class="pre">c_d)</span></code>, usually a latent variable and
+log(det(Jacobian)), that is a tuple <code class="docutils literal notranslate"><span class="pre">(z,</span> <span class="pre">log_det_J)</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedLikelihood.compute_loss">
+<span class="sig-name descname"><span class="pre">compute_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedLikelihood.compute_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedLikelihood.compute_loss" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes the loss of the amortized given input data provided in input_dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys:
+<code class="docutils literal notranslate"><span class="pre">data</span></code>        - the observables over which a condition density is learned (i.e., the observables)
+<code class="docutils literal notranslate"><span class="pre">conditions</span></code>  - the conditioning variables that the directly passed to the surrogate network</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the network
+For instance, <code class="docutils literal notranslate"><span class="pre">kwargs={'training':</span> <span class="pre">True}</span></code> is passed automatically during simulation-based training.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>loss</strong><span class="classifier">tf.Tensor of shape (1,) - the total computed loss given input variables</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedLikelihood.log_likelihood">
+<span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedLikelihood.log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedLikelihood.log_likelihood" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculates the approximate log-likelihood of targets given conditional variables via
+the change-of-variable formula for a conditional normalizing flow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:
+<code class="docutils literal notranslate"><span class="pre">observables</span></code> - the variables over which a condition density is learned (i.e., the observables)
+<code class="docutils literal notranslate"><span class="pre">conditions</span></code>  - the conditioning variables that the directly passed to the inference network</p>
+</dd>
+<dt><strong>to_numpy</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Boolean flag indicating whether to return the log-lik values as a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> or a <code class="docutils literal notranslate"><span class="pre">tf.Tensor</span></code></p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the network</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>log_lik</strong><span class="classifier">tf.Tensor or np.ndarray of shape (batch_size, n_obs)</span></dt><dd><p>the approximate log-likelihood of each data point in each data set</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedLikelihood.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedLikelihood.log_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedLikelihood.log_prob" title="Permalink to this definition">#</a></dt>
+<dd><p>Identical to <cite>log_likelihood(input_dict, to_numpy, **kwargs)</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedLikelihood.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedLikelihood.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedLikelihood.sample" title="Permalink to this definition">#</a></dt>
+<dd><p>Generates <cite>n_samples</cite> random draws from the surrogate likelihood given input conditions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:
+<code class="docutils literal notranslate"><span class="pre">conditions</span></code> - the conditioning variables that are directly passed to the surrogate network</p>
+</dd>
+<dt><strong>n_samples</strong><span class="classifier">int</span></dt><dd><p>The number of posterior samples to obtain from the approximate posterior</p>
+</dd>
+<dt><strong>to_numpy</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Flag indicating whether to return the samples as a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> or a <code class="docutils literal notranslate"><span class="pre">tf.Tensor</span></code></p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the network</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>lik_samples</strong><span class="classifier">tf.Tensor or np.ndarray of shape (n_datasets, n_samples, None)</span></dt><dd><p>A simulated batch of observables from the surrogate likelihood.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedLikelihood.sample_loop">
+<span class="sig-name descname"><span class="pre">sample_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedLikelihood.sample_loop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedLikelihood.sample_loop" title="Permalink to this definition">#</a></dt>
+<dd><p>Generates random draws from the surrogate network given a list of dicts with conditonal variables.
+Useful when GPU memory is limited or data sets have a different (non-Tensor) structure.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>input_list</strong><span class="classifier">list of dictionaries, each dictionary having the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">conditions</span></code> - the conditioning variables that the directly passed to the surrogate network</p>
+</dd>
+<dt><strong>n_samples</strong><span class="classifier">int</span></dt><dd><p>The number of posterior draws (samples) to obtain from the approximate posterior</p>
+</dd>
+<dt><strong>to_numpy</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Flag indicating whether to return the samples as a <cite>np.array</cite> or a <cite>tf.Tensor</cite></p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the network</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>post_samples</strong><span class="classifier">tf.Tensor or np.ndarray of shape (n_data_sets, n_samples, data_dim)</span></dt><dd><p>the sampled parameters per data set</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedModelComparison">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.amortizers.</span></span><span class="sig-name descname"><span class="pre">AmortizedModelComparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedModelComparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedModelComparison" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>An interface to connect an evidential network for Bayesian model comparison with an optional summary network,
+as described in the original paper on evidential neural networks for model comparison according to [1, 2]:</p>
+<p>[1] Radev, S. T., D’Alessandro, M., Mertens, U. K., Voss, A., Köthe, U., &amp; Bürkner, P. C. (2021).
+Amortized bayesian model comparison with evidential deep learning.
+IEEE Transactions on Neural Networks and Learning Systems.</p>
+<p>[2] Elsemüller, L., Schnuerch, M., Bürkner, P. C., &amp; Radev, S. T. (2023).
+A Deep Learning Method for Comparing Bayesian Hierarchical Models.
+arXiv preprint arXiv:2301.11873.</p>
+<p>Note: the original paper [1] does not distinguish between the summary and the evidential networks, but
+treats them as a whole, with the appropriate architecture dictated by the model application. For the
+sake of consistency and modularity, the BayesFlow library separates the two constructs.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedModelComparison.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedModelComparison.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedModelComparison.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs a forward pass through both networks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged
+<cite>summary_conditions</cite> - the conditioning variables that are first passed through a summary network
+<cite>direct_conditions</cite>  - the conditioning variables that the directly passed to the evidential network
+<cite>model_indices</cite>      - the ground-truth, one-hot encoded model indices sampled from the model prior</p>
+</dd>
+<dt><strong>return_summary</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Indicates whether the summary network outputs are returned along the estimated evidences.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>net_out</strong><span class="classifier">tf.Tensor of shape (batch_size, num_models) or tuple of (net_out (batch_size, num_models),</span></dt><dd><p>summary_out (batch_size, summary_dim)), the latter being the summary network outputs, if
+<code class="docutils literal notranslate"><span class="pre">return_summary</span> <span class="pre">is</span> <span class="pre">True</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedModelComparison.compute_loss">
+<span class="sig-name descname"><span class="pre">compute_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedModelComparison.compute_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedModelComparison.compute_loss" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes the loss of the amortized model comparison instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged::
+<cite>summary_conditions</cite> - the conditioning variables that are first passed through a summary network
+<cite>direct_conditions</cite>  - the conditioning variables that the directly passed to the evidence network
+<cite>model_indices</cite>      - the ground-truth, one-hot encoded model indices sampled from the model prior</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>loss</strong><span class="classifier">tf.Tensor of shape (1,) - the total computed loss given input variables</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedModelComparison.posterior_probs">
+<span class="sig-name descname"><span class="pre">posterior_probs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedModelComparison.posterior_probs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedModelComparison.posterior_probs" title="Permalink to this definition">#</a></dt>
+<dd><p>Compute posterior model probabilities (PMPs) given a dictionary with observed or
+simulated data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing at least one of the following mandatory keys, if DEFAULT_KEYS unchanged
+<cite>summary_conditions</cite> - the conditioning variables that are first passed through a summary network
+<cite>direct_conditions</cite>  - the conditioning variables that the directly passed to the evidential network</p>
+</dd>
+<dt><strong>to_numpy</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Flag indicating whether to return the PMPs a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> or a <code class="docutils literal notranslate"><span class="pre">tf.Tensor</span></code></p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the networks</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>out</strong><span class="classifier">tf.Tensor of shape (batch_size, …, num_models)</span></dt><dd><p>The approximated PMPs</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosterior">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.amortizers.</span></span><span class="sig-name descname"><span class="pre">AmortizedPosterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosterior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosterior" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code>, <a class="reference internal" href="#bayesflow.amortizers.AmortizedTarget" title="bayesflow.amortizers.AmortizedTarget"><code class="xref py py-class docutils literal notranslate"><span class="pre">AmortizedTarget</span></code></a></p>
+<p>A wrapper to connect an inference network for parameter estimation with an optional summary network
+as in the original BayesFlow set-up described in the paper:</p>
+<p>[1] Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., &amp; Köthe, U. (2020).
+BayesFlow: Learning complex stochastic models with invertible neural networks.
+IEEE Transactions on Neural Networks and Learning Systems.</p>
+<p>But also allowing for augmented functionality, such as model misspecification detection in summary space:</p>
+<p>[2] Schmitt, M., Bürkner, P. C., Köthe, U., &amp; Radev, S. T. (2022).
+Detecting Model Misspecification in Amortized Bayesian Inference with Neural Networks
+arXiv preprint arXiv:2112.08866.</p>
+<p>And learning of fat-tailed posteriors with a Student-t latent pushforward density:</p>
+<p>[3] Jaini, P., Kobyzev, I., Yu, Y., &amp; Brubaker, M. (2020, November).
+Tails of lipschitz triangular flows.
+In International Conference on Machine Learning (pp. 4673-4681). PMLR.</p>
+<p>[4] Alexanderson, S., &amp; Henter, G. E. (2020).
+Robust model training and generalisation with Studentising flows.
+arXiv preprint arXiv:2006.06599.</p>
+<p>Serves as in interface for learning <code class="docutils literal notranslate"><span class="pre">p(parameters</span> <span class="pre">|</span> <span class="pre">data,</span> <span class="pre">context).</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosterior.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosterior.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosterior.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs a forward pass through the summary and inference network given an input dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:
+<code class="docutils literal notranslate"><span class="pre">parameters</span></code>         - the latent model parameters over which a condition density is learned
+<code class="docutils literal notranslate"><span class="pre">summary_conditions</span></code> - the conditioning variables (including data) that are first passed through a summary network
+<code class="docutils literal notranslate"><span class="pre">direct_conditions</span></code>  - the conditioning variables that the directly passed to the inference network</p>
+</dd>
+<dt><strong>return_summary</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>A flag which determines whether the learnable data summaries (representations) are returned or not.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the networks
+For instance, <code class="docutils literal notranslate"><span class="pre">kwargs={'training':</span> <span class="pre">True}</span></code> is passed automatically during training.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>net_out or (net_out, summary_out)</strong><span class="classifier">tuple of tf.Tensor</span></dt><dd><p>the outputs of <code class="docutils literal notranslate"><span class="pre">inference_net(theta,</span> <span class="pre">summary_net(x,</span> <span class="pre">c_s),</span> <span class="pre">c_d)</span></code>, usually a latent variable and
+log(det(Jacobian)), that is a tuple <code class="docutils literal notranslate"><span class="pre">(z,</span> <span class="pre">log_det_J)</span> <span class="pre">or</span> <span class="pre">(sum_outputs,</span> <span class="pre">(z,</span> <span class="pre">log_det_J))</span></code> if
+<code class="docutils literal notranslate"><span class="pre">return_summary</span></code> is set to True and a summary network is defined.``</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosterior.call_loop">
+<span class="sig-name descname"><span class="pre">call_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosterior.call_loop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosterior.call_loop" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs a forward pass through the summary and inference network given a list of dicts
+with the appropriate entries (i.e., as used for the standard call method).</p>
+<p>This method is useful when GPU memory is limited or data sets have a different (non-Tensor) structure.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>input_list</strong><span class="classifier">list of dicts, where each dict contains the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">parameters</span></code>         - the latent model parameters over which a condition density is learned
+<code class="docutils literal notranslate"><span class="pre">summary_conditions</span></code> - the conditioning variables (including data) that are first passed through a summary network
+<code class="docutils literal notranslate"><span class="pre">direct_conditions</span></code>  - the conditioning variables that the directly passed to the inference network</p>
+</dd>
+<dt><strong>return_summary</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>A flag which determines whether the learnable data summaries (representations) are returned or not.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the networks</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>net_out or (net_out, summary_out)</strong><span class="classifier">tuple of tf.Tensor</span></dt><dd><p>the outputs of <code class="docutils literal notranslate"><span class="pre">inference_net(theta,</span> <span class="pre">summary_net(x,</span> <span class="pre">c_s),</span> <span class="pre">c_d)</span></code>, usually a latent variable and
+log(det(Jacobian)), that is a tuple <code class="docutils literal notranslate"><span class="pre">(z,</span> <span class="pre">log_det_J)</span> <span class="pre">or</span> <span class="pre">(sum_outputs,</span> <span class="pre">(z,</span> <span class="pre">log_det_J))</span> <span class="pre">if</span>
+<span class="pre">return_summary</span> <span class="pre">is</span> <span class="pre">set</span> <span class="pre">to</span> <span class="pre">True</span> <span class="pre">and</span> <span class="pre">a</span> <span class="pre">summary</span> <span class="pre">network</span> <span class="pre">is</span> <span class="pre">defined.</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosterior.compute_loss">
+<span class="sig-name descname"><span class="pre">compute_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosterior.compute_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosterior.compute_loss" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes the loss of the posterior amortizer given an input dictionary, which will
+typically be the output of a Bayesian <code class="docutils literal notranslate"><span class="pre">GenerativeModel</span></code> instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:
+<code class="docutils literal notranslate"><span class="pre">parameters</span></code>         - the latent model parameters over which a condition density is learned
+<code class="docutils literal notranslate"><span class="pre">summary_conditions</span></code> - the conditioning variables that are first passed through a summary network
+<code class="docutils literal notranslate"><span class="pre">direct_conditions</span></code>  - the conditioning variables that the directly passed to the inference network</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the networks
+For instance, <code class="docutils literal notranslate"><span class="pre">kwargs={'training':</span> <span class="pre">True}</span></code> is passed automatically during training.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>total_loss</strong><span class="classifier">tf.Tensor of shape (1,) - the total computed loss given input variables</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosterior.log_posterior">
+<span class="sig-name descname"><span class="pre">log_posterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosterior.log_posterior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosterior.log_posterior" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculates the approximate log-posterior of targets given conditional variables via
+the change-of-variable formula for a conditional normalizing flow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:
+<code class="docutils literal notranslate"><span class="pre">parameters</span></code>         : the latent model parameters over which a conditional density (i.e., a posterior) is learned
+<code class="docutils literal notranslate"><span class="pre">summary_conditions</span></code> : the conditioning variables (including data) that are first passed through a summary network
+<code class="docutils literal notranslate"><span class="pre">direct_conditions</span></code>  : the conditioning variables that are directly passed to the inference network</p>
+</dd>
+<dt><strong>to_numpy</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Flag indicating whether to return the lpdf values as a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> or a <code class="docutils literal notranslate"><span class="pre">tf.Tensor</span></code></p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the networks</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>log_post</strong><span class="classifier">tf.Tensor or np.ndarray of shape (batch_size, n_obs)</span></dt><dd><p>the approximate log-posterior density of each each parameter</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosterior.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosterior.log_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosterior.log_prob" title="Permalink to this definition">#</a></dt>
+<dd><p>Identical to <cite>log_posterior(input_dict, to_numpy, **kwargs)</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosterior.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosterior.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosterior.sample" title="Permalink to this definition">#</a></dt>
+<dd><p>Generates random draws from the approximate posterior given a dictionary with conditonal variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing at least one of the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:
+<code class="docutils literal notranslate"><span class="pre">summary_conditions</span></code> : the conditioning variables (including data) that are first passed through a summary network
+<code class="docutils literal notranslate"><span class="pre">direct_conditions</span></code>  : the conditioning variables that the directly passed to the inference network</p>
+</dd>
+<dt><strong>n_samples</strong><span class="classifier">int</span></dt><dd><p>The number of posterior draws (samples) to obtain from the approximate posterior</p>
+</dd>
+<dt><strong>to_numpy</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Flag indicating whether to return the samples as a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> or a <code class="docutils literal notranslate"><span class="pre">tf.Tensor</span></code>.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the networks</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>post_samples</strong><span class="classifier">tf.Tensor or np.ndarray of shape (n_data_sets, n_samples, n_params)</span></dt><dd><p>The sampled parameters from the approximate posterior of each data set</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosterior.sample_loop">
+<span class="sig-name descname"><span class="pre">sample_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosterior.sample_loop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosterior.sample_loop" title="Permalink to this definition">#</a></dt>
+<dd><p>Generates random draws from the approximate posterior given a list of dicts with conditonal variables.
+Useful when GPU memory is limited or data sets have a different (non-Tensor) structure.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>input_list</strong><span class="classifier">list of dictionaries, each dictionary having the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">summary_conditions</span></code> : the conditioning variables (including data) that are first passed through a summary network
+<code class="docutils literal notranslate"><span class="pre">direct_conditions</span></code>  : the conditioning variables that the directly passed to the inference network</p>
+</dd>
+<dt><strong>n_samples</strong><span class="classifier">int</span></dt><dd><p>The number of posterior draws (samples) to obtain from the approximate posterior</p>
+</dd>
+<dt><strong>to_numpy</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Flag indicating whether to return the samples as a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> or a <code class="docutils literal notranslate"><span class="pre">tf.Tensor</span></code></p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the networks</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>post_samples</strong><span class="classifier">tf.Tensor or np.ndarray of shape (n_datasets, n_samples, n_params)</span></dt><dd><p>The sampled parameters from the approximate posterior of each data set</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosteriorLikelihood">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.amortizers.</span></span><span class="sig-name descname"><span class="pre">AmortizedPosteriorLikelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosteriorLikelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code>, <a class="reference internal" href="#bayesflow.amortizers.AmortizedTarget" title="bayesflow.amortizers.AmortizedTarget"><code class="xref py py-class docutils literal notranslate"><span class="pre">AmortizedTarget</span></code></a></p>
+<p>An interface for jointly learning a surrogate model of the simulator and an approximate
+posterior given a generative model, as proposed by:</p>
+<p>[1] Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., &amp; Bürkner, P. C. (2023).
+JANA: Jointly Amortized Neural Approximation of Complex Bayesian Models.
+arXiv preprint arXiv:2302.09125.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosteriorLikelihood.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosteriorLikelihood.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs a forward pass through both amortizers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys:
+<cite>posterior_inputs</cite>  - The input dictionary for the amortized posterior
+<cite>likelihood_inputs</cite> - The input dictionary for the amortized likelihood</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>(post_out, lik_out)</strong><span class="classifier">tuple</span></dt><dd><p>The outputs of the posterior and likelihood networks given input variables.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosteriorLikelihood.compute_loss">
+<span class="sig-name descname"><span class="pre">compute_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosteriorLikelihood.compute_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.compute_loss" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes the loss of the join amortizer by summing the corresponding amortized posterior
+and likelihood losses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Nested input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged::
+<cite>posterior_inputs</cite>  - The input dictionary for the amortized posterior
+<cite>likelihood_inputs</cite> - The input dictionary for the amortized likelihood</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>total_losses</strong><span class="classifier">dict</span></dt><dd><p>A dictionary with keys <cite>Post.Loss</cite> and <cite>Lik.Loss</cite> containing the individual losses for the
+two amortizers.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosteriorLikelihood.log_likelihood">
+<span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosteriorLikelihood.log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_likelihood" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculates the approximate log-likelihood of data given conditional variables via
+the change-of-variable formula for conditional normalizing flows.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:</p>
+<p><cite>observables</cite> - the variables over which a condition density is learned (i.e., the observables)
+<cite>conditions</cite>  - the conditioning variables that are directly passed to the inference network</p>
+<p>OR a nested dictionary with key <cite>likelihood_inputs</cite> containing the above input dictionary</p>
+</dd>
+<dt><strong>to_numpy</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Flag indicating whether to return the samples as a <cite>np.array</cite> or a <cite>tf.Tensor</cite></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>log_lik</strong><span class="classifier">tf.Tensor of shape (batch_size, n_obs)</span></dt><dd><p>the approximate log-likelihood of each data point in each data set</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosteriorLikelihood.log_posterior">
+<span class="sig-name descname"><span class="pre">log_posterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosteriorLikelihood.log_posterior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_posterior" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculates the approximate log-posterior of targets given conditional variables via
+the change-of-variable formula for conditional normalizing flows.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:</p>
+<p><cite>parameters</cite>         - the latent generative model parameters over which a condition density is learned
+<cite>summary_conditions</cite> - the conditioning variables that are first passed through a summary network
+<cite>direct_conditions</cite>  - the conditioning variables that the directly passed to the inference network</p>
+<p>OR a nested dictionary with key <cite>posterior_inputs</cite> containing the above input dictionary</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>log_post</strong><span class="classifier">tf.Tensor of shape (batch_size, n_obs)</span></dt><dd><p>the approximate log-likelihood of each data point in each data set</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosteriorLikelihood.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosteriorLikelihood.log_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_prob" title="Permalink to this definition">#</a></dt>
+<dd><p>Identical to calling separate <cite>log_likelihood()</cite> and <cite>log_posterior()</cite>.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>out_dict</strong><span class="classifier">dict with keys <cite>log_posterior</cite> and <cite>log_likelihood</cite> corresponding</span></dt><dd></dd>
+<dt>to the computed log_pdfs of the approximate posterior and likelihood.</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosteriorLikelihood.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_lik_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosteriorLikelihood.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample" title="Permalink to this definition">#</a></dt>
+<dd><p>Identical to calling <cite>sample_parameters()</cite> and <cite>sample_data()</cite> separately.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>out_dict</strong><span class="classifier">dict with keys <cite>posterior_samples</cite> and <cite>likelihood_samples</cite> corresponding</span></dt><dd></dd>
+<dt>to the <cite>n_samples</cite> from the approximate posterior and likelihood, respectively</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosteriorLikelihood.sample_data">
+<span class="sig-name descname"><span class="pre">sample_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosteriorLikelihood.sample_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Generates <cite>n_samples</cite> random draws from the surrogate likelihood given input conditions.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:</p>
+<p><cite>conditions</cite> - the conditioning variables that the directly passed to the inference network</p>
+<p>OR a nested dictionary with key <cite>likelihood_inputs</cite> containing the above input dictionary</p>
+</dd>
+<dt><strong>n_samples</strong><span class="classifier">int</span></dt><dd><p>The number of posterior samples to obtain from the approximate posterior</p>
+</dd>
+<dt><strong>to_numpy</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Flag indicating whether to return the samples as a <cite>np.array</cite> or a <cite>tf.Tensor</cite></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>lik_samples</strong><span class="classifier">tf.Tensor or np.ndarray of shape (n_datasets, n_samples, None)</span></dt><dd><p>Simulated observables from the surrogate likelihood.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedPosteriorLikelihood.sample_parameters">
+<span class="sig-name descname"><span class="pre">sample_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedPosteriorLikelihood.sample_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample_parameters" title="Permalink to this definition">#</a></dt>
+<dd><p>Generates random draws from the approximate posterior given conditonal variables.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if DEFAULT KEYS unchanged:</p>
+<p><cite>summary_conditions</cite> : the conditioning variables (including data) that are first passed through a summary network
+<cite>direct_conditions</cite>  : the conditioning variables that the directly passed to the inference network</p>
+<p>OR a nested dictionary with key <cite>posterior_inputs</cite> containing the above input dictionary</p>
+</dd>
+<dt><strong>n_samples</strong><span class="classifier">int</span></dt><dd><p>The number of posterior samples to obtain from the approximate posterior</p>
+</dd>
+<dt><strong>to_numpy</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Boolean flag indicating whether to return the samples as a <cite>np.array</cite> or a <cite>tf.Tensor</cite></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>post_samples</strong><span class="classifier">tf.Tensor or np.ndarray of shape (n_datasets, n_samples, n_params)</span></dt><dd><p>the sampled parameters per data set</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedTarget">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.amortizers.</span></span><span class="sig-name descname"><span class="pre">AmortizedTarget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedTarget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedTarget" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>An abstract interface for an amortized learned distribution. Children should
+implement the following public methods:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">compute_loss(self,</span> <span class="pre">input_dict,</span> <span class="pre">**kwargs)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sample(input_dict,</span> <span class="pre">**kwargs)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">log_prob(input_dict,</span> <span class="pre">**kwargs)</span></code></p></li>
+</ol>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedTarget.compute_loss">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedTarget.compute_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedTarget.compute_loss" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedTarget.log_prob">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedTarget.log_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedTarget.log_prob" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedTarget.sample">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedTarget.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedTarget.sample" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.amortizers.SingleModelAmortizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.amortizers.</span></span><span class="sig-name descname"><span class="pre">SingleModelAmortizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#SingleModelAmortizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.SingleModelAmortizer" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bayesflow.amortizers.AmortizedPosterior" title="bayesflow.amortizers.AmortizedPosterior"><code class="xref py py-class docutils literal notranslate"><span class="pre">AmortizedPosterior</span></code></a></p>
+<p>Deprecated class for amortizer posterior estimation.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.amortizers.TwoLevelAmortizedPosterior">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.amortizers.</span></span><span class="sig-name descname"><span class="pre">TwoLevelAmortizedPosterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#TwoLevelAmortizedPosterior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code>, <a class="reference internal" href="#bayesflow.amortizers.AmortizedTarget" title="bayesflow.amortizers.AmortizedTarget"><code class="xref py py-class docutils literal notranslate"><span class="pre">AmortizedTarget</span></code></a></p>
+<p>An interface for estimating arbitrary two level hierarchical Bayesian models.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.TwoLevelAmortizedPosterior.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#TwoLevelAmortizedPosterior.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Forward pass through the hierarchical amortized posterior.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.TwoLevelAmortizedPosterior.compute_loss">
+<span class="sig-name descname"><span class="pre">compute_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#TwoLevelAmortizedPosterior.compute_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.compute_loss" title="Permalink to this definition">#</a></dt>
+<dd><p>Compute loss of all amortizers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.TwoLevelAmortizedPosterior.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#TwoLevelAmortizedPosterior.log_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.log_prob" title="Permalink to this definition">#</a></dt>
+<dd><p>Compute normalized log density.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.amortizers.TwoLevelAmortizedPosterior.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#TwoLevelAmortizedPosterior.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.sample" title="Permalink to this definition">#</a></dt>
+<dd><p>Obtains samples from the joint hierarchical posterior given observations.</p>
+<p>Important: Currently works only for single hierarchical data sets!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>Input dictionary containing the following mandatory keys, if DEFAULT_KEYS unchanged:
+<cite>summary_conditions</cite> - the hierarchical data set (to be embedded by the summary net)
+As well as optional keys:
+<cite>direct_local_conditions</cite>  - (Context) variables used to condition the local posterior
+<cite>direct_global_conditions</cite> - (Context) variables used to condition the global posterior</p>
+</dd>
+<dt><strong>n_samples</strong><span class="classifier">int</span></dt><dd><p>The number of posterior draws (samples) to obtain from the approximate posterior</p>
+</dd>
+<dt><strong>to_numpy</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Flag indicating whether to return the samples as a <cite>np.array</cite> or a <cite>tf.Tensor</cite></p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the summary network as the amortizers</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../documentation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Documentation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="bayesflow.benchmarks.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">bayesflow.benchmarks package</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.call"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.call_loop"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.call_loop()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.compute_loss"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.log_likelihood"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.log_likelihood()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.log_prob"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.log_prob()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.sample"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.sample()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedLikelihood.sample_loop"><code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood.sample_loop()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedModelComparison"><code class="docutils literal notranslate"><span class="pre">AmortizedModelComparison</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedModelComparison.call"><code class="docutils literal notranslate"><span class="pre">AmortizedModelComparison.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedModelComparison.compute_loss"><code class="docutils literal notranslate"><span class="pre">AmortizedModelComparison.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedModelComparison.posterior_probs"><code class="docutils literal notranslate"><span class="pre">AmortizedModelComparison.posterior_probs()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.call"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.call_loop"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.call_loop()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.compute_loss"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.log_posterior"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.log_posterior()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.log_prob"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.log_prob()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.sample"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.sample()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosterior.sample_loop"><code class="docutils literal notranslate"><span class="pre">AmortizedPosterior.sample_loop()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.call"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.compute_loss"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_likelihood"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.log_likelihood()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_posterior"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.log_posterior()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.log_prob"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.log_prob()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.sample()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample_data"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.sample_data()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedPosteriorLikelihood.sample_parameters"><code class="docutils literal notranslate"><span class="pre">AmortizedPosteriorLikelihood.sample_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedTarget"><code class="docutils literal notranslate"><span class="pre">AmortizedTarget</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedTarget.compute_loss"><code class="docutils literal notranslate"><span class="pre">AmortizedTarget.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedTarget.log_prob"><code class="docutils literal notranslate"><span class="pre">AmortizedTarget.log_prob()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.AmortizedTarget.sample"><code class="docutils literal notranslate"><span class="pre">AmortizedTarget.sample()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.SingleModelAmortizer"><code class="docutils literal notranslate"><span class="pre">SingleModelAmortizer</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior"><code class="docutils literal notranslate"><span class="pre">TwoLevelAmortizedPosterior</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.call"><code class="docutils literal notranslate"><span class="pre">TwoLevelAmortizedPosterior.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.compute_loss"><code class="docutils literal notranslate"><span class="pre">TwoLevelAmortizedPosterior.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.log_prob"><code class="docutils literal notranslate"><span class="pre">TwoLevelAmortizedPosterior.log_prob()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.amortizers.TwoLevelAmortizedPosterior.sample"><code class="docutils literal notranslate"><span class="pre">TwoLevelAmortizedPosterior.sample()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
