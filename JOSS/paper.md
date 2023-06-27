@@ -87,7 +87,7 @@ When it comes to simulation-based inference with neural networks, the `sbi` tool
 
 # Availability, Development, and Documentation
 
-`BayesFlow` is available through PyPI via `pip install bayesflow`, the development version is available via GitHub. GitHub Actions manage continuous integration through automated code testing. Currently, `BayesFlow` features seven tutorial notebooks. These notebooks showcase different aspects of the software, ranging from toy examples to applied modeling scenarios, and illustrating both posterior estimation and model comparison workflows.
+`BayesFlow` is available through PyPI via `pip install bayesflow`, the development version is available via GitHub. GitHub Actions manage continuous integration through automated code testing and documentation. The documentation is hosted at [www.bayesflow.org](https://bayesflow.org/). Currently, `BayesFlow` features seven tutorial notebooks. These notebooks showcase different aspects of the software, ranging from toy examples to applied modeling scenarios, and illustrating both posterior estimation and model comparison workflows.
 
 
 # Acknowledgments
