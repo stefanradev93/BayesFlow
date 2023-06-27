@@ -17,7 +17,7 @@ For starters, check out some of our walk-through notebooks:
 
 ## Project Documentation
 
-The project documentation is available at <https://bayesflow.readthedocs.io>
+The project documentation is available at <https://bayesflow.org>
 
 ## Installation
 
