@@ -1,4 +1,4 @@
-# BayesFlow <img src="img/bayesflow_hex.png" align="right" width=20% height=20% />
+# BayesFlow <img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/bayesflow_hex.png?raw=true" align="right" width=20% height=20% />
 
 [![Actions Status](https://github.com/stefanradev93/bayesflow/workflows/Tests/badge.svg)](https://github.com/stefanradev93/bayesflow/actions)
 [![Licence](https://img.shields.io/github/license/stefanradev93/BayesFlow)](https://img.shields.io/github/license/stefanradev93/BayesFlow)
@@ -31,7 +31,7 @@ when working with intractable simulators whose behavior as a whole is too
 complex to be described analytically. The figure below presents a higher-level
 overview of neurally bootstrapped Bayesian inference.
 
-<img src="img/high_level_framework.png" width=80% height=80%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/high_level_framework.png?raw=true" width=80% height=80%>
 
 ## Getting Started: Parameter Estimation
 
@@ -101,7 +101,7 @@ the model-amortizer combination:
 fig = trainer.diagnose_sbc_histograms()
 ```
 
-<img src="img/showcase_sbc.png" width=65% height=65%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_sbc.png?raw=true" width=65% height=65%>
 
 The histograms are roughly uniform and lie within the expected range for
 well-calibrated inference algorithms as indicated by the shaded gray areas.
@@ -123,7 +123,7 @@ across the simulated data sets.
 fig = bf.diagnostics.plot_recovery(posterior_draws, new_sims['parameters'])
 ```
 
-<img src="img/showcase_recovery.png" width=65% height=65%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_recovery.png?raw=true" width=65% height=65%>
 
 For any individual data set, we can also compare the parameters' posteriors with
 their corresponding priors:
@@ -132,7 +132,7 @@ their corresponding priors:
 fig = bf.diagnostics.plot_posterior_2d(posterior_draws[0], prior=generative_model.prior)
 ```
 
-<img src="img/showcase_posterior.png" width=45% height=45%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_posterior.png?raw=true" width=45% height=45%>
 
 We see clearly how the posterior shrinks relative to the prior for both
 model parameters as a result of conditioning on the data.
@@ -161,7 +161,7 @@ amortized inference if the generative model is a poor representation of reality?
 A modified loss function optimizes the learned summary statistics towards a unit
 Gaussian and reliably detects model misspecification during inference time.
 
-![](docs/source/images/model_misspecification_amortized_sbi.png?raw=true)
+![](https://github.com/stefanradev93/BayesFlow/blob/master/docs/source/images/model_misspecification_amortized_sbi.png?raw=true)
 
 In order to use this method, you should only provide the `summary_loss_fun` argument
 to the `AmortizedPosterior` instance:
@@ -235,7 +235,7 @@ How good are these predicted probabilities in the closed world? We can have a lo
 cal_curves = bf.diagnostics.plot_calibration_curves(sims["model_indices"], model_probs)
 ```
 
-<img src="img/showcase_calibration_curves.png" width=65% height=65%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_calibration_curves.png?raw=true" width=65% height=65%>
 
 Our approximator shows excellent calibration, with the calibration curve being closely aligned to the diagonal, an expected calibration error (ECE) near 0 and most predicted probabilities being certain of the model underlying a data set. We can further assess patterns of misclassification with a confusion matrix:
 
@@ -243,7 +243,7 @@ Our approximator shows excellent calibration, with the calibration curve being c
 conf_matrix = bf.diagnostics.plot_confusion_matrix(sims["model_indices"], model_probs)
 ```
 
-<img src="img/showcase_confusion_matrix.png" width=44% height=44%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_confusion_matrix.png?raw=true" width=44% height=44%>
 
 For the vast majority of simulated data sets, the "true" data-generating model is correctly identified. With these diagnostic results backing us up, we can proceed and apply our trained network to empirical data.
 
