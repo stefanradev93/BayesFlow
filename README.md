@@ -264,7 +264,7 @@ and Statistics</em>, 11-29, PMLR, available for free at: https://arxiv.org/abs/2
 Learning Method for Comparing Bayesian Hierarchical Models. <em>ArXiv preprint</em>,
 available for free at: https://arxiv.org/abs/2301.11873
 
-## Likelihood emulation
+## Likelihood Emulation
 
 In order to learn the exchangeable (i.e., permutation invariant) likelihood from the minimal example instead of the posterior, you may use the `AmortizedLikelihood` wrapper:
 
