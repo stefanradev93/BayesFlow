@@ -7,13 +7,13 @@ Welcome to our BayesFlow library for efficient simulation-based Bayesian workflo
 
 For starters, check out some of our walk-through notebooks:
 
-1. [Quickstart amortized posterior estimation](docs/source/tutorial_notebooks/Intro_Amortized_Posterior_Estimation.ipynb)
-2. [Detecting model misspecification in posterior inference](docs/source/tutorial_notebooks/Model_Misspecification.ipynb)
-3. [Principled Bayesian workflow for cognitive models](docs/source/tutorial_notebooks/LCA_Model_Posterior_Estimation.ipynb)
-4. [Posterior estimation for ODEs](docs/source/tutorial_notebooks/Linear_ODE_system.ipynb)
-5. [Posterior estimation for SIR-like models](docs/source/tutorial_notebooks/Covid19_Initial_Posterior_Estimation.ipynb)
-6. [Model comparison for cognitive models](docs/source/tutorial_notebooks/Model_Comparison_MPT.ipynb)
-7. [Hierarchical model comparison for cognitive models](docs/source/tutorial_notebooks/Hierarchical_Model_Comparison_MPT.ipynb)
+1. [Quickstart amortized posterior estimation](examples/Intro_Amortized_Posterior_Estimation.ipynb)
+2. [Detecting model misspecification in posterior inference](examples/Model_Misspecification.ipynb)
+3. [Principled Bayesian workflow for cognitive models](examples/LCA_Model_Posterior_Estimation.ipynb)
+4. [Posterior estimation for ODEs](examples/Linear_ODE_system.ipynb)
+5. [Posterior estimation for SIR-like models](examples/Covid19_Initial_Posterior_Estimation.ipynb)
+6. [Model comparison for cognitive models](examples/Model_Comparison_MPT.ipynb)
+7. [Hierarchical model comparison for cognitive models](examples/Hierarchical_Model_Comparison_MPT.ipynb)
 
 ## Project Documentation
 
@@ -247,7 +247,7 @@ conf_matrix = bf.diagnostics.plot_confusion_matrix(sims["model_indices"], model_
 
 For the vast majority of simulated data sets, the "true" data-generating model is correctly identified. With these diagnostic results backing us up, we can proceed and apply our trained network to empirical data.
 
-BayesFlow is also able to conduct model comparison for hierarchical models. See this [tutorial notebook](docs/source/tutorial_notebooks/Hierarchical_Model_Comparison_MPT.ipynb) for an introduction to the associated workflow.
+BayesFlow is also able to conduct model comparison for hierarchical models. See this [tutorial notebook](examples/Hierarchical_Model_Comparison_MPT.ipynb) for an introduction to the associated workflow.
 
 ### References and Further Reading
 

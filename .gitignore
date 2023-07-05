@@ -4,11 +4,10 @@ __pycache__/
 */__pycache__/
 projects/
 */bayesflow.egg-info
-docs/build/
+docsrc/_build/
 build
+docs/
 
-# Notebooks
-docs/source/tutorial_notebooks/**
 
 # mypy
 .mypy_cache
@@ -31,3 +30,6 @@ docs/source/tutorial_notebooks/**
 
 # tox
 .tox
+
+# MacOS
+.DS_Store

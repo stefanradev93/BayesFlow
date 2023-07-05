@@ -1,5 +1,5 @@
-Install
-=======
+Full Installation Instructions
+==============================
 
 Requirements
 ------------

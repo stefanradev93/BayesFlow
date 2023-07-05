@@ -219,7 +219,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         # Case dynamic latent space - function of summary conditions
         if self.latent_is_dynamic:
             logpdf = self.latent_dist(sum_out).log_prob(z)
-        # Case static latent space
+        # Case _static latent space
         else:
             logpdf = self.latent_dist.log_prob(z)
 
@@ -297,7 +297,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         if self.latent_is_dynamic:
             z_samples = self.latent_dist(conditions).sample(n_samples)
             z_samples = tf.transpose(z_samples, (1, 0, 2))
-        # Case static latent - marginal samples from the specified dist
+        # Case _static latent - marginal samples from the specified dist
         else:
             z_samples = self.latent_dist.sample((n_data_sets, n_samples))
 
@@ -382,7 +382,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         # Case dynamic latent - function of conditions
         if self.latent_is_dynamic:
             log_post = self.latent_dist(conditions).log_prob(z) + log_det_J
-        # Case static latent - marginal samples from z
+        # Case _static latent - marginal samples from z
         else:
             log_post = self.latent_dist.log_prob(z) + log_det_J
         self._check_output_sanity(log_post)
@@ -1103,8 +1103,8 @@ class TwoLevelAmortizedPosterior(tf.keras.Model, AmortizedTarget):
         **kwargs     : dict, optional, default: {}
             Additional keyword arguments passed to the summary network as the amortizers
 
-        Returns:
-        --------
+        Returns
+        -------
         samples_dict : dict
             A dictionary with keys `global_samples` and `local_samples`
             Local samples will hold an array-like of shape (num_replicas, num_samples, num_local)
