@@ -19,7 +19,7 @@ help:
 # remove example notebooks from source folder
 github:
 	@cp ../INSTALL.rst source/installation.rst
-	@cp ../CONTRIBUTING.md source/contributing.md
+	@cp ../CONTRIBUTING source/contributing.md
 	@cp -a ../examples/. source/_examples
 	@rm -r source/_examples/in_progress
 	@make html
