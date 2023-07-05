@@ -1,4 +1,4 @@
-# BayesFlow <img src="img/bayesflow_hex.png" align="right" width=20% height=20% />
+# BayesFlow <img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/bayesflow_hex.png?raw=true" align="right" width=20% height=20% />
 
 [![Actions Status](https://github.com/stefanradev93/bayesflow/workflows/Tests/badge.svg)](https://github.com/stefanradev93/bayesflow/actions)
 [![Licence](https://img.shields.io/github/license/stefanradev93/BayesFlow)](https://img.shields.io/github/license/stefanradev93/BayesFlow)
@@ -31,7 +31,7 @@ when working with intractable simulators whose behavior as a whole is too
 complex to be described analytically. The figure below presents a higher-level
 overview of neurally bootstrapped Bayesian inference.
 
-<img src="img/high_level_framework.png" width=80% height=80%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/high_level_framework.png?raw=true" width=80% height=80%>
 
 ## Getting Started: Parameter Estimation
 
@@ -77,13 +77,13 @@ Next, we create our BayesFlow setup consisting of a summary and an inference net
 ```python
 summary_net = bf.networks.DeepSet()
 inference_net = bf.networks.InvertibleNetwork(num_params=2)
-amortizer = bf.amortizers.AmortizedPosterior(inference_net, summary_net)
+amortized_posterior = bf.amortizers.AmortizedPosterior(inference_net, summary_net)
 ```
 
 Finally, we connect the networks with the generative model via a `Trainer` instance:
 
 ```python
-trainer = bf.trainers.Trainer(amortizer=amortizer, generative_model=generative_model)
+trainer = bf.trainers.Trainer(amortizer=amortized_posterior, generative_model=generative_model)
 ```
 
 We are now ready to train an amortized posterior approximator. For instance,
@@ -101,7 +101,7 @@ the model-amortizer combination:
 fig = trainer.diagnose_sbc_histograms()
 ```
 
-<img src="img/showcase_sbc.png" width=65% height=65%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_sbc.png?raw=true" width=65% height=65%>
 
 The histograms are roughly uniform and lie within the expected range for
 well-calibrated inference algorithms as indicated by the shaded gray areas.
@@ -113,7 +113,7 @@ per data set:
 
 ```python
 new_sims = trainer.configurator(generative_model(200))
-posterior_draws = amortizer.sample(new_sims, n_samples=500)
+posterior_draws = amortized_posterior.sample(new_sims, n_samples=500)
 ```
 
 We can then quickly inspect the how well the model can recover its parameters
@@ -123,7 +123,7 @@ across the simulated data sets.
 fig = bf.diagnostics.plot_recovery(posterior_draws, new_sims['parameters'])
 ```
 
-<img src="img/showcase_recovery.png" width=65% height=65%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_recovery.png?raw=true" width=65% height=65%>
 
 For any individual data set, we can also compare the parameters' posteriors with
 their corresponding priors:
@@ -132,7 +132,7 @@ their corresponding priors:
 fig = bf.diagnostics.plot_posterior_2d(posterior_draws[0], prior=generative_model.prior)
 ```
 
-<img src="img/showcase_posterior.png" width=45% height=45%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_posterior.png?raw=true" width=45% height=45%>
 
 We see clearly how the posterior shrinks relative to the prior for both
 model parameters as a result of conditioning on the data.
@@ -161,13 +161,13 @@ amortized inference if the generative model is a poor representation of reality?
 A modified loss function optimizes the learned summary statistics towards a unit
 Gaussian and reliably detects model misspecification during inference time.
 
-![](docsrc/source/_static/model_misspecification_amortized_sbi.png?raw=true)
+![](https://github.com/stefanradev93/BayesFlow/blob/master/docs/source/images/model_misspecification_amortized_sbi.png?raw=true)
 
 In order to use this method, you should only provide the `summary_loss_fun` argument
 to the `AmortizedPosterior` instance:
 
 ```python
-amortizer = bf.amortizers.AmortizedPosterior(inference_net, summary_net, summary_loss_fun='MMD')
+amortized_posterior = bf.amortizers.AmortizedPosterior(inference_net, summary_net, summary_loss_fun='MMD')
 ```
 
 The amortizer knows how to combine its losses and you can inspect the summary space for outliers during inference.
@@ -207,13 +207,13 @@ Next, we construct our neural network with a `PMPNetwork` for approximating post
 ```python
 summary_net = bf.networks.DeepSet()
 probability_net = bf.networks.PMPNetwork(num_models=2)
-amortizer = bf.amortizers.AmortizedModelComparison(probability_net, summary_net)
+amortized_bmc = bf.amortizers.AmortizedModelComparison(probability_net, summary_net)
 ```
 
 We combine all previous steps with a `Trainer` instance and train the neural approximator:
 
 ```python
-trainer = bf.trainers.Trainer(amortizer=amortizer, generative_model=meta_model)
+trainer = bf.trainers.Trainer(amortizer=amortized_bmc, generative_model=meta_model)
 losses = trainer.train_online(epochs=3, iterations_per_epoch=100, batch_size=32)
 ```
 
@@ -226,7 +226,7 @@ sims = trainer.configurator(meta_model(5000))
 When feeding the data to our trained network, we almost immediately obtain posterior model probabilities for each of the 5000 data sets:
 
 ```python
-model_probs = amortizer.posterior_probs(sims)
+model_probs = amortized_bmc.posterior_probs(sims)
 ```
 
 How good are these predicted probabilities in the closed world? We can have a look at the calibration:
@@ -235,7 +235,7 @@ How good are these predicted probabilities in the closed world? We can have a lo
 cal_curves = bf.diagnostics.plot_calibration_curves(sims["model_indices"], model_probs)
 ```
 
-<img src="img/showcase_calibration_curves.png" width=65% height=65%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_calibration_curves.png?raw=true" width=65% height=65%>
 
 Our approximator shows excellent calibration, with the calibration curve being closely aligned to the diagonal, an expected calibration error (ECE) near 0 and most predicted probabilities being certain of the model underlying a data set. We can further assess patterns of misclassification with a confusion matrix:
 
@@ -243,7 +243,7 @@ Our approximator shows excellent calibration, with the calibration curve being c
 conf_matrix = bf.diagnostics.plot_confusion_matrix(sims["model_indices"], model_probs)
 ```
 
-<img src="img/showcase_confusion_matrix.png" width=44% height=44%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_confusion_matrix.png?raw=true" width=44% height=44%>
 
 For the vast majority of simulated data sets, the "true" data-generating model is correctly identified. With these diagnostic results backing us up, we can proceed and apply our trained network to empirical data.
 
@@ -257,13 +257,35 @@ C. (2021). Amortized Bayesian Model Comparison with Evidental Deep Learning.
 doi:10.1109/TNNLS.2021.3124052 available for free at: https://arxiv.org/abs/2004.10629
 
 - Schmitt, M., Radev, S. T., & Bürkner, P. C. (2022). Meta-Uncertainty in
-Bayesian Model Comparison. <em>ArXiv preprint</em>, available for free at:
-https://arxiv.org/abs/2210.07278
+Bayesian Model Comparison. In <em>International Conference on Artificial Intelligence
+and Statistics</em>, 11-29, PMLR, available for free at: https://arxiv.org/abs/2210.07278
 
 - Elsemüller, L., Schnuerch, M., Bürkner, P. C., & Radev, S. T. (2023). A Deep
 Learning Method for Comparing Bayesian Hierarchical Models. <em>ArXiv preprint</em>,
 available for free at: https://arxiv.org/abs/2301.11873
 
-## Likelihood emulation
+## Likelihood Emulation
 
-Example coming soon...
+In order to learn the exchangeable (i.e., permutation invariant) likelihood from the minimal example instead of the posterior, you may use the `AmortizedLikelihood` wrapper:
+
+```python
+likelihood_net = bf.networks.InvertibleNetwork(num_params=2)
+amortized_likelihood = bf.amortizers.AmortizedLikelihood(likelihood_net)
+```
+
+This wrapper can interact with a `Trainer` instance in the same way as the `AmortizedPosterior`. Finally, you can also learn the likelihood and the posterior *simultaneously* by using the `AmortizedPosteriorLikelihood` wrapper and choosing your preferred training scheme:
+
+```python
+joint_amortizer = bf.amortizers.AmortizedPosteriorLikelihood(amortized_posterior, amortized_likelihood)
+```
+
+Learning both densities enables us to approximate marginal likelihoods or perform approximate leave-one-out cross-validation (LOO-CV) for prior or posterior predictive model comparison, respectively.
+
+### References and Further Reading
+
+Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P. C. (2023). 
+JANA: Jointly Amortized Neural Approximation of Complex Bayesian Models. <em>arXiv preprint</em>,
+available for free at: https://arxiv.org/abs/2302.09125
+
+## Support
+This work is supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy -– EXC-2181 - 390900948 (the Heidelberg Cluster of Excellence STRUCTURES) and -- EXC-2075 - 390740016 (the Stuttgart Cluster of Excellence SimTech), the Informatics for Life initiative funded by the Klaus Tschira Foundation, and Google Cloud through the Academic Research Grants program.
