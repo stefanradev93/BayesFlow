@@ -4,7 +4,7 @@ name: docs
 # execute this workflow automatically when a we push to main
 on:
   push:
-    branches: [ docs_ms ]
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v3
         with:
-          path: docs_ms
+          path: master
 
       - name: Checkout gh-pages
         uses: actions/checkout@v3
@@ -32,17 +32,17 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd ./docs_ms
+          cd ./master
           python -m pip install .[docs]
       - name: Make the Sphinx docs
         run: |
-          cd ./docs_ms/docsrc
+          cd ./master/docsrc
           make clean
           make github
       - name: Commit changes to docs
         run: |
           cd ./gh-pages
-          cp -R ../docs_ms/docs/* ./
+          cp -R ../master/docs/* ./
           git config --local user.email ""
           git config --local user.name "github-actions"
           git add -A
