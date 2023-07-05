@@ -135,6 +135,7 @@
         <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">BayesFlow</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
@@ -145,8 +146,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../_examples/Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../documentation.html">Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../api/bayesflow.html">Public API: bayesflow package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
@@ -161,58 +161,35 @@
 <li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.attention.html">bayesflow.attention module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.losses.html">bayesflow.losses module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.networks.html">bayesflow.networks module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/advanced_documentation.html">Advanced documentation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../api/bayesflow.benchmarks.html">bayesflow.benchmarks package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm.html">bayesflow.benchmarks.bernoulli_glm module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.bernoulli_glm_raw.html">bayesflow.benchmarks.bernoulli_glm_raw module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear.html">bayesflow.benchmarks.gaussian_linear module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_linear_uniform.html">bayesflow.benchmarks.gaussian_linear_uniform module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.gaussian_mixture.html">bayesflow.benchmarks.gaussian_mixture module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.inverse_kinematics.html">bayesflow.benchmarks.inverse_kinematics module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.lotka_volterra.html">bayesflow.benchmarks.lotka_volterra module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.sir.html">bayesflow.benchmarks.sir module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp.html">bayesflow.benchmarks.slcp module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.slcp_distractors.html">bayesflow.benchmarks.slcp_distractors module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.benchmarks.two_moons.html">bayesflow.benchmarks.two_moons module</a></li>
-</ul>
-</li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../api/bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../api/bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.amortizers.html">bayesflow.amortizers module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.attention.html">bayesflow.attention module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.configuration.html">bayesflow.configuration module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.coupling_networks.html">bayesflow.coupling_networks module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.diagnostics.html">bayesflow.diagnostics module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.inference_networks.html">bayesflow.inference_networks module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.losses.html">bayesflow.losses module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.networks.html">bayesflow.networks module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.sensitivity.html">bayesflow.sensitivity module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.simulation.html">bayesflow.simulation module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.summary_networks.html">bayesflow.summary_networks module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.trainers.html">bayesflow.trainers module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.version.html">bayesflow.version module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.configuration.html">bayesflow.configuration module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.default_settings.html">bayesflow.default_settings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.computational_utilities.html">bayesflow.computational_utilities module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.helper_classes.html">bayesflow.helper_classes module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.helper_functions.html">bayesflow.helper_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.helper_networks.html">bayesflow.helper_networks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.exceptions.html">bayesflow.exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.mcmc.html">bayesflow.mcmc module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.version.html">bayesflow.version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/bayesflow.wrappers.html">bayesflow.wrappers module</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/bayesflow.experimental.html">bayesflow.experimental package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/bayesflow.experimental.rectifiers.html">bayesflow.experimental.rectifiers module</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Full Installation Instructions</a></li>
-</ul>
-<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to BayesFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../about.html">About us</a></li>
 </ul>
 
@@ -416,10 +393,13 @@ document.write(`
 <span class="sd">    While the latter can also be considered batchable in principle, batching them would require non-Tensor</span>
 <span class="sd">    (i.e., non-rectangular) data structures, which usually means inefficient computations.</span>
 
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
 <span class="sd">    Example for a simulation context which will generate a random number of observations between 1 and 100 for</span>
 <span class="sd">    each training batch:</span>
 
 <span class="sd">    &gt;&gt;&gt; gen = ContextGenerator(non_batchable_context_fun=lambda : np.random.randint(1, 101))</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -467,8 +447,8 @@ document.write(`
 
 <span class="sd">        context_dict : dictionary</span>
 <span class="sd">            A dictionary with context variables with the following keys:</span>
-<span class="sd">            `batchable_context` : value</span>
-<span class="sd">            `non_batchable_context` : value</span>
+<span class="sd">            ``batchable_context`` : value</span>
+<span class="sd">            ``non_batchable_context`` : value</span>
 
 <span class="sd">        Note, that the values of the context variables will be None, if the</span>
 <span class="sd">        corresponding context-generating functions have not been provided when</span>
@@ -574,7 +554,7 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">is_batched</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="Prior.__call__"><a class="viewcode-back" href="../../api/bayesflow.simulation.html#bayesflow.simulation.Prior.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates `batch_size` draws from the prior given optional context generator.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates ``batch_size`` draws from the prior given optional context generator.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -677,12 +657,12 @@ document.write(`
 
 <div class="viewcode-block" id="Prior.plot_prior2d"><a class="viewcode-back" href="../../api/bayesflow.simulation.html#bayesflow.simulation.Prior.plot_prior2d">[docs]</a>    <span class="k">def</span> <span class="nf">plot_prior2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates a 2D plot representing bivariate prior ditributions. Uses the function</span>
-<span class="sd">        `bayesflow.diagnostics.plot_prior2d() internally for generating the plot.</span>
+<span class="sd">        ``bayesflow.diagnostics.plot_prior2d()`` internally for generating the plot.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        **kwargs : dict</span>
-<span class="sd">            Optional keyword arguments passed to the `plot_prior2d` function.</span>
+<span class="sd">            Optional keyword arguments passed to the ``plot_prior2d`` function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -764,9 +744,10 @@ document.write(`
 <span class="sd">            An optional function (ideally an instance of ``ContextGenerator``) for generating control variables</span>
 <span class="sd">            for the local_prior_fun.</span>
 
-<span class="sd">            Example: Varying number of local factors (e.g., groups, participants) between 1 and 100:</span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        Varying number of local factors (e.g., groups, participants) between 1 and 100::</span>
 
-<span class="sd">            ``</span>
 <span class="sd">            def draw_hyper():</span>
 <span class="sd">                # Draw location for 2D conditional prior</span>
 <span class="sd">                return np.random.normal(size=2)</span>
@@ -779,6 +760,7 @@ document.write(`
 <span class="sd">            context = ContextGenerator(non_batchable_context_fun=lambda : np.random.randint(1, 101))</span>
 <span class="sd">            prior = TwoLevelPrior(draw_hyper, draw_prior, local_context_generator=context)</span>
 <span class="sd">            prior_dict = prior(batch_size=32)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">hyper_prior</span> <span class="o">=</span> <span class="n">hyper_prior_fun</span>
@@ -876,19 +858,19 @@ document.write(`
 
 <span class="sd">    An optional context generator (i.e., an instance of ContextGenerator) or a user-defined callable object</span>
 <span class="sd">    implementing the following two methods can be provided:</span>
-<span class="sd">    - context_generator.batchable_context(batch_size)</span>
-<span class="sd">    - context_generator.non_batchable_context()</span>
+<span class="sd">    - ``context_generator.batchable_context(batch_size)``</span>
+<span class="sd">    - ``context_generator.non_batchable_context()``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_simulator_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">simulator_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context_generator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiates a data generator which will perform randomized simulations given a set of parameters and optional context.</span>
-<span class="sd">        Either a batch_simulator_fun or simulator_fun, but not both, should be provided to instantiate a Simulator object.</span>
+<span class="sd">        Either a ``batch_simulator_fun`` or ``simulator_fun``, but not both, should be provided to instantiate a ``Simulator`` object.</span>
 
-<span class="sd">        If a batch_simulator_fun is provided, the interface will assume that the function operates on batches of parameter</span>
+<span class="sd">        If a ``batch_simulator_fun`` is provided, the interface will assume that the function operates on batches of parameter</span>
 <span class="sd">        vectors and context variables and will pass the latter directly to the function. Power users should attempt to provide</span>
 <span class="sd">        optimized batched simulators.</span>
 
-<span class="sd">        If a simulator_fun is provided, the interface will assume thatthe function operates on single parameter vectors and</span>
+<span class="sd">        If a ``simulator_fun`` is provided, the interface will assume thatthe function operates on single parameter vectors and</span>
 <span class="sd">        context variables and will wrap the simulator internally to allow batched functionality.</span>
 
 <span class="sd">        Parameters</span>
@@ -899,8 +881,8 @@ document.write(`
 <span class="sd">        simulator_fun       : callable</span>
 <span class="sd">            A function (callable object) with optional control arguments responsible for generating a simulaiton given</span>
 <span class="sd">            a single parameter vector and optional variables.</span>
-<span class="sd">        context generator   : callable (default None, recommended instance of ContextGenerator)</span>
-<span class="sd">            An optional function (ideally an instance of ContextGenerator) for generating prior context variables.</span>
+<span class="sd">        context_generator   : callable (default None, recommended instance of ContextGenerator)</span>
+<span class="sd">            An optional function (ideally an instance of ``ContextGenerator``) for generating prior context variables.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="n">batch_simulator_fun</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="p">(</span><span class="n">simulator_fun</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
@@ -926,9 +908,9 @@ document.write(`
 
 <span class="sd">        out_dict : dictionary</span>
 <span class="sd">            An output dictionary with randomly simulated variables, the following keys are mandatory, if default keys not modified:</span>
-<span class="sd">            `sim_data` : value</span>
-<span class="sd">            `non_batchable_context` : value</span>
-<span class="sd">            `batchable_context` : value</span>
+<span class="sd">            ``sim_data`` : value</span>
+<span class="sd">            ``non_batchable_context`` : value</span>
+<span class="sd">            ``batchable_context`` : value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Always assume first dimension is batch dimension</span>
@@ -1092,8 +1074,8 @@ document.write(`
 <span class="sd">        name                 : str (default - &quot;anonoymous&quot;)</span>
 <span class="sd">            An optional name for the generative model. If kept default (None), &#39;anonymous&#39; is set as name.</span>
 
-<span class="sd">        Important</span>
-<span class="sd">        ----------</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        If you are not using the provided ``Prior`` and ``Simulator`` wrappers for your prior and data generator,</span>
 <span class="sd">        only functions returning a ``np.ndarray`` in the correct format will be accepted, since these will be</span>
 <span class="sd">        wrapped internally. In addition, you need to indicate whether your simulator operates on batched of</span>
@@ -1125,7 +1107,7 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">_test</span><span class="p">()</span>
 
 <div class="viewcode-block" id="GenerativeModel.__call__"><a class="viewcode-back" href="../../api/bayesflow.simulation.html#bayesflow.simulation.GenerativeModel.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Carries out forward inference &#39;batch_size&#39; times.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Carries out forward inference ``batch_size`` times.&quot;&quot;&quot;</span>
 
         <span class="c1"># Forward inference</span>
         <span class="n">prior_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;prior_args&quot;</span><span class="p">,</span> <span class="p">{}))</span>
@@ -1144,7 +1126,7 @@ document.write(`
         <span class="k">return</span> <span class="n">out_dict</span></div>
 
     <span class="k">def</span> <span class="nf">_config_custom_simulator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim_fun</span><span class="p">,</span> <span class="n">is_batched</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Only called if user has provided a custom simulator not using the Simulator wrapper.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Only called if user has provided a custom simulator not using the ``Simulator`` wrapper.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">is_batched</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span>
@@ -1160,8 +1142,8 @@ document.write(`
 <div class="viewcode-block" id="GenerativeModel.plot_pushforward"><a class="viewcode-back" href="../../api/bayesflow.simulation.html#bayesflow.simulation.GenerativeModel.plot_pushforward">[docs]</a>    <span class="k">def</span> <span class="nf">plot_pushforward</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">parameter_draws</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">funcs_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">funcs_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">show_raw_sims</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates simulations from parameter_draws (generated from self.prior if they are not passed as an argument)</span>
-<span class="sd">        and plots visualizations for them.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates simulations from ``parameter_draws`` (generated from ``self.prior`` if they are not passed as</span>
+<span class="sd">        an argument) and plots visualizations for them.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1323,8 +1305,8 @@ document.write(`
 <span class="sd">        disable_user_input: bool, optional, default: False</span>
 <span class="sd">            If True, user will not be asked if memory space is sufficient for presimulation.</span>
 
-<span class="sd">        Important</span>
-<span class="sd">        ----------</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        One of the following pairs of parameters has to be provided:</span>
 
 <span class="sd">        - (iterations_per_epoch, epochs),</span>
@@ -1332,7 +1314,7 @@ document.write(`
 <span class="sd">        - (total_iterations, epochs)</span>
 
 <span class="sd">        Providing all three of the parameters in these pairs leads to a consistency check,</span>
-<span class="sd">         since incompatible combinations are possible.</span>
+<span class="sd">        since incompatible combinations are possible.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Ensure that the combination of parameters provided is sufficient to perform presimulation</span>
         <span class="c1"># and does not contain internal contradictions</span>
@@ -1481,6 +1463,7 @@ document.write(`
 
 <div class="viewcode-block" id="TwoLevelGenerativeModel"><a class="viewcode-back" href="../../api/bayesflow.simulation.html#bayesflow.simulation.TwoLevelGenerativeModel">[docs]</a><span class="k">class</span> <span class="nc">TwoLevelGenerativeModel</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Basic interface for a generative model in a simulation-based context.</span>
+
 <span class="sd">    Generally, a generative model consists of two mandatory components:</span>
 <span class="sd">    - MultilevelPrior : A randomized function returning random parameter draws from a two-level prior distribution;</span>
 <span class="sd">    - Simulator : A function which transforms the parameters into observables in a non-deterministic manner.</span>
@@ -1513,8 +1496,8 @@ document.write(`
 <span class="sd">        name                 : str (default - &quot;anonymous&quot;)</span>
 <span class="sd">            An optional name for the generative model.</span>
 
-<span class="sd">        Important</span>
-<span class="sd">        ----------</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        If you are not using the provided ``TwoLevelPrior`` and ``Simulator`` wrappers for your prior and data</span>
 <span class="sd">        generator, only functions returning a ``np.ndarray`` in the correct format will be accepted, since these will be</span>
 <span class="sd">        wrapped internally. In addition, you need to indicate whether your simulator operates on batched of</span>
@@ -1569,7 +1552,7 @@ document.write(`
         <span class="k">return</span> <span class="n">out_dict</span></div>
 
     <span class="k">def</span> <span class="nf">_config_custom_simulator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim_fun</span><span class="p">,</span> <span class="n">is_batched</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Only called if user has provided a custom simulator not using the Simulator wrapper.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Only called if user has provided a custom simulator not using the ``Simulator`` wrapper.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">is_batched</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span>

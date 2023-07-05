@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Examples &#8212; BayesFlow: Amortized Bayesian Inference</title>
+    <title>Contributing to BayesFlow &#8212; BayesFlow: Amortized Bayesian Inference</title>
   
   
   
@@ -47,14 +47,14 @@
     <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/design-tabs.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'examples';</script>
-    <link rel="canonical" href="https://www.bayesflow.org/examples.html" />
+    <script>DOCUMENTATION_OPTIONS.pagename = 'contributing';</script>
+    <link rel="canonical" href="https://www.bayesflow.org/contributing.html" />
     <link rel="shortcut icon" href="_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="1. Quickstart: Amortized Posterior Estimation" href="_examples/Intro_Amortized_Posterior_Estimation.html" />
-    <link rel="prev" title="BayesFlow" href="index.html" />
+    <link rel="next" title="About us" href="about.html" />
+    <link rel="prev" title="Full Installation Instructions" href="installation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -139,7 +139,7 @@
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="index.html">BayesFlow</a></li>
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="_examples/LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
@@ -192,7 +192,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Full Installation Instructions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing to BayesFlow</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Contributing to BayesFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="about.html">About us</a></li>
 </ul>
 
@@ -265,7 +265,7 @@
       
       
       
-      <li><a href="https://github.com/stefanradev93/BayesFlow/edit/master/examples.rst" target="_blank"
+      <li><a href="https://github.com/stefanradev93/BayesFlow/edit/master/contributing.md" target="_blank"
    class="btn btn-sm btn-source-edit-button dropdown-item"
    title="Suggest edit"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -282,7 +282,7 @@
       
       
       
-      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2Fexamples.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/stefanradev93/BayesFlow/issues/new?title=Issue%20on%20page%20%2Fcontributing.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -312,7 +312,7 @@
       
       
       
-      <li><a href="_sources/examples.rst" target="_blank"
+      <li><a href="_sources/contributing.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -322,7 +322,7 @@
 <span class="btn__icon-container">
   <i class="fas fa-file"></i>
   </span>
-<span class="btn__text-container">.rst</span>
+<span class="btn__text-container">.md</span>
 </a>
 </li>
       
@@ -381,7 +381,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
 </div></div>
       
     </div>
@@ -392,11 +394,26 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Examples</h1>
+    <h1>Contributing to BayesFlow</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#workflow">Workflow</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#environment">Environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tox">Tox</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-commit-hooks">Pre-commit hooks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#github-actions">GitHub Actions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unit-tests">Unit tests</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tutorial-notebooks">Tutorial Notebooks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#documentation">Documentation</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -406,21 +423,88 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="examples">
-<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">#</a></h1>
-<p>This page contains tutorial notebooks for BayesFlow, ranging from toy models to more complex applied modeling scenarios.
-The corresponding Jupyter Notebooks are available <a class="reference external" href="https://github.com/stefanradev93/BayesFlow/blob/master/examples/">here</a>.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="_examples/Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_examples/Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_examples/LCA_Model_Posterior_Estimation.html">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_examples/Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_examples/Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_examples/Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_examples/Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
-</ul>
+  <section class="tex2jax_ignore mathjax_ignore" id="contributing-to-bayesflow">
+<h1>Contributing to BayesFlow<a class="headerlink" href="#contributing-to-bayesflow" title="Permalink to this heading">#</a></h1>
+<section id="workflow">
+<h2>Workflow<a class="headerlink" href="#workflow" title="Permalink to this heading">#</a></h2>
+<p>If you start working on a new feature or a bug fix, please create an issue on GitHub
+describing the issue and assign yourself.</p>
+<p>Make sure that you are working in the <code class="docutils literal notranslate"><span class="pre">Development</span></code> branch, which contains the latest updates.
+Create an own branch or use a fork, where you can implement your changes. To merge your work, please follow these steps:</p>
+<ol class="arabic simple">
+<li><p>Create a pull request to the <code class="docutils literal notranslate"><span class="pre">Development</span></code> branch with a short summary of the code changes;</p></li>
+<li><p>Check that code changes are covered by tests, and all tests pass;</p></li>
+<li><p>Check that the documentation is up-to-date;</p></li>
+<li><p>Request a code review from the main developers.</p></li>
+</ol>
+</section>
+<section id="environment">
+<h2>Environment<a class="headerlink" href="#environment" title="Permalink to this heading">#</a></h2>
+<p>If you want to contribute to the development of BayesFlow, you need to install developer requirements via:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install -r requirements_dev.txt
+</pre></div>
 </div>
+</section>
+<section id="tox">
+<h2>Tox<a class="headerlink" href="#tox" title="Permalink to this heading">#</a></h2>
+<p>Second, this installs the virtual testing tool <code class="docutils literal notranslate"><span class="pre">tox</span></code>
+<a class="reference external" href="https://tox.readthedocs.io/en/latest/">https://tox.readthedocs.io/en/latest/</a>, which we use for all tests, formatting and quality checks. Its configuration is specified in <code class="docutils literal notranslate"><span class="pre">tox.ini</span></code>.
+To run it locally, simply execute:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tox [-e flake8]
+</pre></div>
+</div>
+<p>with an optional <code class="docutils literal notranslate"><span class="pre">-e</span></code> flag specifying the environments to run. See <code class="docutils literal notranslate"><span class="pre">tox.ini</span></code> for more details.</p>
+</section>
+<section id="pre-commit-hooks">
+<h2>Pre-commit hooks<a class="headerlink" href="#pre-commit-hooks" title="Permalink to this heading">#</a></h2>
+<p>Pre-commit hooks are used to examine the fidelity of the code that’s about to be committed.
+For this, you need to install a pre-commit tool (e.g., <a class="reference external" href="https://pre-commit.com/">https://pre-commit.com/</a>).</p>
+<p>To add those hooks to the <code class="docutils literal notranslate"><span class="pre">.git</span></code> folder of your local clone such that they are automatically executed on every commit, run::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pre-commit install
+</pre></div>
+</div>
+<p>When adding new hooks, consider manually running <code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">run</span> <span class="pre">--all-files</span></code> once, as usually only the diff is checked. The configuration is specified in
+<code class="docutils literal notranslate"><span class="pre">.pre-commit-config.yaml</span></code>.</p>
+</section>
+<section id="github-actions">
+<h2>GitHub Actions<a class="headerlink" href="#github-actions" title="Permalink to this heading">#</a></h2>
+<p>We use GitHub Actions for automatic continuous integration testing (<a class="github reference external" href="https://github.com/features/actions?">features/actions</a>). All tests are run on pull requests and required to pass.
+The configuration is specified in <code class="docutils literal notranslate"><span class="pre">.github/workflows/tests.yml</span></code>.</p>
+</section>
+<section id="unit-tests">
+<h2>Unit tests<a class="headerlink" href="#unit-tests" title="Permalink to this heading">#</a></h2>
+<p>Unit tests are located in the <code class="docutils literal notranslate"><span class="pre">tests</span></code> folder. All files starting with <code class="docutils literal notranslate"><span class="pre">test_</span></code> contain tests and are automatically run via GitHub Actions.
+We use <code class="docutils literal notranslate"><span class="pre">pytest</span></code> (<a class="reference external" href="https://docs.pytest.org/en/latest/">https://docs.pytest.org/en/latest/</a>) for our testing environment.</p>
+<p>You can run the all tests locally via:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pytest -e
+</pre></div>
+</div>
+<p>Or a specific test via:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pytest -e test_[mytest]
+</pre></div>
+</div>
+</section>
+<section id="tutorial-notebooks">
+<h2>Tutorial Notebooks<a class="headerlink" href="#tutorial-notebooks" title="Permalink to this heading">#</a></h2>
+<p>New tutorial notebooks are always welcome! You can add your tutorial notebook file to <code class="docutils literal notranslate"><span class="pre">examples/</span></code> and add a reference
+to the list of notebooks in <code class="docutils literal notranslate"><span class="pre">docsrc/source/examples.rst</span></code>.
+Re-build the documentation (see below) and your notebook will be included.</p>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">#</a></h2>
+<p>The documentation uses <a class="reference external" href="https://www.sphinx-doc.org/">sphinx</a> and relies on <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">numpy style docstrings</a> in classes and functions.
+The overall <em>structure</em> of the documentation is manually designed. This also applies to the API documentation. This has two implications for you:</p>
+<ol class="arabic simple">
+<li><p>If you add to existing submodules, the documentation will update automatically (given that you use proper numpy docstrings).</p></li>
+<li><p>If you add a new submodule or subpackage, you need to add a file to <code class="docutils literal notranslate"><span class="pre">docsrc/source/api</span></code> and a reference to the new module to the appropriate section of <code class="docutils literal notranslate"><span class="pre">docsrc/source/api/bayesflow.rst</span></code>.</p></li>
+</ol>
+<p>You can re-build the documentation with</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd docsrc/
+make clean &amp;&amp; make github
+</pre></div>
+</div>
+<p>The entry point of the rendered documentation will be at <code class="docutils literal notranslate"><span class="pre">docs/index.html</span></code>.</p>
+</section>
 </section>
 
 
@@ -436,20 +520,20 @@ The corresponding Jupyter Notebooks are available <a class="reference external" 
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="index.html"
+       href="installation.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">BayesFlow</p>
+        <p class="prev-next-title">Full Installation Instructions</p>
       </div>
     </a>
     <a class="right-next"
-       href="_examples/Intro_Amortized_Posterior_Estimation.html"
+       href="about.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">1. </span>Quickstart: Amortized Posterior Estimation</p>
+        <p class="prev-next-title">About us</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -462,6 +546,27 @@ The corresponding Jupyter Notebooks are available <a class="reference external" 
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#workflow">Workflow</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#environment">Environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tox">Tox</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-commit-hooks">Pre-commit hooks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#github-actions">GitHub Actions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unit-tests">Unit tests</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tutorial-notebooks">Tutorial Notebooks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#documentation">Documentation</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

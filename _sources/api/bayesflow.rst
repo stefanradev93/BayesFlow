@@ -1,47 +1,58 @@
-bayesflow package
-=================
+.. currentmodule:: bayesflow
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   bayesflow.benchmarks
-   bayesflow.experimental
+Public API: bayesflow package
+=============================
 
 Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
+   bayesflow.benchmarks
    bayesflow.amortizers
    bayesflow.attention
-   bayesflow.computational_utilities
-   bayesflow.configuration
    bayesflow.coupling_networks
-   bayesflow.default_settings
    bayesflow.diagnostics
-   bayesflow.exceptions
-   bayesflow.helper_classes
-   bayesflow.helper_functions
-   bayesflow.helper_networks
    bayesflow.inference_networks
    bayesflow.losses
-   bayesflow.mcmc
    bayesflow.networks
    bayesflow.sensitivity
    bayesflow.simulation
    bayesflow.summary_networks
    bayesflow.trainers
+
+
+Configuration
+-------------
+.. toctree::
+   :maxdepth: 1
+
+   bayesflow.configuration
+   bayesflow.default_settings
+
+
+Helpers
+-------
+.. toctree::
+   :maxdepth: 1
+
+   bayesflow.computational_utilities
+   bayesflow.helper_classes
+   bayesflow.helper_functions
+   bayesflow.helper_networks
+
+Miscellaneous
+-------------
+.. toctree::
+   :maxdepth: 1
+
+   bayesflow.exceptions
+   bayesflow.mcmc
    bayesflow.version
    bayesflow.wrappers
 
-Module contents
----------------
+.. toctree::
+   :hidden:
 
-.. automodule:: bayesflow
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   bayesflow.experimental

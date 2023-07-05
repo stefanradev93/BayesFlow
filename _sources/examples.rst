@@ -1,6 +1,5 @@
-********
 Examples
-********
+========
 
 This page contains tutorial notebooks for BayesFlow, ranging from toy models to more complex applied modeling scenarios.
 The corresponding Jupyter Notebooks are available :mainbranch:`here <examples/>`.
