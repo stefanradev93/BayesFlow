@@ -35,13 +35,17 @@ goto end
 
 :github
 mkdir source\_examples
-xcopy /y /s ..\INSTALL.rst source\isntallation.rst
+xcopy /y /s ..\INSTALL.rst source\installation.rst
+xcopy /y /s ..\CONTRIBUTING.md source\contributing.md
 xcopy /y /s ..\examples source\_examples
 rmdir /q /s source\_examples\in_progress
 %SPHINXBUILD% -M html %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 xcopy /y /s "%BUILDDIR%\html" ..\docs
 xcopy /y .nojekyll ..\docs\.nojekyll
 rmdir /q /s source\_examples
+rmdir /q /s _build\html\
+del /q /s source\installation.rst
+del /q /s source\contributing.md
 goto end
 
 :clean

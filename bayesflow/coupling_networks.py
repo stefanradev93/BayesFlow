@@ -601,8 +601,8 @@ class CouplingLayer(tf.keras.Model):
         target          :  tf.Tensor
             If inverse=True: The back-transformed z, shape (batch_size, inp_dim)
 
-        Important
-        ---------
+        Notes
+        -----
         If ``inverse=False``, the return is ``(z, log_det_J)``.\n
         If ``inverse=True``, the return is ``target``
         """

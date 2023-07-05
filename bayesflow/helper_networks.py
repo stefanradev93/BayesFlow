@@ -292,24 +292,30 @@ class MCDropout(tf.keras.Model):
 class ActNorm(tf.keras.Model):
     """Implements an Activation Normalization (ActNorm) Layer.
     Activation Normalization is learned invertible normalization, using
-    a Scale (s) and Bias (b) vector [1].
-        y = s * x + b (forward)
-        x = (y - b)/s (inverse)
+    a Scale (s) and Bias (b) vector::
 
-    The scale and bias can be data dependent initalized, such that the
-    output has a mean of zero and standard deviation of one [1,2].
+       y = s * x + b (forward)
+       x = (y - b)/s (inverse)
+
+    Notes
+    -----
+
+    The scale and bias can be data dependent initialized, such that the
+    output has a mean of zero and standard deviation of one [1]_[2]_.
     Alternatively, it is initialized with vectors of ones (scale) and
     zeros (bias).
 
-    [1] - Kingma, Diederik P., and Prafulla Dhariwal.
-            "Glow: Generative flow with invertible 1x1 convolutions."
-            arXiv preprint arXiv:1807.03039 (2018).
+    References
+    ----------
 
-    [2] - Salimans, Tim, and Durk P. Kingma.
-            "Weight normalization: A simple reparameterization to accelerate
-            training of deep neural networks."
-            Advances in neural information processing systems 29
-            (2016): 901-909.
+    .. [1] Kingma, Diederik P., and Prafulla Dhariwal.
+       "Glow: Generative flow with invertible 1x1 convolutions."
+       arXiv preprint arXiv:1807.03039 (2018).
+
+    .. [2] Salimans, Tim, and Durk P. Kingma.
+       "Weight normalization: A simple reparameterization to accelerate
+       training of deep neural networks."
+       Advances in neural information processing systems 29 (2016): 901-909.
     """
 
     def __init__(self, latent_dim, act_norm_init, **kwargs):
@@ -353,8 +359,8 @@ class ActNorm(tf.keras.Model):
         target          :  tf.Tensor
             If inverse=True: The inversly transformed targets, shape == target.shape
 
-        Important
-        ---------
+        Notes
+        -----
         If ``inverse=False``, the return is ``(z, log_det_J)``.\n
         If ``inverse=True``, the return is ``target``.
         """

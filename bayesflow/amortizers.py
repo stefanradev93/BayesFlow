@@ -1103,8 +1103,8 @@ class TwoLevelAmortizedPosterior(tf.keras.Model, AmortizedTarget):
         **kwargs     : dict, optional, default: {}
             Additional keyword arguments passed to the summary network as the amortizers
 
-        Returns:
-        --------
+        Returns
+        -------
         samples_dict : dict
             A dictionary with keys `global_samples` and `local_samples`
             Local samples will hold an array-like of shape (num_replicas, num_samples, num_local)

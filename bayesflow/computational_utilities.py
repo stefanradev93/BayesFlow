@@ -59,8 +59,8 @@ def posterior_calibration_error(
     max_quantile     : float in (0, 1), optional, default: 0.995
         The maximum posterior quantile to consider
 
-    Returns:
-    --------
+    Returns
+    -------
     calibration_errors : np.ndarray of shape (num_params, ) or (alpha_resolution, num_params),
         if ``aggregator_fun is None``.
         The aggregated calibration error per marginal posterior.
@@ -248,8 +248,8 @@ def expected_calibration_error(m_true, m_pred, num_bins=10):
         Obtaining well calibrated probabilities using bayesian binning.
         In Proceedings of the AAAI conference on artificial intelligence (Vol. 29, No. 1).
 
-    Important
-    ---------
+    Notes
+    -----
     Make sure that ``m_true`` are **one-hot encoded** classes!
 
     Parameters
