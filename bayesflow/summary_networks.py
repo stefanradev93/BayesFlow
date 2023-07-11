@@ -550,7 +550,8 @@ class HierarchicalNetwork(tf.keras.Model):
         that are aligned with the probabilistic structure of the processed data.
 
         Note: The networks will start processing from the lowest hierarchical level (e.g., observational level)
-        up to the highest hierarchical level.
+        up to the highest hierarchical level. It is recommended to provide higher-level networks with more
+        expressive power to allow for an adequate compression of lower-level data.
 
         Example: For two-level hierarchical models with the assumption of temporal dependencies on the lowest
         hierarchical level (e.g., observational level) and exchangeable units at the higher level
@@ -574,7 +575,7 @@ class HierarchicalNetwork(tf.keras.Model):
         ----------
         data       : tf.Tensor of shape (batch_size, ..., data_dim)
             Example, hierarchical data sets with two levels:
-            (batch_size, D, L, x_dim) -> reduces to
+            (batch_size, D, L, x_dim) -> reduces to (batch_size, out_dim).
         return_all : boolean, optional, default: False
             Whether to return all intermediate outputs (True) or just
             the final one (False).
