@@ -479,12 +479,6 @@ document.write(`
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>D:\Anaconda3\envs\TensorFlowDev\lib\site-packages\bayesflow\trainers.py:26: TqdmExperimentalWarning: Using `tqdm.autonotebook.tqdm` in notebook mode. Use `tqdm.tqdm` instead to force console mode (e.g. in jupyter console)
-  from tqdm.autonotebook import tqdm
-</pre></div>
-</div>
-</div>
 </div>
 <section id="introduction">
 <h2><span class="section-number">5.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
@@ -801,8 +795,7 @@ INFO:root:No optional simulation batchable context provided.
 <p>Note, that you should supply a <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code> for the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance, if you don’t want to save the neural approximators manually!</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># change var_obs</span>
-<span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">amortizer</span><span class="o">=</span><span class="n">amortizer</span><span class="p">,</span> <span class="n">generative_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">configurator</span><span class="o">=</span><span class="n">configure_input</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">amortizer</span><span class="o">=</span><span class="n">amortizer</span><span class="p">,</span> <span class="n">generative_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">configurator</span><span class="o">=</span><span class="n">configure_input</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -825,11 +818,11 @@ INFO:root:Done.
 _________________________________________________________________
  Layer (type)                Output Shape              Param #   
 =================================================================
- invertible_network (Inverti  multiple                 222810    
- bleNetwork)                                                     
+ invertible_network_3 (Inver  multiple                 222810    
+ tibleNetwork)                                                   
                                                                  
- sequential_network (Sequent  multiple                 91178     
- ialNetwork)                                                     
+ sequential_network_2 (Seque  multiple                 91178     
+ ntialNetwork)                                                   
                                                                  
 =================================================================
 Total params: 313,988
@@ -853,15 +846,23 @@ _________________________________________________________________
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: total: 31.2 ms
-Wall time: 32.9 ms
+Wall time: 33.9 ms
 </pre></div>
 </div>
 </div>
 </div>
-<p>We will train for <span class="math notranslate nohighlight">\(10\)</span> epochs using <span class="math notranslate nohighlight">\(500\)</span> iterations of <span class="math notranslate nohighlight">\(32\)</span> simulations which amounts to a total of <span class="math notranslate nohighlight">\(20 \times 500 \times 32 = 320000\)</span> simulations performed.</p>
+<p>Still, for the purpose of this illustration, we will use offline training on as little as <span class="math notranslate nohighlight">\(10000\)</span> simulated data sets.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">h</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">validation_sims</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">offline_data</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="n">offline_data</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">validation_sims</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -869,64 +870,83 @@ Wall time: 32.9 ms
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Generated 200 simulations for validation.
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0c5b5f053c6a476f88112aa6d2d62b95", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 1, Loss: 4.617
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "31e8754c6c8d4bd5879e69f34b2c2094", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 1, Loss: 5.041
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e6e3c483a681487ea8ab4ce3ba658c38", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 2, Loss: 3.850
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e99b37db27bc4149a1407fa758315985", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 2, Loss: 4.562
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "992a3e8dd5b74096a648a6dc6f64e083", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 3, Loss: 3.896
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "66e73cdc2d9f448ea3dc1534392ea93f", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 3, Loss: 3.519
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ab9508a39b8348cd80b51d8dc4fcd301", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 4, Loss: 3.243
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "470b4b1dd62246fbb2213b284ba20d62", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 4, Loss: 3.218
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0fbf4bf5093141a6a7a2cd20922e9a87", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 5, Loss: 3.026
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "48ea3aba2b22400e97b3b3e90ecf82f3", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 5, Loss: 3.767
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "c131a68135d44f27a6ddba7efdf7f403", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 6, Loss: 2.949
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6905297dd97245288db58e61f1e8283a", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 6, Loss: 3.367
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "47a6bf05e4bf453fb721712a6399f3d0", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 7, Loss: 3.175
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d69987d571ea46a088c06d2945a86a61", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 7, Loss: 3.128
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "dcb07f2ea8f940d8a7cbbf3c1e240ffa", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 8, Loss: 2.757
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "eef6498b69dc46218ec867283bde9d9c", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 8, Loss: 3.171
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "535cc934cd6e45e888699731ebba5964", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 9, Loss: 2.927
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b3d78c0ede764ba78abbff9260413cfb", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 9, Loss: 3.143
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a13d3d1c6409403a986487fcbda2238a", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 10, Loss: 2.863
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ec66f7e9919a4cb691c1abe904a20b60", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 10, Loss: 3.084
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "049568efa55c4a799919a4bea9bcd6b7", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 11, Loss: 2.995
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6f1ed78c71464a95a29a8f9b6de63c7e", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 11, Loss: 2.872
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3475006ecb494745bb3496da632a6db8", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 12, Loss: 2.493
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "2f9ebd03feeb4cf28b76291ec7b138bd", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 12, Loss: 2.952
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9fa686db05dd48b8b65e3593bbe146c2", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 13, Loss: 2.564
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3f2473ae720d4dc2ade3cb4d21703dfb", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 13, Loss: 2.856
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ca5e9ebb36d949b9923694b1eae203f7", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 14, Loss: 2.456
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "18f02c810246467a96dad56faa9e80b8", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 14, Loss: 2.892
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "2e2953fe43a6437eaf46f0fb41a729be", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 15, Loss: 2.419
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "5d96442039ef47e6844c76f63074a69f", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 15, Loss: 2.584
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "1f65acfba53b405bb05f7b13cee01ded", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 16, Loss: 2.391
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "819e9c563ea74d4799e844479ec9e55f", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 16, Loss: 2.632
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ac6814cd52384c5385c0d697c462fac3", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 17, Loss: 2.351
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0cd86f3511f6448aadbf43f10c3c74dd", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 17, Loss: 2.506
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b267ec9026054030987140f613933885", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 18, Loss: 2.333
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a263bd4cb3284cb19d48ad2c66b96c36", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 18, Loss: 2.445
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6f262dec4f06498a8f87f08441d2d9d5", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 19, Loss: 2.329
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "13c4c533170741429d591e37099a5091", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 19, Loss: 2.377
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "cba18075c8f046e083a003687eb107a1", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 20, Loss: 2.327
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "2390a22c7fe746ad9997d1f0006dc068", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 20, Loss: 2.356
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0d687671bad64277ae60250b7190a607", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 21, Loss: 2.328
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6ab19461143e43fea43810a93aaa58d6", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 22, Loss: 2.333
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "31e1c6d9a69b47e1a265de26e9a588dd", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 23, Loss: 2.293
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "054aea0663b849cfb2b9c9137bc1fd18", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 24, Loss: 2.291
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "67444e915850471d9da5b93d3cf077c1", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 25, Loss: 2.286
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: total: 8min 1s
+Wall time: 6min 41s
 </pre></div>
 </div>
 </div>
@@ -941,7 +961,7 @@ Wall time: 32.9 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/c4a5345368c4ce8f99da8bd0c5058743c20702e8ced9c26904a567291251dc7c.png" src="../_images/c4a5345368c4ce8f99da8bd0c5058743c20702e8ced9c26904a567291251dc7c.png" />
+<img alt="../_images/a87571dac9162a262afd07df291b1b183c5416fc847125c7450bcc08c47ca476.png" src="../_images/a87571dac9162a262afd07df291b1b183c5416fc847125c7450bcc08c47ca476.png" />
 </div>
 </div>
 <p>Great, it seems that our approximator has converged! Before we get too excited and throw our networks at real data, we need to make sure that they meet our expectations <em>in silico</em>, that is, given the small world of simulations the networks have seen.</p>
@@ -959,7 +979,7 @@ Wall time: 32.9 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/00b3df179a2fb3306af47233046681579579d2c45413e6e3f4722ac1bfcd1dc7.png" src="../_images/00b3df179a2fb3306af47233046681579579d2c45413e6e3f4722ac1bfcd1dc7.png" />
+<img alt="../_images/4b22b003b06fa7770378a64e61f3b8ad71172bc8de4c6ac98b5a266fe9d4a3bd.png" src="../_images/4b22b003b06fa7770378a64e61f3b8ad71172bc8de4c6ac98b5a266fe9d4a3bd.png" />
 </div>
 </div>
 </section>
@@ -975,7 +995,7 @@ Wall time: 32.9 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/e20e832e17b212364b2c366756caa5da871cdd41f5ce4c87beeb393dbf3d0a37.png" src="../_images/e20e832e17b212364b2c366756caa5da871cdd41f5ce4c87beeb393dbf3d0a37.png" />
+<img alt="../_images/5044b5a07bc1a0494004e17cc17c3b13d4c641bfa93493c00eca392f1c3fbea1.png" src="../_images/5044b5a07bc1a0494004e17cc17c3b13d4c641bfa93493c00eca392f1c3fbea1.png" />
 </div>
 </div>
 </section>
@@ -1003,7 +1023,7 @@ Wall time: 32.9 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/12f34b7c6b8ba50218b3d7a37e697592320266c62c05127ce7cf3bc889ff4de0.png" src="../_images/12f34b7c6b8ba50218b3d7a37e697592320266c62c05127ce7cf3bc889ff4de0.png" />
+<img alt="../_images/4dbc8f3a146859a21de0485df72fb827d01ce6f2b77d132715892914a7f6e01c.png" src="../_images/4dbc8f3a146859a21de0485df72fb827d01ce6f2b77d132715892914a7f6e01c.png" />
 </div>
 </div>
 <p>We can also produce stacked ECDFs and compute ECDF differences for a more dynamic visualization range.</p>
@@ -1016,7 +1036,7 @@ Wall time: 32.9 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/bb679851d130d3341cb84db67d66ccb0b4457fa8eb42d2e720b5aac843044bae.png" src="../_images/bb679851d130d3341cb84db67d66ccb0b4457fa8eb42d2e720b5aac843044bae.png" />
+<img alt="../_images/96185d1f74c7c06385019255667037d924df30ec1c05135e9e48ab9ce036e5a5.png" src="../_images/96185d1f74c7c06385019255667037d924df30ec1c05135e9e48ab9ce036e5a5.png" />
 </div>
 </div>
 <p>Fianlly, we can also compute SBC histograms on the new validation data by calling the function <code class="docutils literal notranslate"><span class="pre">plot_sbc_histograms</span></code> directly.</p>
@@ -1030,7 +1050,7 @@ Wall time: 32.9 ms
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:The ratio of simulations / posterior draws should be &gt; 20 for reliable variance reduction, but your ratio is 3.                    Confidence intervals might be unreliable!
 </pre></div>
 </div>
-<img alt="../_images/714024a6c9e1052b9b4059916c4cd4d54367b2f8314ba2454d3c5b80cb73fb27.png" src="../_images/714024a6c9e1052b9b4059916c4cd4d54367b2f8314ba2454d3c5b80cb73fb27.png" />
+<img alt="../_images/3c991e828873f20ca8ddc153d872f5bc8ac1adceb0ee3f1f140e1c581c4732b3.png" src="../_images/3c991e828873f20ca8ddc153d872f5bc8ac1adceb0ee3f1f140e1c581c4732b3.png" />
 </div>
 </div>
 </section>
@@ -1051,7 +1071,7 @@ Wall time: 32.9 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/ceea280c705858fd8ac859c55f4fda651a0ec432ed087c97f1784edbf44598c1.png" src="../_images/ceea280c705858fd8ac859c55f4fda651a0ec432ed087c97f1784edbf44598c1.png" />
+<img alt="../_images/2b27d7a5b037cbe7fa7deef6df7a48725adadceddec28d8fc5d3fac1b8f0c966.png" src="../_images/2b27d7a5b037cbe7fa7deef6df7a48725adadceddec28d8fc5d3fac1b8f0c966.png" />
 </div>
 </div>
 </section>
@@ -1091,7 +1111,7 @@ Wall time: 32.9 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/880d290b80e39fcd5c8a0c40fc4c9d554e4f148e14071b14fdc90a996f5f2a3a.png" src="../_images/880d290b80e39fcd5c8a0c40fc4c9d554e4f148e14071b14fdc90a996f5f2a3a.png" />
+<img alt="../_images/3c86abeb5df419fced0b43c0d4953b1b2e784928c6897808b697427797fbbc4c.png" src="../_images/3c86abeb5df419fced0b43c0d4953b1b2e784928c6897808b697427797fbbc4c.png" />
 </div>
 </div>
 </section>
@@ -1105,7 +1125,7 @@ Wall time: 32.9 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/280306f151fe7875a279631ed1ee4a62612f3e5a43712e504c4c01b735cd7301.png" src="../_images/280306f151fe7875a279631ed1ee4a62612f3e5a43712e504c4c01b735cd7301.png" />
+<img alt="../_images/a487e1e5ea0185aa2f504d44e5b6c32f2854938893ac2099776b32a28c94d909.png" src="../_images/a487e1e5ea0185aa2f504d44e5b6c32f2854938893ac2099776b32a28c94d909.png" />
 </div>
 </div>
 </section>
@@ -1176,7 +1196,7 @@ Wall time: 32.9 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/33b435d08c127aece7a0e38e6f3dc3fbdb23dfe733a013299b8c86403cd81ca7.png" src="../_images/33b435d08c127aece7a0e38e6f3dc3fbdb23dfe733a013299b8c86403cd81ca7.png" />
+<img alt="../_images/9e4dd6e251ace816735e078136dcfa9d42422ad4bc55ddee9e15c4427f6f555e.png" src="../_images/9e4dd6e251ace816735e078136dcfa9d42422ad4bc55ddee9e15c4427f6f555e.png" />
 </div>
 </div>
 <p>That’s it for this tutorial! You now know how to use the basic building blocks of <code class="docutils literal notranslate"><span class="pre">BayesFlow</span></code> to create amortized neural approximators. :)</p>
