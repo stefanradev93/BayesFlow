@@ -289,3 +289,44 @@ available for free at: https://arxiv.org/abs/2302.09125
 
 ## Support
 This work is supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy -– EXC-2181 - 390900948 (the Heidelberg Cluster of Excellence STRUCTURES) and -- EXC-2075 - 390740016 (the Stuttgart Cluster of Excellence SimTech), the Informatics for Life initiative funded by the Klaus Tschira Foundation, and Google Cloud through the Academic Research Grants program.
+
+
+# Citing BayesFlow
+
+You can cite BayesFlow along the lines of:
+
+- We estimated the approximate posterior distribution with neural posterior estimation and learned summary statistics (NPE; Radev et al., 2020) via the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+- We trained a neural likelihood estimator (NLE; Papamakarios et al., 2019) via the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+- We sampled from the approximate joint distribution $p(x, \theta)$ using jointly amortized neural approximation (JANA; Radev et al., 2023a), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+
+1. Radev, S. T., Schmitt, M., Schumacher, L., Elsemüller, L., Pratz, V., Schälte, Y., Köthe, U., & Bürkner, P.-C. (2023). BayesFlow: Amortized Bayesian Workflows With Neural Networks. *arXiv:2306.16015*. ([arXiv paper](https://arxiv.org/abs/2306.16015))
+2. Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., Köthe, U. (2020). BayesFlow: Learning Complex Stochastic Models With Invertible Neural Networks. IEEE Trans Neural Netw Learn Syst. 33(4). 1452-1466.
+3. Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P.-C. (2023). JANA: Jointly Amortized Neural Approximation of Complex Bayesian Models. *39th conference on Uncertainty in Artificial Intelligence*. ([UAI Proceedings](https://openreview.net/forum?id=dS3wVICQrU0))
+
+**BibTeX:**
+
+```
+@misc{radev2023bayesflow,
+ title = {BayesFlow: Amortized Bayesian Workflows With Neural Networks},
+ author = {Stefan T Radev and Marvin Schmitt and Lukas Schumacher and Lasse Elsem\"{u}ller and Valentin Pratz and Yannik Sch\"{a}lte and Ullrich K\"{o}the and Paul-Christian B\"{u}rkner},
+ year = {2023},
+ publisher= {arXiv},
+ url={https://arxiv.org/abs/2306.16015}
+}
+
+@article{radev2020bayesflow,
+  doi = {10.1109/TNNLS.2020.3042395},
+  year = {2020},
+  title = {{BayesFlow}: Learning Complex Stochastic Models With Invertible Neural Networks},
+  journal = {IEEE Transactions on Neural Networks and Learning Systems},
+  author = {Radev, Stefan T and Mertens, Ulf K and Voss, A and Ardizzone, L and K\"{o}the, U},
+}
+
+@inproceedings{radev2023jana,
+ title={{JANA}: Jointly Amortized Neural Approximation of Complex Bayesian Models},
+ author={Stefan T. Radev and Marvin Schmitt and Valentin Pratz and Umberto Picchini and Ullrich Koethe and Paul-Christian Buerkner},
+ booktitle={The 39th Conference on Uncertainty in Artificial Intelligence},
+ year={2023},
+ url={https://openreview.net/forum?id=dS3wVICQrU0}
+}
+```
