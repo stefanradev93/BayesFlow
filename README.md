@@ -141,18 +141,17 @@ model parameters as a result of conditioning on the data.
 
 - Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020).
 BayesFlow: Learning complex stochastic models with invertible neural networks.
-<em>IEEE Transactions on Neural Networks and Learning Systems</em>, available
-for free at: https://arxiv.org/abs/2003.06281.
+<em>IEEE Transactions on Neural Networks and Learning Systems, 33(4)</em>, 1452-1466.
 
 - Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., & Köthe, U. (2021).
-OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks and its application to the COVID-19 pandemics in Germany. <em>PLoS computational biology</em>, 17(10), e1009472.
+OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks and its application to the COVID-19 pandemics in Germany. <em>PLoS computational biology, 17(10)</em>, e1009472.
 
 - Bieringer, S., Butter, A., Heimel, T., Höche, S., Köthe, U., Plehn, T., & Radev, S. T. (2021).
-Measuring QCD splittings with invertible networks. <em>SciPost Physics</em>, 10(6), 126.
+Measuring QCD splittings with invertible networks. <em>SciPost Physics, 10(6)</em>, 126.
 
 - von Krause, M., Radev, S. T., & Voss, A. (2022).
 Mental speed is high until age 60 as revealed by analysis of over a million participants.
-<em>Nature Human Behaviour</em>, 6(5), 700-708.
+<em>Nature Human Behaviour, 6(5)</em>, 700-708.
 
 ## Model Misspecification
 
@@ -174,7 +173,7 @@ The amortizer knows how to combine its losses and you can inspect the summary sp
 
 ### References and Further Reading
 
-- Schmitt, M., Bürkner P. C., Köthe U., & Radev S. T. (2021). Detecting Model
+- Schmitt, M., Bürkner P. C., Köthe U., & Radev S. T. (2022). Detecting Model
 Misspecification in Amortized Bayesian Inference with Neural Networks. <em>ArXiv
 preprint</em>, available for free at: https://arxiv.org/abs/2112.08866
 
@@ -283,9 +282,56 @@ Learning both densities enables us to approximate marginal likelihoods or perfor
 
 ### References and Further Reading
 
-Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P. C. (2023). 
-JANA: Jointly Amortized Neural Approximation of Complex Bayesian Models. <em>arXiv preprint</em>,
-available for free at: https://arxiv.org/abs/2302.09125
+Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P.-C. (2023). 
+JANA: Jointly amortized neural approximation of complex Bayesian models. 
+*Proceedings of the Thirty-Ninth Conference on Uncertainty in Artificial Intelligence, 216*, 1695-1706. 
+([arXiv](https://arxiv.org/abs/2302.09125))([PLMR](https://proceedings.mlr.press/v216/radev23a.html))
 
 ## Support
 This work is supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy -– EXC-2181 - 390900948 (the Heidelberg Cluster of Excellence STRUCTURES) and -- EXC-2075 - 390740016 (the Stuttgart Cluster of Excellence SimTech), the Informatics for Life initiative funded by the Klaus Tschira Foundation, and Google Cloud through the Academic Research Grants program.
+
+## Citing BayesFlow
+
+You can cite BayesFlow along the lines of:
+
+- We approximated the posterior with neural posterior estimation and learned summary statistics (NPE; Radev et al., 2020), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+- We approximated the likelihood with neural likelihood estimation (NLE; Papamakarios et al., 2019), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+- We performed simultaneous posterior and likelihood estimation with jointly amortized neural approximation (JANA; Radev et al., 2023a), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+
+1. Radev, S. T., Schmitt, M., Schumacher, L., Elsemüller, L., Pratz, V., Schälte, Y., Köthe, U., & Bürkner, P.-C. (2023). BayesFlow: Amortized Bayesian workflows with neural networks. *arXiv:2306.16015*. ([arXiv](https://arxiv.org/abs/2306.16015))
+2. Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. *IEEE Transactions on Neural Networks and Learning Systems, 33(4)*, 1452-1466. ([arXiv](https://arxiv.org/abs/2003.06281))([IEEE TNNLS](https://ieeexplore.ieee.org/document/9298920))
+3. Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P.-C. (2023). JANA: Jointly amortized neural approximation of complex Bayesian models. *Proceedings of the Thirty-Ninth Conference on Uncertainty in Artificial Intelligence, 216*, 1695-1706. ([arXiv](https://arxiv.org/abs/2302.09125))([PLMR](https://proceedings.mlr.press/v216/radev23a.html))
+
+**BibTeX:**
+
+```
+@misc{radev2023bayesflow,
+ title = {{BayesFlow}: Amortized Bayesian workflows with neural networks},
+ author = {Stefan T Radev and Marvin Schmitt and Lukas Schumacher and Lasse Elsem\"{u}ller and Valentin Pratz and Yannik Sch\"{a}lte and Ullrich K\"{o}the and Paul-Christian B\"{u}rkner},
+ year = {2023},
+ publisher= {arXiv},
+ url={https://arxiv.org/abs/2306.16015}
+}
+
+@article{radev2020bayesflow,
+  title={{BayesFlow}: Learning complex stochastic models with invertible neural networks},
+  author={Radev, Stefan T. and Mertens, Ulf K. and Voss, Andreas and Ardizzone, Lynton and K{\"o}the, Ullrich},
+  journal={IEEE transactions on neural networks and learning systems},
+  volume={33},
+  number={4},
+  pages={1452--1466},
+  year={2020},
+  publisher={IEEE}
+}
+
+@inproceedings{pmlr-v216-radev23a,
+  title = 	 {{JANA}: Jointly amortized neural approximation of complex {B}ayesian models},
+  author =       {Radev, Stefan T. and Schmitt, Marvin and Pratz, Valentin and Picchini, Umberto and K\"othe, Ullrich and B\"urkner, Paul-Christian},
+  booktitle = 	 {Proceedings of the Thirty-Ninth Conference on Uncertainty in Artificial Intelligence},
+  pages = 	 {1695--1706},
+  year = 	 {2023},
+  volume = 	 {216},
+  series = 	 {Proceedings of Machine Learning Research},
+  publisher =    {PMLR}
+}
+```
