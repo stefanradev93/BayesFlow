@@ -8,12 +8,13 @@ Welcome to our BayesFlow library for efficient simulation-based Bayesian workflo
 For starters, check out some of our walk-through notebooks:
 
 1. [Quickstart amortized posterior estimation](examples/Intro_Amortized_Posterior_Estimation.ipynb)
-2. [Detecting model misspecification in posterior inference](examples/Model_Misspecification.ipynb)
-3. [Principled Bayesian workflow for cognitive models](examples/LCA_Model_Posterior_Estimation.ipynb)
-4. [Posterior estimation for ODEs](examples/Linear_ODE_system.ipynb)
-5. [Posterior estimation for SIR-like models](examples/Covid19_Initial_Posterior_Estimation.ipynb)
-6. [Model comparison for cognitive models](examples/Model_Comparison_MPT.ipynb)
-7. [Hierarchical model comparison for cognitive models](examples/Hierarchical_Model_Comparison_MPT.ipynb)
+2. [Tackling strange bimodal distributions](examples/TwoMoons_Bimodal_Posterior.ipynb)
+3. [Detecting model misspecification in posterior inference](examples/Model_Misspecification.ipynb)
+4. [Principled Bayesian workflow for cognitive models](examples/LCA_Model_Posterior_Estimation.ipynb)
+5. [Posterior estimation for ODEs](examples/Linear_ODE_system.ipynb)
+6. [Posterior estimation for SIR-like models](examples/Covid19_Initial_Posterior_Estimation.ipynb)
+7. [Model comparison for cognitive models](examples/Model_Comparison_MPT.ipynb)
+8. [Hierarchical model comparison for cognitive models](examples/Hierarchical_Model_Comparison_MPT.ipynb)
 
 ## Project Documentation
 
@@ -83,7 +84,7 @@ amortized_posterior = bf.amortizers.AmortizedPosterior(inference_net, summary_ne
 Finally, we connect the networks with the generative model via a `Trainer` instance:
 
 ```python
-trainer = bf.trainers.Trainer(amortizer=amortized_posterior, generative_model=generative_model)
+trainer = bf.trainers.Trainer(amortizer=amortized_posterior, generative_model=generative_model, memory=True)
 ```
 
 We are now ready to train an amortized posterior approximator. For instance,
@@ -282,9 +283,9 @@ Learning both densities enables us to approximate marginal likelihoods or perfor
 
 ### References and Further Reading
 
-Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P.-C. (2023). 
-JANA: Jointly amortized neural approximation of complex Bayesian models. 
-*Proceedings of the Thirty-Ninth Conference on Uncertainty in Artificial Intelligence, 216*, 1695-1706. 
+Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P.-C. (2023).
+JANA: Jointly amortized neural approximation of complex Bayesian models.
+*Proceedings of the Thirty-Ninth Conference on Uncertainty in Artificial Intelligence, 216*, 1695-1706.
 ([arXiv](https://arxiv.org/abs/2302.09125))([PLMR](https://proceedings.mlr.press/v216/radev23a.html))
 
 ## Support
