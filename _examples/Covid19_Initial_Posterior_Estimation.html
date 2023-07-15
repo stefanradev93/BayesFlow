@@ -483,11 +483,11 @@ document.write(`
 <section id="introduction">
 <h2><span class="section-number">5.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
 <p>In this tutorial, we will illustrate how to perform posterior inference on simple, stationary SIR-like models (complex models will be tackled in a further notebook). SIR-like models comprise suitable illustrative examples, since they generate time-series and their outputs represent the results of solving a system of ordinary differential equations (ODEs).</p>
-<p>The details for tackling stochastic epidemiological models are described in our corresponding paper, which you can consult for a more formal exposition and a more comprehensive treatment of neural architectures:</p>
+<p>The details for tackling stochastic epidemiological models with neural networks are described in our corresponding paper, which you can consult for a more formal exposition and a more comprehensive treatment of neural architectures:</p>
 <p><em>OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks and its application to the COVID-19 pandemics in Germany</em> https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">RNG</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">RNG</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2023</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -535,7 +535,7 @@ Finally, we will also treat the number of initially infected individuals, <span 
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">model_prior</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates random draws from the prior.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates a random draw from the joint prior.&quot;&quot;&quot;</span>
 
     <span class="n">lambd</span> <span class="o">=</span> <span class="n">RNG</span><span class="o">.</span><span class="n">lognormal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
     <span class="n">mu</span> <span class="o">=</span> <span class="n">RNG</span><span class="o">.</span><span class="n">lognormal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">8</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
@@ -554,9 +554,9 @@ Finally, we will also treat the number of initially infected individuals, <span 
 </div>
 </div>
 </div>
-<p>During training, we will also standardize the prior draws, that is, ensure zero means and unit scale. We will do this purely for technical reasons - neural networks like scaled values. In addition, our current prior ranges differ vastly, so each parameter will contribute disproportionately to the loss function.</p>
+<p>During training, we will also standardize the prior draws, that is, ensure zero location and unit scale. We will do this purely for technical reasons - neural networks like scaled values. In addition, our current prior ranges differ vastly, so each parameter axis may contribute disproportionately to the loss function.</p>
 <p>Here, we will use the <code class="docutils literal notranslate"><span class="pre">estimate_means_and_stds()</span></code> method of a <code class="docutils literal notranslate"><span class="pre">Prior</span></code> instance, which will estimate the prior means and standard deviations from random draws. We could have also just taken the analytic means and standard deviations, but these may not be available in all settings (e.g., implicit priors).</p>
-<p><strong>Caution:</strong> Make sure you have a seed or you set a seed whenever you are doing a Monte-Carlo estimation, since your results might differ slightly due to the empirical variation of the estimates!</p>
+<p><strong>Caution:</strong> Make sure you have a seed or you set a seed whenever you are doing Monte Carlo estimation, since your results might differ slightly due to the empirical variation of the estimates!</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prior_means</span><span class="p">,</span> <span class="n">prior_stds</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">estimate_means_and_stds</span><span class="p">()</span>
@@ -574,7 +574,7 @@ Finally, we will also treat the number of initially infected individuals, <span 
 
 <span class="k">def</span> <span class="nf">convert_params</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">phi</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper function to convert mean/dispersion parameterization of a negative binomial to N and p,</span>
-<span class="sd">    as expected by numpy.</span>
+<span class="sd">    as expected by numpy&#39;s negative_binomial.</span>
 
 <span class="sd">    See https://en.wikipedia.org/wiki/Negative_binomial_distribution#Alternative_formulations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -586,7 +586,7 @@ Finally, we will also treat the number of initially infected individuals, <span 
 
 
 <span class="k">def</span> <span class="nf">stationary_SIR</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs a forward simulation from the stationary SIR model given a random draw from the prior,&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs a forward simulation from the stationary SIR model given a random draw from the prior.&quot;&quot;&quot;</span>
 
     <span class="c1"># Extract parameters and round I0 and D</span>
     <span class="n">lambd</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">I0</span><span class="p">,</span> <span class="n">psi</span> <span class="o">=</span> <span class="n">params</span>
