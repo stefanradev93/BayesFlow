@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>3. Principled Amortized Bayesian Workflow for Cognitive Modeling &#8212; BayesFlow: Amortized Bayesian Inference</title>
+    <title>7. Principled Amortized Bayesian Workflow for Cognitive Modeling &#8212; BayesFlow: Amortized Bayesian Inference</title>
   
   
   
@@ -55,8 +55,8 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="4. Posterior Estimation for ODEs" href="Linear_ODE_system.html" />
-    <link rel="prev" title="2. Detecting Model Misspecification in Amortized Posterior Inference" href="Model_Misspecification.html" />
+    <link rel="next" title="8. Posterior Estimation for ODEs" href="Linear_ODE_system.html" />
+    <link rel="prev" title="6. Detecting Model Misspecification in Amortized Posterior Inference" href="Model_Misspecification.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -143,12 +143,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">BayesFlow</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Model_Misspecification.html">2. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">3. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Linear_ODE_system.html">4. Posterior Estimation for ODEs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Covid19_Initial_Posterior_Estimation.html">5. Posterior Estimation for SIR-like Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Model_Comparison_MPT.html">6. Model Comparison for Cognitive Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Hierarchical_Model_Comparison_MPT.html">7. Hierarchical Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TwoMoons_Bimodal_Posterior.html">2. Two Moons: Tackling Bimodal Posteriors</a></li>
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="Model_Misspecification.html">6. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">7. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Linear_ODE_system.html">8. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Covid19_Initial_Posterior_Estimation.html">9. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Model_Comparison_MPT.html">10. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Hierarchical_Model_Comparison_MPT.html">11. Hierarchical Model Comparison for Cognitive Models</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/bayesflow.html">Public API: bayesflow package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -406,36 +410,36 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">3.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">3.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-simulator">3.2.1. Creating a Simulator</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-prior-distributions">3.2.2. Defining Prior Distributions</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#context">3.2.3. Context</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulator">3.2.4. Simulator</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">7.1. Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">7.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-simulator">7.2.1. Creating a Simulator</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-prior-distributions">7.2.2. Defining Prior Distributions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#context">7.2.3. Context</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulator">7.2.4. Simulator</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-push-forward-check">3.3. Prior Push Forward Check</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-neural-approximator">3.4. Defining the Neural Approximator</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">3.4.1. Summary Network</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">3.4.2. Inference Network</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#amortized-posterior">3.4.3. Amortized Posterior</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-push-forward-check">7.3. Prior Push Forward Check</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-neural-approximator">7.4. Defining the Neural Approximator</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">7.4.1. Summary Network</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">7.4.2. Inference Network</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#amortized-posterior">7.4.3. Amortized Posterior</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-configurator">3.5. Defining the Configurator</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-trainer">3.6. Defining the Trainer</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-phase">3.7. Training Phase</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-loss">3.7.1. Inspecting the Loss</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-latent-space">3.7.2. Inspecting the Latent Space</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-configurator">7.5. Defining the Configurator</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-trainer">7.6. Defining the Trainer</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-phase">7.7. Training Phase</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-loss">7.7.1. Inspecting the Loss</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-latent-space">7.7.2. Inspecting the Latent Space</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">3.8. Prior Predictive Checks</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">3.9. Simulation-Based Calibration</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rank-histograms">3.9.1. Rank Histograms</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rank-ecdf">3.9.2. Rank ECDF</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">7.8. Prior Predictive Checks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">7.9. Simulation-Based Calibration</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rank-histograms">7.9.1. Rank Histograms</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rank-ecdf">7.9.2. Rank ECDF</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inferential-adequacy">3.10. Inferential Adequacy</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-phase">3.11. Inference Phase</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inferential-adequacy">7.10. Inferential Adequacy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-phase">7.11. Inference Phase</a></li>
 </ul>
             </nav>
         </div>
@@ -448,7 +452,7 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="principled-amortized-bayesian-workflow-for-cognitive-modeling">
-<h1><span class="section-number">3. </span>Principled Amortized Bayesian Workflow for Cognitive Modeling<a class="headerlink" href="#principled-amortized-bayesian-workflow-for-cognitive-modeling" title="Permalink to this heading">#</a></h1>
+<h1><span class="section-number">7. </span>Principled Amortized Bayesian Workflow for Cognitive Modeling<a class="headerlink" href="#principled-amortized-bayesian-workflow-for-cognitive-modeling" title="Permalink to this heading">#</a></h1>
 <p>by Lukas Schumacher</p>
 <h1>Table of Contents<span class="tocSkip"></span></h1>
 <div class="toc"><ul class="toc-item"><li><span><a href="#Generative-Model-Definition" data-toc-modified-id="Generative-Model-Definition-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>Generative Model Definition</a></span><ul class="toc-item"><li><span><a href="#Creating-a-Simulator" data-toc-modified-id="Creating-a-Simulator-1.1"><span class="toc-item-num">1.1&nbsp;&nbsp;</span>Creating a Simulator</a></span></li><li><span><a href="#Defining-Prior-Distributions" data-toc-modified-id="Defining-Prior-Distributions-1.2"><span class="toc-item-num">1.2&nbsp;&nbsp;</span>Defining Prior Distributions</a></span></li><li><span><a href="#Context" data-toc-modified-id="Context-1.3"><span class="toc-item-num">1.3&nbsp;&nbsp;</span>Context</a></span></li><li><span><a href="#Simulator" data-toc-modified-id="Simulator-1.4"><span class="toc-item-num">1.4&nbsp;&nbsp;</span>Simulator</a></span></li></ul></li><li><span><a href="#Prior-Push-Forward-Check" data-toc-modified-id="Prior-Push-Forward-Check-2"><span class="toc-item-num">2&nbsp;&nbsp;</span>Prior Push Forward Check</a></span></li><li><span><a href="#Defining-the-Neural-Approximator" data-toc-modified-id="Defining-the-Neural-Approximator-3"><span class="toc-item-num">3&nbsp;&nbsp;</span>Defining the Neural Approximator</a></span><ul class="toc-item"><li><span><a href="#Summary-Network" data-toc-modified-id="Summary-Network-3.1"><span class="toc-item-num">3.1&nbsp;&nbsp;</span>Summary Network</a></span></li><li><span><a href="#Inference-Network" data-toc-modified-id="Inference-Network-3.2"><span class="toc-item-num">3.2&nbsp;&nbsp;</span>Inference Network</a></span></li><li><span><a href="#Amortized-Posterior" data-toc-modified-id="Amortized-Posterior-3.3"><span class="toc-item-num">3.3&nbsp;&nbsp;</span>Amortized Posterior</a></span></li></ul></li><li><span><a href="#Defining-the-Configurator" data-toc-modified-id="Defining-the-Configurator-4"><span class="toc-item-num">4&nbsp;&nbsp;</span>Defining the Configurator</a></span></li><li><span><a href="#Defining-the-Trainer" data-toc-modified-id="Defining-the-Trainer-5"><span class="toc-item-num">5&nbsp;&nbsp;</span>Defining the Trainer</a></span></li><li><span><a href="#Training-Phase" data-toc-modified-id="Training-Phase-6"><span class="toc-item-num">6&nbsp;&nbsp;</span>Training Phase</a></span><ul class="toc-item"><li><span><a href="#Inspecting-the-Loss" data-toc-modified-id="Inspecting-the-Loss-6.1"><span class="toc-item-num">6.1&nbsp;&nbsp;</span>Inspecting the Loss</a></span></li><li><span><a href="#Inspecting-the-Latent-Space" data-toc-modified-id="Inspecting-the-Latent-Space-6.2"><span class="toc-item-num">6.2&nbsp;&nbsp;</span>Inspecting the Latent Space</a></span></li></ul></li><li><span><a href="#Prior-Predictive-Checks" data-toc-modified-id="Prior-Predictive-Checks-7"><span class="toc-item-num">7&nbsp;&nbsp;</span>Prior Predictive Checks</a></span></li><li><span><a href="#Simulation-Based-Calibration" data-toc-modified-id="Simulation-Based-Calibration-8"><span class="toc-item-num">8&nbsp;&nbsp;</span>Simulation-Based Calibration</a></span><ul class="toc-item"><li><span><a href="#Rank-Histograms" data-toc-modified-id="Rank-Histograms-8.1"><span class="toc-item-num">8.1&nbsp;&nbsp;</span>Rank Histograms</a></span></li><li><span><a href="#Rank-ECDF" data-toc-modified-id="Rank-ECDF-8.2"><span class="toc-item-num">8.2&nbsp;&nbsp;</span>Rank ECDF</a></span></li></ul></li><li><span><a href="#Inferential-Adequacy" data-toc-modified-id="Inferential-Adequacy-9"><span class="toc-item-num">9&nbsp;&nbsp;</span>Inferential Adequacy</a></span></li><li><span><a href="#Inference-Phase" data-toc-modified-id="Inference-Phase-10"><span class="toc-item-num">10&nbsp;&nbsp;</span>Inference Phase</a></span></li></ul></div><div class="cell docutils container">
@@ -482,7 +486,7 @@ document.write(`
 </div>
 </div>
 <section id="introduction">
-<h2><span class="section-number">3.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
 <p>Psychological research often relies on mathematical models to explain and predict human behavior.
 Such models aim to formalize cognitive processes by mapping latent psychological constructs to model parameters and specifying how these generate manifest data. In this tutorial, we go through the steps of a principled <a class="reference external" href="https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html">Bayesian workflow</a> that is imperative when developing and applying cognitive models.
 This workflow includes the following steps:</p>
@@ -495,7 +499,7 @@ This workflow includes the following steps:</p>
 <p>To demonstrate how such a workflow is performed with BayesFlow, we will use an exemplar model from the evidence accumulaton model family.</p>
 </section>
 <section id="generative-model-definition">
-<h2><span class="section-number">3.2. </span>Generative Model Definition<a class="headerlink" href="#generative-model-definition" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.2. </span>Generative Model Definition<a class="headerlink" href="#generative-model-definition" title="Permalink to this heading">#</a></h2>
 <p>Evidence accumulation models (EAM) are among the most commonly used cognitive models in psychological research. These decision models account for both choice and response time data by assuming that agents accumulate evidence for decision alternatives until a threshold is reached. This process is typically formalized as a random walk with drift. The standard EAM has four core parameters, each corresponding to a specific latent cognitive construct: i) the drift rate <span class="math notranslate nohighlight">\(v\)</span> represents mental processing speed; ii) the threshold <span class="math notranslate nohighlight">\(a\)</span> reflects decision caution; iii) the starting point <span class="math notranslate nohighlight">\(\beta\)</span> determines decisional biases, and iv) the non-decision time <span class="math notranslate nohighlight">\(\tau\)</span> accounts for decision-unrelated processes such as motor actions and perceptual encoding.</p>
 <p>There are many model variations within the EAM class. Througout this tutorial, we will focus on the leaky competing accumulator (LCA) model proposed by <a class="reference external" href="https://psycnet.apa.org/record/2001-07628-003">Usher and McClelland (2001)</a>. The likelihood function of this model is not known in closed form. This makes it a perfect candidate for <tt>BayesFlow</tt>, as it can handle any model that can be implemented as a randomized data simulator.</p>
 <p>The LCA assumes a competition between seperate accumulators <span class="math notranslate nohighlight">\(A\)</span>, each corresponding to an decision alternative <span class="math notranslate nohighlight">\(j\)</span>. The accumulator <span class="math notranslate nohighlight">\(A_j\)</span> that first hits its threshold wins and the corresponding decision will be made. Evidence accumulation for a certain decision alternative follows a Wiener process with two additional features: i) evidence leakage or decay <span class="math notranslate nohighlight">\(\lambda\)</span> that accounts for information loss over time within each accumulator, and ii) lateral inhibition <span class="math notranslate nohighlight">\(\kappa\)</span>, which represents accumulator activation damping from the other accumulators. The activiation of a single accumulator <span class="math notranslate nohighlight">\(x_j\)</span> is thus updated as follow:</p>
@@ -516,7 +520,7 @@ x_j &amp;=\mathrm{max}(x_j, 0)
 <li><p>Inhibition <span class="math notranslate nohighlight">\(\kappa\)</span></p></li>
 </ul>
 <section id="creating-a-simulator">
-<h3><span class="section-number">3.2.1. </span>Creating a Simulator<a class="headerlink" href="#creating-a-simulator" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.2.1. </span>Creating a Simulator<a class="headerlink" href="#creating-a-simulator" title="Permalink to this heading">#</a></h3>
 <p>Now, let us specify the LCA as a randomized data simulator. For this function we use the <code class="docutils literal notranslate"><span class="pre">&#64;njit</span></code> decorator from the <a class="reference external" href="https://numba.pydata.org/">Numba</a> module to speed up computing time.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -564,7 +568,7 @@ x_j &amp;=\mathrm{max}(x_j, 0)
 </div>
 </section>
 <section id="defining-prior-distributions">
-<h3><span class="section-number">3.2.2. </span>Defining Prior Distributions<a class="headerlink" href="#defining-prior-distributions" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.2.2. </span>Defining Prior Distributions<a class="headerlink" href="#defining-prior-distributions" title="Permalink to this heading">#</a></h3>
 <p>Next, we specify prior distributions for the LCA parameters. We want to bound all the parameters to possible values. We also want that most of the mass of the prior distributions lies on plausible values we know from domain expertice. All LCA parameters should be positive values. The leak and decay parameter are further bounded to <span class="math notranslate nohighlight">\(1\)</span>. Thus, we use Gamma distributions for the drift rates, threshold, and non-decision time. For the leak and decay parameter we use Beta distributions.</p>
 <p>Further down we will create an experimental context for a hypothetical decision making task between three alternatives and two conditions. Let us imagine that the experimental manipulation is expected to affect only the drift rates. Thus, we need three drift rates (one for each alternative) for each condition, resulting in a total of six separate drift rates.</p>
 <div class="cell docutils container">
@@ -638,7 +642,7 @@ x_j &amp;=\mathrm{max}(x_j, 0)
 </div>
 </section>
 <section id="context">
-<h3><span class="section-number">3.2.3. </span>Context<a class="headerlink" href="#context" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.2.3. </span>Context<a class="headerlink" href="#context" title="Permalink to this heading">#</a></h3>
 <p>A generative model, in addition to prior and simulator, also incorporates various contextual factors that affect the data generation process. These contextual assumptions are often specific to the field of study and can include elements such as experimental conditions, number of observations, and subject-specific factors.</p>
 <p><code class="docutils literal notranslate"><span class="pre">BayesFlow</span></code> distinguishes between two types of context variables: <code class="docutils literal notranslate"><span class="pre">batchable_context</span></code> and <code class="docutils literal notranslate"><span class="pre">non_batchable_context</span></code>. This distinction is purely technical, rather then conceptual:</p>
 <ul class="simple">
@@ -748,7 +752,7 @@ Examples for <strong>non-batchable</strong> context variables include the number
 <p>As you can see, the randomly sampled number of observation is constant within a batch of 2 simulated experimental contexts but the order of the experimental conditions is different between the contexts.</p>
 </section>
 <section id="simulator">
-<h3><span class="section-number">3.2.4. </span>Simulator<a class="headerlink" href="#simulator" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.2.4. </span>Simulator<a class="headerlink" href="#simulator" title="Permalink to this heading">#</a></h3>
 <p>Next, we create a function that repeatetly calls the <code class="docutils literal notranslate"><span class="pre">lca_trial</span></code> function to simulate the performance of a single subject in a whole experiment given a set of parameter values and context variables. Again, we use the <code class="docutils literal notranslate"><span class="pre">&#64;njit</span></code> decorator to improve the speed of the core data simulation function, which will be heavily used during training.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -816,7 +820,7 @@ INFO:root:Could not determine shape of simulation batchable context. Type appear
 </section>
 </section>
 <section id="prior-push-forward-check">
-<h2><span class="section-number">3.3. </span>Prior Push Forward Check<a class="headerlink" href="#prior-push-forward-check" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.3. </span>Prior Push Forward Check<a class="headerlink" href="#prior-push-forward-check" title="Permalink to this heading">#</a></h2>
 <p>Now, that we have specified a fully-flegded cognitive model we want to check whether the generative model with its (prior) assumptions produces sensible data that could be oberseved in the real world. To this end, we just simulate some data sets and inspect the joint response time distribution.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -840,9 +844,9 @@ INFO:root:Could not determine shape of simulation batchable context. Type appear
 <p>The next step in our workflow is to conduct prior predictive checks. This involves fitting our LCA model to simulated data and then using the obtained parameters to predict these data through resimulation. Before we can proceed with this step, we first need to train our neural networks.</p>
 </section>
 <section id="defining-the-neural-approximator">
-<h2><span class="section-number">3.4. </span>Defining the Neural Approximator<a class="headerlink" href="#defining-the-neural-approximator" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.4. </span>Defining the Neural Approximator<a class="headerlink" href="#defining-the-neural-approximator" title="Permalink to this heading">#</a></h2>
 <section id="summary-network">
-<h3><span class="section-number">3.4.1. </span>Summary Network<a class="headerlink" href="#summary-network" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.4.1. </span>Summary Network<a class="headerlink" href="#summary-network" title="Permalink to this heading">#</a></h3>
 <p>Although we simulate randomly interleaved experimental manipulation, we are not really interested in any sequential effects during the hypothetical decision task. Therefore, we can treat our data as exchangeable and use an <code class="docutils literal notranslate"><span class="pre">InvariantNetwork</span></code> for the summary network. This invariant neural network respects the permutation invariance of the data. It takes (at least) 3D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">n_obs,</span> <span class="pre">data_dim)</span></code> and reduce them to 2D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">summary_dim)</span></code>, where <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code> is a hyperparameter to be set by us. Heuristically, this number should not be lower than the number of parameters in a model. Below, we create an invariant network with <code class="docutils literal notranslate"><span class="pre">summary_dim</span> <span class="pre">=</span> <span class="pre">32</span></code>:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -853,7 +857,7 @@ INFO:root:Could not determine shape of simulation batchable context. Type appear
 </div>
 </section>
 <section id="inference-network">
-<h3><span class="section-number">3.4.2. </span>Inference Network<a class="headerlink" href="#inference-network" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.4.2. </span>Inference Network<a class="headerlink" href="#inference-network" title="Permalink to this heading">#</a></h3>
 <p>The conditional invertible neural network (cINN) is the key component of our amortized posterior inference framework. The only required hyperparameter for the cINN is the number of parameters to be estimated. However, other hyperparameters, such as the number of coupling layers, can also be adjusted. In our example, we set <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">5</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -864,7 +868,7 @@ INFO:root:Could not determine shape of simulation batchable context. Type appear
 </div>
 </section>
 <section id="amortized-posterior">
-<h3><span class="section-number">3.4.3. </span>Amortized Posterior<a class="headerlink" href="#amortized-posterior" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.4.3. </span>Amortized Posterior<a class="headerlink" href="#amortized-posterior" title="Permalink to this heading">#</a></h3>
 <p>We can now connect the summary and inference networks via the <code class="docutils literal notranslate"><span class="pre">AmortizedPosterior</span></code> wrapper:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -876,7 +880,7 @@ INFO:root:Could not determine shape of simulation batchable context. Type appear
 </section>
 </section>
 <section id="defining-the-configurator">
-<h2><span class="section-number">3.5. </span>Defining the Configurator<a class="headerlink" href="#defining-the-configurator" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.5. </span>Defining the Configurator<a class="headerlink" href="#defining-the-configurator" title="Permalink to this heading">#</a></h2>
 <p>A configurator acts as an intermediary between a generative model and an amortizer. Here we should do mainly two things:</p>
 <ol class="arabic simple">
 <li><p>Bring the output of the generative model (simulated data, context, prior draws) into a suitable format for processing with neural networks.</p></li>
@@ -922,7 +926,7 @@ INFO:root:Could not determine shape of simulation batchable context. Type appear
 </div>
 </section>
 <section id="defining-the-trainer">
-<h2><span class="section-number">3.6. </span>Defining the Trainer<a class="headerlink" href="#defining-the-trainer" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.6. </span>Defining the Trainer<a class="headerlink" href="#defining-the-trainer" title="Permalink to this heading">#</a></h2>
 <p>Now it is time to define the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance. We simply pass the generatvie model, the amortizer, and our configurator. Usually we want to define a <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code>, so the neural approximator will be saved automatically to this path. Otherwise, neural approximators must be manually saved using, for instance, TensorFlow’s <code class="docutils literal notranslate"><span class="pre">amortizer.save_weights()</span></code> method.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -972,7 +976,7 @@ _________________________________________________________________
 </div>
 </section>
 <section id="training-phase">
-<h2><span class="section-number">3.7. </span>Training Phase<a class="headerlink" href="#training-phase" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.7. </span>Training Phase<a class="headerlink" href="#training-phase" title="Permalink to this heading">#</a></h2>
 <p>With the help of <code class="docutils literal notranslate"><span class="pre">numba</span></code> our simulator is relatively fast. Thus, we can safely go with online training. Let’s glean the time taken for a batch of <span class="math notranslate nohighlight">\(32\)</span> simulations:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -997,7 +1001,7 @@ Wall time: 1.03 s
 </div>
 </div>
 <section id="inspecting-the-loss">
-<h3><span class="section-number">3.7.1. </span>Inspecting the Loss<a class="headerlink" href="#inspecting-the-loss" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.7.1. </span>Inspecting the Loss<a class="headerlink" href="#inspecting-the-loss" title="Permalink to this heading">#</a></h3>
 <p>Following our online simulation-based training, we can quickly visualize the loss trajectory using the <code class="docutils literal notranslate"><span class="pre">plot_losses</span></code> function from the <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code> module.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1012,7 +1016,7 @@ Wall time: 1.03 s
 <p>At some point the loss stopped decreasing which indicates that there is not much to learn from further simulation and we can continue with some diagnostics.</p>
 </section>
 <section id="inspecting-the-latent-space">
-<h3><span class="section-number">3.7.2. </span>Inspecting the Latent Space<a class="headerlink" href="#inspecting-the-latent-space" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.7.2. </span>Inspecting the Latent Space<a class="headerlink" href="#inspecting-the-latent-space" title="Permalink to this heading">#</a></h3>
 <p>A quick and useful diagnostic is to check whether the marginal latent distribution <span class="math notranslate nohighlight">\(p(\boldsymbol{z})\)</span> has the prescribed probabilistic structure. Since, by default, we optimize the amortizer with the Kullback-Leibler (KL) loss (also known as maximum likelihood training, which is not to be confused with maximum likelihood estimation!), we expect to observe approximately Gaussian latent space with independent axes. Moreover, since the trainer also keeps an internal <code class="docutils literal notranslate"><span class="pre">SimulationMemory</span></code> instance, we can also directly call it’s <code class="docutils literal notranslate"><span class="pre">diagnose_latent2d</span></code> method (also available in the <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code> module):</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1027,7 +1031,7 @@ Wall time: 1.03 s
 </section>
 </section>
 <section id="prior-predictive-checks">
-<h2><span class="section-number">3.8. </span>Prior Predictive Checks<a class="headerlink" href="#prior-predictive-checks" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.8. </span>Prior Predictive Checks<a class="headerlink" href="#prior-predictive-checks" title="Permalink to this heading">#</a></h2>
 <p>Alright, let us continue with prior predictive checks. To this end, we do the following steps:</p>
 <ol class="arabic simple">
 <li><p>Simulate data with our generative model.</p></li>
@@ -1115,11 +1119,11 @@ Wall time: 1.03 s
 Hence, let us continue with further validation.</p>
 </section>
 <section id="simulation-based-calibration">
-<h2><span class="section-number">3.9. </span>Simulation-Based Calibration<a class="headerlink" href="#simulation-based-calibration" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.9. </span>Simulation-Based Calibration<a class="headerlink" href="#simulation-based-calibration" title="Permalink to this heading">#</a></h2>
 <p>As a further small world (i.e. before seeing real data) check, we have to test the computational faithfulness of our amortizer. We do this with simulation-based calibration (SBC; for more details see, <a class="reference external" href="https://arxiv.org/abs/1804.06788">Talts et al. 2018</a>; <a class="reference external" href="https://arxiv.org/abs/2103.10522">Säilynoja et al. 2021</a>).</p>
 <p>Again, <code class="docutils literal notranslate"><span class="pre">BayesFlow</span></code> has us covered with some great functions to compute and visualize the calibration.</p>
 <section id="rank-histograms">
-<h3><span class="section-number">3.9.1. </span>Rank Histograms<a class="headerlink" href="#rank-histograms" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.9.1. </span>Rank Histograms<a class="headerlink" href="#rank-histograms" title="Permalink to this heading">#</a></h3>
 <p>If we are able to obtain unbiased posterior distributions, we should observe approximately uniform rank statistic histograms</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1133,7 +1137,7 @@ Hence, let us continue with further validation.</p>
 </div>
 </section>
 <section id="rank-ecdf">
-<h3><span class="section-number">3.9.2. </span>Rank ECDF<a class="headerlink" href="#rank-ecdf" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.9.2. </span>Rank ECDF<a class="headerlink" href="#rank-ecdf" title="Permalink to this heading">#</a></h3>
 <p>For models with many parameters, inspecting many histograms can become unwieldly. Moreover, the <code class="docutils literal notranslate"><span class="pre">num_bins</span></code> hyperparameter for the construction of SBC rank histograms can be hard to choose. An alternative diagnostic approach for calibration is through empirical cumulative distribution functions (ECDF) of rank statistics.</p>
 <p>For SBC I always opt for at least a 10:1 ratio between number of simulations and number of posterior samples</p>
 <div class="cell docutils container">
@@ -1163,7 +1167,7 @@ Hence, let us continue with further validation.</p>
 </section>
 </section>
 <section id="inferential-adequacy">
-<h2><span class="section-number">3.10. </span>Inferential Adequacy<a class="headerlink" href="#inferential-adequacy" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.10. </span>Inferential Adequacy<a class="headerlink" href="#inferential-adequacy" title="Permalink to this heading">#</a></h2>
 <p>Being able to recover the true data generating parameters is very important in cognitive modeling. If we a parameter cannot be recovered with reasonable precision then we are not allowed to make any psychological interpretation based on the estimate of this parameter. Further, we can consider to remove this parameter from the model.</p>
 <p>We can test this <em>in silico</em> via the <code class="docutils literal notranslate"><span class="pre">plot_recovery</span></code> function in the <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code> module. For instance, we can compare how well posterior means recover the true parameter. Below, we re-use the <span class="math notranslate nohighlight">\(1000\)</span> simulations we generated for computing the rank ECDFs, but obtain a larger number of posterior draws per data set for more stable results:</p>
 <div class="cell docutils container">
@@ -1186,7 +1190,7 @@ Hence, let us continue with further validation.</p>
 <p>All parameters but the decay parameter <span class="math notranslate nohighlight">\(\lambda\)</span> and the inhibition parameter <span class="math notranslate nohighlight">\(\kappa\)</span> can be recovered with reasonable precision. This is not a suprising result as studies have shown that <span class="math notranslate nohighlight">\(\lambda\)</span> and <span class="math notranslate nohighlight">\(\kappa\)</span> are notoriously hard to recover.</p>
 </section>
 <section id="inference-phase">
-<h2><span class="section-number">3.11. </span>Inference Phase<a class="headerlink" href="#inference-phase" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.11. </span>Inference Phase<a class="headerlink" href="#inference-phase" title="Permalink to this heading">#</a></h2>
 <p>The next step would usually be to fit the model to real empirical data and check whether the model accurately predicts the data at hand. To this end, we perform posterior retrodiction checks. As I do not have empirical data for a 3 three alternative decision-making task I will cover this step on a conceptual level.</p>
 <ol class="arabic simple">
 <li><p>Read the data</p></li>
@@ -1216,7 +1220,7 @@ Hence, let us continue with further validation.</p>
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><span class="section-number">2. </span>Detecting Model Misspecification in Amortized Posterior Inference</p>
+        <p class="prev-next-title"><span class="section-number">6. </span>Detecting Model Misspecification in Amortized Posterior Inference</p>
       </div>
     </a>
     <a class="right-next"
@@ -1224,7 +1228,7 @@ Hence, let us continue with further validation.</p>
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">4. </span>Posterior Estimation for ODEs</p>
+        <p class="prev-next-title"><span class="section-number">8. </span>Posterior Estimation for ODEs</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1246,36 +1250,36 @@ Hence, let us continue with further validation.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">3.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">3.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-simulator">3.2.1. Creating a Simulator</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-prior-distributions">3.2.2. Defining Prior Distributions</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#context">3.2.3. Context</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulator">3.2.4. Simulator</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">7.1. Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">7.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-simulator">7.2.1. Creating a Simulator</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-prior-distributions">7.2.2. Defining Prior Distributions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#context">7.2.3. Context</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulator">7.2.4. Simulator</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-push-forward-check">3.3. Prior Push Forward Check</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-neural-approximator">3.4. Defining the Neural Approximator</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">3.4.1. Summary Network</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">3.4.2. Inference Network</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#amortized-posterior">3.4.3. Amortized Posterior</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-push-forward-check">7.3. Prior Push Forward Check</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-neural-approximator">7.4. Defining the Neural Approximator</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">7.4.1. Summary Network</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">7.4.2. Inference Network</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#amortized-posterior">7.4.3. Amortized Posterior</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-configurator">3.5. Defining the Configurator</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-trainer">3.6. Defining the Trainer</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-phase">3.7. Training Phase</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-loss">3.7.1. Inspecting the Loss</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-latent-space">3.7.2. Inspecting the Latent Space</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-configurator">7.5. Defining the Configurator</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-trainer">7.6. Defining the Trainer</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-phase">7.7. Training Phase</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-loss">7.7.1. Inspecting the Loss</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-latent-space">7.7.2. Inspecting the Latent Space</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">3.8. Prior Predictive Checks</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">3.9. Simulation-Based Calibration</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rank-histograms">3.9.1. Rank Histograms</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rank-ecdf">3.9.2. Rank ECDF</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">7.8. Prior Predictive Checks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">7.9. Simulation-Based Calibration</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rank-histograms">7.9.1. Rank Histograms</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rank-ecdf">7.9.2. Rank ECDF</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inferential-adequacy">3.10. Inferential Adequacy</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-phase">3.11. Inference Phase</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inferential-adequacy">7.10. Inferential Adequacy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-phase">7.11. Inference Phase</a></li>
 </ul>
   </nav></div>
 
