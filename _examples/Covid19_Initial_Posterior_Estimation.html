@@ -792,10 +792,10 @@ INFO:root:No optional simulation batchable context provided.
 <section id="defining-the-trainer">
 <h2><span class="section-number">5.6. </span>Defining the Trainer<a class="headerlink" href="#defining-the-trainer" title="Permalink to this heading">#</a></h2>
 <p>Finally, we are in a position to define our <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance. Notice that we also pass out custom <code class="docutils literal notranslate"><span class="pre">configurator</span></code> function to the constructer. The default configurator won’t do in this case!</p>
-<p>Note, that you should supply a <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code> for the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance, if you don’t want to save the neural approximators manually!</p>
+<p>Note, that you should supply a <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code> for the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance, if you don’t want to save the neural approximators manually! Note also, that we are using <code class="docutils literal notranslate"><span class="pre">memory=True</span></code> so that the trainer keeps some simulations encountered during training. After training, we can quickly perform some diagnostics on these “remembered” simulations to judge the convergence quality.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">amortizer</span><span class="o">=</span><span class="n">amortizer</span><span class="p">,</span> <span class="n">generative_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">configurator</span><span class="o">=</span><span class="n">configure_input</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">amortizer</span><span class="o">=</span><span class="n">amortizer</span><span class="p">,</span> <span class="n">generative_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">configurator</span><span class="o">=</span><span class="n">configure_input</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -859,94 +859,11 @@ Wall time: 33.9 ms
 </div>
 </div>
 </div>
+<p>Depending on your machine, offline training for <span class="math notranslate nohighlight">\(25\)</span> epochs should take between <span class="math notranslate nohighlight">\(1\)</span> and <span class="math notranslate nohighlight">\(7\)</span> minutes.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
-<span class="n">h</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="n">offline_data</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">validation_sims</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Generated 200 simulations for validation.
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "31e8754c6c8d4bd5879e69f34b2c2094", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 1, Loss: 5.041
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e99b37db27bc4149a1407fa758315985", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 2, Loss: 4.562
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "66e73cdc2d9f448ea3dc1534392ea93f", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 3, Loss: 3.519
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "470b4b1dd62246fbb2213b284ba20d62", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 4, Loss: 3.218
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "48ea3aba2b22400e97b3b3e90ecf82f3", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 5, Loss: 3.767
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6905297dd97245288db58e61f1e8283a", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 6, Loss: 3.367
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d69987d571ea46a088c06d2945a86a61", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 7, Loss: 3.128
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "eef6498b69dc46218ec867283bde9d9c", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 8, Loss: 3.171
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b3d78c0ede764ba78abbff9260413cfb", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 9, Loss: 3.143
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ec66f7e9919a4cb691c1abe904a20b60", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 10, Loss: 3.084
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6f1ed78c71464a95a29a8f9b6de63c7e", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 11, Loss: 2.872
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "2f9ebd03feeb4cf28b76291ec7b138bd", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 12, Loss: 2.952
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3f2473ae720d4dc2ade3cb4d21703dfb", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 13, Loss: 2.856
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "18f02c810246467a96dad56faa9e80b8", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 14, Loss: 2.892
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "5d96442039ef47e6844c76f63074a69f", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 15, Loss: 2.584
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "819e9c563ea74d4799e844479ec9e55f", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 16, Loss: 2.632
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0cd86f3511f6448aadbf43f10c3c74dd", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 17, Loss: 2.506
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a263bd4cb3284cb19d48ad2c66b96c36", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 18, Loss: 2.445
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "13c4c533170741429d591e37099a5091", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 19, Loss: 2.377
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "2390a22c7fe746ad9997d1f0006dc068", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 20, Loss: 2.356
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0d687671bad64277ae60250b7190a607", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 21, Loss: 2.328
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6ab19461143e43fea43810a93aaa58d6", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 22, Loss: 2.333
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "31e1c6d9a69b47e1a265de26e9a588dd", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 23, Loss: 2.293
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "054aea0663b849cfb2b9c9137bc1fd18", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 24, Loss: 2.291
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "67444e915850471d9da5b93d3cf077c1", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 25, Loss: 2.286
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: total: 8min 1s
-Wall time: 6min 41s
+<span class="n">history</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="n">offline_data</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">validation_sims</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -956,7 +873,7 @@ Wall time: 6min 41s
 <p>Following our online simulation-based training, we can quickly visualize the loss trajectory using the <code class="docutils literal notranslate"><span class="pre">plot_losses</span></code> function from the <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code> module.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">diag</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="s2">&quot;train_losses&quot;</span><span class="p">],</span> <span class="n">h</span><span class="p">[</span><span class="s2">&quot;val_losses&quot;</span><span class="p">])</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">diag</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;train_losses&quot;</span><span class="p">],</span> <span class="n">history</span><span class="p">[</span><span class="s2">&quot;val_losses&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
