@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>11. Hierarchical Model Comparison for Cognitive Models &#8212; BayesFlow: Amortized Bayesian Inference</title>
+    <title>8. Hierarchical Model Comparison for Cognitive Models &#8212; BayesFlow: Amortized Bayesian Inference</title>
   
   
   
@@ -56,7 +56,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Public API: bayesflow package" href="../api/bayesflow.html" />
-    <link rel="prev" title="10. Model Comparison for Cognitive Models" href="Model_Comparison_MPT.html" />
+    <link rel="prev" title="7. Model Comparison for Cognitive Models" href="Model_Comparison_MPT.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -144,15 +144,12 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TwoMoons_Bimodal_Posterior.html">2. Two Moons: Tackling Bimodal Posteriors</a></li>
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="Model_Misspecification.html">6. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="LCA_Model_Posterior_Estimation.html">7. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Linear_ODE_system.html">8. Posterior Estimation for ODEs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Covid19_Initial_Posterior_Estimation.html">9. Posterior Estimation for SIR-like Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Model_Comparison_MPT.html">10. Model Comparison for Cognitive Models</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">11. Hierarchical Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Model_Misspecification.html">3. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LCA_Model_Posterior_Estimation.html">4. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Linear_ODE_system.html">5. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Covid19_Initial_Posterior_Estimation.html">6. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Model_Comparison_MPT.html">7. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">8. Hierarchical Model Comparison for Cognitive Models</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/bayesflow.html">Public API: bayesflow package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -410,15 +407,15 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">11.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">11.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperpriors-and-priors">11.2.1. Hyperpriors and Priors</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-the-simulators">11.2.2. Creating the Simulators</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">11.2.3. Prior Predictive Checks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">8.1. Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">8.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperpriors-and-priors">8.2.1. Hyperpriors and Priors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-the-simulators">8.2.2. Creating the Simulators</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">8.2.3. Prior Predictive Checks</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-training-validating-the-neural-approximator">11.3. Defining, Training &amp; Validating the Neural Approximator</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">11.4. Network Application</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-training-validating-the-neural-approximator">8.3. Defining, Training &amp; Validating the Neural Approximator</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">8.4. Network Application</a></li>
 </ul>
             </nav>
         </div>
@@ -431,7 +428,7 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="hierarchical-model-comparison-for-cognitive-models">
-<h1><span class="section-number">11. </span>Hierarchical Model Comparison for Cognitive Models<a class="headerlink" href="#hierarchical-model-comparison-for-cognitive-models" title="Permalink to this heading">#</a></h1>
+<h1><span class="section-number">8. </span>Hierarchical Model Comparison for Cognitive Models<a class="headerlink" href="#hierarchical-model-comparison-for-cognitive-models" title="Permalink to this heading">#</a></h1>
 <p>Part 2: Hierarchical Model Comparison</p>
 <p>by Lasse Elsemüller</p>
 <h1>Table of Contents<span class="tocSkip"></span></h1>
@@ -464,12 +461,12 @@ document.write(`
 </div>
 </div>
 <section id="introduction">
-<h2><span class="section-number">11.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">8.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
 <p>This is the second part of the tutorial series covering amortized model comparison with BayesFlow! The general workflow, the scenario and the cognitive models were introduced in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a> and are assumed to be known, so here we will focus on the new elements introduced when comparing hierarchical models.</p>
 <p>In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we only conducted model comparison for a single participant at a time. Let us now consider all participants and their nested observations simultaneously in our model comparison!</p>
 </section>
 <section id="generative-model-definition">
-<h2><span class="section-number">11.2. </span>Generative Model Definition<a class="headerlink" href="#generative-model-definition" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">8.2. </span>Generative Model Definition<a class="headerlink" href="#generative-model-definition" title="Permalink to this heading">#</a></h2>
 <p>To extend our MPT models to hierarchical ones, we need to introduce a superordinate level that encodes our assumptions about the relationships between individuals. We use the most popular hierarchical MPT framework, the latent-trait approach by <a class="reference external" href="https://link.springer.com/article/10.1007/s11336-009-9141-0">Klauer (2010)</a>. Here, we replace our non-hierarchical Beta priors by a multivariate normal distribution, which allows us to model correlations between our parameters. We afterwards use the cumulative distribution function of the standard normal distribution, <span class="math notranslate nohighlight">\(\Phi\)</span>, to transform from the real-line to probabilities. Let’s write out our new model components explicitly with <span class="math notranslate nohighlight">\(m \in M\)</span> denoting the participants:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
@@ -483,7 +480,7 @@ g_m &amp;= \Phi(g_m') \text{ for } m=1,\dots,M\\
 \end{align}
 \end{split}\]</div>
 <section id="hyperpriors-and-priors">
-<h3><span class="section-number">11.2.1. </span>Hyperpriors and Priors<a class="headerlink" href="#hyperpriors-and-priors" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">8.2.1. </span>Hyperpriors and Priors<a class="headerlink" href="#hyperpriors-and-priors" title="Permalink to this heading">#</a></h3>
 <p>We now have to define hyperpriors for the parameters of the multivariate normal prior distribution. For the covariance matrix <span class="math notranslate nohighlight">\(\Sigma\)</span>, the latent-trait approach employs a scaled inverse Wishart distribution. The <span class="math notranslate nohighlight">\(Q\)</span> parameter controls the correlation between our parameters <span class="math notranslate nohighlight">\(d\)</span> and <span class="math notranslate nohighlight">\(g\)</span>, while the variances are determined jointly with the scaling parameters <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
@@ -562,7 +559,7 @@ Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
 </div>
 </section>
 <section id="creating-the-simulators">
-<h3><span class="section-number">11.2.2. </span>Creating the Simulators<a class="headerlink" href="#creating-the-simulators" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">8.2.2. </span>Creating the Simulators<a class="headerlink" href="#creating-the-simulators" title="Permalink to this heading">#</a></h3>
 <p>At this point, it is important to stress again our new definition of a data set: In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we analyzed participants separately, so each data set contained a single participant. With hierarchical models, we can now take all of our experimental data simultaneously into consideration, so each data set contains several participants with nested observations each. We could also have other hierarchical models, such as students nested into classes or employees nested into organizations, so we refer to the higher order units with the general term <em>groups</em>. For this tutorial, we consider a scenario with 50 participants performing 100 trials each.</p>
 <p>We continue our known workflow by first specifying simulator functions, then creating our generative models with the <code class="docutils literal notranslate"><span class="pre">GenerativeModel</span></code> wrapper and finally combining them with the <code class="docutils literal notranslate"><span class="pre">MultiGenerativeModel</span></code> wrapper.</p>
 <div class="cell docutils container">
@@ -713,7 +710,7 @@ First 3 rows of first 2 participants in first data set:
 </div>
 </section>
 <section id="prior-predictive-checks">
-<h3><span class="section-number">11.2.3. </span>Prior Predictive Checks<a class="headerlink" href="#prior-predictive-checks" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">8.2.3. </span>Prior Predictive Checks<a class="headerlink" href="#prior-predictive-checks" title="Permalink to this heading">#</a></h3>
 <p>The interplay between parameters on several levels adds more complexity to the behavior of hierarchical models. Therefore, prior predictive or pushfoward checks become even more crucial for inspecting whether the chosen parametrization matches one’s expectations. Our simulated data sets now contain <code class="docutils literal notranslate"><span class="pre">NUM_GROUPS</span></code> participants and <code class="docutils literal notranslate"><span class="pre">NUM_OBS</span></code> observations each. If we want to simulate 1000 participants as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we now need only 20 simulations from a model, as each data set contains 50 participants. Afterwards, we calculate the hit rates and false alarm rates for each simulated participant as before and plot them.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -810,7 +807,7 @@ First 3 rows of first 2 participants in first data set:
 </section>
 </section>
 <section id="defining-training-validating-the-neural-approximator">
-<h2><span class="section-number">11.3. </span>Defining, Training &amp; Validating the Neural Approximator<a class="headerlink" href="#defining-training-validating-the-neural-approximator" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">8.3. </span>Defining, Training &amp; Validating the Neural Approximator<a class="headerlink" href="#defining-training-validating-the-neural-approximator" title="Permalink to this heading">#</a></h2>
 <p>We adapt the neural network architecture to this new symmetry by changing only a single part, the summary network. We now use a <code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork</span></code> which we pass one summary network for each level. The majority of hierarchical models in cognitive modeling assume IID data on all levels, so we simply use one <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> network for each level. If would have, for instance, temporal dependencies within each participant, we would exchange the first network to one that is specialized on time series data, such as a <code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer</span></code>.</p>
 <p>After this adjustment, all subsequent elements of the training and validation process stay the same as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>.</p>
 <div class="cell docutils container">
@@ -892,7 +889,7 @@ INFO:root:Done.
 <p>Our neural network quickly learned to discriminate between the two hierarchical models and shows excellent performance when validated on simulated data. The calibration curves look a bit shaky, but the marginal bin histograms tell us that this is due to the majority of the predicted probabilities being close to 0 or 1, leaving the middle (‘uncertain’) bins quite abandonded.</p>
 </section>
 <section id="network-application">
-<h2><span class="section-number">11.4. </span>Network Application<a class="headerlink" href="#network-application" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">8.4. </span>Network Application<a class="headerlink" href="#network-application" title="Permalink to this heading">#</a></h2>
 <p>As in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we apply our trained model to a synthetic data set from the 2HT model. We again redefine our simulator with fixed random seeds for reproducible results:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -986,7 +983,7 @@ INFO:root:Done.
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><span class="section-number">10. </span>Model Comparison for Cognitive Models</p>
+        <p class="prev-next-title"><span class="section-number">7. </span>Model Comparison for Cognitive Models</p>
       </div>
     </a>
     <a class="right-next"
@@ -1016,15 +1013,15 @@ INFO:root:Done.
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">11.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">11.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperpriors-and-priors">11.2.1. Hyperpriors and Priors</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-the-simulators">11.2.2. Creating the Simulators</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">11.2.3. Prior Predictive Checks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">8.1. Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">8.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperpriors-and-priors">8.2.1. Hyperpriors and Priors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-the-simulators">8.2.2. Creating the Simulators</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">8.2.3. Prior Predictive Checks</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-training-validating-the-neural-approximator">11.3. Defining, Training &amp; Validating the Neural Approximator</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">11.4. Network Application</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-training-validating-the-neural-approximator">8.3. Defining, Training &amp; Validating the Neural Approximator</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">8.4. Network Application</a></li>
 </ul>
   </nav></div>
 

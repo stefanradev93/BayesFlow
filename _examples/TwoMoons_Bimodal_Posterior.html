@@ -55,7 +55,7 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="6. Detecting Model Misspecification in Amortized Posterior Inference" href="Model_Misspecification.html" />
+    <link rel="next" title="3. Detecting Model Misspecification in Amortized Posterior Inference" href="Model_Misspecification.html" />
     <link rel="prev" title="1. Quickstart: Amortized Posterior Estimation" href="Intro_Amortized_Posterior_Estimation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -144,15 +144,12 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Intro_Amortized_Posterior_Estimation.html">1. Quickstart: Amortized Posterior Estimation</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">2. Two Moons: Tackling Bimodal Posteriors</a></li>
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="Model_Misspecification.html">6. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="LCA_Model_Posterior_Estimation.html">7. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Linear_ODE_system.html">8. Posterior Estimation for ODEs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Covid19_Initial_Posterior_Estimation.html">9. Posterior Estimation for SIR-like Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Model_Comparison_MPT.html">10. Model Comparison for Cognitive Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Hierarchical_Model_Comparison_MPT.html">11. Hierarchical Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Model_Misspecification.html">3. Detecting Model Misspecification in Amortized Posterior Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LCA_Model_Posterior_Estimation.html">4. Principled Amortized Bayesian Workflow for Cognitive Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Linear_ODE_system.html">5. Posterior Estimation for ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Covid19_Initial_Posterior_Estimation.html">6. Posterior Estimation for SIR-like Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Model_Comparison_MPT.html">7. Model Comparison for Cognitive Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Hierarchical_Model_Comparison_MPT.html">8. Hierarchical Model Comparison for Cognitive Models</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/bayesflow.html">Public API: bayesflow package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -410,17 +407,15 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">2. Two Moons: Tackling Bimodal Posteriors</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network-and-amortizer">3. Inference Network and Amortizer</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">4. Trainer</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#validation">5. Validation</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#global-calibration">5.1. Global Calibration</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#two-moons-posterior">5.2. Two Moons Posterior</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#further-experimentation">5.3. Further Experimentation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network-and-amortizer">2.1. Inference Network and Amortizer</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">2.2. Trainer</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validation">2.3. Validation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#global-calibration">2.3.1. Global Calibration</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two-moons-posterior">2.3.2. Two Moons Posterior</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#further-experimentation">2.4. Further Experimentation</a></li>
 </ul>
-
             </nav>
         </div>
     </div>
@@ -450,8 +445,8 @@ document.write(`
 <p>This example will demonstrate amortized estimation of a somewhat strange Bayesian model, whose posterior evaluated at the origin <span class="math notranslate nohighlight">\(x = (0, 0)\)</span> of the “data” will resemble two crescent moons. The forward process is a noisy non-linear transformation on a 2D plane:
 <br><br>
 $$</p>
-<div class="amsmath math notranslate nohighlight" id="equation-a89eb947-ef30-476a-b78f-ced802db70bd">
-<span class="eqno">(1)<a class="headerlink" href="#equation-a89eb947-ef30-476a-b78f-ced802db70bd" title="Permalink to this equation">#</a></span>\[\begin{align}
+<div class="amsmath math notranslate nohighlight" id="equation-fcae0bdd-2cbe-48dd-b0ef-53fa8a2656de">
+<span class="eqno">(1)<a class="headerlink" href="#equation-fcae0bdd-2cbe-48dd-b0ef-53fa8a2656de" title="Permalink to this equation">#</a></span>\[\begin{align}
 x_1 &amp;= -|\theta_1 + \theta_2|/\sqrt{2} + r \cos(\alpha) + 0.25\\
 x_2 &amp;= (-\theta_1 + \theta_2)/\sqrt{2} + r\sin{\alpha}
 \end{align}\]</div>
@@ -461,8 +456,8 @@ x_2 &amp;= (-\theta_1 + \theta_2)/\sqrt{2} + r\sin{\alpha}
 with $x = (x_1, x_2)$ playing the role of &quot;observables&quot;, $\alpha \sim \text{Uniform}(-\pi/2, \pi/2)$, $r \sim \text{Normal}(0.1, 0.01)$, and a prior over the 2D parameter vector $\theta = (\theta_1, \theta_2)$:
 &lt;br&gt;&lt;br&gt;
 \]</div>
-<div class="amsmath math notranslate nohighlight" id="equation-dcf4023f-736a-4bb5-be52-8738a2cecd99">
-<span class="eqno">(2)<a class="headerlink" href="#equation-dcf4023f-736a-4bb5-be52-8738a2cecd99" title="Permalink to this equation">#</a></span>\[\begin{align}
+<div class="amsmath math notranslate nohighlight" id="equation-6cb0bd5e-d102-45a8-ab80-f5b6a51b22fe">
+<span class="eqno">(2)<a class="headerlink" href="#equation-6cb0bd5e-d102-45a8-ab80-f5b6a51b22fe" title="Permalink to this equation">#</a></span>\[\begin{align}
 \theta_1, \theta_2 \sim \text{Uniform}(-1, 1)
 \end{align}\]</div>
 <p>$$</p>
@@ -486,9 +481,8 @@ INFO:root:No optional simulation batchable context provided.
 </div>
 </div>
 </div>
-</section>
-<section class="tex2jax_ignore mathjax_ignore" id="inference-network-and-amortizer">
-<h1><span class="section-number">3. </span>Inference Network and Amortizer<a class="headerlink" href="#inference-network-and-amortizer" title="Permalink to this heading">#</a></h1>
+<section id="inference-network-and-amortizer">
+<h2><span class="section-number">2.1. </span>Inference Network and Amortizer<a class="headerlink" href="#inference-network-and-amortizer" title="Permalink to this heading">#</a></h2>
 <p>We will use a neural spline flow (https://arxiv.org/abs/1906.04032) for modeling the posterior, as these are specialized for locally weird posteriors. By default, some weight regularization and dropout will be applied during training. These can be modified through the <code class="docutils literal notranslate"><span class="pre">coupling_settings</span></code> keyword of the <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -502,8 +496,8 @@ INFO:root:No optional simulation batchable context provided.
 </div>
 </div>
 </section>
-<section class="tex2jax_ignore mathjax_ignore" id="trainer">
-<h1><span class="section-number">4. </span>Trainer<a class="headerlink" href="#trainer" title="Permalink to this heading">#</a></h1>
+<section id="trainer">
+<h2><span class="section-number">2.2. </span>Trainer<a class="headerlink" href="#trainer" title="Permalink to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">benchmark</span></code> object already contains the two moons generative model to simulate pairs of <span class="math notranslate nohighlight">\((\theta, x)\)</span> and the configurator to arrange them into the corresponding dictionary data structure expected by the <code class="docutils literal notranslate"><span class="pre">amortizer</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -536,105 +530,6 @@ INFO:root:Done.
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Generated 200 simulations for validation.
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b8ca23973fa8482faf9e734a7c075ce4", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 1, Loss: -1.523
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "4ffef2aa3daa43a3b435733c21016065", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 2, Loss: -2.010
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ffa9182065ab4fc699fe34e37d40c307", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 3, Loss: -2.028
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "da5b67779abf4a74833350a11d3646aa", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 4, Loss: -2.266
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "7e4874a5b6594070ac3c524bd5778141", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 5, Loss: -2.384
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a234e53a39c94d839b4a83bb38998c19", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 6, Loss: -2.593
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ef5c9d9ab2254403a25e888264d763fb", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 7, Loss: -2.748
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "829593e4bd794dfb9c2f67f086116ae1", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 8, Loss: -2.649
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d4c48608c7a14bf7b8ccd340eb6e60ef", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 9, Loss: -2.746
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "8b5e2194d9044824be9e7474a7a46846", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 10, Loss: -2.812
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "5fa25ced43704e10b47a9894f18c914c", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 11, Loss: -2.966
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e16596efb7c2409ebf6851409e90669c", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 12, Loss: -3.003
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6294dbac916a4cd0a8fe3d661bda367b", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 13, Loss: -2.776
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e37f30313768462d966cf3c75cfbcdbc", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 14, Loss: -3.087
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e7c96d876b5745b2bcc49ead3e5e694a", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 15, Loss: -3.103
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e22e1ea8b2ba4140a2891fed31b32ab0", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 16, Loss: -3.148
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ccbaf5cb2fe54369b4192fd4a3f2a981", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 17, Loss: -3.062
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "40b6096b08c54ba181ccb4aed17a34b8", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 18, Loss: -3.155
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "243e6325fdd54afe8d85fc3f48b50a28", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 19, Loss: -3.202
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e4bce96b8c8b4f42ad8436e18530e636", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 20, Loss: -3.193
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "673bde9d5e664b18b3a5b469f2f36ebb", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 21, Loss: -3.210
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3bc911d45a164a08bb6fb6b35a4430f2", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 22, Loss: -3.307
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e8dc21f823854b07baeb81773202127b", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 23, Loss: -3.318
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "82245e35596d4865bd8f4f9f81b47276", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 24, Loss: -3.271
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "1ad45f931b3f4d7887911e68b5277f6b", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 25, Loss: -3.327
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "76eb21b008b04335a65e375351c8c506", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 26, Loss: -3.337
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e106e409f8d345458d960ac09a354a1e", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 27, Loss: -3.345
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "08b2d8d7aa194a26bac239c58ff6210b", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 28, Loss: -3.372
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "73deee8ab77b46d3aadeb7766f7bb6fb", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 29, Loss: -3.373
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d061bc85e60d4324a3d0ba422af26179", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 30, Loss: -3.378
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: total: 31min 42s
-Wall time: 17min 21s
-</pre></div>
-</div>
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -647,8 +542,8 @@ Wall time: 17min 21s
 </div>
 </div>
 </section>
-<section class="tex2jax_ignore mathjax_ignore" id="validation">
-<h1><span class="section-number">5. </span>Validation<a class="headerlink" href="#validation" title="Permalink to this heading">#</a></h1>
+<section id="validation">
+<h2><span class="section-number">2.3. </span>Validation<a class="headerlink" href="#validation" title="Permalink to this heading">#</a></h2>
 <p>We can use simulation-based calibration(SBC) for free (due to amortization) checking of computational faithfulness.</p>
 <ol class="arabic simple">
 <li><p>Talts, S., Betancourt, M., Simpson, D., Vehtari, A., &amp; Gelman, A. (2018). Validating Bayesian inference algorithms with simulation-based calibration. arXiv preprint arXiv:1804.06788.</p></li>
@@ -670,7 +565,7 @@ Wall time: 814 ms
 </div>
 </div>
 <section id="global-calibration">
-<h2><span class="section-number">5.1. </span>Global Calibration<a class="headerlink" href="#global-calibration" title="Permalink to this heading">#</a></h2>
+<h3><span class="section-number">2.3.1. </span>Global Calibration<a class="headerlink" href="#global-calibration" title="Permalink to this heading">#</a></h3>
 <p>For a good calibration, the ECDF trajectories should remain within the simultanoeus confidence bands.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -684,7 +579,7 @@ Wall time: 814 ms
 </div>
 </section>
 <section id="two-moons-posterior">
-<h2><span class="section-number">5.2. </span>Two Moons Posterior<a class="headerlink" href="#two-moons-posterior" title="Permalink to this heading">#</a></h2>
+<h3><span class="section-number">2.3.2. </span>Two Moons Posterior<a class="headerlink" href="#two-moons-posterior" title="Permalink to this heading">#</a></h3>
 <p>The two moons posterior at point <span class="math notranslate nohighlight">\(x = (0, 0)\)</span> should resemble two crescent shapes. Below, we plot the corresponding posterior samples and posterior density.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -723,8 +618,9 @@ Wall time: 814 ms
 </div>
 </div>
 </section>
+</section>
 <section id="further-experimentation">
-<h2><span class="section-number">5.3. </span>Further Experimentation<a class="headerlink" href="#further-experimentation" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">2.4. </span>Further Experimentation<a class="headerlink" href="#further-experimentation" title="Permalink to this heading">#</a></h2>
 <p>Feel free to explore the following settings:</p>
 <ol class="arabic simple">
 <li><p>Change the <code class="docutils literal notranslate"><span class="pre">coupling_design</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code> to either <code class="docutils literal notranslate"><span class="pre">affine</span></code> or <code class="docutils literal notranslate"><span class="pre">interleaved</span></code>. What do you observe?</p></li>
@@ -761,7 +657,7 @@ Wall time: 814 ms
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">6. </span>Detecting Model Misspecification in Amortized Posterior Inference</p>
+        <p class="prev-next-title"><span class="section-number">3. </span>Detecting Model Misspecification in Amortized Posterior Inference</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -783,17 +679,15 @@ Wall time: 814 ms
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">2. Two Moons: Tackling Bimodal Posteriors</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network-and-amortizer">3. Inference Network and Amortizer</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">4. Trainer</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#validation">5. Validation</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#global-calibration">5.1. Global Calibration</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#two-moons-posterior">5.2. Two Moons Posterior</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#further-experimentation">5.3. Further Experimentation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network-and-amortizer">2.1. Inference Network and Amortizer</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">2.2. Trainer</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validation">2.3. Validation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#global-calibration">2.3.1. Global Calibration</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two-moons-posterior">2.3.2. Two Moons Posterior</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#further-experimentation">2.4. Further Experimentation</a></li>
 </ul>
-
   </nav></div>
 
 </div></div>
