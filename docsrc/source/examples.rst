@@ -11,6 +11,7 @@ The corresponding Jupyter Notebooks are available :mainbranch:`here <examples/>`
    :numbered:
 
    _examples/Intro_Amortized_Posterior_Estimation.ipynb
+   _examples/TwoMoons_Bimodal_Posterior.ipynb
    _examples/Model_Misspecification.ipynb
    _examples/LCA_Model_Posterior_Estimation.ipynb
    _examples/Linear_ODE_system.ipynb
