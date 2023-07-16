@@ -892,7 +892,8 @@ document.write(`
 <span class="sd">        that are aligned with the probabilistic structure of the processed data.</span>
 
 <span class="sd">        Note: The networks will start processing from the lowest hierarchical level (e.g., observational level)</span>
-<span class="sd">        up to the highest hierarchical level.</span>
+<span class="sd">        up to the highest hierarchical level. It is recommended to provide higher-level networks with more</span>
+<span class="sd">        expressive power to allow for an adequate compression of lower-level data.</span>
 
 <span class="sd">        Example: For two-level hierarchical models with the assumption of temporal dependencies on the lowest</span>
 <span class="sd">        hierarchical level (e.g., observational level) and exchangeable units at the higher level</span>
@@ -916,7 +917,7 @@ document.write(`
 <span class="sd">        ----------</span>
 <span class="sd">        data       : tf.Tensor of shape (batch_size, ..., data_dim)</span>
 <span class="sd">            Example, hierarchical data sets with two levels:</span>
-<span class="sd">            (batch_size, D, L, x_dim) -&gt; reduces to</span>
+<span class="sd">            (batch_size, D, L, x_dim) -&gt; reduces to (batch_size, out_dim).</span>
 <span class="sd">        return_all : boolean, optional, default: False</span>
 <span class="sd">            Whether to return all intermediate outputs (True) or just</span>
 <span class="sd">            the final one (False).</span>
@@ -924,7 +925,8 @@ document.write(`
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        out : tf.Tensor</span>
-<span class="sd">            Output of shape ``(batch_size, out_dim) if return_all=False`` else</span>
+<span class="sd">            Output of shape ``(batch_size, out_dim) if return_all=False`` else a tuple</span>
+<span class="sd">            of ``len(outputs) == len(networks)`` corresponding to all outputs of all networks.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">return_all</span><span class="p">:</span>

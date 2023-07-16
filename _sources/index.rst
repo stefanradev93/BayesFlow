@@ -48,13 +48,13 @@ Citation
 
 You can cite BayesFlow along the lines of:
 
-   - We estimated the approximate posterior distribution with neural posterior estimation and learned summary statistics (NPE; Radev et al., 2020) via the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
-   - We trained a neural likelihood estimator (NLE; Papamakarios et al., 2019) via the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
-   - We sampled from the approximate joint distribution :math:`p(x, \theta)` using jointly amortized neural approximation (JANA; Radev et al., 2023a), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+   - We approximated the posterior with neural posterior estimation and learned summary statistics (NPE; Radev et al., 2020), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+   - We approximated the likelihood with neural likelihood estimation (NLE; Papamakarios et al., 2019) without hand-cafted summary statistics, as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+   - We performed simultaneous posterior and likelihood estimation with jointly amortized neural approximation (JANA; Radev et al., 2023a), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
 
-1. Radev, S. T., Schmitt, M., Schumacher, L., Elsemüller, L., Pratz, V., Schälte, Y., Köthe, U., & Bürkner, P.-C. (2023). BayesFlow: Amortized Bayesian Workflows With Neural Networks. *arXiv:2306.16015*. (`arXiv paper <https://arxiv.org/abs/2306.16015>`__)
-2. Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P.-C. (2023). JANA: Jointly Amortized Neural Approximation of Complex Bayesian Models. *39th conference on Uncertainty in Artificial Intelligence*. (`UAI Proceedings <https://openreview.net/forum?id=dS3wVICQrU0>`__)
-
+1. Radev, S. T., Schmitt, M., Schumacher, L., Elsemüller, L., Pratz, V., Schälte, Y., Köthe, U., & Bürkner, P.-C. (2023). BayesFlow: Amortized Bayesian workflows with neural networks. *arXiv:2306.16015*. (`arXiv paper <https://arxiv.org/abs/2306.16015>`__)
+2. Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. *IEEE Transactions on Neural Networks and Learning Systems, 33(4)*, 1452-1466. (`IEEE TNNLS <https://ieeexplore.ieee.org/document/9298920>`__)
+3. Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P.-C. (2023). JANA: Jointly amortized neural approximation of complex Bayesian models. *Proceedings of the Thirty-Ninth Conference on Uncertainty in Artificial Intelligence, 216*, 1695-1706. (`PMLR <https://proceedings.mlr.press/v216/radev23a.html>`__)
 
 ::
 

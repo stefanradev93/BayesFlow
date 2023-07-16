@@ -495,7 +495,7 @@ transforming the nested input into learned summary statistics.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>data</strong><span class="classifier">tf.Tensor of shape (batch_size, …, data_dim)</span></dt><dd><p>Example, hierarchical data sets with two levels:
-(batch_size, D, L, x_dim) -&gt; reduces to</p>
+(batch_size, D, L, x_dim) -&gt; reduces to (batch_size, out_dim).</p>
 </dd>
 <dt><strong>return_all</strong><span class="classifier">boolean, optional, default: False</span></dt><dd><p>Whether to return all intermediate outputs (True) or just
 the final one (False).</p>
@@ -504,7 +504,8 @@ the final one (False).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>out</strong><span class="classifier">tf.Tensor</span></dt><dd><p>Output of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">out_dim)</span> <span class="pre">if</span> <span class="pre">return_all=False</span></code> else</p>
+<dt><strong>out</strong><span class="classifier">tf.Tensor</span></dt><dd><p>Output of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">out_dim)</span> <span class="pre">if</span> <span class="pre">return_all=False</span></code> else a tuple
+of <code class="docutils literal notranslate"><span class="pre">len(outputs)</span> <span class="pre">==</span> <span class="pre">len(networks)</span></code> corresponding to all outputs of all networks.</p>
 </dd>
 </dl>
 </dd>

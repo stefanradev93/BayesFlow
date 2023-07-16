@@ -47,8 +47,6 @@
     <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/design-tabs.js"></script>
-    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <link rel="canonical" href="https://www.bayesflow.org/index.html" />
     <link rel="shortcut icon" href="_static/bayesflow_hex.ico"/>
@@ -464,14 +462,15 @@ You can find detailed installation instructions for developers <a class="referen
 <p>You can cite BayesFlow along the lines of:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>We estimated the approximate posterior distribution with neural posterior estimation and learned summary statistics (NPE; Radev et al., 2020) via the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).</p></li>
-<li><p>We trained a neural likelihood estimator (NLE; Papamakarios et al., 2019) via the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).</p></li>
-<li><p>We sampled from the approximate joint distribution <span class="math notranslate nohighlight">\(p(x, \theta)\)</span> using jointly amortized neural approximation (JANA; Radev et al., 2023a), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).</p></li>
+<li><p>We approximated the posterior with neural posterior estimation and learned summary statistics (NPE; Radev et al., 2020), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).</p></li>
+<li><p>We approximated the likelihood with neural likelihood estimation (NLE; Papamakarios et al., 2019) without hand-cafted summary statistics, as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).</p></li>
+<li><p>We performed simultaneous posterior and likelihood estimation with jointly amortized neural approximation (JANA; Radev et al., 2023a), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).</p></li>
 </ul>
 </div></blockquote>
 <ol class="arabic simple">
-<li><p>Radev, S. T., Schmitt, M., Schumacher, L., Elsemüller, L., Pratz, V., Schälte, Y., Köthe, U., &amp; Bürkner, P.-C. (2023). BayesFlow: Amortized Bayesian Workflows With Neural Networks. <em>arXiv:2306.16015</em>. (<a class="reference external" href="https://arxiv.org/abs/2306.16015">arXiv paper</a>)</p></li>
-<li><p>Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., &amp; Bürkner, P.-C. (2023). JANA: Jointly Amortized Neural Approximation of Complex Bayesian Models. <em>39th conference on Uncertainty in Artificial Intelligence</em>. (<a class="reference external" href="https://openreview.net/forum?id=dS3wVICQrU0">UAI Proceedings</a>)</p></li>
+<li><p>Radev, S. T., Schmitt, M., Schumacher, L., Elsemüller, L., Pratz, V., Schälte, Y., Köthe, U., &amp; Bürkner, P.-C. (2023). BayesFlow: Amortized Bayesian workflows with neural networks. <em>arXiv:2306.16015</em>. (<a class="reference external" href="https://arxiv.org/abs/2306.16015">arXiv paper</a>)</p></li>
+<li><p>Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. <em>IEEE Transactions on Neural Networks and Learning Systems, 33(4)</em>, 1452-1466. (<a class="reference external" href="https://ieeexplore.ieee.org/document/9298920">IEEE TNNLS</a>)</p></li>
+<li><p>Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., &amp; Bürkner, P.-C. (2023). JANA: Jointly amortized neural approximation of complex Bayesian models. <em>Proceedings of the Thirty-Ninth Conference on Uncertainty in Artificial Intelligence, 216</em>, 1695-1706. (<a class="reference external" href="https://proceedings.mlr.press/v216/radev23a.html">PMLR</a>)</p></li>
 </ol>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>@misc{radev2023bayesflow,
   title = {BayesFlow: Amortized Bayesian Workflows With Neural Networks},
