@@ -473,7 +473,7 @@ document.write(`
 </ul>
 <p>The nuts and bolts of using BayesFlow for Bayesian parameter estimation have already been described in the corresponding papers:</p>
 <ul class="simple">
-<li><p>Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. <em>IEEE Transactions on Neural Networks and Learning Systems, 33(4)</em>, 1452-1466. (<a class="reference external" href="https://arxiv.org/abs/2003.06281">arXiv</a>)(<a class="reference external" href="https://ieeexplore.ieee.org/document/9298920">IEEE TNNLS</a>)</p></li>
+<li><p>Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., Köthe, U. (2020). BayesFlow: Learning complex stochastic models with invertible neural networks. <em>IEEE Transactions on Neural Networks and Learning Systems, 33(4)</em>, 1452-1466.</p></li>
 <li><p>Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., &amp; Köthe, U. (2021).
 OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks and its application to the COVID-19 pandemics in Germany. <em>PLoS computational biology, 17(10)</em>, e1009472.</p></li>
 <li><p>Schmitt, M., Bürkner, P. C., Köthe, U., &amp; Radev, S. T. (2021). Detecting model misspecification in amortized Bayesian inference with neural networks. <em>arXiv preprint arXiv:2112.08866</em>.</p></li>
@@ -507,8 +507,8 @@ For instance, in one recent paper (https://www.nature.com/articles/s41562-021-01
  \boldsymbol{x}_n &amp;\sim \mathcal{N}_D(\boldsymbol{\mu}, \sigma_1\mathbb{I})\quad\textrm{ for } n = 1,..,N,
 \end{align}
 \end{split}\]</div>
-<br>
-where $\mathcal{N}_D$ denotes a multivariate Gaussian (normal) density with $D$ dimensions, which we set at $D = 4$ for the current example. For simplicity, we will also set $\sigma_0 =1$ and $\sigma_1 = 1$. We will now implement this model using the latest numpy interface. <section id="prior">
+<p>where <span class="math notranslate nohighlight">\(\mathcal{N}_D\)</span> denotes a multivariate Gaussian (normal) density with <span class="math notranslate nohighlight">\(D\)</span> dimensions, which we set at <span class="math notranslate nohighlight">\(D = 4\)</span> for the current example. For simplicity, we will also set <span class="math notranslate nohighlight">\(\sigma_0 =1\)</span> and <span class="math notranslate nohighlight">\(\sigma_1 = 1\)</span>. We will now implement this model using the latest numpy interface.</p>
+<section id="prior">
 <h3><span class="section-number">1.2.1. </span>Prior<a class="headerlink" href="#prior" title="Permalink to this heading">#</a></h3>
 <p>We first define a function generating single draws from the prior (as specified by our model formulation above), which we pass to the <code class="docutils literal notranslate"><span class="pre">Prior</span></code> wrapper.</p>
 <div class="cell docutils container">

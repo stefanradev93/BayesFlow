@@ -558,7 +558,7 @@ x_j &amp;=\mathrm{max}(x_j, 0)
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.717 1.0
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.849 1.0
 </pre></div>
 </div>
 </div>
@@ -624,8 +624,8 @@ x_j &amp;=\mathrm{max}(x_j, 0)
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;prior_draws&#39;: array([[1.38287256, 1.65047471, 1.51242407, 1.20827913, 1.00632301,
-         0.68320687, 1.50323225, 0.2419318 , 0.04809326, 0.05860063]]),
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;prior_draws&#39;: array([[2.14202107, 0.37964542, 0.71023643, 1.18597077, 0.81592505,
+         1.44358328, 1.68055805, 0.33196847, 0.29361842, 0.17988274]]),
  &#39;batchable_context&#39;: None,
  &#39;non_batchable_context&#39;: None}
 </pre></div>
@@ -654,6 +654,7 @@ x_j &amp;=\mathrm{max}(x_j, 0)
 Examples for <strong>non-batchable</strong> context variables include the number of observations in an experiment, positional encodings, time indices, etc. While the latter can also be considered batchable in principle, batching them would require non-Tensor (i.e., non-rectangular) data structures, which usually means inefficient computations.</p>
 <p>For this tutorial, I want to define one <strong>non-batchable</strong> and one <strong>batchable</strong> context variable that affect the simulator, but not the prior function. Let us imagine a hypothetical three-alternative decision-making task. In this task, two different stimuli are shown. We assume that this experimental manipulation affects the rate of evidence accumulation of the three accumulators. To simulate this experimental manipulation, we can define a function that creates randomly interleaved condition indicators for an experiment with let’s say <span class="math notranslate nohighlight">\(500\)</span> trials. This condition variable is <strong>batchable</strong>, because it will vary for each simulation in a given batch.</p>
 <p>In practice, it’s common to encounter missing trials in psychological research due to various reasons such as a participant’s attentional lapses or experimental errors. Therefore, it’s also important to train our networks with a varying number of observations. This approach will make sure that the model can also be fit to data sets with missing data. Let us create a function that randomly samples a number of observations between <span class="math notranslate nohighlight">\(200\)</span> and <span class="math notranslate nohighlight">\(300\)</span>. This condition variable is not batchable, because if we have different number of observations within a batch, then we don’t get a rectangular multi-dimensional array of <code class="docutils literal notranslate"><span class="pre">size=(batch_size,</span> <span class="pre">n_obs,</span> <span class="pre">data_dim)</span></code>.</p>
+<p><strong>Important:</strong> Since the posterior will also depend on all context variables, these need to be passed to the inference network through a <code class="docutils literal notranslate"><span class="pre">configurator</span></code> function (described below).</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">MIN_OBS</span> <span class="o">=</span> <span class="mi">200</span>
@@ -793,30 +794,38 @@ INFO:root:Could not determine shape of simulation batchable context. Type appear
 <p>Now that we have specified a fully-flegded cognitive model, we want to check whether the generative model with its (prior) assumptions produces sensible data that could be oberseved in the real world. To this end, we just simulate some data sets and inspect the joint response time distribution.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">example_sim</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">][:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;maroon&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
-<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axarr</span><span class="o">.</span><span class="n">flat</span><span class="p">):</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">example_sim</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;maroon&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Simulated RTs (seconds)&quot;</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/e5e88998f84ff2775ff0d777cabd5cd15bd6ee88b8f29eee24cd77dcc8f97dca.png" src="../_images/e5e88998f84ff2775ff0d777cabd5cd15bd6ee88b8f29eee24cd77dcc8f97dca.png" />
+<img alt="../_images/17558f30de9f12eead37b8719513802db48c65694733c021ab3aaf0c5f1d7004.png" src="../_images/17558f30de9f12eead37b8719513802db48c65694733c021ab3aaf0c5f1d7004.png" />
 </div>
 </div>
-<p>We can obtain a skewed distribution which is commonly observed in empricial response time data. We also do not detect any unusual or implausible values such as negative response times or excessively high values. In practice, you would perform these checks over multiple simulations from the prior predictive and try to distil the information through informative <em>summary statistics</em> of the data. Basically, you are trying to answer the following question: What assumptions do my prior and likelihood specification encode regarding the data-generating process and its typical scope?</p>
+<p>The model generates skewed RT distributions which are commonly observed in empricial response time experiments. We also do not detect any unusual or implausible values such as negative response times or excessively high values. In practice, you would perform these checks over multiple simulations from the prior predictive and try to distil the information through informative <em>summary statistics</em> of the data. Basically, you are trying to answer the following question: What assumptions do my prior and likelihood specification encode regarding the data-generating process and its typical scope?</p>
 <p>The next step in our workflow is to conduct model sensitivity and computational faithfulness checks. This involves fitting our LCA model to simulated data and then using the obtained parameters to predict these data through resimulation. Before we can proceed with this step, we first need to train our neural networks.</p>
 </section>
 <section id="defining-the-neural-approximator">
 <h2><span class="section-number">4.4. </span>Defining the Neural Approximator<a class="headerlink" href="#defining-the-neural-approximator" title="Permalink to this heading">#</a></h2>
 <section id="summary-network">
 <h3><span class="section-number">4.4.1. </span>Summary Network<a class="headerlink" href="#summary-network" title="Permalink to this heading">#</a></h3>
-<p>Although we simulate randomly interleaved experimental manipulation, we are not really interested in any sequential effects during the hypothetical decision task. Therefore, we can treat our data as exchangeable and use a <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> for the summary network. This invariant neural network respects the permutation invariance of the data. It takes (at least) 3D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">n_obs,</span> <span class="pre">data_dim)</span></code> and reduce them to 2D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">summary_dim)</span></code>, where <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code> is a hyperparameter to be set by us. Heuristically, this number should not be lower than the number of parameters in a model. Below, we create a deep permutation-invariant network with <code class="docutils literal notranslate"><span class="pre">summary_dim=32</span></code>:</p>
+<p>Although we simulate randomly interleaved experimental manipulation, we are not really interested in any sequential effects during the hypothetical decision task. Therefore, we can treat our data as exchangeable and use a <code class="docutils literal notranslate"><span class="pre">SetTransformer</span></code> for the summary network. This invariant neural network respects the permutation invariance of the data. It takes (at least) 3D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">n_obs,</span> <span class="pre">data_dim)</span></code> and reduce them to 2D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">summary_dim)</span></code>, where <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code> is a hyperparameter to be set by us. Heuristically, this number should not be lower than the number of parameters in a model. Below, we create a deep permutation-invariant network with <code class="docutils literal notranslate"><span class="pre">summary_dim=32</span></code>:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(</span><span class="n">summary_dim</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lca_summary&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">SetTransformer</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">summary_dim</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lca_summary&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
+<p>The <code class="docutils literal notranslate"><span class="pre">input_dim=5</span></code> setting is due to the fact that the configured data will have <span class="math notranslate nohighlight">\(5\)</span> dimensions (last axis): the continuous RT, the <span class="math notranslate nohighlight">\(3\)</span>-dimensional one-hot encoding of the <span class="math notranslate nohighlight">\(3\)</span> choices, and a binary condition indicator.</p>
 </section>
 <section id="inference-network">
 <h3><span class="section-number">4.4.2. </span>Inference Network<a class="headerlink" href="#inference-network" title="Permalink to this heading">#</a></h3>
@@ -920,10 +929,7 @@ INFO:root:Could not determine shape of simulation batchable context. Type appear
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trainer</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">trainers</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span>
-    <span class="n">generative_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-    <span class="n">amortizer</span><span class="o">=</span><span class="n">amortizer</span><span class="p">,</span>
-    <span class="n">configurator</span><span class="o">=</span><span class="n">configurator</span><span class="p">,</span>
-    <span class="c1"># checkpoint_path=&#39;lca_model&#39;</span>
+    <span class="n">generative_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">amortizer</span><span class="o">=</span><span class="n">amortizer</span><span class="p">,</span> <span class="n">configurator</span><span class="o">=</span><span class="n">configurator</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="o">=</span><span class="s2">&quot;lca_model&quot;</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -932,7 +938,7 @@ INFO:root:Could not determine shape of simulation batchable context. Type appear
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Initialized empty loss history.
 INFO:root:Initialized networks from scratch.
 INFO:root:Performing a consistency check with provided components...
-2023-07-15 20:59:05.608931: I tensorflow/compiler/xla/stream_executor/cuda/cuda_dnn.cc:428] Loaded cuDNN version 8200
+2023-07-16 10:34:27.249261: I tensorflow/compiler/xla/stream_executor/cuda/cuda_dnn.cc:428] Loaded cuDNN version 8200
 INFO:root:Done.
 </pre></div>
 </div>
@@ -951,15 +957,15 @@ INFO:root:Done.
 _________________________________________________________________
  Layer (type)                Output Shape              Param #   
 =================================================================
- lca_inference (InvertibleNe  multiple                 528744    
+ lca_inference (InvertibleNe  multiple                 531816    
  twork)                                                          
                                                                  
- lca_summary (SetTransformer  multiple                 63576     
+ lca_summary (SetTransformer  multiple                 63608     
  )                                                               
                                                                  
 =================================================================
-Total params: 592,320
-Trainable params: 592,200
+Total params: 595,424
+Trainable params: 595,304
 Non-trainable params: 120
 _________________________________________________________________
 </pre></div>
@@ -978,8 +984,8 @@ _________________________________________________________________
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 488 ms, sys: 2.84 ms, total: 491 ms
-Wall time: 488 ms
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 509 ms, sys: 0 ns, total: 509 ms
+Wall time: 507 ms
 </pre></div>
 </div>
 </div>
@@ -1000,7 +1006,7 @@ Wall time: 488 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/f6aab323c7ad8d87985f844ad9989a503a748040e693e93f9a2c91087832e540.png" src="../_images/f6aab323c7ad8d87985f844ad9989a503a748040e693e93f9a2c91087832e540.png" />
+<img alt="../_images/57830d9e2580d7570797a3fc0c762438f98bac64c6c854993be5c08be7b57feb.png" src="../_images/57830d9e2580d7570797a3fc0c762438f98bac64c6c854993be5c08be7b57feb.png" />
 </div>
 </div>
 <p>At some point around training step <span class="math notranslate nohighlight">\(25000\)</span>, the loss stopped decreasing, indicating that there is not much to learn from further simulation and we can continue with some diagnostics. Thus, if we wanted to increase performance at this point, we would probably make the networks more expressive than train with more simulations.</p>
@@ -1016,10 +1022,25 @@ Wall time: 488 ms
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate some validation data</span>
-<span class="n">validation_sims</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">configurator</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span>
+<span class="n">validation_sims</span> <span class="o">=</span> <span class="n">configurator</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span>
 
 <span class="c1"># Extract unstandardized prior draws and transform to original scale</span>
 <span class="n">prior_samples</span> <span class="o">=</span> <span class="n">validation_sims</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">prior_stds</span> <span class="o">+</span> <span class="n">prior_means</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note, that our generative model is simulating data sets with a random number of trials:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Estimation will be performed on data sets with </span><span class="si">{</span><span class="n">validation_sims</span><span class="p">[</span><span class="s1">&#39;summary_conditions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> simulated trials.&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Estimation will be performed on data sets with 257 simulated trials
 </pre></div>
 </div>
 </div>
@@ -1040,7 +1061,7 @@ Wall time: 488 ms
 <p>If we are able to obtain unbiased posterior distributions, we should observe approximately uniform rank statistic histograms</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_sbc_histograms</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">num_bins</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_sbc_histograms</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">num_bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">PARAM_NAMES</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1048,7 +1069,7 @@ Wall time: 488 ms
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:The ratio of simulations / posterior draws should be &gt; 20 for reliable variance reduction, but your ratio is 10.                    Confidence intervals might be unreliable!
 </pre></div>
 </div>
-<img alt="../_images/b7382fcdaa65c4fec147c17f6e21de61d68d4e95f2e0ba5e8c59918626c4a3dd.png" src="../_images/b7382fcdaa65c4fec147c17f6e21de61d68d4e95f2e0ba5e8c59918626c4a3dd.png" />
+<img alt="../_images/7b869ec9e9ee96ecff671499fc0c0997dbcc2d257261b497cfe1b331770ceced.png" src="../_images/7b869ec9e9ee96ecff671499fc0c0997dbcc2d257261b497cfe1b331770ceced.png" />
 </div>
 </div>
 <p><strong>Rank ECDFs</strong></p>
@@ -1056,12 +1077,12 @@ Wall time: 488 ms
 <p>Using the <code class="docutils literal notranslate"><span class="pre">difference=True</span></code> parameter, we can tell the function to compute ECDF differences for a more dynamic visualization range.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_sbc_ecdf</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">difference</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_sbc_ecdf</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">difference</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">PARAM_NAMES</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/1c95bb3fd47ddc33c7526abb2b9067ff1009a379b94883b20f70645ff0b1977f.png" src="../_images/1c95bb3fd47ddc33c7526abb2b9067ff1009a379b94883b20f70645ff0b1977f.png" />
+<img alt="../_images/4f9af409aa2e7eb29dcfe1446dc4a81e97e20ba7c31608d00717c437d9ebca1e.png" src="../_images/4f9af409aa2e7eb29dcfe1446dc4a81e97e20ba7c31608d00717c437d9ebca1e.png" />
 </div>
 </div>
 <p>Hooray, both methods indicate that our approximator is more or less well calibrated!</p>
@@ -1080,15 +1101,19 @@ Wall time: 488 ms
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_recovery</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">prior</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_recovery</span><span class="p">(</span>
+    <span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">prior</span><span class="o">.</span><span class="n">param_names</span><span class="p">,</span> <span class="n">point_agg</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">uncertainty_agg</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">std</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/f4b4128d22e92efb2005efa7d43e2c956f7f4e2c19ee435067cb74b9d1bc5c62.png" src="../_images/f4b4128d22e92efb2005efa7d43e2c956f7f4e2c19ee435067cb74b9d1bc5c62.png" />
+<img alt="../_images/69b4399d9203df66049063eb5ccae6e2a638c236865e9a55d397fdc65420769c.png" src="../_images/69b4399d9203df66049063eb5ccae6e2a638c236865e9a55d397fdc65420769c.png" />
 </div>
 </div>
-<p>All parameters but the decay parameter <span class="math notranslate nohighlight">\(\lambda\)</span> and the inhibition parameter <span class="math notranslate nohighlight">\(\kappa\)</span> can be recovered with reasonable precision by the posterior median. This is not a suprising result, as studies have shown that <span class="math notranslate nohighlight">\(\lambda\)</span> and <span class="math notranslate nohighlight">\(\kappa\)</span> are notoriously hard to recover. We can look at model sensitivity more closely via another function which will plot the posterior <span class="math notranslate nohighlight">\(z\)</span>-score vs. the posterior contraction for each marginal posterior.</p>
+<p>All parameters but the decay parameter <span class="math notranslate nohighlight">\(\lambda\)</span> and the inhibition parameter <span class="math notranslate nohighlight">\(\kappa\)</span> can be recovered with reasonable precision by the posterior median. This is not a surprising result, as studies have shown that <span class="math notranslate nohighlight">\(\lambda\)</span> and <span class="math notranslate nohighlight">\(\kappa\)</span> are notoriously hard to recover. Also, we see that large parameter values are hard to recover with sufficient precision, since model sensitivity probably saturates at these values (i.e., the difference in simulator outputs between a threshold <span class="math notranslate nohighlight">\(a = 1\)</span> and <span class="math notranslate nohighlight">\(a = 2\)</span> is more noticeable than the one between <span class="math notranslate nohighlight">\(a = 3\)</span> and <span class="math notranslate nohighlight">\(a = 4\)</span>.</p>
+<p><strong>Idea</strong>: Feel free to inspect point recovery with respect to a different summary of the posterior, for instance, the default posterior median and median absolute deviation (MAD).</p>
+<p>We can look at model sensitivity more closely via another function which will plot the posterior <span class="math notranslate nohighlight">\(z\)</span>-score vs. the posterior contraction for each marginal posterior.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_z_score_contraction</span><span class="p">(</span><span class="n">post_samples</span><span class="p">,</span> <span class="n">prior_samples</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">prior</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
@@ -1096,7 +1121,7 @@ Wall time: 488 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/53d6eff23f120175c33689d6f0960723b0cf6eadf050625a82c0c2d84c7d8359.png" src="../_images/53d6eff23f120175c33689d6f0960723b0cf6eadf050625a82c0c2d84c7d8359.png" />
+<img alt="../_images/28e121d1e3768223aa93903a06d5cd08d8e40eef6ff1e3e73f2d1551aa38c368.png" src="../_images/28e121d1e3768223aa93903a06d5cd08d8e40eef6ff1e3e73f2d1551aa38c368.png" />
 </div>
 </div>
 </section>
@@ -1113,7 +1138,8 @@ Wall time: 488 ms
 <p>We will assess retrodictive performance on <span class="math notranslate nohighlight">\(8\)</span> simulated data sets, but, typically, you would use a much larger number and summarize the results both graphically and numerically. For each synthetic data set, we will draw <span class="math notranslate nohighlight">\(1000\)</span> parameter configurations from the amortized posterior and resimulate data with <span class="math notranslate nohighlight">\(50\)</span> parameter sets randomly sub-sampled from the full set of posterior draws.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">num_sim</span> <span class="o">=</span> <span class="mi">8</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define re-simulation settings</span>
+<span class="n">num_sim</span> <span class="o">=</span> <span class="mi">8</span>
 <span class="n">num_samples</span> <span class="o">=</span> <span class="mi">1000</span>
 <span class="n">num_resim</span> <span class="o">=</span> <span class="mi">50</span>
 </pre></div>
@@ -1123,7 +1149,8 @@ Wall time: 488 ms
 <p><strong>Step 1</strong></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sim_data</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="n">num_sim</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simulate and configure data</span>
+<span class="n">sim_data</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="n">num_sim</span><span class="p">)</span>
 <span class="n">conf_data</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">configurator</span><span class="p">(</span><span class="n">sim_data</span><span class="p">)</span>
 <span class="n">num_obs</span> <span class="o">=</span> <span class="n">sim_data</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
@@ -1133,9 +1160,9 @@ Wall time: 488 ms
 <p><strong>Step 2</strong></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># fit model</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fit model -&gt; draw 1000 posterior samples per data set</span>
 <span class="n">post_samples</span> <span class="o">=</span> <span class="n">amortizer</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">conf_data</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="n">num_samples</span><span class="p">)</span>
-<span class="c1"># unstandardize posteriors</span>
+<span class="c1"># Unstandardize posteriors draws into original scale</span>
 <span class="n">post_samples_not_z</span> <span class="o">=</span> <span class="n">post_samples</span> <span class="o">*</span> <span class="n">prior_stds</span> <span class="o">+</span> <span class="n">prior_means</span>
 </pre></div>
 </div>
@@ -1144,11 +1171,13 @@ Wall time: 488 ms
 <p><strong>Step 3</strong></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># generate random index for posterior parameter set selection</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate random index for posterior parameter set selection</span>
 <span class="n">index_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_samples</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">num_resim</span><span class="p">)</span>
-<span class="c1"># get context of simulated data sets</span>
+
+<span class="c1"># Get context of simulated data sets</span>
 <span class="n">context</span> <span class="o">=</span> <span class="n">sim_data</span><span class="p">[</span><span class="s2">&quot;sim_batchable_context&quot;</span><span class="p">]</span>
-<span class="c1"># resimulate</span>
+
+<span class="c1"># Re-simulate</span>
 <span class="n">pred_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_sim</span><span class="p">,</span> <span class="n">num_resim</span><span class="p">,</span> <span class="n">num_obs</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">sim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sim</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index_set</span><span class="p">):</span>
@@ -1167,25 +1196,27 @@ Wall time: 488 ms
     <span class="p">)</span>
     <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">pred_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;maroon&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Predicted data&quot;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Simulated data set #</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Simulated data set #</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
     <span class="c1"># Set legend to first plot</span>
     <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 
     <span class="c1"># Set x label to bottom row</span>
     <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">num_sim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Response time&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Response time (seconds)&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
     <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
 <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/8231dad9dede3960a177b61c359ab168d90597fffb6bec752de27e96d923a33a.png" src="../_images/8231dad9dede3960a177b61c359ab168d90597fffb6bec752de27e96d923a33a.png" />
+<img alt="../_images/701ba14415375c262eae932f7b66e3f3382057c3a5f28a3d64b3b69299b1c9d2.png" src="../_images/701ba14415375c262eae932f7b66e3f3382057c3a5f28a3d64b3b69299b1c9d2.png" />
 </div>
 </div>
-<p>Comparing the kernel densities between the simulated and predicted response times, we see that we can fit synthetic data reasonably well. In practice, you would try to find good metrics that summarize such results (over a much larger number of simulations) numerically.</p>
-<p>At this point, you will proceed by applying your network to actually observed data.</p>
+<p>Comparing the kernel densities between the simulated and predicted response times, we see that we can fit synthetic data decently, but not satisfactorily. In practice, you would try to find good metrics that summarize such results (over a much larger number of simulations) numerically, in addition to the graphical checks.</p>
+<p>At this point, you will proceed by applying your networks to actually observed data.</p>
 </section>
 </section>
 <section id="inference-phase">
@@ -1197,15 +1228,16 @@ Wall time: 488 ms
 <li><p>Split the data into “training” and “test” parts.</p></li>
 <li><p>Fit the model to the training data.</p></li>
 <li><p>Re-simulate synthetic data with the posterior samples obtained in Step 4 and compare with the training data. This is your indicator of how good the model can reproduce the data it was fitted on.</p></li>
-<li><p>Re-simulate further synthetic data and comapre it with the test data (not used for obtaining the posterior). This is your indicator of how good the model can predict iunseen data.</p></li>
+<li><p>Re-simulate further synthetic data and comapre it with the test data (not used for estimating the posterior). This is your indicator of how good the model can predict iunseen data.</p></li>
 <li><p>Create awesome visualizations.</p></li>
 </ol>
 </section>
 <section id="further-experimentation">
 <h2><span class="section-number">4.10. </span>Further Experimentation<a class="headerlink" href="#further-experimentation" title="Permalink to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p>Currently, we have only performed our small world checks for a randomly samples number of trials. Test model sensitivity for the lowest and the highest number of trials. What do you observe? Which paarameters are most sensitive to increasing number of observations?</p></li>
+<li><p>Currently, we have only performed our small world checks for a randomly samples number of trials. Test model sensitivity for the lowest and the highest number of trials. What do you observe? Which parameters are most sensitive to increasing number of observations?</p></li>
 <li><p>Try a two-step learning approach. First, generate an offline data set with a very small number of trials and train the networks until convergence. Then, continue training using online learning with realistic numbers of trials. How does this approach perform compared? Do you get faster training and similar performance?</p></li>
+<li><p>Change the <code class="docutils literal notranslate"><span class="pre">SetTransformer</span></code> to a <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> architecture. Does the one summary network type perform better than the other?</p></li>
 <li><p>Change the <code class="docutils literal notranslate"><span class="pre">coupling_design</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code> to <code class="docutils literal notranslate"><span class="pre">spline</span></code> and re-train. Can you get better uncertainty reduction and more precise point estimates?</p></li>
 </ol>
 </section>

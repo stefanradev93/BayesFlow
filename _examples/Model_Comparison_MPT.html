@@ -959,7 +959,7 @@ We can further inspect our approximator by examing the confusion matrix for our 
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">summary_net</span><span class="p">(</span><span class="n">fake_data</span><span class="p">)</span>
 <span class="n">preds</span> <span class="o">=</span> <span class="n">inference_net</span><span class="o">.</span><span class="n">posterior_probs</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">preds</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -973,7 +973,7 @@ We can further inspect our approximator by examing the confusion matrix for our 
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bayes_factor12</span> <span class="o">=</span> <span class="n">preds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">preds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">bayes_factor12</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bayes_factor12</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -984,7 +984,7 @@ We can further inspect our approximator by examing the confusion matrix for our 
 </div>
 </div>
 <p>Corresponding to the PMPs, the Bayes factor assigns higher evidence to the 2HT model. Despite only having 100 binary observations at hand, the data are so untypical for the 1HT that the Bayes factor reflects the data being ~20 times more likely under the 2HT model compared to the 1HT model.</p>
-<p>Congratulations, you now know how to conduct amortized Bayesian model comparison with BayesFlow! When you feel ready to find out how to compare hierarchical models, continue with <a class="reference internal" href="Hierarchical_Model_Comparison_MPT.html"><span class="doc std std-doc">part 2</span></a>.</p>
+<p>Congratulations, you now know how to conduct amortized Bayesian model comparison with BayesFlow! When you feel ready to find out how to compare hierarchical models, continue with <a class="reference internal" href="Hierarchical_Model_Comparison_MPT.html"><span class="doc std std-doc">Part 2</span></a>.</p>
 <hr class="footnotes docutils" />
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="note">
