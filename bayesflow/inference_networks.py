@@ -167,8 +167,8 @@ class InvertibleNetwork(tf.keras.Model):
         target          :  tf.Tensor
             If inverse=True: The transformed out, shape (batch_size, ...)
 
-        Important
-        ---------
+        Notes
+        -----
         If ``inverse=False``, the return is ``(z, log_det_J)``.\n
         If ``inverse=True``, the return is ``target``.
         """

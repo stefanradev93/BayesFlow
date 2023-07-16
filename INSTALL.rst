@@ -1,5 +1,5 @@
-Install
-=======
+Full Installation Instructions
+==============================
 
 Requirements
 ------------
@@ -33,6 +33,15 @@ and activate via
 .. code-block:: bash
 
    conda activate bf
+
+Install via pip
+------------------
+
+Install BayesFlow from PyPI via
+
+.. code-block:: bash
+
+   pip install bayesflow
 
 Install from GitHub
 -------------------

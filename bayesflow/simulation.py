@@ -52,10 +52,13 @@ class ContextGenerator:
     While the latter can also be considered batchable in principle, batching them would require non-Tensor
     (i.e., non-rectangular) data structures, which usually means inefficient computations.
 
+    Examples
+    --------
     Example for a simulation context which will generate a random number of observations between 1 and 100 for
     each training batch:
 
     >>> gen = ContextGenerator(non_batchable_context_fun=lambda : np.random.randint(1, 101))
+
     """
 
     def __init__(
@@ -103,8 +106,8 @@ class ContextGenerator:
 
         context_dict : dictionary
             A dictionary with context variables with the following keys:
-            `batchable_context` : value
-            `non_batchable_context` : value
+            ``batchable_context`` : value
+            ``non_batchable_context`` : value
 
         Note, that the values of the context variables will be None, if the
         corresponding context-generating functions have not been provided when
@@ -210,7 +213,7 @@ class Prior:
             self.is_batched = False
 
     def __call__(self, batch_size, *args, **kwargs):
-        """Generates `batch_size` draws from the prior given optional context generator.
+        """Generates ``batch_size`` draws from the prior given optional context generator.
 
         Parameters
         ----------
@@ -313,12 +316,12 @@ class Prior:
 
     def plot_prior2d(self, **kwargs):
         """Generates a 2D plot representing bivariate prior ditributions. Uses the function
-        `bayesflow.diagnostics.plot_prior2d() internally for generating the plot.
+        ``bayesflow.diagnostics.plot_prior2d()`` internally for generating the plot.
 
         Parameters
         ----------
         **kwargs : dict
-            Optional keyword arguments passed to the `plot_prior2d` function.
+            Optional keyword arguments passed to the ``plot_prior2d`` function.
 
         Returns
         -------
@@ -400,9 +403,10 @@ class TwoLevelPrior:
             An optional function (ideally an instance of ``ContextGenerator``) for generating control variables
             for the local_prior_fun.
 
-            Example: Varying number of local factors (e.g., groups, participants) between 1 and 100:
+        Examples
+        --------
+        Varying number of local factors (e.g., groups, participants) between 1 and 100::
 
-            ``
             def draw_hyper():
                 # Draw location for 2D conditional prior
                 return np.random.normal(size=2)
@@ -415,6 +419,7 @@ class TwoLevelPrior:
             context = ContextGenerator(non_batchable_context_fun=lambda : np.random.randint(1, 101))
             prior = TwoLevelPrior(draw_hyper, draw_prior, local_context_generator=context)
             prior_dict = prior(batch_size=32)
+
         """
 
         self.hyper_prior = hyper_prior_fun
@@ -512,19 +517,19 @@ class Simulator:
 
     An optional context generator (i.e., an instance of ContextGenerator) or a user-defined callable object
     implementing the following two methods can be provided:
-    - context_generator.batchable_context(batch_size)
-    - context_generator.non_batchable_context()
+    - ``context_generator.batchable_context(batch_size)``
+    - ``context_generator.non_batchable_context()``
     """
 
     def __init__(self, batch_simulator_fun=None, simulator_fun=None, context_generator=None):
         """Instantiates a data generator which will perform randomized simulations given a set of parameters and optional context.
-        Either a batch_simulator_fun or simulator_fun, but not both, should be provided to instantiate a Simulator object.
+        Either a ``batch_simulator_fun`` or ``simulator_fun``, but not both, should be provided to instantiate a ``Simulator`` object.
 
-        If a batch_simulator_fun is provided, the interface will assume that the function operates on batches of parameter
+        If a ``batch_simulator_fun`` is provided, the interface will assume that the function operates on batches of parameter
         vectors and context variables and will pass the latter directly to the function. Power users should attempt to provide
         optimized batched simulators.
 
-        If a simulator_fun is provided, the interface will assume thatthe function operates on single parameter vectors and
+        If a ``simulator_fun`` is provided, the interface will assume thatthe function operates on single parameter vectors and
         context variables and will wrap the simulator internally to allow batched functionality.
 
         Parameters
@@ -535,8 +540,8 @@ class Simulator:
         simulator_fun       : callable
             A function (callable object) with optional control arguments responsible for generating a simulaiton given
             a single parameter vector and optional variables.
-        context generator   : callable (default None, recommended instance of ContextGenerator)
-            An optional function (ideally an instance of ContextGenerator) for generating prior context variables.
+        context_generator   : callable (default None, recommended instance of ContextGenerator)
+            An optional function (ideally an instance of ``ContextGenerator``) for generating prior context variables.
         """
 
         if (batch_simulator_fun is None) is (simulator_fun is None):
@@ -562,9 +567,9 @@ class Simulator:
 
         out_dict : dictionary
             An output dictionary with randomly simulated variables, the following keys are mandatory, if default keys not modified:
-            `sim_data` : value
-            `non_batchable_context` : value
-            `batchable_context` : value
+            ``sim_data`` : value
+            ``non_batchable_context`` : value
+            ``batchable_context`` : value
         """
 
         # Always assume first dimension is batch dimension
@@ -728,8 +733,8 @@ class GenerativeModel:
         name                 : str (default - "anonoymous")
             An optional name for the generative model. If kept default (None), 'anonymous' is set as name.
 
-        Important
-        ----------
+        Notes
+        -----
         If you are not using the provided ``Prior`` and ``Simulator`` wrappers for your prior and data generator,
         only functions returning a ``np.ndarray`` in the correct format will be accepted, since these will be
         wrapped internally. In addition, you need to indicate whether your simulator operates on batched of
@@ -761,7 +766,7 @@ class GenerativeModel:
             self._test()
 
     def __call__(self, batch_size, **kwargs):
-        """Carries out forward inference 'batch_size' times."""
+        """Carries out forward inference ``batch_size`` times."""
 
         # Forward inference
         prior_out = self.prior(batch_size, **kwargs.pop("prior_args", {}))
@@ -780,7 +785,7 @@ class GenerativeModel:
         return out_dict
 
     def _config_custom_simulator(self, sim_fun, is_batched):
-        """Only called if user has provided a custom simulator not using the Simulator wrapper."""
+        """Only called if user has provided a custom simulator not using the ``Simulator`` wrapper."""
 
         if is_batched is None:
             raise ConfigurationError(
@@ -796,8 +801,8 @@ class GenerativeModel:
     def plot_pushforward(
         self, parameter_draws=None, funcs_list=None, funcs_labels=None, batch_size=1000, show_raw_sims=True
     ):
-        """Creates simulations from parameter_draws (generated from self.prior if they are not passed as an argument)
-        and plots visualizations for them.
+        """Creates simulations from ``parameter_draws`` (generated from ``self.prior`` if they are not passed as
+        an argument) and plots visualizations for them.
 
         Parameters
         ----------
@@ -959,8 +964,8 @@ class GenerativeModel:
         disable_user_input: bool, optional, default: False
             If True, user will not be asked if memory space is sufficient for presimulation.
 
-        Important
-        ----------
+        Notes
+        -----
         One of the following pairs of parameters has to be provided:
 
         - (iterations_per_epoch, epochs),
@@ -968,7 +973,7 @@ class GenerativeModel:
         - (total_iterations, epochs)
 
         Providing all three of the parameters in these pairs leads to a consistency check,
-         since incompatible combinations are possible.
+        since incompatible combinations are possible.
         """
         # Ensure that the combination of parameters provided is sufficient to perform presimulation
         # and does not contain internal contradictions
@@ -1117,6 +1122,7 @@ class GenerativeModel:
 
 class TwoLevelGenerativeModel:
     """Basic interface for a generative model in a simulation-based context.
+
     Generally, a generative model consists of two mandatory components:
     - MultilevelPrior : A randomized function returning random parameter draws from a two-level prior distribution;
     - Simulator : A function which transforms the parameters into observables in a non-deterministic manner.
@@ -1149,8 +1155,8 @@ class TwoLevelGenerativeModel:
         name                 : str (default - "anonymous")
             An optional name for the generative model.
 
-        Important
-        ----------
+        Notes
+        -----
         If you are not using the provided ``TwoLevelPrior`` and ``Simulator`` wrappers for your prior and data
         generator, only functions returning a ``np.ndarray`` in the correct format will be accepted, since these will be
         wrapped internally. In addition, you need to indicate whether your simulator operates on batched of
@@ -1205,7 +1211,7 @@ class TwoLevelGenerativeModel:
         return out_dict
 
     def _config_custom_simulator(self, sim_fun, is_batched):
-        """Only called if user has provided a custom simulator not using the Simulator wrapper."""
+        """Only called if user has provided a custom simulator not using the ``Simulator`` wrapper."""
 
         if is_batched is None:
             raise ConfigurationError(

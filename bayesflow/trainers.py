@@ -21,13 +21,10 @@
 import logging
 import os
 from pickle import load as pickle_load
+import tensorflow as tf
 
 import numpy as np
 from tqdm.autonotebook import tqdm
-
-logging.basicConfig()
-
-import tensorflow as tf
 
 from bayesflow.amortizers import (
     AmortizedLikelihood,
@@ -51,60 +48,69 @@ from bayesflow.helper_classes import (
 from bayesflow.helper_functions import backprop_step, extract_current_lr, format_loss_string, loss_to_string
 from bayesflow.simulation import GenerativeModel, MultiGenerativeModel
 
+logging.basicConfig()
+
 
 class Trainer:
     """This class connects a generative model (or, already simulated data from a model) with
     a configurator and a neural inference architecture for amortized inference (amortizer). A Trainer
     instance is responsible for optimizing the amortizer via various forms of simulation-based training.
 
-    At the very minimum, the trainer must be initialized with an ``amortizer`` instance, which is capable
-    of processing the (configured) outputs of a generative model. A ``configurator`` will then process
+    At the very minimum, the trainer must be initialized with an `amortizer` instance, which is capable
+    of processing the (configured) outputs of a generative model. A `configurator` will then process
     the outputs of the generative model and convert them into suitable inputs for the amortizer. Users
     can choose from a palette of default configurators or create their own configurators, essentially
-    building a modularized pipeline GenerativeModel -> Configurator -> Amortizer. Most complex models
-    wtill require custom configurators.
+    building a modularized pipeline `GenerativeModel` -> `Configurator` -> `Amortizer`. Most complex models
+    will require custom configurators.
+
+    Notes
+    -----
 
     Currently, the trainer supports the following simulation-based training regimes, based on efficiency
     considerations:
 
-    - Online training
-        Usage:
-        >>> trainer.train_online(epochs, iterations_per_epoch, batch_size, **kwargs)
+    * Online training
 
-        This training regime is optimal for fast generative models which can efficiently simulated data on-the-fly.
-        In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than 2-3 seconds.
+      >>> trainer.train_online(epochs, iterations_per_epoch, batch_size, **kwargs)
 
-    - Experience replay training
-        Usage:
-        >>> trainer.train_experience_replay(epochs, iterations_per_epoch, batch_size, **kwargs)
+      This training regime is optimal for fast generative models which can efficiently simulated data on-the-fly.
+      In order for this training regime to be efficient, on-the-fly batch simulations should not take longer
+      than 2-3 seconds.
 
-        This training regime is also good for fast generative models capable of efficiently simulating data on-the-fly.
-        Compare to pure online training, this training will keep an experience replay buffer from which simulations
-        are randomly sampled, so the networks will likely see some simulations multiple times.
+    * Experience replay training
 
-    - Round-based training
-        Usage:
-        >>> trainer.train_rounds(rounds, sim_per_round, epochs, batch_size, **kwargs)
+      >>> trainer.train_experience_replay(epochs, iterations_per_epoch, batch_size, **kwargs)
 
-        This training regime is optimal for slow, but still reasonably performant generative models.
-        In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than one 2-3 minutes.
+      This training regime is also good for fast generative models capable of efficiently simulating data on-the-fly.
+      Compare to pure online training, this training will keep an experience replay buffer from which simulations
+      are randomly sampled, so the networks will likely see some simulations multiple times.
 
-        Important: overfitting presents a danger when using small numbers of simulated data sets, so it is recommended to use
-        some amount of regularization for the neural amortizer(s).
+    * Round-based training
 
-    - Offline taining
-        Usage:
-        >>> trainer.train_offline(simulations_dict, epochs, batch_size, **kwargs)
+      >>> trainer.train_rounds(rounds, sim_per_round, epochs, batch_size, **kwargs)
 
-        This training regime is optimal for very slow, external simulators, which take several minutes for a single simulation.
-        It assumes that all training data has been already simulated and stored on disk.
+      This training regime is optimal for slow, but still reasonably performant generative models.
+      In order for this training regime to be efficient, on-the-fly batch simulations should not take
+      longer than 2-3 minutes.
 
-        Important: overfitting presents a danger when using a small simulated data set, so it is recommended to use
-        some amount of regularization for the neural amortizer(s).
+      .. note:: overfitting presents a danger when using small numbers of simulated data sets, so it is recommended
+         to use some amount of regularization for the neural amortizer(s).
 
-    Note: For extremely slow simulators (i.e., more than an hour of a single simulation), the BayesFlow framework
-    might not be the ideal choice and should probably be considered in combination with a black-box surrogate optimization method,
-    such as Bayesian optimization.
+    * Offline training
+
+      >>> trainer.train_offline(simulations_dict, epochs, batch_size, **kwargs)
+
+      This training regime is optimal for very slow, external simulators, which take several minutes for a
+      single simulation. It assumes that all training data has been already simulated and stored on disk.
+
+      .. warning:: Overfitting presents a danger when using a small simulated data set, so it is recommended to use
+         some amount of regularization for the neural amortizer(s).
+
+      .. note::
+         For extremely slow simulators (i.e., more than an hour of a single simulation), the BayesFlow framework
+         might not be the ideal choice and should probably be considered in combination with a black-box surrogate
+         optimization method, such as Bayesian optimization.
+
     """
 
     def __init__(
@@ -124,9 +130,9 @@ class Trainer:
 
         Parameters
         ----------
-        amortizer         : bayesflow.amortizers.Amortizer
+        amortizer         : `bayesflow.amortizers.Amortizer`
             The neural architecture to be optimized.
-        generative_model  : bayesflow.forward_inference.GenerativeModel
+        generative_model  : `bayesflow.forward_inference.GenerativeModel`
             A generative model returning a dictionary with randomly sampled parameters, data, and optional context
         configurator      : callable or None, optional, default: None
             A callable object transforming and combining the outputs of the generative model into inputs for a BayesFlow
@@ -141,15 +147,18 @@ class Trainer:
             If True, do not perform consistency checks, i.e., simulator runs and passed through nets
         memory            : bool or bayesflow.SimulationMemory, optional, default: False
             If ``True``, store a pre-defined amount of simulations for later use (validation, etc.).
-            If ``SimulationMemory`` instance provided, stores a reference to the instance.
+            If `SimulationMemory` instance provided, stores a reference to the instance.
             Otherwise the corresponding attribute will be set to None.
-        **kwargs          : dict, optional, default: {}
-            Optional keyword arguments for controling the behavior of the Trainer instance. As of now, these could be:
-            memory_kwargs            : dict
-                Keyword arguments to be passed to the ``SimulationMemory`` instance, if ``memory=True``
-            num_models               : int
-                The number of models in an amortized model comparison scenario, in case of a custom model comparison
-                amortizer which does not have a num_models attribute.
+
+        Other Parameters:
+        -----------------
+
+        memory_kwargs : dict
+           Keyword arguments to be passed to the `SimulationMemory` instance, if ``memory=True``
+        num_models : int
+           The number of models in an amortized model comparison scenario, in case of a custom model comparison
+           amortizer which does not have a num_models attribute.
+
         """
 
         # Set-up logging
@@ -206,7 +215,7 @@ class Trainer:
             self.manager = None
         self.checkpoint_path = checkpoint_path
 
-        # Perform a sanity check wiuth provided components
+        # Perform a sanity check with provided components
         if not skip_checks:
             self._check_consistency()
 
@@ -214,23 +223,28 @@ class Trainer:
         """Performs visual pre-inference diagnostics of latent space on either provided validation data
         (new simulations) or internal simulation memory.
         If ``inputs is not None``, then diagnostics will be performed on the inputs, regardless
-        whether the ``simulation_memory`` of the trainer is empty or not. If ``inputs is None``, then
-        the trainer will try to access is memory or raise a ``ConfigurationError``.
+        whether the `simulation_memory` of the trainer is empty or not. If ``inputs is None``, then
+        the trainer will try to access is memory or raise a `ConfigurationError`.
 
         Parameters
         ----------
         inputs   : None, list, or dict, optional, default: None
             The optional inputs to use
-        **kwargs : dict, optional, default: {}
-            Optional keyword arguments, which could be:
-            ``conf_args``  - optional keyword arguments passed to the configurator
-            ``net_args``   - optional keyword arguments passed to the amortizer
-            ``plot_args``  - optional keyword arguments passed to ``plot_latent_space_2d``
+
+        Other Parameters
+        ----------------
+
+        conf_args :
+           optional keyword arguments passed to the configurator
+        net_args :
+           optional keyword arguments passed to the amortizer
+        plot_args :
+           optional keyword arguments passed to `plot_latent_space_2d`
 
         Returns
         -------
         fig      : plt.Figure
-            The figure object which can be readily saved to disk using ``fig.savefig()``.
+            The figure object which can be readily saved to disk using `fig.savefig()`.
         """
 
         if type(self.amortizer) is AmortizedPosterior:
@@ -238,7 +252,7 @@ class Trainer:
             if inputs is None:
                 if self.simulation_memory is None:
                     raise ConfigurationError(
-                        "You should either enable ``simulation memory`` or supply the ``inputs`` argument."
+                        "You should either enable simulation memory or supply the inputs argument."
                     )
                 else:
                     inputs = self.simulation_memory.get_memory()
@@ -258,8 +272,8 @@ class Trainer:
         """Performs visual pre-inference diagnostics via simulation-based calibration (SBC)
         (new simulations) or internal simulation memory.
         If ``inputs is not None``, then diagnostics will be performed on the inputs, regardless
-        whether the ``simulation_memory`` of the trainer is empty or not. If ``inputs is None``, then
-        the trainer will try to access is memory or raise a ``ConfigurationError``.
+        whether the `simulation_memory` of the trainer is empty or not. If ``inputs is None``, then
+        the trainer will try to access is memory or raise a `ConfigurationError`.
 
         Parameters
         ----------
@@ -267,17 +281,21 @@ class Trainer:
             The optional inputs to use
         n_samples : int or None, optional, default: None
             The number of posterior samples to draw for each simulated data set.
-            If None, the number will be heuristically determined so n_sim / n_draws ~= 20
-        **kwargs  : dict, optional, default: {}
-            Optional keyword arguments, which could be:
-            ``conf_args``  - optional keyword arguments passed to the configurator
-            `net_args``   - optional keyword arguments passed to the amortizer
-            ``plot_args``  - optional keyword arguments passed to ``plot_sbc``
+            If None, the number will be heuristically determined so that n_sim / n_draws is approximately equal to 20
+
+        Other Parameters
+        ----------------
+        conf_args :
+           optional keyword arguments passed to the configurator
+        net_args :
+           optional keyword arguments passed to the amortizer
+        plot_args :
+           optional keyword arguments passed to `plot_sbc()`
 
         Returns
         -------
         fig       : plt.Figure
-            The figure object which can be readily saved to disk using ``fig.savefig()``.
+            The figure object which can be readily saved to disk using `fig.savefig()`.
         """
 
         if type(self.amortizer) is AmortizedPosterior:
@@ -347,7 +365,7 @@ class Trainer:
             Number of batch simulations to perform per epoch
         batch_size           : int
             Number of simulations to perform at each backprop step
-        save_checkpoint      : bool (default - True)
+        save_checkpoint      : bool, default: True
             A flag to decide whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
         optimizer            : tf.keras.optimizer.Optimizer or None
@@ -362,29 +380,33 @@ class Trainer:
             Whether to use optional stopping or not during training. Could speed up training.
             Only works if ``validation_sims is not None``, i.e., validation data has been provided.
         use_autograph        : bool, optional, default: True
-            Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
+            Whether to use autograph for the backprop step. Could lead to enormous speed-ups but
             could also be harder to debug.
         validation_sims      : dict or None, optional, default: None
             Simulations used as a "validation set".
             If ``dict``, will assume it's the output of a generative model and try
-            ``amortizer.compute_loss(configurator(validation_sims))''
+            ``amortizer.compute_loss(configurator(validation_sims))``
             after each epoch.
             If ``int``, will assume it's the number of sims to generate from the generative
             model before starting training. Only considered if a generative model has been
             provided during initialization.
             If ``None`` (default), no validation set will be used.
-        **kwargs             : dict, optional
-            Optional keyword arguments, which can be:
-            ``model_args``          - optional kwargs passed to the generative model
-            ``val_model_args``      - optional kwargs passed to the generative model
-                                      for generating validation data. Only useful if
-                                      ``type(validation_sims) is int``.
-            ``conf_args``           - optional kwargs passed to the configurator
-                                      before each backprop (update) step.
-            ``val_conf_args``       - optional kwargs passed to the configurator
-                                      then configuring the validation data.
-            ``net_args``            - optional kwargs passed to the amortizer
-            ``early_stopping_args`` - optional kwargs passed to the ``EarlyStopper``
+
+        Other Parameters
+        ----------------
+        model_args :
+           optional kwargs passed to the generative model
+        val_model_args:
+           optional kwargs passed to the generative model for generating validation data. Only useful if
+           ``type(validation_sims) is int``.
+        conf_args :
+           optional kwargs passed to the configurator before each backprop (update) step.
+        val_conf_args :
+           optional kwargs passed to the configurator then configuring the validation data.
+        net_args :
+           optional kwargs passed to the amortizer
+        early_stopping_args :
+           optional kwargs passed to the `EarlyStopper`
 
         Returns
         -------
@@ -463,54 +485,57 @@ class Trainer:
         Parameters
         ----------
         simulations_dict : dict
-            A dictionaty containing the simulated data / context, if using the default keys,
-            the method expects at least the mandatory keys ``sim_data`` and ``prior_draws`` to be present
+           A dictionary containing the simulated data / context, if using the default keys,
+           the method expects at least the mandatory keys ``sim_data`` and ``prior_draws`` to be present
         epochs           : int
-            Number of epochs (and number of times a checkpoint is stored)
+           Number of epochs (and number of times a checkpoint is stored)
         batch_size       : int
-            Number of simulations to perform at each backpropagation step
-        save_checkpoint  : bool (default - True)
-            Determines whether to save checkpoints after each epoch,
-            if a checkpoint_path provided during initialization, otherwise ignored.
+           Number of simulations to perform at each backpropagation step
+        save_checkpoint  : bool, default: True
+           Determines whether to save checkpoints after each epoch,
+           if a checkpoint_path provided during initialization, otherwise ignored.
         optimizer         : tf.keras.optimizer.Optimizer or None
-            Optimizer for the neural network. ``None`` will result in ``tf.keras.optimizers.Adam``
-            using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
-            will override default learning rate and schedule settings.
+           Optimizer for the neural network. ``None`` will result in ``tf.keras.optimizers.Adam``
+           using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
+           will override default learning rate and schedule settings.
         reuse_optimizer   : bool, optional, default: False
-            A flag indicating whether the optimizer instance should be treated as persistent or not.
-            If ``False``, the optimizer and its states are not stored after training has finished.
-            Otherwise, the optimizer will be stored as ``self.optimizer`` and re-used in further training runs.
+           A flag indicating whether the optimizer instance should be treated as persistent or not.
+           If ``False``, the optimizer and its states are not stored after training has finished.
+           Otherwise, the optimizer will be stored as ``self.optimizer`` and re-used in further training runs.
         early_stopping    : bool, optional, default: False
-            Whether to use optional stopping or not during training. Could speed up training.
-            Only works if ``validation_sims is not None``, i.e., validation data has been provided.
+           Whether to use optional stopping or not during training. Could speed up training.
+           Only works if ``validation_sims is not None``, i.e., validation data has been provided.
         use_autograph     : bool, optional, default: True
-            Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
-            could also be harder to debug.
+           Whether to use autograph for the backprop step. Could lead to enormous speed-ups but
+           could also be harder to debug.
         validation_sims      : dict, int, or None, optional, default: None
-            Simulations used as a "validation set".
-            If ``dict``, will assume it's the output of a generative model and try
-            ``amortizer.compute_loss(configurator(validation_sims))''
-            after each epoch.
-            If ``int``, will assume it's the number of sims to generate from the generative
-            model before starting training. Only considered if a generative model has been
-            provided during initialization.
-            If ``None`` (default), no validation set will be used.
-        **kwargs             : dict, optional
-            Optional keyword arguments, which can be:
-            ``val_model_args``      - optional kwargs passed to the generative model
-                                      for generating validation data. Only useful if
-                                      ``type(validation_sims) is int``.
-            ``conf_args``           - optional kwargs passed to the configurator
-                                      before each backprop (update) step.
-            ``val_conf_args``       - optional kwargs passed to the configurator
-                                      then configuring the validation data.
-            ``net_args``            - optional kwargs passed to the amortizer
-            ``early_stopping_args`` - optional kwargs passed to the ``EarlyStopper``
+           Simulations used as a "validation set".
+           If ``dict``, will assume it's the output of a generative model and try
+           ``amortizer.compute_loss(configurator(validation_sims))`` after each epoch.
+           If ``int``, will assume it's the number of sims to generate from the generative
+           model before starting training. Only considered if a generative model has been
+           provided during initialization.
+           If ``None`` (default), no validation set will be used.
+
+        Other Parameters
+        ----------------
+        val_model_args :
+           optional kwargs passed to the generative model for generating validation data.
+           Only useful if ``type(validation_sims) is int``.
+        conf_args :
+           optional kwargs passed to the configurator before each backprop (update) step.
+        val_conf_args :
+           optional kwargs passed to the configurator then configuring the validation data.
+        net_args :
+           optional kwargs passed to the amortizer
+        early_stopping_args :
+           optional kwargs passed to the `EarlyStopper`
 
         Returns
         -------
         losses : ``dict`` or ``pandas.DataFrame``
-            A dictionary or a data frame storing the losses across epochs and iterations
+           A dictionary or a data frame storing the losses across epochs and iterations
+
         """
 
         # Compile update function, if specified
@@ -600,13 +625,14 @@ class Trainer:
         presimulation_path   : str
             File path to the folder containing the files from the precomputed simulation.
             Ideally generated using a GenerativeModel's presimulate_and_save method, otherwise must match
-            the structure produced by that method:
-
+            the structure produced by that method.
             Each file contains the data for one epoch (i.e. a number of batches), and must be compatible
             with the custom_loader provided.
-            The custom_loader must read each file into a collection (either a dictionary or a list) of simulation_dict objects.
-            This is easily achieved with the pickle library: if the files were generated from collections of simulation_dict objects
-            using pickle.dump, the _default_loader (default for custom_load) will load them using pickle.load.
+            The custom_loader must read each file into a collection (either a dictionary or a list) of simulation_dict
+            objects.
+            This is easily achieved with the pickle library: if the files were generated from collections of
+            simulation_dict objects using pickle.dump, the _default_loader (default for custom_load) will
+            load them using pickle.load.
             Training parameters like number of iterations and batch size are inferred from the files during training.
         optimizer            : tf.keras.optimizer.Optimizer
             Optimizer for the neural network training. Since for this training, it is impossible to guess the number of
@@ -622,33 +648,33 @@ class Trainer:
             If ``False``, the optimizer and its states are not stored after training has finished.
             Otherwise, the optimizer will be stored as ``self.optimizer`` and re-used in further training runs.
         custom_loader        : callable, optional, default: self._default_loader
-            Must take a string file_path as an input and output a collection (dictionary or list) of simulation_dict objects.
-            A simulation_dict has the keys
-            - ``prior_non_batchable_context``,
-            - ``prior_batchable_context``,
-            - ``prior_draws``,
-            - ``sim_non_batchable_context``,
-            - ``sim_batchable_context``,
-            - ``sim_data``.
-            ``prior_draws`` and ``sim_data`` must have actual data as values, the rest are optional.
+            Must take a string file_path as an input and output a collection (dictionary or list) of
+            simulation_dict objects. A simulation_dict has the keys ``prior_non_batchable_context``,
+            ``prior_batchable_context``, ``prior_draws``, ``sim_non_batchable_context``, ``sim_batchable_context``, and
+            ``sim_data``.
+            Here, ``prior_draws`` and ``sim_data`` must have actual data as values, the rest are optional.
         early_stopping       : bool, optional, default: False
             Whether to use optional stopping or not during training. Could speed up training.
         validation_sims      : dict, int, or None, optional, default: None
-            Simulations used as a "validation set".
+            Simulations used as a validation set.
             If ``dict``, will assume it's the output of a generative model and try
-            ``amortizer.compute_loss(configurator(validation_sims))''
+            ``amortizer.compute_loss(configurator(validation_sims))``
             after each epoch.
             If ``int``, will assume it's the number of sims to generate from the generative
             model before starting training. Only considered if a generative model has been
             provided during initialization.
             If ``None`` (default), no validation set will be used.
         use_autograph        : bool, optional, default: True
-            Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
+            Whether to use autograph for the backprop step. Could lead to enormous speed-ups but
             could also be harder to debug.
-        **kwargs             : dict, optional
-            Optional keyword arguments, which can be:
-            ``conf_args``  - optional keyword arguments passed to the configurator
-            ``net_args``   - optional keyword arguments passed to the amortizer
+
+        Other Parameters
+        ----------------
+
+        conf_args :
+           optional keyword arguments passed to the configurator
+        net_args :
+           optional keyword arguments passed to the amortizer
 
         Returns
         -------
@@ -694,7 +720,8 @@ class Trainer:
             file_path = os.path.join(presimulation_path, current_filename)
             epoch_data = custom_loader(file_path)
 
-            # For each epoch, the number of iterations is inferred from the presimulated dictionary or list used for that epoch
+            # For each epoch, the number of iterations is inferred from the presimulated dictionary or
+            # list used for that epoch
             if isinstance(epoch_data, dict):
                 index_list = list(epoch_data.keys())
             elif isinstance(epoch_data, list):
@@ -789,29 +816,33 @@ class Trainer:
             Whether to use optional stopping or not during training. Could speed up training.
             Only works if ``validation_sims is not None``, i.e., validation data has been provided.
         use_autograph        : bool, optional, default: True
-            Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
+            Whether to use autograph for the backprop step. Could lead to enormous speed-ups but
             could also be harder to debug.
         validation_sims      : dict or None, optional, default: None
             Simulations used as a "validation set".
             If ``dict``, will assume it's the output of a generative model and try
-            ``amortizer.compute_loss(configurator(validation_sims))''
+            ``amortizer.compute_loss(configurator(validation_sims))``
             after each epoch.
             If ``int``, will assume it's the number of sims to generate from the generative
             model before starting training. Only considered if a generative model has been
             provided during initialization.
             If ``None`` (default), no validation set will be used.
-        **kwargs             : dict, optional, default: {}
-            Optional keyword arguments, which can be:
-            ``model_args``          - optional kwargs passed to the generative model
-            ``val_model_args``      - optional kwargs passed to the generative model
-                                      for generating validation data. Only useful if
-                                      ``type(validation_sims) is int``.
-            ``conf_args``           - optional kwargs passed to the configurator
-                                      before each backprop (update) step.
-            ``val_conf_args``       - optional kwargs passed to the configurator
-                                      then configuring the validation data.
-            ``net_args``            - optional kwargs passed to the amortizer
-            ``early_stopping_args`` - optional kwargs passed to the ``EarlyStopper``
+
+        Other Parameters
+        ----------------
+        model_args :
+           optional kwargs passed to the generative model
+        val_model_args :
+           optional kwargs passed to the generative model for generating validation data. Only useful if
+           ``type(validation_sims) is int``.
+        conf_args :
+           optional kwargs passed to the configurator before each backprop (update) step.
+        val_conf_args :
+           optional kwargs passed to the configurator then configuring the validation data.
+        net_args :
+           optional kwargs passed to the amortizer
+        early_stopping_args:
+           optional kwargs passed to the `EarlyStopper`
 
         Returns
         -------
@@ -900,9 +931,10 @@ class Trainer:
         are simulated from the generative model and added to the data sets simulated in previous
         round. Then, the networks are trained for ``epochs`` on the augmented set of data sets.
 
-        Important: Training time will increase from round to round, since the number of simulations
-        increases correspondingly. The final round will then train the networks on ``rounds * sim_per_round``
-        data sets, so make sure this number does not eat up all available memory.
+        .. note::
+           Training time will increase from round to round, since the number of simulations
+           increases correspondingly. The final round will then train the networks on ``rounds * sim_per_round``
+           data sets, so make sure this number does not eat up all available memory.
 
         Parameters
         ----------
@@ -914,7 +946,7 @@ class Trainer:
             Number of epochs (and number of times a checkpoint is stored, inner loop) within a round.
         batch_size           : int
             Number of simulations to use at each backpropagation step
-        save_checkpoint : bool, optional, (default - True)
+        save_checkpoint : bool, optional, default: True
             A flag to decide whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
         optimizer            : tf.keras.optimizer.Optimizer or None
@@ -930,29 +962,34 @@ class Trainer:
             Only works if ``validation_sims is not None``, i.e., validation data has been provided.
             Will be performed within rounds, not between rounds!
         use_autograph        : bool, optional, default: True
-            Whether to use autograph for the backprop step. Could lead to enourmous speed-ups but
+            Whether to use autograph for the backprop step. Could lead to enormous speed-ups but
             could also be harder to debug.
         validation_sims      : dict or None, optional, default: None
             Simulations used as a "validation set".
             If ``dict``, will assume it's the output of a generative model and try
-            ``amortizer.compute_loss(configurator(validation_sims))''
+            ``amortizer.compute_loss(configurator(validation_sims))``
             after each epoch.
             If ``int``, will assume it's the number of sims to generate from the generative
             model before starting training. Only considered if a generative model has been
             provided during initialization.
             If ``None`` (default), no validation set will be used.
-        **kwargs             : dict, optional
-            Optional keyword arguments, which can be:
-            ``model_args``          - optional kwargs passed to the generative model
-            ``val_model_args``      - optional kwargs passed to the generative model
-                                      for generating validation data. Only useful if
-                                      ``type(validation_sims) is int``.
-            ``conf_args``           - optional kwargs passed to the configurator
-                                      before each backprop (update) step.
-            ``val_conf_args``       - optional kwargs passed to the configurator
-                                      then configuring the validation data.
-            ``net_args``            - optional kwargs passed to the amortizer
-            ``early_stopping_args`` - optional kwargs passed to the ``EarlyStopper``
+
+        Other Parameters
+        ----------------
+
+        model_args :
+           optional kwargs passed to the generative model
+        val_model_args :
+           optional kwargs passed to the generative model for generating validation data. Only useful if
+           ``type(validation_sims) is int``.
+        conf_args :
+           optional kwargs passed to the configurator before each backprop (update) step.
+        val_conf_args :
+           optional kwargs passed to the configurator then configuring the validation data.
+        net_args :
+           optional kwargs passed to the amortizer
+        early_stopping_args :
+           optional kwargs passed to the `EarlyStopper`
 
         Returns
         -------
@@ -1013,30 +1050,30 @@ class Trainer:
     def mmd_hypothesis_test(
         self, observed_data, reference_data=None, num_reference_simulations=1000, num_null_samples=100, bootstrap=False
     ):
-        """
+        """Performs a sampling-based hypothesis test for detecting Out-Of-Simulation (model misspecification).
 
         Parameters
         ----------
-        observed_data: np.ndarray
-            Observed data, shape (num_observed, ...)
-        reference_data: np.ndarray
-            Reference data representing samples from the "well-specified model", shape (num_reference, ...)
-        num_reference_simulations: int, default: 1000
-            Number of reference simulations (M) simulated from the trainer's generative model
-             if no `reference_data` are provided.
-        num_null_samples: int, default: 100
-            Number of draws from the MMD sampling distribution under the null hypothesis "the trainer's generative
-            model is well-specified"
-        bootstrap: bool, default: False
-            If true, the reference data (see above) are bootstrapped for each sample from the MMD sampling distribution.
-            If false, a new data set is simulated for computing each draw from the MMD sampling distribution.
+        observed_data : np.ndarray
+           Observed data, shape (num_observed, ...)
+        reference_data : np.ndarray
+           Reference data representing samples from the well-specified model, shape (num_reference, ...)
+        num_reference_simulations : int, default: 1000
+           Number of reference simulations (M) simulated from the trainer's generative model
+           if no `reference_data` are provided.
+        num_null_samples : int, default: 100
+           Number of draws from the MMD sampling distribution under the null hypothesis "the trainer's generative
+           model is well-specified"
+        bootstrap : bool, default: False
+           If true, the reference data (see above) are bootstrapped for each sample from the MMD sampling distribution.
+           If false, a new data set is simulated for computing each draw from the MMD sampling distribution.
 
         Returns
         -------
-        mmd_null_samples: np.ndarray
-            samples from the H0 sampling distribution ("well-specified model")
-        mmd_observed: float
-            summary MMD estimate for the observed data sets
+        mmd_null_samples : np.ndarray
+           samples from the H0 sampling distribution ("well-specified model")
+        mmd_observed : float
+           summary MMD estimate for the observed data sets
         """
 
         if reference_data is None:
@@ -1087,12 +1124,12 @@ class Trainer:
                 logger.info(f"Generated {validation_sims} simulations for validation.")
                 return vals
             else:
-                logger.warn(
+                logger.warning(
                     "Validation simulations can only be generated if the Trainer is initialized "
                     + "with a generative model."
                 )
                 return None
-        logger.warn('Type of argument "validation_sims" not understood. No validation simulations were created.')
+        logger.warning('Type of argument "validation_sims" not understood. No validation simulations were created.')
 
     def _config_early_stopping(self, early_stopping, validation_sims, **kwargs):
         """Helper method to configure early stopping or warn user for."""
@@ -1102,7 +1139,7 @@ class Trainer:
                 early_stopper = EarlyStopper(**kwargs.pop("early_stopping_args", {}))
             else:
                 logger = logging.getLogger()
-                logger.warn("No early stopping will be used, since validation_sims were not provided.")
+                logger.warning("No early stopping will be used, since validation_sims were not provided.")
                 early_stopper = None
             return early_stopper
         return None
@@ -1160,7 +1197,6 @@ class Trainer:
 
         Parameters
         ----------
-
         batch_size    : int
             Number of simulations to perform at each backprop step
         update_step   : callable
@@ -1168,11 +1204,16 @@ class Trainer:
             ``update_step(input_dict, amortizer, optimizer, **kwargs)``
         input_dict    : dict
             The optional pre-configured forward dict from a generative model, simulated, if None
-        **kwargs      : dict (default - {})
-            Optional keyword arguments, which can be:
-            ``model_args`` - optional keyword arguments passed to the generative model
-            ``conf_args``  - optional keyword arguments passed to the configurator
-            ``net_args``   - optional keyword arguments passed to the amortizer
+
+        Other Parameters
+        ----------------
+
+        model_args :
+           optional keyword arguments passed to the generative model
+        conf_args :
+           optional keyword arguments passed to the configurator
+        net_args :
+           optional keyword arguments passed to the amortizer
 
         """
 
