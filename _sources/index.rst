@@ -48,8 +48,8 @@ Citation
 
 You can cite BayesFlow along the lines of:
 
-   - We estimated the approximate posterior distribution with neural posterior estimation (NPE; Papamakarios & Murray, 2016) via the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
-   - We trained an neural likelihood estimator (NLE; Papamakarios et al., 2019) via the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+   - We estimated the approximate posterior distribution with neural posterior estimation and learned summary statistics (NPE; Radev et al., 2020) via the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+   - We trained a neural likelihood estimator (NLE; Papamakarios et al., 2019) via the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
    - We sampled from the approximate joint distribution :math:`p(x, \theta)` using jointly amortized neural approximation (JANA; Radev et al., 2023a), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
 
 1. Radev, S. T., Schmitt, M., Schumacher, L., Elsemüller, L., Pratz, V., Schälte, Y., Köthe, U., & Bürkner, P.-C. (2023). BayesFlow: Amortized Bayesian Workflows With Neural Networks. *arXiv:2306.16015*. (`arXiv paper <https://arxiv.org/abs/2306.16015>`__)
@@ -72,6 +72,17 @@ You can cite BayesFlow along the lines of:
      booktitle={The 39th Conference on Uncertainty in Artificial Intelligence},
      year={2023},
      url={https://openreview.net/forum?id=dS3wVICQrU0}
+   }
+
+   @article{radev2020bayesflow,
+     title={{BayesFlow}: Learning complex stochastic models with invertible neural networks},
+     author={Radev, Stefan T. and Mertens, Ulf K. and Voss, Andreas and Ardizzone, Lynton and K{\"o}the, Ullrich},
+     journal={IEEE transactions on neural networks and learning systems},
+     volume={33},
+     number={4},
+     pages={1452--1466},
+     year={2020},
+     publisher={IEEE}
    }
 
 Acknowledgments
