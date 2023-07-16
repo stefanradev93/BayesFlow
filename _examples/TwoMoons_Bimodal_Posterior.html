@@ -442,25 +442,21 @@ document.write(`
 </div>
 </div>
 </div>
-<p>This example will demonstrate amortized estimation of a somewhat strange Bayesian model, whose posterior evaluated at the origin <span class="math notranslate nohighlight">\(x = (0, 0)\)</span> of the “data” will resemble two crescent moons. The forward process is a noisy non-linear transformation on a 2D plane:
-<br><br>
-$$</p>
-<div class="amsmath math notranslate nohighlight" id="equation-fcae0bdd-2cbe-48dd-b0ef-53fa8a2656de">
-<span class="eqno">(1)<a class="headerlink" href="#equation-fcae0bdd-2cbe-48dd-b0ef-53fa8a2656de" title="Permalink to this equation">#</a></span>\[\begin{align}
+<p>This example will demonstrate amortized estimation of a somewhat strange Bayesian model, whose posterior evaluated at the origin <span class="math notranslate nohighlight">\(x = (0, 0)\)</span> of the “data” will resemble two crescent moons. The forward process is a noisy non-linear transformation on a 2D plane:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
 x_1 &amp;= -|\theta_1 + \theta_2|/\sqrt{2} + r \cos(\alpha) + 0.25\\
 x_2 &amp;= (-\theta_1 + \theta_2)/\sqrt{2} + r\sin{\alpha}
-\end{align}\]</div>
+\end{align}
+\end{split}\]</div>
+<p>with <span class="math notranslate nohighlight">\(x = (x_1, x_2)\)</span> playing the role of “observables”, <span class="math notranslate nohighlight">\(\alpha \sim \text{Uniform}(-\pi/2, \pi/2)\)</span>, <span class="math notranslate nohighlight">\(r \sim \text{Normal}(0.1, 0.01)\)</span>, and a prior over the 2D parameter vector <span class="math notranslate nohighlight">\(\theta = (\theta_1, \theta_2)\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[
-&lt;br&gt;
-with $x = (x_1, x_2)$ playing the role of &quot;observables&quot;, $\alpha \sim \text{Uniform}(-\pi/2, \pi/2)$, $r \sim \text{Normal}(0.1, 0.01)$, and a prior over the 2D parameter vector $\theta = (\theta_1, \theta_2)$:
-&lt;br&gt;&lt;br&gt;
-\]</div>
-<div class="amsmath math notranslate nohighlight" id="equation-6cb0bd5e-d102-45a8-ab80-f5b6a51b22fe">
-<span class="eqno">(2)<a class="headerlink" href="#equation-6cb0bd5e-d102-45a8-ab80-f5b6a51b22fe" title="Permalink to this equation">#</a></span>\[\begin{align}
+\begin{align}
 \theta_1, \theta_2 \sim \text{Uniform}(-1, 1)
-\end{align}\]</div>
-<p>$$</p>
+\end{align}
+\]</div>
 <p>This method is typically used for benchmarking simulation-based inference (SBI) methods (see https://arxiv.org/pdf/2101.04653) and any method for amortized Bayesian inference should be capable of recovering the two moons posterior <em>without</em> using a gazillion of simulations. Note, that this is a considerably harder task than modeling the common unconditional two moons data set used often in the context of normalizing flows.</p>
 <p>The two moons generative model, along with all benchmarks from https://arxiv.org/pdf/2101.04653, exists as a standalone object in the <code class="docutils literal notranslate"><span class="pre">bayesflow.benchmarks</span></code> module. So let’s import it using the <code class="docutils literal notranslate"><span class="pre">Benchmark</span></code> helper class.</p>
 <div class="cell docutils container">

@@ -472,100 +472,91 @@ document.write(`
 </div>
 <section id="introduction">
 <h2><span class="section-number">5.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
-<br>
-In this tutorial, we will look at a simple linear ODE system:
-<br>
-$$
+<p>In this tutorial, we will look at a simple linear ODE system:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \frac{du}{dt} = a u + b v \\
 \frac{dv}{dt} = c u + d v  
-$$
-<br>
+\end{split}\]</div>
 <p>with the boundary conditions:</p>
-<br>
-$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 u(t=0) = u_0 \\
 v(t=0) = v_0
-$$
-<br>
+\end{split}\]</div>
 <p>Given the solutions <span class="math notranslate nohighlight">\(u(t)\)</span> and <span class="math notranslate nohighlight">\(v(t)\)</span>, we want to use BayesFlow to estimate the parameters <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span> of the ODE equations as well as the boundary conditions <span class="math notranslate nohighlight">\(u_0\)</span> and <span class="math notranslate nohighlight">\(v_0\)</span> over all possible solutions of the system.</p>
 <section id="analytical-solution">
 <h3><span class="section-number">5.1.1. </span>Analytical Solution<a class="headerlink" href="#analytical-solution" title="Permalink to this heading">#</a></h3>
 <p>The advantage of such a simple ODE system is, that the analytical solutions for <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(v\)</span> are known:</p>
-<br>
-$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{pmatrix}
     u \\
     v
 \end{pmatrix}
 = C_1 e^{\lambda_1 t} \vec{v_1} + C_2 e^{\lambda_2 t} \vec{v_2} = 
 \begin{bmatrix}
-    \vec{v_1} & \vec{v_2}
+    \vec{v_1} &amp; \vec{v_2}
 \end{bmatrix}
 \begin{pmatrix}
     C_1 e^{\lambda_1 t} \\
     C_2 e^{\lambda_2 t}
 \end{pmatrix}
-$$
-<br>
-where $\lambda_1$ and $\lambda_2$ are eigenvalues and $\vec{v_1}$ and $\vec{v_2}$ are the corresponding eigenvectors of the matrix:
-<br>
-<br>
-$$
+\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\lambda_1\)</span> and <span class="math notranslate nohighlight">\(\lambda_2\)</span> are eigenvalues and <span class="math notranslate nohighlight">\(\vec{v_1}\)</span> and <span class="math notranslate nohighlight">\(\vec{v_2}\)</span> are the corresponding eigenvectors of the matrix:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 A=
 \begin{pmatrix}
-    a & b \\
-    c & d \\
+    a &amp; b \\
+    c &amp; d \\
 \end{pmatrix}
-$$
-<br>
+\end{split}\]</div>
 <p>Note, that <span class="math notranslate nohighlight">\(\begin{bmatrix} \vec{v_1} &amp; \vec{v_2} \end{bmatrix}\)</span> is the matrix with eigenvectors <span class="math notranslate nohighlight">\(\vec{v_1}\)</span> and <span class="math notranslate nohighlight">\(\vec{v_2}\)</span> as its column vectors.
 The constants <span class="math notranslate nohighlight">\(C_1\)</span> and <span class="math notranslate nohighlight">\(C_2\)</span> can be computed from the boundary condition:</p>
-<br>
-$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{pmatrix}
     C_1 \\
     C_2
 \end{pmatrix}
 =
 \begin{bmatrix}
-    \vec{v_1} & \vec{v_2}
+    \vec{v_1} &amp; \vec{v_2}
 \end{bmatrix}^{-1}
 \begin{pmatrix}
     u_0 \\
     v_0
 \end{pmatrix}
-$$</section>
+\end{split}\]</div>
+</section>
 <section id="stability-of-solutions">
 <h3><span class="section-number">5.1.2. </span>Stability of Solutions<a class="headerlink" href="#stability-of-solutions" title="Permalink to this heading">#</a></h3>
 <p>The solution <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(v\)</span> will be of the form:</p>
-<p><br><br>
-$<span class="math notranslate nohighlight">\(
+<div class="math notranslate nohighlight">
+\[\begin{split}
 u = v_{11} C_1 e^{\lambda_1 t} + v_{21} C_2 e^{\lambda_2 t} \\
 v = v_{12} C_1 e^{\lambda_1 t} + v_{22} C_2 e^{\lambda_2 t}
-\)</span>$
-<br><br></p>
+\end{split}\]</div>
 <p>By separating the real and complex part of the eigenvalues <span class="math notranslate nohighlight">\(\lambda_j = \gamma + i \omega\)</span> we see that the real part determines whether a solution will be exponential (increasing/decreasing) or stay constant, whereas the complex part will determine the oscillation behaviour.</p>
-<p><br><br>
-$<span class="math notranslate nohighlight">\(
+<div class="math notranslate nohighlight">
+\[\begin{split}
 u = v_{11} C_1 e^{\gamma_1 t} \left[ \cos(\omega_1 t) + i \sin(\omega_1 t) \right] + v_{21} C_2 e^{\gamma_2 t} \left[ \cos(\omega_2 t) + i \sin(\omega_2 t) \right] \\
 v = v_{12} C_1 e^{\gamma_1 t} \left[ \cos(\omega_1 t) + i \sin(\omega_1 t) \right] + v_{22} C_2 e^{\gamma_2 t} \left[  \cos(\omega_2 t) + i \sin(\omega_2 t) \right]
-\)</span>$
-<br><br></p>
+\end{split}\]</div>
 <p>We will apply rejection sampling to only consider stable solutions. In other words, we only keep solutions that fulfill the condition <span class="math notranslate nohighlight">\(\gamma_1 \leq 0\)</span> and <span class="math notranslate nohighlight">\(\gamma_2 \leq 0\)</span>.</p>
 </section>
 </section>
 <section id="generative-model-structure">
 <h2><span class="section-number">5.2. </span>Generative Model Structure<a class="headerlink" href="#generative-model-structure" title="Permalink to this heading">#</a></h2>
-<p>We have to generate some simulated data to train our BayesFlow architecture. The first step is to randomly draw combinations of <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span>, <span class="math notranslate nohighlight">\(d\)</span>, <span class="math notranslate nohighlight">\(u_0\)</span> and <span class="math notranslate nohighlight">\(v_0\)</span> from a uniform prior distribution. By computing the eigenvalues, we can preemptively reject prior samples that will lead to unstable solutions. Additionally, we estimate the prior means and standard deviations for standardization later. The standardization step is just a convenience, since neural networks like well-scaled data.</p>
+<p>We have to generate some simulated data to train our BayesFlow architecture. The first step is to randomly draw combinations of <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span>, <span class="math notranslate nohighlight">\(d\)</span>, <span class="math notranslate nohighlight">\(u_0\)</span> and <span class="math notranslate nohighlight">\(v_0\)</span> from a uniform prior distribution. By computing the eigenvalues, we can preemptively reject prior samples that will lead to unstable solutions. Note, that this will also change the prior. Additionally, we estimate the prior means and standard deviations for standardization later. The standardization step is just a convenience, since neural networks like well-scaled data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">model_prior</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates random draws from uniform pior with rejection sampling.&quot;&quot;&quot;</span>
 
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="c1"># generate draw from prior</span>
         <span class="n">sample</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
-        <span class="c1"># reject, if solution not stable</span>
         <span class="n">A</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
         <span class="n">eigenvalues</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">eigenvalues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">real</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">eigenvalues</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">real</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
