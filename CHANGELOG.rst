@@ -60,3 +60,10 @@ General Improvements:
 3. Figures resulting ``diagnostics.py`` have been improved and prettified
 4. Added a module ``sensitivity.py`` for testing the sensitivity of neural approximators to model misspecification
 5. Multiple bugfixes, including a major bug affecting the saving and loading of learnable permutations
+
+1.1.2 Series
+----------
+
+1. Bugfix in ``SetTransformer`` affecting saving and loading when using the version with inducing points.
+2. Bugfix in ``SetTransformer`` when using ``train_offline`` and batches result in unequal shapes.
+3. Improved documentation with examples
