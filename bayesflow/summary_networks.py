@@ -583,7 +583,8 @@ class HierarchicalNetwork(tf.keras.Model):
         Returns
         -------
         out : tf.Tensor
-            Output of shape ``(batch_size, out_dim) if return_all=False`` else
+            Output of shape ``(batch_size, out_dim) if return_all=False`` else a tuple
+            of ``len(outputs) == len(networks)`` corresponding to all outputs of all networks.
         """
 
         if return_all:
