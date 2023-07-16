@@ -296,7 +296,7 @@ This work is supported by the Deutsche Forschungsgemeinschaft (DFG, German Resea
 You can cite BayesFlow along the lines of:
 
 - We approximated the posterior with neural posterior estimation and learned summary statistics (NPE; Radev et al., 2020), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
-- We approximated the likelihood with neural likelihood estimation (NLE; Papamakarios et al., 2019), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+- We approximated the likelihood with neural likelihood estimation (NLE; Papamakarios et al., 2019) without hand-cafted summary statistics, as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
 - We performed simultaneous posterior and likelihood estimation with jointly amortized neural approximation (JANA; Radev et al., 2023a), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
 
 1. Radev, S. T., Schmitt, M., Schumacher, L., Elsemüller, L., Pratz, V., Schälte, Y., Köthe, U., & Bürkner, P.-C. (2023). BayesFlow: Amortized Bayesian workflows with neural networks. *arXiv:2306.16015*. ([arXiv](https://arxiv.org/abs/2306.16015))
