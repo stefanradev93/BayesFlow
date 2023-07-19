@@ -49,7 +49,7 @@ myst_enable_extensions = [
 myst_url_schemes = ["http", "https", "mailto"]
 autodoc_default_options = {
     "members": "var1, var2",
-    "special-members": "__call__",
+    "special-members": "__call__,__init__",
     "undoc-members": True,
     "exclude-members": "__weakref__",
 }
