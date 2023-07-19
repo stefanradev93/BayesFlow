@@ -407,7 +407,10 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-bayesflow.benchmarks">Module contents</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.Benchmark"><code class="docutils literal notranslate"><span class="pre">Benchmark</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.Benchmark"><code class="docutils literal notranslate"><span class="pre">Benchmark</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.Benchmark.__init__"><code class="docutils literal notranslate"><span class="pre">Benchmark.__init__()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.get_benchmark_module"><code class="docutils literal notranslate"><span class="pre">get_benchmark_module()</span></code></a></li>
 </ul>
 </li>
@@ -506,6 +509,31 @@ document.write(`
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.benchmarks.</span></span><span class="sig-name descname"><span class="pre">Benchmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'joint'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/benchmarks.html#Benchmark"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.benchmarks.Benchmark" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Interface class for a benchmark.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.benchmarks.Benchmark.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'joint'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/benchmarks.html#Benchmark.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.benchmarks.Benchmark.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a benchmark generative model by using the blueprint contained
+in a benchmark file.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>name</strong><span class="classifier">str</span></dt><dd><p>The name of the benchmark file (without suffix, i.e., .py) to use as a blueprint.</p>
+</dd>
+<dt><strong>mode</strong><span class="classifier">str, otpional, default: ‘joint’</span></dt><dd><p>The mode in which to configure the data, should be in (‘joint’, ‘posterior’, ‘likelihood’)</p>
+</dd>
+<dt><strong>seed</strong><span class="classifier">int or None, optional, default: None</span></dt><dd><p>The seed to use if reproducibility is required. Will be passed to a numpy RNG.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Optional keyword arguments.</p>
+<p>If ‘sim_kwargs’ is present, key-value pairs will be interpreted as arguments for the simulator
+and propagated accordingly.</p>
+<p>If ‘prior_kwargs’ is present, key-value pairs will be interpreted as arguments for the prior
+and propagated accordingly.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
@@ -568,7 +596,10 @@ module and returns it.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-bayesflow.benchmarks">Module contents</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.Benchmark"><code class="docutils literal notranslate"><span class="pre">Benchmark</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.Benchmark"><code class="docutils literal notranslate"><span class="pre">Benchmark</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.Benchmark.__init__"><code class="docutils literal notranslate"><span class="pre">Benchmark.__init__()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.get_benchmark_module"><code class="docutils literal notranslate"><span class="pre">get_benchmark_module()</span></code></a></li>
 </ul>
 </li>

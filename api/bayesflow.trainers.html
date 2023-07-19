@@ -406,6 +406,7 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.__init__"><code class="docutils literal notranslate"><span class="pre">Trainer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.diagnose_latent2d"><code class="docutils literal notranslate"><span class="pre">Trainer.diagnose_latent2d()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.diagnose_sbc_histograms"><code class="docutils literal notranslate"><span class="pre">Trainer.diagnose_sbc_histograms()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.load_pretrained_network"><code class="docutils literal notranslate"><span class="pre">Trainer.load_pretrained_network()</span></code></a></li>
@@ -495,6 +496,38 @@ optimization method, such as Bayesian optimization.</p>
 </div>
 </li>
 </ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.trainers.Trainer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amortizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generative_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configurator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_lr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_checks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a trainer which will use a generative model (or data simulated from it) to optimize
+a neural architecture (amortizer) for amortized posterior inference, likelihood inference, or both.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>amortizer</strong><span class="classifier"><cite>bayesflow.amortizers.Amortizer</cite></span></dt><dd><p>The neural architecture to be optimized.</p>
+</dd>
+<dt><strong>generative_model</strong><span class="classifier"><cite>bayesflow.forward_inference.GenerativeModel</cite></span></dt><dd><p>A generative model returning a dictionary with randomly sampled parameters, data, and optional context</p>
+</dd>
+<dt><strong>configurator</strong><span class="classifier">callable or None, optional, default: None</span></dt><dd><p>A callable object transforming and combining the outputs of the generative model into inputs for a BayesFlow
+amortizer.</p>
+</dd>
+<dt><strong>checkpoint_path</strong><span class="classifier">string or None, optional, default: None</span></dt><dd><p>Optional file path for storing the trained amortizer, loss history and optional memory.</p>
+</dd>
+<dt><strong>max_to_keep</strong><span class="classifier">int, optional, default: 3</span></dt><dd><p>Number of checkpoints and loss history snapshots to keep.</p>
+</dd>
+<dt><strong>default_lr</strong><span class="classifier">float, optional, default: 0.0005</span></dt><dd><p>The default learning rate to use for default optimizers.</p>
+</dd>
+<dt><strong>skip_checks</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>If True, do not perform consistency checks, i.e., simulator runs and passed through nets</p>
+</dd>
+<dt><strong>memory</strong><span class="classifier">bool or bayesflow.SimulationMemory, optional, default: False</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, store a pre-defined amount of simulations for later use (validation, etc.).
+If <cite>SimulationMemory</cite> instance provided, stores a reference to the instance.
+Otherwise the corresponding attribute will be set to None.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.trainers.Trainer.diagnose_latent2d">
 <span class="sig-name descname"><span class="pre">diagnose_latent2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/trainers.html#Trainer.diagnose_latent2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.trainers.Trainer.diagnose_latent2d" title="Permalink to this definition">#</a></dt>
@@ -1024,6 +1057,7 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.__init__"><code class="docutils literal notranslate"><span class="pre">Trainer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.diagnose_latent2d"><code class="docutils literal notranslate"><span class="pre">Trainer.diagnose_latent2d()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.diagnose_sbc_histograms"><code class="docutils literal notranslate"><span class="pre">Trainer.diagnose_sbc_histograms()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.trainers.Trainer.load_pretrained_network"><code class="docutils literal notranslate"><span class="pre">Trainer.load_pretrained_network()</span></code></a></li>

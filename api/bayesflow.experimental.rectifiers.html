@@ -406,11 +406,13 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.DriftNetwork"><code class="docutils literal notranslate"><span class="pre">DriftNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.DriftNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">DriftNetwork.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.DriftNetwork.call"><code class="docutils literal notranslate"><span class="pre">DriftNetwork.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.DriftNetwork.drift"><code class="docutils literal notranslate"><span class="pre">DriftNetwork.drift()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.__init__"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.call"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.compute_loss"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.compute_loss()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.log_density"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.log_density()</span></code></a></li>
@@ -440,6 +442,37 @@ of unconditional image generation.</p>
 <p>[1] Liu, X., Gong, C., &amp; Liu, Q. (2022).
 Flow straight and fast: Learning to generate and transfer data with rectified flow.
 arXiv preprint arXiv:2209.03003.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.experimental.rectifiers.DriftNetwork.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mc_dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/experimental/rectifiers.html#DriftNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.experimental.rectifiers.DriftNetwork.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a learnable velocity field instance to be used in the context of rectifying
+flows or neural ODEs.</p>
+<p>[1] Liu, X., Gong, C., &amp; Liu, Q. (2022).
+Flow straight and fast: Learning to generate and transfer data with rectified flow.
+arXiv preprint arXiv:2209.03003.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>target_dim</strong><span class="classifier">int</span></dt><dd><p>The problem dimensionality (e.g., in parameter estimation, the number of parameters)</p>
+</dd>
+<dt><strong>num_dense</strong><span class="classifier">int, optional, default: 3</span></dt><dd><p>The number of hidden layers for the inner fully-connected network</p>
+</dd>
+<dt><strong>dense_args</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The arguments to be passed to <code class="docutils literal notranslate"><span class="pre">tf.keras.layers.Dense</span></code> constructor. If None, default settings
+will be fetched from <code class="docutils literal notranslate"><span class="pre">bayesflow.default_settings</span></code>.</p>
+</dd>
+<dt><strong>dropout</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Whether to use dropout in-between the hidden layers.</p>
+</dd>
+<dt><strong>mc_dropout</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Whether to use dropout Monte Carlo dropout (i.e., Bayesian approximation) during inference</p>
+</dd>
+<dt><strong>dropout_prob</strong><span class="classifier">float in (0, 1), optional, default: 0.05</span></dt><dd><p>The dropout probability. Only has effecft if <code class="docutils literal notranslate"><span class="pre">dropout=True</span></code> or <code class="docutils literal notranslate"><span class="pre">mc_dropout=True</span></code></p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments passed to the <code class="docutils literal notranslate"><span class="pre">tf.keras.Model.__init__</span></code> method.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.experimental.rectifiers.DriftNetwork.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latent_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/experimental/rectifiers.html#DriftNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.experimental.rectifiers.DriftNetwork.call" title="Permalink to this definition">#</a></dt>
@@ -494,6 +527,35 @@ to a normalizing flow in a BayesFlow pipeline.</p>
 <p>[1] Liu, X., Gong, C., &amp; Liu, Q. (2022).
 Flow straight and fast: Learning to generate and transfer data with rectified flow.
 arXiv preprint arXiv:2209.03003.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.experimental.rectifiers.RectifiedDistribution.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drift_net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_net</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latent_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_loss_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/experimental/rectifiers.html#RectifiedDistribution.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Initializes a composite neural network to represent an amortized approximate posterior through
+for a rectifying flow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>drift_net</strong><span class="classifier">tf.keras.Model</span></dt><dd><p>A neural network for the velocity field (drift) of the learnable ODE</p>
+</dd>
+<dt><strong>summary_net</strong><span class="classifier">tf.keras.Model or None, optional, default: None</span></dt><dd><p>An optional summary network to compress non-vector data structures.</p>
+</dd>
+<dt><strong>latent_dist</strong><span class="classifier">callable or None, optional, default: None</span></dt><dd><p>The latent distribution towards which to optimize the networks. Defaults to
+a multivariate unit Gaussian.</p>
+</dd>
+<dt><strong>loss_fun</strong><span class="classifier">callable or None, optional, default: None</span></dt><dd><p>The loss function for “rectifying” the velocity field. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, defaults
+to tf.keras.losses.logcosh. Sensible alternatives are MSE (as in [])</p>
+</dd>
+<dt><strong>summary_loss_fun</strong><span class="classifier">callable, str, or None, optional, default: None</span></dt><dd><p>The loss function which accepts the outputs of the summary network. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no loss is provided
+and the summary space will not be shaped according to a known distribution (see [2]).
+If <code class="docutils literal notranslate"><span class="pre">summary_loss_fun='MMD'</span></code>, the default loss from [2] will be used.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Additional keyword arguments passed to the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method of a <code class="docutils literal notranslate"><span class="pre">tf.keras.Model</span></code> instance.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.experimental.rectifiers.RectifiedDistribution.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_eval_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/experimental/rectifiers.html#RectifiedDistribution.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.call" title="Permalink to this definition">#</a></dt>
@@ -636,11 +698,13 @@ For instance, <code class="docutils literal notranslate"><span class="pre">kwarg
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.DriftNetwork"><code class="docutils literal notranslate"><span class="pre">DriftNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.DriftNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">DriftNetwork.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.DriftNetwork.call"><code class="docutils literal notranslate"><span class="pre">DriftNetwork.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.DriftNetwork.drift"><code class="docutils literal notranslate"><span class="pre">DriftNetwork.drift()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.__init__"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.call"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.compute_loss"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.compute_loss()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.log_density"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.log_density()</span></code></a></li>

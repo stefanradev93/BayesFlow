@@ -374,14 +374,14 @@ document.write(`
 <span class="sd">    See Spectral Normalization for Generative Adversarial Networks](https://arxiv.org/abs/1802.05957).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">power_iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SpectralNormalization.__init__"><a class="viewcode-back" href="../../api/bayesflow.wrappers.html#bayesflow.wrappers.SpectralNormalization.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">power_iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SpectralNormalization</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">power_iterations</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;`power_iterations` should be greater than zero, got &quot;</span> <span class="s2">&quot;`power_iterations=</span><span class="si">{}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">power_iterations</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">power_iterations</span> <span class="o">=</span> <span class="n">power_iterations</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="SpectralNormalization.build"><a class="viewcode-back" href="../../api/bayesflow.wrappers.html#bayesflow.wrappers.SpectralNormalization.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Build `Layer`&quot;&quot;&quot;</span>

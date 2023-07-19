@@ -406,16 +406,19 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.AffineCoupling"><code class="docutils literal notranslate"><span class="pre">AffineCoupling</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.AffineCoupling.__init__"><code class="docutils literal notranslate"><span class="pre">AffineCoupling.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.AffineCoupling.call"><code class="docutils literal notranslate"><span class="pre">AffineCoupling.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer"><code class="docutils literal notranslate"><span class="pre">CouplingLayer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.__init__"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.call"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.forward"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.forward()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.inverse"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.inverse()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling"><code class="docutils literal notranslate"><span class="pre">SplineCoupling</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.__init__"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.call"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.call()</span></code></a></li>
 </ul>
 </li>
@@ -444,6 +447,34 @@ Advances in neural information processing systems, 31.</p>
 <p>[2] Ardizzone, L., Lüth, C., Kruse, J., Rother, C., &amp; Köthe, U. (2019).
 Guided image generation with conditional invertible neural networks.
 arXiv preprint arXiv:1907.02392.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.coupling_networks.AffineCoupling.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#AffineCoupling.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.AffineCoupling.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates one half of an affine coupling layer to be used as part of a <code class="docutils literal notranslate"><span class="pre">CouplingLayer</span></code> in
+an <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code> instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>dim_out</strong><span class="classifier">int</span></dt><dd><p>The output dimensionality of the affine coupling layer.</p>
+</dd>
+<dt><strong>settings_dict</strong><span class="classifier">dict</span></dt><dd><p>The settings for the inner networks. Defaults will use:
+<a href="#id1"><span class="problematic" id="id2">``</span></a>settings_dict={</p>
+<blockquote>
+<div><p>“dense_args”    : dict(units=128, activation=”relu”),
+“num_dense”     : 2,
+“spec_norm”     : False,
+“mc_dropout”    : False,
+“dropout”       : True,
+“residual”      : False,
+“dropout_prob”  : 0.01,
+“soft_clamping” : 1.9</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.coupling_networks.AffineCoupling.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#AffineCoupling.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.AffineCoupling.call" title="Permalink to this definition">#</a></dt>
@@ -481,6 +512,37 @@ z shape: (batch_size, …, input_dim//2), log_det_J shape: (batch_size, …)</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.coupling_networks.</span></span><span class="sig-name descname"><span class="pre">CouplingLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#CouplingLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.CouplingLayer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
 <p>General wrapper for a coupling layer (either affine or spline) with different settings.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.coupling_networks.CouplingLayer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latent_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupling_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupling_design</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'affine'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permutation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fixed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_act_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_norm_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#CouplingLayer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.CouplingLayer.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates an invertible coupling layers instance with the provided hyperparameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>latent_dim</strong><span class="classifier">int</span></dt><dd><p>The dimensionality of the latent space (equal to the dimensionality of the target variable)</p>
+</dd>
+<dt><strong>coupling_settings</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The coupling network settings to pass to the internal coupling layers. See <code class="docutils literal notranslate"><span class="pre">default_settings</span></code>
+for the required entries.</p>
+</dd>
+<dt><strong>coupling_design</strong><span class="classifier">str or callable, optional, default: ‘affine’</span></dt><dd><p>The type of internal coupling network to use. Must be in [‘affine’, ‘spline’].
+In general, spline couplings run slower than affine couplings, but require fewers coupling
+layers. Spline couplings may work best with complex (e.g., multimodal) low-dimensional
+problems. The difference will become less and less pronounced as we move to higher dimensions.</p>
+</dd>
+<dt><strong>permutation</strong><span class="classifier">str or None, optional, default: ‘fixed’</span></dt><dd><p>Whether to use permutations between coupling layers. Highly recommended if <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>
+Important: Must be in [‘fixed’, ‘learnable’, None]</p>
+</dd>
+<dt><strong>use_act_norm</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Whether to use activation normalization after each coupling layer. Recommended to keep default.</p>
+</dd>
+<dt><strong>act_norm_init</strong><span class="classifier">np.ndarray of shape (num_simulations, num_params) or None, optional, default: None</span></dt><dd><p>Optional data-dependent initialization for the internal <code class="docutils literal notranslate"><span class="pre">ActNorm</span></code> layers.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.coupling_networks.CouplingLayer.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_or_z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#CouplingLayer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.CouplingLayer.call" title="Permalink to this definition">#</a></dt>
@@ -574,6 +636,35 @@ arXiv preprint arXiv:1907.02392.</p>
 <p>Implement only rational quadratic splines (RQS), since these appear to work
 best in practice and lead to stable training.</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.coupling_networks.SplineCoupling.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#SplineCoupling.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.SplineCoupling.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates one half of a spline coupling layer to be used as part of a <code class="docutils literal notranslate"><span class="pre">CouplingLayer</span></code> in
+an <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code> instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>dim_out</strong><span class="classifier">int</span></dt><dd><p>The output dimensionality of the coupling layer.</p>
+</dd>
+<dt><strong>settings_dict</strong><span class="classifier">dict</span></dt><dd><p>The settings for the inner networks. Defaults will use:
+<a href="#id3"><span class="problematic" id="id4">``</span></a>settings_dict={</p>
+<blockquote>
+<div><p>“dense_args”     : dict(units=128, activation=”relu”),
+“num_dense”      : 2,
+“spec_norm”      : False,
+“mc_dropout”     : False,
+“dropout”        : True,
+“residual”       : False,
+“dropout_prob”   : 0.05,
+“bins”           : 16,
+“default_domain” : (-5., 5., -5., 5.)</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.coupling_networks.SplineCoupling.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#SplineCoupling.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.SplineCoupling.call" title="Permalink to this definition">#</a></dt>
 <dd><p>Performs one pass through a spline coupling layer (either inverse or forward).</p>
@@ -656,16 +747,19 @@ z shape: (batch_size, …, input_dim//2), log_det_J shape: (batch_size, …)</p>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.AffineCoupling"><code class="docutils literal notranslate"><span class="pre">AffineCoupling</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.AffineCoupling.__init__"><code class="docutils literal notranslate"><span class="pre">AffineCoupling.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.AffineCoupling.call"><code class="docutils literal notranslate"><span class="pre">AffineCoupling.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer"><code class="docutils literal notranslate"><span class="pre">CouplingLayer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.__init__"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.call"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.forward"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.forward()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.inverse"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.inverse()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling"><code class="docutils literal notranslate"><span class="pre">SplineCoupling</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.__init__"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.call"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.call()</span></code></a></li>
 </ul>
 </li>

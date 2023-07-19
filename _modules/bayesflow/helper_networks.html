@@ -375,7 +375,7 @@ document.write(`
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a conditional version of a standard fully connected (FC) network.</span>
 <span class="sd">    Would also work as an unconditional estimator.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="DenseCouplingNet.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.DenseCouplingNet.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a conditional coupling net (FC neural network).</span>
 
 <span class="sd">        Parameters</span>
@@ -432,7 +432,7 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">dim_out</span><span class="p">,</span> <span class="n">kernel_initializer</span><span class="o">=</span><span class="s2">&quot;zeros&quot;</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">residual_output</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">input_shape</span><span class="o">=</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">input_shape</span><span class="o">=</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="DenseCouplingNet.call"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.DenseCouplingNet.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Concatenates target and condition and performs a forward pass through the coupling net.</span>
@@ -470,7 +470,7 @@ document.write(`
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a layer to permute the inputs entering a (conditional) coupling layer. Uses</span>
 <span class="sd">    fixed permutations, as these perform equally well compared to learned permutations.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">):</span>
+<div class="viewcode-block" id="Permutation.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.Permutation.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an invertible permutation layer for a conditional invertible layer.</span>
 
 <span class="sd">        Parameters</span>
@@ -488,7 +488,7 @@ document.write(`
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inv_permutation</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
             <span class="n">initial_value</span><span class="o">=</span><span class="n">inv_permutation_vec</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;inv_permutation&quot;</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Permutation.call"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.Permutation.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Permutes a batch of target vectors over the last axis.</span>
@@ -528,7 +528,7 @@ document.write(`
 <span class="sd">    convolutions. Advances in neural information processing systems, 31.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">):</span>
+<div class="viewcode-block" id="Orthogonal.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.Orthogonal.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an invertible orthogonal transformation (generalized permutation)</span>
 
 <span class="sd">        Parameters</span>
@@ -542,7 +542,7 @@ document.write(`
         <span class="n">init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">initializers</span><span class="o">.</span><span class="n">Orthogonal</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
             <span class="n">initial_value</span><span class="o">=</span><span class="n">init</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">)),</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;learnable_permute&quot;</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Orthogonal.call"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.Orthogonal.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transforms a batch of target vectors over the last axis through an approximately</span>
@@ -599,7 +599,7 @@ document.write(`
 <span class="sd">    In international conference on machine learning (pp. 1050-1059). PMLR.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dropout_prob</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="MCDropout.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.MCDropout.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dropout_prob</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a custom instance of an MC Dropout layer. Will be used both</span>
 <span class="sd">        during training and inference.</span>
 
@@ -610,7 +610,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">drop</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_prob</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_prob</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MCDropout.call"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.MCDropout.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Randomly sets elements of ``inputs`` to zero.</span>
@@ -660,7 +660,7 @@ document.write(`
 <span class="sd">       Advances in neural information processing systems 29 (2016): 901-909.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_dim</span><span class="p">,</span> <span class="n">act_norm_init</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="ActNorm.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.ActNorm.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_dim</span><span class="p">,</span> <span class="n">act_norm_init</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an instance of an ActNorm Layer as proposed by [1].</span>
 
 <span class="sd">        Parameters</span>
@@ -680,7 +680,7 @@ document.write(`
 
             <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">latent_dim</span><span class="p">,)),</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;act_norm_bias&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_initalize_parameters_data_dependent</span><span class="p">(</span><span class="n">act_norm_init</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initalize_parameters_data_dependent</span><span class="p">(</span><span class="n">act_norm_init</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ActNorm.call"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.ActNorm.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs one pass through the actnorm layer (either inverse or forward) and normalizes</span>
@@ -774,7 +774,7 @@ document.write(`
 <span class="sd">    J. Mach. Learn. Res., 21, 90-1. https://www.jmlr.org/papers/volume21/19-322/19-322.pdf</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="InvariantModule.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.InvariantModule.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an invariant module according to [1] which represents a learnable permutation-invariant</span>
 <span class="sd">        function with an option for learnable pooling.</span>
 
@@ -802,7 +802,7 @@ document.write(`
                 <span class="n">pooling_fun</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;pooling_fun&quot;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s2">&quot;pooling_fun argument not understood!&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pooler</span> <span class="o">=</span> <span class="n">pooling_fun</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pooler</span> <span class="o">=</span> <span class="n">pooling_fun</span></div>
 
 <div class="viewcode-block" id="InvariantModule.call"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.InvariantModule.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs the forward pass of a learnable invariant transform.</span>
@@ -832,7 +832,7 @@ document.write(`
 <span class="sd">    J. Mach. Learn. Res., 21, 90-1. https://www.jmlr.org/papers/volume21/19-322/19-322.pdf</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="EquivariantModule.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.EquivariantModule.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an equivariant module according to [1] which combines equivariant transforms</span>
 <span class="sd">        with nested invariant transforms, thereby enabling interactions between set members.</span>
 
@@ -847,7 +847,7 @@ document.write(`
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">invariant_module</span> <span class="o">=</span> <span class="n">InvariantModule</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">s3</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">([</span><span class="n">Dense</span><span class="p">(</span><span class="o">**</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;dense_s3_args&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;num_dense_s3&quot;</span><span class="p">])])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s3</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">([</span><span class="n">Dense</span><span class="p">(</span><span class="o">**</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;dense_s3_args&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;num_dense_s3&quot;</span><span class="p">])])</span></div>
 
 <div class="viewcode-block" id="EquivariantModule.call"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.EquivariantModule.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs the forward pass of a learnable equivariant transform.</span>
@@ -884,7 +884,7 @@ document.write(`
 <div class="viewcode-block" id="MultiConv1D"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.MultiConv1D">[docs]</a><span class="k">class</span> <span class="nc">MultiConv1D</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements an inception-inspired 1D convolutional layer using different kernel sizes.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiConv1D.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.MultiConv1D.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an inception-like Conv1D layer</span>
 
 <span class="sd">        Parameters</span>
@@ -906,7 +906,7 @@ document.write(`
         <span class="n">dim_red_args</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;layer_args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;kernel_size&quot;</span><span class="p">,</span> <span class="s2">&quot;strides&quot;</span><span class="p">]}</span>
         <span class="n">dim_red_args</span><span class="p">[</span><span class="s2">&quot;kernel_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">dim_red_args</span><span class="p">[</span><span class="s2">&quot;strides&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dim_red</span> <span class="o">=</span> <span class="n">Conv1D</span><span class="p">(</span><span class="o">**</span><span class="n">dim_red_args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_red</span> <span class="o">=</span> <span class="n">Conv1D</span><span class="p">(</span><span class="o">**</span><span class="n">dim_red_args</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MultiConv1D.call"><a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.MultiConv1D.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through the layer.</span>

@@ -368,16 +368,16 @@ document.write(`
 <div class="viewcode-block" id="Setting"><a class="viewcode-back" href="../../api/bayesflow.default_settings.html#bayesflow.default_settings.Setting">[docs]</a><span class="k">class</span> <span class="nc">Setting</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for settings. It&#39;s here to potentially extend the setting functionality in future.&quot;&quot;&quot;</span>
 
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="Setting.__init__"><a class="viewcode-back" href="../../api/bayesflow.default_settings.html#bayesflow.default_settings.Setting.__init__">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">pass</span></div></div>
 
 
 <div class="viewcode-block" id="MetaDictSetting"><a class="viewcode-back" href="../../api/bayesflow.default_settings.html#bayesflow.default_settings.MetaDictSetting">[docs]</a><span class="k">class</span> <span class="nc">MetaDictSetting</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements an interface for a default meta_dict with optional mandatory fields.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">mandatory_fields</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]):</span>
+<div class="viewcode-block" id="MetaDictSetting.__init__"><a class="viewcode-back" href="../../api/bayesflow.default_settings.html#bayesflow.default_settings.MetaDictSetting.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">mandatory_fields</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>
@@ -389,7 +389,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">meta_dict</span> <span class="o">=</span> <span class="n">meta_dict</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mandatory_fields</span> <span class="o">=</span> <span class="n">mandatory_fields</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mandatory_fields</span> <span class="o">=</span> <span class="n">mandatory_fields</span></div></div>
 
 
 <span class="n">DEFAULT_SETTING_INVARIANT_NET</span> <span class="o">=</span> <span class="n">MetaDictSetting</span><span class="p">(</span>

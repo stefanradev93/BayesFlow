@@ -385,7 +385,7 @@ document.write(`
 <span class="sd">    https://arxiv.org/abs/2202.07125</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="TimeSeriesTransformer.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.TimeSeriesTransformer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_dim</span><span class="p">,</span>
         <span class="n">attention_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -484,7 +484,7 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">template_net</span> <span class="o">=</span> <span class="n">template_type</span>
 
         <span class="c1"># Final output reduces representation into a vector of length summary_dim</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_layer</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">summary_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_layer</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">summary_dim</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TimeSeriesTransformer.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.TimeSeriesTransformer.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs the forward pass through the transformer.</span>
@@ -517,7 +517,7 @@ document.write(`
 <span class="sd">        In International conference on machine learning (pp. 3744-3753). PMLR.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="SetTransformer.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SetTransformer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_dim</span><span class="p">,</span>
         <span class="n">attention_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -604,7 +604,7 @@ document.write(`
         <span class="c1"># Pooler will be applied to the representations learned through self-attention</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pooler</span> <span class="o">=</span> <span class="n">PoolingWithAttention</span><span class="p">(</span>
             <span class="n">summary_dim</span><span class="p">,</span> <span class="n">attention_settings</span><span class="p">,</span> <span class="n">num_dense_fc</span><span class="p">,</span> <span class="n">dense_settings</span><span class="p">,</span> <span class="n">use_layer_norm</span><span class="p">,</span> <span class="n">num_seeds</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="SetTransformer.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SetTransformer.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs the forward pass through the set-transformer.</span>
@@ -636,7 +636,7 @@ document.write(`
 <span class="sd">    J. Mach. Learn. Res., 21, 90-1.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="DeepSet.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.DeepSet.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="n">num_dense_s1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
@@ -701,7 +701,7 @@ document.write(`
 
         <span class="c1"># Output layer to output &quot;summary_dim&quot; learned summary statistics</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">summary_dim</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">summary_dim</span> <span class="o">=</span> <span class="n">summary_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary_dim</span> <span class="o">=</span> <span class="n">summary_dim</span></div>
 
 <div class="viewcode-block" id="DeepSet.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.DeepSet.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs the forward pass of a learnable deep invariant transformation consisting of</span>
@@ -738,13 +738,13 @@ document.write(`
         <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="InvariantNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.InvariantNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">warn</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> will be deprecated. at some point. Use ``DeepSet`` instead.&quot;</span><span class="p">,</span>
             <span class="ne">DeprecationWarning</span><span class="p">,</span>
             <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="SequentialNetwork"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork">[docs]</a><span class="k">class</span> <span class="nc">SequentialNetwork</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
@@ -760,7 +760,7 @@ document.write(`
 <span class="sd">    https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_conv_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">lstm_units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">conv_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SequentialNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_conv_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">lstm_units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">conv_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a stack of inception-like layers followed by an LSTM network, with the idea</span>
 <span class="sd">        of learning vector representations from multivariate time series data.</span>
 
@@ -793,7 +793,7 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lstm</span> <span class="o">=</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">lstm_units</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">summary_dim</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">summary_dim</span> <span class="o">=</span> <span class="n">summary_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary_dim</span> <span class="o">=</span> <span class="n">summary_dim</span></div>
 
 <div class="viewcode-block" id="SequentialNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through the network by first passing `x` through the sequence of</span>
@@ -821,7 +821,7 @@ document.write(`
 <span class="sd">    of data to provide an individual network for each split of the data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_splits</span><span class="p">,</span> <span class="n">split_data_configurator</span><span class="p">,</span> <span class="n">network_type</span><span class="o">=</span><span class="n">InvariantNetwork</span><span class="p">,</span> <span class="n">network_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SplitNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SplitNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_splits</span><span class="p">,</span> <span class="n">split_data_configurator</span><span class="p">,</span> <span class="n">network_type</span><span class="o">=</span><span class="n">InvariantNetwork</span><span class="p">,</span> <span class="n">network_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a composite network of `num_splits` sub-networks of type `network_type`, each with configuration</span>
 <span class="sd">        specified by `meta`.</span>
 
@@ -858,7 +858,7 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">num_splits</span> <span class="o">=</span> <span class="n">num_splits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">split_data_configurator</span> <span class="o">=</span> <span class="n">split_data_configurator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">networks</span> <span class="o">=</span> <span class="p">[</span><span class="n">network_type</span><span class="p">(</span><span class="o">**</span><span class="n">network_kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_splits</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">networks</span> <span class="o">=</span> <span class="p">[</span><span class="n">network_type</span><span class="p">(</span><span class="o">**</span><span class="n">network_kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_splits</span><span class="p">)]</span></div>
 
 <div class="viewcode-block" id="SplitNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SplitNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through the subnetworks and concatenates their output.</span>
@@ -887,7 +887,7 @@ document.write(`
 <span class="sd">        arXiv preprint arXiv:2301.11873.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">networks_list</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.HierarchicalNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">networks_list</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a hierarchical network consisting of stacked summary networks (one for each hierarchical level)</span>
 <span class="sd">        that are aligned with the probabilistic structure of the processed data.</span>
 
@@ -907,7 +907,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">networks</span> <span class="o">=</span> <span class="n">networks_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">networks</span> <span class="o">=</span> <span class="n">networks_list</span></div>
 
 <div class="viewcode-block" id="HierarchicalNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.HierarchicalNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">return_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs the forward pass through the hierarchical network,</span>

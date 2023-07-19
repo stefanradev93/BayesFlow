@@ -373,7 +373,7 @@ document.write(`
 <span class="sd">    for instance, in ``PyMC3``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+<div class="viewcode-block" id="MCMCSurrogateLikelihood.__init__"><a class="viewcode-back" href="../../api/bayesflow.mcmc.html#bayesflow.mcmc.MCMCSurrogateLikelihood.__init__">[docs]</a>    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amortized_likelihood</span><span class="p">,</span> <span class="n">configurator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">likelihood_postprocessor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grad_postprocessor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates in instance of the surrogate likelihood using a pre-trained ``AmortizedLikelihood`` instance.</span>
 
@@ -405,7 +405,7 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">likelihood_postprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_likelihood_postprocessor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grad_postprocessor</span> <span class="o">=</span> <span class="n">grad_postprocessor</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_postprocessor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">grad_postprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_grad_postprocessor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grad_postprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_grad_postprocessor</span></div>
 
     <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
     <span class="k">def</span> <span class="nf">_default_configurator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -548,7 +548,7 @@ document.write(`
     <span class="n">itypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">dvector</span><span class="p">]</span>  <span class="c1"># expects a vector of parameter values when called</span>
     <span class="n">otypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">dscalar</span><span class="p">]</span>  <span class="c1"># outputs a single scalar value (the log likelihood)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="PyMCSurrogateLikelihood.__init__"><a class="viewcode-back" href="../../api/bayesflow.mcmc.html#bayesflow.mcmc.PyMCSurrogateLikelihood.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">amortized_likelihood</span><span class="p">,</span>
         <span class="n">observables</span><span class="p">,</span>
@@ -598,7 +598,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">observables</span> <span class="o">=</span> <span class="n">observables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logpgrad</span> <span class="o">=</span> <span class="n">_LogLikGrad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood_grad</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observables</span><span class="p">,</span> <span class="n">default_type</span><span class="o">=</span><span class="n">default_pymc_type</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_pymc_type</span> <span class="o">=</span> <span class="n">default_pymc_type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_tf_type</span> <span class="o">=</span> <span class="n">default_tf_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_tf_type</span> <span class="o">=</span> <span class="n">default_tf_type</span></div>
 
     <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
     <span class="k">def</span> <span class="nf">_default_configurator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>

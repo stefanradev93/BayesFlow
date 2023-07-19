@@ -387,7 +387,7 @@ document.write(`
 <span class="sd">    and returns simulation dictionaries as expected by BayesFlow amortizers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_dict</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+<div class="viewcode-block" id="SimulationDataset.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationDataset.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_dict</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a wrapper holding a ``tf.data.Dataset`` instance for</span>
 <span class="sd">        offline training in an amortized estimation context.</span>
 
@@ -410,7 +410,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">keys_used</span> <span class="o">=</span> <span class="n">keys_used</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keys_none</span> <span class="o">=</span> <span class="n">keys_none</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_sim</span> <span class="o">=</span> <span class="n">n_sim</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_determine_slices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine slices for a tensorflow Dataset.&quot;&quot;&quot;</span>
@@ -451,7 +451,7 @@ document.write(`
 <span class="sd">    simulation dictionaries and returning these as expected by BayesFlow amortizers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_dict</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiSimulationDataset.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.MultiSimulationDataset.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_dict</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a wrapper holding multiple ``tf.data.Dataset`` instances for</span>
 <span class="sd">        offline training in an amortized model comparison context.</span>
 
@@ -481,7 +481,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">current_it</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_batches</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">num_batches</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">iters</span> <span class="o">=</span> <span class="p">[</span><span class="nb">iter</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span></div>
 
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_it</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_batches</span><span class="p">:</span>
@@ -501,7 +501,7 @@ document.write(`
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class will track the total validation loss and trigger an early stopping</span>
 <span class="sd">    recommendation based on its hyperparameters.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+<div class="viewcode-block" id="EarlyStopper.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.EarlyStopper.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        patience          : int, optional, default: 4</span>
@@ -514,7 +514,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">patience</span> <span class="o">=</span> <span class="n">patience</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span> <span class="o">=</span> <span class="n">tolerance</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_patience_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patience_counter</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="EarlyStopper.update_and_recommend"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.EarlyStopper.update_and_recommend">[docs]</a>    <span class="k">def</span> <span class="nf">update_and_recommend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_val_loss</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds loss to history and check difference between sequential losses.&quot;&quot;&quot;</span>
@@ -554,7 +554,7 @@ document.write(`
 
     <span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;lr_adjuster&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="RegressionLRAdjuster.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.RegressionLRAdjuster.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">optimizer</span><span class="p">,</span>
         <span class="n">period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
@@ -612,7 +612,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_wait_counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_waiting</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_in_cooldown</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in_cooldown</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="RegressionLRAdjuster.get_slope"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.RegressionLRAdjuster.get_slope">[docs]</a>    <span class="k">def</span> <span class="nf">get_slope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">losses</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fits a Huber regression on the provided loss trajectory or returns `None` if</span>
@@ -774,7 +774,7 @@ document.write(`
 
     <span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;history&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LossHistory.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.LossHistory.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">latest</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">val_history</span> <span class="o">=</span> <span class="p">{}</span>
@@ -782,7 +782,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">val_loss_names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_current_run</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_total_loss</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_total_val_loss</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_val_loss</span> <span class="o">=</span> <span class="p">[]</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">total_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1025,12 +1025,12 @@ document.write(`
 
     <span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;memory&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stores_raw</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">capacity_in_batches</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<div class="viewcode-block" id="SimulationMemory.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationMemory.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stores_raw</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">capacity_in_batches</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stores_raw</span> <span class="o">=</span> <span class="n">stores_raw</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_capacity</span> <span class="o">=</span> <span class="n">capacity_in_batches</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capacity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">size_in_batches</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size_in_batches</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="SimulationMemory.store"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.SimulationMemory.store">[docs]</a>    <span class="k">def</span> <span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Stores simulation outputs in `forward_dict`, if internal buffer is not full.</span>
@@ -1106,7 +1106,7 @@ document.write(`
 <div class="viewcode-block" id="MemoryReplayBuffer"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.MemoryReplayBuffer">[docs]</a><span class="k">class</span> <span class="nc">MemoryReplayBuffer</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a memory replay buffer for simulation-based inference.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity_in_batches</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<div class="viewcode-block" id="MemoryReplayBuffer.__init__"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.MemoryReplayBuffer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity_in_batches</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a circular buffer following the logic of experience replay.</span>
 
 <span class="sd">        Parameters</span>
@@ -1120,7 +1120,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capacity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_size_in_batches</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_full</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_full</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="MemoryReplayBuffer.store"><a class="viewcode-back" href="../../api/bayesflow.helper_classes.html#bayesflow.helper_classes.MemoryReplayBuffer.store">[docs]</a>    <span class="k">def</span> <span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Stores simulation outputs, if internal buffer is not full.</span>

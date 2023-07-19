@@ -384,7 +384,7 @@ document.write(`
 <span class="sd">    arXiv preprint arXiv:1907.02392.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">,</span> <span class="n">settings_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="AffineCoupling.__init__"><a class="viewcode-back" href="../../api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.AffineCoupling.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">,</span> <span class="n">settings_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates one half of an affine coupling layer to be used as part of a ``CouplingLayer`` in</span>
 <span class="sd">        an ``InvertibleNetwork`` instance.</span>
 
@@ -423,7 +423,7 @@ document.write(`
 
         <span class="c1"># Internal network (learnable scale and translation)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">DenseCouplingNet</span><span class="p">(</span><span class="n">s_settings</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">translate</span> <span class="o">=</span> <span class="n">DenseCouplingNet</span><span class="p">(</span><span class="n">t_settings</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translate</span> <span class="o">=</span> <span class="n">DenseCouplingNet</span><span class="p">(</span><span class="n">t_settings</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AffineCoupling.call"><a class="viewcode-back" href="../../api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.AffineCoupling.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split1</span><span class="p">,</span> <span class="n">split2</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs one pass through an affine coupling layer (either inverse or forward).</span>
@@ -523,7 +523,7 @@ document.write(`
 <span class="sd">    best in practice and lead to stable training.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">,</span> <span class="n">settings_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SplineCoupling.__init__"><a class="viewcode-back" href="../../api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.SplineCoupling.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">,</span> <span class="n">settings_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates one half of a spline coupling layer to be used as part of a ``CouplingLayer`` in</span>
 <span class="sd">        an ``InvertibleNetwork`` instance.</span>
 
@@ -562,7 +562,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">num_total_spline_params</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spline_params_counts</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_out</span>
 
         <span class="c1"># Internal network (learnable spline parameters)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">DenseCouplingNet</span><span class="p">(</span><span class="n">settings_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_total_spline_params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">DenseCouplingNet</span><span class="p">(</span><span class="n">settings_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_total_spline_params</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SplineCoupling.call"><a class="viewcode-back" href="../../api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.SplineCoupling.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split1</span><span class="p">,</span> <span class="n">split2</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs one pass through a spline coupling layer (either inverse or forward).</span>
@@ -836,7 +836,7 @@ document.write(`
 <div class="viewcode-block" id="CouplingLayer"><a class="viewcode-back" href="../../api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.CouplingLayer">[docs]</a><span class="k">class</span> <span class="nc">CouplingLayer</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;General wrapper for a coupling layer (either affine or spline) with different settings.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="CouplingLayer.__init__"><a class="viewcode-back" href="../../api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.CouplingLayer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">latent_dim</span><span class="p">,</span>
         <span class="n">coupling_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -919,7 +919,7 @@ document.write(`
         <span class="k">if</span> <span class="n">use_act_norm</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">act_norm</span> <span class="o">=</span> <span class="n">ActNorm</span><span class="p">(</span><span class="n">latent_dim</span><span class="p">,</span> <span class="n">act_norm_init</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">act_norm</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">act_norm</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="CouplingLayer.call"><a class="viewcode-back" href="../../api/bayesflow.coupling_networks.html#bayesflow.coupling_networks.CouplingLayer.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_or_z</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs one pass through a the affine coupling layer (either inverse or forward).</span>

@@ -406,6 +406,7 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.__init__"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.build"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.build()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.call"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.get_config"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.get_config()</span></code></a></li>
@@ -434,6 +435,11 @@ document.write(`
 <p>This wrapper controls the Lipschitz constant of a layer by
 constraining its spectral norm, which can stabilize the training of generative networks.</p>
 <p>See Spectral Normalization for Generative Adversarial Networks](<a class="reference external" href="https://arxiv.org/abs/1802.05957">https://arxiv.org/abs/1802.05957</a>).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.wrappers.SpectralNormalization.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/wrappers.html#SpectralNormalization.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.wrappers.SpectralNormalization.__init__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.wrappers.SpectralNormalization.build">
 <span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/wrappers.html#SpectralNormalization.build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.wrappers.SpectralNormalization.build" title="Permalink to this definition">#</a></dt>
@@ -535,6 +541,7 @@ spectral normalized value, so that the layer is ready for <cite>call()</cite>.</
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.__init__"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.build"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.build()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.call"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.get_config"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.get_config()</span></code></a></li>

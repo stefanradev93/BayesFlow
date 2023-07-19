@@ -406,11 +406,13 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.MCMCSurrogateLikelihood"><code class="docutils literal notranslate"><span class="pre">MCMCSurrogateLikelihood</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.MCMCSurrogateLikelihood.__init__"><code class="docutils literal notranslate"><span class="pre">MCMCSurrogateLikelihood.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.MCMCSurrogateLikelihood.log_likelihood"><code class="docutils literal notranslate"><span class="pre">MCMCSurrogateLikelihood.log_likelihood()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.MCMCSurrogateLikelihood.log_likelihood_grad"><code class="docutils literal notranslate"><span class="pre">MCMCSurrogateLikelihood.log_likelihood_grad()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.PyMCSurrogateLikelihood"><code class="docutils literal notranslate"><span class="pre">PyMCSurrogateLikelihood</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.PyMCSurrogateLikelihood.__init__"><code class="docutils literal notranslate"><span class="pre">PyMCSurrogateLikelihood.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.PyMCSurrogateLikelihood.grad"><code class="docutils literal notranslate"><span class="pre">PyMCSurrogateLikelihood.grad()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.PyMCSurrogateLikelihood.itypes"><code class="docutils literal notranslate"><span class="pre">PyMCSurrogateLikelihood.itypes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.PyMCSurrogateLikelihood.otypes"><code class="docutils literal notranslate"><span class="pre">PyMCSurrogateLikelihood.otypes</span></code></a></li>
@@ -437,6 +439,35 @@ document.write(`
 <p>An interface to provide likelihood evaluation and gradient estimation of a pre-trained
 <code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood</span></code> instance, which can be used in tandem with (HMC)-MCMC, as implemented,
 for instance, in <code class="docutils literal notranslate"><span class="pre">PyMC3</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.mcmc.MCMCSurrogateLikelihood.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amortized_likelihood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configurator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">likelihood_postprocessor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_postprocessor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/mcmc.html#MCMCSurrogateLikelihood.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.mcmc.MCMCSurrogateLikelihood.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates in instance of the surrogate likelihood using a pre-trained <code class="docutils literal notranslate"><span class="pre">AmortizedLikelihood</span></code> instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>amortized_likelihood</strong><span class="classifier">bayesflow.amortized_inference.AmortizedLikelihood</span></dt><dd><p>A pre-trained (invertible) inference network which processes the outputs of the generative model.</p>
+</dd>
+<dt><strong>configurator</strong><span class="classifier">callable, optional, default: None</span></dt><dd><p>A function that takes the input to the <code class="docutils literal notranslate"><span class="pre">log_likelihood</span></code> and <code class="docutils literal notranslate"><span class="pre">log_likelihood_grad</span></code>
+calls and converts them to a dictionary containing the following mandatory keys,
+if DEFAULT_KEYS unchanged:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">observables</span></code> - the variables over which a condition density is learned (i.e., the observables)
+<code class="docutils literal notranslate"><span class="pre">conditions</span></code>  - the conditioning variables that the directly passed to the inference network</p>
+</div></blockquote>
+<p>default: Return the first parameter - has to be a dicitionary with the mentioned characteristics</p>
+</dd>
+<dt><strong>likelihood_postprocessor</strong><span class="classifier">callable, optional, default: None</span></dt><dd><p>A function that takes the likelihood for each observable as an input. Can be used for aggregation
+default: sum all likelihood values and return a single value.</p>
+</dd>
+<dt><strong>grad_postprocessor</strong><span class="classifier">callable, optional, default: None</span></dt><dd><p>A function that takes the gradient for each value in <code class="docutils literal notranslate"><span class="pre">conditions</span></code> as returned by the preprocessor
+default: Leave the values unchanged.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.mcmc.MCMCSurrogateLikelihood.log_likelihood">
 <span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/mcmc.html#MCMCSurrogateLikelihood.log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.mcmc.MCMCSurrogateLikelihood.log_likelihood" title="Permalink to this definition">#</a></dt>
@@ -493,6 +524,45 @@ as returned by <code class="docutils literal notranslate"><span class="pre">conf
 <dt class="sig sig-object py" id="bayesflow.mcmc.PyMCSurrogateLikelihood">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.mcmc.</span></span><span class="sig-name descname"><span class="pre">PyMCSurrogateLikelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amortized_likelihood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configurator=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">likelihood_postprocessor=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_postprocessor=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_pymc_type=&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_tf_type=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/mcmc.html#PyMCSurrogateLikelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.mcmc.PyMCSurrogateLikelihood" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Op</span></code>, <a class="reference internal" href="#bayesflow.mcmc.MCMCSurrogateLikelihood" title="bayesflow.mcmc.MCMCSurrogateLikelihood"><code class="xref py py-class docutils literal notranslate"><span class="pre">MCMCSurrogateLikelihood</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.mcmc.PyMCSurrogateLikelihood.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amortized_likelihood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configurator=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">likelihood_postprocessor=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_postprocessor=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_pymc_type=&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_tf_type=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/mcmc.html#PyMCSurrogateLikelihood.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.mcmc.PyMCSurrogateLikelihood.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>A custom surrogate likelihood function for integration with <code class="docutils literal notranslate"><span class="pre">PyMC3</span></code>, to be used with pymc.Potential</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>amortized_likelihood</strong><span class="classifier">bayesflow.amortized_inference.AmortizedLikelihood</span></dt><dd><p>A pre-trained (invertible) inference network which processes the outputs of the generative model.</p>
+</dd>
+<dt><strong>observables</strong></dt><dd><p>The “observed” data that will be passed to the configurator.
+For the default <code class="docutils literal notranslate"><span class="pre">configurator</span></code>, an np.array of shape (N, x_dim).</p>
+</dd>
+<dt><strong>configurator</strong><span class="classifier">callable, optional, default None</span></dt><dd><p>A function that takes the input to the log_likelihood and log_likelihood_grad
+calls and converts it to a dictionary containing the following mandatory keys,
+if DEFAULT_KEYS unchanged:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">observables</span></code> - the variables over which a condition density is learned (i.e., the observables)
+<code class="docutils literal notranslate"><span class="pre">conditions</span></code>  - the conditioning variables that the directly passed to the inference network</p>
+</div></blockquote>
+<dl class="simple">
+<dt>default behavior: convert <code class="docutils literal notranslate"><span class="pre">observables</span></code> to shape (1, N, x_dim),</dt><dd><p>expand parameters of shape (cond_dim) to shape (1, N, cond_dim)</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>likelihood_postprocessor</strong><span class="classifier">callable, optional, default: None</span></dt><dd><p>A function that takes the likelihood for each observable, can be used for aggregation
+default behavior: sum all likelihoods and return a single value</p>
+</dd>
+<dt><strong>grad_postprocessor</strong><span class="classifier">callable, optional, default: None</span></dt><dd><p>A function that takes the gradient for each value in <code class="docutils literal notranslate"><span class="pre">conditions</span></code> as returned by the preprocessor
+default behavior: Reduce shape from (1, N, cond_dim) to (cond_dim) by summing the corresponding values</p>
+</dd>
+<dt><strong>default_pymc_type</strong><span class="classifier">np.dtype, optional, default: np.float64</span></dt><dd><p>The default float type to use for numpy arrays as required by PyMC.</p>
+</dd>
+<dt><strong>default_tf_type</strong><span class="classifier">np.dtype, optional, default: np.float32</span></dt><dd><p>The default float type to use for tensorflow tensors.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.mcmc.PyMCSurrogateLikelihood.grad">
 <span class="sig-name descname"><span class="pre">grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_grads</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/mcmc.html#PyMCSurrogateLikelihood.grad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.mcmc.PyMCSurrogateLikelihood.grad" title="Permalink to this definition">#</a></dt>
@@ -593,11 +663,13 @@ The primary purpose of this method is to set the values of these sub-lists.</p>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.MCMCSurrogateLikelihood"><code class="docutils literal notranslate"><span class="pre">MCMCSurrogateLikelihood</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.MCMCSurrogateLikelihood.__init__"><code class="docutils literal notranslate"><span class="pre">MCMCSurrogateLikelihood.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.MCMCSurrogateLikelihood.log_likelihood"><code class="docutils literal notranslate"><span class="pre">MCMCSurrogateLikelihood.log_likelihood()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.MCMCSurrogateLikelihood.log_likelihood_grad"><code class="docutils literal notranslate"><span class="pre">MCMCSurrogateLikelihood.log_likelihood_grad()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.PyMCSurrogateLikelihood"><code class="docutils literal notranslate"><span class="pre">PyMCSurrogateLikelihood</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.PyMCSurrogateLikelihood.__init__"><code class="docutils literal notranslate"><span class="pre">PyMCSurrogateLikelihood.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.PyMCSurrogateLikelihood.grad"><code class="docutils literal notranslate"><span class="pre">PyMCSurrogateLikelihood.grad()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.PyMCSurrogateLikelihood.itypes"><code class="docutils literal notranslate"><span class="pre">PyMCSurrogateLikelihood.itypes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.mcmc.PyMCSurrogateLikelihood.otypes"><code class="docutils literal notranslate"><span class="pre">PyMCSurrogateLikelihood.otypes</span></code></a></li>

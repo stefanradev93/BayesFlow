@@ -406,18 +406,22 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.InducedSelfAttentionBlock"><code class="docutils literal notranslate"><span class="pre">InducedSelfAttentionBlock</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.InducedSelfAttentionBlock.__init__"><code class="docutils literal notranslate"><span class="pre">InducedSelfAttentionBlock.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.InducedSelfAttentionBlock.call"><code class="docutils literal notranslate"><span class="pre">InducedSelfAttentionBlock.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.MultiHeadAttentionBlock"><code class="docutils literal notranslate"><span class="pre">MultiHeadAttentionBlock</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.MultiHeadAttentionBlock.__init__"><code class="docutils literal notranslate"><span class="pre">MultiHeadAttentionBlock.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.MultiHeadAttentionBlock.call"><code class="docutils literal notranslate"><span class="pre">MultiHeadAttentionBlock.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.PoolingWithAttention"><code class="docutils literal notranslate"><span class="pre">PoolingWithAttention</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.PoolingWithAttention.__init__"><code class="docutils literal notranslate"><span class="pre">PoolingWithAttention.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.PoolingWithAttention.call"><code class="docutils literal notranslate"><span class="pre">PoolingWithAttention.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.SelfAttentionBlock"><code class="docutils literal notranslate"><span class="pre">SelfAttentionBlock</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.SelfAttentionBlock.__init__"><code class="docutils literal notranslate"><span class="pre">SelfAttentionBlock.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.SelfAttentionBlock.call"><code class="docutils literal notranslate"><span class="pre">SelfAttentionBlock.call()</span></code></a></li>
 </ul>
 </li>
@@ -445,6 +449,34 @@ designed to deal with large sets via a learnable set of “inducing points”.</
 In International conference on machine learning (pp. 3744-3753). PMLR.</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.attention.InducedSelfAttentionBlock.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_fc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_layer_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_inducing_points</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/attention.html#InducedSelfAttentionBlock.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.attention.InducedSelfAttentionBlock.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a self-attention attention block with inducing points (ISAB) which will typically
+be used as part of a set transformer architecture according to [1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dim</strong><span class="classifier">int</span></dt><dd><p>The dimensionality of the input data (last axis).</p>
+</dd>
+<dt><strong>attention_settings</strong><span class="classifier">dict</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">MultiHeadAttention</span></code> layer
+See <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention">https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention</a>.</p>
+</dd>
+<dt><strong>num_dense_fc</strong><span class="classifier">int</span></dt><dd><p>The number of hidden layers for the internal feedforward network</p>
+</dd>
+<dt><strong>dense_settings</strong><span class="classifier">dict</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">Dense</span></code> layer</p>
+</dd>
+<dt><strong>use_layer_norm</strong><span class="classifier">boolean</span></dt><dd><p>Whether layer normalization before and after attention + feedforward</p>
+</dd>
+<dt><strong>num_inducing_points</strong><span class="classifier">int</span></dt><dd><p>The number of inducing points. Should be lower than the smallest set size</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.attention.InducedSelfAttentionBlock.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/attention.html#InducedSelfAttentionBlock.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.attention.InducedSelfAttentionBlock.call" title="Permalink to this definition">#</a></dt>
@@ -477,6 +509,32 @@ In International conference on machine learning (pp. 3744-3753). PMLR.</p>
 In International conference on machine learning (pp. 3744-3753). PMLR.</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.attention.MultiHeadAttentionBlock.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_fc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_layer_norm</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/attention.html#MultiHeadAttentionBlock.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.attention.MultiHeadAttentionBlock.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a multihead attention block which will typically be used as part of a
+set transformer architecture according to [1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dim</strong><span class="classifier">int</span></dt><dd><p>The dimensionality of the input data (last axis).</p>
+</dd>
+<dt><strong>attention_settings</strong><span class="classifier">dict</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">MultiHeadAttention</span></code> layer
+See <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention">https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention</a>.</p>
+</dd>
+<dt><strong>num_dense_fc</strong><span class="classifier">int</span></dt><dd><p>The number of hidden layers for the internal feedforward network</p>
+</dd>
+<dt><strong>dense_settings</strong><span class="classifier">dict</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">Dense</span></code> layer</p>
+</dd>
+<dt><strong>use_layer_norm</strong><span class="classifier">boolean</span></dt><dd><p>Whether layer normalization before and after attention + feedforward</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.attention.MultiHeadAttentionBlock.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/attention.html#MultiHeadAttentionBlock.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.attention.MultiHeadAttentionBlock.call" title="Permalink to this definition">#</a></dt>
@@ -513,6 +571,37 @@ In International conference on machine learning (pp. 3744-3753). PMLR.</p>
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.attention.PoolingWithAttention.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_fc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_layer_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_seeds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/attention.html#PoolingWithAttention.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.attention.PoolingWithAttention.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a multihead attention block (MAB) which will perform cross-attention between an input set
+and a set of seed vectors (typically one for a single summary) with summary_dim output dimensions.</p>
+<p>Could also be used as part of a <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> for representing learnabl instead of fixed pooling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>summary_dim</strong><span class="classifier">int</span></dt><dd><p>The dimensionality of the learned permutation-invariant representation.</p>
+</dd>
+<dt><strong>attention_settings</strong><span class="classifier">dict</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">MultiHeadAttention</span></code> layer
+See <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention">https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention</a>.</p>
+</dd>
+<dt><strong>num_dense_fc</strong><span class="classifier">int</span></dt><dd><p>The number of hidden layers for the internal feedforward network</p>
+</dd>
+<dt><strong>dense_settings</strong><span class="classifier">dict</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">Dense</span></code> layer</p>
+</dd>
+<dt><strong>use_layer_norm</strong><span class="classifier">boolean</span></dt><dd><p>Whether layer normalization before and after attention + feedforward</p>
+</dd>
+<dt><strong>num_seeds</strong><span class="classifier">int, optional, default: 1</span></dt><dd><p>The number of “seed vectors” to use. Each seed vector represents a permutation-invariant
+summary of the entire set. If you use <code class="docutils literal notranslate"><span class="pre">num_seeds</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>, the resulting seeds will be flattened
+into a 2-dimensional output, which will have a dimensionality of <code class="docutils literal notranslate"><span class="pre">num_seeds</span> <span class="pre">*</span> <span class="pre">summary_dim</span></code></p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.attention.PoolingWithAttention.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/attention.html#PoolingWithAttention.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.attention.PoolingWithAttention.call" title="Permalink to this definition">#</a></dt>
 <dd><p>Performs the forward pass through the PMA block.</p>
@@ -544,6 +633,32 @@ In International conference on machine learning (pp. 3744-3753). PMLR.</p>
 In International conference on machine learning (pp. 3744-3753). PMLR.</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.attention.SelfAttentionBlock.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_fc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_layer_norm</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/attention.html#SelfAttentionBlock.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.attention.SelfAttentionBlock.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a self-attention attention block which will typically be used as part of a
+set transformer architecture according to [1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dim</strong><span class="classifier">int</span></dt><dd><p>The dimensionality of the input data (last axis).</p>
+</dd>
+<dt><strong>attention_settings</strong><span class="classifier">dict</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">MultiHeadAttention</span></code> layer
+See <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention">https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention</a>.</p>
+</dd>
+<dt><strong>num_dense_fc</strong><span class="classifier">int</span></dt><dd><p>The number of hidden layers for the internal feedforward network</p>
+</dd>
+<dt><strong>dense_settings</strong><span class="classifier">dict</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">Dense</span></code> layer</p>
+</dd>
+<dt><strong>use_layer_norm</strong><span class="classifier">boolean</span></dt><dd><p>Whether layer normalization before and after attention + feedforward</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.attention.SelfAttentionBlock.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/attention.html#SelfAttentionBlock.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.attention.SelfAttentionBlock.call" title="Permalink to this definition">#</a></dt>
@@ -617,18 +732,22 @@ In International conference on machine learning (pp. 3744-3753). PMLR.</p>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.InducedSelfAttentionBlock"><code class="docutils literal notranslate"><span class="pre">InducedSelfAttentionBlock</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.InducedSelfAttentionBlock.__init__"><code class="docutils literal notranslate"><span class="pre">InducedSelfAttentionBlock.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.InducedSelfAttentionBlock.call"><code class="docutils literal notranslate"><span class="pre">InducedSelfAttentionBlock.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.MultiHeadAttentionBlock"><code class="docutils literal notranslate"><span class="pre">MultiHeadAttentionBlock</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.MultiHeadAttentionBlock.__init__"><code class="docutils literal notranslate"><span class="pre">MultiHeadAttentionBlock.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.MultiHeadAttentionBlock.call"><code class="docutils literal notranslate"><span class="pre">MultiHeadAttentionBlock.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.PoolingWithAttention"><code class="docutils literal notranslate"><span class="pre">PoolingWithAttention</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.PoolingWithAttention.__init__"><code class="docutils literal notranslate"><span class="pre">PoolingWithAttention.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.PoolingWithAttention.call"><code class="docutils literal notranslate"><span class="pre">PoolingWithAttention.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.SelfAttentionBlock"><code class="docutils literal notranslate"><span class="pre">SelfAttentionBlock</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.SelfAttentionBlock.__init__"><code class="docutils literal notranslate"><span class="pre">SelfAttentionBlock.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.attention.SelfAttentionBlock.call"><code class="docutils literal notranslate"><span class="pre">SelfAttentionBlock.call()</span></code></a></li>
 </ul>
 </li>

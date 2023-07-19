@@ -406,27 +406,36 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.DeepSet"><code class="docutils literal notranslate"><span class="pre">DeepSet</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.DeepSet.__init__"><code class="docutils literal notranslate"><span class="pre">DeepSet.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.DeepSet.call"><code class="docutils literal notranslate"><span class="pre">DeepSet.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.HierarchicalNetwork"><code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.HierarchicalNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.HierarchicalNetwork.call"><code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork.call()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.InvariantNetwork"><code class="docutils literal notranslate"><span class="pre">InvariantNetwork</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.InvariantNetwork"><code class="docutils literal notranslate"><span class="pre">InvariantNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.InvariantNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">InvariantNetwork.__init__()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork.call"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SetTransformer"><code class="docutils literal notranslate"><span class="pre">SetTransformer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SetTransformer.__init__"><code class="docutils literal notranslate"><span class="pre">SetTransformer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SetTransformer.call"><code class="docutils literal notranslate"><span class="pre">SetTransformer.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SplitNetwork"><code class="docutils literal notranslate"><span class="pre">SplitNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SplitNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">SplitNetwork.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SplitNetwork.call"><code class="docutils literal notranslate"><span class="pre">SplitNetwork.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.TimeSeriesTransformer"><code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.TimeSeriesTransformer.__init__"><code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.TimeSeriesTransformer.call"><code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer.call()</span></code></a></li>
 </ul>
 </li>
@@ -453,6 +462,45 @@ Deep sets. Advances in neural information processing systems, 30.</p>
 <p>[2] Bloem-Reddy, B., &amp; Teh, Y. W. (2020).
 Probabilistic Symmetries and Invariant Neural Networks.
 J. Mach. Learn. Res., 21, 90-1.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.summary_networks.DeepSet.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_s1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_s2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_s3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_equiv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_s1_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_s2_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_s3_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pooling_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#DeepSet.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.DeepSet.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a stack of ‘num_equiv’ equivariant layers followed by a final invariant layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>summary_dim</strong><span class="classifier">int, optional, default: 10</span></dt><dd><p>The number of learned summary statistics.</p>
+</dd>
+<dt><strong>num_dense_s1</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of dense layers in the inner function of a deep set.</p>
+</dd>
+<dt><strong>num_dense_s2</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of dense layers in the outer function of a deep set.</p>
+</dd>
+<dt><strong>num_dense_s3</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of dense layers in an equivariant layer.</p>
+</dd>
+<dt><strong>num_equiv</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of equivariant layers in the network.</p>
+</dd>
+<dt><strong>dense_s1_args</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The arguments for the dense layers of s1 (inner, pre-pooling function). If <cite>None</cite>,
+defaults will be used (see <cite>default_settings</cite>). Otherwise, all arguments for a
+tf.keras.layers.Dense layer are supported.</p>
+</dd>
+<dt><strong>dense_s2_args</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The arguments for the dense layers of s2 (outer, post-pooling function). If <cite>None</cite>,
+defaults will be used (see <cite>default_settings</cite>). Otherwise, all arguments for a
+tf.keras.layers.Dense layer are supported.</p>
+</dd>
+<dt><strong>dense_s3_args</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The arguments for the dense layers of s3 (equivariant function). If <cite>None</cite>,
+defaults will be used (see <cite>default_settings</cite>). Otherwise, all arguments for a
+tf.keras.layers.Dense layer are supported.</p>
+</dd>
+<dt><strong>pooling_fun</strong><span class="classifier">str of callable, optional, default: ‘mean’</span></dt><dd><p>If string argument provided, should be one in [‘mean’, ‘max’]. In addition, ac actual
+neural network can be passed for learnable pooling.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.summary_networks.DeepSet.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#DeepSet.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.DeepSet.call" title="Permalink to this definition">#</a></dt>
@@ -487,6 +535,25 @@ arXiv preprint arXiv:2301.11873.</p>
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.summary_networks.HierarchicalNetwork.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">networks_list</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#HierarchicalNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.HierarchicalNetwork.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a hierarchical network consisting of stacked summary networks (one for each hierarchical level)
+that are aligned with the probabilistic structure of the processed data.</p>
+<p>Note: The networks will start processing from the lowest hierarchical level (e.g., observational level)
+up to the highest hierarchical level. It is recommended to provide higher-level networks with more
+expressive power to allow for an adequate compression of lower-level data.</p>
+<p>Example: For two-level hierarchical models with the assumption of temporal dependencies on the lowest
+hierarchical level (e.g., observational level) and exchangeable units at the higher level
+(e.g., group level), a list of [SequentialNetwork(), DeepSet()] could be passed.</p>
+<hr class="docutils" />
+<p>Parameters:
+networks_list : list of tf.keras.Model:</p>
+<blockquote>
+<div><p>The list of summary networks (one per hierarchical level), starting from the lowest hierarchical level</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.summary_networks.HierarchicalNetwork.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#HierarchicalNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.HierarchicalNetwork.call" title="Permalink to this definition">#</a></dt>
 <dd><p>Performs the forward pass through the hierarchical network,
@@ -519,6 +586,45 @@ of <code class="docutils literal notranslate"><span class="pre">len(outputs)</sp
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.summary_networks.</span></span><span class="sig-name descname"><span class="pre">InvariantNetwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#InvariantNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.InvariantNetwork" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#bayesflow.summary_networks.DeepSet" title="bayesflow.summary_networks.DeepSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeepSet</span></code></a></p>
 <p>Deprecated class for <code class="docutils literal notranslate"><span class="pre">InvariantNetwork</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.summary_networks.InvariantNetwork.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#InvariantNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.InvariantNetwork.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a stack of ‘num_equiv’ equivariant layers followed by a final invariant layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>summary_dim</strong><span class="classifier">int, optional, default: 10</span></dt><dd><p>The number of learned summary statistics.</p>
+</dd>
+<dt><strong>num_dense_s1</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of dense layers in the inner function of a deep set.</p>
+</dd>
+<dt><strong>num_dense_s2</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of dense layers in the outer function of a deep set.</p>
+</dd>
+<dt><strong>num_dense_s3</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of dense layers in an equivariant layer.</p>
+</dd>
+<dt><strong>num_equiv</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of equivariant layers in the network.</p>
+</dd>
+<dt><strong>dense_s1_args</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The arguments for the dense layers of s1 (inner, pre-pooling function). If <cite>None</cite>,
+defaults will be used (see <cite>default_settings</cite>). Otherwise, all arguments for a
+tf.keras.layers.Dense layer are supported.</p>
+</dd>
+<dt><strong>dense_s2_args</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The arguments for the dense layers of s2 (outer, post-pooling function). If <cite>None</cite>,
+defaults will be used (see <cite>default_settings</cite>). Otherwise, all arguments for a
+tf.keras.layers.Dense layer are supported.</p>
+</dd>
+<dt><strong>dense_s3_args</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The arguments for the dense layers of s3 (equivariant function). If <cite>None</cite>,
+defaults will be used (see <cite>default_settings</cite>). Otherwise, all arguments for a
+tf.keras.layers.Dense layer are supported.</p>
+</dd>
+<dt><strong>pooling_fun</strong><span class="classifier">str of callable, optional, default: ‘mean’</span></dt><dd><p>If string argument provided, should be one in [‘mean’, ‘max’]. In addition, ac actual
+neural network can be passed for learnable pooling.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -532,6 +638,34 @@ OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with i
 and its application to the COVID-19 pandemics in Germany.
 PLoS computational biology, 17(10), e1009472.</p>
 <p><a class="reference external" href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472">https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472</a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.summary_networks.SequentialNetwork.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_conv_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lstm_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conv_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SequentialNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SequentialNetwork.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a stack of inception-like layers followed by an LSTM network, with the idea
+of learning vector representations from multivariate time series data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>summary_dim</strong><span class="classifier">int, optional, default: 10</span></dt><dd><p>The number of learned summary statistics.</p>
+</dd>
+<dt><strong>num_conv_layers</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of convolutional layers to use.</p>
+</dd>
+<dt><strong>lstm_units</strong><span class="classifier">int, optional, default: 128</span></dt><dd><p>The number of hidden LSTM units.</p>
+</dd>
+<dt><strong>conv_settings</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The arguments passed to the <cite>MultiConv1D</cite> internal networks. If <cite>None</cite>,
+defaults will be used from <cite>default_settings</cite>. If a dictionary is provided,
+it should contain the followin keys:
+- layer_args      (dict) : arguments for <cite>tf.keras.layers.Conv1D</cite> without kernel_size
+- min_kernel_size (int)  : the minimum kernel size (&gt;= 1)
+- max_kernel_size (int)  : the maximum kernel size</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.summary_networks.SequentialNetwork.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SequentialNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SequentialNetwork.call" title="Permalink to this definition">#</a></dt>
@@ -567,6 +701,57 @@ In International conference on machine learning (pp. 3744-3753). PMLR.</p>
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.summary_networks.SetTransformer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_layer_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_fc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_attention_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_inducing_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_seeds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SetTransformer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SetTransformer.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a set transformer architecture according to [1] which will extract permutation-invariant
+features from an input set using a set of seed vectors (typically one for a single summary) with <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code>
+output dimensions.</p>
+<p>Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate
+during training, e.g., setting <code class="docutils literal notranslate"><span class="pre">default_lr=1e-5</span></code> in a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>input_dim</strong><span class="classifier">int</span></dt><dd><p>The dimensionality of the input data (last axis).</p>
+</dd>
+<dt><strong>attention_settings</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">MultiHeadAttention</span></code> layer
+For instance, to use an attention block with 4 heads and key dimension 32, you can do:</p>
+<p><code class="docutils literal notranslate"><span class="pre">attention_settings=dict(num_heads=4,</span> <span class="pre">key_dim=32)</span></code></p>
+<p>You may also want to include dropout regularization in small-to-medium data regimes:</p>
+<p><code class="docutils literal notranslate"><span class="pre">attention_settings=dict(num_heads=4,</span> <span class="pre">key_dim=32,</span> <span class="pre">dropout=0.1)</span></code></p>
+<p>For more details and arguments, see:
+<a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention">https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention</a></p>
+</dd>
+<dt><strong>dense_settings</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">Dense</span></code> layer.
+For instance, to use hidden layers with 32 units and a relu activation, you can do:</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a>dict(units=32, activation=’relu’)</p>
+<p>For more details and arguments, see:
+<a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense">https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense</a></p>
+</dd>
+<dt><strong>use_layer_norm</strong><span class="classifier">boolean, optional, default: True</span></dt><dd><p>Whether layer normalization before and after attention + feedforward</p>
+</dd>
+<dt><strong>num_dense_fc</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of hidden layers for the internal feedforward network</p>
+</dd>
+<dt><strong>summary_dim</strong><span class="classifier">int</span></dt><dd><p>The dimensionality of the learned permutation-invariant representation.</p>
+</dd>
+<dt><strong>num_attention_blocks</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of self-attention blocks to use before pooling.</p>
+</dd>
+<dt><strong>num_inducing_points</strong><span class="classifier">int or None, optional, default: 32</span></dt><dd><p>The number of inducing points. Should be lower than the smallest set size.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> selected, a vanilla self-attenion block (SAB) will be used, otherwise
+ISAB blocks will be used. For <code class="docutils literal notranslate"><span class="pre">num_attention_blocks</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>, we currently recommend
+always using some number of inducing points.</p>
+</dd>
+<dt><strong>num_seeds</strong><span class="classifier">int, optional, default: 1</span></dt><dd><p>The number of “seed vectors” to use. Each seed vector represents a permutation-invariant
+summary of the entire set. If you use <code class="docutils literal notranslate"><span class="pre">num_seeds</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>, the resulting seeds will be flattened
+into a 2-dimensional output, which will have a dimensionality of <code class="docutils literal notranslate"><span class="pre">num_seeds</span> <span class="pre">*</span> <span class="pre">summary_dim</span></code>.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.summary_networks.SetTransformer.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SetTransformer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SetTransformer.call" title="Permalink to this definition">#</a></dt>
 <dd><p>Performs the forward pass through the set-transformer.</p>
@@ -594,6 +779,45 @@ In International conference on machine learning (pp. 3744-3753). PMLR.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
 <p>Implements a vertical stack of networks and concatenates their individual outputs. Allows for splitting
 of data to provide an individual network for each split of the data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.summary_networks.SplitNetwork.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_splits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_data_configurator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_type=&lt;class</span> <span class="pre">'bayesflow.summary_networks.InvariantNetwork'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_kwargs={}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SplitNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SplitNetwork.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a composite network of <cite>num_splits</cite> sub-networks of type <cite>network_type</cite>, each with configuration
+specified by <cite>meta</cite>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num_splits</strong><span class="classifier">int</span></dt><dd><p>The number if splits for the data, which will equal the number of sub-networks.</p>
+</dd>
+<dt><strong>split_data_configurator</strong><span class="classifier">callable</span></dt><dd><p>Function that takes the arguments <cite>i</cite> and <cite>x</cite> where <cite>i</cite> is the index of the
+network and <cite>x</cite> are the inputs to the <cite>SplitNetwork</cite>. Should return the input
+for the corresponding network.</p>
+<p>For example, to achieve a network with is permutation-invariant both
+vertically (i.e., across rows)  and horizontally (i.e., across columns), one could to:
+<a href="#id3"><span class="problematic" id="id4">`</span></a>def split(i, x):</p>
+<blockquote>
+<div><p>selector = tf.where(x[:,:,0]==i, 1.0, 0.0)
+selected = x[:,:,1] * selector
+split_x = tf.stack((selector, selected), axis=-1)
+return split_x</p>
+</div></blockquote>
+<p>`
+where <cite>x[:,:,0]</cite> contains an integer indicating which split the data
+in <cite>x[:,:,1]</cite> belongs to. All values in <cite>x[:,:,1]</cite> that are not selected
+are set to zero. The selector is passed along with the modified data,
+indicating which rows belong to the split <cite>i</cite>.</p>
+</dd>
+<dt><strong>network_type</strong><span class="classifier">callable, optional, default: <cite>InvariantNetowk</cite></span></dt><dd><p>Type of neural network to use.</p>
+</dd>
+<dt><strong>meta</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>A dictionary containing the configuration for the networks.</p>
+</dd>
+<dt><strong>**kwargs</strong></dt><dd><p>Optional keyword arguments to be passed to the <cite>tf.keras.Model</cite> superclass.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.summary_networks.SplitNetwork.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SplitNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SplitNetwork.call" title="Permalink to this definition">#</a></dt>
@@ -625,6 +849,59 @@ Some ideas can be found in [1]:</p>
 <p>[1] Wen, Q., Zhou, T., Zhang, C., Chen, W., Ma, Z., Yan, J., &amp; Sun, L. (2022).
 Transformers in time series: A survey. arXiv preprint arXiv:2202.07125.
 https://arxiv.org/abs/2202.07125</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.summary_networks.TimeSeriesTransformer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_layer_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_fc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_attention_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lstm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#TimeSeriesTransformer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.TimeSeriesTransformer.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a transformer architecture for encoding time series data into fixed size vectors given by
+<code class="docutils literal notranslate"><span class="pre">summary_dim</span></code>. It features a recurrent network given by <code class="docutils literal notranslate"><span class="pre">template_type</span></code> which is responsible for
+providing a single summary of the time series which then attends to each point in the time series pro-
+cessed via a series of <code class="docutils literal notranslate"><span class="pre">num_attention_blocks</span></code> self-attention layers.</p>
+<p>Important: Assumes that positional encodings have been appended to the input time series.</p>
+<p>Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate
+during training, e.g., setting <code class="docutils literal notranslate"><span class="pre">default_lr=1e-5</span></code> in a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>input_dim</strong><span class="classifier">int</span></dt><dd><p>The dimensionality of the input data (last axis).</p>
+</dd>
+<dt><strong>attention_settings</strong><span class="classifier">dict or None, optional, default None</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">MultiHeadAttention</span></code> layer.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, default settings will be used (see <code class="docutils literal notranslate"><span class="pre">bayesflow.default_settings</span></code>)
+For instance, to use an attention block with 4 heads and key dimension 32, you can do:</p>
+<p><code class="docutils literal notranslate"><span class="pre">attention_settings=dict(num_heads=4,</span> <span class="pre">key_dim=32)</span></code></p>
+<p>You may also want to include dropout regularization in small-to-medium data regimes:</p>
+<p><code class="docutils literal notranslate"><span class="pre">attention_settings=dict(num_heads=4,</span> <span class="pre">key_dim=32,</span> <span class="pre">dropout=0.1)</span></code></p>
+<p>For more details and arguments, see:
+<a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention">https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention</a></p>
+</dd>
+<dt><strong>dense_settings</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">Dense</span></code> layer.
+For instance, to use hidden layers with 32 units and a relu activation, you can do:</p>
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a>dict(units=32, activation=’relu’)</p>
+<p>For more details and arguments, see:
+<a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense">https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense</a></p>
+</dd>
+<dt><strong>use_layer_norm</strong><span class="classifier">boolean, optional, default: True</span></dt><dd><p>Whether layer normalization before and after attention + feedforward</p>
+</dd>
+<dt><strong>num_dense_fc</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of hidden layers for the internal feedforward network</p>
+</dd>
+<dt><strong>summary_dim</strong><span class="classifier">int</span></dt><dd><p>The dimensionality of the learned permutation-invariant representation.</p>
+</dd>
+<dt><strong>num_attention_blocks</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of self-attention blocks to use before pooling.</p>
+</dd>
+<dt><strong>template_type</strong><span class="classifier">str or callable, optional, default: ‘lstm’</span></dt><dd><p>The many-to-one (learnable) transformation of the time series.
+if <code class="docutils literal notranslate"><span class="pre">lstm</span></code>, an LSTM network will be used.
+if <code class="docutils literal notranslate"><span class="pre">gru</span></code>, a GRU unit will be used.
+if callable, a reference to <code class="docutils literal notranslate"><span class="pre">template_type</span></code> will be stored as an attribute.</p>
+</dd>
+<dt><strong>template_dim</strong><span class="classifier">int, optional, default: 64</span></dt><dd><p>Only used if <code class="docutils literal notranslate"><span class="pre">template_type</span></code> in [‘lstm’, ‘gru’]. The number of hidden
+units (equiv. output dimensions) of the recurrent network.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.summary_networks.TimeSeriesTransformer.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#TimeSeriesTransformer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.TimeSeriesTransformer.call" title="Permalink to this definition">#</a></dt>
@@ -698,27 +975,36 @@ https://arxiv.org/abs/2202.07125</p>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.DeepSet"><code class="docutils literal notranslate"><span class="pre">DeepSet</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.DeepSet.__init__"><code class="docutils literal notranslate"><span class="pre">DeepSet.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.DeepSet.call"><code class="docutils literal notranslate"><span class="pre">DeepSet.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.HierarchicalNetwork"><code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.HierarchicalNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.HierarchicalNetwork.call"><code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork.call()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.InvariantNetwork"><code class="docutils literal notranslate"><span class="pre">InvariantNetwork</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.InvariantNetwork"><code class="docutils literal notranslate"><span class="pre">InvariantNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.InvariantNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">InvariantNetwork.__init__()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork.call"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SetTransformer"><code class="docutils literal notranslate"><span class="pre">SetTransformer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SetTransformer.__init__"><code class="docutils literal notranslate"><span class="pre">SetTransformer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SetTransformer.call"><code class="docutils literal notranslate"><span class="pre">SetTransformer.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SplitNetwork"><code class="docutils literal notranslate"><span class="pre">SplitNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SplitNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">SplitNetwork.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SplitNetwork.call"><code class="docutils literal notranslate"><span class="pre">SplitNetwork.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.TimeSeriesTransformer"><code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.TimeSeriesTransformer.__init__"><code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.TimeSeriesTransformer.call"><code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer.call()</span></code></a></li>
 </ul>
 </li>

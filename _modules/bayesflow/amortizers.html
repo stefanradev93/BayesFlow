@@ -387,9 +387,9 @@ document.write(`
 <span class="sd">    3. ``log_prob(input_dict, **kwargs)``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="AmortizedTarget.__init__"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedTarget.__init__">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">pass</span>
+        <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="AmortizedTarget.compute_loss"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedTarget.compute_loss">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -435,7 +435,7 @@ document.write(`
 <span class="sd">    Serves as in interface for learning ``p(parameters | data, context).``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="AmortizedPosterior.__init__"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosterior.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">inference_net</span><span class="p">,</span>
         <span class="n">summary_net</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -486,7 +486,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_net</span><span class="o">.</span><span class="n">latent_dim</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">latent_is_dynamic</span> <span class="o">=</span> <span class="n">latent_is_dynamic</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summary_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_summary_loss</span><span class="p">(</span><span class="n">summary_loss_fun</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">latent_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_latent_dist</span><span class="p">(</span><span class="n">latent_dist</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latent_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_latent_dist</span><span class="p">(</span><span class="n">latent_dist</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AmortizedPosterior.call"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosterior.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="n">return_summary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through the summary and inference network given an input dictionary.</span>
@@ -791,7 +791,7 @@ document.write(`
 <span class="sd">    ``p(data | parameters, context)``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surrogate_net</span><span class="p">,</span> <span class="n">latent_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="AmortizedLikelihood.__init__"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedLikelihood.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surrogate_net</span><span class="p">,</span> <span class="n">latent_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a composite neural architecture representing an amortized emulator</span>
 <span class="sd">        for the simulator (i.e., the implicit likelihood model).</span>
 
@@ -810,7 +810,7 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">surrogate_net</span> <span class="o">=</span> <span class="n">surrogate_net</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surrogate_net</span><span class="o">.</span><span class="n">latent_dim</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">latent_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_latent_dist</span><span class="p">(</span><span class="n">latent_dist</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latent_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_latent_dist</span><span class="p">(</span><span class="n">latent_dist</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AmortizedLikelihood.call"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedLikelihood.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through the summary and inference network.</span>
@@ -1015,7 +1015,7 @@ document.write(`
 <span class="sd">    arXiv preprint arXiv:2302.09125.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amortized_posterior</span><span class="p">,</span> <span class="n">amortized_likelihood</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="AmortizedPosteriorLikelihood.__init__"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosteriorLikelihood.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amortized_posterior</span><span class="p">,</span> <span class="n">amortized_likelihood</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a joint learner comprising an amortized posterior and an amortized emulator.</span>
 
 <span class="sd">        Parameters</span>
@@ -1031,7 +1031,7 @@ document.write(`
         <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">amortized_posterior</span> <span class="o">=</span> <span class="n">amortized_posterior</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">amortized_likelihood</span> <span class="o">=</span> <span class="n">amortized_likelihood</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amortized_likelihood</span> <span class="o">=</span> <span class="n">amortized_likelihood</span></div>
 
 <div class="viewcode-block" id="AmortizedPosteriorLikelihood.call"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedPosteriorLikelihood.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through both amortizers.</span>
@@ -1234,7 +1234,7 @@ document.write(`
 <span class="sd">    sake of consistency and modularity, the BayesFlow library separates the two constructs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inference_net</span><span class="p">,</span> <span class="n">summary_net</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loss_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="AmortizedModelComparison.__init__"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedModelComparison.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inference_net</span><span class="p">,</span> <span class="n">summary_net</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loss_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a composite neural architecture for amortized bayesian model comparison.</span>
 
 <span class="sd">        Parameters</span>
@@ -1260,7 +1260,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">inference_net</span> <span class="o">=</span> <span class="n">inference_net</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">summary_net</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_loss</span><span class="p">(</span><span class="n">loss_fun</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_models</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_net</span><span class="o">.</span><span class="n">num_models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_models</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_net</span><span class="o">.</span><span class="n">num_models</span></div>
 
 <div class="viewcode-block" id="AmortizedModelComparison.call"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedModelComparison.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="n">return_summary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through both networks.</span>
@@ -1381,7 +1381,7 @@ document.write(`
 <div class="viewcode-block" id="TwoLevelAmortizedPosterior"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.TwoLevelAmortizedPosterior">[docs]</a><span class="k">class</span> <span class="nc">TwoLevelAmortizedPosterior</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">,</span> <span class="n">AmortizedTarget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An interface for estimating arbitrary two level hierarchical Bayesian models.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_amortizer</span><span class="p">,</span> <span class="n">global_amortizer</span><span class="p">,</span> <span class="n">summary_net</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="TwoLevelAmortizedPosterior.__init__"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.TwoLevelAmortizedPosterior.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_amortizer</span><span class="p">,</span> <span class="n">global_amortizer</span><span class="p">,</span> <span class="n">summary_net</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an wrapper for estimating two-level hierarchical Bayesian models.</span>
 
 <span class="sd">        Parameters</span>
@@ -1405,7 +1405,7 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">local_amortizer</span> <span class="o">=</span> <span class="n">local_amortizer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">global_amortizer</span> <span class="o">=</span> <span class="n">global_amortizer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">summary_net</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">summary_net</span></div>
 
 <div class="viewcode-block" id="TwoLevelAmortizedPosterior.call"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.TwoLevelAmortizedPosterior.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward pass through the hierarchical amortized posterior.&quot;&quot;&quot;</span>
@@ -1561,13 +1561,13 @@ document.write(`
         <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> will be deprecated. Use `AmortizedPosterior` instead.&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SingleModelAmortizer.__init__"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.SingleModelAmortizer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">warn</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> will be deprecated. Use `AmortizedPosterior` instead.&quot;</span><span class="p">,</span>
             <span class="ne">DeprecationWarning</span><span class="p">,</span>
             <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 </pre></div>
 
                 </article>

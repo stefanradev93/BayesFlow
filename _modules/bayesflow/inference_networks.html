@@ -374,7 +374,7 @@ document.write(`
 
     <span class="n">available_designs</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;affine&quot;</span><span class="p">,</span> <span class="s2">&quot;spline&quot;</span><span class="p">,</span> <span class="s2">&quot;interleaved&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="InvertibleNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.inference_networks.html#bayesflow.inference_networks.InvertibleNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">num_params</span><span class="p">,</span>
         <span class="n">num_coupling_layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
@@ -486,7 +486,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">soft_high</span> <span class="o">=</span> <span class="n">soft_flow_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">permutation</span> <span class="o">=</span> <span class="n">permutation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_act_norm</span> <span class="o">=</span> <span class="n">use_act_norm</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim</span> <span class="o">=</span> <span class="n">num_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim</span> <span class="o">=</span> <span class="n">num_params</span></div>
 
 <div class="viewcode-block" id="InvertibleNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.inference_networks.html#bayesflow.inference_networks.InvertibleNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs one pass through an invertible chain (either inverse or forward).</span>
@@ -633,7 +633,7 @@ document.write(`
 <span class="sd">    Advances in neural information processing systems, 31.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_models</span><span class="p">,</span> <span class="n">dense_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_dense</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">output_activation</span><span class="o">=</span><span class="s2">&quot;softplus&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="EvidentialNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.inference_networks.html#bayesflow.inference_networks.EvidentialNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_models</span><span class="p">,</span> <span class="n">dense_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_dense</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">output_activation</span><span class="o">=</span><span class="s2">&quot;softplus&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an instance of an evidential network for amortized model comparison.</span>
 
 <span class="sd">        Parameters</span>
@@ -666,7 +666,7 @@ document.write(`
             <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">dense_args</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;units&quot;</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;activation&quot;</span><span class="p">},</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_models</span> <span class="o">=</span> <span class="n">num_models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_models</span> <span class="o">=</span> <span class="n">num_models</span></div>
 
 <div class="viewcode-block" id="EvidentialNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.inference_networks.html#bayesflow.inference_networks.EvidentialNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes evidences for model comparison given a batch of data and optional concatenated context,</span>
@@ -731,7 +731,7 @@ document.write(`
 <span class="sd">        arXiv preprint arXiv:2301.11873.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="PMPNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.inference_networks.html#bayesflow.inference_networks.PMPNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">num_models</span><span class="p">,</span>
         <span class="n">dense_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -783,7 +783,7 @@ document.write(`
                 <span class="k">pass</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_layer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">num_models</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_activation</span> <span class="o">=</span> <span class="n">output_activation</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_models</span> <span class="o">=</span> <span class="n">num_models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_models</span> <span class="o">=</span> <span class="n">num_models</span></div>
 
 <div class="viewcode-block" id="PMPNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.inference_networks.html#bayesflow.inference_networks.PMPNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="n">return_probs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward pass through the network. Computes approximated PMPs given a batch of data</span>
