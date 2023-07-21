@@ -405,11 +405,11 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.configurator"><code class="docutils literal notranslate"><span class="pre">configurator()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.draw_mixture_student_t"><code class="docutils literal notranslate"><span class="pre">draw_mixture_student_t()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.get_random_student_t"><code class="docutils literal notranslate"><span class="pre">get_random_student_t()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.draw_mixture_student_t"><code class="docutils literal notranslate"><span class="pre">draw_mixture_student_t()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.prior"><code class="docutils literal notranslate"><span class="pre">prior()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.simulator"><code class="docutils literal notranslate"><span class="pre">simulator()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.configurator"><code class="docutils literal notranslate"><span class="pre">configurator()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -424,9 +424,31 @@ document.write(`
   <section id="module-bayesflow.benchmarks.slcp_distractors">
 <span id="bayesflow-benchmarks-slcp-distractors-module"></span><h1>bayesflow.benchmarks.slcp_distractors module<a class="headerlink" href="#module-bayesflow.benchmarks.slcp_distractors" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.benchmarks.slcp_distractors.configurator">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.benchmarks.slcp_distractors.</span></span><span class="sig-name descname"><span class="pre">configurator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">forward_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'posterior'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_summary_condition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/benchmarks/slcp_distractors.html#configurator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.benchmarks.slcp_distractors.configurator" title="Permalink to this definition">#</a></dt>
-<dd><p>Configures simulator outputs for use in BayesFlow training.</p>
+<dt class="sig sig-object py" id="bayesflow.benchmarks.slcp_distractors.get_random_student_t">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.benchmarks.slcp_distractors.</span></span><span class="sig-name descname"><span class="pre">get_random_student_t</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/benchmarks/slcp_distractors.html#get_random_student_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.benchmarks.slcp_distractors.get_random_student_t" title="Permalink to this definition">#</a></dt>
+<dd><p>A helper function to create a “frozen” multivariate student-t distribution of dimensions <cite>dim</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>dim</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The dimensionality of the student-t distribution.</p>
+</dd>
+<dt><strong>mu_scale</strong><span class="classifier">float, optional, default: 15</span></dt><dd><p>The scale of the zero-centered Gaussian prior from which the mean vector
+of the student-t distribution is drawn.</p>
+</dd>
+<dt><strong>shape_scale</strong><span class="classifier">float, optional, default: 0.01</span></dt><dd><p>The scale of the assumed <cite>np.eye(dim)</cite> shape matrix. The default is chosen to keep
+the scale of the distractors and observations relatively similar.</p>
+</dd>
+<dt><strong>rng</strong><span class="classifier">np.random.Generator or None, default: None</span></dt><dd><p>An optional random number generator to use.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>student</strong><span class="classifier">callable (scipy.stats._multivariate.multivariate_t_frozen)</span></dt><dd><p>The student-t generator.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -454,34 +476,6 @@ of each student-t distribution in the mixture is drawn.</p>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>sample</strong><span class="classifier">np.ndarray of shape (n_draws, dim)</span></dt><dd><p>The random draws from the mixture of students.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.benchmarks.slcp_distractors.get_random_student_t">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.benchmarks.slcp_distractors.</span></span><span class="sig-name descname"><span class="pre">get_random_student_t</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/benchmarks/slcp_distractors.html#get_random_student_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.benchmarks.slcp_distractors.get_random_student_t" title="Permalink to this definition">#</a></dt>
-<dd><p>A helper function to create a “frozen” multivariate student-t distribution of dimensions <cite>dim</cite>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>dim</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The dimensionality of the student-t distribution.</p>
-</dd>
-<dt><strong>mu_scale</strong><span class="classifier">float, optional, default: 15</span></dt><dd><p>The scale of the zero-centered Gaussian prior from which the mean vector
-of the student-t distribution is drawn.</p>
-</dd>
-<dt><strong>shape_scale</strong><span class="classifier">float, optional, default: 0.01</span></dt><dd><p>The scale of the assumed <cite>np.eye(dim)</cite> shape matrix. The default is chosen to keep
-the scale of the distractors and observations relatively similar.</p>
-</dd>
-<dt><strong>rng</strong><span class="classifier">np.random.Generator or None, default: None</span></dt><dd><p>An optional random number generator to use.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>student</strong><span class="classifier">callable (scipy.stats._multivariate.multivariate_t_frozen)</span></dt><dd><p>The student-t generator.</p>
 </dd>
 </dl>
 </dd>
@@ -550,6 +544,12 @@ representation of the simulated data is returned.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.benchmarks.slcp_distractors.configurator">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.benchmarks.slcp_distractors.</span></span><span class="sig-name descname"><span class="pre">configurator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">forward_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'posterior'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_summary_condition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/benchmarks/slcp_distractors.html#configurator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.benchmarks.slcp_distractors.configurator" title="Permalink to this definition">#</a></dt>
+<dd><p>Configures simulator outputs for use in BayesFlow training.</p>
+</dd></dl>
+
 </section>
 
 
@@ -600,11 +600,11 @@ representation of the simulated data is returned.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.configurator"><code class="docutils literal notranslate"><span class="pre">configurator()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.draw_mixture_student_t"><code class="docutils literal notranslate"><span class="pre">draw_mixture_student_t()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.get_random_student_t"><code class="docutils literal notranslate"><span class="pre">get_random_student_t()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.draw_mixture_student_t"><code class="docutils literal notranslate"><span class="pre">draw_mixture_student_t()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.prior"><code class="docutils literal notranslate"><span class="pre">prior()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.simulator"><code class="docutils literal notranslate"><span class="pre">simulator()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.benchmarks.slcp_distractors.configurator"><code class="docutils literal notranslate"><span class="pre">configurator()</span></code></a></li>
 </ul>
   </nav></div>
 

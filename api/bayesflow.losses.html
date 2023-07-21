@@ -407,11 +407,11 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.kl_dirichlet"><code class="docutils literal notranslate"><span class="pre">kl_dirichlet()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.kl_latent_space_gaussian"><code class="docutils literal notranslate"><span class="pre">kl_latent_space_gaussian()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.kl_latent_space_student"><code class="docutils literal notranslate"><span class="pre">kl_latent_space_student()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.log_loss"><code class="docutils literal notranslate"><span class="pre">log_loss()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.kl_dirichlet"><code class="docutils literal notranslate"><span class="pre">kl_dirichlet()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.mmd_summary_space"><code class="docutils literal notranslate"><span class="pre">mmd_summary_space()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.log_loss"><code class="docutils literal notranslate"><span class="pre">log_loss()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -425,28 +425,6 @@ document.write(`
                   
   <section id="module-bayesflow.losses">
 <span id="bayesflow-losses-module"></span><h1>bayesflow.losses module<a class="headerlink" href="#module-bayesflow.losses" title="Permalink to this heading">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.losses.kl_dirichlet">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></span><span class="sig-name descname"><span class="pre">kl_dirichlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/losses.html#kl_dirichlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.kl_dirichlet" title="Permalink to this definition">#</a></dt>
-<dd><p>Computes the KL divergence between a Dirichlet distribution with parameter vector alpha and a uniform Dirichlet.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>model_indices</strong><span class="classifier">tf.Tensor of shape (batch_size, n_models)</span></dt><dd><p>one-hot-encoded true model indices</p>
-</dd>
-<dt><strong>alpha</strong><span class="classifier">tf.Tensor of shape (batch_size, n_models)</span></dt><dd><p>positive network outputs in <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">+inf]</span></code></p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>kl</strong><span class="classifier">tf.Tensor</span></dt><dd><p>A single scalar representing <span class="math notranslate nohighlight">\(D_{KL}(\mathrm{Dir}(\alpha) | \mathrm{Dir}(1,1,\ldots,1) )\)</span>, shape (,)</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.losses.kl_latent_space_gaussian">
 <span class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></span><span class="sig-name descname"><span class="pre">kl_latent_space_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_det_J</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/losses.html#kl_latent_space_gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.kl_latent_space_gaussian" title="Permalink to this definition">#</a></dt>
@@ -501,6 +479,47 @@ posterior assuming latent student t-distribution as a source distribution.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.losses.kl_dirichlet">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></span><span class="sig-name descname"><span class="pre">kl_dirichlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/losses.html#kl_dirichlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.kl_dirichlet" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes the KL divergence between a Dirichlet distribution with parameter vector alpha and a uniform Dirichlet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>model_indices</strong><span class="classifier">tf.Tensor of shape (batch_size, n_models)</span></dt><dd><p>one-hot-encoded true model indices</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">tf.Tensor of shape (batch_size, n_models)</span></dt><dd><p>positive network outputs in <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">+inf]</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>kl</strong><span class="classifier">tf.Tensor</span></dt><dd><p>A single scalar representing <span class="math notranslate nohighlight">\(D_{KL}(\mathrm{Dir}(\alpha) | \mathrm{Dir}(1,1,\ldots,1) )\)</span>, shape (,)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.losses.mmd_summary_space">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></span><span class="sig-name descname"><span class="pre">mmd_summary_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_dist=&lt;function</span> <span class="pre">random_normal&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel='gaussian'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/losses.html#mmd_summary_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.mmd_summary_space" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes the MMD(p(summary_otuputs) | z_dist) to re-shape the summary network outputs in
+an information-preserving manner.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>summary_outputs</strong><span class="classifier">tf Tensor of shape (batch_size, …)</span></dt><dd><p>The outputs of the summary network.</p>
+</dd>
+<dt><strong>z_dist</strong><span class="classifier">callable, default tf.random.normal</span></dt><dd><p>The latent data distribution towards which the summary outputs are optimized.</p>
+</dd>
+<dt><strong>kernel</strong><span class="classifier">str in (‘gaussian’, ‘inverse_multiquadratic’), default ‘gaussian’</span></dt><dd><p>The kernel function to use for MMD computation.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.losses.log_loss">
 <span class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></span><span class="sig-name descname"><span class="pre">log_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evidential</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/losses.html#log_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.log_loss" title="Permalink to this definition">#</a></dt>
 <dd><p>Computes the logarithmic loss given true <code class="docutils literal notranslate"><span class="pre">model_indices</span></code> and approximate model
@@ -531,25 +550,6 @@ normalized (False, default)</p>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>loss</strong><span class="classifier">tf.Tensor</span></dt><dd><p>A single scalar Monte-Carlo approximation of the log-loss, shape (,)</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.losses.mmd_summary_space">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></span><span class="sig-name descname"><span class="pre">mmd_summary_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_dist=&lt;function</span> <span class="pre">random_normal&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel='gaussian'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/losses.html#mmd_summary_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.mmd_summary_space" title="Permalink to this definition">#</a></dt>
-<dd><p>Computes the MMD(p(summary_otuputs) | z_dist) to re-shape the summary network outputs in
-an information-preserving manner.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>summary_outputs</strong><span class="classifier">tf Tensor of shape (batch_size, …)</span></dt><dd><p>The outputs of the summary network.</p>
-</dd>
-<dt><strong>z_dist</strong><span class="classifier">callable, default tf.random.normal</span></dt><dd><p>The latent data distribution towards which the summary outputs are optimized.</p>
-</dd>
-<dt><strong>kernel</strong><span class="classifier">str in (‘gaussian’, ‘inverse_multiquadratic’), default ‘gaussian’</span></dt><dd><p>The kernel function to use for MMD computation.</p>
 </dd>
 </dl>
 </dd>
@@ -606,11 +606,11 @@ an information-preserving manner.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.kl_dirichlet"><code class="docutils literal notranslate"><span class="pre">kl_dirichlet()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.kl_latent_space_gaussian"><code class="docutils literal notranslate"><span class="pre">kl_latent_space_gaussian()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.kl_latent_space_student"><code class="docutils literal notranslate"><span class="pre">kl_latent_space_student()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.log_loss"><code class="docutils literal notranslate"><span class="pre">log_loss()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.kl_dirichlet"><code class="docutils literal notranslate"><span class="pre">kl_dirichlet()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.mmd_summary_space"><code class="docutils literal notranslate"><span class="pre">mmd_summary_space()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.log_loss"><code class="docutils literal notranslate"><span class="pre">log_loss()</span></code></a></li>
 </ul>
   </nav></div>
 

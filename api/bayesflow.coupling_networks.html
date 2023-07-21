@@ -410,16 +410,16 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.AffineCoupling.call"><code class="docutils literal notranslate"><span class="pre">AffineCoupling.call()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling"><code class="docutils literal notranslate"><span class="pre">SplineCoupling</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.__init__"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.call"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.call()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer"><code class="docutils literal notranslate"><span class="pre">CouplingLayer</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.__init__"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.call"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.forward"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.forward()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.inverse"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.inverse()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling"><code class="docutils literal notranslate"><span class="pre">SplineCoupling</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.__init__"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.__init__()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.call"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.call()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -488,6 +488,80 @@ an <code class="docutils literal notranslate"><span class="pre">InvertibleNetwor
 </dd>
 <dt><strong>condition</strong><span class="classifier">tf.Tensor or None</span></dt><dd><p>The conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, …).
 If <code class="docutils literal notranslate"><span class="pre">condition</span> <span class="pre">is</span> <span class="pre">None</span></code>, then the layer reduces to an unconditional coupling.</p>
+</dd>
+<dt><strong>inverse</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Flag indicating whether to run the block forward or backward.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>(z, log_det_J)</strong><span class="classifier">tuple(tf.Tensor, tf.Tensor)</span></dt><dd><p>If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
+z shape: (batch_size, …, input_dim//2), log_det_J shape: (batch_size, …)</p>
+</dd>
+<dt><strong>target</strong><span class="classifier">tf.Tensor</span></dt><dd><p>If inverse=True: The back-transformed z, shape (batch_size, …, inp_dim//2)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.coupling_networks.SplineCoupling">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.coupling_networks.</span></span><span class="sig-name descname"><span class="pre">SplineCoupling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#SplineCoupling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.SplineCoupling" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Implements a conditional spline coupling block according to [1, 2], with additional
+options, such as residual blocks or Monte Carlo Dropout.</p>
+<p>[1] Durkan, C., Bekasov, A., Murray, I., &amp; Papamakarios, G. (2019).
+Neural spline flows. Advances in Neural Information Processing Systems, 32.</p>
+<p>[2] Ardizzone, L., Lüth, C., Kruse, J., Rother, C., &amp; Köthe, U. (2019).
+Guided image generation with conditional invertible neural networks.
+arXiv preprint arXiv:1907.02392.</p>
+<p>Implement only rational quadratic splines (RQS), since these appear to work
+best in practice and lead to stable training.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.coupling_networks.SplineCoupling.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#SplineCoupling.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.SplineCoupling.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates one half of a spline coupling layer to be used as part of a <code class="docutils literal notranslate"><span class="pre">CouplingLayer</span></code> in
+an <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code> instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>dim_out</strong><span class="classifier">int</span></dt><dd><p>The output dimensionality of the coupling layer.</p>
+</dd>
+<dt><strong>settings_dict</strong><span class="classifier">dict</span></dt><dd><p>The settings for the inner networks. Defaults will use:
+<a href="#id3"><span class="problematic" id="id4">``</span></a>settings_dict={</p>
+<blockquote>
+<div><p>“dense_args”     : dict(units=128, activation=”relu”),
+“num_dense”      : 2,
+“spec_norm”      : False,
+“mc_dropout”     : False,
+“dropout”        : True,
+“residual”       : False,
+“dropout_prob”   : 0.05,
+“bins”           : 16,
+“default_domain” : (-5., 5., -5., 5.)</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.coupling_networks.SplineCoupling.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#SplineCoupling.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.SplineCoupling.call" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs one pass through a spline coupling layer (either inverse or forward).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>split1</strong><span class="classifier">tf.Tensor of shape (batch_size, …, input_dim//2)</span></dt><dd><p>The first partition of the input vector(s)</p>
+</dd>
+<dt><strong>split2</strong><span class="classifier">tf.Tensor of shape (batch_size, …, ceil[input_dim//2])</span></dt><dd><p>The second partition of the input vector(s)</p>
+</dd>
+<dt><strong>condition</strong><span class="classifier">tf.Tensor or None</span></dt><dd><p>The conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, …).
+If <code class="docutils literal notranslate"><span class="pre">condition</span> <span class="pre">is</span> <span class="pre">None</span></code>, then the layer recuces to an unconditional coupling.</p>
 </dd>
 <dt><strong>inverse</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Flag indicating whether to run the block forward or backward.</p>
 </dd>
@@ -622,80 +696,6 @@ If <cite>None</cite>, transformation amounts to unconditional estimation.</p>
 
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="bayesflow.coupling_networks.SplineCoupling">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.coupling_networks.</span></span><span class="sig-name descname"><span class="pre">SplineCoupling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#SplineCoupling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.SplineCoupling" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
-<p>Implements a conditional spline coupling block according to [1, 2], with additional
-options, such as residual blocks or Monte Carlo Dropout.</p>
-<p>[1] Durkan, C., Bekasov, A., Murray, I., &amp; Papamakarios, G. (2019).
-Neural spline flows. Advances in Neural Information Processing Systems, 32.</p>
-<p>[2] Ardizzone, L., Lüth, C., Kruse, J., Rother, C., &amp; Köthe, U. (2019).
-Guided image generation with conditional invertible neural networks.
-arXiv preprint arXiv:1907.02392.</p>
-<p>Implement only rational quadratic splines (RQS), since these appear to work
-best in practice and lead to stable training.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="bayesflow.coupling_networks.SplineCoupling.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#SplineCoupling.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.SplineCoupling.__init__" title="Permalink to this definition">#</a></dt>
-<dd><p>Creates one half of a spline coupling layer to be used as part of a <code class="docutils literal notranslate"><span class="pre">CouplingLayer</span></code> in
-an <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code> instance.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>dim_out</strong><span class="classifier">int</span></dt><dd><p>The output dimensionality of the coupling layer.</p>
-</dd>
-<dt><strong>settings_dict</strong><span class="classifier">dict</span></dt><dd><p>The settings for the inner networks. Defaults will use:
-<a href="#id3"><span class="problematic" id="id4">``</span></a>settings_dict={</p>
-<blockquote>
-<div><p>“dense_args”     : dict(units=128, activation=”relu”),
-“num_dense”      : 2,
-“spec_norm”      : False,
-“mc_dropout”     : False,
-“dropout”        : True,
-“residual”       : False,
-“dropout_prob”   : 0.05,
-“bins”           : 16,
-“default_domain” : (-5., 5., -5., 5.)</p>
-</div></blockquote>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="bayesflow.coupling_networks.SplineCoupling.call">
-<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#SplineCoupling.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.SplineCoupling.call" title="Permalink to this definition">#</a></dt>
-<dd><p>Performs one pass through a spline coupling layer (either inverse or forward).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>split1</strong><span class="classifier">tf.Tensor of shape (batch_size, …, input_dim//2)</span></dt><dd><p>The first partition of the input vector(s)</p>
-</dd>
-<dt><strong>split2</strong><span class="classifier">tf.Tensor of shape (batch_size, …, ceil[input_dim//2])</span></dt><dd><p>The second partition of the input vector(s)</p>
-</dd>
-<dt><strong>condition</strong><span class="classifier">tf.Tensor or None</span></dt><dd><p>The conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, …).
-If <code class="docutils literal notranslate"><span class="pre">condition</span> <span class="pre">is</span> <span class="pre">None</span></code>, then the layer recuces to an unconditional coupling.</p>
-</dd>
-<dt><strong>inverse</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Flag indicating whether to run the block forward or backward.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>(z, log_det_J)</strong><span class="classifier">tuple(tf.Tensor, tf.Tensor)</span></dt><dd><p>If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
-z shape: (batch_size, …, input_dim//2), log_det_J shape: (batch_size, …)</p>
-</dd>
-<dt><strong>target</strong><span class="classifier">tf.Tensor</span></dt><dd><p>If inverse=True: The back-transformed z, shape (batch_size, …, inp_dim//2)</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 
 
@@ -751,16 +751,16 @@ z shape: (batch_size, …, input_dim//2), log_det_J shape: (batch_size, …)</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.AffineCoupling.call"><code class="docutils literal notranslate"><span class="pre">AffineCoupling.call()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling"><code class="docutils literal notranslate"><span class="pre">SplineCoupling</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.__init__"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.call"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.call()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer"><code class="docutils literal notranslate"><span class="pre">CouplingLayer</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.__init__"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.call"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.forward"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.forward()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.CouplingLayer.inverse"><code class="docutils literal notranslate"><span class="pre">CouplingLayer.inverse()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling"><code class="docutils literal notranslate"><span class="pre">SplineCoupling</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.__init__"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.__init__()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.coupling_networks.SplineCoupling.call"><code class="docutils literal notranslate"><span class="pre">SplineCoupling.call()</span></code></a></li>
 </ul>
 </li>
 </ul>

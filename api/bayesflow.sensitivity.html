@@ -406,8 +406,8 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.sensitivity.misspecification_experiment"><code class="docutils literal notranslate"><span class="pre">misspecification_experiment()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.sensitivity.plot_color_grid"><code class="docutils literal notranslate"><span class="pre">plot_color_grid()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.sensitivity.plot_model_misspecification_sensitivity"><code class="docutils literal notranslate"><span class="pre">plot_model_misspecification_sensitivity()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.sensitivity.plot_color_grid"><code class="docutils literal notranslate"><span class="pre">plot_color_grid()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -461,6 +461,35 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.sensitivity.plot_model_misspecification_sensitivity">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.sensitivity.</span></span><span class="sig-name descname"><span class="pre">plot_model_misspecification_sensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_config_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_config_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/sensitivity.html#plot_model_misspecification_sensitivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.sensitivity.plot_model_misspecification_sensitivity" title="Permalink to this definition">#</a></dt>
+<dd><p>Visualizes the results from a sensitivity analysis via a colored 2D grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>results_dict</strong><span class="classifier">dict</span></dt><dd><p>The results from <code class="xref py py-func docutils literal notranslate"><span class="pre">sensitivity.misspecification_experiment()</span></code>,
+Alternatively, a dictionary with mandatory keys: P1, P2, values</p>
+</dd>
+<dt><strong>first_config_dict</strong><span class="classifier">dict</span></dt><dd><p>see parameter <cite>first_config_dict</cite> in <code class="xref py py-func docutils literal notranslate"><span class="pre">sensitivity.misspecification_experiment()</span></code>
+Important: Needs additional key <code class="docutils literal notranslate"><span class="pre">well_specified_value</span></code></p>
+</dd>
+<dt><strong>second_config_dict</strong><span class="classifier">dict</span></dt><dd><p>see parameter <cite>second_config_dict</cite> in <code class="xref py py-func docutils literal notranslate"><span class="pre">sensitivity.misspecification_experiment()</span></code>
+Important: Needs additional key <code class="docutils literal notranslate"><span class="pre">well_specified_value</span></code></p>
+</dd>
+<dt><strong>plot_config</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>Optional plot configuration dictionary,
+fields: xticks, yticks, vmin, vmax, cmap, cbar_title</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.sensitivity.plot_color_grid">
 <span class="sig-prename descclassname"><span class="pre">bayesflow.sensitivity.</span></span><span class="sig-name descname"><span class="pre">plot_color_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'z'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hline_location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vline_location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/sensitivity.html#plot_color_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.sensitivity.plot_color_grid" title="Permalink to this definition">#</a></dt>
 <dd><p>Plots a 2-dimensional color grid.</p>
@@ -492,35 +521,6 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 <dt><strong>hline_location</strong><span class="classifier">float, default: None</span></dt><dd><p>(optional) horizontal dashed line</p>
 </dd>
 <dt><strong>vline_location</strong><span class="classifier">float, default: None</span></dt><dd><p>(optional) vertical dashed line</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.sensitivity.plot_model_misspecification_sensitivity">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.sensitivity.</span></span><span class="sig-name descname"><span class="pre">plot_model_misspecification_sensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_config_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_config_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/sensitivity.html#plot_model_misspecification_sensitivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.sensitivity.plot_model_misspecification_sensitivity" title="Permalink to this definition">#</a></dt>
-<dd><p>Visualizes the results from a sensitivity analysis via a colored 2D grid.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>results_dict</strong><span class="classifier">dict</span></dt><dd><p>The results from <code class="xref py py-func docutils literal notranslate"><span class="pre">sensitivity.misspecification_experiment()</span></code>,
-Alternatively, a dictionary with mandatory keys: P1, P2, values</p>
-</dd>
-<dt><strong>first_config_dict</strong><span class="classifier">dict</span></dt><dd><p>see parameter <cite>first_config_dict</cite> in <code class="xref py py-func docutils literal notranslate"><span class="pre">sensitivity.misspecification_experiment()</span></code>
-Important: Needs additional key <code class="docutils literal notranslate"><span class="pre">well_specified_value</span></code></p>
-</dd>
-<dt><strong>second_config_dict</strong><span class="classifier">dict</span></dt><dd><p>see parameter <cite>second_config_dict</cite> in <code class="xref py py-func docutils literal notranslate"><span class="pre">sensitivity.misspecification_experiment()</span></code>
-Important: Needs additional key <code class="docutils literal notranslate"><span class="pre">well_specified_value</span></code></p>
-</dd>
-<dt><strong>plot_config</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>Optional plot configuration dictionary,
-fields: xticks, yticks, vmin, vmax, cmap, cbar_title</p>
 </dd>
 </dl>
 </dd>
@@ -583,8 +583,8 @@ fields: xticks, yticks, vmin, vmax, cmap, cbar_title</p>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.sensitivity.misspecification_experiment"><code class="docutils literal notranslate"><span class="pre">misspecification_experiment()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.sensitivity.plot_color_grid"><code class="docutils literal notranslate"><span class="pre">plot_color_grid()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.sensitivity.plot_model_misspecification_sensitivity"><code class="docutils literal notranslate"><span class="pre">plot_model_misspecification_sensitivity()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.sensitivity.plot_color_grid"><code class="docutils literal notranslate"><span class="pre">plot_color_grid()</span></code></a></li>
 </ul>
   </nav></div>
 

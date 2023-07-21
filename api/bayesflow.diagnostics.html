@@ -405,17 +405,17 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_calibration_curves"><code class="docutils literal notranslate"><span class="pre">plot_calibration_curves()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_confusion_matrix"><code class="docutils literal notranslate"><span class="pre">plot_confusion_matrix()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_latent_space_2d"><code class="docutils literal notranslate"><span class="pre">plot_latent_space_2d()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_losses"><code class="docutils literal notranslate"><span class="pre">plot_losses()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_mmd_hypothesis_test"><code class="docutils literal notranslate"><span class="pre">plot_mmd_hypothesis_test()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_posterior_2d"><code class="docutils literal notranslate"><span class="pre">plot_posterior_2d()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_prior2d"><code class="docutils literal notranslate"><span class="pre">plot_prior2d()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_recovery"><code class="docutils literal notranslate"><span class="pre">plot_recovery()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_z_score_contraction"><code class="docutils literal notranslate"><span class="pre">plot_z_score_contraction()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_sbc_ecdf"><code class="docutils literal notranslate"><span class="pre">plot_sbc_ecdf()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_sbc_histograms"><code class="docutils literal notranslate"><span class="pre">plot_sbc_histograms()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_z_score_contraction"><code class="docutils literal notranslate"><span class="pre">plot_z_score_contraction()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_posterior_2d"><code class="docutils literal notranslate"><span class="pre">plot_posterior_2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_losses"><code class="docutils literal notranslate"><span class="pre">plot_losses()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_prior2d"><code class="docutils literal notranslate"><span class="pre">plot_prior2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_latent_space_2d"><code class="docutils literal notranslate"><span class="pre">plot_latent_space_2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_calibration_curves"><code class="docutils literal notranslate"><span class="pre">plot_calibration_curves()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_confusion_matrix"><code class="docutils literal notranslate"><span class="pre">plot_confusion_matrix()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_mmd_hypothesis_test"><code class="docutils literal notranslate"><span class="pre">plot_mmd_hypothesis_test()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -429,275 +429,6 @@ document.write(`
                   
   <section id="module-bayesflow.diagnostics">
 <span id="bayesflow-diagnostics-module"></span><h1>bayesflow.diagnostics module<a class="headerlink" href="#module-bayesflow.diagnostics" title="Permalink to this heading">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_calibration_curves">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_calibration_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_calibration_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_calibration_curves" title="Permalink to this definition">#</a></dt>
-<dd><p>Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities
-for a model comparison problem. The marginal histograms inform about the fraction of predictions in each bin.
-Depends on the <code class="docutils literal notranslate"><span class="pre">expected_calibration_error</span></code> function for computing the ECE.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>true_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The one-hot-encoded true model indices per data set.</p>
-</dd>
-<dt><strong>pred_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The predicted posterior model probabilities (PMPs) per data set.</p>
-</dd>
-<dt><strong>model_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The model names for nice plot titles. Inferred if None.</p>
-</dd>
-<dt><strong>num_bins</strong><span class="classifier">int, optional, default: 10</span></dt><dd><p>The number of bins to use for the calibration curves (and marginal histograms).</p>
-</dd>
-<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the y-label and y-label texts</p>
-</dd>
-<dt><strong>legend_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the legend text (ECE value)</p>
-</dd>
-<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text. Only relevant if <cite>stacked=False</cite></p>
-</dd>
-<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
-</dd>
-<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: None</span></dt><dd><p>The figure size passed to the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> constructor. Inferred if <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color of the calibration curves</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>fig</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_confusion_matrix">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_confusion_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xtick_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ytick_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_confusion_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_confusion_matrix" title="Permalink to this definition">#</a></dt>
-<dd><p>Plots a confusion matrix for validating a neural network trained for Bayesian model comparison.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>true_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The one-hot-encoded true model indices per data set.</p>
-</dd>
-<dt><strong>pred_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The predicted posterior model probabilities (PMPs) per data set.</p>
-</dd>
-<dt><strong>model_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The model names for nice plot titles. Inferred if None.</p>
-</dd>
-<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: (5, 5)</span></dt><dd><p>The figure size passed to the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> constructor. Inferred if <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 18</span></dt><dd><p>The font size of the title text.</p>
-</dd>
-<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis label and model name texts.</p>
-</dd>
-<dt><strong>xtick_rotation: int, optional, default: None</strong></dt><dd><p>Rotation of x-axis tick labels (helps with long model names).</p>
-</dd>
-<dt><strong>ytick_rotation: int, optional, default: None</strong></dt><dd><p>Rotation of y-axis tick labels (helps with long model names).</p>
-</dd>
-<dt><strong>normalize</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>A flag for normalization of the confusion matrix.
-If True, each row of the confusion matrix is normalized to sum to 1.</p>
-</dd>
-<dt><strong>cmap</strong><span class="classifier">matplotlib.colors.Colormap or str, optional, default: None</span></dt><dd><p>Colormap to be used for the cells. If a str, it should be the name of a registered colormap,
-e.g., ‘viridis’. Default colormap matches the BayesFlow defaults by ranging from white to red.</p>
-</dd>
-<dt><strong>title</strong><span class="classifier">bool, optional, default True</span></dt><dd><p>A flag for adding ‘Confusion Matrix’ above the matrix.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>fig</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_latent_space_2d">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_latent_space_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_latent_space_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_latent_space_2d" title="Permalink to this definition">#</a></dt>
-<dd><p>Creates pairplots for the latent space learned by the inference network. Enables
-visual inspection of the the latent space and whether its structrue corresponds to the
-one enforced by the optimization criterion.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>z_samples</strong><span class="classifier">np.ndarray or tf.Tensor of shape (n_sim, n_params)</span></dt><dd><p>The latent samples computed through a forward pass of the inference network.</p>
-</dd>
-<dt><strong>height</strong><span class="classifier">float, optional, default: 2.5</span></dt><dd><p>The height of the pair plot.</p>
-</dd>
-<dt><strong>color</strong><span class="classifier">str, optional, defailt</span><span class="classifier">‘#8f2727’</span></dt><dd><p>The color of the plot</p>
-</dd>
-<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Additional keyword arguments passed to the sns.PairGrid constructor</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_losses">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_losses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_losses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_losses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'black'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lw_train</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lw_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_losses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_losses" title="Permalink to this definition">#</a></dt>
-<dd><p>A generic helper function to plot the losses of a series of training epochs and runs.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>train_losses</strong><span class="classifier">pd.DataFrame</span></dt><dd><p>The (plottable) history as returned by a train_[…] method of a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.
-Alternatively, you can just pass a data frame of validation losses instead of train losses,
-if you only want to plot the validation loss.</p>
-</dd>
-<dt><strong>val_losses</strong><span class="classifier">pd.DataFrame or None, optional, default: None</span></dt><dd><p>The (plottable) validation history as returned by a train_[…] method of a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.
-If left <code class="docutils literal notranslate"><span class="pre">None</span></code>, only train losses are plotted. Should have the same number of columns
-as <code class="docutils literal notranslate"><span class="pre">train_losses</span></code>.</p>
-</dd>
-<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: None</span></dt><dd><p>The figure size passed to the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> constructor. Inferred if <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt><strong>train_color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the train loss trajectory</p>
-</dd>
-<dt><strong>val_color</strong><span class="classifier">str, optional, default: black</span></dt><dd><p>The color for the optional validation loss trajectory</p>
-</dd>
-<dt><strong>lw_train</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The linewidth for the training loss curve</p>
-</dd>
-<dt><strong>lw_val</strong><span class="classifier">int, optional, default: 3</span></dt><dd><p>The linewidth for the validation loss curve</p>
-</dd>
-<dt><strong>grid_alpha</strong><span class="classifier">float, optional, default 0.5</span></dt><dd><p>The opacity factor for the background gridlines</p>
-</dd>
-<dt><strong>legend_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the legend text</p>
-</dd>
-<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the y-label text</p>
-</dd>
-<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
-</dl>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt>AssertionError</dt><dd><p>If the number of columns in <code class="docutils literal notranslate"><span class="pre">train_losses</span></code> does not match the
-number of columns in <code class="docutils literal notranslate"><span class="pre">val_losses</span></code>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_mmd_hypothesis_test">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_mmd_hypothesis_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmd_null</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmd_observed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.16407,</span> <span class="pre">0.020171,</span> <span class="pre">0.577478)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observed_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'red'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'orange'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate_vlines_at_kde</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_mmd_hypothesis_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_mmd_hypothesis_test" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>mmd_null: np.ndarray</strong></dt><dd><p>samples from the MMD sampling distribution under the null hypothesis “the model is well-specified”</p>
-</dd>
-<dt><strong>mmd_observed: float</strong></dt><dd><p>observed MMD value</p>
-</dd>
-<dt><strong>alpha_level: float</strong></dt><dd><p>rejection probability (type I error)</p>
-</dd>
-<dt><strong>null_color: color</strong></dt><dd><p>color for the H0 sampling distribution</p>
-</dd>
-<dt><strong>observed_color: color</strong></dt><dd><p>color for the observed MMD</p>
-</dd>
-<dt><strong>alpha_color: color</strong></dt><dd><p>color for the rejection area</p>
-</dd>
-<dt><strong>truncate_vlines_at_kde: bool</strong></dt><dd><p>true: cut off the vlines at the kde
-false: continue kde lines across the plot</p>
-</dd>
-<dt><strong>xmin: float</strong></dt><dd><p>lower x axis limit</p>
-</dd>
-<dt><strong>xmax: float</strong></dt><dd><p>upper x axis limit</p>
-</dd>
-<dt><strong>bw_factor: float, default: 1.5</strong></dt><dd><p>bandwidth (aka. smoothing parameter) of the kernel density estimate</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_posterior_2d">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_posterior_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posterior_draws</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_draws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gray'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_posterior_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_posterior_2d" title="Permalink to this definition">#</a></dt>
-<dd><p>Generates a bivariate pairplot given posterior draws and optional prior or prior draws.</p>
-<dl class="simple">
-<dt>posterior_draws<span class="classifier">np.ndarray of shape (n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained for a SINGLE observed data set.</p>
-</dd>
-<dt>prior<span class="classifier">bayesflow.forward_inference.Prior instance or None, optional, default: None</span></dt><dd><p>The optional prior object having an input-output signature as given by ayesflow.forward_inference.Prior</p>
-</dd>
-<dt>prior_draws<span class="classifier">np.ndarray of shape (n_prior_draws, n_params) or None, optonal (default: None)</span></dt><dd><p>The optional prior draws obtained from the prior. If both prior and prior_draws are provided, prior_draws
-will be used.</p>
-</dd>
-<dt>param_names<span class="classifier">list or None, optional, default: None</span></dt><dd><p>The parameter names for nice plot titles. Inferred if None</p>
-</dd>
-<dt>height<span class="classifier">float, optional, default: 3</span></dt><dd><p>The height of the pairplot</p>
-</dd>
-<dt>label_fontsize<span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the x and y-label texts (parameter names)</p>
-</dd>
-<dt>legend_fontsize<span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the legend text</p>
-</dd>
-<dt>tick_fontsize<span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
-</dd>
-<dt>post_color<span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the posterior histograms and KDEs</p>
-</dd>
-<dt>priors_color<span class="classifier">str, optional, default: gray</span></dt><dd><p>The color for the optional prior histograms and KDEs</p>
-</dd>
-<dt>post_alpha<span class="classifier">float in [0, 1], optonal, default: 0.9</span></dt><dd><p>The opacity of the posterior plots</p>
-</dd>
-<dt>prior_alpha<span class="classifier">float in [0, 1], optonal, default: 0.7</span></dt><dd><p>The opacity of the prior plots</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
-</dl>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>AssertionError</dt><dd><p>If the shape of posterior_draws is not 2-dimensional.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_prior2d">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_prior2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_prior2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_prior2d" title="Permalink to this definition">#</a></dt>
-<dd><p>Creates pairplots for a given joint prior.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>prior</strong><span class="classifier">callable</span></dt><dd><p>The prior object which takes a single integer argument and generates random draws.</p>
-</dd>
-<dt><strong>param_names</strong><span class="classifier">list of str or None, optional, default None</span></dt><dd><p>An optional list of strings which</p>
-</dd>
-<dt><strong>n_samples</strong><span class="classifier">int, optional, default: 1000</span></dt><dd><p>The number of random draws from the joint prior</p>
-</dd>
-<dt><strong>height</strong><span class="classifier">float, optional, default: 2.5</span></dt><dd><p>The height of the pair plot</p>
-</dd>
-<dt><strong>color</strong><span class="classifier">str, optional, defailt</span><span class="classifier">‘#8f2727’</span></dt><dd><p>The color of the plot</p>
-</dd>
-<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Additional keyword arguments passed to the sns.PairGrid constructor</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.diagnostics.plot_recovery">
 <span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_recovery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_agg=&lt;function</span> <span class="pre">median&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainty_agg=&lt;function</span> <span class="pre">median_abs_deviation&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize=16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize=18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_fontsize=16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize=12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_corr=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_r2=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color='#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_col=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_row=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_recovery"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_recovery" title="Permalink to this definition">#</a></dt>
@@ -739,6 +470,65 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 <dt><strong>add_corr</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>A flag for adding correlation between true and estimates to the plot</p>
 </dd>
 <dt><strong>add_r2</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>A flag for adding R^2 between true and estimates to the plot</p>
+</dd>
+<dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the true vs. estimated scatter points and errobars</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ShapeError</dt><dd><p>If there is a deviation form the expected shapes of <code class="docutils literal notranslate"><span class="pre">post_samples</span></code> and <code class="docutils literal notranslate"><span class="pre">prior_samples</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_z_score_contraction">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_z_score_contraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_z_score_contraction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_z_score_contraction" title="Permalink to this definition">#</a></dt>
+<dd><p>Implements a graphical check for global model sensitivity by plotting the posterior
+z-score over the posterior contraction for each set of posterior samples in <code class="docutils literal notranslate"><span class="pre">post_samples</span></code>
+according to [1].</p>
+<ul class="simple">
+<li><p>The definition of the posterior z-score is:</p></li>
+</ul>
+<p>post_z_score = (posterior_mean - true_parameters) / posterior_std</p>
+<p>And the score is adequate if it centers around zero and spreads roughly in the interval [-3, 3]</p>
+<ul class="simple">
+<li><p>The definition of posterior contraction is:</p></li>
+</ul>
+<p>post_contraction = 1 - (posterior_variance / prior_variance)</p>
+<p>In other words, the posterior is a proxy for the reduction in ucnertainty gained by
+replacing the prior with the posterior. The ideal posterior contraction tends to 1.
+Contraction near zero indicates that the posterior variance is almost identical to
+the prior variance for the particular marginal parameter distribution.</p>
+<p>Note: Means and variances will be estimated vie their sample-based estimators.</p>
+<p>[1] Schad, D. J., Betancourt, M., &amp; Vasishth, S. (2021).
+Toward a principled Bayesian workflow in cognitive science.
+Psychological methods, 26(1), 103.</p>
+<p>Also available at <a class="reference external" href="https://arxiv.org/abs/1904.12765">https://arxiv.org/abs/1904.12765</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>post_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained from n_data_sets</p>
+</dd>
+<dt><strong>prior_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_params)</span></dt><dd><p>The prior draws (true parameters) obtained for generating the n_data_sets</p>
+</dd>
+<dt><strong>param_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The parameter names for nice plot titles. Inferred if None</p>
+</dd>
+<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default</span><span class="classifier">None</span></dt><dd><p>The figure size passed to the matplotlib constructor. Inferred if None.</p>
+</dd>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the y-label text</p>
+</dd>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text</p>
+</dd>
+<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
 </dd>
 <dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the true vs. estimated scatter points and errobars</p>
 </dd>
@@ -866,47 +656,83 @@ arXiv preprint arXiv:1804.06788.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_z_score_contraction">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_z_score_contraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_z_score_contraction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_z_score_contraction" title="Permalink to this definition">#</a></dt>
-<dd><p>Implements a graphical check for global model sensitivity by plotting the posterior
-z-score over the posterior contraction for each set of posterior samples in <code class="docutils literal notranslate"><span class="pre">post_samples</span></code>
-according to [1].</p>
-<ul class="simple">
-<li><p>The definition of the posterior z-score is:</p></li>
-</ul>
-<p>post_z_score = (posterior_mean - true_parameters) / posterior_std</p>
-<p>And the score is adequate if it centers around zero and spreads roughly in the interval [-3, 3]</p>
-<ul class="simple">
-<li><p>The definition of posterior contraction is:</p></li>
-</ul>
-<p>post_contraction = 1 - (posterior_variance / prior_variance)</p>
-<p>In other words, the posterior is a proxy for the reduction in ucnertainty gained by
-replacing the prior with the posterior. The ideal posterior contraction tends to 1.
-Contraction near zero indicates that the posterior variance is almost identical to
-the prior variance for the particular marginal parameter distribution.</p>
-<p>Note: Means and variances will be estimated vie their sample-based estimators.</p>
-<p>[1] Schad, D. J., Betancourt, M., &amp; Vasishth, S. (2021).
-Toward a principled Bayesian workflow in cognitive science.
-Psychological methods, 26(1), 103.</p>
-<p>Also available at <a class="reference external" href="https://arxiv.org/abs/1904.12765">https://arxiv.org/abs/1904.12765</a></p>
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_posterior_2d">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_posterior_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posterior_draws</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_draws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gray'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_posterior_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_posterior_2d" title="Permalink to this definition">#</a></dt>
+<dd><p>Generates a bivariate pairplot given posterior draws and optional prior or prior draws.</p>
+<dl class="simple">
+<dt>posterior_draws<span class="classifier">np.ndarray of shape (n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained for a SINGLE observed data set.</p>
+</dd>
+<dt>prior<span class="classifier">bayesflow.forward_inference.Prior instance or None, optional, default: None</span></dt><dd><p>The optional prior object having an input-output signature as given by ayesflow.forward_inference.Prior</p>
+</dd>
+<dt>prior_draws<span class="classifier">np.ndarray of shape (n_prior_draws, n_params) or None, optonal (default: None)</span></dt><dd><p>The optional prior draws obtained from the prior. If both prior and prior_draws are provided, prior_draws
+will be used.</p>
+</dd>
+<dt>param_names<span class="classifier">list or None, optional, default: None</span></dt><dd><p>The parameter names for nice plot titles. Inferred if None</p>
+</dd>
+<dt>height<span class="classifier">float, optional, default: 3</span></dt><dd><p>The height of the pairplot</p>
+</dd>
+<dt>label_fontsize<span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the x and y-label texts (parameter names)</p>
+</dd>
+<dt>legend_fontsize<span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the legend text</p>
+</dd>
+<dt>tick_fontsize<span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
+</dd>
+<dt>post_color<span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the posterior histograms and KDEs</p>
+</dd>
+<dt>priors_color<span class="classifier">str, optional, default: gray</span></dt><dd><p>The color for the optional prior histograms and KDEs</p>
+</dd>
+<dt>post_alpha<span class="classifier">float in [0, 1], optonal, default: 0.9</span></dt><dd><p>The opacity of the posterior plots</p>
+</dd>
+<dt>prior_alpha<span class="classifier">float in [0, 1], optonal, default: 0.7</span></dt><dd><p>The opacity of the prior plots</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>AssertionError</dt><dd><p>If the shape of posterior_draws is not 2-dimensional.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_losses">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_losses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_losses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_losses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'black'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lw_train</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lw_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_losses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_losses" title="Permalink to this definition">#</a></dt>
+<dd><p>A generic helper function to plot the losses of a series of training epochs and runs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>post_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained from n_data_sets</p>
+<dt><strong>train_losses</strong><span class="classifier">pd.DataFrame</span></dt><dd><p>The (plottable) history as returned by a train_[…] method of a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.
+Alternatively, you can just pass a data frame of validation losses instead of train losses,
+if you only want to plot the validation loss.</p>
 </dd>
-<dt><strong>prior_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_params)</span></dt><dd><p>The prior draws (true parameters) obtained for generating the n_data_sets</p>
+<dt><strong>val_losses</strong><span class="classifier">pd.DataFrame or None, optional, default: None</span></dt><dd><p>The (plottable) validation history as returned by a train_[…] method of a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.
+If left <code class="docutils literal notranslate"><span class="pre">None</span></code>, only train losses are plotted. Should have the same number of columns
+as <code class="docutils literal notranslate"><span class="pre">train_losses</span></code>.</p>
 </dd>
-<dt><strong>param_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The parameter names for nice plot titles. Inferred if None</p>
+<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: None</span></dt><dd><p>The figure size passed to the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> constructor. Inferred if <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
-<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default</span><span class="classifier">None</span></dt><dd><p>The figure size passed to the matplotlib constructor. Inferred if None.</p>
+<dt><strong>train_color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the train loss trajectory</p>
+</dd>
+<dt><strong>val_color</strong><span class="classifier">str, optional, default: black</span></dt><dd><p>The color for the optional validation loss trajectory</p>
+</dd>
+<dt><strong>lw_train</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The linewidth for the training loss curve</p>
+</dd>
+<dt><strong>lw_val</strong><span class="classifier">int, optional, default: 3</span></dt><dd><p>The linewidth for the validation loss curve</p>
+</dd>
+<dt><strong>grid_alpha</strong><span class="classifier">float, optional, default 0.5</span></dt><dd><p>The opacity factor for the background gridlines</p>
+</dd>
+<dt><strong>legend_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the legend text</p>
 </dd>
 <dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the y-label text</p>
 </dd>
 <dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text</p>
-</dd>
-<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
-</dd>
-<dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the true vs. estimated scatter points and errobars</p>
 </dd>
 </dl>
 </dd>
@@ -917,8 +743,182 @@ Psychological methods, 26(1), 103.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ShapeError</dt><dd><p>If there is a deviation form the expected shapes of <code class="docutils literal notranslate"><span class="pre">post_samples</span></code> and <code class="docutils literal notranslate"><span class="pre">prior_samples</span></code>.</p>
+<dt>AssertionError</dt><dd><p>If the number of columns in <code class="docutils literal notranslate"><span class="pre">train_losses</span></code> does not match the
+number of columns in <code class="docutils literal notranslate"><span class="pre">val_losses</span></code>.</p>
 </dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_prior2d">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_prior2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_prior2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_prior2d" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates pairplots for a given joint prior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>prior</strong><span class="classifier">callable</span></dt><dd><p>The prior object which takes a single integer argument and generates random draws.</p>
+</dd>
+<dt><strong>param_names</strong><span class="classifier">list of str or None, optional, default None</span></dt><dd><p>An optional list of strings which</p>
+</dd>
+<dt><strong>n_samples</strong><span class="classifier">int, optional, default: 1000</span></dt><dd><p>The number of random draws from the joint prior</p>
+</dd>
+<dt><strong>height</strong><span class="classifier">float, optional, default: 2.5</span></dt><dd><p>The height of the pair plot</p>
+</dd>
+<dt><strong>color</strong><span class="classifier">str, optional, defailt</span><span class="classifier">‘#8f2727’</span></dt><dd><p>The color of the plot</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Additional keyword arguments passed to the sns.PairGrid constructor</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_latent_space_2d">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_latent_space_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_latent_space_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_latent_space_2d" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates pairplots for the latent space learned by the inference network. Enables
+visual inspection of the the latent space and whether its structrue corresponds to the
+one enforced by the optimization criterion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>z_samples</strong><span class="classifier">np.ndarray or tf.Tensor of shape (n_sim, n_params)</span></dt><dd><p>The latent samples computed through a forward pass of the inference network.</p>
+</dd>
+<dt><strong>height</strong><span class="classifier">float, optional, default: 2.5</span></dt><dd><p>The height of the pair plot.</p>
+</dd>
+<dt><strong>color</strong><span class="classifier">str, optional, defailt</span><span class="classifier">‘#8f2727’</span></dt><dd><p>The color of the plot</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Additional keyword arguments passed to the sns.PairGrid constructor</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_calibration_curves">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_calibration_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_calibration_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_calibration_curves" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities
+for a model comparison problem. The marginal histograms inform about the fraction of predictions in each bin.
+Depends on the <code class="docutils literal notranslate"><span class="pre">expected_calibration_error</span></code> function for computing the ECE.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>true_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The one-hot-encoded true model indices per data set.</p>
+</dd>
+<dt><strong>pred_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The predicted posterior model probabilities (PMPs) per data set.</p>
+</dd>
+<dt><strong>model_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The model names for nice plot titles. Inferred if None.</p>
+</dd>
+<dt><strong>num_bins</strong><span class="classifier">int, optional, default: 10</span></dt><dd><p>The number of bins to use for the calibration curves (and marginal histograms).</p>
+</dd>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the y-label and y-label texts</p>
+</dd>
+<dt><strong>legend_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the legend text (ECE value)</p>
+</dd>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text. Only relevant if <cite>stacked=False</cite></p>
+</dd>
+<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
+</dd>
+<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: None</span></dt><dd><p>The figure size passed to the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> constructor. Inferred if <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color of the calibration curves</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fig</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_confusion_matrix">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_confusion_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xtick_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ytick_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_confusion_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_confusion_matrix" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots a confusion matrix for validating a neural network trained for Bayesian model comparison.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>true_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The one-hot-encoded true model indices per data set.</p>
+</dd>
+<dt><strong>pred_models</strong><span class="classifier">np.ndarray of shape (num_data_sets, num_models)</span></dt><dd><p>The predicted posterior model probabilities (PMPs) per data set.</p>
+</dd>
+<dt><strong>model_names</strong><span class="classifier">list or None, optional, default: None</span></dt><dd><p>The model names for nice plot titles. Inferred if None.</p>
+</dd>
+<dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: (5, 5)</span></dt><dd><p>The figure size passed to the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> constructor. Inferred if <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 18</span></dt><dd><p>The font size of the title text.</p>
+</dd>
+<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis label and model name texts.</p>
+</dd>
+<dt><strong>xtick_rotation: int, optional, default: None</strong></dt><dd><p>Rotation of x-axis tick labels (helps with long model names).</p>
+</dd>
+<dt><strong>ytick_rotation: int, optional, default: None</strong></dt><dd><p>Rotation of y-axis tick labels (helps with long model names).</p>
+</dd>
+<dt><strong>normalize</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>A flag for normalization of the confusion matrix.
+If True, each row of the confusion matrix is normalized to sum to 1.</p>
+</dd>
+<dt><strong>cmap</strong><span class="classifier">matplotlib.colors.Colormap or str, optional, default: None</span></dt><dd><p>Colormap to be used for the cells. If a str, it should be the name of a registered colormap,
+e.g., ‘viridis’. Default colormap matches the BayesFlow defaults by ranging from white to red.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">bool, optional, default True</span></dt><dd><p>A flag for adding ‘Confusion Matrix’ above the matrix.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fig</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.diagnostics.plot_mmd_hypothesis_test">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_mmd_hypothesis_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmd_null</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmd_observed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.16407,</span> <span class="pre">0.020171,</span> <span class="pre">0.577478)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observed_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'red'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'orange'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate_vlines_at_kde</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_mmd_hypothesis_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_mmd_hypothesis_test" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>mmd_null: np.ndarray</strong></dt><dd><p>samples from the MMD sampling distribution under the null hypothesis “the model is well-specified”</p>
+</dd>
+<dt><strong>mmd_observed: float</strong></dt><dd><p>observed MMD value</p>
+</dd>
+<dt><strong>alpha_level: float</strong></dt><dd><p>rejection probability (type I error)</p>
+</dd>
+<dt><strong>null_color: color</strong></dt><dd><p>color for the H0 sampling distribution</p>
+</dd>
+<dt><strong>observed_color: color</strong></dt><dd><p>color for the observed MMD</p>
+</dd>
+<dt><strong>alpha_color: color</strong></dt><dd><p>color for the rejection area</p>
+</dd>
+<dt><strong>truncate_vlines_at_kde: bool</strong></dt><dd><p>true: cut off the vlines at the kde
+false: continue kde lines across the plot</p>
+</dd>
+<dt><strong>xmin: float</strong></dt><dd><p>lower x axis limit</p>
+</dd>
+<dt><strong>xmax: float</strong></dt><dd><p>upper x axis limit</p>
+</dd>
+<dt><strong>bw_factor: float, default: 1.5</strong></dt><dd><p>bandwidth (aka. smoothing parameter) of the kernel density estimate</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">plt.Figure - the figure instance for optional saving</span></dt><dd></dd>
 </dl>
 </dd>
 </dl>
@@ -974,17 +974,17 @@ Psychological methods, 26(1), 103.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_calibration_curves"><code class="docutils literal notranslate"><span class="pre">plot_calibration_curves()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_confusion_matrix"><code class="docutils literal notranslate"><span class="pre">plot_confusion_matrix()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_latent_space_2d"><code class="docutils literal notranslate"><span class="pre">plot_latent_space_2d()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_losses"><code class="docutils literal notranslate"><span class="pre">plot_losses()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_mmd_hypothesis_test"><code class="docutils literal notranslate"><span class="pre">plot_mmd_hypothesis_test()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_posterior_2d"><code class="docutils literal notranslate"><span class="pre">plot_posterior_2d()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_prior2d"><code class="docutils literal notranslate"><span class="pre">plot_prior2d()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_recovery"><code class="docutils literal notranslate"><span class="pre">plot_recovery()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_z_score_contraction"><code class="docutils literal notranslate"><span class="pre">plot_z_score_contraction()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_sbc_ecdf"><code class="docutils literal notranslate"><span class="pre">plot_sbc_ecdf()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_sbc_histograms"><code class="docutils literal notranslate"><span class="pre">plot_sbc_histograms()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_z_score_contraction"><code class="docutils literal notranslate"><span class="pre">plot_z_score_contraction()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_posterior_2d"><code class="docutils literal notranslate"><span class="pre">plot_posterior_2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_losses"><code class="docutils literal notranslate"><span class="pre">plot_losses()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_prior2d"><code class="docutils literal notranslate"><span class="pre">plot_prior2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_latent_space_2d"><code class="docutils literal notranslate"><span class="pre">plot_latent_space_2d()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_calibration_curves"><code class="docutils literal notranslate"><span class="pre">plot_calibration_curves()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_confusion_matrix"><code class="docutils literal notranslate"><span class="pre">plot_confusion_matrix()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.diagnostics.plot_mmd_hypothesis_test"><code class="docutils literal notranslate"><span class="pre">plot_mmd_hypothesis_test()</span></code></a></li>
 </ul>
   </nav></div>
 

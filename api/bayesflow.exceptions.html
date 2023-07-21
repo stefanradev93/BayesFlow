@@ -405,14 +405,14 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ArgumentError"><code class="docutils literal notranslate"><span class="pre">ArgumentError</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ConfigurationError"><code class="docutils literal notranslate"><span class="pre">ConfigurationError</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.InferenceError"><code class="docutils literal notranslate"><span class="pre">InferenceError</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.LossError"><code class="docutils literal notranslate"><span class="pre">LossError</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.OperationNotSupportedError"><code class="docutils literal notranslate"><span class="pre">OperationNotSupportedError</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ShapeError"><code class="docutils literal notranslate"><span class="pre">ShapeError</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.SimulationError"><code class="docutils literal notranslate"><span class="pre">SimulationError</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.SummaryStatsError"><code class="docutils literal notranslate"><span class="pre">SummaryStatsError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.LossError"><code class="docutils literal notranslate"><span class="pre">LossError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ShapeError"><code class="docutils literal notranslate"><span class="pre">ShapeError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ConfigurationError"><code class="docutils literal notranslate"><span class="pre">ConfigurationError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.InferenceError"><code class="docutils literal notranslate"><span class="pre">InferenceError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.OperationNotSupportedError"><code class="docutils literal notranslate"><span class="pre">OperationNotSupportedError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ArgumentError"><code class="docutils literal notranslate"><span class="pre">ArgumentError</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -427,10 +427,31 @@ document.write(`
   <section id="module-bayesflow.exceptions">
 <span id="bayesflow-exceptions-module"></span><h1>bayesflow.exceptions module<a class="headerlink" href="#module-bayesflow.exceptions" title="Permalink to this heading">#</a></h1>
 <dl class="py exception">
-<dt class="sig sig-object py" id="bayesflow.exceptions.ArgumentError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></span><span class="sig-name descname"><span class="pre">ArgumentError</span></span><a class="reference internal" href="../_modules/bayesflow/exceptions.html#ArgumentError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.ArgumentError" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="bayesflow.exceptions.SimulationError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></span><span class="sig-name descname"><span class="pre">SimulationError</span></span><a class="reference internal" href="../_modules/bayesflow/exceptions.html#SimulationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.SimulationError" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
-<p>Class for error that occurs as a result of a function call which is invalid due to the input arguments.</p>
+<p>Class for an error in simulation.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="bayesflow.exceptions.SummaryStatsError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></span><span class="sig-name descname"><span class="pre">SummaryStatsError</span></span><a class="reference internal" href="../_modules/bayesflow/exceptions.html#SummaryStatsError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.SummaryStatsError" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Class for error in summary statistics.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="bayesflow.exceptions.LossError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></span><span class="sig-name descname"><span class="pre">LossError</span></span><a class="reference internal" href="../_modules/bayesflow/exceptions.html#LossError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.LossError" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Class for error in applying loss.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="bayesflow.exceptions.ShapeError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></span><span class="sig-name descname"><span class="pre">ShapeError</span></span><a class="reference internal" href="../_modules/bayesflow/exceptions.html#ShapeError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.ShapeError" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Class for error in expected shapes.</p>
 </dd></dl>
 
 <dl class="py exception">
@@ -448,13 +469,6 @@ document.write(`
 </dd></dl>
 
 <dl class="py exception">
-<dt class="sig sig-object py" id="bayesflow.exceptions.LossError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></span><span class="sig-name descname"><span class="pre">LossError</span></span><a class="reference internal" href="../_modules/bayesflow/exceptions.html#LossError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.LossError" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
-<p>Class for error in applying loss.</p>
-</dd></dl>
-
-<dl class="py exception">
 <dt class="sig sig-object py" id="bayesflow.exceptions.OperationNotSupportedError">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></span><span class="sig-name descname"><span class="pre">OperationNotSupportedError</span></span><a class="reference internal" href="../_modules/bayesflow/exceptions.html#OperationNotSupportedError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.OperationNotSupportedError" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
@@ -463,24 +477,10 @@ e.g., when a trainer is initialized without generative model but the user demand
 </dd></dl>
 
 <dl class="py exception">
-<dt class="sig sig-object py" id="bayesflow.exceptions.ShapeError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></span><span class="sig-name descname"><span class="pre">ShapeError</span></span><a class="reference internal" href="../_modules/bayesflow/exceptions.html#ShapeError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.ShapeError" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="bayesflow.exceptions.ArgumentError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></span><span class="sig-name descname"><span class="pre">ArgumentError</span></span><a class="reference internal" href="../_modules/bayesflow/exceptions.html#ArgumentError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.ArgumentError" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
-<p>Class for error in expected shapes.</p>
-</dd></dl>
-
-<dl class="py exception">
-<dt class="sig sig-object py" id="bayesflow.exceptions.SimulationError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></span><span class="sig-name descname"><span class="pre">SimulationError</span></span><a class="reference internal" href="../_modules/bayesflow/exceptions.html#SimulationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.SimulationError" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
-<p>Class for an error in simulation.</p>
-</dd></dl>
-
-<dl class="py exception">
-<dt class="sig sig-object py" id="bayesflow.exceptions.SummaryStatsError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.exceptions.</span></span><span class="sig-name descname"><span class="pre">SummaryStatsError</span></span><a class="reference internal" href="../_modules/bayesflow/exceptions.html#SummaryStatsError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.exceptions.SummaryStatsError" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
-<p>Class for error in summary statistics.</p>
+<p>Class for error that occurs as a result of a function call which is invalid due to the input arguments.</p>
 </dd></dl>
 
 </section>
@@ -533,14 +533,14 @@ e.g., when a trainer is initialized without generative model but the user demand
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ArgumentError"><code class="docutils literal notranslate"><span class="pre">ArgumentError</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ConfigurationError"><code class="docutils literal notranslate"><span class="pre">ConfigurationError</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.InferenceError"><code class="docutils literal notranslate"><span class="pre">InferenceError</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.LossError"><code class="docutils literal notranslate"><span class="pre">LossError</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.OperationNotSupportedError"><code class="docutils literal notranslate"><span class="pre">OperationNotSupportedError</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ShapeError"><code class="docutils literal notranslate"><span class="pre">ShapeError</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.SimulationError"><code class="docutils literal notranslate"><span class="pre">SimulationError</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.SummaryStatsError"><code class="docutils literal notranslate"><span class="pre">SummaryStatsError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.LossError"><code class="docutils literal notranslate"><span class="pre">LossError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ShapeError"><code class="docutils literal notranslate"><span class="pre">ShapeError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ConfigurationError"><code class="docutils literal notranslate"><span class="pre">ConfigurationError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.InferenceError"><code class="docutils literal notranslate"><span class="pre">InferenceError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.OperationNotSupportedError"><code class="docutils literal notranslate"><span class="pre">OperationNotSupportedError</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.exceptions.ArgumentError"><code class="docutils literal notranslate"><span class="pre">ArgumentError</span></code></a></li>
 </ul>
   </nav></div>
 

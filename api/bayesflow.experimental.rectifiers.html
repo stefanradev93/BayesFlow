@@ -415,8 +415,8 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.__init__"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.call"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.compute_loss"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.compute_loss()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.log_density"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.log_density()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.sample"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.sample()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.log_density"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.log_density()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -610,12 +610,6 @@ For instance, <code class="docutils literal notranslate"><span class="pre">kwarg
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="bayesflow.experimental.rectifiers.RectifiedDistribution.log_density">
-<span class="sig-name descname"><span class="pre">log_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/experimental/rectifiers.html#RectifiedDistribution.log_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.log_density" title="Permalink to this definition">#</a></dt>
-<dd><p>Computes the log density…</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.experimental.rectifiers.RectifiedDistribution.sample">
 <span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/experimental/rectifiers.html#RectifiedDistribution.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.sample" title="Permalink to this definition">#</a></dt>
 <dd><p>Generates random draws from the approximate posterior given a dictionary with conditonal variables.</p>
@@ -643,6 +637,12 @@ For instance, <code class="docutils literal notranslate"><span class="pre">kwarg
 </dl>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.experimental.rectifiers.RectifiedDistribution.log_density">
+<span class="sig-name descname"><span class="pre">log_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/experimental/rectifiers.html#RectifiedDistribution.log_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.log_density" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes the log density…</p>
 </dd></dl>
 
 </dd></dl>
@@ -707,8 +707,8 @@ For instance, <code class="docutils literal notranslate"><span class="pre">kwarg
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.__init__"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.call"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.call()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.compute_loss"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.compute_loss()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.log_density"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.log_density()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.sample"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.sample()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.experimental.rectifiers.RectifiedDistribution.log_density"><code class="docutils literal notranslate"><span class="pre">RectifiedDistribution.log_density()</span></code></a></li>
 </ul>
 </li>
 </ul>

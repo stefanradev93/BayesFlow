@@ -405,14 +405,14 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.backprop_step"><code class="docutils literal notranslate"><span class="pre">backprop_step()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.build_meta_dict"><code class="docutils literal notranslate"><span class="pre">build_meta_dict()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.check_posterior_prior_shapes"><code class="docutils literal notranslate"><span class="pre">check_posterior_prior_shapes()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.check_tensor_sanity"><code class="docutils literal notranslate"><span class="pre">check_tensor_sanity()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.merge_left_into_right"><code class="docutils literal notranslate"><span class="pre">merge_left_into_right()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.build_meta_dict"><code class="docutils literal notranslate"><span class="pre">build_meta_dict()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.extract_current_lr"><code class="docutils literal notranslate"><span class="pre">extract_current_lr()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.format_loss_string"><code class="docutils literal notranslate"><span class="pre">format_loss_string()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.loss_to_string"><code class="docutils literal notranslate"><span class="pre">loss_to_string()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.merge_left_into_right"><code class="docutils literal notranslate"><span class="pre">merge_left_into_right()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.backprop_step"><code class="docutils literal notranslate"><span class="pre">backprop_step()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.check_posterior_prior_shapes"><code class="docutils literal notranslate"><span class="pre">check_posterior_prior_shapes()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -427,30 +427,15 @@ document.write(`
   <section id="module-bayesflow.helper_functions">
 <span id="bayesflow-helper-functions-module"></span><h1>bayesflow.helper_functions module<a class="headerlink" href="#module-bayesflow.helper_functions" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.helper_functions.backprop_step">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">backprop_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amortizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#backprop_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.backprop_step" title="Permalink to this definition">#</a></dt>
-<dd><p>Computes the loss of the provided amortizer given an input dictionary and applies gradients.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>The configured output of the genrative model</p>
-</dd>
-<dt><strong>amortizer</strong><span class="classifier">tf.keras.Model</span></dt><dd><p>The custom amortizer. Needs to implement a compute_loss method.</p>
-</dd>
-<dt><strong>optimizer</strong><span class="classifier">tf.keras.optimizers.Optimizer</span></dt><dd><p>The optimizer used to update the amortizer’s parameters.</p>
-</dd>
-<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Optional keyword arguments passed to the network’s compute_loss method</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>loss</strong><span class="classifier">dict</span></dt><dd><p>The outputs of the compute_loss() method of the amortizer comprising all
-loss components, such as divergences or regularization.</p>
-</dd>
-</dl>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="bayesflow.helper_functions.check_tensor_sanity">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">check_tensor_sanity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#check_tensor_sanity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.check_tensor_sanity" title="Permalink to this definition">#</a></dt>
+<dd><p>Tests for the presence of NaNs and Infs in a tensor.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.helper_functions.merge_left_into_right">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">merge_left_into_right</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#merge_left_into_right"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.merge_left_into_right" title="Permalink to this definition">#</a></dt>
+<dd><p>Function to merge nested dict <cite>left_dict</cite> into nested dict <cite>right_dict</cite>.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -482,35 +467,6 @@ loss components, such as divergences or regularization.</p>
 </dl>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.helper_functions.check_posterior_prior_shapes">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">check_posterior_prior_shapes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#check_posterior_prior_shapes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.check_posterior_prior_shapes" title="Permalink to this definition">#</a></dt>
-<dd><p>Checks requirements for the shapes of posterior and prior draws as
-necessitated by most diagnostic functions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>post_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained from n_data_sets</p>
-</dd>
-<dt><strong>prior_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_params)</span></dt><dd><p>The prior draws obtained for generating n_data_sets</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>ShapeError</dt><dd><p>If there is a deviation form the expected shapes of <cite>post_samples</cite> and <cite>prior_samples</cite>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.helper_functions.check_tensor_sanity">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">check_tensor_sanity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#check_tensor_sanity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.check_tensor_sanity" title="Permalink to this definition">#</a></dt>
-<dd><p>Tests for the presence of NaNs and Infs in a tensor.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -548,9 +504,53 @@ dictionary = {k1: v1, k2: v2} -&gt; ‘k1: v1, k2: v2’</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="bayesflow.helper_functions.merge_left_into_right">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">merge_left_into_right</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#merge_left_into_right"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.merge_left_into_right" title="Permalink to this definition">#</a></dt>
-<dd><p>Function to merge nested dict <cite>left_dict</cite> into nested dict <cite>right_dict</cite>.</p>
+<dt class="sig sig-object py" id="bayesflow.helper_functions.backprop_step">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">backprop_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amortizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#backprop_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.backprop_step" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes the loss of the provided amortizer given an input dictionary and applies gradients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_dict</strong><span class="classifier">dict</span></dt><dd><p>The configured output of the genrative model</p>
+</dd>
+<dt><strong>amortizer</strong><span class="classifier">tf.keras.Model</span></dt><dd><p>The custom amortizer. Needs to implement a compute_loss method.</p>
+</dd>
+<dt><strong>optimizer</strong><span class="classifier">tf.keras.optimizers.Optimizer</span></dt><dd><p>The optimizer used to update the amortizer’s parameters.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Optional keyword arguments passed to the network’s compute_loss method</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>loss</strong><span class="classifier">dict</span></dt><dd><p>The outputs of the compute_loss() method of the amortizer comprising all
+loss components, such as divergences or regularization.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.helper_functions.check_posterior_prior_shapes">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">check_posterior_prior_shapes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#check_posterior_prior_shapes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.check_posterior_prior_shapes" title="Permalink to this definition">#</a></dt>
+<dd><p>Checks requirements for the shapes of posterior and prior draws as
+necessitated by most diagnostic functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>post_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained from n_data_sets</p>
+</dd>
+<dt><strong>prior_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_params)</span></dt><dd><p>The prior draws obtained for generating n_data_sets</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>ShapeError</dt><dd><p>If there is a deviation form the expected shapes of <cite>post_samples</cite> and <cite>prior_samples</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -603,14 +603,14 @@ dictionary = {k1: v1, k2: v2} -&gt; ‘k1: v1, k2: v2’</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.backprop_step"><code class="docutils literal notranslate"><span class="pre">backprop_step()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.build_meta_dict"><code class="docutils literal notranslate"><span class="pre">build_meta_dict()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.check_posterior_prior_shapes"><code class="docutils literal notranslate"><span class="pre">check_posterior_prior_shapes()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.check_tensor_sanity"><code class="docutils literal notranslate"><span class="pre">check_tensor_sanity()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.merge_left_into_right"><code class="docutils literal notranslate"><span class="pre">merge_left_into_right()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.build_meta_dict"><code class="docutils literal notranslate"><span class="pre">build_meta_dict()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.extract_current_lr"><code class="docutils literal notranslate"><span class="pre">extract_current_lr()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.format_loss_string"><code class="docutils literal notranslate"><span class="pre">format_loss_string()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.loss_to_string"><code class="docutils literal notranslate"><span class="pre">loss_to_string()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.merge_left_into_right"><code class="docutils literal notranslate"><span class="pre">merge_left_into_right()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.backprop_step"><code class="docutils literal notranslate"><span class="pre">backprop_step()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.helper_functions.check_posterior_prior_shapes"><code class="docutils literal notranslate"><span class="pre">check_posterior_prior_shapes()</span></code></a></li>
 </ul>
   </nav></div>
 

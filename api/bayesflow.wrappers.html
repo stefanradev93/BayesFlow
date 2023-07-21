@@ -409,8 +409,8 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.__init__"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.build"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.build()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.call"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.call()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.get_config"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.get_config()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.normalize_weights"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.normalize_weights()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.get_config"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.get_config()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -461,6 +461,14 @@ constraining its spectral norm, which can stabilize the training of generative n
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.wrappers.SpectralNormalization.normalize_weights">
+<span class="sig-name descname"><span class="pre">normalize_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/wrappers.html#SpectralNormalization.normalize_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.wrappers.SpectralNormalization.normalize_weights" title="Permalink to this definition">#</a></dt>
+<dd><p>Generate spectral normalized weights.</p>
+<p>This method will update the value of <cite>self.w</cite> with the
+spectral normalized value, so that the layer is ready for <cite>call()</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.wrappers.SpectralNormalization.get_config">
 <span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/wrappers.html#SpectralNormalization.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.wrappers.SpectralNormalization.get_config" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns the config of the layer.</p>
@@ -478,14 +486,6 @@ returned dict if they want to modify it.</p>
 <dt>Returns:</dt><dd><p>Python dictionary.</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="bayesflow.wrappers.SpectralNormalization.normalize_weights">
-<span class="sig-name descname"><span class="pre">normalize_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/wrappers.html#SpectralNormalization.normalize_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.wrappers.SpectralNormalization.normalize_weights" title="Permalink to this definition">#</a></dt>
-<dd><p>Generate spectral normalized weights.</p>
-<p>This method will update the value of <cite>self.w</cite> with the
-spectral normalized value, so that the layer is ready for <cite>call()</cite>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -544,8 +544,8 @@ spectral normalized value, so that the layer is ready for <cite>call()</cite>.</
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.__init__"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.build"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.build()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.call"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.call()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.get_config"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.get_config()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.normalize_weights"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.normalize_weights()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.wrappers.SpectralNormalization.get_config"><code class="docutils literal notranslate"><span class="pre">SpectralNormalization.get_config()</span></code></a></li>
 </ul>
 </li>
 </ul>

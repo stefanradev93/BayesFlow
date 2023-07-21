@@ -405,12 +405,12 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.MetaDictSetting"><code class="docutils literal notranslate"><span class="pre">MetaDictSetting</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.MetaDictSetting.__init__"><code class="docutils literal notranslate"><span class="pre">MetaDictSetting.__init__()</span></code></a></li>
-</ul>
-</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.Setting"><code class="docutils literal notranslate"><span class="pre">Setting</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.Setting.__init__"><code class="docutils literal notranslate"><span class="pre">Setting.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.MetaDictSetting"><code class="docutils literal notranslate"><span class="pre">MetaDictSetting</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.MetaDictSetting.__init__"><code class="docutils literal notranslate"><span class="pre">MetaDictSetting.__init__()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -426,6 +426,18 @@ document.write(`
                   
   <section id="module-bayesflow.default_settings">
 <span id="bayesflow-default-settings-module"></span><h1>bayesflow.default_settings module<a class="headerlink" href="#module-bayesflow.default_settings" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.default_settings.Setting">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.default_settings.</span></span><span class="sig-name descname"><span class="pre">Setting</span></span><a class="reference internal" href="../_modules/bayesflow/default_settings.html#Setting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.Setting" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for settings. It’s here to potentially extend the setting functionality in future.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.default_settings.Setting.__init__">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/default_settings.html#Setting.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.Setting.__init__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="bayesflow.default_settings.MetaDictSetting">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.default_settings.</span></span><span class="sig-name descname"><span class="pre">MetaDictSetting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mandatory_fields</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/default_settings.html#MetaDictSetting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.MetaDictSetting" title="Permalink to this definition">#</a></dt>
@@ -445,18 +457,6 @@ document.write(`
 </dd>
 </dl>
 </dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="bayesflow.default_settings.Setting">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.default_settings.</span></span><span class="sig-name descname"><span class="pre">Setting</span></span><a class="reference internal" href="../_modules/bayesflow/default_settings.html#Setting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.Setting" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Abstract base class for settings. It’s here to potentially extend the setting functionality in future.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="bayesflow.default_settings.Setting.__init__">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/default_settings.html#Setting.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.default_settings.Setting.__init__" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -510,12 +510,12 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.MetaDictSetting"><code class="docutils literal notranslate"><span class="pre">MetaDictSetting</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.MetaDictSetting.__init__"><code class="docutils literal notranslate"><span class="pre">MetaDictSetting.__init__()</span></code></a></li>
-</ul>
-</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.Setting"><code class="docutils literal notranslate"><span class="pre">Setting</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.Setting.__init__"><code class="docutils literal notranslate"><span class="pre">Setting.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.MetaDictSetting"><code class="docutils literal notranslate"><span class="pre">MetaDictSetting</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.default_settings.MetaDictSetting.__init__"><code class="docutils literal notranslate"><span class="pre">MetaDictSetting.__init__()</span></code></a></li>
 </ul>
 </li>
 </ul>
