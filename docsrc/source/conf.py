@@ -52,6 +52,7 @@ autodoc_default_options = {
     "special-members": "__call__,__init__",
     "undoc-members": True,
     "exclude-members": "__weakref__",
+    "member-order": "bysource"
 }
 
 # Define shorthand for external links:
