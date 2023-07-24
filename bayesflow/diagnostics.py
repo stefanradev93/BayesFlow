@@ -788,6 +788,8 @@ def plot_posterior_2d(
 def plot_losses(
     train_losses,
     val_losses=None,
+    moving_average=False,
+    ma_window_fraction=0.01,
     fig_size=None,
     train_color="#8f2727",
     val_color="black",
@@ -803,31 +805,35 @@ def plot_losses(
     Parameters
     ----------
 
-    train_losses      : pd.DataFrame
+    train_losses       : pd.DataFrame
         The (plottable) history as returned by a train_[...] method of a ``Trainer`` instance.
         Alternatively, you can just pass a data frame of validation losses instead of train losses,
         if you only want to plot the validation loss.
-    val_losses        : pd.DataFrame or None, optional, default: None
+    val_losses         : pd.DataFrame or None, optional, default: None
         The (plottable) validation history as returned by a train_[...] method of a ``Trainer`` instance.
         If left ``None``, only train losses are plotted. Should have the same number of columns
         as ``train_losses``.
-    fig_size          : tuple or None, optional, default: None
+    moving_average     : bool, optional, default: False
+        A flag for adding a moving average line of the train_losses.
+    ma_window_fraction : int, optional, default: 0.01
+        Window size for the moving average as a fraction of total training steps.
+    fig_size           : tuple or None, optional, default: None
         The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
-    train_color       : str, optional, default: '#8f2727'
+    train_color        : str, optional, default: '#8f2727'
         The color for the train loss trajectory
-    val_color         : str, optional, default: black
+    val_color          : str, optional, default: black
         The color for the optional validation loss trajectory
-    lw_train          : int, optional, default: 2
+    lw_train           : int, optional, default: 2
         The linewidth for the training loss curve
-    lw_val            : int, optional, default: 3
+    lw_val             : int, optional, default: 3
         The linewidth for the validation loss curve
-    grid_alpha        : float, optional, default 0.5
+    grid_alpha         : float, optional, default 0.5
         The opacity factor for the background gridlines
-    legend_fontsize   : int, optional, default: 14
+    legend_fontsize    : int, optional, default: 14
         The font size of the legend text
-    label_fontsize    : int, optional, default: 14
+    label_fontsize     : int, optional, default: 14
         The font size of the y-label text
-    title_fontsize    : int, optional, default: 16
+    title_fontsize     : int, optional, default: 16
         The font size of the title text
 
     Returns
@@ -864,6 +870,11 @@ def plot_losses(
     for i, ax in enumerate(looper):
         # Plot train curve
         ax.plot(train_step_index, train_losses.iloc[:, i], color=train_color, lw=lw_train, alpha=0.9, label="Training")
+        if moving_average:
+            moving_average_window = int(train_losses.shape[0] * ma_window_fraction)
+            smoothed_loss = train_losses.iloc[:, i].rolling(window=moving_average_window).mean()
+            ax.plot(train_step_index, smoothed_loss, color="grey", lw=lw_train, label="Training (Moving Average)")
+
         # Plot optional val curve
         if val_losses is not None:
             if i < val_losses.shape[1]:
@@ -1172,10 +1183,10 @@ def plot_confusion_matrix(
     ax.set(xticks=np.arange(cm.shape[1]), yticks=np.arange(cm.shape[0]))
     ax.set_xticklabels(model_names, fontsize=tick_fontsize)
     if xtick_rotation:
-       plt.xticks(rotation=xtick_rotation, ha="right")
+        plt.xticks(rotation=xtick_rotation, ha="right")
     ax.set_yticklabels(model_names, fontsize=tick_fontsize)
     if ytick_rotation:
-       plt.yticks(rotation=ytick_rotation)
+        plt.yticks(rotation=ytick_rotation)
     ax.set_xlabel("Predicted model", fontsize=tick_fontsize)
     ax.set_ylabel("True model", fontsize=tick_fontsize)
 
@@ -1192,16 +1203,18 @@ def plot_confusion_matrix(
     return fig
 
 
-def plot_mmd_hypothesis_test(mmd_null,
-                             mmd_observed=None,
-                             alpha_level=0.05,
-                             null_color=(0.16407, 0.020171, 0.577478),
-                             observed_color="red",
-                             alpha_color="orange",
-                             truncate_vlines_at_kde=False,
-                             xmin=None,
-                             xmax=None,
-                             bw_factor=1.5):
+def plot_mmd_hypothesis_test(
+    mmd_null,
+    mmd_observed=None,
+    alpha_level=0.05,
+    null_color=(0.16407, 0.020171, 0.577478),
+    observed_color="red",
+    alpha_color="orange",
+    truncate_vlines_at_kde=False,
+    xmin=None,
+    xmax=None,
+    bw_factor=1.5,
+):
     """
 
     Parameters
@@ -1242,25 +1255,31 @@ def plot_mmd_hypothesis_test(mmd_null,
     def fill_area_under_kde(kde_object, x_start, x_end=None, **kwargs):
         kde_x, kde_y = kde_object.lines[0].get_data()
         if x_end is not None:
-            plt.fill_between(kde_x, kde_y, where=(kde_x >= x_start) & (kde_x <= x_end),
-                             interpolate=True, **kwargs)
+            plt.fill_between(kde_x, kde_y, where=(kde_x >= x_start) & (kde_x <= x_end), interpolate=True, **kwargs)
         else:
-            plt.fill_between(kde_x, kde_y, where=(kde_x >= x_start),
-                             interpolate=True, **kwargs)
+            plt.fill_between(kde_x, kde_y, where=(kde_x >= x_start), interpolate=True, **kwargs)
 
     f = plt.figure(figsize=(8, 4))
 
     kde = sns.kdeplot(mmd_null, fill=False, linewidth=0, bw_adjust=bw_factor)
-    sns.kdeplot(mmd_null, fill=True, alpha=.12, color=null_color, bw_adjust=bw_factor)
+    sns.kdeplot(mmd_null, fill=True, alpha=0.12, color=null_color, bw_adjust=bw_factor)
 
     if truncate_vlines_at_kde:
         draw_vline_to_kde(x=mmd_observed, kde_object=kde, color=observed_color, label=r"Observed data")
     else:
-        plt.vlines(x=mmd_observed, ymin=0, ymax=plt.gca().get_ylim()[1], color=observed_color, linewidth=3,
-                   label=r"Observed data")
+        plt.vlines(
+            x=mmd_observed,
+            ymin=0,
+            ymax=plt.gca().get_ylim()[1],
+            color=observed_color,
+            linewidth=3,
+            label=r"Observed data",
+        )
 
     mmd_critical = np.quantile(mmd_null, 1 - alpha_level)
-    fill_area_under_kde(kde, mmd_critical, color=alpha_color, alpha=0.5, label=fr"{int(alpha_level*100)}% rejection area")
+    fill_area_under_kde(
+        kde, mmd_critical, color=alpha_color, alpha=0.5, label=rf"{int(alpha_level*100)}% rejection area"
+    )
 
     if truncate_vlines_at_kde:
         draw_vline_to_kde(x=mmd_critical, kde_object=kde, color=alpha_color)
@@ -1273,7 +1292,7 @@ def plot_mmd_hypothesis_test(mmd_null,
     plt.ylabel("")
     plt.yticks([])
     plt.xlim(xmin, xmax)
-    plt.tick_params(axis='both', which='major', labelsize=16)
+    plt.tick_params(axis="both", which="major", labelsize=16)
 
     plt.legend(fontsize=20)
     sns.despine()
