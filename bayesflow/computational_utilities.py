@@ -279,7 +279,8 @@ def expected_calibration_error(m_true, m_pred, num_bins=10):
     # Extract number of models and prepare containers
     n_models = m_true.shape[1]
     cal_errs = []
-    probs = []
+    probs_true = []
+    probs_pred = []
 
     # Loop for each model and compute calibration errs per bin
     for k in range(n_models):
@@ -295,8 +296,9 @@ def expected_calibration_error(m_true, m_pred, num_bins=10):
         cal_err = np.sum(np.abs(prob_true - prob_pred) * (bin_total[nonzero] / len(y_true)))
 
         cal_errs.append(cal_err)
-        probs.append((prob_true, prob_pred))
-    return cal_errs, probs
+        probs_true.append(prob_true)
+        probs_pred.append(prob_pred)
+    return cal_errs, probs_true, probs_pred
 
 
 def maximum_mean_discrepancy(source_samples, target_samples, kernel="gaussian", mmd_weight=1.0, minimum=0.0):

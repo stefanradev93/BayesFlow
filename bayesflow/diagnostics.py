@@ -1057,7 +1057,7 @@ def plot_calibration_curves(
     # Determine n_subplots dynamically
     n_row = int(np.ceil(num_models / 6))
     n_col = int(np.ceil(num_models / n_row))
-    cal_errs, cal_probs = expected_calibration_error(true_models, pred_models, num_bins)
+    cal_errs, probs_true, probs_pred = expected_calibration_error(true_models, pred_models, num_bins)
 
     # Initialize figure
     if fig_size is None:
@@ -1073,7 +1073,7 @@ def plot_calibration_curves(
         ax = axarr
     for j in range(num_models):
         # Plot calibration curve
-        ax[j].plot(cal_probs[j][0], cal_probs[j][1], color=color)
+        ax[j].plot(probs_pred[j], probs_true[j], color=color)
 
         # Plot AB line
         ax[j].plot(ax[j].get_xlim(), ax[j].get_xlim(), "--", color="darkgrey")
