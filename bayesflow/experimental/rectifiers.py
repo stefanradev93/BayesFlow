@@ -207,7 +207,7 @@ class RectifiedDistribution(tf.keras.Model):
         )
 
         # Extract target variables
-        target_vars = input_dict[defaults.DEFAULT_KEYS["targets"]]
+        target_vars = input_dict[defaults.DEFAULT_KEYS["parameters"]]
 
         # Extract batch size (autograph friendly)
         batch_size = tf.shape(target_vars)[0]
@@ -327,7 +327,7 @@ class RectifiedDistribution(tf.keras.Model):
         )
 
         # Extract targets
-        target_vars = input_dict[defaults.DEFAULT_KEYS["targets"]]
+        target_vars = input_dict[defaults.DEFAULT_KEYS["parameters"]]
 
         # Reverse ODE and log pdf computation with the trace method
         latents, trace = self._solve_euler_inv(target_vars, conditions, step_size, **kwargs)
