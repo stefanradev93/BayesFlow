@@ -462,8 +462,8 @@ document.write(`
 </div>
 <section id="introduction">
 <h2><span class="section-number">8.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
-<p>This is the second part of the tutorial series covering amortized model comparison with BayesFlow! The general workflow, the scenario and the cognitive models were introduced in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a> and are assumed to be known, so here we will focus on the new elements introduced when comparing hierarchical models.</p>
-<p>In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we only conducted model comparison for a single participant at a time. Let us now consider all participants and their nested observations simultaneously in our model comparison!</p>
+<p>This is the second part of the tutorial series covering amortized model comparison with BayesFlow! The general workflow, the scenario and the cognitive models were introduced in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a> and are assumed to be known, so here we will focus on the new elements introduced when comparing hierarchical models.</p>
+<p>In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>, we only conducted model comparison for a single participant at a time. Let us now consider all participants and their nested observations simultaneously in our model comparison!</p>
 </section>
 <section id="generative-model-definition">
 <h2><span class="section-number">8.2. </span>Generative Model Definition<a class="headerlink" href="#generative-model-definition" title="Permalink to this heading">#</a></h2>
@@ -526,7 +526,7 @@ Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">hierarchical_prior_fun</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="s2">&quot;Samples a random parameter configuration from the hierarchical prior distribution.&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Samples a random parameter configuration from the hierarchical prior distribution.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
@@ -560,7 +560,7 @@ Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
 </section>
 <section id="creating-the-simulators">
 <h3><span class="section-number">8.2.2. </span>Creating the Simulators<a class="headerlink" href="#creating-the-simulators" title="Permalink to this heading">#</a></h3>
-<p>At this point, it is important to stress again our new definition of a data set: In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we analyzed participants separately, so each data set contained a single participant. With hierarchical models, we can now take all of our experimental data simultaneously into consideration, so each data set contains several participants with nested observations each. We could also have other hierarchical models, such as students nested into classes or employees nested into organizations, so we refer to the higher order units with the general term <em>groups</em>. For this tutorial, we consider a scenario with 50 participants performing 100 trials each.</p>
+<p>At this point, it is important to stress again our new definition of a data set: In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>, we analyzed participants separately, so each data set contained a single participant. With hierarchical models, we can now take all of our experimental data simultaneously into consideration, so each data set contains several participants with nested observations each. We could also have other hierarchical models, such as students nested into classes or employees nested into organizations, so we refer to the higher order units with the general term <em>groups</em>. For this tutorial, we consider a scenario with 50 participants performing 100 trials each.</p>
 <p>We continue our known workflow by first specifying simulator functions, then creating our generative models with the <code class="docutils literal notranslate"><span class="pre">GenerativeModel</span></code> wrapper and finally combining them with the <code class="docutils literal notranslate"><span class="pre">MultiGenerativeModel</span></code> wrapper.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -577,18 +577,18 @@ Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    theta   : np.ndarray of shape (num_parameters)</span>
+<span class="sd">    theta      : np.ndarray of shape (num_parameters, )</span>
 <span class="sd">        Contains draws from the prior distribution for each parameter.</span>
-<span class="sd">    model   : str, either &quot;1HT&quot; or &quot;2HT&quot;</span>
+<span class="sd">    model      : str, either &quot;1HT&quot; or &quot;2HT&quot;</span>
 <span class="sd">        Decides the model to generate data from.</span>
-<span class="sd">    num_obs : int</span>
+<span class="sd">    num_groups : int</span>
 <span class="sd">        The number of groups (participants).</span>
-<span class="sd">    num_obs : int</span>
+<span class="sd">    num_obs    : int</span>
 <span class="sd">        The number of observations (trials) per group.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    X     : np.ndarray of shape (num_groups, num_obs, 3)</span>
+<span class="sd">    X     : np.ndarray of shape (num_groups, num_obs, 2)</span>
 <span class="sd">        The generated data set. Contains two columns:</span>
 <span class="sd">            1. Stimulus type (0=&quot;new&quot;, 1=&quot;old&quot;)</span>
 <span class="sd">            2. Response (0=&quot;new&quot;, 1=&quot;old&quot;)</span>
@@ -677,7 +677,7 @@ INFO:root:No optional simulation batchable context provided.
 </div>
 </div>
 </div>
-<p>We added the ‘group’-dimension to our data sets, so we now have our data in a 4-dimensional format with the shape (number of data sets, number of groups/participants, number of observations, number of variables):</p>
+<p>We added the <em>group</em> dimension to our data sets, so we now have our data in a 4-dimensional format with the shape (number of data sets, number of groups/participants, number of observations, number of variables):</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_output</span> <span class="o">=</span> <span class="n">model_1ht</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
@@ -711,10 +711,10 @@ First 3 rows of first 2 participants in first data set:
 </section>
 <section id="prior-predictive-checks">
 <h3><span class="section-number">8.2.3. </span>Prior Predictive Checks<a class="headerlink" href="#prior-predictive-checks" title="Permalink to this heading">#</a></h3>
-<p>The interplay between parameters on several levels adds more complexity to the behavior of hierarchical models. Therefore, prior predictive or pushfoward checks become even more crucial for inspecting whether the chosen parametrization matches one’s expectations. Our simulated data sets now contain <code class="docutils literal notranslate"><span class="pre">NUM_GROUPS</span></code> participants and <code class="docutils literal notranslate"><span class="pre">NUM_OBS</span></code> observations each. If we want to simulate 1000 participants as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we now need only 20 simulations from a model, as each data set contains 50 participants. Afterwards, we calculate the hit rates and false alarm rates for each simulated participant as before and plot them.</p>
+<p>The interplay between parameters on several levels adds more complexity to the behavior of hierarchical models. Therefore, prior predictive or pushfoward checks become even more crucial for inspecting whether the chosen parametrization matches one’s expectations. Our simulated data sets now contain <code class="docutils literal notranslate"><span class="pre">NUM_GROUPS</span></code> participants and <code class="docutils literal notranslate"><span class="pre">NUM_OBS</span></code> observations each. If we want to simulate 1000 participants as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>, we now need only 20 simulations from a model, as each data set contains 50 participants. Afterwards, we calculate the hit rates and false alarm rates for each simulated participant as before and plot them.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Data simulation</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Data simulation from each model</span>
 <span class="n">sim_pfcheck_1ht</span> <span class="o">=</span> <span class="n">model_1ht</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">sim_pfcheck_2ht</span> <span class="o">=</span> <span class="n">model_2ht</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
@@ -769,7 +769,7 @@ First 3 rows of first 2 participants in first data set:
 <img alt="../_images/cc76c2a87a0e1524bdf502b2f029d22ecce9212444e6ef5b609871570de2f0d8.png" src="../_images/cc76c2a87a0e1524bdf502b2f029d22ecce9212444e6ef5b609871570de2f0d8.png" />
 </div>
 </div>
-<p>If we plot our 1000 participants over all data sets, we see simular patterns as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>. Let’s additionally take a look at the patterns within the simulated data sets to ensure that the variability between data sets is reasonable:</p>
+<p>If we plot our 1000 participants over all data sets, we see simular patterns as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>. Let’s additionally take a look at the patterns within the simulated data sets to ensure that the variability between data sets is reasonable:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">__version__</span>
@@ -808,8 +808,8 @@ First 3 rows of first 2 participants in first data set:
 </section>
 <section id="defining-training-validating-the-neural-approximator">
 <h2><span class="section-number">8.3. </span>Defining, Training &amp; Validating the Neural Approximator<a class="headerlink" href="#defining-training-validating-the-neural-approximator" title="Permalink to this heading">#</a></h2>
-<p>We adapt the neural network architecture to this new symmetry by changing only a single part, the summary network. We now use a <code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork</span></code> which we pass one summary network for each level. The majority of hierarchical models in cognitive modeling assume IID data on all levels, so we simply use one <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> network for each level. If would have, for instance, temporal dependencies within each participant, we would exchange the first network to one that is specialized on time series data, such as a <code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer</span></code>.</p>
-<p>After this adjustment, all subsequent elements of the training and validation process stay the same as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>.</p>
+<p>We adapt the neural network architecture to this new symmetry by changing only a single part, the summary network. We now use a <code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork</span></code> which we pass one summary network for each level. The majority of hierarchical models in cognitive modeling assume IID data on all levels, so we simply use one <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> network for each level. If we would have, for instance, temporal dependencies within each participant, we would exchange the first network to one that is specialized for processing time series data, such as a <code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer</span></code>.</p>
+<p>After this adjustment, all subsequent elements of the training and validation process stay the same as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">summary_networks</span><span class="o">.</span><span class="n">HierarchicalNetwork</span><span class="p">([</span><span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(),</span> <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">()])</span>
@@ -832,7 +832,7 @@ INFO:root:Done.
 </div>
 </div>
 </div>
-<p>Note: Online learning will be a bit slow to due slow data generation, but still worth it due to amortization. :-)</p>
+<p>Note: Online learning will be a bit slow to due slow data generation, but still worth it due to amortization. :-) In practice, you would train longer than just <span class="math notranslate nohighlight">\(3\)</span> epochs.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">losses</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
@@ -890,7 +890,7 @@ INFO:root:Done.
 </section>
 <section id="network-application">
 <h2><span class="section-number">8.4. </span>Network Application<a class="headerlink" href="#network-application" title="Permalink to this heading">#</a></h2>
-<p>As in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, we apply our trained model to a synthetic data set from the 2HT model. We again redefine our simulator with fixed random seeds for reproducible results:</p>
+<p>As in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>, we apply our trained model to a synthetic data set from the <strong>2HT</strong> model. We again redefine our simulator with fixed random seeds for reproducible results:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prior_fixed</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Prior</span><span class="p">(</span>
@@ -961,7 +961,7 @@ INFO:root:Done.
 </div>
 </div>
 </div>
-<p>Our Bayesian model comparison reveals clear evidence for the 2HT model, much more decisive than in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>. While the unambiguousness of the results depends of course on the model specification and the randomly simulated data, our model comparison now contains 50 times more data by considering all participants simultaneously!</p>
+<p>Our Bayesian model comparison reveals clear evidence for the 2HT model, much more decisive than in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>. While the unambiguousness of the results depends, of course, on the model specification and the randomly simulated data, our model comparison now contains <span class="math notranslate nohighlight">\(50\)</span> times more data by considering all participants simultaneously!</p>
 </section>
 </section>
 

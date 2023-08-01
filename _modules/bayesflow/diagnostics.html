@@ -1130,6 +1130,8 @@ document.write(`
 <div class="viewcode-block" id="plot_losses"><a class="viewcode-back" href="../../api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_losses">[docs]</a><span class="k">def</span> <span class="nf">plot_losses</span><span class="p">(</span>
     <span class="n">train_losses</span><span class="p">,</span>
     <span class="n">val_losses</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">moving_average</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">ma_window_fraction</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
     <span class="n">fig_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">train_color</span><span class="o">=</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">,</span>
     <span class="n">val_color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
@@ -1145,31 +1147,35 @@ document.write(`
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 
-<span class="sd">    train_losses      : pd.DataFrame</span>
+<span class="sd">    train_losses       : pd.DataFrame</span>
 <span class="sd">        The (plottable) history as returned by a train_[...] method of a ``Trainer`` instance.</span>
 <span class="sd">        Alternatively, you can just pass a data frame of validation losses instead of train losses,</span>
 <span class="sd">        if you only want to plot the validation loss.</span>
-<span class="sd">    val_losses        : pd.DataFrame or None, optional, default: None</span>
+<span class="sd">    val_losses         : pd.DataFrame or None, optional, default: None</span>
 <span class="sd">        The (plottable) validation history as returned by a train_[...] method of a ``Trainer`` instance.</span>
 <span class="sd">        If left ``None``, only train losses are plotted. Should have the same number of columns</span>
 <span class="sd">        as ``train_losses``.</span>
-<span class="sd">    fig_size          : tuple or None, optional, default: None</span>
+<span class="sd">    moving_average     : bool, optional, default: False</span>
+<span class="sd">        A flag for adding a moving average line of the train_losses.</span>
+<span class="sd">    ma_window_fraction : int, optional, default: 0.01</span>
+<span class="sd">        Window size for the moving average as a fraction of total training steps.</span>
+<span class="sd">    fig_size           : tuple or None, optional, default: None</span>
 <span class="sd">        The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``</span>
-<span class="sd">    train_color       : str, optional, default: &#39;#8f2727&#39;</span>
+<span class="sd">    train_color        : str, optional, default: &#39;#8f2727&#39;</span>
 <span class="sd">        The color for the train loss trajectory</span>
-<span class="sd">    val_color         : str, optional, default: black</span>
+<span class="sd">    val_color          : str, optional, default: black</span>
 <span class="sd">        The color for the optional validation loss trajectory</span>
-<span class="sd">    lw_train          : int, optional, default: 2</span>
+<span class="sd">    lw_train           : int, optional, default: 2</span>
 <span class="sd">        The linewidth for the training loss curve</span>
-<span class="sd">    lw_val            : int, optional, default: 3</span>
+<span class="sd">    lw_val             : int, optional, default: 3</span>
 <span class="sd">        The linewidth for the validation loss curve</span>
-<span class="sd">    grid_alpha        : float, optional, default 0.5</span>
+<span class="sd">    grid_alpha         : float, optional, default 0.5</span>
 <span class="sd">        The opacity factor for the background gridlines</span>
-<span class="sd">    legend_fontsize   : int, optional, default: 14</span>
+<span class="sd">    legend_fontsize    : int, optional, default: 14</span>
 <span class="sd">        The font size of the legend text</span>
-<span class="sd">    label_fontsize    : int, optional, default: 14</span>
+<span class="sd">    label_fontsize     : int, optional, default: 14</span>
 <span class="sd">        The font size of the y-label text</span>
-<span class="sd">    title_fontsize    : int, optional, default: 16</span>
+<span class="sd">    title_fontsize     : int, optional, default: 16</span>
 <span class="sd">        The font size of the title text</span>
 
 <span class="sd">    Returns</span>
@@ -1206,6 +1212,11 @@ document.write(`
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">looper</span><span class="p">):</span>
         <span class="c1"># Plot train curve</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">train_step_index</span><span class="p">,</span> <span class="n">train_losses</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">train_color</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="n">lw_train</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Training&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">moving_average</span><span class="p">:</span>
+            <span class="n">moving_average_window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">train_losses</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ma_window_fraction</span><span class="p">)</span>
+            <span class="n">smoothed_loss</span> <span class="o">=</span> <span class="n">train_losses</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="n">moving_average_window</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">train_step_index</span><span class="p">,</span> <span class="n">smoothed_loss</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="n">lw_train</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Training (Moving Average)&quot;</span><span class="p">)</span>
+
         <span class="c1"># Plot optional val curve</span>
         <span class="k">if</span> <span class="n">val_losses</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">val_losses</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
@@ -1388,7 +1399,7 @@ document.write(`
     <span class="c1"># Determine n_subplots dynamically</span>
     <span class="n">n_row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_models</span> <span class="o">/</span> <span class="mi">6</span><span class="p">))</span>
     <span class="n">n_col</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_models</span> <span class="o">/</span> <span class="n">n_row</span><span class="p">))</span>
-    <span class="n">cal_errs</span><span class="p">,</span> <span class="n">cal_probs</span> <span class="o">=</span> <span class="n">expected_calibration_error</span><span class="p">(</span><span class="n">true_models</span><span class="p">,</span> <span class="n">pred_models</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">)</span>
+    <span class="n">cal_errs</span><span class="p">,</span> <span class="n">probs_true</span><span class="p">,</span> <span class="n">probs_pred</span> <span class="o">=</span> <span class="n">expected_calibration_error</span><span class="p">(</span><span class="n">true_models</span><span class="p">,</span> <span class="n">pred_models</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">)</span>
 
     <span class="c1"># Initialize figure</span>
     <span class="k">if</span> <span class="n">fig_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1404,7 +1415,7 @@ document.write(`
         <span class="n">ax</span> <span class="o">=</span> <span class="n">axarr</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_models</span><span class="p">):</span>
         <span class="c1"># Plot calibration curve</span>
-        <span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cal_probs</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">cal_probs</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">probs_pred</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">probs_true</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
 
         <span class="c1"># Plot AB line</span>
         <span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">(),</span> <span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">(),</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;darkgrey&quot;</span><span class="p">)</span>
@@ -1514,10 +1525,10 @@ document.write(`
     <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xticks</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">yticks</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">model_names</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">tick_fontsize</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">xtick_rotation</span><span class="p">:</span>
-       <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="n">xtick_rotation</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="n">xtick_rotation</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">model_names</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">tick_fontsize</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ytick_rotation</span><span class="p">:</span>
-       <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="n">ytick_rotation</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="n">ytick_rotation</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Predicted model&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">tick_fontsize</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;True model&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">tick_fontsize</span><span class="p">)</span>
 
@@ -1534,16 +1545,18 @@ document.write(`
     <span class="k">return</span> <span class="n">fig</span></div>
 
 
-<div class="viewcode-block" id="plot_mmd_hypothesis_test"><a class="viewcode-back" href="../../api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_mmd_hypothesis_test">[docs]</a><span class="k">def</span> <span class="nf">plot_mmd_hypothesis_test</span><span class="p">(</span><span class="n">mmd_null</span><span class="p">,</span>
-                             <span class="n">mmd_observed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                             <span class="n">alpha_level</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-                             <span class="n">null_color</span><span class="o">=</span><span class="p">(</span><span class="mf">0.16407</span><span class="p">,</span> <span class="mf">0.020171</span><span class="p">,</span> <span class="mf">0.577478</span><span class="p">),</span>
-                             <span class="n">observed_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
-                             <span class="n">alpha_color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">,</span>
-                             <span class="n">truncate_vlines_at_kde</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                             <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                             <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                             <span class="n">bw_factor</span><span class="o">=</span><span class="mf">1.5</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_mmd_hypothesis_test"><a class="viewcode-back" href="../../api/bayesflow.diagnostics.html#bayesflow.diagnostics.plot_mmd_hypothesis_test">[docs]</a><span class="k">def</span> <span class="nf">plot_mmd_hypothesis_test</span><span class="p">(</span>
+    <span class="n">mmd_null</span><span class="p">,</span>
+    <span class="n">mmd_observed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">alpha_level</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">null_color</span><span class="o">=</span><span class="p">(</span><span class="mf">0.16407</span><span class="p">,</span> <span class="mf">0.020171</span><span class="p">,</span> <span class="mf">0.577478</span><span class="p">),</span>
+    <span class="n">observed_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+    <span class="n">alpha_color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">,</span>
+    <span class="n">truncate_vlines_at_kde</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">bw_factor</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Parameters</span>
@@ -1584,25 +1597,31 @@ document.write(`
     <span class="k">def</span> <span class="nf">fill_area_under_kde</span><span class="p">(</span><span class="n">kde_object</span><span class="p">,</span> <span class="n">x_start</span><span class="p">,</span> <span class="n">x_end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">kde_x</span><span class="p">,</span> <span class="n">kde_y</span> <span class="o">=</span> <span class="n">kde_object</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">kde_x</span><span class="p">,</span> <span class="n">kde_y</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="p">(</span><span class="n">kde_x</span> <span class="o">&gt;=</span> <span class="n">x_start</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">kde_x</span> <span class="o">&lt;=</span> <span class="n">x_end</span><span class="p">),</span>
-                             <span class="n">interpolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">kde_x</span><span class="p">,</span> <span class="n">kde_y</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="p">(</span><span class="n">kde_x</span> <span class="o">&gt;=</span> <span class="n">x_start</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">kde_x</span> <span class="o">&lt;=</span> <span class="n">x_end</span><span class="p">),</span> <span class="n">interpolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">kde_x</span><span class="p">,</span> <span class="n">kde_y</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="p">(</span><span class="n">kde_x</span> <span class="o">&gt;=</span> <span class="n">x_start</span><span class="p">),</span>
-                             <span class="n">interpolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">kde_x</span><span class="p">,</span> <span class="n">kde_y</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="p">(</span><span class="n">kde_x</span> <span class="o">&gt;=</span> <span class="n">x_start</span><span class="p">),</span> <span class="n">interpolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 
     <span class="n">kde</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">mmd_null</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bw_adjust</span><span class="o">=</span><span class="n">bw_factor</span><span class="p">)</span>
-    <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">mmd_null</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">.12</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">null_color</span><span class="p">,</span> <span class="n">bw_adjust</span><span class="o">=</span><span class="n">bw_factor</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">mmd_null</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">null_color</span><span class="p">,</span> <span class="n">bw_adjust</span><span class="o">=</span><span class="n">bw_factor</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">truncate_vlines_at_kde</span><span class="p">:</span>
         <span class="n">draw_vline_to_kde</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">mmd_observed</span><span class="p">,</span> <span class="n">kde_object</span><span class="o">=</span><span class="n">kde</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">observed_color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Observed data&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">mmd_observed</span><span class="p">,</span> <span class="n">ymin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">observed_color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-                   <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Observed data&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">mmd_observed</span><span class="p">,</span>
+            <span class="n">ymin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">ymax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">observed_color</span><span class="p">,</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Observed data&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="n">mmd_critical</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">mmd_null</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_level</span><span class="p">)</span>
-    <span class="n">fill_area_under_kde</span><span class="p">(</span><span class="n">kde</span><span class="p">,</span> <span class="n">mmd_critical</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">alpha_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">fr</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">alpha_level</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="si">}</span><span class="s2">% rejection area&quot;</span><span class="p">)</span>
+    <span class="n">fill_area_under_kde</span><span class="p">(</span>
+        <span class="n">kde</span><span class="p">,</span> <span class="n">mmd_critical</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">alpha_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">rf</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">alpha_level</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="si">}</span><span class="s2">% rejection area&quot;</span>
+    <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">truncate_vlines_at_kde</span><span class="p">:</span>
         <span class="n">draw_vline_to_kde</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">mmd_critical</span><span class="p">,</span> <span class="n">kde_object</span><span class="o">=</span><span class="n">kde</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">alpha_color</span><span class="p">)</span>
@@ -1615,7 +1634,7 @@ document.write(`
     <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
     <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>

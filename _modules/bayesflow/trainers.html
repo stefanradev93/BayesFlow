@@ -363,9 +363,9 @@ document.write(`
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pickle</span> <span class="kn">import</span> <span class="n">load</span> <span class="k">as</span> <span class="n">pickle_load</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">from</span> <span class="nn">tqdm.autonotebook</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">bayesflow.amortizers</span> <span class="kn">import</span> <span class="p">(</span>
@@ -1079,7 +1079,10 @@ document.write(`
                     <span class="n">input_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurator</span><span class="p">(</span><span class="n">epoch_data</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
 
                     <span class="c1"># Like the number of iterations, the batch size is inferred from presimulated dictionary or list</span>
-                    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">epoch_data</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amortizer</span><span class="p">,</span> <span class="n">AmortizedModelComparison</span><span class="p">):</span>
+                        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;summary_conditions&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">epoch_data</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;sim_data&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_step</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">_backprop_step</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
                     <span class="c1"># Store returned loss</span>

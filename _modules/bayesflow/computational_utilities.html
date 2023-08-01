@@ -621,7 +621,8 @@ document.write(`
     <span class="c1"># Extract number of models and prepare containers</span>
     <span class="n">n_models</span> <span class="o">=</span> <span class="n">m_true</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">cal_errs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">probs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">probs_true</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">probs_pred</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Loop for each model and compute calibration errs per bin</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_models</span><span class="p">):</span>
@@ -637,8 +638,9 @@ document.write(`
         <span class="n">cal_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">prob_true</span> <span class="o">-</span> <span class="n">prob_pred</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">bin_total</span><span class="p">[</span><span class="n">nonzero</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)))</span>
 
         <span class="n">cal_errs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cal_err</span><span class="p">)</span>
-        <span class="n">probs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">prob_true</span><span class="p">,</span> <span class="n">prob_pred</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">cal_errs</span><span class="p">,</span> <span class="n">probs</span></div>
+        <span class="n">probs_true</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prob_true</span><span class="p">)</span>
+        <span class="n">probs_pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prob_pred</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cal_errs</span><span class="p">,</span> <span class="n">probs_true</span><span class="p">,</span> <span class="n">probs_pred</span></div>
 
 
 <div class="viewcode-block" id="maximum_mean_discrepancy"><a class="viewcode-back" href="../../api/bayesflow.computational_utilities.html#bayesflow.computational_utilities.maximum_mean_discrepancy">[docs]</a><span class="k">def</span> <span class="nf">maximum_mean_discrepancy</span><span class="p">(</span><span class="n">source_samples</span><span class="p">,</span> <span class="n">target_samples</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span> <span class="n">mmd_weight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>

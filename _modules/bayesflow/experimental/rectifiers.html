@@ -549,7 +549,7 @@ document.write(`
         <span class="p">)</span>
 
         <span class="c1"># Extract target variables</span>
-        <span class="n">target_vars</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;targets&quot;</span><span class="p">]]</span>
+        <span class="n">target_vars</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]]</span>
 
         <span class="c1"># Extract batch size (autograph friendly)</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">target_vars</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -669,7 +669,7 @@ document.write(`
         <span class="p">)</span>
 
         <span class="c1"># Extract targets</span>
-        <span class="n">target_vars</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;targets&quot;</span><span class="p">]]</span>
+        <span class="n">target_vars</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_KEYS</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]]</span>
 
         <span class="c1"># Reverse ODE and log pdf computation with the trace method</span>
         <span class="n">latents</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_euler_inv</span><span class="p">(</span><span class="n">target_vars</span><span class="p">,</span> <span class="n">conditions</span><span class="p">,</span> <span class="n">step_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
