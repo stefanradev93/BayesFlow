@@ -3,8 +3,9 @@ from unittest.mock import Mock
 import pytest
 import numpy as np
 from bayesflow import computational_utilities
-from bayesflow.exceptions import ArgumentError
+from bayesflow.exceptions import ArgumentError, ShapeError
 from bayesflow.trainers import Trainer
+import tensorflow as tf
 
 
 @pytest.mark.parametrize("x_true, x_pred, output",
@@ -93,3 +94,44 @@ def test_aggregated_error(x_true, x_pred, inner_error_fun, outer_aggregation_fun
         outer_aggregation_fun=outer_aggregation_fun
     )
     assert aggregated_error_result == pytest.approx(output)
+
+
+def test_c2st_shape_error():
+    source_samples = np.random.random(size=(5, 2))
+    target_samples = np.random.random(size=(5, 3))
+    with pytest.raises(ShapeError):
+        computational_utilities.c2st(source_samples, target_samples)
+
+
+@pytest.mark.parametrize(
+    "source_samples, target_samples",
+    [
+        (np.random.random((5, 2)), np.random.random((5, 2))),
+        (np.random.random((10, 2)), np.random.random((5, 2))),
+        (tf.constant(np.random.random((5, 2))), tf.constant(np.random.random((5, 2))))
+    ]
+)
+def test_c2st(source_samples, target_samples):
+    c2st_score = computational_utilities.c2st(source_samples, target_samples)
+    assert 0.0 <= c2st_score <= 1.0
+
+
+@pytest.mark.parametrize(
+    "n_folds, scoring, normalize, seed, hidden_units_per_dim",
+    [
+        (3, "accuracy", False, 42, 5),
+        (7, "f1", True, 12, 10)
+    ]
+)
+def test_c2st_params(n_folds, scoring, normalize, seed, hidden_units_per_dim):
+    source_samples = np.random.random((5, 2))
+    target_samples = np.random.random((10, 2))
+    _ = computational_utilities.c2st(
+        source_samples=source_samples,
+        target_samples=target_samples,
+        n_folds=n_folds,
+        scoring=scoring,
+        normalize=normalize,
+        seed=seed,
+        hidden_units_per_dim=hidden_units_per_dim
+    )
