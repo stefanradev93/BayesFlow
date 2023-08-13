@@ -744,7 +744,7 @@ class SimulationMemory:
         memory_path = os.path.join(file_path, f"{SimulationMemory.file_name}.pkl")
 
         # Case memory file exists
-        if os.path.exists(file_path):
+        if os.path.exists(memory_path):
             # Load pickle and fill in attributes
             with open(memory_path, "rb") as f:
                 full_memory_dict = pickle.load(f)
