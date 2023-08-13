@@ -67,3 +67,10 @@ General Improvements:
 1. Bugfix in ``SetTransformer`` affecting saving and loading when using the version with inducing points.
 2. Bugfix in ``SetTransformer`` when using ``train_offline`` and batches result in unequal shapes.
 3. Improved documentation with examples
+
+1.1.3 Series
+----------
+
+1. Bugfix in ``SimulationMemory`` affecting the use of empty folders for initializing a ``Trainer``
+2. Bugfix in ``Trainer.train_from_presimulation()`` for model comparison tasks
+3. Added a classifier two-sample test function ``c2st`` in ``computational_utilities``
