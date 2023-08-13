@@ -421,6 +421,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.computational_utilities.root_mean_squared_error"><code class="docutils literal notranslate"><span class="pre">root_mean_squared_error()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.computational_utilities.aggregated_error"><code class="docutils literal notranslate"><span class="pre">aggregated_error()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.computational_utilities.aggregated_rmse"><code class="docutils literal notranslate"><span class="pre">aggregated_rmse()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.computational_utilities.c2st"><code class="docutils literal notranslate"><span class="pre">c2st()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -794,6 +795,44 @@ aggregates N errors to a single aggregated error value</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.computational_utilities.c2st">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">c2st</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_folds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'accuracy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">123</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_units_per_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregate_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#c2st"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.c2st" title="Permalink to this definition">#</a></dt>
+<dd><p>C2ST metric [1] using an sklearn neural network classifier (i.e., MLP).
+Code adapted from <a class="github reference external" href="https://github.com/sbi-benchmark/sbibm/blob/main/sbibm/metrics/c2st.py">sbi-benchmark/sbibm</a></p>
+<p>[1] Lopez-Paz, D., &amp; Oquab, M. (2016). Revisiting classifier two-sample tests. arXiv:1610.06545.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>source_samples</strong><span class="classifier">np.ndarray or tf.Tensor</span></dt><dd><p>Source samples (e.g., approximate posterior samples)</p>
+</dd>
+<dt><strong>target_samples</strong><span class="classifier">np.ndarray or tf.Tensor</span></dt><dd><p>Target samples (e.g., samples from a reference posterior)</p>
+</dd>
+<dt><strong>n_folds</strong><span class="classifier">int, optional, default: 5</span></dt><dd><p>Number of folds in k-fold cross-validation for the classifier evaluation</p>
+</dd>
+<dt><strong>scoring</strong><span class="classifier">str, optional, default: “accuracy”</span></dt><dd><p>Evaluation score of the sklearn MLP classifier</p>
+</dd>
+<dt><strong>normalize</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Whether the data shall be z-standardized relative to source_samples</p>
+</dd>
+<dt><strong>seed</strong><span class="classifier">int, optional, default: 123</span></dt><dd><p>RNG seed for the MLP and k-fold CV</p>
+</dd>
+<dt><strong>hidden_units_per_dim</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>Number of hidden units in the MLP, relative to the input dimensions.
+Example: source samples are 5D, hidden_units_per_dim=16 -&gt; 80 hidden units per layer</p>
+</dd>
+<dt><strong>aggregate_output</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Whether to return a single value aggregated over all cross-validation runs
+or all values from all runs. If left at default, the empirical mean will be returned</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>c2st_score</strong><span class="classifier">float</span></dt><dd><p>The resulting C2ST score</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
@@ -858,6 +897,7 @@ aggregates N errors to a single aggregated error value</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.computational_utilities.root_mean_squared_error"><code class="docutils literal notranslate"><span class="pre">root_mean_squared_error()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.computational_utilities.aggregated_error"><code class="docutils literal notranslate"><span class="pre">aggregated_error()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.computational_utilities.aggregated_rmse"><code class="docutils literal notranslate"><span class="pre">aggregated_rmse()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.computational_utilities.c2st"><code class="docutils literal notranslate"><span class="pre">c2st()</span></code></a></li>
 </ul>
   </nav></div>
 

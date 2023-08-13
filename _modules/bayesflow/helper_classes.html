@@ -1086,7 +1086,7 @@ document.write(`
         <span class="n">memory_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">SimulationMemory</span><span class="o">.</span><span class="n">file_name</span><span class="si">}</span><span class="s2">.pkl&quot;</span><span class="p">)</span>
 
         <span class="c1"># Case memory file exists</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">memory_path</span><span class="p">):</span>
             <span class="c1"># Load pickle and fill in attributes</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">memory_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">full_memory_dict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
