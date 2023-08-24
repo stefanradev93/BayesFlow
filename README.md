@@ -161,7 +161,8 @@ amortized inference if the generative model is a poor representation of reality?
 A modified loss function optimizes the learned summary statistics towards a unit
 Gaussian and reliably detects model misspecification during inference time.
 
-![](https://github.com/stefanradev93/BayesFlow/blob/master/docs/source/images/model_misspecification_amortized_sbi.png?raw=true)
+
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/examples/img/model_misspecification_amortized_sbi.png" width=100% height=100%>
 
 In order to use this method, you should only provide the `summary_loss_fun` argument
 to the `AmortizedPosterior` instance:
