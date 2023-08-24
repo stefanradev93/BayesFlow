@@ -511,7 +511,7 @@ Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/b420ccb081d6ef916af26a3b3b6336ff8ff0e16acc58be3803f65a52d878b948.png" src="../_images/b420ccb081d6ef916af26a3b3b6336ff8ff0e16acc58be3803f65a52d878b948.png" />
+<img alt="../_images/1a0ba982633c774d7e6cbaf00ef3583b87ce4eff8db88914d67168c0c98b7312.png" src="../_images/1a0ba982633c774d7e6cbaf00ef3583b87ce4eff8db88914d67168c0c98b7312.png" />
 </div>
 </div>
 <p>We now follow the same steps as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a> to translate our prior into code:</p>
@@ -549,8 +549,8 @@ Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;prior_draws&#39;: array([[ 0.33133578, -0.15124493,  0.19373801, -0.0171947 , -0.0171947 ,
-          1.20265298]]),
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;prior_draws&#39;: array([[ 0.05011422, -0.05707152,  0.00281103, -0.00548419, -0.00548419,
+          0.93683835]]),
  &#39;batchable_context&#39;: None,
  &#39;non_batchable_context&#39;: None}
 </pre></div>
@@ -692,9 +692,9 @@ INFO:root:No optional simulation batchable context provided.
 First 3 rows of first 2 participants in first data set:
 [[[1 1]
   [1 1]
-  [1 0]]
+  [1 1]]
 
- [[1 0]
+ [[1 1]
   [1 1]
   [1 1]]]
 </pre></div>
@@ -766,22 +766,10 @@ First 3 rows of first 2 participants in first data set:
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/cc76c2a87a0e1524bdf502b2f029d22ecce9212444e6ef5b609871570de2f0d8.png" src="../_images/cc76c2a87a0e1524bdf502b2f029d22ecce9212444e6ef5b609871570de2f0d8.png" />
+<img alt="../_images/9c546af252472e4fa7e98c48227e7165175442272f91635c93380bf0b74ea322.png" src="../_images/9c546af252472e4fa7e98c48227e7165175442272f91635c93380bf0b74ea322.png" />
 </div>
 </div>
 <p>If we plot our 1000 participants over all data sets, we see simular patterns as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>. Let’s additionally take a look at the patterns within the simulated data sets to ensure that the variability between data sets is reasonable:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">__version__</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;0.12.2&#39;
-</pre></div>
-</div>
-</div>
-</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 3b. Plot rates for each data set</span>
@@ -800,7 +788,7 @@ First 3 rows of first 2 participants in first data set:
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/9d0e970196e7133477480a2c8e987d0c3a97630e831a6ef699ab0609d796d8cc.png" src="../_images/9d0e970196e7133477480a2c8e987d0c3a97630e831a6ef699ab0609d796d8cc.png" />
+<img alt="../_images/6b0ea1051fc75fab57e718661350538caef581e3b0f8b0a9bd7da0b53deb3c3d.png" src="../_images/6b0ea1051fc75fab57e718661350538caef581e3b0f8b0a9bd7da0b53deb3c3d.png" />
 </div>
 </div>
 <p>We observe some variability but not completely opposing patterns between our simulated data sets. This matches the expectations that we would have when collecting multiple data sets in the field.</p>
@@ -809,10 +797,11 @@ First 3 rows of first 2 participants in first data set:
 <section id="defining-training-validating-the-neural-approximator">
 <h2><span class="section-number">8.3. </span>Defining, Training &amp; Validating the Neural Approximator<a class="headerlink" href="#defining-training-validating-the-neural-approximator" title="Permalink to this heading">#</a></h2>
 <p>We adapt the neural network architecture to this new symmetry by changing only a single part, the summary network. We now use a <code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork</span></code> which we pass one summary network for each level. The majority of hierarchical models in cognitive modeling assume IID data on all levels, so we simply use one <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> network for each level. If we would have, for instance, temporal dependencies within each participant, we would exchange the first network to one that is specialized for processing time series data, such as a <code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer</span></code>.</p>
-<p>After this adjustment, all subsequent elements of the training and validation process stay the same as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>.</p>
+<p>The first summary network summarizes the information contained within the participants separately and passes the resulting embeddings to the second summary network. The second network then further compresses all participant embeddings to a single vector of learned summary statistics, so we equip it with a sufficient number of summary dimensions to avoid a bottleneck.</p>
+<p>After these adjustments, all subsequent elements of the training and validation process stay the same as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">summary_networks</span><span class="o">.</span><span class="n">HierarchicalNetwork</span><span class="p">([</span><span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(),</span> <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">()])</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">summary_networks</span><span class="o">.</span><span class="n">HierarchicalNetwork</span><span class="p">([</span><span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(),</span> <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(</span><span class="n">summary_dim</span><span class="o">=</span><span class="mi">64</span><span class="p">)])</span>
 <span class="n">inference_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">inference_networks</span><span class="o">.</span><span class="n">PMPNetwork</span><span class="p">(</span><span class="n">num_models</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">amortizer</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">amortizers</span><span class="o">.</span><span class="n">AmortizedModelComparison</span><span class="p">(</span><span class="n">inference_net</span><span class="p">,</span> <span class="n">summary_net</span><span class="p">)</span>
 </pre></div>
@@ -840,7 +829,7 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9a80c0c876d948e58dd6074095605ea2", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "68dc25b988dd4c05ad91cdba00a21625", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "cc3e92b1725247d49046f8f4ea27b297", "version_major": 2, "version_minor": 0}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "13a009c0f1244991a3524e2ad655b6a4", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "47b7dd06131742b2899384454311242b", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "33170bf6d2224b159360cda1ce898776", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -849,7 +838,7 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/60dbc832a609c992cc19085c5253f7c9dd24275e3220ffce16ea0e5b5f4bbf04.png" src="../_images/60dbc832a609c992cc19085c5253f7c9dd24275e3220ffce16ea0e5b5f4bbf04.png" />
+<img alt="../_images/5351f36859b4dd93a7ad20783bda6203c302f903611ee48b4ede96525d713d50.png" src="../_images/5351f36859b4dd93a7ad20783bda6203c302f903611ee48b4ede96525d713d50.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -873,7 +862,7 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/d32f91f80c6c8a7752406837fa9a24461eb203db7a6c9040c99806db55ceb66b.png" src="../_images/d32f91f80c6c8a7752406837fa9a24461eb203db7a6c9040c99806db55ceb66b.png" />
+<img alt="../_images/14fc8687d407404682722dc9ef0fa7feafb349737be681c7b3d43a1c8f9d9c95.png" src="../_images/14fc8687d407404682722dc9ef0fa7feafb349737be681c7b3d43a1c8f9d9c95.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -943,7 +932,7 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(2,), dtype=float32, numpy=array([0.00307983, 0.9969202 ], dtype=float32)&gt;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(2,), dtype=float32, numpy=array([0.00729466, 0.9927053 ], dtype=float32)&gt;
 </pre></div>
 </div>
 </div>
@@ -956,7 +945,7 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(), dtype=float32, numpy=0.003089342&gt;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(), dtype=float32, numpy=0.007348266&gt;
 </pre></div>
 </div>
 </div>
