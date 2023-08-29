@@ -74,3 +74,10 @@ General Improvements:
 1. Bugfix in ``SimulationMemory`` affecting the use of empty folders for initializing a ``Trainer``
 2. Bugfix in ``Trainer.train_from_presimulation()`` for model comparison tasks
 3. Added a classifier two-sample test function ``c2st`` in ``computational_utilities``
+
+
+1.1.4 Series
+----------
+
+1. Add ``bidirectional`` flag to ``SequentialNetwork`` and ``TimeSeriesTransformer`` for potential to improve
+performance
