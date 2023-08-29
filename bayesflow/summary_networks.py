@@ -21,7 +21,7 @@
 from warnings import warn
 
 import tensorflow as tf
-from tensorflow.keras.layers import GRU, LSTM, Dense
+from tensorflow.keras.layers import GRU, LSTM, Bidirectional, Dense
 from tensorflow.keras.models import Sequential
 
 from bayesflow import default_settings as defaults
@@ -53,6 +53,7 @@ class TimeSeriesTransformer(tf.keras.Model):
         summary_dim=10,
         num_attention_blocks=2,
         template_type="lstm",
+        bidirectional=False,
         template_dim=64,
         **kwargs,
     ):
@@ -104,6 +105,10 @@ class TimeSeriesTransformer(tf.keras.Model):
             if ``lstm``, an LSTM network will be used.
             if ``gru``, a GRU unit will be used.
             if callable, a reference to ``template_type`` will be stored as an attribute.
+        bidirectional        : bool, optional, default: False
+            Indicates whether the involved LSTM template network is bidirectional (i.e., forward
+            and backward in time) or unidirectional (forward in time). Defaults to False, but may
+            increase performance in some applications.
         template_dim         : int, optional, default: 64
             Only used if ``template_type`` in ['lstm', 'gru']. The number of hidden
             units (equiv. output dimensions) of the recurrent network.
@@ -134,9 +139,9 @@ class TimeSeriesTransformer(tf.keras.Model):
 
         # A recurrent network will learn the dynamic many-to-one template
         if template_type.upper() == "LSTM":
-            self.template_net = LSTM(template_dim)
+            self.template_net = Bidirectional(LSTM(template_dim)) if bidirectional else LSTM(template_dim)
         elif template_type.upper() == "GRU":
-            self.template_net = GRU(template_dim)
+            self.template_net = Bidirectional(GRU(template_dim)) if bidirectional else GRU(template_dim)
         else:
             assert callable(template_type), "Argument `template_dim` should be callable or in ['lstm', 'gru']"
             self.template_net = template_type
@@ -418,7 +423,9 @@ class SequentialNetwork(tf.keras.Model):
     https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472
     """
 
-    def __init__(self, summary_dim=10, num_conv_layers=2, lstm_units=128, conv_settings=None, **kwargs):
+    def __init__(
+        self, summary_dim=10, num_conv_layers=2, lstm_units=128, bidirectional=False, conv_settings=None, **kwargs
+    ):
         """Creates a stack of inception-like layers followed by an LSTM network, with the idea
         of learning vector representations from multivariate time series data.
 
@@ -437,6 +444,9 @@ class SequentialNetwork(tf.keras.Model):
             - layer_args      (dict) : arguments for `tf.keras.layers.Conv1D` without kernel_size
             - min_kernel_size (int)  : the minimum kernel size (>= 1)
             - max_kernel_size (int)  : the maximum kernel size
+        bidirectional   : bool, optional, default: False
+            Indicates whether the involved LSTM network is bidirectional (forward and backward in time)
+            or unidirectional (forward in time). Defaults to False, but may increase performance.
         **kwargs        : dict
             Optional keyword arguments passed to the __init__() method of tf.keras.Model
         """
@@ -449,7 +459,7 @@ class SequentialNetwork(tf.keras.Model):
 
         self.net = Sequential([MultiConv1D(conv_settings) for _ in range(num_conv_layers)])
 
-        self.lstm = LSTM(lstm_units)
+        self.lstm = Bidirectional(LSTM(lstm_units)) if bidirectional else LSTM(lstm_units)
         self.out_layer = Dense(summary_dim, activation="linear")
         self.summary_dim = summary_dim
 
