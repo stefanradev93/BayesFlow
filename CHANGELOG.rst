@@ -80,4 +80,5 @@ General Improvements:
 ----------
 
 1. Add ``bidirectional`` flag to ``SequentialNetwork`` and ``TimeSeriesTransformer`` for potential to improve
-performance
+performance.
+2. Deprecate name ``SequentialNetwork`` and use ``SequenceNetwork`` instead to avoid confusion with ``tf.keras.Sequential``.
