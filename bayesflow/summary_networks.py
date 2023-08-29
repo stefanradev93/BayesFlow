@@ -410,8 +410,8 @@ class InvariantNetwork(DeepSet):
         super().__init__(*args, **kwargs)
 
 
-class SequentialNetwork(tf.keras.Model):
-    """Implements a sequence of `MultiConv1D` layers followed by an LSTM network.
+class SequenceNetwork(tf.keras.Model):
+    """Implements a sequence of `MultiConv1D` layers followed by an (bidirectional) LSTM network.
 
     For details and rationale, see [1]:
 
@@ -482,6 +482,22 @@ class SequentialNetwork(tf.keras.Model):
         out = self.lstm(out, **kwargs)
         out = self.out_layer(out, **kwargs)
         return out
+
+
+class SequentialNetwork(SequenceNetwork):
+    """Deprecated class for amortizer posterior estimation."""
+
+    def __init_subclass__(cls, **kwargs):
+        warn(f"{cls.__name__} will be deprecated. Use `SequenceNetwork` instead.", DeprecationWarning, stacklevel=2)
+        super().__init_subclass__(**kwargs)
+
+    def __init__(self, *args, **kwargs):
+        warn(
+            f"{self.__class__.__name__} will be deprecated. Use `SequenceNetwork` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
 
 
 class SplitNetwork(tf.keras.Model):
@@ -565,7 +581,7 @@ class HierarchicalNetwork(tf.keras.Model):
 
         Example: For two-level hierarchical models with the assumption of temporal dependencies on the lowest
         hierarchical level (e.g., observational level) and exchangeable units at the higher level
-        (e.g., group level), a list of [SequentialNetwork(), DeepSet()] could be passed.
+        (e.g., group level), a list of [SequenceNetwork(), DeepSet()] could be passed.
 
         ----------
 
