@@ -25,7 +25,7 @@ from bayesflow.attention import InducedSelfAttentionBlock, SelfAttentionBlock
 from bayesflow.summary_networks import (
     DeepSet,
     HierarchicalNetwork,
-    SequentialNetwork,
+    SequenceNetwork,
     SetTransformer,
     TimeSeriesTransformer,
 )
@@ -110,8 +110,8 @@ def test_deep_set(num_equiv, summary_dim):
 
 @pytest.mark.parametrize("num_conv_layers", [1, 3])
 @pytest.mark.parametrize("lstm_units", [16, 32])
-def test_sequential_network(num_conv_layers, lstm_units):
-    """Tests the fidelity of the ``SequentialNetwork`` w.r.t. shape integrity
+def test_sequence_network(num_conv_layers, lstm_units):
+    """Tests the fidelity of the ``SequenceNetwork`` w.r.t. shape integrity
     using a number of relevant configurations."""
 
     # Create settings dict and network
@@ -120,7 +120,7 @@ def test_sequential_network(num_conv_layers, lstm_units):
         "num_conv_layers": num_conv_layers,
         "lstm_units": lstm_units,
     }
-    net = SequentialNetwork(**settings)
+    net = SequenceNetwork(**settings)
 
     # Create test data and pass through network
     x, _, _ = _gen_randomized_3d_data()

@@ -24,6 +24,7 @@ from bayesflow.summary_networks import (
     DeepSet,
     HierarchicalNetwork,
     InvariantNetwork,
+    SequenceNetwork,
     SequentialNetwork,
     SetTransformer,
     SplitNetwork,
