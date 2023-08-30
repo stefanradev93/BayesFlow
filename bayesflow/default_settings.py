@@ -104,7 +104,7 @@ DEFAULT_SETTING_AFFINE_COUPLING = MetaDictSetting(
         "mc_dropout": False,
         "dropout": True,
         "residual": False,
-        "dropout_prob": 0.01,
+        "dropout_prob": 0.05,
         "soft_clamping": 1.9,
     },
     mandatory_fields=[],
