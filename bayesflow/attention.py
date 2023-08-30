@@ -34,7 +34,7 @@ class MultiHeadAttentionBlock(tf.keras.Model):
 
     def __init__(self, input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm, **kwargs):
         """Creates a multihead attention block which will typically be used as part of a
-        set transformer architecture according to [1].
+        set transformer architecture according to [1]. Corresponds to standard cross-attention.
 
         Parameters
         ----------
