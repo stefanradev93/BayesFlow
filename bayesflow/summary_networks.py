@@ -185,7 +185,7 @@ class SetTransformer(tf.keras.Model):
         input_dim,
         attention_settings=None,
         dense_settings=None,
-        use_layer_norm=True,
+        use_layer_norm=False,
         num_dense_fc=2,
         summary_dim=10,
         num_attention_blocks=2,
@@ -224,8 +224,8 @@ class SetTransformer(tf.keras.Model):
 
             For more details and arguments, see:
             https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense
-        use_layer_norm       : boolean, optional, default: True
-            Whether layer normalization before and after attention + feedforward
+        use_layer_norm       : boolean, optional, default: False
+            Whether to use layer normalization before and after attention + feedforward
         num_dense_fc         : int, optional, default: 2
             The number of hidden layers for the internal feedforward network
         summary_dim          : int
