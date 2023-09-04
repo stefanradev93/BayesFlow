@@ -436,9 +436,10 @@ class SplineCoupling(tf.keras.Model):
         """
 
         shape = tf.shape(parameters)
-        if len(shape) == 2:
+        rank = len(shape)
+        if rank == 2:
             new_shape = (shape[0], self.dim_out, -1)
-        elif len(shape) == 3:
+        elif rank == 3:
             new_shape = (shape[0], shape[1], self.dim_out, -1)
         else:
             raise NotImplementedError("Spline flows can currently only operate on 2D and 3D inputs!")

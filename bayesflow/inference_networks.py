@@ -188,7 +188,7 @@ class InvertibleNetwork(tf.keras.Model):
             condition_shape = tf.shape(condition)
 
             # Needs to be concatinable with condition
-            if tf.rank(condition) == 2:
+            if len(condition_shape) == 2:
                 shape_scale = (condition_shape[0], 1)
             else:
                 shape_scale = (condition_shape[0], condition_shape[1], 1)
@@ -201,7 +201,7 @@ class InvertibleNetwork(tf.keras.Model):
                 noise_scale = tf.zeros(shape=shape_scale) + self.soft_low
 
             # Perturb data with noise (will broadcast to all dimensions)
-            if len(shape_scale) == 2 and tf.rank(targets) == 3:
+            if len(shape_scale) == 2 and len(target_shape) == 3:
                 targets += tf.expand_dims(noise_scale, axis=1) * tf.random.normal(shape=target_shape)
             else:
                 targets += noise_scale * tf.random.normal(shape=target_shape)
@@ -228,7 +228,7 @@ class InvertibleNetwork(tf.keras.Model):
         if self.soft_flow and condition is not None:
             # Needs to be concatinable with condition
             shape_scale = (
-                (condition.shape[0], 1) if tf.rank(condition) == 2 else (condition.shape[0], condition.shape[1], 1)
+                (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
             )
             noise_scale = tf.zeros(shape=shape_scale) + 2.0 * self.soft_low
 
