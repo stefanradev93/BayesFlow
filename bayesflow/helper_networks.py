@@ -228,7 +228,7 @@ class Orthogonal(tf.keras.Model):
         """Performs a learnable generalized permutation over the last axis."""
 
         shape = tf.shape(target)
-        rank = tf.rank(target)
+        rank = len(shape)
         log_det = tf.math.log(tf.math.abs(tf.linalg.det(self.W)))
         if rank == 2:
             z = tf.linalg.matmul(target, self.W)
@@ -241,7 +241,7 @@ class Orthogonal(tf.keras.Model):
         """Un-does the learnable permutation over the last axis."""
 
         W_inv = tf.linalg.inv(self.W)
-        rank = tf.rank(z)
+        rank = len(tf.shape(z))
         if rank == 2:
             return tf.linalg.matmul(z, W_inv)
         return tf.tensordot(z, W_inv, [[rank - 1], [0]])
@@ -527,7 +527,7 @@ class EquivariantModule(tf.keras.Model):
         # Example: Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
         out_inv = self.invariant_module(x, **kwargs)
         out_inv = tf.expand_dims(out_inv, -2)
-        tiler = [1] * tf.rank(x)
+        tiler = [1] * len(shape)
         tiler[-2] = shape[-2]
         out_inv_rep = tf.tile(out_inv, tiler)
 
