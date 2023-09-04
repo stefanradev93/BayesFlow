@@ -112,7 +112,7 @@ class DenseCouplingNet(tf.keras.Model):
 
         # Handle 3D case for a set-flow and repeat condition over
         # the second `time` or `n_observations` axis of `target``
-        if target.ndim == 3 and condition.ndim == 2:
+        if tf.rank(target) == 3 and tf.rank(condition) == 2:
             shape = tf.shape(target)
             condition = tf.expand_dims(condition, 1)
             condition = tf.tile(condition, [1, shape[1], 1])
@@ -228,7 +228,7 @@ class Orthogonal(tf.keras.Model):
         """Performs a learnable generalized permutation over the last axis."""
 
         shape = tf.shape(target)
-        rank = target.ndim
+        rank = tf.rank(target)
         log_det = tf.math.log(tf.math.abs(tf.linalg.det(self.W)))
         if rank == 2:
             z = tf.linalg.matmul(target, self.W)
@@ -241,7 +241,7 @@ class Orthogonal(tf.keras.Model):
         """Un-does the learnable permutation over the last axis."""
 
         W_inv = tf.linalg.inv(self.W)
-        rank = z.ndim
+        rank = tf.rank(z)
         if rank == 2:
             return tf.linalg.matmul(z, W_inv)
         return tf.tensordot(z, W_inv, [[rank - 1], [0]])
@@ -402,11 +402,11 @@ class ActNorm(tf.keras.Model):
         """
 
         # 2D Tensor case, assume first batch dimension
-        if init_data.ndim == 2:
+        if tf.rank(init_data) == 2:
             mean = tf.math.reduce_mean(init_data, axis=0)
             std = tf.math.reduce_std(init_data, axis=0)
         # 3D Tensor case, assume first batch dimension, second number of observations dimension
-        elif init_data.ndim == 3:
+        elif tf.rank(init_data) == 3:
             mean = tf.math.reduce_mean(init_data, axis=(0, 1))
             std = tf.math.reduce_std(init_data, axis=(0, 1))
         # Raise other cases
@@ -527,7 +527,7 @@ class EquivariantModule(tf.keras.Model):
         # Example: Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
         out_inv = self.invariant_module(x, **kwargs)
         out_inv = tf.expand_dims(out_inv, -2)
-        tiler = [1] * x.ndim
+        tiler = [1] * tf.rank(x)
         tiler[-2] = shape[-2]
         out_inv_rep = tf.tile(out_inv, tiler)
 
