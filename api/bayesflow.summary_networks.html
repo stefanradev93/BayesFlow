@@ -424,9 +424,13 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.InvariantNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">InvariantNetwork.__init__()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequenceNetwork"><code class="docutils literal notranslate"><span class="pre">SequenceNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequenceNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">SequenceNetwork.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequenceNetwork.call"><code class="docutils literal notranslate"><span class="pre">SequenceNetwork.call()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork.__init__()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork.call"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SplitNetwork"><code class="docutils literal notranslate"><span class="pre">SplitNetwork</span></code></a><ul class="nav section-nav flex-column">
@@ -463,7 +467,7 @@ Transformers in time series: A survey. arXiv preprint arXiv:2202.07125.
 https://arxiv.org/abs/2202.07125</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.summary_networks.TimeSeriesTransformer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_layer_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_fc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_attention_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lstm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#TimeSeriesTransformer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.TimeSeriesTransformer.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_layer_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_fc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_attention_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lstm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#TimeSeriesTransformer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.TimeSeriesTransformer.__init__" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates a transformer architecture for encoding time series data into fixed size vectors given by
 <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code>. It features a recurrent network given by <code class="docutils literal notranslate"><span class="pre">template_type</span></code> which is responsible for
 providing a single summary of the time series which then attends to each point in the time series pro-
@@ -503,6 +507,10 @@ For instance, to use hidden layers with 32 units and a relu activation, you can 
 if <code class="docutils literal notranslate"><span class="pre">lstm</span></code>, an LSTM network will be used.
 if <code class="docutils literal notranslate"><span class="pre">gru</span></code>, a GRU unit will be used.
 if callable, a reference to <code class="docutils literal notranslate"><span class="pre">template_type</span></code> will be stored as an attribute.</p>
+</dd>
+<dt><strong>bidirectional</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Indicates whether the involved LSTM template network is bidirectional (i.e., forward
+and backward in time) or unidirectional (forward in time). Defaults to False, but may
+increase performance in some applications.</p>
 </dd>
 <dt><strong>template_dim</strong><span class="classifier">int, optional, default: 64</span></dt><dd><p>Only used if <code class="docutils literal notranslate"><span class="pre">template_type</span></code> in [‘lstm’, ‘gru’]. The number of hidden
 units (equiv. output dimensions) of the recurrent network.</p>
@@ -549,7 +557,7 @@ In International conference on machine learning (pp. 3744-3753). PMLR.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.summary_networks.SetTransformer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_layer_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_fc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_attention_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_inducing_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_seeds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SetTransformer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SetTransformer.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_layer_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dense_fc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_attention_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_inducing_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_seeds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SetTransformer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SetTransformer.__init__" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates a set transformer architecture according to [1] which will extract permutation-invariant
 features from an input set using a set of seed vectors (typically one for a single summary) with <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code>
 output dimensions.</p>
@@ -574,7 +582,7 @@ For instance, to use hidden layers with 32 units and a relu activation, you can 
 <p>For more details and arguments, see:
 <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense">https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense</a></p>
 </dd>
-<dt><strong>use_layer_norm</strong><span class="classifier">boolean, optional, default: True</span></dt><dd><p>Whether layer normalization before and after attention + feedforward</p>
+<dt><strong>use_layer_norm</strong><span class="classifier">boolean, optional, default: False</span></dt><dd><p>Whether to use layer normalization before and after attention + feedforward</p>
 </dd>
 <dt><strong>num_dense_fc</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of hidden layers for the internal feedforward network</p>
 </dd>
@@ -739,10 +747,10 @@ neural network can be passed for learnable pooling.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="bayesflow.summary_networks.SequentialNetwork">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.summary_networks.</span></span><span class="sig-name descname"><span class="pre">SequentialNetwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SequentialNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SequentialNetwork" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="bayesflow.summary_networks.SequenceNetwork">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.summary_networks.</span></span><span class="sig-name descname"><span class="pre">SequenceNetwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SequenceNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SequenceNetwork" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
-<p>Implements a sequence of <cite>MultiConv1D</cite> layers followed by an LSTM network.</p>
+<p>Implements a sequence of <cite>MultiConv1D</cite> layers followed by an (bidirectional) LSTM network.</p>
 <p>For details and rationale, see [1]:</p>
 <p>[1] Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., &amp; Köthe, U. (2021).
 OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks
@@ -750,8 +758,8 @@ and its application to the COVID-19 pandemics in Germany.
 PLoS computational biology, 17(10), e1009472.</p>
 <p><a class="reference external" href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472">https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472</a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="bayesflow.summary_networks.SequentialNetwork.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_conv_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lstm_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conv_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SequentialNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SequentialNetwork.__init__" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="bayesflow.summary_networks.SequenceNetwork.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_conv_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lstm_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conv_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SequenceNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SequenceNetwork.__init__" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates a stack of inception-like layers followed by an LSTM network, with the idea
 of learning vector representations from multivariate time series data.</p>
 <dl class="field-list simple">
@@ -770,6 +778,9 @@ it should contain the followin keys:
 - min_kernel_size (int)  : the minimum kernel size (&gt;= 1)
 - max_kernel_size (int)  : the maximum kernel size</p>
 </dd>
+<dt><strong>bidirectional</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Indicates whether the involved LSTM network is bidirectional (forward and backward in time)
+or unidirectional (forward in time). Defaults to False, but may increase performance.</p>
+</dd>
 <dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model</p>
 </dd>
 </dl>
@@ -778,8 +789,8 @@ it should contain the followin keys:
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="bayesflow.summary_networks.SequentialNetwork.call">
-<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SequentialNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SequentialNetwork.call" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="bayesflow.summary_networks.SequenceNetwork.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SequenceNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SequenceNetwork.call" title="Permalink to this definition">#</a></dt>
 <dd><p>Performs a forward pass through the network by first passing <cite>x</cite> through the sequence of
 multi-convolutional layers and then applying the LSTM network.</p>
 <dl class="field-list simple">
@@ -792,6 +803,44 @@ multi-convolutional layers and then applying the LSTM network.</p>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>out</strong><span class="classifier">tf.Tensor</span></dt><dd><p>Output of shape (batch_size, summary_dim)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bayesflow.summary_networks.SequentialNetwork">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.summary_networks.</span></span><span class="sig-name descname"><span class="pre">SequentialNetwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SequentialNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SequentialNetwork" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bayesflow.summary_networks.SequenceNetwork" title="bayesflow.summary_networks.SequenceNetwork"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequenceNetwork</span></code></a></p>
+<p>Deprecated class for amortizer posterior estimation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bayesflow.summary_networks.SequentialNetwork.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SequentialNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SequentialNetwork.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a stack of inception-like layers followed by an LSTM network, with the idea
+of learning vector representations from multivariate time series data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>summary_dim</strong><span class="classifier">int, optional, default: 10</span></dt><dd><p>The number of learned summary statistics.</p>
+</dd>
+<dt><strong>num_conv_layers</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of convolutional layers to use.</p>
+</dd>
+<dt><strong>lstm_units</strong><span class="classifier">int, optional, default: 128</span></dt><dd><p>The number of hidden LSTM units.</p>
+</dd>
+<dt><strong>conv_settings</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The arguments passed to the <cite>MultiConv1D</cite> internal networks. If <cite>None</cite>,
+defaults will be used from <cite>default_settings</cite>. If a dictionary is provided,
+it should contain the followin keys:
+- layer_args      (dict) : arguments for <cite>tf.keras.layers.Conv1D</cite> without kernel_size
+- min_kernel_size (int)  : the minimum kernel size (&gt;= 1)
+- max_kernel_size (int)  : the maximum kernel size</p>
+</dd>
+<dt><strong>bidirectional</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Indicates whether the involved LSTM network is bidirectional (forward and backward in time)
+or unidirectional (forward in time). Defaults to False, but may increase performance.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model</p>
 </dd>
 </dl>
 </dd>
@@ -887,7 +936,7 @@ up to the highest hierarchical level. It is recommended to provide higher-level 
 expressive power to allow for an adequate compression of lower-level data.</p>
 <p>Example: For two-level hierarchical models with the assumption of temporal dependencies on the lowest
 hierarchical level (e.g., observational level) and exchangeable units at the higher level
-(e.g., group level), a list of [SequentialNetwork(), DeepSet()] could be passed.</p>
+(e.g., group level), a list of [SequenceNetwork(), DeepSet()] could be passed.</p>
 <hr class="docutils" />
 <p>Parameters:
 networks_list : list of tf.keras.Model:</p>
@@ -993,9 +1042,13 @@ of <code class="docutils literal notranslate"><span class="pre">len(outputs)</sp
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.InvariantNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">InvariantNetwork.__init__()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequenceNetwork"><code class="docutils literal notranslate"><span class="pre">SequenceNetwork</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequenceNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">SequenceNetwork.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequenceNetwork.call"><code class="docutils literal notranslate"><span class="pre">SequenceNetwork.call()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork.__init__()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SequentialNetwork.call"><code class="docutils literal notranslate"><span class="pre">SequentialNetwork.call()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.summary_networks.SplitNetwork"><code class="docutils literal notranslate"><span class="pre">SplitNetwork</span></code></a><ul class="nav section-nav flex-column">

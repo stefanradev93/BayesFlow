@@ -363,7 +363,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
-<span class="kn">from</span> <span class="nn">tensorflow.keras.layers</span> <span class="kn">import</span> <span class="n">GRU</span><span class="p">,</span> <span class="n">LSTM</span><span class="p">,</span> <span class="n">Dense</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.layers</span> <span class="kn">import</span> <span class="n">GRU</span><span class="p">,</span> <span class="n">LSTM</span><span class="p">,</span> <span class="n">Bidirectional</span><span class="p">,</span> <span class="n">Dense</span>
 <span class="kn">from</span> <span class="nn">tensorflow.keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
 
 <span class="kn">from</span> <span class="nn">bayesflow</span> <span class="kn">import</span> <span class="n">default_settings</span> <span class="k">as</span> <span class="n">defaults</span>
@@ -395,6 +395,7 @@ document.write(`
         <span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="n">num_attention_blocks</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">template_type</span><span class="o">=</span><span class="s2">&quot;lstm&quot;</span><span class="p">,</span>
+        <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">template_dim</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
@@ -446,6 +447,10 @@ document.write(`
 <span class="sd">            if ``lstm``, an LSTM network will be used.</span>
 <span class="sd">            if ``gru``, a GRU unit will be used.</span>
 <span class="sd">            if callable, a reference to ``template_type`` will be stored as an attribute.</span>
+<span class="sd">        bidirectional        : bool, optional, default: False</span>
+<span class="sd">            Indicates whether the involved LSTM template network is bidirectional (i.e., forward</span>
+<span class="sd">            and backward in time) or unidirectional (forward in time). Defaults to False, but may</span>
+<span class="sd">            increase performance in some applications.</span>
 <span class="sd">        template_dim         : int, optional, default: 64</span>
 <span class="sd">            Only used if ``template_type`` in [&#39;lstm&#39;, &#39;gru&#39;]. The number of hidden</span>
 <span class="sd">            units (equiv. output dimensions) of the recurrent network.</span>
@@ -476,9 +481,9 @@ document.write(`
 
         <span class="c1"># A recurrent network will learn the dynamic many-to-one template</span>
         <span class="k">if</span> <span class="n">template_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;LSTM&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">template_net</span> <span class="o">=</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">template_dim</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template_net</span> <span class="o">=</span> <span class="n">Bidirectional</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="n">template_dim</span><span class="p">))</span> <span class="k">if</span> <span class="n">bidirectional</span> <span class="k">else</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">template_dim</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">template_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;GRU&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">template_net</span> <span class="o">=</span> <span class="n">GRU</span><span class="p">(</span><span class="n">template_dim</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template_net</span> <span class="o">=</span> <span class="n">Bidirectional</span><span class="p">(</span><span class="n">GRU</span><span class="p">(</span><span class="n">template_dim</span><span class="p">))</span> <span class="k">if</span> <span class="n">bidirectional</span> <span class="k">else</span> <span class="n">GRU</span><span class="p">(</span><span class="n">template_dim</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">callable</span><span class="p">(</span><span class="n">template_type</span><span class="p">),</span> <span class="s2">&quot;Argument `template_dim` should be callable or in [&#39;lstm&#39;, &#39;gru&#39;]&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">template_net</span> <span class="o">=</span> <span class="n">template_type</span>
@@ -522,7 +527,7 @@ document.write(`
         <span class="n">input_dim</span><span class="p">,</span>
         <span class="n">attention_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dense_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">use_layer_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">use_layer_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">num_dense_fc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="n">num_attention_blocks</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
@@ -561,8 +566,8 @@ document.write(`
 
 <span class="sd">            For more details and arguments, see:</span>
 <span class="sd">            https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense</span>
-<span class="sd">        use_layer_norm       : boolean, optional, default: True</span>
-<span class="sd">            Whether layer normalization before and after attention + feedforward</span>
+<span class="sd">        use_layer_norm       : boolean, optional, default: False</span>
+<span class="sd">            Whether to use layer normalization before and after attention + feedforward</span>
 <span class="sd">        num_dense_fc         : int, optional, default: 2</span>
 <span class="sd">            The number of hidden layers for the internal feedforward network</span>
 <span class="sd">        summary_dim          : int</span>
@@ -747,8 +752,8 @@ document.write(`
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="SequentialNetwork"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork">[docs]</a><span class="k">class</span> <span class="nc">SequentialNetwork</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a sequence of `MultiConv1D` layers followed by an LSTM network.</span>
+<div class="viewcode-block" id="SequenceNetwork"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequenceNetwork">[docs]</a><span class="k">class</span> <span class="nc">SequenceNetwork</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a sequence of `MultiConv1D` layers followed by an (bidirectional) LSTM network.</span>
 
 <span class="sd">    For details and rationale, see [1]:</span>
 
@@ -760,7 +765,9 @@ document.write(`
 <span class="sd">    https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009472</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SequentialNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_conv_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">lstm_units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">conv_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SequenceNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequenceNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_conv_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">lstm_units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">conv_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a stack of inception-like layers followed by an LSTM network, with the idea</span>
 <span class="sd">        of learning vector representations from multivariate time series data.</span>
 
@@ -779,6 +786,9 @@ document.write(`
 <span class="sd">            - layer_args      (dict) : arguments for `tf.keras.layers.Conv1D` without kernel_size</span>
 <span class="sd">            - min_kernel_size (int)  : the minimum kernel size (&gt;= 1)</span>
 <span class="sd">            - max_kernel_size (int)  : the maximum kernel size</span>
+<span class="sd">        bidirectional   : bool, optional, default: False</span>
+<span class="sd">            Indicates whether the involved LSTM network is bidirectional (forward and backward in time)</span>
+<span class="sd">            or unidirectional (forward in time). Defaults to False, but may increase performance.</span>
 <span class="sd">        **kwargs        : dict</span>
 <span class="sd">            Optional keyword arguments passed to the __init__() method of tf.keras.Model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -791,11 +801,11 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">([</span><span class="n">MultiConv1D</span><span class="p">(</span><span class="n">conv_settings</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_conv_layers</span><span class="p">)])</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">lstm</span> <span class="o">=</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">lstm_units</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lstm</span> <span class="o">=</span> <span class="n">Bidirectional</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="n">lstm_units</span><span class="p">))</span> <span class="k">if</span> <span class="n">bidirectional</span> <span class="k">else</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">lstm_units</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">summary_dim</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summary_dim</span> <span class="o">=</span> <span class="n">summary_dim</span></div>
 
-<div class="viewcode-block" id="SequentialNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SequenceNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequenceNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through the network by first passing `x` through the sequence of</span>
 <span class="sd">        multi-convolutional layers and then applying the LSTM network.</span>
 
@@ -814,6 +824,22 @@ document.write(`
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lstm</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span></div></div>
+
+
+<div class="viewcode-block" id="SequentialNetwork"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork">[docs]</a><span class="k">class</span> <span class="nc">SequentialNetwork</span><span class="p">(</span><span class="n">SequenceNetwork</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated class for amortizer posterior estimation.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> will be deprecated. Use `SequenceNetwork` instead.&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SequentialNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SequentialNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> will be deprecated. Use `SequenceNetwork` instead.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="SplitNetwork"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SplitNetwork">[docs]</a><span class="k">class</span> <span class="nc">SplitNetwork</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
@@ -897,7 +923,7 @@ document.write(`
 
 <span class="sd">        Example: For two-level hierarchical models with the assumption of temporal dependencies on the lowest</span>
 <span class="sd">        hierarchical level (e.g., observational level) and exchangeable units at the higher level</span>
-<span class="sd">        (e.g., group level), a list of [SequentialNetwork(), DeepSet()] could be passed.</span>
+<span class="sd">        (e.g., group level), a list of [SequenceNetwork(), DeepSet()] could be passed.</span>
 
 <span class="sd">        ----------</span>
 

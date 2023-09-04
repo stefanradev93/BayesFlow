@@ -440,13 +440,13 @@ document.write(`
 
 <span class="n">DEFAULT_SETTING_AFFINE_COUPLING</span> <span class="o">=</span> <span class="n">MetaDictSetting</span><span class="p">(</span>
     <span class="n">meta_dict</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;dense_args&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="mf">5e-4</span><span class="p">)),</span>
+        <span class="s2">&quot;dense_args&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="mf">1e-4</span><span class="p">)),</span>
         <span class="s2">&quot;num_dense&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
         <span class="s2">&quot;spec_norm&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s2">&quot;mc_dropout&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s2">&quot;dropout&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s2">&quot;residual&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="s2">&quot;dropout_prob&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="s2">&quot;dropout_prob&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
         <span class="s2">&quot;soft_clamping&quot;</span><span class="p">:</span> <span class="mf">1.9</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="n">mandatory_fields</span><span class="o">=</span><span class="p">[],</span>
@@ -455,7 +455,7 @@ document.write(`
 
 <span class="n">DEFAULT_SETTING_SPLINE_COUPLING</span> <span class="o">=</span> <span class="n">MetaDictSetting</span><span class="p">(</span>
     <span class="n">meta_dict</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;dense_args&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">)),</span>
+        <span class="s2">&quot;dense_args&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="mf">1e-4</span><span class="p">)),</span>
         <span class="s2">&quot;num_dense&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
         <span class="s2">&quot;spec_norm&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s2">&quot;mc_dropout&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>

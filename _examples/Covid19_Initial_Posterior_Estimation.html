@@ -473,7 +473,7 @@ document.write(`
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bayesflow.diagnostics</span> <span class="k">as</span> <span class="nn">diag</span>
 <span class="kn">from</span> <span class="nn">bayesflow.amortizers</span> <span class="kn">import</span> <span class="n">AmortizedPosterior</span>
-<span class="kn">from</span> <span class="nn">bayesflow.networks</span> <span class="kn">import</span> <span class="n">InvertibleNetwork</span><span class="p">,</span> <span class="n">SequentialNetwork</span>
+<span class="kn">from</span> <span class="nn">bayesflow.networks</span> <span class="kn">import</span> <span class="n">InvertibleNetwork</span><span class="p">,</span> <span class="n">SequenceNetwork</span>
 <span class="kn">from</span> <span class="nn">bayesflow.simulation</span> <span class="kn">import</span> <span class="n">GenerativeModel</span><span class="p">,</span> <span class="n">Prior</span><span class="p">,</span> <span class="n">Simulator</span>
 <span class="kn">from</span> <span class="nn">bayesflow.trainers</span> <span class="kn">import</span> <span class="n">Trainer</span>
 </pre></div>
@@ -717,7 +717,7 @@ INFO:root:No optional simulation batchable context provided.
 <p>Feel free to experiment with different summary architectures as well!</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">SequentialNetwork</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">SequenceNetwork</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
