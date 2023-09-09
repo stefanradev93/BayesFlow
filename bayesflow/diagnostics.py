@@ -144,7 +144,7 @@ def plot_recovery(
         if i >= n_params:
             break
 
-        # Add scatter and errorbars
+        # Add scatter and error bars
         if uncertainty_agg is not None:
             _ = ax.errorbar(prior_samples[:, i], est[:, i], yerr=u[:, i], fmt="o", alpha=0.5, color=color)
         else:
@@ -950,9 +950,9 @@ def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f
     try:
         g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
     except Exception as e:
-        logging.warn("KDE failed due to the following exception:\n" + repr(e) + "\nSubstituting scatter plot.")
-        g.map_lower(plt.scatter, alpha=0.6, s=40, edgecolor="k", color=color)
-    g.map_upper(plt.scatter, alpha=0.6, s=40, edgecolor="k", color=color)
+        logging.warning("KDE failed due to the following exception:\n" + repr(e) + "\nSubstituting scatter plot.")
+        g.map_lower(sns.scatterplot, alpha=0.6, s=40, edgecolor="k", color=color)
+    g.map_upper(sns.scatterplot, alpha=0.6, s=40, edgecolor="k", color=color)
 
     # Add grids
     for i in range(dim):
@@ -963,7 +963,7 @@ def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f
 
 
 def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
-    """Creates pairplots for the latent space learned by the inference network. Enables
+    """Creates pair plots for the latent space learned by the inference network. Enables
     visual inspection of the latent space and whether its structure corresponds to the
     one enforced by the optimization criterion.
 
@@ -998,7 +998,7 @@ def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
     g = sns.PairGrid(data_to_plot, height=height, **kwargs)
     g.map_diag(sns.histplot, fill=True, color=color, alpha=0.9, kde=True)
     g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
-    g.map_upper(plt.scatter, alpha=0.6, s=40, edgecolor="k", color=color)
+    g.map_upper(sns.scatterplot, alpha=0.6, s=40, edgecolor="k", color=color)
 
     # Add grids
     for i in range(z_dim):
