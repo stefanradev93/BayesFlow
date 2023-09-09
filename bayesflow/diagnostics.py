@@ -71,7 +71,7 @@ def plot_recovery(
         The posterior draws obtained from n_data_sets
     prior_samples     : np.ndarray of shape (n_data_sets, n_params)
         The prior draws (true parameters) obtained for generating the n_data_sets
-    point_agg         : callable, optional, default: np.median
+    point_agg         : callable, optional, default: ``np.median``
         The function to apply to the posterior draws to get a point estimate for each marginal.
         The default computes the marginal median for each marginal posterior as a robust
         point estimate.
@@ -89,7 +89,7 @@ def plot_recovery(
     metric_fontsize   : int, optional, default: 16
         The font size of the goodness-of-fit metric (if provided)
     tick_fontsize     : int, optional, default: 12
-        The font size of the axis ticklabels
+        The font size of the axis tick labels
     add_corr          : bool, optional, default: True
         A flag for adding correlation between true and estimates to the plot
     add_r2            : bool, optional, default: True
@@ -242,7 +242,7 @@ def plot_z_score_contraction(
 
     post_contraction = 1 - (posterior_variance / prior_variance)
 
-    In other words, the posterior is a proxy for the reduction in ucnertainty gained by
+    In other words, the posterior is a proxy for the reduction in uncertainty gained by
     replacing the prior with the posterior. The ideal posterior contraction tends to 1.
     Contraction near zero indicates that the posterior variance is almost identical to
     the prior variance for the particular marginal parameter distribution.
@@ -894,7 +894,7 @@ def plot_losses(
         ax.grid(alpha=grid_alpha)
         ax.set_title(train_losses.columns[i], fontsize=title_fontsize)
         # Only add legend if there is a validation curve
-        if val_losses is not None:
+        if val_losses is not None or moving_average:
             ax.legend(fontsize=legend_fontsize)
     f.tight_layout()
     return f
