@@ -62,7 +62,7 @@ def plot_recovery(
     https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html
 
     Important: Posterior aggregates play no special role in Bayesian inference and should only
-    be used heuristically. For instanec, in the case of multi-modal posteriors, common point
+    be used heuristically. For instance, in the case of multi-modal posteriors, common point
     estimates, such as mean, (geometric) median, or maximum a posteriori (MAP) mean nothing.
 
     Parameters
@@ -95,7 +95,7 @@ def plot_recovery(
     add_r2            : bool, optional, default: True
         A flag for adding R^2 between true and estimates to the plot
     color             : str, optional, default: '#8f2727'
-        The color for the true vs. estimated scatter points and errobars
+        The color for the true vs. estimated scatter points and error bars
 
     Returns
     -------
@@ -253,7 +253,7 @@ def plot_z_score_contraction(
     Toward a principled Bayesian workflow in cognitive science.
     Psychological methods, 26(1), 103.
 
-    Also available at https://arxiv.org/abs/1904.12765
+    Paper also available at https://arxiv.org/abs/1904.12765
 
     Parameters
     ----------
@@ -272,7 +272,7 @@ def plot_z_score_contraction(
     tick_fontsize     : int, optional, default: 12
         The font size of the axis ticklabels
     color             : str, optional, default: '#8f2727'
-        The color for the true vs. estimated scatter points and errobars
+        The color for the true vs. estimated scatter points and error bars
 
     Returns
     -------
@@ -887,7 +887,7 @@ def plot_losses(
                     lw=lw_val,
                     label="Validation",
                 )
-            # Schmuck
+        # Schmuck
         ax.set_xlabel("Training step #", fontsize=label_fontsize)
         ax.set_ylabel("Loss value", fontsize=label_fontsize)
         sns.despine(ax=ax)
@@ -901,7 +901,7 @@ def plot_losses(
 
 
 def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f2727", **kwargs):
-    """Creates pairplots for a given joint prior.
+    """Creates pair-plots for a given joint prior.
 
     Parameters
     ----------
@@ -913,7 +913,7 @@ def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f
         The number of random draws from the joint prior
     height      : float, optional, default: 2.5
         The height of the pair plot
-    color       : str, optional, defailt : '#8f2727'
+    color       : str, optional, default : '#8f2727'
         The color of the plot
     **kwargs    : dict, optional
         Additional keyword arguments passed to the sns.PairGrid constructor
@@ -943,7 +943,9 @@ def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f
     # Generate plots
     g = sns.PairGrid(data_to_plot, height=height, **kwargs)
     g.map_diag(sns.histplot, fill=True, color=color, alpha=0.9, kde=True)
-    # Kernel density estimation (KDE) may not always be possible (e.g. with parameters whose correlation is close to 1 or -1).
+
+    # Kernel density estimation (KDE) may not always be possible
+    # (e.g. with parameters whose correlation is close to 1 or -1).
     # In this scenario, a scatter-plot is generated instead.
     try:
         g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
@@ -962,7 +964,7 @@ def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f
 
 def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
     """Creates pairplots for the latent space learned by the inference network. Enables
-    visual inspection of the the latent space and whether its structrue corresponds to the
+    visual inspection of the latent space and whether its structure corresponds to the
     one enforced by the optimization criterion.
 
     Parameters
@@ -971,7 +973,7 @@ def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
         The latent samples computed through a forward pass of the inference network.
     height      : float, optional, default: 2.5
         The height of the pair plot.
-    color       : str, optional, defailt : '#8f2727'
+    color       : str, optional, default : '#8f2727'
         The color of the plot
     **kwargs    : dict, optional
         Additional keyword arguments passed to the sns.PairGrid constructor
@@ -1235,32 +1237,31 @@ def plot_mmd_hypothesis_test(
 
     Parameters
     ----------
-    mmd_null: np.ndarray
-        samples from the MMD sampling distribution under the null hypothesis "the model is well-specified"
-    mmd_observed: float
-        observed MMD value
-    alpha_level: float
-        rejection probability (type I error)
-    null_color: color
-        color for the H0 sampling distribution
-    observed_color: color
-        color for the observed MMD
-    alpha_color: color
-        color for the rejection area
+    mmd_null       : np.ndarray
+        The samples from the MMD sampling distribution under the null hypothesis "the model is well-specified"
+    mmd_observed   : float
+        The observed MMD value
+    alpha_level    : float
+        The rejection probability (type I error)
+    null_color     : str or tuple
+        The color of the H0 sampling distribution
+    observed_color : str or tuple
+        The color of the observed MMD
+    alpha_color    : str or tuple
+        The color of the rejection area
     truncate_vlines_at_kde: bool
         true: cut off the vlines at the kde
         false: continue kde lines across the plot
-    xmin: float
-        lower x axis limit
-    xmax: float
-        upper x axis limit
-    bw_factor: float, default: 1.5
+    xmin           : float
+        The lower x-axis limit
+    xmax           : float
+        The upper x-axis limit
+    bw_factor      : float, optional, default: 1.5
         bandwidth (aka. smoothing parameter) of the kernel density estimate
 
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
-
     """
 
     def draw_vline_to_kde(x, kde_object, color, label=None, **kwargs):
