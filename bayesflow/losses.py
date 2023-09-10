@@ -19,7 +19,6 @@
 # SOFTWARE.
 
 import tensorflow as tf
-import tensorflow_probability as tfp
 
 from bayesflow.computational_utilities import maximum_mean_discrepancy
 
@@ -62,7 +61,7 @@ def kl_latent_space_student(v, z, log_det_J):
     z          : tf.Tensor of shape (batch_size, ...)
         The (latent transformed) target variables
     log_det_J  : tf.Tensor of shape (batch_size, ...)
-        The logartihm of the Jacobian determinant of the transformation.
+        The logarithm of the Jacobian determinant of the transformation.
 
     Returns
     -------
@@ -131,7 +130,7 @@ def mmd_summary_space(summary_outputs, z_dist=tf.random.normal, kernel="gaussian
         The kernel function to use for MMD computation.
     """
 
-    z_samples = z_dist(summary_outputs.shape)
+    z_samples = z_dist(tf.shape(summary_outputs))
     mmd_loss = maximum_mean_discrepancy(summary_outputs, z_samples, kernel)
     return mmd_loss
 
