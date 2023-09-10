@@ -62,7 +62,7 @@ def plot_recovery(
     https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html
 
     Important: Posterior aggregates play no special role in Bayesian inference and should only
-    be used heuristically. For instanec, in the case of multi-modal posteriors, common point
+    be used heuristically. For instance, in the case of multi-modal posteriors, common point
     estimates, such as mean, (geometric) median, or maximum a posteriori (MAP) mean nothing.
 
     Parameters
@@ -71,7 +71,7 @@ def plot_recovery(
         The posterior draws obtained from n_data_sets
     prior_samples     : np.ndarray of shape (n_data_sets, n_params)
         The prior draws (true parameters) obtained for generating the n_data_sets
-    point_agg         : callable, optional, default: np.median
+    point_agg         : callable, optional, default: ``np.median``
         The function to apply to the posterior draws to get a point estimate for each marginal.
         The default computes the marginal median for each marginal posterior as a robust
         point estimate.
@@ -89,13 +89,13 @@ def plot_recovery(
     metric_fontsize   : int, optional, default: 16
         The font size of the goodness-of-fit metric (if provided)
     tick_fontsize     : int, optional, default: 12
-        The font size of the axis ticklabels
+        The font size of the axis tick labels
     add_corr          : bool, optional, default: True
         A flag for adding correlation between true and estimates to the plot
     add_r2            : bool, optional, default: True
         A flag for adding R^2 between true and estimates to the plot
     color             : str, optional, default: '#8f2727'
-        The color for the true vs. estimated scatter points and errobars
+        The color for the true vs. estimated scatter points and error bars
 
     Returns
     -------
@@ -144,7 +144,7 @@ def plot_recovery(
         if i >= n_params:
             break
 
-        # Add scatter and errorbars
+        # Add scatter and error bars
         if uncertainty_agg is not None:
             _ = ax.errorbar(prior_samples[:, i], est[:, i], yerr=u[:, i], fmt="o", alpha=0.5, color=color)
         else:
@@ -242,7 +242,7 @@ def plot_z_score_contraction(
 
     post_contraction = 1 - (posterior_variance / prior_variance)
 
-    In other words, the posterior is a proxy for the reduction in ucnertainty gained by
+    In other words, the posterior is a proxy for the reduction in uncertainty gained by
     replacing the prior with the posterior. The ideal posterior contraction tends to 1.
     Contraction near zero indicates that the posterior variance is almost identical to
     the prior variance for the particular marginal parameter distribution.
@@ -253,7 +253,7 @@ def plot_z_score_contraction(
     Toward a principled Bayesian workflow in cognitive science.
     Psychological methods, 26(1), 103.
 
-    Also available at https://arxiv.org/abs/1904.12765
+    Paper also available at https://arxiv.org/abs/1904.12765
 
     Parameters
     ----------
@@ -272,7 +272,7 @@ def plot_z_score_contraction(
     tick_fontsize     : int, optional, default: 12
         The font size of the axis ticklabels
     color             : str, optional, default: '#8f2727'
-        The color for the true vs. estimated scatter points and errobars
+        The color for the true vs. estimated scatter points and error bars
 
     Returns
     -------
@@ -887,21 +887,21 @@ def plot_losses(
                     lw=lw_val,
                     label="Validation",
                 )
-            # Schmuck
+        # Schmuck
         ax.set_xlabel("Training step #", fontsize=label_fontsize)
         ax.set_ylabel("Loss value", fontsize=label_fontsize)
         sns.despine(ax=ax)
         ax.grid(alpha=grid_alpha)
         ax.set_title(train_losses.columns[i], fontsize=title_fontsize)
         # Only add legend if there is a validation curve
-        if val_losses is not None:
+        if val_losses is not None or moving_average:
             ax.legend(fontsize=legend_fontsize)
     f.tight_layout()
     return f
 
 
 def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f2727", **kwargs):
-    """Creates pairplots for a given joint prior.
+    """Creates pair-plots for a given joint prior.
 
     Parameters
     ----------
@@ -913,7 +913,7 @@ def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f
         The number of random draws from the joint prior
     height      : float, optional, default: 2.5
         The height of the pair plot
-    color       : str, optional, defailt : '#8f2727'
+    color       : str, optional, default : '#8f2727'
         The color of the plot
     **kwargs    : dict, optional
         Additional keyword arguments passed to the sns.PairGrid constructor
@@ -943,14 +943,16 @@ def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f
     # Generate plots
     g = sns.PairGrid(data_to_plot, height=height, **kwargs)
     g.map_diag(sns.histplot, fill=True, color=color, alpha=0.9, kde=True)
-    # Kernel density estimation (KDE) may not always be possible (e.g. with parameters whose correlation is close to 1 or -1).
+
+    # Kernel density estimation (KDE) may not always be possible
+    # (e.g. with parameters whose correlation is close to 1 or -1).
     # In this scenario, a scatter-plot is generated instead.
     try:
         g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
     except Exception as e:
-        logging.warn("KDE failed due to the following exception:\n" + repr(e) + "\nSubstituting scatter plot.")
-        g.map_lower(plt.scatter, alpha=0.6, s=40, edgecolor="k", color=color)
-    g.map_upper(plt.scatter, alpha=0.6, s=40, edgecolor="k", color=color)
+        logging.warning("KDE failed due to the following exception:\n" + repr(e) + "\nSubstituting scatter plot.")
+        g.map_lower(sns.scatterplot, alpha=0.6, s=40, edgecolor="k", color=color)
+    g.map_upper(sns.scatterplot, alpha=0.6, s=40, edgecolor="k", color=color)
 
     # Add grids
     for i in range(dim):
@@ -961,8 +963,8 @@ def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f
 
 
 def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
-    """Creates pairplots for the latent space learned by the inference network. Enables
-    visual inspection of the the latent space and whether its structrue corresponds to the
+    """Creates pair plots for the latent space learned by the inference network. Enables
+    visual inspection of the latent space and whether its structure corresponds to the
     one enforced by the optimization criterion.
 
     Parameters
@@ -971,7 +973,7 @@ def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
         The latent samples computed through a forward pass of the inference network.
     height      : float, optional, default: 2.5
         The height of the pair plot.
-    color       : str, optional, defailt : '#8f2727'
+    color       : str, optional, default : '#8f2727'
         The color of the plot
     **kwargs    : dict, optional
         Additional keyword arguments passed to the sns.PairGrid constructor
@@ -996,7 +998,7 @@ def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
     g = sns.PairGrid(data_to_plot, height=height, **kwargs)
     g.map_diag(sns.histplot, fill=True, color=color, alpha=0.9, kde=True)
     g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
-    g.map_upper(plt.scatter, alpha=0.6, s=40, edgecolor="k", color=color)
+    g.map_upper(sns.scatterplot, alpha=0.6, s=40, edgecolor="k", color=color)
 
     # Add grids
     for i in range(z_dim):
@@ -1060,6 +1062,8 @@ def plot_calibration_curves(
     # Determine n_subplots dynamically
     n_row = int(np.ceil(num_models / 6))
     n_col = int(np.ceil(num_models / n_row))
+
+    # Compute calibration
     cal_errs, probs_true, probs_pred = expected_calibration_error(true_models, pred_models, num_bins)
 
     # Initialize figure
@@ -1094,8 +1098,6 @@ def plot_calibration_curves(
         ax[j].spines["top"].set_visible(False)
         ax[j].set_xlim([0 - epsilon, 1 + epsilon])
         ax[j].set_ylim([0 - epsilon, 1 + epsilon])
-        ax[j].set_xlabel("Predicted probability", fontsize=label_fontsize)
-        ax[j].set_ylabel("True probability", fontsize=label_fontsize)
         ax[j].set_xticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
         ax[j].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
         ax[j].grid(alpha=0.5)
@@ -1110,6 +1112,18 @@ def plot_calibration_curves(
             transform=ax[j].transAxes,
             size=legend_fontsize,
         )
+
+    # Only add x-labels to the bottom row
+    bottom_row = axarr if n_row == 1 else axarr[0] if n_col == 1 else axarr[n_row - 1, :]
+    for _ax in bottom_row:
+        _ax.set_xlabel("Predicted probability", fontsize=label_fontsize)
+
+    # Only add y-labels to left-most row
+    if n_row == 1:  # if there is only one row, the ax array is 1D
+        ax[0].set_ylabel("True probability", fontsize=label_fontsize)
+    else:  # if there is more than one row, the ax array is 2D
+        for _ax in axarr[:, 0]:
+            _ax.set_ylabel("True probability", fontsize=label_fontsize)
 
     fig.tight_layout()
     return fig
@@ -1223,32 +1237,31 @@ def plot_mmd_hypothesis_test(
 
     Parameters
     ----------
-    mmd_null: np.ndarray
-        samples from the MMD sampling distribution under the null hypothesis "the model is well-specified"
-    mmd_observed: float
-        observed MMD value
-    alpha_level: float
-        rejection probability (type I error)
-    null_color: color
-        color for the H0 sampling distribution
-    observed_color: color
-        color for the observed MMD
-    alpha_color: color
-        color for the rejection area
+    mmd_null       : np.ndarray
+        The samples from the MMD sampling distribution under the null hypothesis "the model is well-specified"
+    mmd_observed   : float
+        The observed MMD value
+    alpha_level    : float
+        The rejection probability (type I error)
+    null_color     : str or tuple
+        The color of the H0 sampling distribution
+    observed_color : str or tuple
+        The color of the observed MMD
+    alpha_color    : str or tuple
+        The color of the rejection area
     truncate_vlines_at_kde: bool
         true: cut off the vlines at the kde
         false: continue kde lines across the plot
-    xmin: float
-        lower x axis limit
-    xmax: float
-        upper x axis limit
-    bw_factor: float, default: 1.5
+    xmin           : float
+        The lower x-axis limit
+    xmax           : float
+        The upper x-axis limit
+    bw_factor      : float, optional, default: 1.5
         bandwidth (aka. smoothing parameter) of the kernel density estimate
 
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
-
     """
 
     def draw_vline_to_kde(x, kde_object, color, label=None, **kwargs):
