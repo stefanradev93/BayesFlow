@@ -427,6 +427,10 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
     def _determine_summary_loss(self, loss_fun):
         """Determines which summary loss to use if default `None` argument provided, otherwise return identity."""
 
+        # Throw, if summary loss without a summary network provided
+        if loss_fun is not None and self.summary_net is None:
+            raise ConfigurationError('You need to provide a summary_net if you want to use a summary_loss_fun.')
+
         # If callable, return provided loss
         if loss_fun is None or callable(loss_fun):
             return loss_fun
@@ -566,12 +570,12 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
         return lik_samples
 
     def sample_loop(self, input_list, n_samples, to_numpy=True, **kwargs):
-        """Generates random draws from the surrogate network given a list of dicts with conditonal variables.
+        """Generates random draws from the surrogate network given a list of dicts with conditional variables.
         Useful when GPU memory is limited or data sets have a different (non-Tensor) structure.
 
         Parameters
         ----------
-        input_list   : list of dictionaries, each dictionary having the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
+        input_list   : list of dictionaries, each dictionary having the following mandatory keys (default):
             ``conditions`` - the conditioning variables that the directly passed to the surrogate network
         n_samples    : int
             The number of posterior draws (samples) to obtain from the approximate posterior
