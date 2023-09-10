@@ -513,6 +513,7 @@ INFO:root:Done.
 </div>
 <p>You have probably noticed, that we are not using any summary network, since the two moons “observables” are single 2D vectors. This is the reason why the simulator outputs will be going into the <code class="docutils literal notranslate"><span class="pre">direct_conditions</span></code> key of the configured output.</p>
 <p>To make the problem more challenging, we will generate <span class="math notranslate nohighlight">\(10000\)</span> simulations from the model, which puts us into the “mid-range” of training data availability.</p>
+<p>Depending on your machine, the below training should take between <span class="math notranslate nohighlight">\(3 - 5\)</span> minutes.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">offline_data</span> <span class="o">=</span> <span class="n">benchmark</span><span class="o">.</span><span class="n">generative_model</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
@@ -523,7 +524,7 @@ INFO:root:Done.
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
-<span class="n">history</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="n">offline_data</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">validation_sims</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<span class="n">history</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_offline</span><span class="p">(</span><span class="n">offline_data</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">validation_sims</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -535,7 +536,7 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/820cb700ef9186da11e2f4db8838c4f4376cca561356c583a0de96ac57668d9b.png" src="../_images/820cb700ef9186da11e2f4db8838c4f4376cca561356c583a0de96ac57668d9b.png" />
+<img alt="../_images/c64abd80ce21e92a75fde729a72f12e46482283cf0c71d939d0be9fc9a523611.png" src="../_images/c64abd80ce21e92a75fde729a72f12e46482283cf0c71d939d0be9fc9a523611.png" />
 </div>
 </div>
 </section>
@@ -555,8 +556,8 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: total: 438 ms
-Wall time: 814 ms
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 135 ms, sys: 15.3 ms, total: 150 ms
+Wall time: 145 ms
 </pre></div>
 </div>
 </div>
@@ -571,13 +572,13 @@ Wall time: 814 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/aabd8cfa31c86a78420e7c576ea61c874f663940de21b25c2968b0dab2071c26.png" src="../_images/aabd8cfa31c86a78420e7c576ea61c874f663940de21b25c2968b0dab2071c26.png" />
+<img alt="../_images/ef760d4a8c489dd2d5a0c58a307b1dcd6d5f0bc9ff91abd3d3e3f29d86e30989.png" src="../_images/ef760d4a8c489dd2d5a0c58a307b1dcd6d5f0bc9ff91abd3d3e3f29d86e30989.png" />
 </div>
 </div>
 </section>
 <section id="two-moons-posterior">
 <h3><span class="section-number">2.3.2. </span>Two Moons Posterior<a class="headerlink" href="#two-moons-posterior" title="Permalink to this heading">#</a></h3>
-<p>The two moons posterior at point <span class="math notranslate nohighlight">\(x = (0, 0)\)</span> should resemble two crescent shapes. Below, we plot the corresponding posterior samples and posterior density.</p>
+<p>The two moons posterior at point <span class="math notranslate nohighlight">\(x = (0, 0)\)</span> should resemble two crescent shapes. Below, we plot the corresponding posterior samples and posterior density. These results suggest that our spline flow setup can approximate the expected analytical posterior fairly well.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Prepare figure</span>
@@ -611,7 +612,7 @@ Wall time: 814 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/469cfdee8f594e5a11592e8fa35263c2a78990b48932d675f4bf77340522e2a5.png" src="../_images/469cfdee8f594e5a11592e8fa35263c2a78990b48932d675f4bf77340522e2a5.png" />
+<img alt="../_images/5c44cd03887f57f35e30eeefc4008744d44e3cee803d7e26b7ad66408a7c5cc1.png" src="../_images/5c44cd03887f57f35e30eeefc4008744d44e3cee803d7e26b7ad66408a7c5cc1.png" />
 </div>
 </div>
 </section>

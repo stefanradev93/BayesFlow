@@ -769,6 +769,10 @@ document.write(`
     <span class="k">def</span> <span class="nf">_determine_summary_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loss_fun</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determines which summary loss to use if default `None` argument provided, otherwise return identity.&quot;&quot;&quot;</span>
 
+        <span class="c1"># Throw, if summary loss without a summary network provided</span>
+        <span class="k">if</span> <span class="n">loss_fun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary_net</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s1">&#39;You need to provide a summary_net if you want to use a summary_loss_fun.&#39;</span><span class="p">)</span>
+
         <span class="c1"># If callable, return provided loss</span>
         <span class="k">if</span> <span class="n">loss_fun</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">callable</span><span class="p">(</span><span class="n">loss_fun</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">loss_fun</span>
@@ -908,12 +912,12 @@ document.write(`
         <span class="k">return</span> <span class="n">lik_samples</span></div>
 
 <div class="viewcode-block" id="AmortizedLikelihood.sample_loop"><a class="viewcode-back" href="../../api/bayesflow.amortizers.html#bayesflow.amortizers.AmortizedLikelihood.sample_loop">[docs]</a>    <span class="k">def</span> <span class="nf">sample_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_list</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">to_numpy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates random draws from the surrogate network given a list of dicts with conditonal variables.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates random draws from the surrogate network given a list of dicts with conditional variables.</span>
 <span class="sd">        Useful when GPU memory is limited or data sets have a different (non-Tensor) structure.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        input_list   : list of dictionaries, each dictionary having the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:</span>
+<span class="sd">        input_list   : list of dictionaries, each dictionary having the following mandatory keys (default):</span>
 <span class="sd">            ``conditions`` - the conditioning variables that the directly passed to the surrogate network</span>
 <span class="sd">        n_samples    : int</span>
 <span class="sd">            The number of posterior draws (samples) to obtain from the approximate posterior</span>

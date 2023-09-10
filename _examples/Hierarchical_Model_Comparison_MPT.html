@@ -447,19 +447,6 @@ document.write(`
 </div>
 </div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Confirm that GPU is available for training</span>
-<span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">list_physical_devices</span><span class="p">(</span><span class="s2">&quot;GPU&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[PhysicalDevice(name=&#39;/physical_device:GPU:0&#39;, device_type=&#39;GPU&#39;)]
-</pre></div>
-</div>
-</div>
-</div>
 <section id="introduction">
 <h2><span class="section-number">8.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
 <p>This is the second part of the tutorial series covering amortized model comparison with BayesFlow! The general workflow, the scenario and the cognitive models were introduced in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a> and are assumed to be known, so here we will focus on the new elements introduced when comparing hierarchical models.</p>
@@ -511,10 +498,10 @@ Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/1a0ba982633c774d7e6cbaf00ef3583b87ce4eff8db88914d67168c0c98b7312.png" src="../_images/1a0ba982633c774d7e6cbaf00ef3583b87ce4eff8db88914d67168c0c98b7312.png" />
+<img alt="../_images/3bfaae3966b7d3d7f7d7141152499544daf2c7224223b36025d372d83b6e26a7.png" src="../_images/3bfaae3966b7d3d7f7d7141152499544daf2c7224223b36025d372d83b6e26a7.png" />
 </div>
 </div>
-<p>We now follow the same steps as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a> to translate our prior into code:</p>
+<p>We now follow the same steps as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a> to translate our prior into code:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">PARAM_NAMES</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s2">&quot;$\mu_d$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\mu_g$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{00}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{01}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{10}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{11}</span><span class="s2">$&quot;</span><span class="p">]</span>
@@ -549,8 +536,8 @@ Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;prior_draws&#39;: array([[ 0.05011422, -0.05707152,  0.00281103, -0.00548419, -0.00548419,
-          0.93683835]]),
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;prior_draws&#39;: array([[-0.27184395,  0.04654362,  0.63897366,  0.08509082,  0.08509082,
+          0.29657829]]),
  &#39;batchable_context&#39;: None,
  &#39;non_batchable_context&#39;: None}
 </pre></div>
@@ -766,32 +753,10 @@ First 3 rows of first 2 participants in first data set:
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/9c546af252472e4fa7e98c48227e7165175442272f91635c93380bf0b74ea322.png" src="../_images/9c546af252472e4fa7e98c48227e7165175442272f91635c93380bf0b74ea322.png" />
+<img alt="../_images/f204fa5f1d5f022f39f2ebce67c9bc699640351ef9e2e5bbd5b32c81e7c05695.png" src="../_images/f204fa5f1d5f022f39f2ebce67c9bc699640351ef9e2e5bbd5b32c81e7c05695.png" />
 </div>
 </div>
-<p>If we plot our 1000 participants over all data sets, we see simular patterns as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>. Let’s additionally take a look at the patterns within the simulated data sets to ensure that the variability between data sets is reasonable:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 3b. Plot rates for each data set</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">constrained_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-<span class="n">subfigs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">subfigures</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">palette</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">rates_1htm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">subfig</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subfigs</span><span class="p">):</span>
-    <span class="n">subfig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">model_names</span><span class="p">[</span><span class="n">row</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
-    <span class="n">axs</span> <span class="o">=</span> <span class="n">subfig</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    <span class="p">[</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axs</span><span class="p">]</span>
-    <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="n">palette</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hit Rates&quot;</span><span class="p">)</span>
-    <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="n">palette</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;False Alarm Rates&quot;</span><span class="p">)</span>
-<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../_images/6b0ea1051fc75fab57e718661350538caef581e3b0f8b0a9bd7da0b53deb3c3d.png" src="../_images/6b0ea1051fc75fab57e718661350538caef581e3b0f8b0a9bd7da0b53deb3c3d.png" />
-</div>
-</div>
-<p>We observe some variability but not completely opposing patterns between our simulated data sets. This matches the expectations that we would have when collecting multiple data sets in the field.</p>
+<p>If we plot our 1000 participants over all data sets, we see simular patterns as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>.</p>
 </section>
 </section>
 <section id="defining-training-validating-the-neural-approximator">
@@ -801,7 +766,10 @@ First 3 rows of first 2 participants in first data set:
 <p>After these adjustments, all subsequent elements of the training and validation process stay the same as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">summary_networks</span><span class="o">.</span><span class="n">HierarchicalNetwork</span><span class="p">([</span><span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(),</span> <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(</span><span class="n">summary_dim</span><span class="o">=</span><span class="mi">64</span><span class="p">)])</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">summary_networks</span><span class="o">.</span><span class="n">HierarchicalNetwork</span><span class="p">([</span>
+    <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(),</span> 
+    <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(</span><span class="n">summary_dim</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<span class="p">])</span>
 <span class="n">inference_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">inference_networks</span><span class="o">.</span><span class="n">PMPNetwork</span><span class="p">(</span><span class="n">num_models</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">amortizer</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">amortizers</span><span class="o">.</span><span class="n">AmortizedModelComparison</span><span class="p">(</span><span class="n">inference_net</span><span class="p">,</span> <span class="n">summary_net</span><span class="p">)</span>
 </pre></div>
@@ -821,24 +789,22 @@ INFO:root:Done.
 </div>
 </div>
 </div>
-<p>Note: Online learning will be a bit slow to due slow data generation, but still worth it due to amortization. :-) In practice, you would train longer than just <span class="math notranslate nohighlight">\(3\)</span> epochs.</p>
+<p>Note: Online learning will be a bit slower than what we observed in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a> due to the slower data generation, but still worth it due to amortization. :-) In practice, you would train longer than just <span class="math notranslate nohighlight">\(5\)</span> epochs and may want to try offline learning as well.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">losses</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">losses</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">diag_plot</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">train_losses</span><span class="o">=</span><span class="n">losses</span><span class="p">,</span> <span class="n">moving_average</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ma_window_fraction</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "13a009c0f1244991a3524e2ad655b6a4", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "47b7dd06131742b2899384454311242b", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "33170bf6d2224b159360cda1ce898776", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">diag_plot</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">train_losses</span><span class="o">=</span><span class="n">losses</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../_images/5351f36859b4dd93a7ad20783bda6203c302f903611ee48b4ede96525d713d50.png" src="../_images/5351f36859b4dd93a7ad20783bda6203c302f903611ee48b4ede96525d713d50.png" />
+<img alt="../_images/d1c5cf0eda69d23f8e314a88de20ececef5ff59ff3430d4a694c6c9aab29bcb0.png" src="../_images/d1c5cf0eda69d23f8e314a88de20ececef5ff59ff3430d4a694c6c9aab29bcb0.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -862,7 +828,7 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/14fc8687d407404682722dc9ef0fa7feafb349737be681c7b3d43a1c8f9d9c95.png" src="../_images/14fc8687d407404682722dc9ef0fa7feafb349737be681c7b3d43a1c8f9d9c95.png" />
+<img alt="../_images/5e8e9a471ba963a30c05fa9f0c52f02237b5d42c28d46be2ed8e367a1bd825b3.png" src="../_images/5e8e9a471ba963a30c05fa9f0c52f02237b5d42c28d46be2ed8e367a1bd825b3.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -872,7 +838,7 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/56e367deec3718a5247e7749d4d1b0a495187a5acad67eba6c6eec857827b6dd.png" src="../_images/56e367deec3718a5247e7749d4d1b0a495187a5acad67eba6c6eec857827b6dd.png" />
+<img alt="../_images/433689966b05ffb1fe75175cb49f132413a0ac5d077e90356809b6315187adfb.png" src="../_images/433689966b05ffb1fe75175cb49f132413a0ac5d077e90356809b6315187adfb.png" />
 </div>
 </div>
 <p>Our neural network quickly learned to discriminate between the two hierarchical models and shows excellent performance when validated on simulated data. The calibration curves look a bit shaky, but the marginal bin histograms tell us that this is due to the majority of the predicted probabilities being close to 0 or 1, leaving the middle (‘uncertain’) bins quite abandonded.</p>
@@ -919,7 +885,7 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/b675e38e6e02c680d3dab96d532d961d4f08a462736a37c12e7a20c7d88c2b93.png" src="../_images/b675e38e6e02c680d3dab96d532d961d4f08a462736a37c12e7a20c7d88c2b93.png" />
+<img alt="../_images/f03a203ffaae34aeee3b6c00137b1bb72444cda5919e5ee77d11781efa7036be.png" src="../_images/f03a203ffaae34aeee3b6c00137b1bb72444cda5919e5ee77d11781efa7036be.png" />
 </div>
 </div>
 <p>As in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, our data set contains many participants with low false alarm rates, which are unlikely under the 1HT model. Let’s see the evidence contained in our simulated data:</p>
@@ -932,7 +898,7 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(2,), dtype=float32, numpy=array([0.00729466, 0.9927053 ], dtype=float32)&gt;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(2,), dtype=float32, numpy=array([0.00586275, 0.9941373 ], dtype=float32)&gt;
 </pre></div>
 </div>
 </div>
@@ -945,7 +911,7 @@ INFO:root:Done.
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(), dtype=float32, numpy=0.007348266&gt;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tf.Tensor: shape=(), dtype=float32, numpy=0.005897322&gt;
 </pre></div>
 </div>
 </div>

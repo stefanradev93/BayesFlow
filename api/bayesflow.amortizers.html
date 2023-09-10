@@ -853,12 +853,12 @@ log(det(Jacobian)), that is a tuple <code class="docutils literal notranslate"><
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.amortizers.AmortizedLikelihood.sample_loop">
 <span class="sig-name descname"><span class="pre">sample_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/amortizers.html#AmortizedLikelihood.sample_loop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.amortizers.AmortizedLikelihood.sample_loop" title="Permalink to this definition">#</a></dt>
-<dd><p>Generates random draws from the surrogate network given a list of dicts with conditonal variables.
+<dd><p>Generates random draws from the surrogate network given a list of dicts with conditional variables.
 Useful when GPU memory is limited or data sets have a different (non-Tensor) structure.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>input_list</strong><span class="classifier">list of dictionaries, each dictionary having the following mandatory keys, if <code class="docutils literal notranslate"><span class="pre">DEFAULT_KEYS</span></code> unchanged:</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">conditions</span></code> - the conditioning variables that the directly passed to the surrogate network</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_list</strong><span class="classifier">list of dictionaries, each dictionary having the following mandatory keys (default):</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">conditions</span></code> - the conditioning variables that the directly passed to the surrogate network</p>
 </dd>
 <dt><strong>n_samples</strong><span class="classifier">int</span></dt><dd><p>The number of posterior draws (samples) to obtain from the approximate posterior</p>
 </dd>

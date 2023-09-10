@@ -455,12 +455,6 @@ document.write(`
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>D:\Anaconda3\envs\TensorFlowDev\lib\site-packages\bayesflow\trainers.py:26: TqdmExperimentalWarning: Using `tqdm.autonotebook.tqdm` in notebook mode. Use `tqdm.tqdm` instead to force console mode (e.g. in jupyter console)
-  from tqdm.autonotebook import tqdm
-</pre></div>
-</div>
-</div>
 </div>
 <section id="introduction">
 <h2><span class="section-number">1.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
@@ -640,7 +634,7 @@ INFO:root:No optional simulation batchable context provided.
 <h2><span class="section-number">1.3. </span>Defining the Neural Approximator<a class="headerlink" href="#defining-the-neural-approximator" title="Permalink to this heading">#</a></h2>
 <section id="summary-network">
 <h3><span class="section-number">1.3.1. </span>Summary Network<a class="headerlink" href="#summary-network" title="Permalink to this heading">#</a></h3>
-<p>Since our likelihood generates data exchangeably, we need to respect the permutation invariance of the data. For that, we will use a <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> which does exactly that. This network will take (at least) 3D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">n_obs,</span> <span class="pre">D)</span></code> and reduce them to 2D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">summary_dim)</span></code>, where <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code> is a hyperparameter to be set by the user (you). Heuristically, this number should not be lower than the number of parameters in a model. Below, we create an invariant network with <code class="docutils literal notranslate"><span class="pre">summary_dim</span> <span class="pre">=</span> <span class="pre">10</span></code>:</p>
+<p>Since our likelihood generates data exchangeably, we need to respect the permutation invariance of the data. For that, we will use a <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> which does exactly that. This network will take (at least) 3D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">n_obs,</span> <span class="pre">D)</span></code> and reduce them to 2D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">summary_dim)</span></code>, where <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code> is a hyperparameter to be set by the user (you). Heuristically, this number should not be lower than the number of parameters in a model. Below, we create a permutation-invariant network with <code class="docutils literal notranslate"><span class="pre">summary_dim</span> <span class="pre">=</span> <span class="pre">10</span></code>:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(</span><span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
@@ -670,7 +664,7 @@ Shape of summary vectors:  (3, 10)
 </section>
 <section id="inference-network">
 <h3><span class="section-number">1.3.2. </span>Inference Network<a class="headerlink" href="#inference-network" title="Permalink to this heading">#</a></h3>
-<p>Next we define the main workhorse of our our framework for amortized posterior inference - the conditional invertible neural network (cINN). The only mandatory hyperparameter for the <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code> is the number of parameters we aim to estimate, in our case <code class="docutils literal notranslate"><span class="pre">num_params</span> <span class="pre">=</span> <span class="pre">4</span></code>. However, we can change some more, for instance set the number of coupling layers <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">3</span></code>, which will make training faster than using the default <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">6</span></code>, but also reduce the expressiveness (performance) of our network. Naturally, we don’t need a lot of expressiveness for our trivial Gaussian model, so we can proceed with <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">3</span></code>.</p>
+<p>Next we define the main workhorse of our our framework for amortized posterior inference - the conditional invertible neural network (cINN). The only mandatory hyperparameter for the <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code> is the number of parameters we aim to estimate, in our case <code class="docutils literal notranslate"><span class="pre">num_params</span> <span class="pre">=</span> <span class="pre">4</span></code>. However, we can change some more, for instance set the number of coupling layers <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">4</span></code>, which will make training a bit faster than using the default <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">6</span></code>, but also reduce the expressiveness (performance) of our network. Naturally, we don’t need a lot of expressiveness for our trivial Gaussian model, so we can proceed with <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">4</span></code>.</p>
 <p>The invertible inference network has the following further hyperparameters:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">num_params</span></code> (mandatory) - The number of model parameters (eq. the dimensionality of the latent space).</p></li>
@@ -690,7 +684,7 @@ Shape of summary vectors:  (3, 10)
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inference_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">InvertibleNetwork</span><span class="p">(</span>
     <span class="n">num_params</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-    <span class="n">num_coupling_layers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">num_coupling_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
     <span class="n">coupling_settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dense_args&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kernel_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span> <span class="s2">&quot;dropout&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
 <span class="p">)</span>
 </pre></div>
@@ -828,8 +822,8 @@ True
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: total: 0 ns
-Wall time: 2.96 ms
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 1.09 ms, sys: 143 µs, total: 1.23 ms
+Wall time: 1.36 ms
 </pre></div>
 </div>
 </div>
@@ -837,36 +831,12 @@ Wall time: 2.96 ms
 <p>We are well below the recommended 2-3 seconds for online training, so that is what we will do. Online training has three mandatory parameters: <code class="docutils literal notranslate"><span class="pre">epochs</span></code>, <code class="docutils literal notranslate"><span class="pre">iterations_per_epoch</span></code>, and <code class="docutils literal notranslate"><span class="pre">batch_size</span></code>. Thus, the total number of simulations that will be performed by a single call (run) will be <code class="docutils literal notranslate"><span class="pre">epochs</span></code> <span class="math notranslate nohighlight">\(\times\)</span> <code class="docutils literal notranslate"><span class="pre">iterations_per_epoch</span></code> <span class="math notranslate nohighlight">\(\times\)</span>  <code class="docutils literal notranslate"><span class="pre">batch_size</span></code>. Moreover, the networks will never experience the same simulation twice, since each batch will contain a new set of simulations.</p>
 <section id="online-training">
 <h3><span class="section-number">1.5.1. </span>Online Training<a class="headerlink" href="#online-training" title="Permalink to this heading">#</a></h3>
-<p>Note how the average loss goes down, along with the learning rate (LR). The latter happens, because BayesFlow uses a cosine decay for the learning rate by default, unless a custom optimizer from <code class="docutils literal notranslate"><span class="pre">tensorflow.optimizers</span></code> is provided. Thus, the learning rate will decrease atuomatically from its default value of <span class="math notranslate nohighlight">\(0.0005\)</span> to <span class="math notranslate nohighlight">\(0\)</span> over the course of the training. We will also use <span class="math notranslate nohighlight">\(200\)</span> simulations for tracking validation error (even though we don’t strictly need to do this for online learning.</p>
+<p>Note how the average loss goes down, along with the learning rate (LR). The latter happens, because BayesFlow uses a cosine decay for the learning rate by default, unless a custom optimizer from <code class="docutils literal notranslate"><span class="pre">tensorflow.optimizers</span></code> is provided. Thus, the learning rate will decrease atuomatically from its default value of <span class="math notranslate nohighlight">\(0.0005\)</span> to <span class="math notranslate nohighlight">\(0\)</span> over the course of the training. We will also use <span class="math notranslate nohighlight">\(200\)</span> simulations for tracking validation error (even though we don’t strictly need to do this for online learning, where the network sees a completely new batch of data in each iteration).</p>
 <p>Depending on your hardware, this training should take between <span class="math notranslate nohighlight">\(30\)</span> seconds and <span class="math notranslate nohighlight">\(5\)</span> minutes. Note, that for actual applications, we will train considerably longer than <span class="math notranslate nohighlight">\(5\)</span> epochs.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
-<span class="n">history</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">validation_sims</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Generated 200 simulations for validation.
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ba67a6b2b45c4b168e4d7c4a495b81f7", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 1, Loss: 0.523
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "da0c17b7bd8d4e89b36be956f2cd5539", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 2, Loss: -1.393
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "cb6adedd0f804ab892b6d7329c1d8c48", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 3, Loss: -1.761
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "35b7e58078a24b94b6b18bc20019837b", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 4, Loss: -1.990
-</pre></div>
-</div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "60a8fe6e683341a8a4e5b7ea007bdf88", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Validation, Epoch: 5, Loss: -2.121
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: total: 3min 22s
-Wall time: 2min 59s
+<span class="n">history</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">validation_sims</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -877,12 +847,12 @@ Wall time: 2min 59s
 <p>We can inspect the evolution of the loss via a utility function <code class="docutils literal notranslate"><span class="pre">plot_losses</span></code>, for which we have imported the <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code> module from <code class="docutils literal notranslate"><span class="pre">BayesFlow</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;train_losses&quot;</span><span class="p">],</span> <span class="n">history</span><span class="p">[</span><span class="s2">&quot;val_losses&quot;</span><span class="p">])</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;train_losses&quot;</span><span class="p">],</span> <span class="n">history</span><span class="p">[</span><span class="s2">&quot;val_losses&quot;</span><span class="p">],</span> <span class="n">moving_average</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/5c3b64844beb7392f6f8111cf339798402a9b58e930b36afcf42d465dee8bb77.png" src="../_images/5c3b64844beb7392f6f8111cf339798402a9b58e930b36afcf42d465dee8bb77.png" />
+<img alt="../_images/e90537870bda84aa04c30c1c9bf731ca1000bb2ceafd7f051b02f55cb2fc3a08.png" src="../_images/e90537870bda84aa04c30c1c9bf731ca1000bb2ceafd7f051b02f55cb2fc3a08.png" />
 </div>
 </div>
 </section>
@@ -914,7 +884,11 @@ Wall time: 2min 59s
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/cbbd3bc1a57dcc93a733a08098a0de1f49a2df75ed83eaa0824fb454fc1654c4.png" src="../_images/cbbd3bc1a57dcc93a733a08098a0de1f49a2df75ed83eaa0824fb454fc1654c4.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/radevs/anaconda3/envs/BayesFlowDev/lib/python3.10/site-packages/seaborn/axisgrid.py:64: UserWarning: The figure layout has changed to tight
+  self.fig.tight_layout(*args, **kwargs)
+</pre></div>
+</div>
+<img alt="../_images/8d04fa0d7c6a162aa431af3befbd2cf504c453c42da2bd93147bc3f021f815c1.png" src="../_images/8d04fa0d7c6a162aa431af3befbd2cf504c453c42da2bd93147bc3f021f815c1.png" />
 </div>
 </div>
 </section>
@@ -940,7 +914,7 @@ Wall time: 2min 59s
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:The ratio of simulations / posterior draws should be &gt; 20 for reliable variance reduction, but your ratio is 5.                    Confidence intervals might be unreliable!
 </pre></div>
 </div>
-<img alt="../_images/2e5917a3ed551e5576ec021c9b93973c490d5bf3d111376b96e7fa92a2f914be.png" src="../_images/2e5917a3ed551e5576ec021c9b93973c490d5bf3d111376b96e7fa92a2f914be.png" />
+<img alt="../_images/ec89e4d06a2b629d2f96cf6d01b2d7b1c0eec17663c4fd31eefc82d996b692cd.png" src="../_images/ec89e4d06a2b629d2f96cf6d01b2d7b1c0eec17663c4fd31eefc82d996b692cd.png" />
 </div>
 </div>
 <p>Note, that the above function compalins about the simulations-to-posterior-samples ratio, which is too low for reasonable density estimation and confidence intervals. Thus, we may want to use the more modern version of SBC which is based on empirical cumulative distribution functions (ECDFs) and does not have a <code class="docutils literal notranslate"><span class="pre">num_bins</span></code> hyperparameter. You can read more about this method at https://arxiv.org/abs/2103.10522.</p>
@@ -951,7 +925,7 @@ Wall time: 2min 59s
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/b4d3f9bcd9af9cbbfb0363a27cb05631b9a7d510c06adf3aea78fed4c7d1df9e.png" src="../_images/b4d3f9bcd9af9cbbfb0363a27cb05631b9a7d510c06adf3aea78fed4c7d1df9e.png" />
+<img alt="../_images/0acec6c9b2ae4a31c36818a80ed1acc71f26065982deecc3973aad7f02b3813b.png" src="../_images/0acec6c9b2ae4a31c36818a80ed1acc71f26065982deecc3973aad7f02b3813b.png" />
 </div>
 </div>
 </section>
@@ -985,7 +959,7 @@ Wall time: 2min 59s
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/8ef74bd0d4f2b471752716dd29077fabe89cfe6da39989fa48adc969a38fb71d.png" src="../_images/8ef74bd0d4f2b471752716dd29077fabe89cfe6da39989fa48adc969a38fb71d.png" />
+<img alt="../_images/44001b2ba97f48fd3230dce3ba8b2fd22be8584f4491c47fc13a44091b56d979.png" src="../_images/44001b2ba97f48fd3230dce3ba8b2fd22be8584f4491c47fc13a44091b56d979.png" />
 </div>
 </div>
 <p>Even better, you might want to inspect the sensitivity of the model in terms of how good some expectation (e.g., the mean) captures the ground truth parameter and how much the posterior shrinks with regard to the prior (i.e., so called posterior contraction). For that, we can compute the prior variance analytically or simply estimate it via Monte Carlo.</p>
@@ -996,7 +970,7 @@ Wall time: 2min 59s
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/28c87475f0dec6988ca84b30383ca7f2c1347baaa4f85cb0c0c8f76e7b019cec.png" src="../_images/28c87475f0dec6988ca84b30383ca7f2c1347baaa4f85cb0c0c8f76e7b019cec.png" />
+<img alt="../_images/5630cc497a241344515e5c3aa6e32903872be6410bc636f6e3f07379d1ac62da.png" src="../_images/5630cc497a241344515e5c3aa6e32903872be6410bc636f6e3f07379d1ac62da.png" />
 </div>
 </div>
 <p>We observe the best case of model adequacy - no bias and large contraction. You can play around with different samples sizes per simulation (i.e., the <code class="docutils literal notranslate"><span class="pre">n_obs</span></code> argument in the likelihood function) and check all diagnostics again. Or, even better, you can try estimating your own models!</p>

@@ -452,12 +452,6 @@ document.write(`
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>C:\Users/Lasse/projects/BayesFlow_dev/BayesFlow\bayesflow\trainers.py:27: TqdmExperimentalWarning: Using `tqdm.autonotebook.tqdm` in notebook mode. Use `tqdm.tqdm` instead to force console mode (e.g. in jupyter console)
-  from tqdm.autonotebook import tqdm
-</pre></div>
-</div>
-</div>
 </div>
 <section id="introduction">
 <h2><span class="section-number">7.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
@@ -537,11 +531,11 @@ x_0 &amp;\sim \textrm{Bernoulli}(p_{01})
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;prior_draws&#39;: array([[0.72507821, 0.43871473],
-        [0.25227661, 0.70368601],
-        [0.63183556, 0.23868609],
-        [0.44525514, 0.15086819],
-        [0.29593877, 0.53031092]]),
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;prior_draws&#39;: array([[0.60567859, 0.21211342],
+        [0.53302919, 0.50565267],
+        [0.30158864, 0.87688014],
+        [0.5178926 , 0.57265337],
+        [0.70948297, 0.88509065]]),
  &#39;batchable_context&#39;: None,
  &#39;non_batchable_context&#39;: None}
 </pre></div>
@@ -551,12 +545,16 @@ x_0 &amp;\sim \textrm{Bernoulli}(p_{01})
 <p>Note, that the prior also returned some other stuff, which allows for more flexible priors (e.g., parametric priors or prior sensitivity analysis). To inspect whether our chosen prior is sensible, we can conduct some prior predictive checks in the parameter space. The simplest one is to simply visualize our prior draws:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">plot_prior2d</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">plot_prior2d</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/17c4834307ee7f66f9946177c92bb6059b4a88c38093e3f1f3567a7860ead2f7.png" src="../_images/17c4834307ee7f66f9946177c92bb6059b4a88c38093e3f1f3567a7860ead2f7.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/radevs/anaconda3/envs/BayesFlowDev/lib/python3.10/site-packages/seaborn/axisgrid.py:64: UserWarning: The figure layout has changed to tight
+  self.fig.tight_layout(*args, **kwargs)
+</pre></div>
+</div>
+<img alt="../_images/c30fff484668539a4853d69f0a12641cc9d72098c2762007943ee642eac7f915.png" src="../_images/c30fff484668539a4853d69f0a12641cc9d72098c2762007943ee642eac7f915.png" />
 </div>
 </div>
 <p>We see that our beta priors symmetrically concentrate the probability mass around .5, but still consider more extreme parameter values possible.</p>
@@ -692,9 +690,9 @@ INFO:root:No optional simulation batchable context provided.
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Shape of data batch: (5, 100, 2)
 First 3 rows in first data set:
-[[1 0]
- [1 0]
- [1 0]]
+[[1 1]
+ [1 1]
+ [1 1]]
 </pre></div>
 </div>
 </div>
@@ -770,7 +768,7 @@ First 3 rows in first data set:
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/5ef71b0e2910754008e04a3499d76190854402d732920f74b5b14fc706069d22.png" src="../_images/5ef71b0e2910754008e04a3499d76190854402d732920f74b5b14fc706069d22.png" />
+<img alt="../_images/ac2c87b28f78dedc532cb1b08e322bd64468b98e57eb03c2ef2e0715bba40954.png" src="../_images/ac2c87b28f78dedc532cb1b08e322bd64468b98e57eb03c2ef2e0715bba40954.png" />
 </div>
 </div>
 <p>Unsurprisingly, we observe similar hit rates for both models, as they assume the same latent processes for old items. Their difference in assumptions concerning new items manifests in the false alarm rates: The symmetric beta prior on the <span class="math notranslate nohighlight">\(g\)</span> parameter directly translates into false alarm rates around ~.5 for the 1HT model. For the 2HT model, the additional recognition stage set before the guessing process lowers the false alarm rate to ~.25.</p>
@@ -820,6 +818,7 @@ First 3 rows in first data set:
 </div>
 <div class="cell_output docutils container">
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Performing a consistency check with provided components...
+2023-09-09 16:48:10.901555: I tensorflow/compiler/xla/stream_executor/cuda/cuda_blas.cc:606] TensorFloat-32 will be used for the matrix multiplication. This will only be logged once.
 INFO:root:Done.
 </pre></div>
 </div>
@@ -842,9 +841,9 @@ _________________________________________________________________
  deep_set (DeepSet)          multiple                  67466     
                                                                  
 =================================================================
-Total params: 76,620
-Trainable params: 76,620
-Non-trainable params: 0
+Total params: 76620 (299.30 KB)
+Trainable params: 76620 (299.30 KB)
+Non-trainable params: 0 (0.00 Byte)
 _________________________________________________________________
 </pre></div>
 </div>
@@ -854,25 +853,24 @@ _________________________________________________________________
 </section>
 <section id="training-phase">
 <h2><span class="section-number">7.4. </span>Training Phase<a class="headerlink" href="#training-phase" title="Permalink to this heading">#</a></h2>
-<p>Our simple simulators are extremly fast, so we can use online training (simulating the data on the fly during training). Here, we use 5 epochs with 500 iterations each and a batch size of 64 simulations. This means that we use <span class="math notranslate nohighlight">\(5 \times 500 \times 64 = 160,000\)</span> unique simulations in total for training our neural network.</p>
+<p>Our simple simulators are extremly fast, so we can use online training (simulating the data on the fly during training). Here, we use 5 epochs with 500 iterations each and a batch size of 64 simulations. This means that we use <span class="math notranslate nohighlight">\(10 \times 500 \times 64 = 320,000\)</span> unique simulations in total for training our neural network. We can do this, because the simulators are trivial to implement and thus very efficient to run. Training should take a couple of seconds to complete.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">losses</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<span class="n">losses</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9032db7068a74ca78da7a91aa176f9b5", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "1fc2ad1e365145059b643d3cfc627ce7", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "944b82f1f012435d8c82a0d7024d48ec", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "2e95afa40824477893450e2c9eae6bfe", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "54a1940348a5476693618ba261724aa9", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <p>Right after training finishes, we can inspect how the loss evolved over the training duration:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">diag_plot</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">train_losses</span><span class="o">=</span><span class="n">losses</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">diag_plot</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">train_losses</span><span class="o">=</span><span class="n">losses</span><span class="p">,</span> <span class="n">moving_average</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/aa2382e562e025cf22700297608c3fe6dd3f653923cf64c3c35ea15a64cdc7f3.png" src="../_images/aa2382e562e025cf22700297608c3fe6dd3f653923cf64c3c35ea15a64cdc7f3.png" />
+<img alt="../_images/ec353b69df7f6e6838d084a9d4346c5478e12a7e3b7e0e52d7c0aa66b8d5b9a3.png" src="../_images/ec353b69df7f6e6838d084a9d4346c5478e12a7e3b7e0e52d7c0aa66b8d5b9a3.png" />
 </div>
 </div>
 <p>We see that the network picked up the important parts of the task very fast and plateaued afterwards, which indicates that we have had more than enough training steps.</p>
@@ -882,7 +880,7 @@ _________________________________________________________________
 <p>The ability of our amortized networks to quickly process thousands of simulated data sets opens up new possibilities for validating our method prior to applying it. Let’s first simulate some data from our models and use the configurator to quickly transform it:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate some validation data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate 1000 validation data sets</span>
 <span class="n">sim_data</span> <span class="o">=</span> <span class="n">generative_models</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
 
 <span class="c1"># Use the configurator to transform the data structure</span>
@@ -909,7 +907,7 @@ _________________________________________________________________
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/54900d03dea098d0f9d6251b5d60768bd8b55cfb37acc793b03f595b85181c95.png" src="../_images/54900d03dea098d0f9d6251b5d60768bd8b55cfb37acc793b03f595b85181c95.png" />
+<img alt="../_images/0c74af233d2fbddf5e982f36fb5a52c203db9cd7e76682290f5c4141b2d94866.png" src="../_images/0c74af233d2fbddf5e982f36fb5a52c203db9cd7e76682290f5c4141b2d94866.png" />
 </div>
 </div>
 <p>We observe a close alignment of the calibration curve to the diagonal without systematic over- or underconfidence. The ECE being close 0 also confirms that our neural approximator produces highly calibrated PMPs.
@@ -921,10 +919,10 @@ We can further inspect our approximator by examing the confusion matrix for our 
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/1f49c5dd9d12e93cf3fdaf63a71e3c084c3523b69714d0663d36b39ad4321122.png" src="../_images/1f49c5dd9d12e93cf3fdaf63a71e3c084c3523b69714d0663d36b39ad4321122.png" />
+<img alt="../_images/d415195dfb6dbaef2b91b6b3cd3bc6e2115b8d6e2635b655bb142d18bef68afa.png" src="../_images/d415195dfb6dbaef2b91b6b3cd3bc6e2115b8d6e2635b655bb142d18bef68afa.png" />
 </div>
 </div>
-<p>We see that in ~75% of simulated data sets the underlying model is correctly detected. By increasing the training duration and/or size of the neural networks, we could check whether our classifier is performing suboptimally or we already reached the upper bound performance that our sparse data allow for. The excellent calibration that we observed before suggests the second option here.</p>
+<p>We see that in ~72% of simulated data sets the underlying model is correctly detected. By increasing the training duration and/or size of the neural networks, we could check whether our classifier is performing suboptimally or we already reached the upper bound performance that our sparse data allow for. The excellent calibration that we observed before suggests the second option here.</p>
 </section>
 <section id="network-application">
 <h2><span class="section-number">7.6. </span>Network Application<a class="headerlink" href="#network-application" title="Permalink to this heading">#</a></h2>
@@ -973,7 +971,7 @@ We can further inspect our approximator by examing the confusion matrix for our 
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.04832352, 0.9516764 ], dtype=float32)
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.04058154, 0.9594184 ], dtype=float32)
 </pre></div>
 </div>
 </div>
@@ -988,7 +986,7 @@ We can further inspect our approximator by examing the confusion matrix for our 
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[0.04832352 0.9516764 ]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[0.04058154 0.9594184 ]
 </pre></div>
 </div>
 </div>
@@ -1002,7 +1000,7 @@ We can further inspect our approximator by examing the confusion matrix for our 
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>19.693855
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>23.641743
 </pre></div>
 </div>
 </div>

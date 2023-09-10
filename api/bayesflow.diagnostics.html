@@ -439,16 +439,16 @@ can be controlled with the <code class="docutils literal notranslate"><span clas
 point and uncertainty estimates:</p>
 <p><a class="reference external" href="https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html">https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html</a></p>
 <p>Important: Posterior aggregates play no special role in Bayesian inference and should only
-be used heuristically. For instanec, in the case of multi-modal posteriors, common point
+be used heuristically. For instance, in the case of multi-modal posteriors, common point
 estimates, such as mean, (geometric) median, or maximum a posteriori (MAP) mean nothing.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>post_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_post_draws, n_params)</span></dt><dd><p>The posterior draws obtained from n_data_sets</p>
 </dd>
 <dt><strong>prior_samples</strong><span class="classifier">np.ndarray of shape (n_data_sets, n_params)</span></dt><dd><p>The prior draws (true parameters) obtained for generating the n_data_sets</p>
 </dd>
-<dt><strong>point_agg</strong><span class="classifier">callable, optional, default: np.median</span></dt><dd><p>The function to apply to the posterior draws to get a point estimate for each marginal.
+<dt><strong>point_agg</strong><span class="classifier">callable, optional, default: <code class="docutils literal notranslate"><span class="pre">np.median</span></code></span></dt><dd><p>The function to apply to the posterior draws to get a point estimate for each marginal.
 The default computes the marginal median for each marginal posterior as a robust
 point estimate.</p>
 </dd>
@@ -465,13 +465,13 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 </dd>
 <dt><strong>metric_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the goodness-of-fit metric (if provided)</p>
 </dd>
-<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
+<dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis tick labels</p>
 </dd>
 <dt><strong>add_corr</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>A flag for adding correlation between true and estimates to the plot</p>
 </dd>
 <dt><strong>add_r2</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>A flag for adding R^2 between true and estimates to the plot</p>
 </dd>
-<dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the true vs. estimated scatter points and errobars</p>
+<dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the true vs. estimated scatter points and error bars</p>
 </dd>
 </dl>
 </dd>
@@ -504,7 +504,7 @@ according to [1].</p>
 <li><p>The definition of posterior contraction is:</p></li>
 </ul>
 <p>post_contraction = 1 - (posterior_variance / prior_variance)</p>
-<p>In other words, the posterior is a proxy for the reduction in ucnertainty gained by
+<p>In other words, the posterior is a proxy for the reduction in uncertainty gained by
 replacing the prior with the posterior. The ideal posterior contraction tends to 1.
 Contraction near zero indicates that the posterior variance is almost identical to
 the prior variance for the particular marginal parameter distribution.</p>
@@ -512,7 +512,7 @@ the prior variance for the particular marginal parameter distribution.</p>
 <p>[1] Schad, D. J., Betancourt, M., &amp; Vasishth, S. (2021).
 Toward a principled Bayesian workflow in cognitive science.
 Psychological methods, 26(1), 103.</p>
-<p>Also available at <a class="reference external" href="https://arxiv.org/abs/1904.12765">https://arxiv.org/abs/1904.12765</a></p>
+<p>Paper also available at <a class="reference external" href="https://arxiv.org/abs/1904.12765">https://arxiv.org/abs/1904.12765</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -530,7 +530,7 @@ Psychological methods, 26(1), 103.</p>
 </dd>
 <dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
 </dd>
-<dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the true vs. estimated scatter points and errobars</p>
+<dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the true vs. estimated scatter points and error bars</p>
 </dd>
 </dl>
 </dd>
@@ -758,7 +758,7 @@ number of columns in <code class="docutils literal notranslate"><span class="pre
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.diagnostics.plot_prior2d">
 <span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_prior2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_prior2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_prior2d" title="Permalink to this definition">#</a></dt>
-<dd><p>Creates pairplots for a given joint prior.</p>
+<dd><p>Creates pair-plots for a given joint prior.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -770,7 +770,7 @@ number of columns in <code class="docutils literal notranslate"><span class="pre
 </dd>
 <dt><strong>height</strong><span class="classifier">float, optional, default: 2.5</span></dt><dd><p>The height of the pair plot</p>
 </dd>
-<dt><strong>color</strong><span class="classifier">str, optional, defailt</span><span class="classifier">‘#8f2727’</span></dt><dd><p>The color of the plot</p>
+<dt><strong>color</strong><span class="classifier">str, optional, default</span><span class="classifier">‘#8f2727’</span></dt><dd><p>The color of the plot</p>
 </dd>
 <dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Additional keyword arguments passed to the sns.PairGrid constructor</p>
 </dd>
@@ -787,8 +787,8 @@ number of columns in <code class="docutils literal notranslate"><span class="pre
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.diagnostics.plot_latent_space_2d">
 <span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_latent_space_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_latent_space_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_latent_space_2d" title="Permalink to this definition">#</a></dt>
-<dd><p>Creates pairplots for the latent space learned by the inference network. Enables
-visual inspection of the the latent space and whether its structrue corresponds to the
+<dd><p>Creates pair plots for the latent space learned by the inference network. Enables
+visual inspection of the latent space and whether its structure corresponds to the
 one enforced by the optimization criterion.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -797,7 +797,7 @@ one enforced by the optimization criterion.</p>
 </dd>
 <dt><strong>height</strong><span class="classifier">float, optional, default: 2.5</span></dt><dd><p>The height of the pair plot.</p>
 </dd>
-<dt><strong>color</strong><span class="classifier">str, optional, defailt</span><span class="classifier">‘#8f2727’</span></dt><dd><p>The color of the plot</p>
+<dt><strong>color</strong><span class="classifier">str, optional, default</span><span class="classifier">‘#8f2727’</span></dt><dd><p>The color of the plot</p>
 </dd>
 <dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Additional keyword arguments passed to the sns.PairGrid constructor</p>
 </dd>
@@ -899,26 +899,26 @@ e.g., ‘viridis’. Default colormap matches the BayesFlow defaults by ranging 
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>mmd_null: np.ndarray</strong></dt><dd><p>samples from the MMD sampling distribution under the null hypothesis “the model is well-specified”</p>
+<dt><strong>mmd_null</strong><span class="classifier">np.ndarray</span></dt><dd><p>The samples from the MMD sampling distribution under the null hypothesis “the model is well-specified”</p>
 </dd>
-<dt><strong>mmd_observed: float</strong></dt><dd><p>observed MMD value</p>
+<dt><strong>mmd_observed</strong><span class="classifier">float</span></dt><dd><p>The observed MMD value</p>
 </dd>
-<dt><strong>alpha_level: float</strong></dt><dd><p>rejection probability (type I error)</p>
+<dt><strong>alpha_level</strong><span class="classifier">float</span></dt><dd><p>The rejection probability (type I error)</p>
 </dd>
-<dt><strong>null_color: color</strong></dt><dd><p>color for the H0 sampling distribution</p>
+<dt><strong>null_color</strong><span class="classifier">str or tuple</span></dt><dd><p>The color of the H0 sampling distribution</p>
 </dd>
-<dt><strong>observed_color: color</strong></dt><dd><p>color for the observed MMD</p>
+<dt><strong>observed_color</strong><span class="classifier">str or tuple</span></dt><dd><p>The color of the observed MMD</p>
 </dd>
-<dt><strong>alpha_color: color</strong></dt><dd><p>color for the rejection area</p>
+<dt><strong>alpha_color</strong><span class="classifier">str or tuple</span></dt><dd><p>The color of the rejection area</p>
 </dd>
 <dt><strong>truncate_vlines_at_kde: bool</strong></dt><dd><p>true: cut off the vlines at the kde
 false: continue kde lines across the plot</p>
 </dd>
-<dt><strong>xmin: float</strong></dt><dd><p>lower x axis limit</p>
+<dt><strong>xmin</strong><span class="classifier">float</span></dt><dd><p>The lower x-axis limit</p>
 </dd>
-<dt><strong>xmax: float</strong></dt><dd><p>upper x axis limit</p>
+<dt><strong>xmax</strong><span class="classifier">float</span></dt><dd><p>The upper x-axis limit</p>
 </dd>
-<dt><strong>bw_factor: float, default: 1.5</strong></dt><dd><p>bandwidth (aka. smoothing parameter) of the kernel density estimate</p>
+<dt><strong>bw_factor</strong><span class="classifier">float, optional, default: 1.5</span></dt><dd><p>bandwidth (aka. smoothing parameter) of the kernel density estimate</p>
 </dd>
 </dl>
 </dd>

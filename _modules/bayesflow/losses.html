@@ -361,7 +361,6 @@ document.write(`
 <span class="c1"># SOFTWARE.</span>
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorflow_probability</span> <span class="k">as</span> <span class="nn">tfp</span>
 
 <span class="kn">from</span> <span class="nn">bayesflow.computational_utilities</span> <span class="kn">import</span> <span class="n">maximum_mean_discrepancy</span>
 
@@ -404,7 +403,7 @@ document.write(`
 <span class="sd">    z          : tf.Tensor of shape (batch_size, ...)</span>
 <span class="sd">        The (latent transformed) target variables</span>
 <span class="sd">    log_det_J  : tf.Tensor of shape (batch_size, ...)</span>
-<span class="sd">        The logartihm of the Jacobian determinant of the transformation.</span>
+<span class="sd">        The logarithm of the Jacobian determinant of the transformation.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -473,7 +472,7 @@ document.write(`
 <span class="sd">        The kernel function to use for MMD computation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">z_samples</span> <span class="o">=</span> <span class="n">z_dist</span><span class="p">(</span><span class="n">summary_outputs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">z_samples</span> <span class="o">=</span> <span class="n">z_dist</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">summary_outputs</span><span class="p">))</span>
     <span class="n">mmd_loss</span> <span class="o">=</span> <span class="n">maximum_mean_discrepancy</span><span class="p">(</span><span class="n">summary_outputs</span><span class="p">,</span> <span class="n">z_samples</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mmd_loss</span></div>
 
