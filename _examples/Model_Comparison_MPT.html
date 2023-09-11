@@ -853,7 +853,7 @@ _________________________________________________________________
 </section>
 <section id="training-phase">
 <h2><span class="section-number">7.4. </span>Training Phase<a class="headerlink" href="#training-phase" title="Permalink to this heading">#</a></h2>
-<p>Our simple simulators are extremly fast, so we can use online training (simulating the data on the fly during training). Here, we use 5 epochs with 500 iterations each and a batch size of 64 simulations. This means that we use <span class="math notranslate nohighlight">\(10 \times 500 \times 64 = 320,000\)</span> unique simulations in total for training our neural network. We can do this, because the simulators are trivial to implement and thus very efficient to run. Training should take a couple of seconds to complete.</p>
+<p>Our simple simulators are extremly fast, so we can use online training (simulating the data on the fly during training). Here, we use <span class="math notranslate nohighlight">\(10\)</span> epochs with <span class="math notranslate nohighlight">\(500\)</span> iterations each and a batch size of <span class="math notranslate nohighlight">\(64\)</span> simulations. This means that we use <span class="math notranslate nohighlight">\(10 \times 500 \times 64 = 320,000\)</span> unique simulations in total for training our neural network. We can do this because the simulators are trivial to implement and thus very efficient to run. Training should take a couple of seconds to complete.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
@@ -966,7 +966,7 @@ We can further inspect our approximator by examing the confusion matrix for our 
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Way 1: Amortizer with dictionary input</span>
-<span class="n">amortizer</span><span class="o">.</span><span class="n">posterior_probs</span><span class="p">({</span><span class="s2">&quot;summary_conditions&quot;</span> <span class="p">:</span> <span class="n">fake_data</span><span class="p">})[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">amortizer</span><span class="o">.</span><span class="n">posterior_probs</span><span class="p">({</span><span class="s2">&quot;summary_conditions&quot;</span><span class="p">:</span> <span class="n">fake_data</span><span class="p">})[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
