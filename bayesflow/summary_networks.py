@@ -148,6 +148,7 @@ class TimeSeriesTransformer(tf.keras.Model):
 
         # Final output reduces representation into a vector of length summary_dim
         self.output_layer = Dense(summary_dim)
+        self.summary_dim = summary_dim
 
     def call(self, x, **kwargs):
         """Performs the forward pass through the transformer.
@@ -268,6 +269,8 @@ class SetTransformer(tf.keras.Model):
         self.pooler = PoolingWithAttention(
             summary_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm, num_seeds
         )
+
+        self.summary_dim = summary_dim
 
     def call(self, x, **kwargs):
         """Performs the forward pass through the set-transformer.
