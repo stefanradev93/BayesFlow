@@ -98,7 +98,11 @@ def plot_recovery(
         A flag for adding R^2 between true and estimates to the plot
     color             : str, optional, default: '#8f2727'
         The color for the true vs. estimated scatter points and error bars
-
+    xlabel            : str, optional, default: 'Ground truth'
+        The label on the x-axis of the plot
+    ylabel            : str, optional, default: 'Estimated'
+        The label on the y-axis of the plot
+        
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
