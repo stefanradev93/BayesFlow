@@ -103,7 +103,7 @@ the model-amortizer combination on unseen simulations:
 new_sims = trainer.configurator(generative_model(500))
 
 # Obtain 100 posteriors draws per data set instantly
-posterior_draws = amortized_posterior.sample(new_sims, n_samples=250)
+posterior_draws = amortized_posterior.sample(new_sims, n_samples=100)
 
 # Diagnoze calibration
 fig = bf.diagnostics.plot_sbc_histograms(posterior_draws, new_sims['parameters'])
@@ -207,7 +207,7 @@ meta_model = bf.simulation.MultiGenerativeModel([model_m1, model_m2])
 Next, we construct our neural network with a `PMPNetwork` for approximating posterior model probabilities:
 
 ```python
-summary_net = bf.networks.DeepSet()
+summary_net = bf.networks.SetTransformer(input_dim=2)
 probability_net = bf.networks.PMPNetwork(num_models=2)
 amortized_bmc = bf.amortizers.AmortizedModelComparison(probability_net, summary_net)
 ```
