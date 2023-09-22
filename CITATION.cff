@@ -1,0 +1,72 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Radev
+  given-names: Stefan T.
+  orcid: "https://orcid.org/0000-0002-6702-9559"
+- family-names: Schmitt
+  given-names: Marvin
+  orcid: "https://orcid.org/0000-0003-1293-820X"
+- family-names: Schumacher
+  given-names: Lukas
+  orcid: "https://orcid.org/0000-0003-1512-8288"
+- family-names: Elsemüller
+  given-names: Lasse
+  orcid: "https://orcid.org/0000-0003-0368-720X"
+- family-names: Pratz
+  given-names: Valentin
+  orcid: "https://orcid.org/0000-0001-8371-3417"
+- family-names: Schälte
+  given-names: Yannik
+  orcid: "https://orcid.org/0000-0003-1293-820X"
+- family-names: Köthe
+  given-names: Ullrich
+  orcid: "https://orcid.org/0000-0001-6036-1287"
+- family-names: Bürkner
+  given-names: Paul-Christian
+  orcid: "https://orcid.org/0000-0001-5765-8995"
+contact:
+- family-names: Radev
+  given-names: Stefan T.
+  orcid: "https://orcid.org/0000-0002-6702-9559"
+doi: 10.5281/zenodo.8346393
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Radev
+    given-names: Stefan T.
+    orcid: "https://orcid.org/0000-0002-6702-9559"
+  - family-names: Schmitt
+    given-names: Marvin
+    orcid: "https://orcid.org/0000-0003-1293-820X"
+  - family-names: Schumacher
+    given-names: Lukas
+    orcid: "https://orcid.org/0000-0003-1512-8288"
+  - family-names: Elsemüller
+    given-names: Lasse
+    orcid: "https://orcid.org/0000-0003-0368-720X"
+  - family-names: Pratz
+    given-names: Valentin
+    orcid: "https://orcid.org/0000-0001-8371-3417"
+  - family-names: Schälte
+    given-names: Yannik
+    orcid: "https://orcid.org/0000-0003-1293-820X"
+  - family-names: Köthe
+    given-names: Ullrich
+    orcid: "https://orcid.org/0000-0001-6036-1287"
+  - family-names: Bürkner
+    given-names: Paul-Christian
+    orcid: "https://orcid.org/0000-0001-5765-8995"
+  date-published: 2023-09-22
+  doi: 10.21105/joss.05702
+  issn: 2475-9066
+  issue: 89
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 5702
+  title: "BayesFlow: Amortized Bayesian Workflows With Neural Networks"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.05702"
+  volume: 8
+title: "BayesFlow: Amortized Bayesian Workflows With Neural Networks"
