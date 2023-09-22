@@ -198,8 +198,8 @@ class SetTransformer(tf.keras.Model):
         features from an input set using a set of seed vectors (typically one for a single summary) with ``summary_dim``
         output dimensions.
 
-        Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate
-        during training, e.g., setting ``default_lr=1e-5`` in a ``Trainer`` instance.
+        Recommended: When using transformers as summary networks, you may want to use a smaller learning rate
+        during training, e.g., setting ``default_lr=1e-4`` in a ``Trainer`` instance.
 
         Parameters
         ----------
@@ -211,7 +211,7 @@ class SetTransformer(tf.keras.Model):
 
             ``attention_settings=dict(num_heads=4, key_dim=32)``
 
-            You may also want to include dropout regularization in small-to-medium data regimes:
+            You may also want to include stronger dropout regularization in small-to-medium data regimes:
 
             ``attention_settings=dict(num_heads=4, key_dim=32, dropout=0.1)``
 
@@ -235,7 +235,7 @@ class SetTransformer(tf.keras.Model):
             The number of self-attention blocks to use before pooling.
         num_inducing_points  : int or None, optional, default: 32
             The number of inducing points. Should be lower than the smallest set size.
-            If ``None`` selected, a vanilla self-attenion block (SAB) will be used, otherwise
+            If ``None`` selected, a vanilla self-attention block (SAB) will be used, otherwise
             ISAB blocks will be used. For ``num_attention_blocks > 1``, we currently recommend
             always using some number of inducing points.
         num_seeds            : int, optional, default: 1
@@ -355,9 +355,9 @@ class DeepSet(tf.keras.Model):
             num_dense_s1=num_dense_s1,
             num_dense_s2=num_dense_s2,
             num_dense_s3=num_dense_s3,
-            dense_s1_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT if dense_s1_args is None else dense_s1_args,
-            dense_s2_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT if dense_s2_args is None else dense_s2_args,
-            dense_s3_args=defaults.DEFAULT_SETTING_DENSE_INVARIANT if dense_s3_args is None else dense_s3_args,
+            dense_s1_args=defaults.DEFAULT_SETTING_DENSE_DEEP_SET if dense_s1_args is None else dense_s1_args,
+            dense_s2_args=defaults.DEFAULT_SETTING_DENSE_DEEP_SET if dense_s2_args is None else dense_s2_args,
+            dense_s3_args=defaults.DEFAULT_SETTING_DENSE_DEEP_SET if dense_s3_args is None else dense_s3_args,
             pooling_fun=pooling_fun,
         )
 
@@ -369,7 +369,7 @@ class DeepSet(tf.keras.Model):
         self.out_layer = Dense(summary_dim, activation="linear")
         self.summary_dim = summary_dim
 
-    def call(self, x):
+    def call(self, x, **kwargs):
         """Performs the forward pass of a learnable deep invariant transformation consisting of
         a sequence of equivariant transforms followed by an invariant transform.
 
@@ -385,10 +385,10 @@ class DeepSet(tf.keras.Model):
         """
 
         # Pass through series of augmented equivariant transforms
-        out_equiv = self.equiv_layers(x)
+        out_equiv = self.equiv_layers(x, **kwargs)
 
         # Pass through final invariant layer
-        out = self.out_layer(self.inv(out_equiv))
+        out = self.out_layer(self.inv(out_equiv, **kwargs), **kwargs)
 
         return out
 
@@ -443,7 +443,7 @@ class SequenceNetwork(tf.keras.Model):
         conv_settings   : dict or None, optional, default: None
             The arguments passed to the `MultiConv1D` internal networks. If `None`,
             defaults will be used from `default_settings`. If a dictionary is provided,
-            it should contain the followin keys:
+            it should contain the following keys:
             - layer_args      (dict) : arguments for `tf.keras.layers.Conv1D` without kernel_size
             - min_kernel_size (int)  : the minimum kernel size (>= 1)
             - max_kernel_size (int)  : the maximum kernel size
@@ -508,8 +508,8 @@ class SplitNetwork(tf.keras.Model):
     of data to provide an individual network for each split of the data.
     """
 
-    def __init__(self, num_splits, split_data_configurator, network_type=InvariantNetwork, network_kwargs={}, **kwargs):
-        """Creates a composite network of `num_splits` sub-networks of type `network_type`, each with configuration
+    def __init__(self, num_splits, split_data_configurator, network_type=DeepSet, network_kwargs={}, **kwargs):
+        """Creates a composite network of `num_splits` subnetworks of type `network_type`, each with configuration
         specified by `meta`.
 
         Parameters
@@ -535,7 +535,7 @@ class SplitNetwork(tf.keras.Model):
             indicating which rows belong to the split `i`.
         network_type            : callable, optional, default: `InvariantNetowk`
             Type of neural network to use.
-        meta                    : dict, optional, default: {}
+        network_kwargs          : dict, optional, default: {}
             A dictionary containing the configuration for the networks.
         **kwargs
             Optional keyword arguments to be passed to the `tf.keras.Model` superclass.
@@ -547,7 +547,7 @@ class SplitNetwork(tf.keras.Model):
         self.split_data_configurator = split_data_configurator
         self.networks = [network_type(**network_kwargs) for _ in range(num_splits)]
 
-    def call(self, x):
+    def call(self, x, **kwargs):
         """Performs a forward pass through the subnetworks and concatenates their output.
 
         Parameters
@@ -561,7 +561,7 @@ class SplitNetwork(tf.keras.Model):
             Output of shape (batch_size, out_dim)
         """
 
-        out = [self.networks[i](self.split_data_configurator(i, x)) for i in range(self.num_splits)]
+        out = [self.networks[i](self.split_data_configurator(i, x), **kwargs) for i in range(self.num_splits)]
         out = tf.concat(out, axis=-1)
         return out
 
@@ -602,7 +602,7 @@ class HierarchicalNetwork(tf.keras.Model):
 
         Parameters
         ----------
-        data       : tf.Tensor of shape (batch_size, ..., data_dim)
+        x          : tf.Tensor of shape (batch_size, ..., data_dim)
             Example, hierarchical data sets with two levels:
             (batch_size, D, L, x_dim) -> reduces to (batch_size, out_dim).
         return_all : boolean, optional, default: False

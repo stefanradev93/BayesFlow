@@ -2,6 +2,7 @@
 
 [![Actions Status](https://github.com/stefanradev93/bayesflow/workflows/Tests/badge.svg)](https://github.com/stefanradev93/bayesflow/actions)
 [![Licence](https://img.shields.io/github/license/stefanradev93/BayesFlow)](https://img.shields.io/github/license/stefanradev93/BayesFlow)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.05702/status.svg)](https://doi.org/10.21105/joss.05702)
 
 Welcome to our BayesFlow library for efficient simulation-based Bayesian workflows! Our library enables users to create specialized neural networks for *amortized Bayesian inference*, which repay users with rapid statistical inference after a potentially longer simulation-based training phase.
 
@@ -76,7 +77,7 @@ generative_model = bf.simulation.GenerativeModel(prior, simulator)
 Next, we create our BayesFlow setup consisting of a summary and an inference network:
 
 ```python
-summary_net = bf.networks.DeepSet()
+summary_net = bf.networks.SetTransformer(input_dim=2)
 inference_net = bf.networks.InvertibleNetwork(num_params=2)
 amortized_posterior = bf.amortizers.AmortizedPosterior(inference_net, summary_net)
 ```
@@ -84,43 +85,44 @@ amortized_posterior = bf.amortizers.AmortizedPosterior(inference_net, summary_ne
 Finally, we connect the networks with the generative model via a `Trainer` instance:
 
 ```python
-trainer = bf.trainers.Trainer(amortizer=amortized_posterior, generative_model=generative_model, memory=True)
+trainer = bf.trainers.Trainer(amortizer=amortized_posterior, generative_model=generative_model)
 ```
 
 We are now ready to train an amortized posterior approximator. For instance,
 to run online training, we simply call:
 
 ```python
-losses = trainer.train_online(epochs=10, iterations_per_epoch=500, batch_size=32)
+losses = trainer.train_online(epochs=10, iterations_per_epoch=1000, batch_size=32)
 ```
 
-Before inference, we can use simulation-based calibration (SBC,
+Prior to inference, we can use simulation-based calibration (SBC,
 https://arxiv.org/abs/1804.06788) to check the computational faithfulness of
-the model-amortizer combination:
+the model-amortizer combination on unseen simulations:
 
 ```python
-fig = trainer.diagnose_sbc_histograms()
+# Generate 500 new simulated data sets
+new_sims = trainer.configurator(generative_model(500))
+
+# Obtain 100 posteriors draws per data set instantly
+posterior_draws = amortized_posterior.sample(new_sims, n_samples=100)
+
+# Diagnoze calibration
+fig = bf.diagnostics.plot_sbc_histograms(posterior_draws, new_sims['parameters'])
 ```
 
 <img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_sbc.png?raw=true" width=65% height=65%>
 
 The histograms are roughly uniform and lie within the expected range for
 well-calibrated inference algorithms as indicated by the shaded gray areas.
-Accordingly, our amortizer seems to have converged to the intended target.
+Accordingly, our neural approximator seems to have converged to the intended target.
 
-Amortized inference on new (real or simulated) data is then easy and fast.
-For example, we can simulate 200 new data sets and generate 500 posterior draws
-per data set:
+As you can see, amortized inference on new (real or simulated) data is easy and fast.
+We can obtain further 5000 posterior draws per simulated data set and quickly inspect 
+how well the model can recover its parameters across the entire *prior predictive distribution*.
 
-```python
-new_sims = trainer.configurator(generative_model(200))
-posterior_draws = amortized_posterior.sample(new_sims, n_samples=500)
-```
-
-We can then quickly inspect the how well the model can recover its parameters
-across the simulated data sets.
 
 ```python
+posterior_draws = amortized_posterior.sample(new_sims, n_samples=5000)
 fig = bf.diagnostics.plot_recovery(posterior_draws, new_sims['parameters'])
 ```
 
@@ -162,7 +164,7 @@ A modified loss function optimizes the learned summary statistics towards a unit
 Gaussian and reliably detects model misspecification during inference time.
 
 
-<img src="https://github.com/stefanradev93/BayesFlow/blob/master/examples/img/model_misspecification_amortized_sbi.png" width=100% height=100%>
+<img src="https://github.com/stefanradev93/BayesFlow/blob/master/examples/img/model_misspecification_amortized_sbi.png?raw=true" width=100% height=100%>
 
 In order to use this method, you should only provide the `summary_loss_fun` argument
 to the `AmortizedPosterior` instance:
@@ -206,7 +208,7 @@ meta_model = bf.simulation.MultiGenerativeModel([model_m1, model_m2])
 Next, we construct our neural network with a `PMPNetwork` for approximating posterior model probabilities:
 
 ```python
-summary_net = bf.networks.DeepSet()
+summary_net = bf.networks.SetTransformer(input_dim=2)
 probability_net = bf.networks.PMPNetwork(num_models=2)
 amortized_bmc = bf.amortizers.AmortizedModelComparison(probability_net, summary_net)
 ```

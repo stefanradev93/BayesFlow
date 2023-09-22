@@ -51,6 +51,8 @@ def plot_recovery(
     color="#8f2727",
     n_col=None,
     n_row=None,
+    xlabel="Ground truth",
+    ylabel="Estimated",
 ):
     """Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
     The point estimate can be controlled with the ``point_agg`` argument, and the uncertainty estimate
@@ -96,7 +98,11 @@ def plot_recovery(
         A flag for adding R^2 between true and estimates to the plot
     color             : str, optional, default: '#8f2727'
         The color for the true vs. estimated scatter points and error bars
-
+    xlabel            : str, optional, default: 'Ground truth'
+        The label on the x-axis of the plot
+    ylabel            : str, optional, default: 'Estimated'
+        The label on the y-axis of the plot
+        
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
@@ -198,15 +204,15 @@ def plot_recovery(
     # Only add x-labels to the bottom row
     bottom_row = axarr if n_row == 1 else axarr[0] if n_col == 1 else axarr[n_row - 1, :]
     for _ax in bottom_row:
-        _ax.set_xlabel("Ground truth", fontsize=label_fontsize)
+        _ax.set_xlabel(xlabel, fontsize=label_fontsize)
 
     # Only add y-labels to right left-most row
     if n_row == 1:  # if there is only one row, the ax array is 1D
-        axarr[0].set_ylabel("Estimated", fontsize=label_fontsize)
+        axarr[0].set_ylabel(ylabel, fontsize=label_fontsize)
     # If there is more than one row, the ax array is 2D
     else:
         for _ax in axarr[:, 0]:
-            _ax.set_ylabel("Estimated", fontsize=label_fontsize)
+            _ax.set_ylabel(ylabel, fontsize=label_fontsize)
 
     # Remove unused axes entirely
     for _ax in axarr_it[n_params:]:

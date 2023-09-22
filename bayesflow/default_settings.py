@@ -73,7 +73,7 @@ DEFAULT_SETTING_MULTI_CONV = {
 }
 
 
-DEFAULT_SETTING_DENSE_INVARIANT = {"units": 64, "activation": "relu", "kernel_initializer": "glorot_uniform"}
+DEFAULT_SETTING_DENSE_DEEP_SET = {"units": 64, "activation": "relu", "kernel_initializer": "glorot_uniform"}
 
 
 DEFAULT_SETTING_DENSE_RECT = {"units": 256, "activation": "swish", "kernel_initializer": "glorot_uniform"}
