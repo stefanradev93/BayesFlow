@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
 
   
-  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -34,8 +34,9 @@
     <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
+  <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
 
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
@@ -62,6 +63,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -299,10 +309,10 @@
 
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script>
@@ -310,7 +320,7 @@ document.write(`
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
   </button>
 `);
 </script>
@@ -540,8 +550,8 @@ document.write(`
 <span class="sd">        features from an input set using a set of seed vectors (typically one for a single summary) with ``summary_dim``</span>
 <span class="sd">        output dimensions.</span>
 
-<span class="sd">        Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate</span>
-<span class="sd">        during training, e.g., setting ``default_lr=1e-5`` in a ``Trainer`` instance.</span>
+<span class="sd">        Recommended: When using transformers as summary networks, you may want to use a smaller learning rate</span>
+<span class="sd">        during training, e.g., setting ``default_lr=1e-4`` in a ``Trainer`` instance.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -553,7 +563,7 @@ document.write(`
 
 <span class="sd">            ``attention_settings=dict(num_heads=4, key_dim=32)``</span>
 
-<span class="sd">            You may also want to include dropout regularization in small-to-medium data regimes:</span>
+<span class="sd">            You may also want to include stronger dropout regularization in small-to-medium data regimes:</span>
 
 <span class="sd">            ``attention_settings=dict(num_heads=4, key_dim=32, dropout=0.1)``</span>
 
@@ -577,7 +587,7 @@ document.write(`
 <span class="sd">            The number of self-attention blocks to use before pooling.</span>
 <span class="sd">        num_inducing_points  : int or None, optional, default: 32</span>
 <span class="sd">            The number of inducing points. Should be lower than the smallest set size.</span>
-<span class="sd">            If ``None`` selected, a vanilla self-attenion block (SAB) will be used, otherwise</span>
+<span class="sd">            If ``None`` selected, a vanilla self-attention block (SAB) will be used, otherwise</span>
 <span class="sd">            ISAB blocks will be used. For ``num_attention_blocks &gt; 1``, we currently recommend</span>
 <span class="sd">            always using some number of inducing points.</span>
 <span class="sd">        num_seeds            : int, optional, default: 1</span>
@@ -697,9 +707,9 @@ document.write(`
             <span class="n">num_dense_s1</span><span class="o">=</span><span class="n">num_dense_s1</span><span class="p">,</span>
             <span class="n">num_dense_s2</span><span class="o">=</span><span class="n">num_dense_s2</span><span class="p">,</span>
             <span class="n">num_dense_s3</span><span class="o">=</span><span class="n">num_dense_s3</span><span class="p">,</span>
-            <span class="n">dense_s1_args</span><span class="o">=</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_INVARIANT</span> <span class="k">if</span> <span class="n">dense_s1_args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dense_s1_args</span><span class="p">,</span>
-            <span class="n">dense_s2_args</span><span class="o">=</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_INVARIANT</span> <span class="k">if</span> <span class="n">dense_s2_args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dense_s2_args</span><span class="p">,</span>
-            <span class="n">dense_s3_args</span><span class="o">=</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_INVARIANT</span> <span class="k">if</span> <span class="n">dense_s3_args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dense_s3_args</span><span class="p">,</span>
+            <span class="n">dense_s1_args</span><span class="o">=</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_DEEP_SET</span> <span class="k">if</span> <span class="n">dense_s1_args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dense_s1_args</span><span class="p">,</span>
+            <span class="n">dense_s2_args</span><span class="o">=</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_DEEP_SET</span> <span class="k">if</span> <span class="n">dense_s2_args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dense_s2_args</span><span class="p">,</span>
+            <span class="n">dense_s3_args</span><span class="o">=</span><span class="n">defaults</span><span class="o">.</span><span class="n">DEFAULT_SETTING_DENSE_DEEP_SET</span> <span class="k">if</span> <span class="n">dense_s3_args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dense_s3_args</span><span class="p">,</span>
             <span class="n">pooling_fun</span><span class="o">=</span><span class="n">pooling_fun</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -711,7 +721,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">summary_dim</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summary_dim</span> <span class="o">=</span> <span class="n">summary_dim</span></div>
 
-<div class="viewcode-block" id="DeepSet.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.DeepSet.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="DeepSet.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.DeepSet.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs the forward pass of a learnable deep invariant transformation consisting of</span>
 <span class="sd">        a sequence of equivariant transforms followed by an invariant transform.</span>
 
@@ -727,10 +737,10 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Pass through series of augmented equivariant transforms</span>
-        <span class="n">out_equiv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">equiv_layers</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">out_equiv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">equiv_layers</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Pass through final invariant layer</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">out_equiv</span><span class="p">))</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">out_equiv</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">out</span></div></div>
 
@@ -785,7 +795,7 @@ document.write(`
 <span class="sd">        conv_settings   : dict or None, optional, default: None</span>
 <span class="sd">            The arguments passed to the `MultiConv1D` internal networks. If `None`,</span>
 <span class="sd">            defaults will be used from `default_settings`. If a dictionary is provided,</span>
-<span class="sd">            it should contain the followin keys:</span>
+<span class="sd">            it should contain the following keys:</span>
 <span class="sd">            - layer_args      (dict) : arguments for `tf.keras.layers.Conv1D` without kernel_size</span>
 <span class="sd">            - min_kernel_size (int)  : the minimum kernel size (&gt;= 1)</span>
 <span class="sd">            - max_kernel_size (int)  : the maximum kernel size</span>
@@ -850,8 +860,8 @@ document.write(`
 <span class="sd">    of data to provide an individual network for each split of the data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SplitNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SplitNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_splits</span><span class="p">,</span> <span class="n">split_data_configurator</span><span class="p">,</span> <span class="n">network_type</span><span class="o">=</span><span class="n">InvariantNetwork</span><span class="p">,</span> <span class="n">network_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a composite network of `num_splits` sub-networks of type `network_type`, each with configuration</span>
+<div class="viewcode-block" id="SplitNetwork.__init__"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SplitNetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_splits</span><span class="p">,</span> <span class="n">split_data_configurator</span><span class="p">,</span> <span class="n">network_type</span><span class="o">=</span><span class="n">DeepSet</span><span class="p">,</span> <span class="n">network_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a composite network of `num_splits` subnetworks of type `network_type`, each with configuration</span>
 <span class="sd">        specified by `meta`.</span>
 
 <span class="sd">        Parameters</span>
@@ -877,7 +887,7 @@ document.write(`
 <span class="sd">            indicating which rows belong to the split `i`.</span>
 <span class="sd">        network_type            : callable, optional, default: `InvariantNetowk`</span>
 <span class="sd">            Type of neural network to use.</span>
-<span class="sd">        meta                    : dict, optional, default: {}</span>
+<span class="sd">        network_kwargs          : dict, optional, default: {}</span>
 <span class="sd">            A dictionary containing the configuration for the networks.</span>
 <span class="sd">        **kwargs</span>
 <span class="sd">            Optional keyword arguments to be passed to the `tf.keras.Model` superclass.</span>
@@ -889,7 +899,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">split_data_configurator</span> <span class="o">=</span> <span class="n">split_data_configurator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">networks</span> <span class="o">=</span> <span class="p">[</span><span class="n">network_type</span><span class="p">(</span><span class="o">**</span><span class="n">network_kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_splits</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="SplitNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SplitNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="SplitNetwork.call"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SplitNetwork.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through the subnetworks and concatenates their output.</span>
 
 <span class="sd">        Parameters</span>
@@ -903,7 +913,7 @@ document.write(`
 <span class="sd">            Output of shape (batch_size, out_dim)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">split_data_configurator</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_splits</span><span class="p">)]</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">split_data_configurator</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_splits</span><span class="p">)]</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span></div></div>
 
@@ -944,7 +954,7 @@ document.write(`
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        data       : tf.Tensor of shape (batch_size, ..., data_dim)</span>
+<span class="sd">        x          : tf.Tensor of shape (batch_size, ..., data_dim)</span>
 <span class="sd">            Example, hierarchical data sets with two levels:</span>
 <span class="sd">            (batch_size, D, L, x_dim) -&gt; reduces to (batch_size, out_dim).</span>
 <span class="sd">        return_all : boolean, optional, default: False</span>
@@ -975,16 +985,12 @@ document.write(`
 
               
               
-                <footer class="bd-footer-article">
-                  
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
 <div class="prev-next-area">
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -1029,8 +1035,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
 
   <footer class="bd-footer">
   </footer>

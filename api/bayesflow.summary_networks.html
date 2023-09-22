@@ -19,12 +19,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -35,8 +35,9 @@
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -65,6 +66,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -367,10 +377,10 @@
 
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script>
@@ -378,7 +388,7 @@ document.write(`
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
   </button>
 `);
 </script>
@@ -561,8 +571,8 @@ In International conference on machine learning (pp. 3744-3753). PMLR.</p>
 <dd><p>Creates a set transformer architecture according to [1] which will extract permutation-invariant
 features from an input set using a set of seed vectors (typically one for a single summary) with <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code>
 output dimensions.</p>
-<p>Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate
-during training, e.g., setting <code class="docutils literal notranslate"><span class="pre">default_lr=1e-5</span></code> in a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.</p>
+<p>Recommended: When using transformers as summary networks, you may want to use a smaller learning rate
+during training, e.g., setting <code class="docutils literal notranslate"><span class="pre">default_lr=1e-4</span></code> in a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
@@ -571,7 +581,7 @@ during training, e.g., setting <code class="docutils literal notranslate"><span 
 <dt><strong>attention_settings</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>A dictionary which will be unpacked as the arguments for the <code class="docutils literal notranslate"><span class="pre">MultiHeadAttention</span></code> layer
 For instance, to use an attention block with 4 heads and key dimension 32, you can do:</p>
 <p><code class="docutils literal notranslate"><span class="pre">attention_settings=dict(num_heads=4,</span> <span class="pre">key_dim=32)</span></code></p>
-<p>You may also want to include dropout regularization in small-to-medium data regimes:</p>
+<p>You may also want to include stronger dropout regularization in small-to-medium data regimes:</p>
 <p><code class="docutils literal notranslate"><span class="pre">attention_settings=dict(num_heads=4,</span> <span class="pre">key_dim=32,</span> <span class="pre">dropout=0.1)</span></code></p>
 <p>For more details and arguments, see:
 <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention">https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention</a></p>
@@ -591,7 +601,7 @@ For instance, to use hidden layers with 32 units and a relu activation, you can 
 <dt><strong>num_attention_blocks</strong><span class="classifier">int, optional, default: 2</span></dt><dd><p>The number of self-attention blocks to use before pooling.</p>
 </dd>
 <dt><strong>num_inducing_points</strong><span class="classifier">int or None, optional, default: 32</span></dt><dd><p>The number of inducing points. Should be lower than the smallest set size.
-If <code class="docutils literal notranslate"><span class="pre">None</span></code> selected, a vanilla self-attenion block (SAB) will be used, otherwise
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> selected, a vanilla self-attention block (SAB) will be used, otherwise
 ISAB blocks will be used. For <code class="docutils literal notranslate"><span class="pre">num_attention_blocks</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>, we currently recommend
 always using some number of inducing points.</p>
 </dd>
@@ -679,7 +689,7 @@ neural network can be passed for learnable pooling.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.summary_networks.DeepSet.call">
-<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#DeepSet.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.DeepSet.call" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#DeepSet.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.DeepSet.call" title="Permalink to this definition">#</a></dt>
 <dd><p>Performs the forward pass of a learnable deep invariant transformation consisting of
 a sequence of equivariant transforms followed by an invariant transform.</p>
 <dl class="field-list simple">
@@ -773,7 +783,7 @@ of learning vector representations from multivariate time series data.</p>
 </dd>
 <dt><strong>conv_settings</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The arguments passed to the <cite>MultiConv1D</cite> internal networks. If <cite>None</cite>,
 defaults will be used from <cite>default_settings</cite>. If a dictionary is provided,
-it should contain the followin keys:
+it should contain the following keys:
 - layer_args      (dict) : arguments for <cite>tf.keras.layers.Conv1D</cite> without kernel_size
 - min_kernel_size (int)  : the minimum kernel size (&gt;= 1)
 - max_kernel_size (int)  : the maximum kernel size</p>
@@ -832,7 +842,7 @@ of learning vector representations from multivariate time series data.</p>
 </dd>
 <dt><strong>conv_settings</strong><span class="classifier">dict or None, optional, default: None</span></dt><dd><p>The arguments passed to the <cite>MultiConv1D</cite> internal networks. If <cite>None</cite>,
 defaults will be used from <cite>default_settings</cite>. If a dictionary is provided,
-it should contain the followin keys:
+it should contain the following keys:
 - layer_args      (dict) : arguments for <cite>tf.keras.layers.Conv1D</cite> without kernel_size
 - min_kernel_size (int)  : the minimum kernel size (&gt;= 1)
 - max_kernel_size (int)  : the maximum kernel size</p>
@@ -857,8 +867,8 @@ or unidirectional (forward in time). Defaults to False, but may increase perform
 of data to provide an individual network for each split of the data.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.summary_networks.SplitNetwork.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_splits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_data_configurator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_type=&lt;class</span> <span class="pre">'bayesflow.summary_networks.InvariantNetwork'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_kwargs={}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SplitNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SplitNetwork.__init__" title="Permalink to this definition">#</a></dt>
-<dd><p>Creates a composite network of <cite>num_splits</cite> sub-networks of type <cite>network_type</cite>, each with configuration
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_splits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_data_configurator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_type=&lt;class</span> <span class="pre">'bayesflow.summary_networks.DeepSet'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_kwargs={}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SplitNetwork.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SplitNetwork.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a composite network of <cite>num_splits</cite> subnetworks of type <cite>network_type</cite>, each with configuration
 specified by <cite>meta</cite>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -885,7 +895,7 @@ indicating which rows belong to the split <cite>i</cite>.</p>
 </dd>
 <dt><strong>network_type</strong><span class="classifier">callable, optional, default: <cite>InvariantNetowk</cite></span></dt><dd><p>Type of neural network to use.</p>
 </dd>
-<dt><strong>meta</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>A dictionary containing the configuration for the networks.</p>
+<dt><strong>network_kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>A dictionary containing the configuration for the networks.</p>
 </dd>
 <dt><strong>**kwargs</strong></dt><dd><p>Optional keyword arguments to be passed to the <cite>tf.keras.Model</cite> superclass.</p>
 </dd>
@@ -896,7 +906,7 @@ indicating which rows belong to the split <cite>i</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.summary_networks.SplitNetwork.call">
-<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SplitNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SplitNetwork.call" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SplitNetwork.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SplitNetwork.call" title="Permalink to this definition">#</a></dt>
 <dd><p>Performs a forward pass through the subnetworks and concatenates their output.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -953,7 +963,7 @@ transforming the nested input into learned summary statistics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>data</strong><span class="classifier">tf.Tensor of shape (batch_size, …, data_dim)</span></dt><dd><p>Example, hierarchical data sets with two levels:
+<dt><strong>x</strong><span class="classifier">tf.Tensor of shape (batch_size, …, data_dim)</span></dt><dd><p>Example, hierarchical data sets with two levels:
 (batch_size, D, L, x_dim) -&gt; reduces to (batch_size, out_dim).</p>
 </dd>
 <dt><strong>return_all</strong><span class="classifier">boolean, optional, default: False</span></dt><dd><p>Whether to return all intermediate outputs (True) or just
@@ -981,11 +991,10 @@ of <code class="docutils literal notranslate"><span class="pre">len(outputs)</sp
 
               
               
-                <footer class="bd-footer-article">
-                  
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="bayesflow.simulation.html"
@@ -1005,10 +1014,7 @@ of <code class="docutils literal notranslate"><span class="pre">len(outputs)</sp
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -1104,8 +1110,8 @@ of <code class="docutils literal notranslate"><span class="pre">len(outputs)</sp
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
 
   <footer class="bd-footer">
   </footer>
