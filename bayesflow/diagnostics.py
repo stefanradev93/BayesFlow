@@ -1144,8 +1144,8 @@ def plot_confusion_matrix(
     title_fontsize=18,
     value_fontsize=10,
     tick_fontsize=12,
-    xtick_rotation=0,
-    ytick_rotation=90,
+    xtick_rotation=None,
+    ytick_rotation=None,
     normalize=True,
     cmap=None,
     title=True,
@@ -1170,9 +1170,9 @@ def plot_confusion_matrix(
         The font size of the text annotations and the colorbar tick labels.
     tick_fontsize  : int, optional, default: 12
         The font size of the axis label and model name texts.
-    xtick_rotation: int, optional, default: 0
+    xtick_rotation: int, optional, default: None
         Rotation of x-axis tick labels (helps with long model names).
-    ytick_rotation: int, optional, default: 90
+    ytick_rotation: int, optional, default: None
         Rotation of y-axis tick labels (helps with long model names).
     normalize      : bool, optional, default: True
         A flag for normalization of the confusion matrix.
@@ -1233,7 +1233,6 @@ def plot_confusion_matrix(
     if title:
         ax.set_title("Confusion Matrix", fontsize=title_fontsize)
     return fig
-
 
 def plot_mmd_hypothesis_test(
     mmd_null,
