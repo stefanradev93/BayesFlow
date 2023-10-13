@@ -1206,9 +1206,9 @@ def plot_confusion_matrix(
 
     # Initialize figure
     fig, ax = plt.subplots(1, 1, figsize=fig_size)
-
-    im = ax.imshow(cm, interpolation="nearest", cmap=cmap, vmin=0.0, vmax=1.0)
+    im = ax.imshow(cm, interpolation="nearest", cmap=cmap)
     cbar = ax.figure.colorbar(im, ax=ax, shrink=0.75)
+
     cbar.ax.tick_params(labelsize=value_fontsize)
 
     ax.set(xticks=np.arange(cm.shape[1]), yticks=np.arange(cm.shape[0]))
