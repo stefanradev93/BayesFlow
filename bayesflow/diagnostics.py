@@ -1140,7 +1140,9 @@ def plot_confusion_matrix(
     pred_models,
     model_names=None,
     fig_size=(5, 5),
+    label_fontsize=16,
     title_fontsize=18,
+    value_fontsize=10,
     tick_fontsize=12,
     xtick_rotation=None,
     ytick_rotation=None,
@@ -1160,8 +1162,12 @@ def plot_confusion_matrix(
         The model names for nice plot titles. Inferred if None.
     fig_size       : tuple or None, optional, default: (5, 5)
         The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
+    label_fontsize    : int, optional, default: 16
+        The font size of the y-label and y-label texts
     title_fontsize : int, optional, default: 18
         The font size of the title text.
+    value_fontsize  : int, optional, default: 10
+        The font size of the text annotations and the colorbar tick labels.
     tick_fontsize  : int, optional, default: 12
         The font size of the axis label and model name texts.
     xtick_rotation: int, optional, default: None
@@ -1200,9 +1206,10 @@ def plot_confusion_matrix(
 
     # Initialize figure
     fig, ax = plt.subplots(1, 1, figsize=fig_size)
-
     im = ax.imshow(cm, interpolation="nearest", cmap=cmap)
-    ax.figure.colorbar(im, ax=ax, shrink=0.7)
+    cbar = ax.figure.colorbar(im, ax=ax, shrink=0.75)
+
+    cbar.ax.tick_params(labelsize=value_fontsize)
 
     ax.set(xticks=np.arange(cm.shape[1]), yticks=np.arange(cm.shape[0]))
     ax.set_xticklabels(model_names, fontsize=tick_fontsize)
@@ -1211,8 +1218,8 @@ def plot_confusion_matrix(
     ax.set_yticklabels(model_names, fontsize=tick_fontsize)
     if ytick_rotation:
         plt.yticks(rotation=ytick_rotation)
-    ax.set_xlabel("Predicted model", fontsize=tick_fontsize)
-    ax.set_ylabel("True model", fontsize=tick_fontsize)
+    ax.set_xlabel("Predicted model", fontsize=label_fontsize)
+    ax.set_ylabel("True model", fontsize=label_fontsize)
 
     # Loop over data dimensions and create text annotations
     fmt = ".2f" if normalize else "d"
@@ -1220,12 +1227,11 @@ def plot_confusion_matrix(
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
             ax.text(
-                j, i, format(cm[i, j], fmt), ha="center", va="center", color="white" if cm[i, j] > thresh else "black"
+                j, i, format(cm[i, j], fmt), fontsize=value_fontsize, ha="center", va="center", color="white" if cm[i, j] > thresh else "black"
             )
     if title:
         ax.set_title("Confusion Matrix", fontsize=title_fontsize)
     return fig
-
 
 def plot_mmd_hypothesis_test(
     mmd_null,
