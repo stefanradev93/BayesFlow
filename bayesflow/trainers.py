@@ -34,7 +34,7 @@ from bayesflow.amortizers import (
 )
 from bayesflow.computational_utilities import maximum_mean_discrepancy
 from bayesflow.configuration import *
-from bayesflow.default_settings import DEFAULT_KEYS, OPTIMIZER_DEFAULTS
+from bayesflow.default_settings import DEFAULT_KEYS, OPTIMIZER_DEFAULTS, TQDM_MININTERVAL
 from bayesflow.diagnostics import plot_latent_space_2d, plot_sbc_histograms
 from bayesflow.exceptions import ArgumentError, SimulationError
 from bayesflow.helper_classes import (
@@ -432,7 +432,7 @@ class Trainer:
 
         # Loop through training epochs
         for ep in range(1, epochs + 1):
-            with tqdm(total=iterations_per_epoch, desc=f"Training epoch {ep}") as p_bar:
+            with tqdm(total=iterations_per_epoch, desc=f"Training epoch {ep}", mininterval=TQDM_MININTERVAL) as p_bar:
                 for it in range(1, iterations_per_epoch + 1):
                     # Perform one training step and obtain current loss value
                     loss = self._train_step(batch_size, update_step=_backprop_step, **kwargs)
@@ -450,7 +450,7 @@ class Trainer:
                     disp_str = format_loss_string(ep, it, loss, avg_dict, lr=lr)
 
                     # Update progress bar
-                    p_bar.set_postfix_str(disp_str)
+                    p_bar.set_postfix_str(disp_str, refresh=False)
                     p_bar.update(1)
 
             # Store and compute validation loss, if specified
@@ -558,7 +558,9 @@ class Trainer:
 
         # Loop through epochs
         for ep in range(1, epochs + 1):
-            with tqdm(total=data_set.num_batches, desc="Training epoch {}".format(ep)) as p_bar:
+            with tqdm(
+                total=data_set.num_batches, desc="Training epoch {}".format(ep), mininterval=TQDM_MININTERVAL
+            ) as p_bar:
                 # Loop through dataset
                 for bi, forward_dict in enumerate(data_set, start=1):
                     # Perform one training step and obtain current loss value
@@ -578,7 +580,7 @@ class Trainer:
                     disp_str = format_loss_string(ep, bi, loss, avg_dict, lr=lr, it_str="Batch")
 
                     # Update progress
-                    p_bar.set_postfix_str(disp_str)
+                    p_bar.set_postfix_str(disp_str, refresh=False)
                     p_bar.update(1)
 
             # Store and compute validation loss, if specified
@@ -731,7 +733,7 @@ class Trainer:
                     f"Loading a simulation file resulted in a {type(epoch_data)}. Must be a dictionary or a list!"
                 )
 
-            with tqdm(total=len(index_list), desc=f"Training epoch {ep}") as p_bar:
+            with tqdm(total=len(index_list), desc=f"Training epoch {ep}", mininterval=TQDM_MININTERVAL) as p_bar:
                 for it, index in enumerate(index_list, start=1):
                     # Perform one training step and obtain current loss value
                     input_dict = self.configurator(epoch_data[index])
@@ -756,7 +758,7 @@ class Trainer:
                     disp_str = format_loss_string(ep, it, loss, avg_dict, lr=lr)
 
                     # Update progress bar
-                    p_bar.set_postfix_str(disp_str)
+                    p_bar.set_postfix_str(disp_str, refresh=False)
                     p_bar.update(1)
 
             # Store after each epoch, if specified
@@ -873,7 +875,7 @@ class Trainer:
 
         # Loop through epochs
         for ep in range(1, epochs + 1):
-            with tqdm(total=iterations_per_epoch, desc=f"Training epoch {ep}") as p_bar:
+            with tqdm(total=iterations_per_epoch, desc=f"Training epoch {ep}", mininterval=TQDM_MININTERVAL) as p_bar:
                 for it in range(1, iterations_per_epoch + 1):
                     # Simulate a batch of data and store into buffer
                     input_dict = self._forward_inference(
@@ -900,7 +902,7 @@ class Trainer:
                     disp_str = format_loss_string(ep, it, loss, avg_dict, lr=lr)
 
                     # Update progress bar
-                    p_bar.set_postfix_str(disp_str)
+                    p_bar.set_postfix_str(disp_str, refresh=False)
                     p_bar.update(1)
 
             # Store and compute validation loss, if specified
@@ -1099,7 +1101,7 @@ class Trainer:
         num_reference = reference_summary.shape[0]
 
         mmd_null_samples = np.empty(num_null_samples, dtype=np.float32)
-        for i in tqdm(range(num_null_samples)):
+        for i in tqdm(range(num_null_samples), mininterval=TQDM_MININTERVAL):
             if bootstrap:
                 bootstrap_idx = np.random.randint(0, num_reference, size=num_observed)
                 simulated_summary = tf.gather(reference_summary, bootstrap_idx, axis=0)
