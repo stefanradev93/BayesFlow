@@ -29,7 +29,7 @@ from tqdm.autonotebook import tqdm
 
 logging.basicConfig()
 
-from bayesflow.default_settings import DEFAULT_KEYS
+from bayesflow.default_settings import DEFAULT_KEYS, TQDM_MININTERVAL
 from bayesflow.diagnostics import plot_prior2d
 from bayesflow.exceptions import ConfigurationError
 
@@ -1109,7 +1109,9 @@ class GenerativeModel:
         # Generate the presimulation files
         file_counter = extend_from
         for i in range(total_files):
-            with tqdm(total=batches_per_file, desc=f"Batches generated for file {i+1}") as p_bar:
+            with tqdm(
+                total=batches_per_file, desc=f"Batches generated for file {i+1}", mininterval=TQDM_MININTERVAL
+            ) as p_bar:
                 file_list = [{} for _ in range(batches_per_file)]
                 for k in range(batches_per_file):
                     file_list[k] = self.__call__(batch_size=batch_size)
