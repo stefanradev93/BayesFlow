@@ -162,7 +162,7 @@ class EarlyStopper:
     def __init__(self, patience=5, tolerance=0.05):
         """
 
-        patience          : int, optional, default: 4
+        patience          : int, optional, default: 5
             How many successive times the tolerance value is reached before triggering
             an early stopping recommendation.
         tolerance         : float, optional, default: 0.05
@@ -769,7 +769,7 @@ class MemoryReplayBuffer:
 
         Parameters
         ----------
-        capacity_in_batches : int, optional, default: 50
+        capacity_in_batches : int, optional, default: 500
             The capacity of the buffer in batches of simulations. Could potentially grow
             very large, so make sure you pick a reasonable number!
         """

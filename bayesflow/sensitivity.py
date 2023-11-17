@@ -53,11 +53,11 @@ def misspecification_experiment(
     second_config_dict  : dict
         Configuration for the second misspecification factor
         fields: name (str), values (1D np.ndarray)
-    error_function      : callable, default: bayesflow.computational_utilities.aggregated_rmse
+    error_function      : callable, default: bayesflow.computational_utilities.aggregated_error
         A callable that computes an error metric on the approximate posterior samples
     n_posterior_samples : int, optional, default: 500
         Number of samples from the approximate posterior per data set
-    n_sim               : int, optional, default: 100
+    n_sim               : int, optional, default: 200
         Number of simulated data sets per configuration
     configurator        : callable or None, optional, default: None
         An optional configurator for the misspecified simulations.

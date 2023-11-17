@@ -26,7 +26,7 @@ from bayesflow.exceptions import ConfigurationError
 
 
 class DefaultJointConfigurator:
-    """Fallback class for a generic configrator for joint posterior and likelihood approximation."""
+    """Fallback class for a generic configurator for joint posterior and likelihood approximation."""
 
     def __init__(self, default_float_type=np.float32):
         self.posterior_config = DefaultPosteriorConfigurator(default_float_type=default_float_type)

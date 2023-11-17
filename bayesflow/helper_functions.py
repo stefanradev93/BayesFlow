@@ -165,7 +165,7 @@ def backprop_step(input_dict, amortizer, optimizer, **kwargs):
     Parameters
     ----------
     input_dict  : dict
-        The configured output of the genrative model
+        The configured output of the generative model
     amortizer   : tf.keras.Model
         The custom amortizer. Needs to implement a compute_loss method.
     optimizer   : tf.keras.optimizers.Optimizer
