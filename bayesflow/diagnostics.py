@@ -84,9 +84,9 @@ def plot_recovery(
         The parameter names for nice plot titles. Inferred if None
     fig_size          : tuple or None, optional, default : None
         The figure size passed to the matplotlib constructor. Inferred if None.
-    label_fontsize    : int, optional, default: 14
+    label_fontsize    : int, optional, default: 16
         The font size of the y-label text
-    title_fontsize    : int, optional, default: 16
+    title_fontsize    : int, optional, default: 18
         The font size of the title text
     metric_fontsize   : int, optional, default: 16
         The font size of the goodness-of-fit metric (if provided)
@@ -114,7 +114,7 @@ def plot_recovery(
     Raises
     ------
     ShapeError
-        If there is a deviation form the expected shapes of ``post_samples`` and ``prior_samples``.
+        If there is a deviation from the expected shapes of ``post_samples`` and ``prior_samples``.
     """
 
     # Sanity check
@@ -252,12 +252,12 @@ def plot_z_score_contraction(
 
     post_contraction = 1 - (posterior_variance / prior_variance)
 
-    In other words, the posterior is a proxy for the reduction in uncertainty gained by
+    In other words, the posterior contraction is a proxy for the reduction in uncertainty gained by
     replacing the prior with the posterior. The ideal posterior contraction tends to 1.
     Contraction near zero indicates that the posterior variance is almost identical to
     the prior variance for the particular marginal parameter distribution.
 
-    Note: Means and variances will be estimated vie their sample-based estimators.
+    Note: Means and variances will be estimated via their sample-based estimators.
 
     [1] Schad, D. J., Betancourt, M., & Vasishth, S. (2021).
     Toward a principled Bayesian workflow in cognitive science.
@@ -275,9 +275,9 @@ def plot_z_score_contraction(
         The parameter names for nice plot titles. Inferred if None
     fig_size          : tuple or None, optional, default : None
         The figure size passed to the matplotlib constructor. Inferred if None.
-    label_fontsize    : int, optional, default: 14
+    label_fontsize    : int, optional, default: 16
         The font size of the y-label text
-    title_fontsize    : int, optional, default: 16
+    title_fontsize    : int, optional, default: 18
         The font size of the title text
     tick_fontsize     : int, optional, default: 12
         The font size of the axis ticklabels
@@ -295,7 +295,7 @@ def plot_z_score_contraction(
     Raises
     ------
     ShapeError
-        If there is a deviation form the expected shapes of ``post_samples`` and ``prior_samples``.
+        If there is a deviation from the expected shapes of ``post_samples`` and ``prior_samples``.
     """
 
     # Sanity check for shape integrity
@@ -421,7 +421,7 @@ def plot_sbc_ecdf(
         The font size of the y-label and y-label texts
     legend_fontsize   : int, optional, default: 14
         The font size of the legend text
-    title_fontsize    : int, optional, default: 16
+    title_fontsize    : int, optional, default: 18
         The font size of the title text. Only relevant if `stacked=False`
     tick_fontsize     : int, optional, default: 12
         The font size of the axis ticklabels
@@ -587,11 +587,11 @@ def plot_sbc_histograms(
         The figure size passed to the matplotlib constructor. Inferred if None
     num_bins          : int, optional, default: 10
         The number of bins to use for each marginal histogram
-    binomial_interval : float in (0, 1), optional, default: 0.95
+    binomial_interval : float in (0, 1), optional, default: 0.99
         The width of the confidence interval for the binomial distribution
-    label_fontsize    : int, optional, default: 14
+    label_fontsize    : int, optional, default: 16
         The font size of the y-label text
-    title_fontsize    : int, optional, default: 16
+    title_fontsize    : int, optional, default: 18
         The font size of the title text
     tick_fontsize     : int, optional, default: 12
         The font size of the axis ticklabels
@@ -1077,7 +1077,7 @@ def plot_calibration_curves(
         The font size of the y-label and y-label texts
     legend_fontsize   : int, optional, default: 14
         The font size of the legend text (ECE value)
-    title_fontsize    : int, optional, default: 16
+    title_fontsize    : int, optional, default: 18
         The font size of the title text. Only relevant if `stacked=False`
     tick_fontsize     : int, optional, default: 12
         The font size of the axis ticklabels
@@ -1296,20 +1296,20 @@ def plot_mmd_hypothesis_test(
         The samples from the MMD sampling distribution under the null hypothesis "the model is well-specified"
     mmd_observed   : float
         The observed MMD value
-    alpha_level    : float
+    alpha_level    : float, optional, default: 0.05
         The rejection probability (type I error)
-    null_color     : str or tuple
+    null_color     : str or tuple, optional, default: (0.16407, 0.020171, 0.577478)
         The color of the H0 sampling distribution
-    observed_color : str or tuple
+    observed_color : str or tuple, optional, default: "red"
         The color of the observed MMD
-    alpha_color    : str or tuple
+    alpha_color    : str or tuple, optional, default: "orange"
         The color of the rejection area
-    truncate_vlines_at_kde: bool
+    truncate_vlines_at_kde: bool, optional, default: False
         true: cut off the vlines at the kde
         false: continue kde lines across the plot
-    xmin           : float
+    xmin           : float, optional, default: None
         The lower x-axis limit
-    xmax           : float
+    xmax           : float, optional, default: None
         The upper x-axis limit
     bw_factor      : float, optional, default: 1.5
         bandwidth (aka. smoothing parameter) of the kernel density estimate

@@ -51,7 +51,7 @@ def posterior_calibration_error(
         The random draws from the approximate posteriors over ``num_datasets``
     prior_samples      : np.ndarray of shape (num_datasets, num_params)
         The corresponding ground-truth values sampled from the prior
-    alpha_resolution   : int, optional, default: 100
+    alpha_resolution   : int, optional, default: 20
         The number of credibility intervals (CIs) to consider
     aggregator_fun     : callable or None, optional, default: np.median
         The function used to aggregate the marginal calibration errors.
@@ -233,7 +233,7 @@ def mmd_kernel_unbiased(x, y, kernel):
     Returns
     -------
     loss   : tf.Tensor of shape (,)
-        The statistically unbiaserd squared maximum mean discrepancy (MMD) value.
+        The statistically unbiased squared maximum mean discrepancy (MMD) value.
     """
 
     m, n = x.shape[0], y.shape[0]
