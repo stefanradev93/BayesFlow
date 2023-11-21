@@ -116,6 +116,8 @@ class TimeSeriesTransformer(tf.keras.Model):
         template_dim         : int, optional, default: 64
             Only used if ``template_type`` in ['lstm', 'gru']. The number of hidden
             units (equiv. output dimensions) of the recurrent network.
+            When using ``bidirectional=True``, the output dimensions of the template
+            will be double the template_dim size, so consider reducing it in half.
         **kwargs             : dict, optional, default: {}
             Optional keyword arguments passed to the __init__() method of tf.keras.Model
         """
