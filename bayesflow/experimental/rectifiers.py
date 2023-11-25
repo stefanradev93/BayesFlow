@@ -178,19 +178,23 @@ class RectifiedDistribution(tf.keras.Model):
         self.loss_fun = self._determine_loss(loss_fun)
         self.summary_loss = self._determine_summary_loss(summary_loss_fun)
 
-    def call(self, input_dict, return_summary=False, num_eval_points=32, **kwargs):
+    def call(self, input_dict, return_summary=False, num_eval_points=1, **kwargs):
         """Performs a forward pass through the summary and drift network given an input dictionary.
 
         Parameters
         ----------
-        input_dict     : dict
+        input_dict      : dict
             Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
             ``targets``            - the latent model parameters over which a condition density is learned
             ``summary_conditions`` - the conditioning variables (including data) that are first passed through a summary network
             ``direct_conditions``  - the conditioning variables that the directly passed to the inference network
-        return_summary : bool, optional, default: False
+        return_summary  : bool, optional, default: False
             A flag which determines whether the learnable data summaries (representations) are returned or not.
-        **kwargs       : dict, optional, default: {}
+        num_eval_points : int, optional, default: 1
+            The number of time points for evaluating the noisy estimator. Values larger than the default 1
+            may reduce the variance of the estimator, but may lead to increased memory demands, since an
+            additional dimension is added at axis 1 of all tensors.
+        **kwargs        : dict, optional, default: {}
             Additional keyword arguments passed to the networks
             For instance, ``kwargs={'training': True}`` is passed automatically during training.
 
@@ -215,13 +219,15 @@ class RectifiedDistribution(tf.keras.Model):
         # Sample latent variables
         latent_vars = self.latent_dist.sample(batch_size)
 
-        # Do a little trick for less noisy estimator
-        target_vars = tf.stack([target_vars] * num_eval_points, axis=1)
-        latent_vars = tf.stack([latent_vars] * num_eval_points, axis=1)
-        full_cond = tf.stack([full_cond] * num_eval_points, axis=1)
-
-        # Sample time
-        time = tf.random.uniform((batch_size, num_eval_points, 1))
+        # Do a little trick for less noisy estimator, if evals > 1
+        if num_eval_points > 1:
+            target_vars = tf.stack([target_vars] * num_eval_points, axis=1)
+            latent_vars = tf.stack([latent_vars] * num_eval_points, axis=1)
+            full_cond = tf.stack([full_cond] * num_eval_points, axis=1)
+            # Sample time
+            time = tf.random.uniform((batch_size, num_eval_points, 1))
+        else:
+            time = tf.random.uniform((batch_size, 1))
 
         # Compute drift
         net_out = self.drift_net(target_vars, latent_vars, time, full_cond, **kwargs)
