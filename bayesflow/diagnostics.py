@@ -53,6 +53,7 @@ def plot_recovery(
     n_row=None,
     xlabel="Ground truth",
     ylabel="Estimated",
+    **kwargs
 ):
     """Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
     The point estimate can be controlled with the ``point_agg`` argument, and the uncertainty estimate
@@ -106,6 +107,9 @@ def plot_recovery(
         The label on the x-axis of the plot
     ylabel            : str, optional, default: 'Estimated'
         The label on the y-axis of the plot
+    **kwargs          : optional
+        Additional keyword arguments passed to ax.errorbar or ax.scatter.
+        Example: `rasterized=True` to reduce PDF file size with many dots
         
     Returns
     -------
@@ -156,9 +160,9 @@ def plot_recovery(
 
         # Add scatter and error bars
         if uncertainty_agg is not None:
-            _ = ax.errorbar(prior_samples[:, i], est[:, i], yerr=u[:, i], fmt="o", alpha=0.5, color=color)
+            _ = ax.errorbar(prior_samples[:, i], est[:, i], yerr=u[:, i], fmt="o", alpha=0.5, color=color, **kwargs)
         else:
-            _ = ax.scatter(prior_samples[:, i], est[:, i], alpha=0.5, color=color)
+            _ = ax.scatter(prior_samples[:, i], est[:, i], alpha=0.5, color=color, **kwargs)
 
         # Make plots quadratic to avoid visual illusions
         lower = min(prior_samples[:, i].min(), est[:, i].min())
