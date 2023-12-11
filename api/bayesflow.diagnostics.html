@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
@@ -19,12 +19,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -35,14 +35,11 @@
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
@@ -50,7 +47,7 @@
     <script src="../_static/design-tabs.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/bayesflow.diagnostics';</script>
     <link rel="canonical" href="https://www.bayesflow.org/api/bayesflow.diagnostics.html" />
-    <link rel="shortcut icon" href="../_static/bayesflow_hex.ico"/>
+    <link rel="icon" href="../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -128,9 +125,11 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
+  
   
   
   
@@ -140,8 +139,8 @@
       
     
     
-    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="BayesFlow: Amortized Bayesian Inference - Home"/>
+    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="BayesFlow: Amortized Bayesian Inference - Home"/>`);</script>
   
   
 </a></div>
@@ -375,6 +374,7 @@
 </button>
 
 
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -384,6 +384,7 @@ document.write(`
   </button>
 `);
 </script>
+
 
 <script>
 document.write(`
@@ -441,7 +442,7 @@ document.write(`
 <span id="bayesflow-diagnostics-module"></span><h1>bayesflow.diagnostics module<a class="headerlink" href="#module-bayesflow.diagnostics" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.diagnostics.plot_recovery">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_recovery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_agg=&lt;function</span> <span class="pre">median&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainty_agg=&lt;function</span> <span class="pre">median_abs_deviation&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize=16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize=18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_fontsize=16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize=12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_corr=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_r2=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color='#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_col=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_row=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel='Ground</span> <span class="pre">truth'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel='Estimated'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_recovery"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_recovery" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_recovery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_agg=&lt;function</span> <span class="pre">median&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainty_agg=&lt;function</span> <span class="pre">median_abs_deviation&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize=16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize=18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_fontsize=16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize=12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_corr=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_r2=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color='#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_col=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_row=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel='Ground</span> <span class="pre">truth'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel='Estimated'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_recovery"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_recovery" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
 The point estimate can be controlled with the <code class="docutils literal notranslate"><span class="pre">point_agg</span></code> argument, and the uncertainty estimate
 can be controlled with the <code class="docutils literal notranslate"><span class="pre">uncertainty_agg</span></code> argument.</p>
@@ -469,9 +470,9 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 </dd>
 <dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default</span><span class="classifier">None</span></dt><dd><p>The figure size passed to the matplotlib constructor. Inferred if None.</p>
 </dd>
-<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the y-label text</p>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the y-label text</p>
 </dd>
-<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text</p>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 18</span></dt><dd><p>The font size of the title text</p>
 </dd>
 <dt><strong>metric_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the goodness-of-fit metric (if provided)</p>
 </dd>
@@ -483,9 +484,16 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 </dd>
 <dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the true vs. estimated scatter points and error bars</p>
 </dd>
+<dt><strong>n_row</strong><span class="classifier">int, optional, default: None</span></dt><dd><p>The number of rows for the subplots. Dynamically determined if None.</p>
+</dd>
+<dt><strong>n_col</strong><span class="classifier">int, optional, default: None</span></dt><dd><p>The number of columns for the subplots. Dynamically determined if None.</p>
+</dd>
 <dt><strong>xlabel</strong><span class="classifier">str, optional, default: ‘Ground truth’</span></dt><dd><p>The label on the x-axis of the plot</p>
 </dd>
 <dt><strong>ylabel</strong><span class="classifier">str, optional, default: ‘Estimated’</span></dt><dd><p>The label on the y-axis of the plot</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">optional</span></dt><dd><p>Additional keyword arguments passed to ax.errorbar or ax.scatter.
+Example: <cite>rasterized=True</cite> to reduce PDF file size with many dots</p>
 </dd>
 </dl>
 </dd>
@@ -496,7 +504,7 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ShapeError</dt><dd><p>If there is a deviation form the expected shapes of <code class="docutils literal notranslate"><span class="pre">post_samples</span></code> and <code class="docutils literal notranslate"><span class="pre">prior_samples</span></code>.</p>
+<dt>ShapeError</dt><dd><p>If there is a deviation from the expected shapes of <code class="docutils literal notranslate"><span class="pre">post_samples</span></code> and <code class="docutils literal notranslate"><span class="pre">prior_samples</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -518,11 +526,11 @@ according to [1].</p>
 <li><p>The definition of posterior contraction is:</p></li>
 </ul>
 <p>post_contraction = 1 - (posterior_variance / prior_variance)</p>
-<p>In other words, the posterior is a proxy for the reduction in uncertainty gained by
+<p>In other words, the posterior contraction is a proxy for the reduction in uncertainty gained by
 replacing the prior with the posterior. The ideal posterior contraction tends to 1.
 Contraction near zero indicates that the posterior variance is almost identical to
 the prior variance for the particular marginal parameter distribution.</p>
-<p>Note: Means and variances will be estimated vie their sample-based estimators.</p>
+<p>Note: Means and variances will be estimated via their sample-based estimators.</p>
 <p>[1] Schad, D. J., Betancourt, M., &amp; Vasishth, S. (2021).
 Toward a principled Bayesian workflow in cognitive science.
 Psychological methods, 26(1), 103.</p>
@@ -538,13 +546,17 @@ Psychological methods, 26(1), 103.</p>
 </dd>
 <dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default</span><span class="classifier">None</span></dt><dd><p>The figure size passed to the matplotlib constructor. Inferred if None.</p>
 </dd>
-<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the y-label text</p>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the y-label text</p>
 </dd>
-<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text</p>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 18</span></dt><dd><p>The font size of the title text</p>
 </dd>
 <dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
 </dd>
 <dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color for the true vs. estimated scatter points and error bars</p>
+</dd>
+<dt><strong>n_row</strong><span class="classifier">int, optional, default: None</span></dt><dd><p>The number of rows for the subplots. Dynamically determined if None.</p>
+</dd>
+<dt><strong>n_col</strong><span class="classifier">int, optional, default: None</span></dt><dd><p>The number of columns for the subplots. Dynamically determined if None.</p>
 </dd>
 </dl>
 </dd>
@@ -555,7 +567,7 @@ Psychological methods, 26(1), 103.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ShapeError</dt><dd><p>If there is a deviation form the expected shapes of <code class="docutils literal notranslate"><span class="pre">post_samples</span></code> and <code class="docutils literal notranslate"><span class="pre">prior_samples</span></code>.</p>
+<dt>ShapeError</dt><dd><p>If there is a deviation from the expected shapes of <code class="docutils literal notranslate"><span class="pre">post_samples</span></code> and <code class="docutils literal notranslate"><span class="pre">prior_samples</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -564,7 +576,7 @@ Psychological methods, 26(1), 103.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.diagnostics.plot_sbc_ecdf">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_sbc_ecdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank_ecdf_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#a34f4f'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grey'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_sbc_ecdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_sbc_ecdf" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_sbc_ecdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank_ecdf_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#a34f4f'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grey'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_sbc_ecdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_sbc_ecdf" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates the empirical CDFs for each marginal rank distribution and plots it against
 a uniform ECDF. ECDF simultaneous bands are drawn using simulations from the uniform,
 as proposed by [1].</p>
@@ -593,13 +605,17 @@ have its own subplot, similar to the behavior of <cite>plot_sbc_histograms</cite
 </dd>
 <dt><strong>legend_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the legend text</p>
 </dd>
-<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text. Only relevant if <cite>stacked=False</cite></p>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 18</span></dt><dd><p>The font size of the title text. Only relevant if <cite>stacked=False</cite></p>
 </dd>
 <dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
 </dd>
 <dt><strong>rank_ecdf_color</strong><span class="classifier">str, optional, default: ‘#a34f4f’</span></dt><dd><p>The color to use for the rank ECDFs</p>
 </dd>
 <dt><strong>fill_color</strong><span class="classifier">str, optional, default: ‘grey’</span></dt><dd><p>The color of the fill arguments.</p>
+</dd>
+<dt><strong>n_row</strong><span class="classifier">int, optional, default: None</span></dt><dd><p>The number of rows for the subplots. Dynamically determined if None.</p>
+</dd>
+<dt><strong>n_col</strong><span class="classifier">int, optional, default: None</span></dt><dd><p>The number of columns for the subplots. Dynamically determined if None.</p>
 </dd>
 <dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Keyword arguments can be passed to control the behavior of ECDF simultaneous band computation
 through the <code class="docutils literal notranslate"><span class="pre">ecdf_bands_kwargs</span></code> dictionary. See <cite>simultaneous_ecdf_bands</cite> for keyword arguments</p>
@@ -622,7 +638,7 @@ through the <code class="docutils literal notranslate"><span class="pre">ecdf_ba
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.diagnostics.plot_sbc_histograms">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_sbc_histograms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binomial_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#a34f4f'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_sbc_histograms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_sbc_histograms" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_sbc_histograms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binomial_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#a34f4f'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_sbc_histograms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_sbc_histograms" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates and plots publication-ready histograms of rank statistics for simulation-based calibration
 (SBC) checks according to [1].</p>
 <p>Any deviation from uniformity indicates miscalibration and thus poor convergence
@@ -643,15 +659,19 @@ arXiv preprint arXiv:1804.06788.</p>
 </dd>
 <dt><strong>num_bins</strong><span class="classifier">int, optional, default: 10</span></dt><dd><p>The number of bins to use for each marginal histogram</p>
 </dd>
-<dt><strong>binomial_interval</strong><span class="classifier">float in (0, 1), optional, default: 0.95</span></dt><dd><p>The width of the confidence interval for the binomial distribution</p>
+<dt><strong>binomial_interval</strong><span class="classifier">float in (0, 1), optional, default: 0.99</span></dt><dd><p>The width of the confidence interval for the binomial distribution</p>
 </dd>
-<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the y-label text</p>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the y-label text</p>
 </dd>
-<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text</p>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 18</span></dt><dd><p>The font size of the title text</p>
 </dd>
 <dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
 </dd>
 <dt><strong>hist_color</strong><span class="classifier">str, optional, default ‘#a34f4f’</span></dt><dd><p>The color to use for the histogram body</p>
+</dd>
+<dt><strong>n_row</strong><span class="classifier">int, optional, default: None</span></dt><dd><p>The number of rows for the subplots. Dynamically determined if None.</p>
+</dd>
+<dt><strong>n_col</strong><span class="classifier">int, optional, default: None</span></dt><dd><p>The number of columns for the subplots. Dynamically determined if None.</p>
 </dd>
 </dl>
 </dd>
@@ -827,7 +847,7 @@ one enforced by the optimization criterion.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.diagnostics.plot_calibration_curves">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_calibration_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_calibration_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_calibration_curves" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_calibration_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#8f2727'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_calibration_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_calibration_curves" title="Permalink to this definition">#</a></dt>
 <dd><p>Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities
 for a model comparison problem. The marginal histograms inform about the fraction of predictions in each bin.
 Depends on the <code class="docutils literal notranslate"><span class="pre">expected_calibration_error</span></code> function for computing the ECE.</p>
@@ -846,7 +866,7 @@ Depends on the <code class="docutils literal notranslate"><span class="pre">expe
 </dd>
 <dt><strong>legend_fontsize</strong><span class="classifier">int, optional, default: 14</span></dt><dd><p>The font size of the legend text (ECE value)</p>
 </dd>
-<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the title text. Only relevant if <cite>stacked=False</cite></p>
+<dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 18</span></dt><dd><p>The font size of the title text. Only relevant if <cite>stacked=False</cite></p>
 </dd>
 <dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis ticklabels</p>
 </dd>
@@ -855,6 +875,10 @@ Depends on the <code class="docutils literal notranslate"><span class="pre">expe
 <dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: None</span></dt><dd><p>The figure size passed to the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> constructor. Inferred if <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 <dt><strong>color</strong><span class="classifier">str, optional, default: ‘#8f2727’</span></dt><dd><p>The color of the calibration curves</p>
+</dd>
+<dt><strong>n_row</strong><span class="classifier">int, optional, default: None</span></dt><dd><p>The number of rows for the subplots. Dynamically determined if None.</p>
+</dd>
+<dt><strong>n_col</strong><span class="classifier">int, optional, default: None</span></dt><dd><p>The number of columns for the subplots. Dynamically determined if None.</p>
 </dd>
 </dl>
 </dd>
@@ -868,7 +892,7 @@ Depends on the <code class="docutils literal notranslate"><span class="pre">expe
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.diagnostics.plot_confusion_matrix">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_confusion_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xtick_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ytick_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_confusion_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_confusion_matrix" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.diagnostics.</span></span><span class="sig-name descname"><span class="pre">plot_confusion_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xtick_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ytick_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/diagnostics.html#plot_confusion_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.diagnostics.plot_confusion_matrix" title="Permalink to this definition">#</a></dt>
 <dd><p>Plots a confusion matrix for validating a neural network trained for Bayesian model comparison.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -881,7 +905,11 @@ Depends on the <code class="docutils literal notranslate"><span class="pre">expe
 </dd>
 <dt><strong>fig_size</strong><span class="classifier">tuple or None, optional, default: (5, 5)</span></dt><dd><p>The figure size passed to the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> constructor. Inferred if <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
+<dt><strong>label_fontsize</strong><span class="classifier">int, optional, default: 16</span></dt><dd><p>The font size of the y-label and y-label texts</p>
+</dd>
 <dt><strong>title_fontsize</strong><span class="classifier">int, optional, default: 18</span></dt><dd><p>The font size of the title text.</p>
+</dd>
+<dt><strong>value_fontsize</strong><span class="classifier">int, optional, default: 10</span></dt><dd><p>The font size of the text annotations and the colorbar tick labels.</p>
 </dd>
 <dt><strong>tick_fontsize</strong><span class="classifier">int, optional, default: 12</span></dt><dd><p>The font size of the axis label and model name texts.</p>
 </dd>
@@ -917,20 +945,20 @@ e.g., ‘viridis’. Default colormap matches the BayesFlow defaults by ranging 
 </dd>
 <dt><strong>mmd_observed</strong><span class="classifier">float</span></dt><dd><p>The observed MMD value</p>
 </dd>
-<dt><strong>alpha_level</strong><span class="classifier">float</span></dt><dd><p>The rejection probability (type I error)</p>
+<dt><strong>alpha_level</strong><span class="classifier">float, optional, default: 0.05</span></dt><dd><p>The rejection probability (type I error)</p>
 </dd>
-<dt><strong>null_color</strong><span class="classifier">str or tuple</span></dt><dd><p>The color of the H0 sampling distribution</p>
+<dt><strong>null_color</strong><span class="classifier">str or tuple, optional, default: (0.16407, 0.020171, 0.577478)</span></dt><dd><p>The color of the H0 sampling distribution</p>
 </dd>
-<dt><strong>observed_color</strong><span class="classifier">str or tuple</span></dt><dd><p>The color of the observed MMD</p>
+<dt><strong>observed_color</strong><span class="classifier">str or tuple, optional, default: “red”</span></dt><dd><p>The color of the observed MMD</p>
 </dd>
-<dt><strong>alpha_color</strong><span class="classifier">str or tuple</span></dt><dd><p>The color of the rejection area</p>
+<dt><strong>alpha_color</strong><span class="classifier">str or tuple, optional, default: “orange”</span></dt><dd><p>The color of the rejection area</p>
 </dd>
-<dt><strong>truncate_vlines_at_kde: bool</strong></dt><dd><p>true: cut off the vlines at the kde
+<dt><strong>truncate_vlines_at_kde: bool, optional, default: False</strong></dt><dd><p>true: cut off the vlines at the kde
 false: continue kde lines across the plot</p>
 </dd>
-<dt><strong>xmin</strong><span class="classifier">float</span></dt><dd><p>The lower x-axis limit</p>
+<dt><strong>xmin</strong><span class="classifier">float, optional, default: None</span></dt><dd><p>The lower x-axis limit</p>
 </dd>
-<dt><strong>xmax</strong><span class="classifier">float</span></dt><dd><p>The upper x-axis limit</p>
+<dt><strong>xmax</strong><span class="classifier">float, optional, default: None</span></dt><dd><p>The upper x-axis limit</p>
 </dd>
 <dt><strong>bw_factor</strong><span class="classifier">float, optional, default: 1.5</span></dt><dd><p>bandwidth (aka. smoothing parameter) of the kernel density estimate</p>
 </dd>
@@ -955,7 +983,7 @@ false: continue kde lines across the plot</p>
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
     <a class="left-prev"
        href="bayesflow.coupling_networks.html"
@@ -1018,6 +1046,7 @@ false: continue kde lines across the plot</p>
   
   <div class="footer-item">
     
+
   <p class="copyright">
     
       © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
@@ -1044,8 +1073,8 @@ false: continue kde lines across the plot</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
   </footer>

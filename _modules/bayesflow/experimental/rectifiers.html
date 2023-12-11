@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -34,14 +34,11 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
-  <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
@@ -49,7 +46,7 @@
     <script src="../../../_static/design-tabs.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/bayesflow/experimental/rectifiers';</script>
     <link rel="canonical" href="https://www.bayesflow.org/_modules/bayesflow/experimental/rectifiers.html" />
-    <link rel="shortcut icon" href="../../../_static/bayesflow_hex.ico"/>
+    <link rel="icon" href="../../../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../../../about.html" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -125,9 +122,11 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item">
+
   
 
 <a class="navbar-brand logo" href="../../../index.html">
+  
   
   
   
@@ -137,8 +136,8 @@
       
     
     
-    <img src="../../../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../../../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../../../_static/bayesflow_hex.png" class="logo__image only-light" alt="BayesFlow: Amortized Bayesian Inference - Home"/>
+    <script>document.write(`<img src="../../../_static/bayesflow_hex.png" class="logo__image only-dark" alt="BayesFlow: Amortized Bayesian Inference - Home"/>`);</script>
   
   
 </a></div>
@@ -307,6 +306,7 @@
 </button>
 
 
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -316,6 +316,7 @@ document.write(`
   </button>
 `);
 </script>
+
 
 <script>
 document.write(`
@@ -530,19 +531,23 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_fun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_loss</span><span class="p">(</span><span class="n">loss_fun</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summary_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_summary_loss</span><span class="p">(</span><span class="n">summary_loss_fun</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="RectifiedDistribution.call"><a class="viewcode-back" href="../../../api/bayesflow.experimental.rectifiers.html#bayesflow.experimental.rectifiers.RectifiedDistribution.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="n">return_summary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_eval_points</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="RectifiedDistribution.call"><a class="viewcode-back" href="../../../api/bayesflow.experimental.rectifiers.html#bayesflow.experimental.rectifiers.RectifiedDistribution.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="n">return_summary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_eval_points</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass through the summary and drift network given an input dictionary.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        input_dict     : dict</span>
+<span class="sd">        input_dict      : dict</span>
 <span class="sd">            Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:</span>
 <span class="sd">            ``targets``            - the latent model parameters over which a condition density is learned</span>
 <span class="sd">            ``summary_conditions`` - the conditioning variables (including data) that are first passed through a summary network</span>
 <span class="sd">            ``direct_conditions``  - the conditioning variables that the directly passed to the inference network</span>
-<span class="sd">        return_summary : bool, optional, default: False</span>
+<span class="sd">        return_summary  : bool, optional, default: False</span>
 <span class="sd">            A flag which determines whether the learnable data summaries (representations) are returned or not.</span>
-<span class="sd">        **kwargs       : dict, optional, default: {}</span>
+<span class="sd">        num_eval_points : int, optional, default: 1</span>
+<span class="sd">            The number of time points for evaluating the noisy estimator. Values larger than the default 1</span>
+<span class="sd">            may reduce the variance of the estimator, but may lead to increased memory demands, since an</span>
+<span class="sd">            additional dimension is added at axis 1 of all tensors.</span>
+<span class="sd">        **kwargs        : dict, optional, default: {}</span>
 <span class="sd">            Additional keyword arguments passed to the networks</span>
 <span class="sd">            For instance, ``kwargs={&#39;training&#39;: True}`` is passed automatically during training.</span>
 
@@ -567,13 +572,15 @@ document.write(`
         <span class="c1"># Sample latent variables</span>
         <span class="n">latent_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_dist</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
 
-        <span class="c1"># Do a little trick for less noisy estimator</span>
-        <span class="n">target_vars</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">target_vars</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_eval_points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">latent_vars</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">latent_vars</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_eval_points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">full_cond</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">full_cond</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_eval_points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-        <span class="c1"># Sample time</span>
-        <span class="n">time</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">num_eval_points</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># Do a little trick for less noisy estimator, if evals &gt; 1</span>
+        <span class="k">if</span> <span class="n">num_eval_points</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">target_vars</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">target_vars</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_eval_points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">latent_vars</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">latent_vars</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_eval_points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">full_cond</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">full_cond</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_eval_points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># Sample time</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">num_eval_points</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="c1"># Compute drift</span>
         <span class="n">net_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drift_net</span><span class="p">(</span><span class="n">target_vars</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">full_cond</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -785,7 +792,7 @@ document.write(`
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
 </div>
                 </footer>
@@ -806,6 +813,7 @@ document.write(`
   
   <div class="footer-item">
     
+
   <p class="copyright">
     
       © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
@@ -832,8 +840,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
   </footer>

@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../../_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -34,14 +34,11 @@
     <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
-  <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
@@ -49,7 +46,7 @@
     <script src="../../_static/design-tabs.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/bayesflow/trainers';</script>
     <link rel="canonical" href="https://www.bayesflow.org/_modules/bayesflow/trainers.html" />
-    <link rel="shortcut icon" href="../../_static/bayesflow_hex.ico"/>
+    <link rel="icon" href="../../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../../about.html" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -125,9 +122,11 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item">
+
   
 
 <a class="navbar-brand logo" href="../../index.html">
+  
   
   
   
@@ -137,8 +136,8 @@
       
     
     
-    <img src="../../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../../_static/bayesflow_hex.png" class="logo__image only-light" alt="BayesFlow: Amortized Bayesian Inference - Home"/>
+    <script>document.write(`<img src="../../_static/bayesflow_hex.png" class="logo__image only-dark" alt="BayesFlow: Amortized Bayesian Inference - Home"/>`);</script>
   
   
 </a></div>
@@ -307,6 +306,7 @@
 </button>
 
 
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -316,6 +316,7 @@ document.write(`
   </button>
 `);
 </script>
+
 
 <script>
 document.write(`
@@ -386,7 +387,7 @@ document.write(`
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">bayesflow.computational_utilities</span> <span class="kn">import</span> <span class="n">maximum_mean_discrepancy</span>
 <span class="kn">from</span> <span class="nn">bayesflow.configuration</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">bayesflow.default_settings</span> <span class="kn">import</span> <span class="n">DEFAULT_KEYS</span><span class="p">,</span> <span class="n">OPTIMIZER_DEFAULTS</span>
+<span class="kn">from</span> <span class="nn">bayesflow.default_settings</span> <span class="kn">import</span> <span class="n">DEFAULT_KEYS</span><span class="p">,</span> <span class="n">OPTIMIZER_DEFAULTS</span><span class="p">,</span> <span class="n">TQDM_MININTERVAL</span>
 <span class="kn">from</span> <span class="nn">bayesflow.diagnostics</span> <span class="kn">import</span> <span class="n">plot_latent_space_2d</span><span class="p">,</span> <span class="n">plot_sbc_histograms</span>
 <span class="kn">from</span> <span class="nn">bayesflow.exceptions</span> <span class="kn">import</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">SimulationError</span>
 <span class="kn">from</span> <span class="nn">bayesflow.helper_classes</span> <span class="kn">import</span> <span class="p">(</span>
@@ -784,7 +785,7 @@ document.write(`
 
         <span class="c1"># Loop through training epochs</span>
         <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">epochs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">iterations_per_epoch</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Training epoch </span><span class="si">{</span><span class="n">ep</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p_bar</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">iterations_per_epoch</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Training epoch </span><span class="si">{</span><span class="n">ep</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mininterval</span><span class="o">=</span><span class="n">TQDM_MININTERVAL</span><span class="p">)</span> <span class="k">as</span> <span class="n">p_bar</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">iterations_per_epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                     <span class="c1"># Perform one training step and obtain current loss value</span>
                     <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_step</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">update_step</span><span class="o">=</span><span class="n">_backprop_step</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -802,7 +803,7 @@ document.write(`
                     <span class="n">disp_str</span> <span class="o">=</span> <span class="n">format_loss_string</span><span class="p">(</span><span class="n">ep</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">avg_dict</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
 
                     <span class="c1"># Update progress bar</span>
-                    <span class="n">p_bar</span><span class="o">.</span><span class="n">set_postfix_str</span><span class="p">(</span><span class="n">disp_str</span><span class="p">)</span>
+                    <span class="n">p_bar</span><span class="o">.</span><span class="n">set_postfix_str</span><span class="p">(</span><span class="n">disp_str</span><span class="p">,</span> <span class="n">refresh</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                     <span class="n">p_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># Store and compute validation loss, if specified</span>
@@ -910,7 +911,9 @@ document.write(`
 
         <span class="c1"># Loop through epochs</span>
         <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">epochs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">data_set</span><span class="o">.</span><span class="n">num_batches</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Training epoch </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ep</span><span class="p">))</span> <span class="k">as</span> <span class="n">p_bar</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span>
+                <span class="n">total</span><span class="o">=</span><span class="n">data_set</span><span class="o">.</span><span class="n">num_batches</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Training epoch </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ep</span><span class="p">),</span> <span class="n">mininterval</span><span class="o">=</span><span class="n">TQDM_MININTERVAL</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">p_bar</span><span class="p">:</span>
                 <span class="c1"># Loop through dataset</span>
                 <span class="k">for</span> <span class="n">bi</span><span class="p">,</span> <span class="n">forward_dict</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_set</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
                     <span class="c1"># Perform one training step and obtain current loss value</span>
@@ -930,7 +933,7 @@ document.write(`
                     <span class="n">disp_str</span> <span class="o">=</span> <span class="n">format_loss_string</span><span class="p">(</span><span class="n">ep</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">avg_dict</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">,</span> <span class="n">it_str</span><span class="o">=</span><span class="s2">&quot;Batch&quot;</span><span class="p">)</span>
 
                     <span class="c1"># Update progress</span>
-                    <span class="n">p_bar</span><span class="o">.</span><span class="n">set_postfix_str</span><span class="p">(</span><span class="n">disp_str</span><span class="p">)</span>
+                    <span class="n">p_bar</span><span class="o">.</span><span class="n">set_postfix_str</span><span class="p">(</span><span class="n">disp_str</span><span class="p">,</span> <span class="n">refresh</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                     <span class="n">p_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># Store and compute validation loss, if specified</span>
@@ -1083,7 +1086,7 @@ document.write(`
                     <span class="sa">f</span><span class="s2">&quot;Loading a simulation file resulted in a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">epoch_data</span><span class="p">)</span><span class="si">}</span><span class="s2">. Must be a dictionary or a list!&quot;</span>
                 <span class="p">)</span>
 
-            <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">index_list</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Training epoch </span><span class="si">{</span><span class="n">ep</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p_bar</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">index_list</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Training epoch </span><span class="si">{</span><span class="n">ep</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mininterval</span><span class="o">=</span><span class="n">TQDM_MININTERVAL</span><span class="p">)</span> <span class="k">as</span> <span class="n">p_bar</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index_list</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
                     <span class="c1"># Perform one training step and obtain current loss value</span>
                     <span class="n">input_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurator</span><span class="p">(</span><span class="n">epoch_data</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
@@ -1108,7 +1111,7 @@ document.write(`
                     <span class="n">disp_str</span> <span class="o">=</span> <span class="n">format_loss_string</span><span class="p">(</span><span class="n">ep</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">avg_dict</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
 
                     <span class="c1"># Update progress bar</span>
-                    <span class="n">p_bar</span><span class="o">.</span><span class="n">set_postfix_str</span><span class="p">(</span><span class="n">disp_str</span><span class="p">)</span>
+                    <span class="n">p_bar</span><span class="o">.</span><span class="n">set_postfix_str</span><span class="p">(</span><span class="n">disp_str</span><span class="p">,</span> <span class="n">refresh</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                     <span class="n">p_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># Store after each epoch, if specified</span>
@@ -1225,7 +1228,7 @@ document.write(`
 
         <span class="c1"># Loop through epochs</span>
         <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">epochs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">iterations_per_epoch</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Training epoch </span><span class="si">{</span><span class="n">ep</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p_bar</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">iterations_per_epoch</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Training epoch </span><span class="si">{</span><span class="n">ep</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mininterval</span><span class="o">=</span><span class="n">TQDM_MININTERVAL</span><span class="p">)</span> <span class="k">as</span> <span class="n">p_bar</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">iterations_per_epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                     <span class="c1"># Simulate a batch of data and store into buffer</span>
                     <span class="n">input_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_inference</span><span class="p">(</span>
@@ -1252,7 +1255,7 @@ document.write(`
                     <span class="n">disp_str</span> <span class="o">=</span> <span class="n">format_loss_string</span><span class="p">(</span><span class="n">ep</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">avg_dict</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
 
                     <span class="c1"># Update progress bar</span>
-                    <span class="n">p_bar</span><span class="o">.</span><span class="n">set_postfix_str</span><span class="p">(</span><span class="n">disp_str</span><span class="p">)</span>
+                    <span class="n">p_bar</span><span class="o">.</span><span class="n">set_postfix_str</span><span class="p">(</span><span class="n">disp_str</span><span class="p">,</span> <span class="n">refresh</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                     <span class="n">p_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># Store and compute validation loss, if specified</span>
@@ -1451,7 +1454,7 @@ document.write(`
         <span class="n">num_reference</span> <span class="o">=</span> <span class="n">reference_summary</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">mmd_null_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">num_null_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_null_samples</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_null_samples</span><span class="p">),</span> <span class="n">mininterval</span><span class="o">=</span><span class="n">TQDM_MININTERVAL</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">bootstrap</span><span class="p">:</span>
                 <span class="n">bootstrap_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_reference</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_observed</span><span class="p">)</span>
                 <span class="n">simulated_summary</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">reference_summary</span><span class="p">,</span> <span class="n">bootstrap_idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -1687,7 +1690,7 @@ document.write(`
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
 </div>
                 </footer>
@@ -1708,6 +1711,7 @@ document.write(`
   
   <div class="footer-item">
     
+
   <p class="copyright">
     
       © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
@@ -1734,8 +1738,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
   </footer>

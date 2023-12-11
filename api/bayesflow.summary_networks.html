@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
@@ -19,12 +19,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -35,14 +35,11 @@
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
@@ -50,7 +47,7 @@
     <script src="../_static/design-tabs.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/bayesflow.summary_networks';</script>
     <link rel="canonical" href="https://www.bayesflow.org/api/bayesflow.summary_networks.html" />
-    <link rel="shortcut icon" href="../_static/bayesflow_hex.ico"/>
+    <link rel="icon" href="../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -128,9 +125,11 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
+  
   
   
   
@@ -140,8 +139,8 @@
       
     
     
-    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="BayesFlow: Amortized Bayesian Inference - Home"/>
+    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="BayesFlow: Amortized Bayesian Inference - Home"/>`);</script>
   
   
 </a></div>
@@ -375,6 +374,7 @@
 </button>
 
 
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -384,6 +384,7 @@ document.write(`
   </button>
 `);
 </script>
+
 
 <script>
 document.write(`
@@ -482,9 +483,12 @@ https://arxiv.org/abs/2202.07125</p>
 <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code>. It features a recurrent network given by <code class="docutils literal notranslate"><span class="pre">template_type</span></code> which is responsible for
 providing a single summary of the time series which then attends to each point in the time series pro-
 cessed via a series of <code class="docutils literal notranslate"><span class="pre">num_attention_blocks</span></code> self-attention layers.</p>
-<p>Important: Assumes that positional encodings have been appended to the input time series.</p>
-<p>Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate
-during training, e.g., setting <code class="docutils literal notranslate"><span class="pre">default_lr=1e-5</span></code> in a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.</p>
+<p>Important: Assumes that positional encodings have been appended to the input time series, e.g.,
+through a custom configurator.</p>
+<p>Recommended: When using transformers as summary networks, you may want to use a smaller learning rate
+during training, e.g., setting <code class="docutils literal notranslate"><span class="pre">default_lr=5e-5</span></code> in a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance.</p>
+<p>Layer normalization (controllable through the <code class="docutils literal notranslate"><span class="pre">use_layer_norm</span></code> keyword argument) may not always work
+well in certain applications. Consider setting it to <code class="docutils literal notranslate"><span class="pre">False</span></code> if the network is underperforming.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
@@ -523,7 +527,9 @@ and backward in time) or unidirectional (forward in time). Defaults to False, bu
 increase performance in some applications.</p>
 </dd>
 <dt><strong>template_dim</strong><span class="classifier">int, optional, default: 64</span></dt><dd><p>Only used if <code class="docutils literal notranslate"><span class="pre">template_type</span></code> in [‘lstm’, ‘gru’]. The number of hidden
-units (equiv. output dimensions) of the recurrent network.</p>
+units (equiv. output dimensions) of the recurrent network.
+When using <code class="docutils literal notranslate"><span class="pre">bidirectional=True</span></code>, the output dimensions of the template
+will be double the template_dim size, so consider reducing it in half.</p>
 </dd>
 <dt><strong>**kwargs</strong><span class="classifier">dict, optional, default: {}</span></dt><dd><p>Optional keyword arguments passed to the __init__() method of tf.keras.Model</p>
 </dd>
@@ -994,7 +1000,7 @@ of <code class="docutils literal notranslate"><span class="pre">len(outputs)</sp
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
     <a class="left-prev"
        href="bayesflow.simulation.html"
@@ -1084,6 +1090,7 @@ of <code class="docutils literal notranslate"><span class="pre">len(outputs)</sp
   
   <div class="footer-item">
     
+
   <p class="copyright">
     
       © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
@@ -1110,8 +1117,8 @@ of <code class="docutils literal notranslate"><span class="pre">len(outputs)</sp
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
   </footer>

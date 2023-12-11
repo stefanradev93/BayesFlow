@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
@@ -19,12 +19,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -35,14 +35,11 @@
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
@@ -50,7 +47,7 @@
     <script src="../_static/design-tabs.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/bayesflow.coupling_networks';</script>
     <link rel="canonical" href="https://www.bayesflow.org/api/bayesflow.coupling_networks.html" />
-    <link rel="shortcut icon" href="../_static/bayesflow_hex.ico"/>
+    <link rel="icon" href="../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -128,9 +125,11 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
+  
   
   
   
@@ -140,8 +139,8 @@
       
     
     
-    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="BayesFlow: Amortized Bayesian Inference - Home"/>
+    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="BayesFlow: Amortized Bayesian Inference - Home"/>`);</script>
   
   
 </a></div>
@@ -375,6 +374,7 @@
 </button>
 
 
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -384,6 +384,7 @@ document.write(`
   </button>
 `);
 </script>
+
 
 <script>
 document.write(`
@@ -609,7 +610,7 @@ z shape: (batch_size, …, input_dim//2), log_det_J shape: (batch_size, …)</p>
 for the required entries.</p>
 </dd>
 <dt><strong>coupling_design</strong><span class="classifier">str or callable, optional, default: ‘affine’</span></dt><dd><p>The type of internal coupling network to use. Must be in [‘affine’, ‘spline’].
-In general, spline couplings run slower than affine couplings, but require fewers coupling
+In general, spline couplings run slower than affine couplings, but requires fewer coupling
 layers. Spline couplings may work best with complex (e.g., multimodal) low-dimensional
 problems. The difference will become less and less pronounced as we move to higher dimensions.</p>
 </dd>
@@ -630,14 +631,14 @@ Important: Must be in [‘fixed’, ‘learnable’, None]</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="bayesflow.coupling_networks.CouplingLayer.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_or_z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/coupling_networks.html#CouplingLayer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.coupling_networks.CouplingLayer.call" title="Permalink to this definition">#</a></dt>
-<dd><p>Performs one pass through a the affine coupling layer (either inverse or forward).</p>
+<dd><p>Performs one pass through the affine coupling layer (either inverse or forward).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>target_or_z</strong><span class="classifier">tf.Tensor</span></dt><dd><p>The estimation quantites of interest or latent representations z ~ p(z), shape (batch_size, …)</p>
+<dt><strong>target_or_z</strong><span class="classifier">tf.Tensor</span></dt><dd><p>The estimation quantities of interest or latent representations z ~ p(z), shape (batch_size, …)</p>
 </dd>
 <dt><strong>condition</strong><span class="classifier">tf.Tensor or None</span></dt><dd><p>The conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, …).
-If <cite>condition is None</cite>, then the layer recuces to an unconditional ACL.</p>
+If <cite>condition is None</cite>, then the layer reduces to an unconditional ACL.</p>
 </dd>
 <dt><strong>inverse</strong><span class="classifier">bool, optional, default: False</span></dt><dd><p>Flag indicating whether to run the block forward or backward.</p>
 </dd>
@@ -717,7 +718,7 @@ If <cite>None</cite>, transformation amounts to unconditional estimation.</p>
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
     <a class="left-prev"
        href="bayesflow.attention.html"
@@ -786,6 +787,7 @@ If <cite>None</cite>, transformation amounts to unconditional estimation.</p>
   
   <div class="footer-item">
     
+
   <p class="copyright">
     
       © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
@@ -812,8 +814,8 @@ If <cite>None</cite>, transformation amounts to unconditional estimation.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
   </footer>

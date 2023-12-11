@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
@@ -19,12 +19,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -35,14 +35,11 @@
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
@@ -52,7 +49,7 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/Hierarchical_Model_Comparison_MPT';</script>
     <link rel="canonical" href="https://www.bayesflow.org/_examples/Hierarchical_Model_Comparison_MPT.html" />
-    <link rel="shortcut icon" href="../_static/bayesflow_hex.ico"/>
+    <link rel="icon" href="../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -130,9 +127,11 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
+  
   
   
   
@@ -142,8 +141,8 @@
       
     
     
-    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="BayesFlow: Amortized Bayesian Inference - Home"/>
+    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="BayesFlow: Amortized Bayesian Inference - Home"/>`);</script>
   
   
 </a></div>
@@ -377,6 +376,7 @@
 </button>
 
 
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -386,6 +386,7 @@ document.write(`
   </button>
 `);
 </script>
+
 
 <script>
 document.write(`
@@ -459,8 +460,8 @@ document.write(`
 </div>
 <section id="introduction">
 <h2><span class="section-number">8.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
-<p>This is the second part of the tutorial series covering amortized model comparison with BayesFlow! The general workflow, the scenario and the cognitive models were introduced in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a> and are assumed to be known, so here we will focus on the new elements introduced when comparing hierarchical models.</p>
-<p>In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>, we only conducted model comparison for a single participant at a time. Let us now consider all participants and their nested observations simultaneously in our model comparison!</p>
+<p>This is the second part of the tutorial series covering amortized model comparison with BayesFlow! The general workflow, the scenario and the cognitive models were introduced in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a> and are assumed to be known, so here we will focus on the new elements introduced when comparing hierarchical models.</p>
+<p>In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>, we only conducted model comparison for a single participant at a time. Let us now consider all participants and their nested observations simultaneously in our model comparison!</p>
 </section>
 <section id="generative-model-definition">
 <h2><span class="section-number">8.2. </span>Generative Model Definition<a class="headerlink" href="#generative-model-definition" title="Permalink to this heading">#</a></h2>
@@ -511,7 +512,7 @@ Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
 <img alt="../_images/3bfaae3966b7d3d7f7d7141152499544daf2c7224223b36025d372d83b6e26a7.png" src="../_images/3bfaae3966b7d3d7f7d7141152499544daf2c7224223b36025d372d83b6e26a7.png" />
 </div>
 </div>
-<p>We now follow the same steps as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a> to translate our prior into code:</p>
+<p>We now follow the same steps as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a> to translate our prior into code:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">PARAM_NAMES</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s2">&quot;$\mu_d$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\mu_g$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{00}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{01}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{10}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\Sigma_</span><span class="si">{11}</span><span class="s2">$&quot;</span><span class="p">]</span>
@@ -557,7 +558,7 @@ Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
 </section>
 <section id="creating-the-simulators">
 <h3><span class="section-number">8.2.2. </span>Creating the Simulators<a class="headerlink" href="#creating-the-simulators" title="Permalink to this heading">#</a></h3>
-<p>At this point, it is important to stress again our new definition of a data set: In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>, we analyzed participants separately, so each data set contained a single participant. With hierarchical models, we can now take all of our experimental data simultaneously into consideration, so each data set contains several participants with nested observations each. We could also have other hierarchical models, such as students nested into classes or employees nested into organizations, so we refer to the higher order units with the general term <em>groups</em>. For this tutorial, we consider a scenario with 50 participants performing 100 trials each.</p>
+<p>At this point, it is important to stress again our new definition of a data set: In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>, we analyzed participants separately, so each data set contained a single participant. With hierarchical models, we can now take all of our experimental data simultaneously into consideration, so each data set contains several participants with nested observations each. We could also have other hierarchical models, such as students nested into classes or employees nested into organizations, so we refer to the higher order units with the general term <em>groups</em>. For this tutorial, we consider a scenario with 50 participants performing 100 trials each.</p>
 <p>We continue our known workflow by first specifying simulator functions, then creating our generative models with the <code class="docutils literal notranslate"><span class="pre">GenerativeModel</span></code> wrapper and finally combining them with the <code class="docutils literal notranslate"><span class="pre">MultiGenerativeModel</span></code> wrapper.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -708,7 +709,7 @@ First 3 rows of first 2 participants in first data set:
 </section>
 <section id="prior-predictive-checks">
 <h3><span class="section-number">8.2.3. </span>Prior Predictive Checks<a class="headerlink" href="#prior-predictive-checks" title="Permalink to this heading">#</a></h3>
-<p>The interplay between parameters on several levels adds more complexity to the behavior of hierarchical models. Therefore, prior predictive or pushfoward checks become even more crucial for inspecting whether the chosen parametrization matches one’s expectations. Our simulated data sets now contain <code class="docutils literal notranslate"><span class="pre">NUM_GROUPS</span></code> participants and <code class="docutils literal notranslate"><span class="pre">NUM_OBS</span></code> observations each. If we want to simulate 1000 participants as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>, we now need only 20 simulations from a model, as each data set contains 50 participants. Afterwards, we calculate the hit rates and false alarm rates for each simulated participant as before and plot them.</p>
+<p>The interplay between parameters on several levels adds more complexity to the behavior of hierarchical models. Therefore, prior predictive or pushfoward checks become even more crucial for inspecting whether the chosen parametrization matches one’s expectations. Our simulated data sets now contain <code class="docutils literal notranslate"><span class="pre">NUM_GROUPS</span></code> participants and <code class="docutils literal notranslate"><span class="pre">NUM_OBS</span></code> observations each. If we want to simulate 1000 participants as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>, we now need only 20 simulations from a model, as each data set contains 50 participants. Afterwards, we calculate the hit rates and false alarm rates for each simulated participant as before and plot them.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Data simulation from each model</span>
@@ -766,14 +767,14 @@ First 3 rows of first 2 participants in first data set:
 <img alt="../_images/f204fa5f1d5f022f39f2ebce67c9bc699640351ef9e2e5bbd5b32c81e7c05695.png" src="../_images/f204fa5f1d5f022f39f2ebce67c9bc699640351ef9e2e5bbd5b32c81e7c05695.png" />
 </div>
 </div>
-<p>If we plot our 1000 participants over all data sets, we see simular patterns as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>.</p>
+<p>If we plot our 1000 participants over all data sets, we see simular patterns as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>.</p>
 </section>
 </section>
 <section id="defining-training-validating-the-neural-approximator">
 <h2><span class="section-number">8.3. </span>Defining, Training &amp; Validating the Neural Approximator<a class="headerlink" href="#defining-training-validating-the-neural-approximator" title="Permalink to this heading">#</a></h2>
 <p>We adapt the neural network architecture to this new symmetry by changing only a single part, the summary network. We now use a <code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork</span></code> which we pass one summary network for each level. The majority of hierarchical models in cognitive modeling assume IID data on all levels, so we simply use one <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> network for each level. If we would have, for instance, temporal dependencies within each participant, we would exchange the first network to one that is specialized for processing time series data, such as a <code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer</span></code>.</p>
 <p>The first summary network summarizes the information contained within the participants separately and passes the resulting embeddings to the second summary network. The second network then further compresses all participant embeddings to a single vector of learned summary statistics, so we equip it with a sufficient number of summary dimensions to avoid a bottleneck.</p>
-<p>After these adjustments, all subsequent elements of the training and validation process stay the same as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>.</p>
+<p>After these adjustments, all subsequent elements of the training and validation process stay the same as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">summary_networks</span><span class="o">.</span><span class="n">HierarchicalNetwork</span><span class="p">([</span>
@@ -799,7 +800,7 @@ INFO:root:Done.
 </div>
 </div>
 </div>
-<p>Note: Online learning will be a bit slower than what we observed in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a> due to the slower data generation, but still worth it due to amortization. :-) In practice, you would train longer than just <span class="math notranslate nohighlight">\(5\)</span> epochs and may want to try offline learning as well.</p>
+<p>Note: Online learning will be a bit slower than what we observed in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a> due to the slower data generation, but still worth it due to amortization. :-) In practice, you would train longer than just <span class="math notranslate nohighlight">\(5\)</span> epochs and may want to try offline learning as well.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">losses</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_online</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
@@ -855,7 +856,7 @@ INFO:root:Done.
 </section>
 <section id="network-application">
 <h2><span class="section-number">8.4. </span>Network Application<a class="headerlink" href="#network-application" title="Permalink to this heading">#</a></h2>
-<p>As in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>, we apply our trained model to a synthetic data set from the <strong>2HT</strong> model. We again redefine our simulator with fixed random seeds for reproducible results:</p>
+<p>As in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>, we apply our trained model to a synthetic data set from the <strong>2HT</strong> model. We again redefine our simulator with fixed random seeds for reproducible results:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prior_fixed</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Prior</span><span class="p">(</span>
@@ -898,7 +899,7 @@ INFO:root:Done.
 <img alt="../_images/f03a203ffaae34aeee3b6c00137b1bb72444cda5919e5ee77d11781efa7036be.png" src="../_images/f03a203ffaae34aeee3b6c00137b1bb72444cda5919e5ee77d11781efa7036be.png" />
 </div>
 </div>
-<p>As in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">part 1</span></a>, our data set contains many participants with low false alarm rates, which are unlikely under the 1HT model. Let’s see the evidence contained in our simulated data:</p>
+<p>As in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">part 1</span></a>, our data set contains many participants with low false alarm rates, which are unlikely under the 1HT model. Let’s see the evidence contained in our simulated data:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">summary_net</span><span class="p">(</span><span class="n">fake_data</span><span class="p">)</span>
@@ -926,7 +927,7 @@ INFO:root:Done.
 </div>
 </div>
 </div>
-<p>Our Bayesian model comparison reveals clear evidence for the 2HT model, much more decisive than in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="doc std std-doc">Part 1</span></a>. While the unambiguousness of the results depends, of course, on the model specification and the randomly simulated data, our model comparison now contains <span class="math notranslate nohighlight">\(50\)</span> times more data by considering all participants simultaneously!</p>
+<p>Our Bayesian model comparison reveals clear evidence for the 2HT model, much more decisive than in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>. While the unambiguousness of the results depends, of course, on the model specification and the randomly simulated data, our model comparison now contains <span class="math notranslate nohighlight">\(50\)</span> times more data by considering all participants simultaneously!</p>
 </section>
 </section>
 
@@ -939,7 +940,7 @@ INFO:root:Done.
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
     <a class="left-prev"
        href="Model_Comparison_MPT.html"
@@ -1000,6 +1001,7 @@ INFO:root:Done.
   
   <div class="footer-item">
     
+
   <p class="copyright">
     
       © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
@@ -1026,8 +1028,8 @@ INFO:root:Done.
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
   </footer>

@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
@@ -19,12 +19,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -35,14 +35,11 @@
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
@@ -50,7 +47,7 @@
     <script src="../_static/design-tabs.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/bayesflow.simulation';</script>
     <link rel="canonical" href="https://www.bayesflow.org/api/bayesflow.simulation.html" />
-    <link rel="shortcut icon" href="../_static/bayesflow_hex.ico"/>
+    <link rel="icon" href="../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -128,9 +125,11 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
+  
   
   
   
@@ -140,8 +139,8 @@
       
     
     
-    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/bayesflow_hex.png" class="logo__image only-light" alt="BayesFlow: Amortized Bayesian Inference - Home"/>
+    <script>document.write(`<img src="../_static/bayesflow_hex.png" class="logo__image only-dark" alt="BayesFlow: Amortized Bayesian Inference - Home"/>`);</script>
   
   
 </a></div>
@@ -375,6 +374,7 @@
 </button>
 
 
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -384,6 +384,7 @@ document.write(`
   </button>
 `);
 </script>
+
 
 <script>
 document.write(`
@@ -739,20 +740,20 @@ for the local_prior_fun.</p>
 </dl>
 <p class="rubric">Examples</p>
 <p>Varying number of local factors (e.g., groups, participants) between 1 and 100:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">draw_hyper</span><span class="p">():</span>
-    <span class="c1"># Draw location for 2D conditional prior</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">draw_prior</span><span class="p">(</span><span class="n">means</span><span class="p">,</span> <span class="n">num_groups</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
-    <span class="c1"># Draw parameter given location from hyperprior</span>
-    <span class="n">dim</span> <span class="o">=</span> <span class="n">means</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">means</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">dim</span><span class="p">))</span>
-
-<span class="n">context</span> <span class="o">=</span> <span class="n">ContextGenerator</span><span class="p">(</span><span class="n">non_batchable_context_fun</span><span class="o">=</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">101</span><span class="p">))</span>
-<span class="n">prior</span> <span class="o">=</span> <span class="n">TwoLevelPrior</span><span class="p">(</span><span class="n">draw_hyper</span><span class="p">,</span> <span class="n">draw_prior</span><span class="p">,</span> <span class="n">local_context_generator</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-<span class="n">prior_dict</span> <span class="o">=</span> <span class="n">prior</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
-</pre></div>
-</div>
+<blockquote>
+<div><dl class="simple">
+<dt>def draw_hyper():</dt><dd><p># Draw location for 2D conditional prior
+return np.random.normal(size=2)</p>
+</dd>
+<dt>def draw_prior(means, num_groups, sigma=1.):</dt><dd><p># Draw parameter given location from hyperprior
+dim = means.shape[0]
+return np.random.normal(means, sigma, size=(num_groups, dim))</p>
+</dd>
+</dl>
+<p>context = ContextGenerator(non_batchable_context_fun=lambda : np.random.randint(1, 101))
+prior = TwoLevelPrior(draw_hyper, draw_prior, local_context_generator=context)
+prior_dict = prior(batch_size=32)</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -801,7 +802,7 @@ Either a <code class="docutils literal notranslate"><span class="pre">batch_simu
 <p>If a <code class="docutils literal notranslate"><span class="pre">batch_simulator_fun</span></code> is provided, the interface will assume that the function operates on batches of parameter
 vectors and context variables and will pass the latter directly to the function. Power users should attempt to provide
 optimized batched simulators.</p>
-<p>If a <code class="docutils literal notranslate"><span class="pre">simulator_fun</span></code> is provided, the interface will assume thatthe function operates on single parameter vectors and
+<p>If a <code class="docutils literal notranslate"><span class="pre">simulator_fun</span></code> is provided, the interface will assume that the function operates on single parameter vectors and
 context variables and will wrap the simulator internally to allow batched functionality.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -907,9 +908,9 @@ The default behavior without user input is to use numpy’s mean and standard de
 <dt><strong>funcs_labels</strong><span class="classifier">list of str</span></dt><dd><p>A list of labels for the functions in funcs_list.
 The default behavior without user input is to call the functions “Aggregator function 1, Aggregator function 2, etc.”</p>
 </dd>
-<dt><strong>batch_size</strong><span class="classifier">int</span></dt><dd><p>The number of prior draws to generate (and then create and visualizes simulations from)</p>
+<dt><strong>batch_size</strong><span class="classifier">int, optional, default: 1000</span></dt><dd><p>The number of prior draws to generate (and then create and visualizes simulations from)</p>
 </dd>
-<dt><strong>show_raw_sims</strong><span class="classifier">bool</span></dt><dd><p>Flag determining whether or not a plot of 49 raw (i.e. unaggregated) simulations is generated.
+<dt><strong>show_raw_sims</strong><span class="classifier">bool, optional, default: True</span></dt><dd><p>Flag determining whether or not a plot of 49 raw (i.e. unaggregated) simulations is generated.
 Useful for very general data exploration.</p>
 </dd>
 </dl>
@@ -1080,7 +1081,7 @@ arguments expected by the simulators.</p>
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
     <a class="left-prev"
        href="bayesflow.sensitivity.html"
@@ -1178,6 +1179,7 @@ arguments expected by the simulators.</p>
   
   <div class="footer-item">
     
+
   <p class="copyright">
     
       © Copyright 2023, BayesFlow authors (lead maintainer: Stefan T. Radev).
@@ -1204,8 +1206,8 @@ arguments expected by the simulators.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
   </footer>
