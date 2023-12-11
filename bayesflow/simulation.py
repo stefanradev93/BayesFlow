@@ -29,7 +29,7 @@ from tqdm.autonotebook import tqdm
 
 logging.basicConfig()
 
-from bayesflow.default_settings import DEFAULT_KEYS
+from bayesflow.default_settings import DEFAULT_KEYS, TQDM_MININTERVAL
 from bayesflow.diagnostics import plot_prior2d
 from bayesflow.exceptions import ConfigurationError
 
@@ -405,7 +405,7 @@ class TwoLevelPrior:
 
         Examples
         --------
-        Varying number of local factors (e.g., groups, participants) between 1 and 100::
+        Varying number of local factors (e.g., groups, participants) between 1 and 100:
 
             def draw_hyper():
                 # Draw location for 2D conditional prior
@@ -529,7 +529,7 @@ class Simulator:
         vectors and context variables and will pass the latter directly to the function. Power users should attempt to provide
         optimized batched simulators.
 
-        If a ``simulator_fun`` is provided, the interface will assume thatthe function operates on single parameter vectors and
+        If a ``simulator_fun`` is provided, the interface will assume that the function operates on single parameter vectors and
         context variables and will wrap the simulator internally to allow batched functionality.
 
         Parameters
@@ -815,9 +815,9 @@ class GenerativeModel:
         funcs_labels        : list of str
             A list of labels for the functions in funcs_list.
             The default behavior without user input is to call the functions "Aggregator function 1, Aggregator function 2, etc."
-        batch_size          : int
+        batch_size          : int, optional, default: 1000
             The number of prior draws to generate (and then create and visualizes simulations from)
-        show_raw_sims       : bool
+        show_raw_sims       : bool, optional, default: True
             Flag determining whether or not a plot of 49 raw (i.e. unaggregated) simulations is generated.
             Useful for very general data exploration.
 
@@ -1109,7 +1109,9 @@ class GenerativeModel:
         # Generate the presimulation files
         file_counter = extend_from
         for i in range(total_files):
-            with tqdm(total=batches_per_file, desc=f"Batches generated for file {i+1}") as p_bar:
+            with tqdm(
+                total=batches_per_file, desc=f"Batches generated for file {i+1}", mininterval=TQDM_MININTERVAL
+            ) as p_bar:
                 file_list = [{} for _ in range(batches_per_file)]
                 for k in range(batches_per_file):
                     file_list[k] = self.__call__(batch_size=batch_size)

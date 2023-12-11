@@ -313,7 +313,7 @@ class SplineCoupling(tf.keras.Model):
         target         : tf.Tensor of shape (batch_size, ..., dim_2)
             The target partition of the input vector to transform.
         spline_params  : tuple(tf.Tensor,...)
-            A tuple with tensors corresponding to the learnbale spline features:
+            A tuple with tensors corresponding to the learnable spline features:
             (left_edge, bottom_edge, widths, heights, derivatives)
         inverse        : bool, optional, default: False
             Flag indicating whether to run the block forward or backward.
@@ -516,7 +516,7 @@ class CouplingLayer(tf.keras.Model):
             for the required entries.
         coupling_design       : str or callable, optional, default: 'affine'
             The type of internal coupling network to use. Must be in ['affine', 'spline'].
-            In general, spline couplings run slower than affine couplings, but require fewers coupling
+            In general, spline couplings run slower than affine couplings, but requires fewer coupling
             layers. Spline couplings may work best with complex (e.g., multimodal) low-dimensional
             problems. The difference will become less and less pronounced as we move to higher dimensions.
         permutation           : str or None, optional, default: 'fixed'
@@ -581,15 +581,15 @@ class CouplingLayer(tf.keras.Model):
             self.act_norm = None
 
     def call(self, target_or_z, condition, inverse=False, **kwargs):
-        """Performs one pass through a the affine coupling layer (either inverse or forward).
+        """Performs one pass through the affine coupling layer (either inverse or forward).
 
         Parameters
         ----------
         target_or_z      : tf.Tensor
-            The estimation quantites of interest or latent representations z ~ p(z), shape (batch_size, ...)
+            The estimation quantities of interest or latent representations z ~ p(z), shape (batch_size, ...)
         condition        : tf.Tensor or None
             The conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, ...).
-            If `condition is None`, then the layer recuces to an unconditional ACL.
+            If `condition is None`, then the layer reduces to an unconditional ACL.
         inverse          : bool, optional, default: False
             Flag indicating whether to run the block forward or backward.
 

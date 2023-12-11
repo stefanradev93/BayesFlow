@@ -199,3 +199,8 @@ DEFAULT_KEYS = {
 
 
 MMD_BANDWIDTH_LIST = [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 5, 10, 15, 20, 25, 30, 35, 100, 1e3, 1e4, 1e5, 1e6]
+
+# Minimum time interval between tqdm status updates to reduce
+# load. Only respected when refresh=False in set_postfix
+# and set_postfix_str
+TQDM_MININTERVAL = 0.1  # in seconds

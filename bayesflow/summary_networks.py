@@ -62,10 +62,14 @@ class TimeSeriesTransformer(tf.keras.Model):
         providing a single summary of the time series which then attends to each point in the time series pro-
         cessed via a series of ``num_attention_blocks`` self-attention layers.
 
-        Important: Assumes that positional encodings have been appended to the input time series.
+        Important: Assumes that positional encodings have been appended to the input time series, e.g.,
+        through a custom configurator.
 
-        Recommnded: When using transformers as summary networks, you may want to use a smaller learning rate
-        during training, e.g., setting ``default_lr=1e-5`` in a ``Trainer`` instance.
+        Recommended: When using transformers as summary networks, you may want to use a smaller learning rate
+        during training, e.g., setting ``default_lr=5e-5`` in a ``Trainer`` instance.
+
+        Layer normalization (controllable through the ``use_layer_norm`` keyword argument) may not always work
+        well in certain applications. Consider setting it to ``False`` if the network is underperforming.
 
         Parameters
         ----------
@@ -112,6 +116,8 @@ class TimeSeriesTransformer(tf.keras.Model):
         template_dim         : int, optional, default: 64
             Only used if ``template_type`` in ['lstm', 'gru']. The number of hidden
             units (equiv. output dimensions) of the recurrent network.
+            When using ``bidirectional=True``, the output dimensions of the template
+            will be double the template_dim size, so consider reducing it in half.
         **kwargs             : dict, optional, default: {}
             Optional keyword arguments passed to the __init__() method of tf.keras.Model
         """
@@ -133,8 +139,12 @@ class TimeSeriesTransformer(tf.keras.Model):
 
         # Construct final attention layer, which will perform cross-attention
         # between the outputs ot the self-attention layers and the dynamic template
+        if bidirectional:
+            final_input_dim = template_dim*2
+        else:
+            final_input_dim = template_dim
         self.output_attention = MultiHeadAttentionBlock(
-            template_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm
+            final_input_dim, attention_settings, num_dense_fc, dense_settings, use_layer_norm
         )
 
         # A recurrent network will learn the dynamic many-to-one template

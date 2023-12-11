@@ -53,6 +53,7 @@ def plot_recovery(
     n_row=None,
     xlabel="Ground truth",
     ylabel="Estimated",
+    **kwargs
 ):
     """Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
     The point estimate can be controlled with the ``point_agg`` argument, and the uncertainty estimate
@@ -84,9 +85,9 @@ def plot_recovery(
         The parameter names for nice plot titles. Inferred if None
     fig_size          : tuple or None, optional, default : None
         The figure size passed to the matplotlib constructor. Inferred if None.
-    label_fontsize    : int, optional, default: 14
+    label_fontsize    : int, optional, default: 16
         The font size of the y-label text
-    title_fontsize    : int, optional, default: 16
+    title_fontsize    : int, optional, default: 18
         The font size of the title text
     metric_fontsize   : int, optional, default: 16
         The font size of the goodness-of-fit metric (if provided)
@@ -98,10 +99,17 @@ def plot_recovery(
         A flag for adding R^2 between true and estimates to the plot
     color             : str, optional, default: '#8f2727'
         The color for the true vs. estimated scatter points and error bars
+    n_row             : int, optional, default: None
+        The number of rows for the subplots. Dynamically determined if None.
+    n_col             : int, optional, default: None
+        The number of columns for the subplots. Dynamically determined if None.
     xlabel            : str, optional, default: 'Ground truth'
         The label on the x-axis of the plot
     ylabel            : str, optional, default: 'Estimated'
         The label on the y-axis of the plot
+    **kwargs          : optional
+        Additional keyword arguments passed to ax.errorbar or ax.scatter.
+        Example: `rasterized=True` to reduce PDF file size with many dots
         
     Returns
     -------
@@ -110,7 +118,7 @@ def plot_recovery(
     Raises
     ------
     ShapeError
-        If there is a deviation form the expected shapes of ``post_samples`` and ``prior_samples``.
+        If there is a deviation from the expected shapes of ``post_samples`` and ``prior_samples``.
     """
 
     # Sanity check
@@ -152,9 +160,9 @@ def plot_recovery(
 
         # Add scatter and error bars
         if uncertainty_agg is not None:
-            _ = ax.errorbar(prior_samples[:, i], est[:, i], yerr=u[:, i], fmt="o", alpha=0.5, color=color)
+            _ = ax.errorbar(prior_samples[:, i], est[:, i], yerr=u[:, i], fmt="o", alpha=0.5, color=color, **kwargs)
         else:
-            _ = ax.scatter(prior_samples[:, i], est[:, i], alpha=0.5, color=color)
+            _ = ax.scatter(prior_samples[:, i], est[:, i], alpha=0.5, color=color, **kwargs)
 
         # Make plots quadratic to avoid visual illusions
         lower = min(prior_samples[:, i].min(), est[:, i].min())
@@ -232,7 +240,7 @@ def plot_z_score_contraction(
     tick_fontsize=12,
     color="#8f2727",
     n_col=None,
-    n_row=None,
+    n_row=None
 ):
     """Implements a graphical check for global model sensitivity by plotting the posterior
     z-score over the posterior contraction for each set of posterior samples in ``post_samples``
@@ -248,12 +256,12 @@ def plot_z_score_contraction(
 
     post_contraction = 1 - (posterior_variance / prior_variance)
 
-    In other words, the posterior is a proxy for the reduction in uncertainty gained by
+    In other words, the posterior contraction is a proxy for the reduction in uncertainty gained by
     replacing the prior with the posterior. The ideal posterior contraction tends to 1.
     Contraction near zero indicates that the posterior variance is almost identical to
     the prior variance for the particular marginal parameter distribution.
 
-    Note: Means and variances will be estimated vie their sample-based estimators.
+    Note: Means and variances will be estimated via their sample-based estimators.
 
     [1] Schad, D. J., Betancourt, M., & Vasishth, S. (2021).
     Toward a principled Bayesian workflow in cognitive science.
@@ -271,14 +279,18 @@ def plot_z_score_contraction(
         The parameter names for nice plot titles. Inferred if None
     fig_size          : tuple or None, optional, default : None
         The figure size passed to the matplotlib constructor. Inferred if None.
-    label_fontsize    : int, optional, default: 14
+    label_fontsize    : int, optional, default: 16
         The font size of the y-label text
-    title_fontsize    : int, optional, default: 16
+    title_fontsize    : int, optional, default: 18
         The font size of the title text
     tick_fontsize     : int, optional, default: 12
         The font size of the axis ticklabels
     color             : str, optional, default: '#8f2727'
         The color for the true vs. estimated scatter points and error bars
+    n_row             : int, optional, default: None
+        The number of rows for the subplots. Dynamically determined if None.
+    n_col             : int, optional, default: None
+        The number of columns for the subplots. Dynamically determined if None.
 
     Returns
     -------
@@ -287,7 +299,7 @@ def plot_z_score_contraction(
     Raises
     ------
     ShapeError
-        If there is a deviation form the expected shapes of ``post_samples`` and ``prior_samples``.
+        If there is a deviation from the expected shapes of ``post_samples`` and ``prior_samples``.
     """
 
     # Sanity check for shape integrity
@@ -379,6 +391,8 @@ def plot_sbc_ecdf(
     tick_fontsize=12,
     rank_ecdf_color="#a34f4f",
     fill_color="grey",
+    n_row=None,
+    n_col=None,
     **kwargs,
 ):
     """Creates the empirical CDFs for each marginal rank distribution and plots it against
@@ -411,7 +425,7 @@ def plot_sbc_ecdf(
         The font size of the y-label and y-label texts
     legend_fontsize   : int, optional, default: 14
         The font size of the legend text
-    title_fontsize    : int, optional, default: 16
+    title_fontsize    : int, optional, default: 18
         The font size of the title text. Only relevant if `stacked=False`
     tick_fontsize     : int, optional, default: 12
         The font size of the axis ticklabels
@@ -419,6 +433,10 @@ def plot_sbc_ecdf(
         The color to use for the rank ECDFs
     fill_color        : str, optional, default: 'grey'
         The color of the fill arguments.
+    n_row             : int, optional, default: None
+        The number of rows for the subplots. Dynamically determined if None.
+    n_col             : int, optional, default: None
+        The number of columns for the subplots. Dynamically determined if None.
     **kwargs          : dict, optional, default: {}
         Keyword arguments can be passed to control the behavior of ECDF simultaneous band computation
         through the ``ecdf_bands_kwargs`` dictionary. See `simultaneous_ecdf_bands` for keyword arguments
@@ -447,9 +465,14 @@ def plot_sbc_ecdf(
         n_row, n_col = 1, 1
         f, ax = plt.subplots(1, 1, figsize=fig_size)
     else:
-        # Determine n_subplots dynamically
-        n_row = int(np.ceil(n_params / 6))
-        n_col = int(np.ceil(n_params / n_row))
+        # Determine number of rows and columns for subplots based on inputs
+        if n_row is None and n_col is None:
+            n_row = int(np.ceil(n_params / 6))
+            n_col = int(np.ceil(n_params / n_row))
+        elif n_row is None and n_col is not None:
+            n_row = int(np.ceil(n_params / n_col))
+        elif n_row is not None and n_col is None:
+            n_col = int(np.ceil(n_params / n_row))
 
         # Determine fig_size dynamically, if None
         if fig_size is None:
@@ -543,6 +566,8 @@ def plot_sbc_histograms(
     title_fontsize=18,
     tick_fontsize=12,
     hist_color="#a34f4f",
+    n_row=None,
+    n_col=None
 ):
     """Creates and plots publication-ready histograms of rank statistics for simulation-based calibration
     (SBC) checks according to [1].
@@ -566,16 +591,20 @@ def plot_sbc_histograms(
         The figure size passed to the matplotlib constructor. Inferred if None
     num_bins          : int, optional, default: 10
         The number of bins to use for each marginal histogram
-    binomial_interval : float in (0, 1), optional, default: 0.95
+    binomial_interval : float in (0, 1), optional, default: 0.99
         The width of the confidence interval for the binomial distribution
-    label_fontsize    : int, optional, default: 14
+    label_fontsize    : int, optional, default: 16
         The font size of the y-label text
-    title_fontsize    : int, optional, default: 16
+    title_fontsize    : int, optional, default: 18
         The font size of the title text
     tick_fontsize     : int, optional, default: 12
         The font size of the axis ticklabels
     hist_color        : str, optional, default '#a34f4f'
         The color to use for the histogram body
+    n_row             : int, optional, default: None
+        The number of rows for the subplots. Dynamically determined if None.
+    n_col             : int, optional, default: None
+        The number of columns for the subplots. Dynamically determined if None.
 
     Returns
     -------
@@ -615,9 +644,14 @@ def plot_sbc_histograms(
     if param_names is None:
         param_names = [f"$\\theta_{{{i}}}$" for i in range(1, n_params + 1)]
 
-    # Determine n_subplots dynamically
-    n_row = int(np.ceil(n_params / 6))
-    n_col = int(np.ceil(n_params / n_row))
+    # Determine number of rows and columns for subplots based on inputs
+    if n_row is None and n_col is None:
+        n_row = int(np.ceil(n_params / 6))
+        n_col = int(np.ceil(n_params / n_row))
+    elif n_row is None and n_col is not None:
+        n_row = int(np.ceil(n_params / n_col))
+    elif n_row is not None and n_col is None:
+        n_col = int(np.ceil(n_params / n_row))
 
     # Initialize figure
     if fig_size is None:
@@ -1026,6 +1060,8 @@ def plot_calibration_curves(
     epsilon=0.02,
     fig_size=None,
     color="#8f2727",
+    n_row=None,
+    n_col=None
 ):
     """Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities
     for a model comparison problem. The marginal histograms inform about the fraction of predictions in each bin.
@@ -1045,7 +1081,7 @@ def plot_calibration_curves(
         The font size of the y-label and y-label texts
     legend_fontsize   : int, optional, default: 14
         The font size of the legend text (ECE value)
-    title_fontsize    : int, optional, default: 16
+    title_fontsize    : int, optional, default: 18
         The font size of the title text. Only relevant if `stacked=False`
     tick_fontsize     : int, optional, default: 12
         The font size of the axis ticklabels
@@ -1055,6 +1091,10 @@ def plot_calibration_curves(
         The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
     color             : str, optional, default: '#8f2727'
         The color of the calibration curves
+    n_row             : int, optional, default: None
+        The number of rows for the subplots. Dynamically determined if None.
+    n_col             : int, optional, default: None
+        The number of columns for the subplots. Dynamically determined if None.
 
     Returns
     -------
@@ -1065,9 +1105,15 @@ def plot_calibration_curves(
     if model_names is None:
         model_names = [rf"$M_{{{m}}}$" for m in range(1, num_models + 1)]
 
-    # Determine n_subplots dynamically
-    n_row = int(np.ceil(num_models / 6))
-    n_col = int(np.ceil(num_models / n_row))
+    # Determine number of rows and columns for subplots based on inputs
+    if n_row is None and n_col is None:
+        n_row = int(np.ceil(num_models / 6))
+        n_col = int(np.ceil(num_models / n_row))
+    elif n_row is None and n_col is not None:
+        n_row = int(np.ceil(num_models / n_col))
+    elif n_row is not None and n_col is None:
+        n_col = int(np.ceil(num_models / n_row))
+
 
     # Compute calibration
     cal_errs, probs_true, probs_pred = expected_calibration_error(true_models, pred_models, num_bins)
@@ -1140,7 +1186,9 @@ def plot_confusion_matrix(
     pred_models,
     model_names=None,
     fig_size=(5, 5),
+    label_fontsize=16,
     title_fontsize=18,
+    value_fontsize=10,
     tick_fontsize=12,
     xtick_rotation=None,
     ytick_rotation=None,
@@ -1160,8 +1208,12 @@ def plot_confusion_matrix(
         The model names for nice plot titles. Inferred if None.
     fig_size       : tuple or None, optional, default: (5, 5)
         The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
+    label_fontsize    : int, optional, default: 16
+        The font size of the y-label and y-label texts
     title_fontsize : int, optional, default: 18
         The font size of the title text.
+    value_fontsize  : int, optional, default: 10
+        The font size of the text annotations and the colorbar tick labels.
     tick_fontsize  : int, optional, default: 12
         The font size of the axis label and model name texts.
     xtick_rotation: int, optional, default: None
@@ -1200,9 +1252,10 @@ def plot_confusion_matrix(
 
     # Initialize figure
     fig, ax = plt.subplots(1, 1, figsize=fig_size)
-
     im = ax.imshow(cm, interpolation="nearest", cmap=cmap)
-    ax.figure.colorbar(im, ax=ax, shrink=0.7)
+    cbar = ax.figure.colorbar(im, ax=ax, shrink=0.75)
+
+    cbar.ax.tick_params(labelsize=value_fontsize)
 
     ax.set(xticks=np.arange(cm.shape[1]), yticks=np.arange(cm.shape[0]))
     ax.set_xticklabels(model_names, fontsize=tick_fontsize)
@@ -1211,8 +1264,8 @@ def plot_confusion_matrix(
     ax.set_yticklabels(model_names, fontsize=tick_fontsize)
     if ytick_rotation:
         plt.yticks(rotation=ytick_rotation)
-    ax.set_xlabel("Predicted model", fontsize=tick_fontsize)
-    ax.set_ylabel("True model", fontsize=tick_fontsize)
+    ax.set_xlabel("Predicted model", fontsize=label_fontsize)
+    ax.set_ylabel("True model", fontsize=label_fontsize)
 
     # Loop over data dimensions and create text annotations
     fmt = ".2f" if normalize else "d"
@@ -1220,7 +1273,7 @@ def plot_confusion_matrix(
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
             ax.text(
-                j, i, format(cm[i, j], fmt), ha="center", va="center", color="white" if cm[i, j] > thresh else "black"
+                j, i, format(cm[i, j], fmt), fontsize=value_fontsize, ha="center", va="center", color="white" if cm[i, j] > thresh else "black"
             )
     if title:
         ax.set_title("Confusion Matrix", fontsize=title_fontsize)
@@ -1247,20 +1300,20 @@ def plot_mmd_hypothesis_test(
         The samples from the MMD sampling distribution under the null hypothesis "the model is well-specified"
     mmd_observed   : float
         The observed MMD value
-    alpha_level    : float
+    alpha_level    : float, optional, default: 0.05
         The rejection probability (type I error)
-    null_color     : str or tuple
+    null_color     : str or tuple, optional, default: (0.16407, 0.020171, 0.577478)
         The color of the H0 sampling distribution
-    observed_color : str or tuple
+    observed_color : str or tuple, optional, default: "red"
         The color of the observed MMD
-    alpha_color    : str or tuple
+    alpha_color    : str or tuple, optional, default: "orange"
         The color of the rejection area
-    truncate_vlines_at_kde: bool
+    truncate_vlines_at_kde: bool, optional, default: False
         true: cut off the vlines at the kde
         false: continue kde lines across the plot
-    xmin           : float
+    xmin           : float, optional, default: None
         The lower x-axis limit
-    xmax           : float
+    xmax           : float, optional, default: None
         The upper x-axis limit
     bw_factor      : float, optional, default: 1.5
         bandwidth (aka. smoothing parameter) of the kernel density estimate

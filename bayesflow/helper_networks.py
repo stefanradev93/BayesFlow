@@ -179,7 +179,7 @@ class Permutation(tf.keras.Model):
 
 
 class Orthogonal(tf.keras.Model):
-    """Imeplements a learnable orthogonal transformation according to [1]. Can be
+    """Implements a learnable orthogonal transformation according to [1]. Can be
     used as an alternative to a fixed ``Permutation`` layer.
 
     [1] Kingma, D. P., & Dhariwal, P. (2018). Glow: Generative flow with invertible 1x1
@@ -357,7 +357,7 @@ class ActNorm(tf.keras.Model):
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
             v shape: (batch_size, inp_dim), log_det_J shape: (,)
         target          :  tf.Tensor
-            If inverse=True: The inversly transformed targets, shape == target.shape
+            If inverse=True: The inversely transformed targets, shape == target.shape
 
         Notes
         -----

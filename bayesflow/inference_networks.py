@@ -119,8 +119,8 @@ class InvertibleNetwork(tf.keras.Model):
             Optional data-dependent initialization for the internal ``ActNorm`` layers, as done in [5]. Could be helpful
             for deep invertible networks.
         use_soft_flow         : bool, optional, default: False
-            Whether to perturb the taregt distribution (i.e., parameters) with small amount of independent
-            noise, as done in [2]. Could be helpful for degenrate distributions.
+            Whether to perturb the target distribution (i.e., parameters) with small amount of independent
+            noise, as done in [2]. Could be helpful for degenerate distributions.
         soft_flow_bounds      : tuple(float, float), optional, default: (1e-3, 5e-2)
             The bounds of the continuous uniform distribution from which the noise scale would be sampled
             at each iteration. Only relevant when ``use_soft_flow=True``.
@@ -178,7 +178,7 @@ class InvertibleNetwork(tf.keras.Model):
         return self.forward(targets, condition, **kwargs)
 
     def forward(self, targets, condition, **kwargs):
-        """Performs a forward pass though the chain."""
+        """Performs a forward pass through the chain."""
 
         # Add noise to target if using SoftFlow, use explicitly
         # not in call(), since methods are public
