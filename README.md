@@ -19,9 +19,9 @@ For starters, check out some of our walk-through notebooks:
 7. [Model comparison for cognitive models](examples/Model_Comparison_MPT.ipynb)
 8. [Hierarchical model comparison for cognitive models](examples/Hierarchical_Model_Comparison_MPT.ipynb)
 
-## Project Documentation
+## Documentation \& Help
 
-The project documentation is available at <https://bayesflow.org>
+The project documentation is available at <https://bayesflow.org>. Please use [BayesFlow Forums](https://discuss.bayesflow.org/) for any BayesFlow-related questions and discussions, and [GitHub Issues](https://github.com/stefanradev93/BayesFlow/issues) for bug reports and feature requests. 
 
 ## Installation
 
