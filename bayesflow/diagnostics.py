@@ -910,7 +910,7 @@ def plot_losses(
     for i, ax in enumerate(looper):
         # Plot train curve
         ax.plot(train_step_index, train_losses.iloc[:, i], color=train_color, lw=lw_train, alpha=0.9, label="Training")
-        if moving_average:
+        if moving_average and train_losses.columns[0] == "Loss":
             moving_average_window = int(train_losses.shape[0] * ma_window_fraction)
             smoothed_loss = train_losses.iloc[:, i].rolling(window=moving_average_window).mean()
             ax.plot(train_step_index, smoothed_loss, color="grey", lw=lw_train, label="Training (Moving Average)")
