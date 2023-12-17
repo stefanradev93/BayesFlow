@@ -53,7 +53,7 @@ def plot_recovery(
     n_row=None,
     xlabel="Ground truth",
     ylabel="Estimated",
-    **kwargs
+    **kwargs,
 ):
     """Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.
     The point estimate can be controlled with the ``point_agg`` argument, and the uncertainty estimate
@@ -110,7 +110,7 @@ def plot_recovery(
     **kwargs          : optional
         Additional keyword arguments passed to ax.errorbar or ax.scatter.
         Example: `rasterized=True` to reduce PDF file size with many dots
-        
+
     Returns
     -------
     f : plt.Figure - the figure instance for optional saving
@@ -240,7 +240,7 @@ def plot_z_score_contraction(
     tick_fontsize=12,
     color="#8f2727",
     n_col=None,
-    n_row=None
+    n_row=None,
 ):
     """Implements a graphical check for global model sensitivity by plotting the posterior
     z-score over the posterior contraction for each set of posterior samples in ``post_samples``
@@ -567,7 +567,7 @@ def plot_sbc_histograms(
     tick_fontsize=12,
     hist_color="#a34f4f",
     n_row=None,
-    n_col=None
+    n_col=None,
 ):
     """Creates and plots publication-ready histograms of rank statistics for simulation-based calibration
     (SBC) checks according to [1].
@@ -910,7 +910,7 @@ def plot_losses(
     for i, ax in enumerate(looper):
         # Plot train curve
         ax.plot(train_step_index, train_losses.iloc[:, i], color=train_color, lw=lw_train, alpha=0.9, label="Training")
-        if moving_average:
+        if moving_average and train_losses.columns[i] == "Loss":
             moving_average_window = int(train_losses.shape[0] * ma_window_fraction)
             smoothed_loss = train_losses.iloc[:, i].rolling(window=moving_average_window).mean()
             ax.plot(train_step_index, smoothed_loss, color="grey", lw=lw_train, label="Training (Moving Average)")
@@ -929,7 +929,7 @@ def plot_losses(
                 )
         # Schmuck
         ax.set_xlabel("Training step #", fontsize=label_fontsize)
-        ax.set_ylabel("Loss value", fontsize=label_fontsize)
+        ax.set_ylabel("Value", fontsize=label_fontsize)
         sns.despine(ax=ax)
         ax.grid(alpha=grid_alpha)
         ax.set_title(train_losses.columns[i], fontsize=title_fontsize)
@@ -1061,7 +1061,7 @@ def plot_calibration_curves(
     fig_size=None,
     color="#8f2727",
     n_row=None,
-    n_col=None
+    n_col=None,
 ):
     """Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities
     for a model comparison problem. The marginal histograms inform about the fraction of predictions in each bin.
@@ -1113,7 +1113,6 @@ def plot_calibration_curves(
         n_row = int(np.ceil(num_models / n_col))
     elif n_row is not None and n_col is None:
         n_col = int(np.ceil(num_models / n_row))
-
 
     # Compute calibration
     cal_errs, probs_true, probs_pred = expected_calibration_error(true_models, pred_models, num_bins)
@@ -1273,7 +1272,13 @@ def plot_confusion_matrix(
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
             ax.text(
-                j, i, format(cm[i, j], fmt), fontsize=value_fontsize, ha="center", va="center", color="white" if cm[i, j] > thresh else "black"
+                j,
+                i,
+                format(cm[i, j], fmt),
+                fontsize=value_fontsize,
+                ha="center",
+                va="center",
+                color="white" if cm[i, j] > thresh else "black",
             )
     if title:
         ax.set_title("Confusion Matrix", fontsize=title_fontsize)
