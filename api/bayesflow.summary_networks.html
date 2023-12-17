@@ -565,7 +565,8 @@ will be double the template_dim size, so consider reducing it in half.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bayesflow.summary_networks.</span></span><span class="sig-name descname"><span class="pre">SetTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/summary_networks.html#SetTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.summary_networks.SetTransformer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
 <p>Implements the set transformer architecture from [1] which ultimately represents
-a learnable permutation-invariant function.</p>
+a learnable permutation-invariant function. Designed to naturally model interactions in
+the input set, which may be hard to capture with the simpler <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> architecture.</p>
 <dl class="simple">
 <dt>[1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., &amp; Teh, Y. W. (2019).</dt><dd><p>Set transformer: A framework for attention-based permutation-invariant neural networks.
 In International conference on machine learning (pp. 3744-3753). PMLR.</p>

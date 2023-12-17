@@ -493,7 +493,7 @@ document.write(`
         <span class="c1"># Construct final attention layer, which will perform cross-attention</span>
         <span class="c1"># between the outputs ot the self-attention layers and the dynamic template</span>
         <span class="k">if</span> <span class="n">bidirectional</span><span class="p">:</span>
-            <span class="n">final_input_dim</span> <span class="o">=</span> <span class="n">template_dim</span><span class="o">*</span><span class="mi">2</span>
+            <span class="n">final_input_dim</span> <span class="o">=</span> <span class="n">template_dim</span> <span class="o">*</span> <span class="mi">2</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">final_input_dim</span> <span class="o">=</span> <span class="n">template_dim</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_attention</span> <span class="o">=</span> <span class="n">MultiHeadAttentionBlock</span><span class="p">(</span>
@@ -537,7 +537,8 @@ document.write(`
 
 <div class="viewcode-block" id="SetTransformer"><a class="viewcode-back" href="../../api/bayesflow.summary_networks.html#bayesflow.summary_networks.SetTransformer">[docs]</a><span class="k">class</span> <span class="nc">SetTransformer</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements the set transformer architecture from [1] which ultimately represents</span>
-<span class="sd">    a learnable permutation-invariant function.</span>
+<span class="sd">    a learnable permutation-invariant function. Designed to naturally model interactions in</span>
+<span class="sd">    the input set, which may be hard to capture with the simpler ``DeepSet`` architecture.</span>
 
 <span class="sd">    [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., &amp; Teh, Y. W. (2019).</span>
 <span class="sd">        Set transformer: A framework for attention-based permutation-invariant neural networks.</span>

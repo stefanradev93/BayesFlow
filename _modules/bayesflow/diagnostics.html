@@ -406,7 +406,7 @@ document.write(`
     <span class="n">n_row</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Ground truth&quot;</span><span class="p">,</span>
     <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Estimated&quot;</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates and plots publication-ready recovery plot with true vs. point estimate + uncertainty.</span>
 <span class="sd">    The point estimate can be controlled with the ``point_agg`` argument, and the uncertainty estimate</span>
@@ -463,7 +463,7 @@ document.write(`
 <span class="sd">    **kwargs          : optional</span>
 <span class="sd">        Additional keyword arguments passed to ax.errorbar or ax.scatter.</span>
 <span class="sd">        Example: `rasterized=True` to reduce PDF file size with many dots</span>
-<span class="sd">        </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    f : plt.Figure - the figure instance for optional saving</span>
@@ -593,7 +593,7 @@ document.write(`
     <span class="n">tick_fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">,</span>
     <span class="n">n_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">n_row</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">n_row</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a graphical check for global model sensitivity by plotting the posterior</span>
 <span class="sd">    z-score over the posterior contraction for each set of posterior samples in ``post_samples``</span>
@@ -920,7 +920,7 @@ document.write(`
     <span class="n">tick_fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">hist_color</span><span class="o">=</span><span class="s2">&quot;#a34f4f&quot;</span><span class="p">,</span>
     <span class="n">n_row</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">n_col</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">n_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates and plots publication-ready histograms of rank statistics for simulation-based calibration</span>
 <span class="sd">    (SBC) checks according to [1].</span>
@@ -1263,7 +1263,7 @@ document.write(`
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">looper</span><span class="p">):</span>
         <span class="c1"># Plot train curve</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">train_step_index</span><span class="p">,</span> <span class="n">train_losses</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">train_color</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="n">lw_train</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Training&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">moving_average</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">moving_average</span> <span class="ow">and</span> <span class="n">train_losses</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Loss&quot;</span><span class="p">:</span>
             <span class="n">moving_average_window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">train_losses</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ma_window_fraction</span><span class="p">)</span>
             <span class="n">smoothed_loss</span> <span class="o">=</span> <span class="n">train_losses</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="n">moving_average_window</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">train_step_index</span><span class="p">,</span> <span class="n">smoothed_loss</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="n">lw_train</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Training (Moving Average)&quot;</span><span class="p">)</span>
@@ -1282,7 +1282,7 @@ document.write(`
                 <span class="p">)</span>
         <span class="c1"># Schmuck</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Training step #&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">label_fontsize</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Loss value&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">label_fontsize</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">label_fontsize</span><span class="p">)</span>
         <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">grid_alpha</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">train_losses</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">title_fontsize</span><span class="p">)</span>
@@ -1414,7 +1414,7 @@ document.write(`
     <span class="n">fig_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#8f2727&quot;</span><span class="p">,</span>
     <span class="n">n_row</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">n_col</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">n_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities</span>
 <span class="sd">    for a model comparison problem. The marginal histograms inform about the fraction of predictions in each bin.</span>
@@ -1466,7 +1466,6 @@ document.write(`
         <span class="n">n_row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_models</span> <span class="o">/</span> <span class="n">n_col</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">n_row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">n_col</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">n_col</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_models</span> <span class="o">/</span> <span class="n">n_row</span><span class="p">))</span>
-
 
     <span class="c1"># Compute calibration</span>
     <span class="n">cal_errs</span><span class="p">,</span> <span class="n">probs_true</span><span class="p">,</span> <span class="n">probs_pred</span> <span class="o">=</span> <span class="n">expected_calibration_error</span><span class="p">(</span><span class="n">true_models</span><span class="p">,</span> <span class="n">pred_models</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">)</span>
@@ -1626,7 +1625,13 @@ document.write(`
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="nb">format</span><span class="p">(</span><span class="n">cm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">fmt</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">value_fontsize</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span> <span class="k">if</span> <span class="n">cm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">thresh</span> <span class="k">else</span> <span class="s2">&quot;black&quot;</span>
+                <span class="n">j</span><span class="p">,</span>
+                <span class="n">i</span><span class="p">,</span>
+                <span class="nb">format</span><span class="p">(</span><span class="n">cm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">fmt</span><span class="p">),</span>
+                <span class="n">fontsize</span><span class="o">=</span><span class="n">value_fontsize</span><span class="p">,</span>
+                <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+                <span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span> <span class="k">if</span> <span class="n">cm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">thresh</span> <span class="k">else</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
             <span class="p">)</span>
     <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Confusion Matrix&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">title_fontsize</span><span class="p">)</span>
