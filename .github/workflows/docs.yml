@@ -1,7 +1,7 @@
 # From https://github.com/eeholmes/readthedoc-test/blob/main/.github/workflows/docs_pages.yml
 name: docs
 
-# execute this workflow automatically when a we push to master
+# execute this workflow automatically when we push to master
 on:
   push:
     branches:
