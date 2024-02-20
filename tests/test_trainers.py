@@ -68,8 +68,9 @@ def _create_training_setup(mode):
     trainer = Trainer(generative_model=model, amortizer=amortizer)
     return trainer
 
+
 class TestTrainer:
-    def setup(self):
+    def setup_method(self):
         trainer_posterior = _create_training_setup("posterior")
         trainer_likelihood = _create_training_setup("likelihood")
         trainer_joint = _create_training_setup("joint")
@@ -110,7 +111,6 @@ class TestTrainer:
             assert type(h) is dict
             assert type(h["train_losses"]) is DataFrame
             assert type(h["val_losses"]) is DataFrame
-
 
     @pytest.mark.parametrize("mode", ["posterior", "joint"])
     @pytest.mark.parametrize("reuse_optimizer", [True, False])
@@ -202,34 +202,3 @@ class TestTrainer:
             assert type(h) is dict
             assert type(h["train_losses"]) is DataFrame
             assert type(h["val_losses"]) is DataFrame
-
-    @pytest.mark.parametrize("reference_data", [None, "dict", "numpy"])
-    @pytest.mark.parametrize("observed_data_type", ["dict", "numpy"])
-    @pytest.mark.parametrize("bootstrap", [True, False])
-    def mmd_hypothesis_test_no_reference(self, reference_data, observed_data_type, bootstrap):
-        trainer = self.trainers["posterior"]
-        _ = trainer.train_online(epochs=1, iterations_per_epoch=1, batch_size=4)
-
-        num_reference_simulations = 10
-        num_observed_simulations = 2
-        num_null_samples = 5
-
-        if reference_data is None:
-            if reference_data == "dict":
-                reference_data = trainer.configurator(trainer.generative_model(num_reference_simulations))
-            elif reference_data == "numpy":
-                reference_data = trainer.configurator(trainer.generative_model(num_reference_simulations))['summary_conditions']
-
-        if observed_data_type == "dict":
-            observed_data = trainer.configurator(trainer.generative_model(num_observed_simulations))
-        elif observed_data_type == "numpy":
-            observed_data = trainer.configurator(trainer.generative_model(num_observed_simulations))['summary_conditions']
-
-        MMD_sampling_distribution, MMD_observed = trainer.mmd_hypothesis_test(observed_data=observed_data,
-                                                                              reference_data=reference_data,
-                                                                              num_reference_simulations=num_reference_simulations,
-                                                                              num_null_samples=num_null_samples,
-                                                                              bootstrap=bootstrap)
-
-        assert MMD_sampling_distribution.shape[0] == num_reference_simulations
-        assert np.all(MMD_sampling_distribution > 0)
