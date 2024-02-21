@@ -1,11 +1,10 @@
+from copy import deepcopy
 from functools import partial
 from unittest.mock import MagicMock, Mock
 
 import numpy as np
 import pytest
 import tensorflow as tf
-
-from copy import deepcopy
 
 from bayesflow import computational_utilities, sensitivity, simulation
 from tests.test_trainers import _create_training_setup, _prior, _simulator
@@ -26,7 +25,7 @@ def _trainer_amortizer_sample_mock(input_dict, n_samples):
 
 
 class TestMisspecificationExperiment:
-    def setup(self):
+    def setup_method(self):
         self.trainer = _create_training_setup(mode="posterior")
 
         # Mock the approximate posterior sampling of the amortizer, return np.ones of shape (n_sim, n_samples)

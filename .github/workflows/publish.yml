@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: python3 -m pip install --upgrade build && python3 -m build
+      - run: python3 -m pip install -U build && python3 -m build
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
