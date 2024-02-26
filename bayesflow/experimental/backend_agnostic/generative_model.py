@@ -6,7 +6,7 @@ from .types import Observations, Shape
 
 
 class GenerativeModel(keras.Model):
-    """ Generate Observations Unconditionally: x ~ p(x|c) = ∫ p(x|θ,c) p(θ|c) dθ """
+    """ Generate Observations Unconditionally: x ~ p(x) = ∫∫ p(x|θ,c) p(θ|c) p(c) dθ dc """
     def __init__(
             self,
             prior: SampleParametersMixin,
