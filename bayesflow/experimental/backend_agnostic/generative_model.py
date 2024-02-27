@@ -14,7 +14,6 @@ class GenerativeModel(keras.Model):
             context_prior: SampleContextsMixin = None
     ) -> None:
         """
-
         Parameters
         ----------
         prior : SampleParametersMixin
@@ -31,11 +30,11 @@ class GenerativeModel(keras.Model):
 
     def sample(self, batch_shape: Shape, /) -> Observations:
         if self.context_prior is None:
-            context = None
+            contexts = None
         else:
-            context = self.context_prior.sample_contexts(batch_shape)
+            contexts = self.context_prior.sample_contexts(batch_shape)
 
-        parameters = self.prior.sample_parameters(batch_shape, contexts=context)
-        observations = self.simulator.sample_observations(batch_shape, parameters=parameters, contexts=context)
+        parameters = self.prior.sample_parameters(batch_shape, contexts=contexts)
+        observations = self.simulator.sample_observations(batch_shape, parameters=parameters, contexts=contexts)
 
         return observations
