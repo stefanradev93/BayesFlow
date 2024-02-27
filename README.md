@@ -106,7 +106,7 @@ the model-amortizer combination on unseen simulations:
 new_sims = trainer.configurator(generative_model(500))
 
 # Obtain 100 posteriors draws per data set instantly
-posterior_draws = amortized_posterior.sample(new_sims, n_samples=100)
+posterior_draws = amortized_posterior.sample(new_sims)
 
 # Diagnoze calibration
 fig = bf.diagnostics.plot_sbc_histograms(posterior_draws, new_sims['parameters'])
@@ -122,9 +122,8 @@ As you can see, amortized inference on new (real or simulated) data is easy and 
 We can obtain further 5000 posterior draws per simulated data set and quickly inspect 
 how well the model can recover its parameters across the entire *prior predictive distribution*.
 
-
 ```python
-posterior_draws = amortized_posterior.sample(new_sims, n_samples=5000)
+posterior_draws = amortized_posterior.sample(new_sims)
 fig = bf.diagnostics.plot_recovery(posterior_draws, new_sims['parameters'])
 ```
 

@@ -254,3 +254,35 @@ class TestSimulator(unittest.TestCase):
 
     def test_sim_no_context_non_batched(self):
         pass
+
+
+import pytest
+
+@pytest.fixture(params=["jax", "tensorflow", "torch"])
+def backend(request):
+    return request.param
+
+@pytest.fixture()
+def normal_distribution(backend):
+    match backend:
+        case "jax":
+            import tensorflow_probability.substrates.jax.distributions as D
+            return D.Normal
+        case "tensorflow":
+            import tensorflow_probability.python.distributions as D
+            return D.Normal
+        case "torch":
+            import torch.distributions as D
+            return D.Normal
+
+
+def test_prior_distribution(normal_distribution):
+    pass
+
+
+
+def test_prior_decorator():
+    from bayesflow.simulation import Prior
+
+    @Prior
+    def sample()
