@@ -1,4 +1,5 @@
 
+from .amortization import AmortizedLikelihood, AmortizedPosterior
 from .generative_model import GenerativeModel
 from .sampling import (
     SampleContextsMixin,
