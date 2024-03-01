@@ -20,15 +20,18 @@ class AmortizedPosterior(keras.Model, SamplePosteriorMixin):
         observations, parameters = data["observations"], data["parameters"]
 
         data["summaries"] = self.summary_network(observations)
-        try:
-            summary_loss, summary_metrics = self.summary_network.compute_loss_metrics(data)
-        except AttributeError:
-            summary_loss, summary_metrics = self.summary_network.compute_loss(data), self.summary_network.compute_metrics(data)
 
-        try:
+        if hasattr(self.summary_network, "compute_loss_metrics"):
+            summary_loss, summary_metrics = self.summary_network.compute_loss_metrics(data)
+        else:
+            summary_loss = self.inference_network.compute_loss(data)
+            summary_metrics = self.inference_network.compute_metrics(data, None, None)
+
+        if hasattr(self.inference_network, "compute_loss_metrics"):
             inference_loss, inference_metrics = self.inference_network.compute_loss_metrics(data)
-        except AttributeError:
-            inference_loss, inference_metrics = self.inference_network.compute_loss(data), self.inference_network.compute_metrics(data)
+        else:
+            inference_loss = self.inference_network.compute_loss(data)
+            inference_metrics = self.inference_network.compute_metrics(data, None, None)
 
         summary_metrics = {f"summary/{key}": value for key, value in summary_metrics.items()}
         inference_metrics = {f"inference/{key}": value for key, value in inference_metrics.items()}
