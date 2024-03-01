@@ -1,18 +1,16 @@
 
-import keras
-
 from .sampling import SampleContextsMixin, SampleParametersMixin, SampleObservationsMixin
 from .types import Observations, Shape
 
 
-class GenerativeModel(keras.Model):
+class GenerativeModel:
     """ Generate Observations Unconditionally: x ~ p(x) = ∫∫ p(x|θ,c) p(θ|c) p(c) dθ dc """
     def __init__(
             self,
             prior: SampleParametersMixin,
             simulator: SampleObservationsMixin,
             context_prior: SampleContextsMixin = None
-    ) -> None:
+    ):
         """
         Parameters
         ----------

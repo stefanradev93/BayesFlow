@@ -7,7 +7,7 @@ from ..types import Parameters, Contexts, Observations
 
 
 class AmortizedLikelihood(keras.Model, SampleLikelihoodMixin):
-    def __init__(self, surrogate_network: keras.Model) -> None:
+    def __init__(self, surrogate_network: keras.Model):
         super().__init__()
         self.surrogate_network = surrogate_network
 

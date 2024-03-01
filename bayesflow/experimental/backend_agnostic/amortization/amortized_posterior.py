@@ -7,7 +7,7 @@ from ..types import Observations, Contexts, Parameters
 
 
 class AmortizedPosterior(keras.Model, SamplePosteriorMixin):
-    def __init__(self, summary_network: keras.Model, inference_network: keras.Model) -> None:
+    def __init__(self, summary_network: keras.Model, inference_network: keras.Model):
         super().__init__()
         self.summary_network = summary_network
         self.inference_network = inference_network
