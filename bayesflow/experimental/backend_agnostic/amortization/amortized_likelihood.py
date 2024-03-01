@@ -14,5 +14,9 @@ class AmortizedLikelihood(keras.Model, SampleLikelihoodMixin):
         return self.surrogate_network(parameters, contexts)
 
     def compute_loss_metrics(self, data):
-        observations, parameters = data["observations"], data["parameters"]
-        return self.surrogate_network.compute_loss(observations, parameters)
+        try:
+            loss, metrics = self.surrogate_network.compute_loss_metrics(data)
+        except AttributeError:
+            loss, metrics = self.surrogate_network.compute_loss(data), self.surrogate_network.compute_metrics(data)
+
+        return loss, metrics
