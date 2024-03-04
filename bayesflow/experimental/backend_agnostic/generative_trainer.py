@@ -15,9 +15,10 @@ class GenerativeTrainer(keras.Model):
     def train_step(self, *args, **kwargs):
         backend = keras.backend.backend()
 
-        try:
-            return getattr(self, f"train_step_{backend}")(*args, **kwargs)
-        except AttributeError:
+        method_name = f"train_step_{backend}"
+        if hasattr(self, method_name):
+            return getattr(self, method_name)(*args, **kwargs)
+        else:
             raise NotImplementedError(f"Generative model training is not supported for backend '{backend}'.")
 
     def compute_loss_metrics(self, data):
