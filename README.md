@@ -73,7 +73,7 @@ def prior(D=2, mu=0., sigma=1.0):
 Then, we connect the `prior` with the `simulator` using a `GenerativeModel` wrapper:
 
 ```python
-generative_model = bf.simulation.GenerativeModel(prior, simulator)
+generative_model = bf.simulation.GenerativeModel(prior, simulator, simulator_is_batched=False)
 ```
 
 Next, we create our BayesFlow setup consisting of a summary and an inference network:
