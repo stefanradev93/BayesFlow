@@ -10,6 +10,18 @@ class AmortizedLikelihood(keras.Model, SampleLikelihoodMixin):
         super().__init__()
         self.surrogate_network = surrogate_network
 
+    def call(self, *args, **kwargs):
+        return None
+        # TODO: technically this implementation is fine, but it's not very useful
+        # parameters, contexts = data["parameters"], data.get("contexts")
+        # return self.surrogate_network(parameters, contexts)
+
+    def compute_loss(self, data: dict = None, *args, **kwargs):
+        return self.surrogate_network.compute_loss(data, *args, **kwargs)
+
+    def compute_metrics(self, data: dict = None, *args, **kwargs):
+        return self.surrogate_network.compute_metrics(data, *args, **kwargs)
+
     def sample_likelihood(self, batch_shape: Shape, parameters: Parameters, contexts: Contexts = None) -> Observations:
         return self.surrogate_network(parameters, contexts)
 

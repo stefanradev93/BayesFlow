@@ -18,6 +18,27 @@ class AmortizedPosteriorLikelihood(keras.Model, SamplePosteriorMixin, SampleLike
         self.amortized_likelihood = AmortizedLikelihood(surrogate_network)
         self.amortized_posterior = AmortizedPosterior(summary_network, inference_network)
 
+    def call(self, *args, **kwargs):
+        # TODO: can we implement this?
+        return None
+
+    def compute_loss(self, data: dict = None, *args, **kwargs):
+        posterior_loss = self.amortized_posterior.compute_loss(data, *args, **kwargs)
+        likelihood_loss = self.amortized_likelihood.compute_loss(data, *args, **kwargs)
+
+        return posterior_loss + likelihood_loss
+
+    def compute_metrics(self, data: dict = None, *args, **kwargs):
+        posterior_metrics = self.amortized_posterior.compute_metrics(data, *args, **kwargs)
+        likelihood_metrics = self.amortized_likelihood.compute_metrics(data, *args, **kwargs)
+
+        posterior_metrics = {f"posterior/{key}": value for key, value in posterior_metrics.items()}
+        likelihood_metrics = {f"likelihood/{key}": value for key, value in likelihood_metrics.items()}
+
+        metrics = posterior_metrics | likelihood_metrics
+
+        return metrics
+
     def compute_loss_metrics(self, data):
         posterior_loss, posterior_metrics = self.amortized_posterior.compute_loss_metrics(data)
         likelihood_loss, likelihood_metrics = self.amortized_likelihood.compute_loss_metrics(data)
