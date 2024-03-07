@@ -149,7 +149,7 @@ BayesFlow: Learning complex stochastic models with invertible neural networks.
 <em>IEEE Transactions on Neural Networks and Learning Systems, 33(4)</em>, 1452-1466.
 
 - Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., & Köthe, U. (2021).
-OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks and its application to the COVID-19 pandemics in Germany. <em>PLoS computational biology, 17(10)</em>, e1009472.
+OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks and its application to the COVID-19 pandemics in Germany. <em>PLoS Computational Biology, 17(10)</em>, e1009472.
 
 - Bieringer, S., Butter, A., Heimel, T., Höche, S., Köthe, U., Plehn, T., & Radev, S. T. (2021).
 Measuring QCD splittings with invertible networks. <em>SciPost Physics, 10(6)</em>, 126.
