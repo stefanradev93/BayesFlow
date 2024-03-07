@@ -429,7 +429,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
 
         # Throw, if summary loss without a summary network provided
         if loss_fun is not None and self.summary_net is None:
-            raise ConfigurationError('You need to provide a summary_net if you want to use a summary_loss_fun.')
+            raise ConfigurationError("You need to provide a summary_net if you want to use a summary_loss_fun.")
 
         # If callable, return provided loss
         if loss_fun is None or callable(loss_fun):
@@ -1214,19 +1214,3 @@ class TwoLevelAmortizedPosterior(tf.keras.Model, AmortizedTarget):
             local_summaries = input_dict.get("direct_local_conditions")
             global_summaries = input_dict.get("direct_global_conditions")
         return local_summaries, global_summaries
-
-
-class SingleModelAmortizer(AmortizedPosterior):
-    """Deprecated class for amortizer posterior estimation."""
-
-    def __init_subclass__(cls, **kwargs):
-        warn(f"{cls.__name__} will be deprecated. Use `AmortizedPosterior` instead.", DeprecationWarning, stacklevel=2)
-        super().__init_subclass__(**kwargs)
-
-    def __init__(self, *args, **kwargs):
-        warn(
-            f"{self.__class__.__name__} will be deprecated. Use `AmortizedPosterior` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)
