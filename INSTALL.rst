@@ -4,7 +4,7 @@ Full Installation Instructions
 Requirements
 ------------
 
-This package requires Python 3.9 or later.
+This package requires Python 3.10 or later.
 A simple installation is possible via `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_,
 e.g. (on Linux)
 

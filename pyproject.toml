@@ -26,7 +26,7 @@ no_implicit_reexport = true
 
 [tool.black]
 line-length = 120
-target-version = ["py39", "py310"]
+target-version = ["py310", "py311"]
 
 [tool.isort]
 profile = "black"

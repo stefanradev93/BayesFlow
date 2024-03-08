@@ -141,10 +141,18 @@ class MultiSimulationDataset:
         self.iters = [iter(d) for d in self.datasets]
         self.batch_size = batch_size
 
+        # Include further keys (= shared context) from forward_dict
+        self.further_keys = {}
+        for key, value in forward_dict.items():
+            if key not in [DEFAULT_KEYS["model_outputs"], DEFAULT_KEYS["model_indices"]]:
+                self.further_keys[key] = value
+
     def __next__(self):
         if self.current_it < self.num_batches:
             outputs = [next(d) for d in self.iters]
             output_dict = {DEFAULT_KEYS["model_outputs"]: outputs, DEFAULT_KEYS["model_indices"]: self.model_indices}
+            if self.further_keys:
+                output_dict.update(self.further_keys)
             self.current_it += 1
             return output_dict
         self.current_it = 0

@@ -454,8 +454,8 @@ class Trainer:
                     p_bar.update(1)
 
             # Store and compute validation loss, if specified
-            self._save_trainer(save_checkpoint)
             self._validation(ep, validation_sims, **kwargs)
+            self._save_trainer(save_checkpoint)
 
             # Check early stopping, if specified
             if self._check_early_stopping(early_stopper):
@@ -579,13 +579,13 @@ class Trainer:
                     # Format for display on progress bar
                     disp_str = format_loss_string(ep, bi, loss, avg_dict, lr=lr, it_str="Batch")
 
-                    # Update progress
+                    # Update progress bar
                     p_bar.set_postfix_str(disp_str, refresh=False)
                     p_bar.update(1)
 
             # Store and compute validation loss, if specified
-            self._save_trainer(save_checkpoint)
             self._validation(ep, validation_sims, **kwargs)
+            self._save_trainer(save_checkpoint)
 
             # Check early stopping, if specified
             if self._check_early_stopping(early_stopper):
@@ -762,15 +762,14 @@ class Trainer:
                     p_bar.update(1)
 
             # Store after each epoch, if specified
-            self._save_trainer(save_checkpoint)
-
             self._validation(ep, validation_sims, **kwargs)
+            self._save_trainer(save_checkpoint)
 
             # Check early stopping, if specified
             if self._check_early_stopping(early_stopper):
                 break
 
-        # Remove reference to optimizer, if not set to persistent
+        # Remove optimizer reference, if not set as persistent
         if not reuse_optimizer:
             self.optimizer = None
         return self.loss_history.get_plottable()
@@ -906,8 +905,8 @@ class Trainer:
                     p_bar.update(1)
 
             # Store and compute validation loss, if specified
-            self._save_trainer(save_checkpoint)
             self._validation(ep, validation_sims, **kwargs)
+            self._save_trainer(save_checkpoint)
 
             # Check early stopping, if specified
             if self._check_early_stopping(early_stopper):

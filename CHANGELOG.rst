@@ -83,3 +83,10 @@ General Improvements:
 performance.
 2. Deprecate name ``SequentialNetwork`` and use ``SequenceNetwork`` instead to avoid confusion with ``tf.keras.Sequential``.
 3. Change default to ``use_layer_norm=False`` of ``SetTransformer`` due to superior performance on relevant exchangeable models.
+
+
+1.1.5 Series
+----------
+1. Fix bug failing to propagate global context variables for model comparison.
+2. Major revamp of tutorials.
+3. Update dependencies and continuous integration.
