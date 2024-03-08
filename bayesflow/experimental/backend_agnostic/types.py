@@ -14,7 +14,12 @@ except ModuleNotFoundError:
         import torch
         Tensor = torch.Tensor
 
+Context = Tensor
+Observable = Tensor
+Parameter = Tensor
 
-Contexts = dict[str, Tensor]
-Observations = dict[str, Tensor]
-Parameters = dict[str, Tensor]
+Contexts = dict[str, Context]
+Observables = dict[str, Observable]
+Parameters = dict[str, Parameter]
+
+Data = dict[str, Contexts | Observables | Parameters]
