@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>bayesflow.helper_functions module &#8212; BayesFlow: Amortized Bayesian Inference</title>
   
@@ -19,33 +18,33 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/bayesflow.helper_functions';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="canonical" href="https://www.bayesflow.org/api/bayesflow.helper_functions.html" />
     <link rel="icon" href="../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../about.html" />
@@ -62,10 +61,9 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>
@@ -106,11 +104,14 @@
 </form></div>
   </div>
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
-    </nav>
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -144,7 +145,18 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">BayesFlow</a></li>
@@ -433,25 +445,25 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="module-bayesflow.helper_functions">
-<span id="bayesflow-helper-functions-module"></span><h1>bayesflow.helper_functions module<a class="headerlink" href="#module-bayesflow.helper_functions" title="Permalink to this heading">#</a></h1>
+<span id="bayesflow-helper-functions-module"></span><h1>bayesflow.helper_functions module<a class="headerlink" href="#module-bayesflow.helper_functions" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.helper_functions.check_tensor_sanity">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">check_tensor_sanity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#check_tensor_sanity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.check_tensor_sanity" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">check_tensor_sanity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#check_tensor_sanity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.check_tensor_sanity" title="Link to this definition">#</a></dt>
 <dd><p>Tests for the presence of NaNs and Infs in a tensor.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.helper_functions.merge_left_into_right">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">merge_left_into_right</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#merge_left_into_right"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.merge_left_into_right" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">merge_left_into_right</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#merge_left_into_right"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.merge_left_into_right" title="Link to this definition">#</a></dt>
 <dd><p>Function to merge nested dict <cite>left_dict</cite> into nested dict <cite>right_dict</cite>.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.helper_functions.build_meta_dict">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">build_meta_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_setting</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bayesflow.default_settings.html#bayesflow.default_settings.MetaDictSetting" title="bayesflow.default_settings.MetaDictSetting"><span class="pre">MetaDictSetting</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#build_meta_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.build_meta_dict" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">build_meta_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_setting</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bayesflow.default_settings.html#bayesflow.default_settings.MetaDictSetting" title="bayesflow.default_settings.MetaDictSetting"><span class="pre">MetaDictSetting</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#build_meta_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.build_meta_dict" title="Link to this definition">#</a></dt>
 <dd><p>Integrates a user-defined dictionary into a default dictionary.</p>
 <p>Takes a user-defined dictionary and a default dictionary.</p>
 <ol class="arabic simple">
@@ -482,7 +494,7 @@ document.write(`
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.helper_functions.extract_current_lr">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">extract_current_lr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#extract_current_lr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.extract_current_lr" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">extract_current_lr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#extract_current_lr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.extract_current_lr" title="Link to this definition">#</a></dt>
 <dd><p>Extracts current learning rate from <cite>optimizer</cite>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -502,13 +514,13 @@ document.write(`
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.helper_functions.format_loss_string">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">format_loss_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">it</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ep_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Epoch'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">it_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Iter'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_loss_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Loss'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#format_loss_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.format_loss_string" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">format_loss_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">it</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ep_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Epoch'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">it_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Iter'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_loss_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Loss'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#format_loss_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.format_loss_string" title="Link to this definition">#</a></dt>
 <dd><p>Prepare loss string for displaying on progress bar.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.helper_functions.loss_to_string">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">loss_to_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ep_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Epoch'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_loss_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Loss'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#loss_to_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.loss_to_string" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">loss_to_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ep_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Epoch'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_loss_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Loss'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#loss_to_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.loss_to_string" title="Link to this definition">#</a></dt>
 <dd><p>Converts output from an amortizer into a string.
 For instance, if a <code class="docutils literal notranslate"><span class="pre">dict</span></code> is provided, it will be converted as, e.g.,:
 dictionary = {k1: v1, k2: v2} -&gt; ‘k1: v1, k2: v2’</p>
@@ -516,7 +528,7 @@ dictionary = {k1: v1, k2: v2} -&gt; ‘k1: v1, k2: v2’</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.helper_functions.backprop_step">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">backprop_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amortizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#backprop_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.backprop_step" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">backprop_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amortizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#backprop_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.backprop_step" title="Link to this definition">#</a></dt>
 <dd><p>Computes the loss of the provided amortizer given an input dictionary and applies gradients.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -543,7 +555,7 @@ loss components, such as divergences or regularization.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.helper_functions.check_posterior_prior_shapes">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">check_posterior_prior_shapes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#check_posterior_prior_shapes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.check_posterior_prior_shapes" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.helper_functions.</span></span><span class="sig-name descname"><span class="pre">check_posterior_prior_shapes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/helper_functions.html#check_posterior_prior_shapes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.helper_functions.check_posterior_prior_shapes" title="Link to this definition">#</a></dt>
 <dd><p>Checks requirements for the shapes of posterior and prior draws as
 necessitated by most diagnostic functions.</p>
 <dl class="field-list simple">
@@ -604,6 +616,7 @@ necessitated by most diagnostic functions.</p>
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
   <div class="sidebar-secondary-item">
   <div class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
@@ -662,8 +675,8 @@ necessitated by most diagnostic functions.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
   </footer>

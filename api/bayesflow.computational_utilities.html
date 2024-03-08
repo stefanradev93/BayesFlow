@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>bayesflow.computational_utilities module &#8212; BayesFlow: Amortized Bayesian Inference</title>
   
@@ -19,35 +18,35 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/bayesflow.computational_utilities';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="canonical" href="https://www.bayesflow.org/api/bayesflow.computational_utilities.html" />
     <link rel="icon" href="../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../about.html" />
@@ -64,10 +63,9 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>
@@ -108,11 +106,14 @@
 </form></div>
   </div>
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
-    </nav>
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -146,7 +147,18 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">BayesFlow</a></li>
@@ -442,13 +454,13 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="module-bayesflow.computational_utilities">
-<span id="bayesflow-computational-utilities-module"></span><h1>bayesflow.computational_utilities module<a class="headerlink" href="#module-bayesflow.computational_utilities" title="Permalink to this heading">#</a></h1>
+<span id="bayesflow-computational-utilities-module"></span><h1>bayesflow.computational_utilities module<a class="headerlink" href="#module-bayesflow.computational_utilities" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.posterior_calibration_error">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">posterior_calibration_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posterior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_resolution=20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregator_fun=&lt;function</span> <span class="pre">median&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_quantile=0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_quantile=0.995</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#posterior_calibration_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.posterior_calibration_error" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">posterior_calibration_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posterior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_resolution=20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregator_fun=&lt;function</span> <span class="pre">median&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_quantile=0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_quantile=0.995</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#posterior_calibration_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.posterior_calibration_error" title="Link to this definition">#</a></dt>
 <dd><p>Computes an aggregate score for the marginal calibration error over an ensemble of approximate
 posteriors. The calibration error is given as the aggregate (e.g., median) of the absolute deviation
 between an alpha-CI and the relative number of inliers from <code class="docutils literal notranslate"><span class="pre">prior_samples</span></code> over multiple alphas in
@@ -485,7 +497,7 @@ The aggregated calibration error per marginal posterior.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.compute_jacobian_trace">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">compute_jacobian_trace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#compute_jacobian_trace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.compute_jacobian_trace" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">compute_jacobian_trace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#compute_jacobian_trace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.compute_jacobian_trace" title="Link to this definition">#</a></dt>
 <dd><p>Computes the exact Jacobian Trace of function with respect to inputs. Suitable for low dimensions (&lt;32)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -509,7 +521,7 @@ The aggregated calibration error per marginal posterior.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.gaussian_kernel_matrix">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">gaussian_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#gaussian_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.gaussian_kernel_matrix" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">gaussian_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#gaussian_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.gaussian_kernel_matrix" title="Link to this definition">#</a></dt>
 <dd><p>Computes a Gaussian radial basis functions (RBFs) between the samples of x and y.</p>
 <p>We create a sum of multiple Gaussian kernels each having a width <span class="math notranslate nohighlight">\(\sigma_i\)</span>.</p>
 <dl class="field-list simple">
@@ -535,7 +547,7 @@ If <cite>sigmas is None</cite>, a default range will be used, contained in <code
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.inverse_multiquadratic_kernel_matrix">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">inverse_multiquadratic_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#inverse_multiquadratic_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.inverse_multiquadratic_kernel_matrix" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">inverse_multiquadratic_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#inverse_multiquadratic_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.inverse_multiquadratic_kernel_matrix" title="Link to this definition">#</a></dt>
 <dd><p>Computes an inverse multiquadratic RBF between the samples of x and y.</p>
 <p>We create a sum of multiple IM-RBF kernels each having a width <span class="math notranslate nohighlight">\(\sigma_i\)</span>.</p>
 <dl class="field-list simple">
@@ -561,7 +573,7 @@ If <cite>sigmas is None</cite>, a default range will be used, contained in <cite
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.mmd_kernel">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">mmd_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#mmd_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.mmd_kernel" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">mmd_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#mmd_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.mmd_kernel" title="Link to this definition">#</a></dt>
 <dd><p>Computes the estimator of the Maximum Mean Discrepancy (MMD) between two samples: x and y.</p>
 <p>Maximum Mean Discrepancy (MMD) is a distance-measure between random draws from
 the distributions <cite>x ~ P</cite> and <cite>y ~ Q</cite>.</p>
@@ -587,7 +599,7 @@ the distributions <cite>x ~ P</cite> and <cite>y ~ Q</cite>.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.mmd_kernel_unbiased">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">mmd_kernel_unbiased</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#mmd_kernel_unbiased"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.mmd_kernel_unbiased" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">mmd_kernel_unbiased</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#mmd_kernel_unbiased"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.mmd_kernel_unbiased" title="Link to this definition">#</a></dt>
 <dd><p>Computes the unbiased estimator of the Maximum Mean Discrepancy (MMD) between two samples: x and y.
 Maximum Mean Discrepancy (MMD) is a distance-measure between the samples of the distributions <cite>x ~ P</cite> and <cite>y ~ Q</cite>.</p>
 <dl class="field-list simple">
@@ -612,7 +624,7 @@ Maximum Mean Discrepancy (MMD) is a distance-measure between the samples of the 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.expected_calibration_error">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">expected_calibration_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#expected_calibration_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.expected_calibration_error" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">expected_calibration_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#expected_calibration_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.expected_calibration_error" title="Link to this definition">#</a></dt>
 <dd><p>Estimates the expected calibration error (ECE) of a model comparison network according to [1].</p>
 <dl class="simple">
 <dt>[1] Naeini, M. P., Cooper, G., &amp; Hauskrecht, M. (2015).</dt><dd><p>Obtaining well calibrated probabilities using bayesian binning.
@@ -646,7 +658,7 @@ Each list contains two arrays of length (num_bins) with the predicted and true p
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.maximum_mean_discrepancy">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">maximum_mean_discrepancy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmd_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#maximum_mean_discrepancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.maximum_mean_discrepancy" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">maximum_mean_discrepancy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmd_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#maximum_mean_discrepancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.maximum_mean_discrepancy" title="Link to this definition">#</a></dt>
 <dd><p>Computes the MMD given a particular choice of kernel.</p>
 <p>For details, consult Gretton et al. (2012):
 <a class="reference external" href="https://www.jmlr.org/papers/volume13/gretton12a/gretton12a.pdf">https://www.jmlr.org/papers/volume13/gretton12a/gretton12a.pdf</a></p>
@@ -676,7 +688,7 @@ Each list contains two arrays of length (num_bins) with the predicted and true p
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.get_coverage_probs">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">get_coverage_probs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#get_coverage_probs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.get_coverage_probs" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">get_coverage_probs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#get_coverage_probs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.get_coverage_probs" title="Link to this definition">#</a></dt>
 <dd><p>Vectorized function to compute the minimal coverage probability for uniform
 ECDFs given evaluation points z and a sample of samples u.</p>
 <dl class="field-list simple">
@@ -693,7 +705,7 @@ ECDFs given evaluation points z and a sample of samples u.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.simultaneous_ecdf_bands">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">simultaneous_ecdf_bands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_simulations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#simultaneous_ecdf_bands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.simultaneous_ecdf_bands" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">simultaneous_ecdf_bands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_simulations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#simultaneous_ecdf_bands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.simultaneous_ecdf_bands" title="Link to this definition">#</a></dt>
 <dd><p>Computes the simultaneous ECDF bands through simulation according to
 the algorithm described in Section 2.2:</p>
 <p><a class="reference external" href="https://link.springer.com/content/pdf/10.1007/s11222-022-10090-6.pdf">https://link.springer.com/content/pdf/10.1007/s11222-022-10090-6.pdf</a></p>
@@ -729,7 +741,7 @@ to avoid edge artefacts. No need to touch this.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.mean_squared_error">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">mean_squared_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#mean_squared_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.mean_squared_error" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">mean_squared_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#mean_squared_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.mean_squared_error" title="Link to this definition">#</a></dt>
 <dd><p>Computes the mean squared error between a single true value and M estimates thereof.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -751,7 +763,7 @@ to avoid edge artefacts. No need to touch this.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.root_mean_squared_error">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">root_mean_squared_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#root_mean_squared_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.root_mean_squared_error" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">root_mean_squared_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#root_mean_squared_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.root_mean_squared_error" title="Link to this definition">#</a></dt>
 <dd><p>Computes the root mean squared error (RMSE) between a single true value and M estimates thereof.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -773,7 +785,7 @@ to avoid edge artefacts. No need to touch this.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.aggregated_error">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">aggregated_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_error_fun=&lt;function</span> <span class="pre">root_mean_squared_error&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer_aggregation_fun=&lt;function</span> <span class="pre">mean&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#aggregated_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.aggregated_error" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">aggregated_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_error_fun=&lt;function</span> <span class="pre">root_mean_squared_error&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer_aggregation_fun=&lt;function</span> <span class="pre">mean&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#aggregated_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.aggregated_error" title="Link to this definition">#</a></dt>
 <dd><p>Computes the aggregated error between a vector of N true values and M estimates of each true value.</p>
 <p>x_true      : np.ndarray
 true values, shape (N)</p>
@@ -787,7 +799,7 @@ aggregates N errors to a single aggregated error value</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.aggregated_rmse">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">aggregated_rmse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#aggregated_rmse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.aggregated_rmse" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">aggregated_rmse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#aggregated_rmse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.aggregated_rmse" title="Link to this definition">#</a></dt>
 <dd><p>Computes the aggregated RMSE for a matrix of predictions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -808,7 +820,7 @@ aggregates N errors to a single aggregated error value</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bayesflow.computational_utilities.c2st">
-<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">c2st</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_folds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'accuracy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">123</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_units_per_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregate_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#c2st"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.c2st" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">bayesflow.computational_utilities.</span></span><span class="sig-name descname"><span class="pre">c2st</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_folds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'accuracy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">123</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_units_per_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregate_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/computational_utilities.html#c2st"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.computational_utilities.c2st" title="Link to this definition">#</a></dt>
 <dd><p>C2ST metric [1] using an sklearn neural network classifier (i.e., MLP).
 Code adapted from <a class="github reference external" href="https://github.com/sbi-benchmark/sbibm/blob/main/sbibm/metrics/c2st.py">sbi-benchmark/sbibm</a></p>
 <p>[1] Lopez-Paz, D., &amp; Oquab, M. (2016). Revisiting classifier two-sample tests. arXiv:1610.06545.</p>
@@ -884,6 +896,7 @@ or all values from all runs. If left at default, the empirical mean will be retu
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
   <div class="sidebar-secondary-item">
   <div class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
@@ -949,8 +962,8 @@ or all values from all runs. If left at default, the empirical mean will be retu
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
   </footer>

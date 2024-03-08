@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>1. Quickstart: Amortized Posterior Estimation &#8212; BayesFlow: Amortized Bayesian Inference</title>
   
@@ -19,35 +18,35 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/Intro_Amortized_Posterior_Estimation';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="canonical" href="https://www.bayesflow.org/_examples/Intro_Amortized_Posterior_Estimation.html" />
     <link rel="icon" href="../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../about.html" />
@@ -64,10 +63,9 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>
@@ -108,11 +106,14 @@
 </form></div>
   </div>
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
-    </nav>
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -146,7 +147,18 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">BayesFlow</a></li>
@@ -418,32 +430,33 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">1.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-generative-model">1.2. Defining the Generative Model</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior">1.2.1. Prior</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulator">1.2.2. Simulator</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model">1.2.3. Generative Model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">1.1. Table of Contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">1.2. Introduction <a class="anchor" id="introduction"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-generative-model">1.3. Defining the Generative Model <a class="anchor" id="defining_the_generative"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior">1.3.1. Prior <a class="anchor" id="prior"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulator">1.3.2. Simulator <a class="anchor" id="simulator"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model">1.3.3. Generative Model <a class="anchor" id="generative_model"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-neural-approximator">1.3. Defining the Neural Approximator</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">1.3.1. Summary Network</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">1.3.2. Inference Network</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#amortized-posterior">1.3.3. Amortized Posterior</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-neural-approximator">1.4. Defining the Neural Approximator <a class="anchor" id="defining_the_neural"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">1.4.1. Summary Network <a class="anchor" id="summary_network"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">1.4.2. Inference Network <a class="anchor" id="inference_network"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#amortized-posterior">1.4.3. Amortized Posterior <a class="anchor" id="amortized_posterior"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-trainer">1.4. Defining the Trainer</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-phase">1.5. Training Phase</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#online-training">1.5.1. Online Training</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-loss">1.5.2. Inspecting the Loss</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#validating-consistency">1.5.3. Validating Consistency</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#latent-space-inspection">1.5.3.1. Latent space inspection</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">1.5.3.2. Simulation-Based Calibration</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#posterior-z-score-and-contraction">1.5.3.3. Posterior z-score and contraction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-trainer">1.5. Defining the Trainer <a class="anchor" id="defining_the_trainer"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-phase">1.6. Training Phase <a class="anchor" id="training_phase"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#online-training">1.6.1. Online Training <a class="anchor" id="online_training"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-loss">1.6.2. Inspecting the Loss <a class="anchor" id="inspecting_the_loss"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#validating-consistency">1.6.3. Validating Consistency <a class="anchor" id="validating_consistency"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#latent-space-inspection">1.6.3.1. Latent space inspection <a class="anchor" id="latent_space_inspection"></a></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">1.6.3.2. Simulation-Based Calibration <a class="anchor" id="simulation_based_calibration"></a></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#posterior-z-score-and-contraction">1.6.3.3. Posterior z-score and contraction <a class="anchor" id="posterior_z_score_and"></a></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-phase">1.6. Inference Phase</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-phase">1.7. Inference Phase <a class="anchor" id="inference_phase"></a></a></li>
 </ul>
             </nav>
         </div>
@@ -453,11 +466,44 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
-  <h1>Table of Contents<span class="tocSkip"></span></h1>
-<div class="toc"><ul class="toc-item"><li><span><a href="#Introduction" data-toc-modified-id="Introduction-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>Introduction</a></span></li><li><span><a href="#Defining-the-Generative-Model" data-toc-modified-id="Defining-the-Generative-Model-2"><span class="toc-item-num">2&nbsp;&nbsp;</span>Defining the Generative Model</a></span><ul class="toc-item"><li><span><a href="#Prior" data-toc-modified-id="Prior-2.1"><span class="toc-item-num">2.1&nbsp;&nbsp;</span>Prior</a></span></li><li><span><a href="#Simulator" data-toc-modified-id="Simulator-2.2"><span class="toc-item-num">2.2&nbsp;&nbsp;</span>Simulator</a></span></li><li><span><a href="#Generative-Model" data-toc-modified-id="Generative-Model-2.3"><span class="toc-item-num">2.3&nbsp;&nbsp;</span>Generative Model</a></span></li></ul></li><li><span><a href="#Defining-the-Neural-Approximator" data-toc-modified-id="Defining-the-Neural-Approximator-3"><span class="toc-item-num">3&nbsp;&nbsp;</span>Defining the Neural Approximator</a></span><ul class="toc-item"><li><span><a href="#Summary-Network" data-toc-modified-id="Summary-Network-3.1"><span class="toc-item-num">3.1&nbsp;&nbsp;</span>Summary Network</a></span></li><li><span><a href="#Inference-Network" data-toc-modified-id="Inference-Network-3.2"><span class="toc-item-num">3.2&nbsp;&nbsp;</span>Inference Network</a></span></li><li><span><a href="#Amortized-Posterior" data-toc-modified-id="Amortized-Posterior-3.3"><span class="toc-item-num">3.3&nbsp;&nbsp;</span>Amortized Posterior</a></span></li></ul></li><li><span><a href="#Defining-the-Trainer" data-toc-modified-id="Defining-the-Trainer-4"><span class="toc-item-num">4&nbsp;&nbsp;</span>Defining the Trainer</a></span></li><li><span><a href="#Training-Phase" data-toc-modified-id="Training-Phase-5"><span class="toc-item-num">5&nbsp;&nbsp;</span>Training Phase</a></span><ul class="toc-item"><li><span><a href="#Online-Training" data-toc-modified-id="Online-Training-5.1"><span class="toc-item-num">5.1&nbsp;&nbsp;</span>Online Training</a></span></li><li><span><a href="#Inspecting-the-Loss" data-toc-modified-id="Inspecting-the-Loss-5.2"><span class="toc-item-num">5.2&nbsp;&nbsp;</span>Inspecting the Loss</a></span></li><li><span><a href="#Validating-Consistency" data-toc-modified-id="Validating-Consistency-5.3"><span class="toc-item-num">5.3&nbsp;&nbsp;</span>Validating Consistency</a></span><ul class="toc-item"><li><span><a href="#Latent-space-inspection" data-toc-modified-id="Latent-space-inspection-5.3.1"><span class="toc-item-num">5.3.1&nbsp;&nbsp;</span>Latent space inspection</a></span></li><li><span><a href="#Simulation-Based-Calibration" data-toc-modified-id="Simulation-Based-Calibration-5.3.2"><span class="toc-item-num">5.3.2&nbsp;&nbsp;</span>Simulation-Based Calibration</a></span></li><li><span><a href="#Posterior-z-score-and-contraction" data-toc-modified-id="Posterior-z-score-and-contraction-5.3.3"><span class="toc-item-num">5.3.3&nbsp;&nbsp;</span>Posterior z-score and contraction</a></span></li></ul></li></ul></li><li><span><a href="#Inference-Phase" data-toc-modified-id="Inference-Phase-6"><span class="toc-item-num">6&nbsp;&nbsp;</span>Inference Phase</a></span></li></ul></div><section class="tex2jax_ignore mathjax_ignore" id="quickstart-amortized-posterior-estimation">
-<h1><span class="section-number">1. </span>Quickstart: Amortized Posterior Estimation<a class="headerlink" href="#quickstart-amortized-posterior-estimation" title="Permalink to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="quickstart-amortized-posterior-estimation">
+<h1><span class="section-number">1. </span>Quickstart: Amortized Posterior Estimation<a class="headerlink" href="#quickstart-amortized-posterior-estimation" title="Link to this heading">#</a></h1>
+<section id="table-of-contents">
+<h2><span class="section-number">1.1. </span>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#introduction"><span class="xref myst">Introduction</span></a></p></li>
+<li><p><a class="reference internal" href="#defining_the_generative"><span class="xref myst">Defining the Generative Model</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="../api/bayesflow.benchmarks.bernoulli_glm.html#bayesflow.benchmarks.bernoulli_glm.prior" title="bayesflow.benchmarks.bernoulli_glm.prior"><span class="xref myst py py-func">Prior</span></a></p></li>
+<li><p><a class="reference internal" href="../api/bayesflow.benchmarks.bernoulli_glm.html#bayesflow.benchmarks.bernoulli_glm.simulator" title="bayesflow.benchmarks.bernoulli_glm.simulator"><span class="xref myst py py-func">Simulator</span></a></p></li>
+<li><p><a class="reference internal" href="#generative_model"><span class="xref myst">Generative Model</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#defining_the_neural"><span class="xref myst">Defining the Neural Approximator</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#summary_network"><span class="xref myst">Summary Network</span></a></p></li>
+<li><p><a class="reference internal" href="#inference_network"><span class="xref myst">Inference Network</span></a></p></li>
+<li><p><a class="reference internal" href="#amortized_posterior"><span class="xref myst">Amortized Posterior</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#defining_the_trainer"><span class="xref myst">Defining the Trainer</span></a></p></li>
+<li><p><a class="reference internal" href="#training_phase"><span class="xref myst">Training Phase</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#online_training"><span class="xref myst">Online Training</span></a></p></li>
+<li><p><a class="reference internal" href="#inspecting_the_loss"><span class="xref myst">Inspecting the Loss</span></a></p></li>
+<li><p><a class="reference internal" href="#validating_consistency"><span class="xref myst">Validating Consistency</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#latent_space_inspection"><span class="xref myst">Latent space inspection</span></a></p></li>
+<li><p><a class="reference internal" href="#simulation_based_calibration"><span class="xref myst">Simulation-Based Calibration</span></a></p></li>
+<li><p><a class="reference internal" href="#posterior_z_score_and"><span class="xref myst">Posterior z-score and contraction</span></a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#inference_phase"><span class="xref myst">Inference Phase</span></a></p></li>
+</ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -466,10 +512,29 @@ document.write(`
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-02-05 03:05:37.850165: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2024-02-05 03:05:38.303673: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2024-02-05 03:05:38.304006: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2024-02-05 03:05:38.402257: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2024-02-05 03:05:38.559381: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2024-02-05 03:05:38.563812: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-02-05 03:05:41.393576: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+/home/pritom/miniconda3/envs/bayesflow/lib/python3.10/site-packages/bayesflow/trainers.py:27: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+  from tqdm.autonotebook import tqdm
+</pre></div>
 </div>
+</div>
+</div>
+</section>
 <section id="introduction">
-<h2><span class="section-number">1.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
-<p>Welcome to the very first tutorial on using <strong>BayesFlow</strong> for amortized posterior estimation! In this notebook, we will estimate the means of a multivariate Gaussian model and illustrate some features of the library along the way. Above, we have already imported the core entities we will need for this notebook. In brief:</p>
+<h2><span class="section-number">1.2. </span>Introduction <a class="anchor" id="introduction"></a><a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<p>Welcome to the very first tutorial on using <strong>BayesFlow</strong> for amortized posterior estimation! In this notebook, we will estimate the means of a multivariate Gaussian model and illustrate some features of the library along the way.</p>
+<p>Here is a brief description of amortized posterior estimation:</p>
+<p>In traditional posterior estimation, as in Bayesian inference, we seek to compute or approximate the posterior distribution of model parameters given observed data for each new data instance separately. This process can be computationally expensive, especially for complex models or large datasets, because it often involves iterative optimization or sampling methods. This step needs to be repeated for each new instance of data.</p>
+<p>Amortized posterior estimation offers a solution to this problem. “Amortization” here refers to spreading out the computational cost over multiple instances. Instead of computing a new posterior from scratch for each data instance, amortized inference learns a function. This function is parameterized by a neural network, that directly maps observations to an approximation of the posterior distribution. This function is trained over the dataset to approximate the posterior for any new data instance efficiently. In this example, we will use a simple Gaussian model to illustrate the basic concepts of amortized posterior estimation.</p>
+<p>Above, we have already imported the core entities that we will need for this notebook. In brief:</p>
 <ul class="simple">
 <li><p>The module <code class="docutils literal notranslate"><span class="pre">simulation</span></code> contains high-level wrappers for gluing together priors, simulators, and context generators into a single <code class="docutils literal notranslate"><span class="pre">GenerativeModel</span></code> object, which will generate all quantities of interest for a modeling scenario.</p></li>
 <li><p>The module <code class="docutils literal notranslate"><span class="pre">networks</span></code> contains the core neural architectures used for various tasks, e.g., an <code class="docutils literal notranslate"><span class="pre">InvariantNetwork</span></code> for realizing normalizing flows (https://paperswithcode.com/method/normalizing-flows) or a <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> for learning permutation-invariant summary representations (embeddings).</p></li>
@@ -488,9 +553,9 @@ The summary network transforms input data <span class="math notranslate nohighli
 The inference network generates random draws from an approximate posterior <span class="math notranslate nohighlight">\(q\)</span> via a conditional invertible neural network (cINN).
 This process is illustrated in the figure below:</p>
 <a class="reference internal image-reference" href="../_images/bayesflow_overview.png"><img alt="../_images/bayesflow_overview.png" src="../_images/bayesflow_overview.png" style="width: 90%;" /></a>
-<p>The left panel illustrates the <em>training phase</em>. During this phase, only the model (i.e., simulator and prior) is used to jointly train the summary and inference networks. The right panel illustrates the <em>inference phase</em>. During this phase, arbitrarily many actually observed data sets can be fed through the networks to obtain posteriors.
+<p>The left panel illustrates the <em>training phase</em>. During this phase, only the model (i.e., simulator and prior) is used to jointly train the summary and inference networks. A parameter vector <span class="math notranslate nohighlight">\(\theta\)</span> is sampled from the prior distribution and then fed to the simulator. The simulator returns <span class="math notranslate nohighlight">\(N\)</span> counts of <span class="math notranslate nohighlight">\(x\)</span> vectors that serve as input to the summary network. The right panel illustrates the <em>inference phase</em>. During this phase, arbitrarily many actually observed data sets can be fed through the networks to obtain posteriors.
 For instance, in one recent paper (https://www.nature.com/articles/s41562-021-01282-7), the authors applied pre-trained networks to more than one million observed data sets! Now let’s get into some coding…</p>
-<p>First and foremost, we set a local seed for reproducibility (best <code class="docutils literal notranslate"><span class="pre">numpy</span></code> practice as of 2022).</p>
+<p>First and foremost, we set a local seed for reproducibility (best <code class="docutils literal notranslate"><span class="pre">numpy</span></code> practice as of 2022). See (https://numpy.org/neps/nep-0019-rng-policy.html) for more details.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">RNG</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2023</span><span class="p">)</span>
@@ -500,10 +565,11 @@ For instance, in one recent paper (https://www.nature.com/articles/s41562-021-01
 </div>
 </section>
 <section id="defining-the-generative-model">
-<h2><span class="section-number">1.2. </span>Defining the Generative Model<a class="headerlink" href="#defining-the-generative-model" title="Permalink to this heading">#</a></h2>
-<p>From the perspective of the BayesFlow framework, a generative model is more than just a prior and a simulator. In addition, it consists of various <em>implicit</em> context assumptions, which we can make <em>explicit</em> at any time. Furthermore, we can also <em>amortize</em> over these context variables, thus making our real-world inference more flexible (i.e., applicable to more contexts). The figure below illustrates the skeleton of a generative model as conceptualized in the BayesFlow framework.</p>
+<h2><span class="section-number">1.3. </span>Defining the Generative Model <a class="anchor" id="defining_the_generative"></a><a class="headerlink" href="#defining-the-generative-model" title="Link to this heading">#</a></h2>
+<p>From the perspective of the BayesFlow framework, a generative model is more than just a prior (encoding beliefs about the parameters before observing data) and a simulator (a likelihood function, often implicit, that generates data given parameters). In addition, it consists of various <em>implicit</em> context assumptions, which we can make <em>explicit</em> at any time. Furthermore, we can also <em>amortize</em> over these context variables, thus making our real-world inference more flexible (i.e., applicable to more contexts). We are leveraging the concept of amortized inference and extending it to context variables as well. The figure below illustrates the skeleton of a generative model as conceptualized in the BayesFlow framework.</p>
 <a class="reference internal image-reference" href="../_images/generative_model.png"><img alt="../_images/generative_model.png" src="../_images/generative_model.png" style="width: 75%;" /></a>
 <p>This conceptual model allows you to tackle very flexible model families with BayesFlow, as well as various other Bayesian tasks, such as prior sensitivity analysis or multiverse analysis.</p>
+<p>Prior sensitivity analysis: it is a technique used in Bayesian statistics to assess how sensitive the results of a model are to the choice of the prior distribution. In Bayesian inference, the prior represents our existing knowledge or assumptions about the parameters before observing the data. However, the selection of an appropriate prior can sometimes be subjective, and different priors can lead to different posterior estimates. Prior sensitivity analysis involves systematically varying the priors and examining how these variations affect the posterior estimates.</p>
 <p>The toy Gaussian model we will use for this tutorial takes a particularly simple form:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
@@ -514,7 +580,7 @@ For instance, in one recent paper (https://www.nature.com/articles/s41562-021-01
 \end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathcal{N}_D\)</span> denotes a multivariate Gaussian (normal) density with <span class="math notranslate nohighlight">\(D\)</span> dimensions, which we set at <span class="math notranslate nohighlight">\(D = 4\)</span> for the current example. For simplicity, we will also set <span class="math notranslate nohighlight">\(\sigma_0 =1\)</span> and <span class="math notranslate nohighlight">\(\sigma_1 = 1\)</span>. We will now implement this model using the latest numpy interface.</p>
 <section id="prior">
-<h3><span class="section-number">1.2.1. </span>Prior<a class="headerlink" href="#prior" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">1.3.1. </span>Prior <a class="anchor" id="prior"></a><a class="headerlink" href="#prior" title="Link to this heading">#</a></h3>
 <p>We first define a function generating single draws from the prior (as specified by our model formulation above), which we pass to the <code class="docutils literal notranslate"><span class="pre">Prior</span></code> wrapper.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -563,10 +629,10 @@ The interface distinguishes between two types of context: <code class="docutils 
 <li><p>Non-batchable context variables stay the same for each simulation in a batch, but differ across simulated batches;</p></li>
 </ul>
 <p>Examples for <strong>batchable</strong> context variables include experimental design variables, design matrices, etc.
-Examples for <strong>non-batchable</strong> context variables include the number of observations in an experiment, positional encodings, time indices, etc. While the latter can also be considered batchable in principle, batching them would require non-Tensor (i.e., non-rectangular) data structures, which usually means inefficient computations.</p>
+Examples for <strong>non-batchable</strong> context variables include the number of observations in an experiment, positional encodings, time indices, etc. While the latter can also be considered batchable in principle, batching them would require non-Tensor (i.e., non-rectangular) data structures. When you have a variable that changes its structure or size across different batches (like varying the number of observations), it doesn’t fit neatly into a rectangular tensor structure. One would need to use non-tensor data structures, which are not as efficiently processed by the hardware typically used for machine learning computations (like GPUs).</p>
 </section>
 <section id="simulator">
-<h3><span class="section-number">1.2.2. </span>Simulator<a class="headerlink" href="#simulator" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">1.3.2. </span>Simulator <a class="anchor" id="simulator"></a><a class="headerlink" href="#simulator" title="Link to this heading">#</a></h3>
 <p>In this case, our simulator function is equally simple to our prior function. We will call it a likelihood function, in correspondence with standard Bayesian terminology, and pass it to the <code class="docutils literal notranslate"><span class="pre">Simulator</span></code> wrapper.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -583,10 +649,10 @@ Examples for <strong>non-batchable</strong> context variables include the number
 </div>
 </div>
 </div>
-<p>Note, that we define our <code class="docutils literal notranslate"><span class="pre">simulator_fun</span></code> with two arguments. A positional argument which stands for a single random draw from the prior and a keyword argument <code class="docutils literal notranslate"><span class="pre">n_obs</span></code> which represents the number of observations <span class="math notranslate nohighlight">\(N\)</span> we will generate from the likelihood for each draw from the prior. As some point, we want to vary <span class="math notranslate nohighlight">\(N\)</span> during training, so that the architecture can generalize to different <span class="math notranslate nohighlight">\(N\)</span> during inference.</p>
+<p>Note, that we define our simulator function or <code class="docutils literal notranslate"><span class="pre">likelihood_fun</span></code> with two arguments. A positional argument, <code class="docutils literal notranslate"><span class="pre">params</span></code> which stands for a single random draw from the prior and a keyword argument <code class="docutils literal notranslate"><span class="pre">n_obs</span></code> which represents the number of observations <span class="math notranslate nohighlight">\(N\)</span> that we will generate from the likelihood for each draw from the prior. As some point, we want to vary <span class="math notranslate nohighlight">\(N\)</span> during training, so that the architecture can generalize to different values of <span class="math notranslate nohighlight">\(N\)</span> during inference.</p>
 </section>
 <section id="generative-model">
-<h3><span class="section-number">1.2.3. </span>Generative Model<a class="headerlink" href="#generative-model" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">1.3.3. </span>Generative Model <a class="anchor" id="generative_model"></a><a class="headerlink" href="#generative-model" title="Link to this heading">#</a></h3>
 <p>We will now connect the prior with the likelihood (simulator) via the <code class="docutils literal notranslate"><span class="pre">GenerativeModel</span></code> interface:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -642,10 +708,10 @@ INFO:root:No optional simulation batchable context provided.
 </section>
 </section>
 <section id="defining-the-neural-approximator">
-<h2><span class="section-number">1.3. </span>Defining the Neural Approximator<a class="headerlink" href="#defining-the-neural-approximator" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">1.4. </span>Defining the Neural Approximator <a class="anchor" id="defining_the_neural"></a><a class="headerlink" href="#defining-the-neural-approximator" title="Link to this heading">#</a></h2>
 <section id="summary-network">
-<h3><span class="section-number">1.3.1. </span>Summary Network<a class="headerlink" href="#summary-network" title="Permalink to this heading">#</a></h3>
-<p>Since our likelihood generates data exchangeably, we need to respect the permutation invariance of the data. For that, we will use a <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> which does exactly that. This network will take (at least) 3D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">n_obs,</span> <span class="pre">D)</span></code> and reduce them to 2D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">summary_dim)</span></code>, where <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code> is a hyperparameter to be set by the user (you). Heuristically, this number should not be lower than the number of parameters in a model. Below, we create a permutation-invariant network with <code class="docutils literal notranslate"><span class="pre">summary_dim</span> <span class="pre">=</span> <span class="pre">10</span></code>:</p>
+<h3><span class="section-number">1.4.1. </span>Summary Network <a class="anchor" id="summary_network"></a><a class="headerlink" href="#summary-network" title="Link to this heading">#</a></h3>
+<p>Since our likelihood generates data exchangeably, we need to respect the permutation invariance of the data. Exchangeability in data means that the probability distribution of a sequence of observations remains the same regardless of the order in which the observations appear. In other words, the data is permutation invariant. For that, we will use a <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> which does exactly that. This network will take (at least) 3D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">n_obs,</span> <span class="pre">D)</span></code> and reduce them to 2D tensors of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">summary_dim)</span></code>, where <code class="docutils literal notranslate"><span class="pre">summary_dim</span></code> is a hyperparameter to be set by the user (you). Heuristically, this number should not be lower than the number of parameters in a model. Below, we create a permutation-invariant network with <code class="docutils literal notranslate"><span class="pre">summary_dim</span> <span class="pre">=</span> <span class="pre">10</span></code>:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">DeepSet</span><span class="p">(</span><span class="n">summary_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
@@ -653,7 +719,7 @@ INFO:root:No optional simulation batchable context provided.
 </div>
 </div>
 </div>
-<p>Note, that the hyperparameter setting for the <code class="docutils literal notranslate"><span class="pre">InvariantNetwork</span></code> are all provided inside a single Python dictionary. It helps to inspect the outputs of the summary network manually and confirm its operation:</p>
+<p>Note, that the hyperparameter setting for the <code class="docutils literal notranslate"><span class="pre">InvariantNetwork</span></code> are all provided inside a single Python dictionary. Here, <code class="docutils literal notranslate"><span class="pre">InvariantNetwork</span></code> is used to learn a summary representation of data that is invariant to the permutation of its elements. It helps to inspect the outputs of the summary network manually and confirm its operation:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">test_inp</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
@@ -674,8 +740,8 @@ Shape of summary vectors:  (3, 10)
 <p>It is these summary vectors that will enter as conditions for the inference network. Upon convergence of the simulation-based training, we can think of them as <em>learned summary statistics</em> or <em>data embeddings</em>.</p>
 </section>
 <section id="inference-network">
-<h3><span class="section-number">1.3.2. </span>Inference Network<a class="headerlink" href="#inference-network" title="Permalink to this heading">#</a></h3>
-<p>Next we define the main workhorse of our our framework for amortized posterior inference - the conditional invertible neural network (cINN). The only mandatory hyperparameter for the <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code> is the number of parameters we aim to estimate, in our case <code class="docutils literal notranslate"><span class="pre">num_params</span> <span class="pre">=</span> <span class="pre">4</span></code>. However, we can change some more, for instance set the number of coupling layers <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">4</span></code>, which will make training a bit faster than using the default <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">6</span></code>, but also reduce the expressiveness (performance) of our network. Naturally, we don’t need a lot of expressiveness for our trivial Gaussian model, so we can proceed with <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">4</span></code>.</p>
+<h3><span class="section-number">1.4.2. </span>Inference Network <a class="anchor" id="inference_network"></a><a class="headerlink" href="#inference-network" title="Link to this heading">#</a></h3>
+<p>Next, we define the main workhorse of our our framework for amortized posterior inference - the conditional invertible neural network (cINN). The only mandatory hyperparameter for the <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code> is the number of parameters we aim to estimate, in our case <code class="docutils literal notranslate"><span class="pre">num_params</span> <span class="pre">=</span> <span class="pre">4</span></code>. However, we can change some more, for instance set the number of coupling layers <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">4</span></code>, which will make training a bit faster than using the default <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">6</span></code>, but also reduce the expressiveness (performance) of our network. Naturally, we don’t need a lot of expressiveness for our trivial Gaussian model, so we can proceed with <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span> <span class="pre">=</span> <span class="pre">4</span></code>.</p>
 <p>The invertible inference network has the following further hyperparameters:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">num_params</span></code> (mandatory) - The number of model parameters (eq. the dimensionality of the latent space).</p></li>
@@ -685,12 +751,12 @@ Shape of summary vectors:  (3, 10)
 <li><p><code class="docutils literal notranslate"><span class="pre">soft_clamping</span></code> - The soft-clamping parameter. Just use the default value.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">permutation</span></code> - Whether to use permutations before each coupling layer. Should be used by default.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">use_act_norm</span></code> - Whether to apply activation normalization after each coupling layer (https://arxiv.org/abs/1807.03039). Works well in practice and stabilizes training.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">act_norm_init</span></code> - In some cases, you can perform data-dependend initialization of the <code class="docutils literal notranslate"><span class="pre">ActNorm</span></code> layers, as in https://arxiv.org/abs/1807.03039.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">act_norm_init</span></code> - In some cases, you can perform data-dependent initialization of the <code class="docutils literal notranslate"><span class="pre">ActNorm</span></code> layers, as in https://arxiv.org/abs/1807.03039.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">use_soft_flow</span></code> - Whether to use a SoftFlow architecture (https://arxiv.org/abs/2006.04604). Useful for degenerate distributions.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">soft_flow_bounds</span></code> - The bounds for the varying standard deviation of <code class="docutils literal notranslate"><span class="pre">SoftFlow</span></code>’s noise. Do not touch, unless you have good reasons to.</p></li>
 </ul>
 <p>You can glean all the defaults in the <code class="docutils literal notranslate"><span class="pre">default_settings</span></code> module. For most applications, you only need to define the <code class="docutils literal notranslate"><span class="pre">num_params</span></code> and <code class="docutils literal notranslate"><span class="pre">num_coupling_layers</span></code> hyperparameters.</p>
-<p>Note, that we also remove the default <code class="docutils literal notranslate"><span class="pre">L2</span></code> and <code class="docutils literal notranslate"><span class="pre">dropout</span></code> regularization from the networks, as we need this only for offline learning with pre-simulated data.</p>
+<p>Note, that we also remove the default <code class="docutils literal notranslate"><span class="pre">L2</span></code> and <code class="docutils literal notranslate"><span class="pre">dropout</span></code> regularization from the networks, as we need this only for offline learning with pre-simulated data. In the context of online learning, where the model is continuously updated with new data, regularization can be counterproductive. It can unnecessarily constrain the model, preventing it from fully adapting to the latest data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inference_net</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">InvertibleNetwork</span><span class="p">(</span>
@@ -710,6 +776,7 @@ Shape of summary vectors:  (3, 10)
 </div>
 </div>
 </div>
+<p>Note about <code class="docutils literal notranslate"><span class="pre">z</span></code>: The inference network takes summary vectors as input and outputs latent vectors (<code class="docutils literal notranslate"><span class="pre">z</span></code>). The latent space is a lower-dimensional space that is assumed to capture the essential information about the parameters. It is essentially transforming the parameter space to the latent space (Gaussian in this case).</p>
 <p>We can inspect the shapes of the outputs as well:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -727,8 +794,8 @@ Shape of log det Jacobian: (3,)
 </div>
 </section>
 <section id="amortized-posterior">
-<h3><span class="section-number">1.3.3. </span>Amortized Posterior<a class="headerlink" href="#amortized-posterior" title="Permalink to this heading">#</a></h3>
-<p>We can now connect the <code class="docutils literal notranslate"><span class="pre">summary_net</span></code> and the <code class="docutils literal notranslate"><span class="pre">inference_net</span></code> via the high-level wrapper <code class="docutils literal notranslate"><span class="pre">AmortizedPosterior</span></code>. This wrapper knows how to compute its loss function, draw samples from the approximate posterior given new data and also compute normalized posterior densities.</p>
+<h3><span class="section-number">1.4.3. </span>Amortized Posterior <a class="anchor" id="amortized_posterior"></a><a class="headerlink" href="#amortized-posterior" title="Link to this heading">#</a></h3>
+<p>We can now connect the <code class="docutils literal notranslate"><span class="pre">summary_net</span></code> and the <code class="docutils literal notranslate"><span class="pre">inference_net</span></code> via the high-level wrapper <code class="docutils literal notranslate"><span class="pre">AmortizedPosterior</span></code>. This wrapper knows how to compute its loss function, draw samples from the approximate posterior given new data and also compute normalized posterior densities. Normalized posterior density refers to a posterior probability distribution that has been adjusted so that its total area (or volume, in the case of multi-dimensional distributions) sums up to one.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">amortizer</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">amortizers</span><span class="o">.</span><span class="n">AmortizedPosterior</span><span class="p">(</span><span class="n">inference_net</span><span class="p">,</span> <span class="n">summary_net</span><span class="p">)</span>
@@ -739,7 +806,7 @@ Shape of log det Jacobian: (3,)
 </section>
 </section>
 <section id="defining-the-trainer">
-<h2><span class="section-number">1.4. </span>Defining the Trainer<a class="headerlink" href="#defining-the-trainer" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">1.5. </span>Defining the Trainer <a class="anchor" id="defining_the_trainer"></a><a class="headerlink" href="#defining-the-trainer" title="Link to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance connects a generative model with an amortizer and enables various types of simulation-based training. Actually, it has only a single mandatory argument, <code class="docutils literal notranslate"><span class="pre">amortizer</span></code>, which expect an <code class="docutils literal notranslate"><span class="pre">Amortized*</span></code> instance. However, in order to be able to perform on-the-fly simulation-based training (see below), we also need to provide the generative model. Note, that the generative model does not need to use our provided wrappers, but the keys of its dictionary output should adhere to BayesFlow’s expectations.</p>
 <p>Note: If you want to automatically save the <code class="docutils literal notranslate"><span class="pre">amortizer</span></code> and related loss history, you can provide a <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code> argument indicating the folder for storing the checkpoints.</p>
 <div class="cell docutils container">
@@ -816,13 +883,13 @@ True
 <p>Here, we are not using direct equality, since the configurator converts <code class="docutils literal notranslate"><span class="pre">float64</span></code> numbers to <code class="docutils literal notranslate"><span class="pre">float32</span></code> so as to use GPU memory more efficiently.</p>
 </section>
 <section id="training-phase">
-<h2><span class="section-number">1.5. </span>Training Phase<a class="headerlink" href="#training-phase" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">1.6. </span>Training Phase <a class="anchor" id="training_phase"></a><a class="headerlink" href="#training-phase" title="Link to this heading">#</a></h2>
 <p>The following training modes are currently available:</p>
 <ul class="simple">
-<li><p><strong>Online training</strong> - This training regime is optimal for fast generative models which can efficiently simulate data on-the-fly. In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than 2-3 seconds. The networks never see the same simulations twice, so no regularization is necessary.</p></li>
-<li><p><strong>Experience replay</strong> - This training regime is also good for fast generative models which can efficiently simulated data on-the-fly. It will use a memory replay buffer, as utilized in reinforcement learning, so the network will eventually “experience” some simulations multiple times.</p></li>
-<li><p><strong>Round-based training</strong> - This training regime is optimal for slow, but still reasonably performant generative models. In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than one 2-3 minutes.</p></li>
-<li><p><strong>Offline training</strong> - This training regime is optimal for very slow, external simulators, which take several minutes for a single simulation. It assumes that all training data has already been simulated and stored on disk. Default regularization should be used (or even increase for very small data sets).</p></li>
+<li><p><strong>Online training</strong> - This training regime is optimal for fast generative models which can efficiently simulate data on-the-fly. In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than 2-3 seconds. The networks never see the same simulations twice, so no regularization (which are primarily used to prevent overfitting on a static dataset) is necessary. This training mode ensures that the model is constantly adapting to fresh data, enhancing its ability to generalize and learn diverse patterns.</p></li>
+<li><p><strong>Experience replay</strong> - This training regime is also good for fast generative models which can efficiently simulated data on-the-fly. It will use a memory replay buffer, as utilized in reinforcement learning, so the network will eventually “experience” some simulations multiple times. This allows it to reinforce its learning from these repeated experiences. Experience replay can help improve learning efficiency and stability, especially in scenarios where generating entirely new simulations on-the-fly for every training step may not be optimal.</p></li>
+<li><p><strong>Round-based training</strong> - This training regime is optimal for slow, but still reasonably performant generative models. In order for this training regime to be efficient, on-the-fly batch simulations should not take longer than one 2-3 minutes. In round-based training, simulations are generated in rounds, and each round of simulations is used for a phase of training before generating new simulations for the next round. This creates a balance between the need for new data and the computational cost of generating it.</p></li>
+<li><p><strong>Offline training</strong> - This training regime is optimal for very slow, external simulators, which take several minutes for a single simulation. It assumes that all training data has already been simulated and stored on disk. Default regularization should be used (or even increase for very small data sets). This method is less flexible but it is used in cases where the generative model is too slow to generate data on-the-fly.</p></li>
 </ul>
 <p>Usually, domain modelers have a pretty good understanding of how fast a simulation model runs. We can also quickly measure the time taken for a given number of simulations (<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>) directly inside the notebook.</p>
 <div class="cell docutils container">
@@ -833,16 +900,21 @@ True
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 1.09 ms, sys: 143 µs, total: 1.23 ms
-Wall time: 1.36 ms
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 3.35 ms, sys: 10 µs, total: 3.36 ms
+Wall time: 3.67 ms
 </pre></div>
 </div>
 </div>
 </div>
 <p>We are well below the recommended 2-3 seconds for online training, so that is what we will do. Online training has three mandatory parameters: <code class="docutils literal notranslate"><span class="pre">epochs</span></code>, <code class="docutils literal notranslate"><span class="pre">iterations_per_epoch</span></code>, and <code class="docutils literal notranslate"><span class="pre">batch_size</span></code>. Thus, the total number of simulations that will be performed by a single call (run) will be <code class="docutils literal notranslate"><span class="pre">epochs</span></code> <span class="math notranslate nohighlight">\(\times\)</span> <code class="docutils literal notranslate"><span class="pre">iterations_per_epoch</span></code> <span class="math notranslate nohighlight">\(\times\)</span>  <code class="docutils literal notranslate"><span class="pre">batch_size</span></code>. Moreover, the networks will never experience the same simulation twice, since each batch will contain a new set of simulations.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">epochs</span></code>: This parameter defines the total number of complete passes through the training dataset. Each epoch consists of several iterations, where the model is exposed to different subsets of the data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">iterations_per_epoch</span></code>: This specifies the number of training iterations that occur in each epoch. During each iteration, the model is updated based on a batch of new data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: This determines the number of simulations in each batch. It’s the size of the data subset that the model will see and learn from in each iteration.</p></li>
+</ul>
 <section id="online-training">
-<h3><span class="section-number">1.5.1. </span>Online Training<a class="headerlink" href="#online-training" title="Permalink to this heading">#</a></h3>
-<p>Note how the average loss goes down, along with the learning rate (LR). The latter happens, because BayesFlow uses a cosine decay for the learning rate by default, unless a custom optimizer from <code class="docutils literal notranslate"><span class="pre">tensorflow.optimizers</span></code> is provided. Thus, the learning rate will decrease atuomatically from its default value of <span class="math notranslate nohighlight">\(0.0005\)</span> to <span class="math notranslate nohighlight">\(0\)</span> over the course of the training. We will also use <span class="math notranslate nohighlight">\(200\)</span> simulations for tracking validation error (even though we don’t strictly need to do this for online learning, where the network sees a completely new batch of data in each iteration).</p>
+<h3><span class="section-number">1.6.1. </span>Online Training <a class="anchor" id="online_training"></a><a class="headerlink" href="#online-training" title="Link to this heading">#</a></h3>
+<p>Note how the average loss goes down, along with the learning rate (LR). The latter happens, because BayesFlow uses a cosine decay for the learning rate by default, unless a custom optimizer from <code class="docutils literal notranslate"><span class="pre">tensorflow.optimizers</span></code> is provided. Thus, the learning rate will decrease atuomatically from its default value of <span class="math notranslate nohighlight">\(0.0005\)</span> to <span class="math notranslate nohighlight">\(0\)</span> over the course of the training. We will also use <span class="math notranslate nohighlight">\(200\)</span> simulations for tracking validation error (even though we don’t strictly need to do this for online learning, where the network sees a completely new batch of data in each iteration). This step is about assessing the model’s performance on a separate set of data that it hasn’t been trained on. It’s a way to monitor how well the model generalizes to new, unseen data.</p>
 <p>Depending on your hardware, this training should take between <span class="math notranslate nohighlight">\(30\)</span> seconds and <span class="math notranslate nohighlight">\(5\)</span> minutes. Note, that for actual applications, we will train considerably longer than <span class="math notranslate nohighlight">\(5\)</span> epochs.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -851,11 +923,43 @@ Wall time: 1.36 ms
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:Generated 200 simulations for validation.
+Training epoch 1:   0%|          | 0/1000 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Training epoch 1: 100%|██████████| 1000/1000 [01:42&lt;00:00,  9.72it/s, Epoch: 1, Iter: 1000,Loss: -0.002,Avg.Loss: 1.520,LR: 4.88E-04]
+INFO:root:Validation, Epoch: 1, Loss: -0.310
+Training epoch 2: 100%|██████████| 1000/1000 [00:53&lt;00:00, 18.72it/s, Epoch: 2, Iter: 1000,Loss: -1.684,Avg.Loss: -1.179,LR: 4.52E-04]
+INFO:root:Validation, Epoch: 2, Loss: -1.507
+Training epoch 3: 100%|██████████| 1000/1000 [00:52&lt;00:00, 18.95it/s, Epoch: 3, Iter: 1000,Loss: -2.126,Avg.Loss: -1.550,LR: 3.97E-04]
+INFO:root:Validation, Epoch: 3, Loss: -1.887
+Training epoch 4: 100%|██████████| 1000/1000 [00:52&lt;00:00, 19.08it/s, Epoch: 4, Iter: 1000,Loss: -1.558,Avg.Loss: -1.746,LR: 3.27E-04]
+INFO:root:Validation, Epoch: 4, Loss: -1.805
+Training epoch 5: 100%|██████████| 1000/1000 [00:52&lt;00:00, 19.06it/s, Epoch: 5, Iter: 1000,Loss: -1.588,Avg.Loss: -1.856,LR: 2.50E-04]
+INFO:root:Validation, Epoch: 5, Loss: -2.132
+Training epoch 6: 100%|██████████| 1000/1000 [00:53&lt;00:00, 18.74it/s, Epoch: 6, Iter: 1000,Loss: -1.779,Avg.Loss: -1.938,LR: 1.73E-04]
+INFO:root:Validation, Epoch: 6, Loss: -2.102
+Training epoch 7: 100%|██████████| 1000/1000 [00:52&lt;00:00, 19.00it/s, Epoch: 7, Iter: 1000,Loss: -2.131,Avg.Loss: -2.011,LR: 1.03E-04]
+INFO:root:Validation, Epoch: 7, Loss: -2.171
+Training epoch 8: 100%|██████████| 1000/1000 [00:46&lt;00:00, 21.44it/s, Epoch: 8, Iter: 1000,Loss: -2.051,Avg.Loss: -2.069,LR: 4.78E-05]
+INFO:root:Validation, Epoch: 8, Loss: -2.229
+Training epoch 9: 100%|██████████| 1000/1000 [00:39&lt;00:00, 25.57it/s, Epoch: 9, Iter: 1000,Loss: -2.375,Avg.Loss: -2.123,LR: 1.23E-05]
+INFO:root:Validation, Epoch: 9, Loss: -2.249
+Training epoch 10: 100%|██████████| 1000/1000 [00:39&lt;00:00, 25.55it/s, Epoch: 10, Iter: 1000,Loss: -2.243,Avg.Loss: -2.145,LR: 1.49E-11]
+INFO:root:Validation, Epoch: 10, Loss: -2.274
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 12min 41s, sys: 44 s, total: 13min 25s
+Wall time: 9min 8s
+</pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="inspecting-the-loss">
-<h3><span class="section-number">1.5.2. </span>Inspecting the Loss<a class="headerlink" href="#inspecting-the-loss" title="Permalink to this heading">#</a></h3>
-<p>We can inspect the evolution of the loss via a utility function <code class="docutils literal notranslate"><span class="pre">plot_losses</span></code>, for which we have imported the <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code> module from <code class="docutils literal notranslate"><span class="pre">BayesFlow</span></code>.</p>
+<h3><span class="section-number">1.6.2. </span>Inspecting the Loss <a class="anchor" id="inspecting_the_loss"></a><a class="headerlink" href="#inspecting-the-loss" title="Link to this heading">#</a></h3>
+<p>Bayesian models can be complex and computationally intensive, and metrics like training and validation loss can provide critical insights into the model’s performance and stability. A decreasing loss over time indicates that the model is learning effectively, while fluctuations or increases in loss might suggest issues in the training process, such as overfitting, underfitting, or inappropriate learning rate settings. We can inspect the evolution of the loss via a utility function <code class="docutils literal notranslate"><span class="pre">plot_losses</span></code>, for which we have imported the <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code> module from <code class="docutils literal notranslate"><span class="pre">BayesFlow</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;train_losses&quot;</span><span class="p">],</span> <span class="n">history</span><span class="p">[</span><span class="s2">&quot;val_losses&quot;</span><span class="p">],</span> <span class="n">moving_average</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -863,14 +967,14 @@ Wall time: 1.36 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/e90537870bda84aa04c30c1c9bf731ca1000bb2ceafd7f051b02f55cb2fc3a08.png" src="../_images/e90537870bda84aa04c30c1c9bf731ca1000bb2ceafd7f051b02f55cb2fc3a08.png" />
+<img alt="../_images/1ec2fc070cab4ab3f37f27b4afccb99215f5aa083079233c2a1d1e1fb315c258.png" src="../_images/1ec2fc070cab4ab3f37f27b4afccb99215f5aa083079233c2a1d1e1fb315c258.png" />
 </div>
 </div>
 </section>
 <section id="validating-consistency">
-<h3><span class="section-number">1.5.3. </span>Validating Consistency<a class="headerlink" href="#validating-consistency" title="Permalink to this heading">#</a></h3>
-<p>Validating the consistency of our model-amortizer coupling is an important step which should be performed before any real data are presented to the networks. In other words, the model should work in the ‘’small world’’, before going out in the world of real data. In addition to a smooth loss reduction curve, we can use at least four handy diagnostic utilities.</p>
-<p>For a better illustration, we will start by generating some test simulations (not seen during training). Note, that we also use the default configurator to prepare these test simulations for interacting with the networks.</p>
+<h3><span class="section-number">1.6.3. </span>Validating Consistency <a class="anchor" id="validating_consistency"></a><a class="headerlink" href="#validating-consistency" title="Link to this heading">#</a></h3>
+<p>Validating the consistency of our model-amortizer coupling is an important step which should be performed before any real data are presented to the networks. In other words, the model should work in the ‘’small world’’, before going out in the world of real data. This involves testing the model under known conditions and ensuring that it behaves logically and accurately. It is a critical step to avoid surprises when the model is later exposed to real and more complex data. In addition to a smooth loss reduction curve, we can use at least four handy diagnostic utilities.</p>
+<p>For a better illustration, we will start by generating some test simulations (not seen during training) using the simulator <code class="docutils literal notranslate"><span class="pre">model</span></code>. Note, that we also use the default configurator to prepare these test simulations for interacting with the networks.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">test_sims</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">configurator</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="mi">500</span><span class="p">))</span>
@@ -879,8 +983,8 @@ Wall time: 1.36 ms
 </div>
 </div>
 <section id="latent-space-inspection">
-<h4><span class="section-number">1.5.3.1. </span>Latent space inspection<a class="headerlink" href="#latent-space-inspection" title="Permalink to this heading">#</a></h4>
-<p>Since our training objective prescribes a unit Gaussian to the latent variable <span class="math notranslate nohighlight">\(\boldsymbol{z}\)</span> (see: https://arxiv.org/abs/2003.06281), we expect that, upon good convergence, the latent space will exhibit the prescribed probabilistic structure. We can quickly inspect this structure by calling the <code class="docutils literal notranslate"><span class="pre">plot_latent_space_2d</span></code> function from the <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code> module.</p>
+<h4><span class="section-number">1.6.3.1. </span>Latent space inspection <a class="anchor" id="latent_space_inspection"></a><a class="headerlink" href="#latent-space-inspection" title="Link to this heading">#</a></h4>
+<p>Since our training objective prescribes a unit Gaussian to the latent variable <span class="math notranslate nohighlight">\(\boldsymbol{z}\)</span> (see: https://arxiv.org/abs/2003.06281), we expect that, upon good convergence, the latent space will exhibit the prescribed probabilistic structure. Good convergence means that the model has learned an appropriate representation of the data in its latent space. We can quickly inspect this structure by calling the <code class="docutils literal notranslate"><span class="pre">plot_latent_space_2d</span></code> function from the <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code> module.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">z_samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">amortizer</span><span class="p">(</span><span class="n">test_sims</span><span class="p">)</span>
@@ -895,18 +999,15 @@ Wall time: 1.36 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/radevs/anaconda3/envs/BayesFlowDev/lib/python3.10/site-packages/seaborn/axisgrid.py:64: UserWarning: The figure layout has changed to tight
-  self.fig.tight_layout(*args, **kwargs)
-</pre></div>
-</div>
-<img alt="../_images/8d04fa0d7c6a162aa431af3befbd2cf504c453c42da2bd93147bc3f021f815c1.png" src="../_images/8d04fa0d7c6a162aa431af3befbd2cf504c453c42da2bd93147bc3f021f815c1.png" />
+<img alt="../_images/4020385795cb3ce7ae1fc4afdb224c8f54695c8008a92de047fd8d4b5916ac79.png" src="../_images/4020385795cb3ce7ae1fc4afdb224c8f54695c8008a92de047fd8d4b5916ac79.png" />
 </div>
 </div>
 </section>
 <section id="simulation-based-calibration">
-<h4><span class="section-number">1.5.3.2. </span>Simulation-Based Calibration<a class="headerlink" href="#simulation-based-calibration" title="Permalink to this heading">#</a></h4>
+<h4><span class="section-number">1.6.3.2. </span>Simulation-Based Calibration <a class="anchor" id="simulation_based_calibration"></a><a class="headerlink" href="#simulation-based-calibration" title="Link to this heading">#</a></h4>
 <p>By now a classic in Bayesian analysis. If you are not familiar with this procedure, you must read about it here: https://arxiv.org/abs/1804.06788</p>
-<p>To perform SBC, we first need to obtain a number of <code class="docutils literal notranslate"><span class="pre">L</span></code> posterior draws from <code class="docutils literal notranslate"><span class="pre">M</span></code> simulated data sets. While the procedure is typically intractable, amortized inference allows us to perform SBC instantly.</p>
+<p>SBC is a technique used to assess whether a probabilistic model correctly infers parameters from data. The basic idea is to simulate a large number of datasets from the model’s prior distribution and then perform posterior inference on these simulated datasets. The goal is to check if the inferred posterior distributions are consistent with the priors. Essentially, SBC tests if the model can accurately recover the parameters it used to generate the data in the first place. This process helps identify any systematic biases or inaccuracies in the model’s inference process.</p>
+<p>To perform SBC, we first need to obtain <code class="docutils literal notranslate"><span class="pre">L</span></code> number of posterior draws from <code class="docutils literal notranslate"><span class="pre">M</span></code> simulated data sets. While the procedure is typically intractable, amortized inference allows us to perform SBC instantly.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Obtain 100 posterior samples for each simulated data set in test_sims</span>
@@ -925,10 +1026,10 @@ Wall time: 1.36 ms
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:The ratio of simulations / posterior draws should be &gt; 20 for reliable variance reduction, but your ratio is 5.                    Confidence intervals might be unreliable!
 </pre></div>
 </div>
-<img alt="../_images/ec89e4d06a2b629d2f96cf6d01b2d7b1c0eec17663c4fd31eefc82d996b692cd.png" src="../_images/ec89e4d06a2b629d2f96cf6d01b2d7b1c0eec17663c4fd31eefc82d996b692cd.png" />
+<img alt="../_images/5e6a71275883e467811c6d17afb548b0c978e8705c08b414df9007b9cb28708a.png" src="../_images/5e6a71275883e467811c6d17afb548b0c978e8705c08b414df9007b9cb28708a.png" />
 </div>
 </div>
-<p>Note, that the above function compalins about the simulations-to-posterior-samples ratio, which is too low for reasonable density estimation and confidence intervals. Thus, we may want to use the more modern version of SBC which is based on empirical cumulative distribution functions (ECDFs) and does not have a <code class="docutils literal notranslate"><span class="pre">num_bins</span></code> hyperparameter. You can read more about this method at https://arxiv.org/abs/2103.10522.</p>
+<p>Note, that the above function complains about the simulations-to-posterior-samples ratio, which is too low for reasonable density estimation and confidence intervals. Thus, we may want to use the more modern version of SBC which is based on empirical cumulative distribution functions (ECDFs) and does not have a <code class="docutils literal notranslate"><span class="pre">num_bins</span></code> hyperparameter. You can read more about this method at https://arxiv.org/abs/2103.10522.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_sbc_ecdf</span><span class="p">(</span><span class="n">posterior_samples</span><span class="p">,</span> <span class="n">test_sims</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">],</span> <span class="n">difference</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -936,12 +1037,17 @@ Wall time: 1.36 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/0acec6c9b2ae4a31c36818a80ed1acc71f26065982deecc3973aad7f02b3813b.png" src="../_images/0acec6c9b2ae4a31c36818a80ed1acc71f26065982deecc3973aad7f02b3813b.png" />
+<img alt="../_images/3a054f368dba66b44bbfba9222cb94ea477d374cf97e2df2f81d194a8ae5699b.png" src="../_images/3a054f368dba66b44bbfba9222cb94ea477d374cf97e2df2f81d194a8ae5699b.png" />
 </div>
 </div>
 </section>
 <section id="posterior-z-score-and-contraction">
-<h4><span class="section-number">1.5.3.3. </span>Posterior z-score and contraction<a class="headerlink" href="#posterior-z-score-and-contraction" title="Permalink to this heading">#</a></h4>
+<h4><span class="section-number">1.6.3.3. </span>Posterior z-score and contraction <a class="anchor" id="posterior_z_score_and"></a><a class="headerlink" href="#posterior-z-score-and-contraction" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p>Posterior z-score: It measures how many standard deviations away the mean of the posterior distribution is from the true value of the parameter. A z-score of 0 indicates the mean perfectly aligns with the true value (no bias) while positive/negative z-scores indicate positive/negative bias, respectively.</p></li>
+<li><p>Posterior contraction: It measures how much the posterior distribution contracts around the true value of the parameter as more data is observed. A higher contraction indicates that the data provides strong evidence, narrowing the uncertainty range.</p></li>
+</ul>
+<p>Ideally, we should obtain high contraction and a z-score near 0. This means the model accurately captures the true value with little bias and high confidence.</p>
 <p>A quick and dirty way to gain an understanding of how good point estimates and uncertainty estimates capture the “true” parameters, assuming the generative model is well-specified. For this, we will draw more samples from the posteriors in order to get smaller Monte Carlo error.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -970,7 +1076,7 @@ Wall time: 1.36 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/44001b2ba97f48fd3230dce3ba8b2fd22be8584f4491c47fc13a44091b56d979.png" src="../_images/44001b2ba97f48fd3230dce3ba8b2fd22be8584f4491c47fc13a44091b56d979.png" />
+<img alt="../_images/4981589dcae8acf9c7d9cda5438501db43f3c97ebc902694d60c86f918744bb3.png" src="../_images/4981589dcae8acf9c7d9cda5438501db43f3c97ebc902694d60c86f918744bb3.png" />
 </div>
 </div>
 <p>Even better, you might want to inspect the sensitivity of the model in terms of how good some expectation (e.g., the mean) captures the ground truth parameter and how much the posterior shrinks with regard to the prior (i.e., so called posterior contraction). For that, we can compute the prior variance analytically or simply estimate it via Monte Carlo.</p>
@@ -981,7 +1087,7 @@ Wall time: 1.36 ms
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/5630cc497a241344515e5c3aa6e32903872be6410bc636f6e3f07379d1ac62da.png" src="../_images/5630cc497a241344515e5c3aa6e32903872be6410bc636f6e3f07379d1ac62da.png" />
+<img alt="../_images/fd093cb6f243a7e185a4851302453ff030255ff6ea8947378239902abf6bb62a.png" src="../_images/fd093cb6f243a7e185a4851302453ff030255ff6ea8947378239902abf6bb62a.png" />
 </div>
 </div>
 <p>We observe the best case of model adequacy - no bias and large contraction. You can play around with different samples sizes per simulation (i.e., the <code class="docutils literal notranslate"><span class="pre">n_obs</span></code> argument in the likelihood function) and check all diagnostics again. Or, even better, you can try estimating your own models!</p>
@@ -989,7 +1095,7 @@ Wall time: 1.36 ms
 </section>
 </section>
 <section id="inference-phase">
-<h2><span class="section-number">1.6. </span>Inference Phase<a class="headerlink" href="#inference-phase" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">1.7. </span>Inference Phase <a class="anchor" id="inference_phase"></a><a class="headerlink" href="#inference-phase" title="Link to this heading">#</a></h2>
 <p>Once the approximator has passed all consistency checks, we can now go ahead and apply it to real data! Since the data-generating parameters of real systems are per definition unobservable, we cannot use the same methods as below for ascertaining real-world validity of our inferences. Hence, as in any modeling scenario, we would need external validation and posterior predictive checks.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1039,38 +1145,40 @@ Wall time: 1.36 ms
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
   <div class="sidebar-secondary-item">
   <div class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">1.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-generative-model">1.2. Defining the Generative Model</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior">1.2.1. Prior</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulator">1.2.2. Simulator</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model">1.2.3. Generative Model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">1.1. Table of Contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">1.2. Introduction <a class="anchor" id="introduction"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-generative-model">1.3. Defining the Generative Model <a class="anchor" id="defining_the_generative"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior">1.3.1. Prior <a class="anchor" id="prior"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulator">1.3.2. Simulator <a class="anchor" id="simulator"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model">1.3.3. Generative Model <a class="anchor" id="generative_model"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-neural-approximator">1.3. Defining the Neural Approximator</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">1.3.1. Summary Network</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">1.3.2. Inference Network</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#amortized-posterior">1.3.3. Amortized Posterior</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-neural-approximator">1.4. Defining the Neural Approximator <a class="anchor" id="defining_the_neural"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">1.4.1. Summary Network <a class="anchor" id="summary_network"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">1.4.2. Inference Network <a class="anchor" id="inference_network"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#amortized-posterior">1.4.3. Amortized Posterior <a class="anchor" id="amortized_posterior"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-trainer">1.4. Defining the Trainer</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-phase">1.5. Training Phase</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#online-training">1.5.1. Online Training</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-loss">1.5.2. Inspecting the Loss</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#validating-consistency">1.5.3. Validating Consistency</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#latent-space-inspection">1.5.3.1. Latent space inspection</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">1.5.3.2. Simulation-Based Calibration</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#posterior-z-score-and-contraction">1.5.3.3. Posterior z-score and contraction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-the-trainer">1.5. Defining the Trainer <a class="anchor" id="defining_the_trainer"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-phase">1.6. Training Phase <a class="anchor" id="training_phase"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#online-training">1.6.1. Online Training <a class="anchor" id="online_training"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-loss">1.6.2. Inspecting the Loss <a class="anchor" id="inspecting_the_loss"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#validating-consistency">1.6.3. Validating Consistency <a class="anchor" id="validating_consistency"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#latent-space-inspection">1.6.3.1. Latent space inspection <a class="anchor" id="latent_space_inspection"></a></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">1.6.3.2. Simulation-Based Calibration <a class="anchor" id="simulation_based_calibration"></a></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#posterior-z-score-and-contraction">1.6.3.3. Posterior z-score and contraction <a class="anchor" id="posterior_z_score_and"></a></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-phase">1.6. Inference Phase</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-phase">1.7. Inference Phase <a class="anchor" id="inference_phase"></a></a></li>
 </ul>
   </nav></div>
 
@@ -1115,8 +1223,8 @@ Wall time: 1.36 ms
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
   </footer>

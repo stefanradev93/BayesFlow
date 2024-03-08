@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>3. Detecting Model Misspecification in Amortized Posterior Inference &#8212; BayesFlow: Amortized Bayesian Inference</title>
   
@@ -19,35 +18,35 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/Model_Misspecification';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="canonical" href="https://www.bayesflow.org/_examples/Model_Misspecification.html" />
     <link rel="icon" href="../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../about.html" />
@@ -64,10 +63,9 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>
@@ -108,11 +106,14 @@
 </form></div>
   </div>
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
-    </nav>
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -146,7 +147,18 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">BayesFlow</a></li>
@@ -418,23 +430,24 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">3.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-specification">3.2. Model specification</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training">3.3. Training</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#training-loop">3.3.1. Training loop</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#diagnostics">3.3.2. Diagnostics</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-summary-space">3.3.3. Inspecting the summary space</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">3.1. Table of Contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">3.2. Introduction <a class="anchor" id="introduction"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-specification">3.3. Model specification <a class="anchor" id="model_specification"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training">3.4. Training <a class="anchor" id="training"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#training-loop">3.4.1. Training loop <a class="anchor" id="training_loop"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#diagnostics">3.4.2. Diagnostics <a class="anchor" id="diagnostics"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-summary-space">3.4.3. Inspecting the summary space <a class="anchor" id="inspecting_the_summary"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#observed-data-misspecification-detection">3.4. Observed Data: Misspecification Detection</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-in-data-space">3.4.1. Visualization in data space</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#detecting-misspecification-in-summary-space">3.4.2. Detecting misspecification in summary space</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#observed-data-misspecification-detection">3.5. Observed Data: Misspecification Detection <a class="anchor" id="observed_data__misspecification"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-in-data-space">3.5.1. Visualization in data space <a class="anchor" id="visualization_in_data"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#detecting-misspecification-in-summary-space">3.5.2. Detecting misspecification in summary space <a class="anchor" id="detecting_misspecification_in"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hypothesis-test-for-observed-data">3.5. Hypothesis test for observed data</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sensitivity-to-misspecification">3.6. Sensitivity to Misspecification</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#computing-sensitivity">3.6.1. Computing Sensitivity</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-the-results">3.6.2. Plotting the results</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hypothesis-test-for-observed-data">3.6. Hypothesis test for observed data <a class="anchor" id="hypothesis_test_for"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sensitivity-to-misspecification">3.7. Sensitivity to Misspecification <a class="anchor" id="sensitivity_to_misspecification"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#computing-sensitivity">3.7.1. Computing Sensitivity <a class="anchor" id="computing_sensitivity"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-the-results">3.7.2. Plotting the results <a class="anchor" id="plotting_the_results"></a></a></li>
 </ul>
 </li>
 </ul>
@@ -446,12 +459,37 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="detecting-model-misspecification-in-amortized-posterior-inference">
-<h1><span class="section-number">3. </span>Detecting Model Misspecification in Amortized Posterior Inference<a class="headerlink" href="#detecting-model-misspecification-in-amortized-posterior-inference" title="Permalink to this heading">#</a></h1>
-<h1>Table of Contents<span class="tocSkip"></span></h1>
-<div class="toc"><ul class="toc-item"><li><span><a href="#Detecting-Model-Misspecification-in-Amortized-Posterior-Inference" data-toc-modified-id="Detecting-Model-Misspecification-in-Amortized-Posterior-Inference-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>Detecting Model Misspecification in Amortized Posterior Inference</a></span><ul class="toc-item"><li><span><a href="#Introduction" data-toc-modified-id="Introduction-1.1"><span class="toc-item-num">1.1&nbsp;&nbsp;</span>Introduction</a></span></li><li><span><a href="#Model-specification" data-toc-modified-id="Model-specification-1.2"><span class="toc-item-num">1.2&nbsp;&nbsp;</span>Model specification</a></span></li><li><span><a href="#Training" data-toc-modified-id="Training-1.3"><span class="toc-item-num">1.3&nbsp;&nbsp;</span>Training</a></span><ul class="toc-item"><li><span><a href="#Training-loop" data-toc-modified-id="Training-loop-1.3.1"><span class="toc-item-num">1.3.1&nbsp;&nbsp;</span>Training loop</a></span></li><li><span><a href="#Diagnostics" data-toc-modified-id="Diagnostics-1.3.2"><span class="toc-item-num">1.3.2&nbsp;&nbsp;</span>Diagnostics</a></span></li><li><span><a href="#Inspecting-the-summary-space" data-toc-modified-id="Inspecting-the-summary-space-1.3.3"><span class="toc-item-num">1.3.3&nbsp;&nbsp;</span>Inspecting the summary space</a></span></li></ul></li><li><span><a href="#Observed-Data:-Misspecification-Detection" data-toc-modified-id="Observed-Data:-Misspecification-Detection-1.4"><span class="toc-item-num">1.4&nbsp;&nbsp;</span>Observed Data: Misspecification Detection</a></span><ul class="toc-item"><li><span><a href="#Visualization-in-data-space" data-toc-modified-id="Visualization-in-data-space-1.4.1"><span class="toc-item-num">1.4.1&nbsp;&nbsp;</span>Visualization in data space</a></span></li><li><span><a href="#Detecting-misspecification-in-summary-space" data-toc-modified-id="Detecting-misspecification-in-summary-space-1.4.2"><span class="toc-item-num">1.4.2&nbsp;&nbsp;</span>Detecting misspecification in summary space</a></span></li></ul></li><li><span><a href="#Hypothesis-test-for-observed-data" data-toc-modified-id="Hypothesis-test-for-observed-data-1.5"><span class="toc-item-num">1.5&nbsp;&nbsp;</span>Hypothesis test for observed data</a></span></li><li><span><a href="#Sensitivity-to-Misspecification" data-toc-modified-id="Sensitivity-to-Misspecification-1.6"><span class="toc-item-num">1.6&nbsp;&nbsp;</span>Sensitivity to Misspecification</a></span><ul class="toc-item"><li><span><a href="#Computing-Sensitivity" data-toc-modified-id="Computing-Sensitivity-1.6.1"><span class="toc-item-num">1.6.1&nbsp;&nbsp;</span>Computing Sensitivity</a></span></li><li><span><a href="#Plotting-the-results" data-toc-modified-id="Plotting-the-results-1.6.2"><span class="toc-item-num">1.6.2&nbsp;&nbsp;</span>Plotting the results</a></span></li></ul></li></ul></li></ul></div><div class="cell docutils container">
+<h1><span class="section-number">3. </span>Detecting Model Misspecification in Amortized Posterior Inference<a class="headerlink" href="#detecting-model-misspecification-in-amortized-posterior-inference" title="Link to this heading">#</a></h1>
+<section id="table-of-contents">
+<h2><span class="section-number">3.1. </span>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#introduction"><span class="xref myst">Introduction</span></a></p></li>
+<li><p><a class="reference internal" href="#model_specification"><span class="xref myst">Model specification</span></a></p></li>
+<li><p><a class="reference internal" href="#training"><span class="xref myst">Training</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#training_loop"><span class="xref myst">Training loop</span></a></p></li>
+<li><p><a class="reference internal" href="../api/bayesflow.diagnostics.html#module-bayesflow.diagnostics" title="bayesflow.diagnostics"><span class="xref myst py py-mod">Diagnostics</span></a></p></li>
+<li><p><a class="reference internal" href="#inspecting_the_summary"><span class="xref myst">Inspecting the summary space</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#observed_data__misspecification"><span class="xref myst">Observed Data: Misspecification Detection</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#visualization_in_data"><span class="xref myst">Visualization in data space</span></a></p></li>
+<li><p><a class="reference internal" href="#detecting_misspecification_in"><span class="xref myst">Detecting misspecification in summary space</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#hypothesis_test_for"><span class="xref myst">Hypothesis test for observed data</span></a></p></li>
+<li><p><a class="reference internal" href="#sensitivity_to_misspecification"><span class="xref myst">Sensitivity to Misspecification</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#computing_sensitivity"><span class="xref myst">Computing Sensitivity</span></a></p></li>
+<li><p><a class="reference internal" href="#plotting_the_results"><span class="xref myst">Plotting the results</span></a></p></li>
+</ul>
+</li>
+</ul>
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib</span>
 <span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
@@ -467,8 +505,9 @@ document.write(`
 </div>
 </div>
 </div>
+</section>
 <section id="introduction">
-<h2><span class="section-number">3.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">3.2. </span>Introduction <a class="anchor" id="introduction"></a><a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
 <p>Under certain regularity conditions, the theory on simulation-based inference assures that the (amortized) neural posterior estimator <span class="math notranslate nohighlight">\(q_{\phi}\)</span> samples from the exact posterior <span class="math notranslate nohighlight">\(p(\theta\,|\,x)\)</span> after convergence.</p>
 <p>However, the neural posterior approximator is optimized with respect to the “prior prredictive distribution” of the generative model which we specify for the training process.
 When the generative model at test time (aka “true data generating process”) deviates from the one used during training, the guarantees for the approximate neural posterior no longer hold and the approximate posterior samples can be wrong in essentially arbitrary ways.</p>
@@ -476,7 +515,7 @@ When the generative model at test time (aka “true data generating process”) 
 <img alt="../_images/model_misspecification_amortized_sbi.png" src="../_images/model_misspecification_amortized_sbi.png" />
 </section>
 <section id="model-specification">
-<h2><span class="section-number">3.2. </span>Model specification<a class="headerlink" href="#model-specification" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">3.3. </span>Model specification <a class="anchor" id="model_specification"></a><a class="headerlink" href="#model-specification" title="Link to this heading">#</a></h2>
 <p>The general Bayesian forward model can be formulated as a two-step process:</p>
 <div class="math notranslate nohighlight">
 \[
@@ -522,7 +561,7 @@ INFO:root:No optional simulation batchable context provided.
 </div>
 </section>
 <section id="training">
-<h2><span class="section-number">3.3. </span>Training<a class="headerlink" href="#training" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">3.4. </span>Training <a class="anchor" id="training"></a><a class="headerlink" href="#training" title="Link to this heading">#</a></h2>
 <p>We choose a <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> architecture [1] to learn 2 permutation-invariant summary statistics from the data, which are then passed to the posterior network and jointly optimized.
 The Inference network is a standard <code class="docutils literal notranslate"><span class="pre">InvertibleNetwork</span></code> with two coupling layers and the <code class="docutils literal notranslate"><span class="pre">AmortizedPosterior</span></code> combines the inference and summary networks. Since we desire model misspecification detection via a structured summary space [2], we select <code class="docutils literal notranslate"><span class="pre">summary_loss_fun=&quot;MMD&quot;</span></code> and the amortizer combines its losses correctly.
 Finally, the <code class="docutils literal notranslate"><span class="pre">trainer</span></code> wraps the generative model and the amortizer into a consistent object for training and subsequent sampling.</p>
@@ -545,7 +584,7 @@ INFO:root:Done.
 </div>
 </div>
 <section id="training-loop">
-<h3><span class="section-number">3.3.1. </span>Training loop<a class="headerlink" href="#training-loop" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">3.4.1. </span>Training loop <a class="anchor" id="training_loop"></a><a class="headerlink" href="#training-loop" title="Link to this heading">#</a></h3>
 <p>Because the inference problem is simple and illustrative, we just train for 15 epochs with 500 iterations per epoch and a batch size of 32.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -556,7 +595,7 @@ INFO:root:Done.
 </div>
 </section>
 <section id="diagnostics">
-<h3><span class="section-number">3.3.2. </span>Diagnostics<a class="headerlink" href="#diagnostics" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">3.4.2. </span>Diagnostics <a class="anchor" id="diagnostics"></a><a class="headerlink" href="#diagnostics" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">plot_losses</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
@@ -591,7 +630,7 @@ INFO:root:Done.
 </div>
 </section>
 <section id="inspecting-the-summary-space">
-<h3><span class="section-number">3.3.3. </span>Inspecting the summary space<a class="headerlink" href="#inspecting-the-summary-space" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">3.4.3. </span>Inspecting the summary space <a class="anchor" id="inspecting_the_summary"></a><a class="headerlink" href="#inspecting-the-summary-space" title="Link to this heading">#</a></h3>
 <p>In fact, the summary space has essentially converged to a unit Gaussian for samples from the generative model which we used to train the networks.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -610,7 +649,7 @@ INFO:root:Done.
 </section>
 </section>
 <section id="observed-data-misspecification-detection">
-<h2><span class="section-number">3.4. </span>Observed Data: Misspecification Detection<a class="headerlink" href="#observed-data-misspecification-detection" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">3.5. </span>Observed Data: Misspecification Detection <a class="anchor" id="observed_data__misspecification"></a><a class="headerlink" href="#observed-data-misspecification-detection" title="Link to this heading">#</a></h2>
 <p>After assessing the converged neural posterior approximator’s performance for the reference model used for training, we will now perform inference on data from a different data generating process. In a real-life analysis, this would be the observed data <span class="math notranslate nohighlight">\(x_{\text{obs}}\)</span> from an experiment or study.</p>
 <p>For this illustration, we choose the prior scale <span class="math notranslate nohighlight">\(\tau_0\)</span> as the source of misspecification. That means that we observe 1000 data sets <span class="math notranslate nohighlight">\(\{x_{\text{obs}}^{(k)}\}_{k=1}^{1000}\)</span> from a generative model with prior scale <span class="math notranslate nohighlight">\(\tau_0=4\)</span>. Consequently, the prior covariance is <span class="math notranslate nohighlight">\(4\cdot\mathbb{I}=\begin{pmatrix}4&amp;0\\0&amp;4\end{pmatrix}\)</span>. The remaining fixed parameters <span class="math notranslate nohighlight">\(\mu_0\)</span> and <span class="math notranslate nohighlight">\(\Sigma\)</span> are unaltered.</p>
 <div class="cell docutils container">
@@ -657,7 +696,7 @@ INFO:root:No optional simulation batchable context provided.
 </div>
 </div>
 <section id="visualization-in-data-space">
-<h3><span class="section-number">3.4.1. </span>Visualization in data space<a class="headerlink" href="#visualization-in-data-space" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">3.5.1. </span>Visualization in data space <a class="anchor" id="visualization_in_data"></a><a class="headerlink" href="#visualization-in-data-space" title="Link to this heading">#</a></h3>
 <p>Let’s visualize some of the data <span class="math notranslate nohighlight">\(x_{\text{obs}}\)</span> from that generative model. This plot lives in the data domain <span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span> and depicts the data <span class="math notranslate nohighlight">\(x_{\text{obs}}\)</span>. Each color is one data set <span class="math notranslate nohighlight">\(k=1,\ldots,1000\)</span>, and all points of one color form the respective data set <span class="math notranslate nohighlight">\(x_{\text{obs}}^{(k)}\)</span>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -688,7 +727,7 @@ INFO:root:No optional simulation batchable context provided.
 </div>
 </section>
 <section id="detecting-misspecification-in-summary-space">
-<h3><span class="section-number">3.4.2. </span>Detecting misspecification in summary space<a class="headerlink" href="#detecting-misspecification-in-summary-space" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">3.5.2. </span>Detecting misspecification in summary space <a class="anchor" id="detecting_misspecification_in"></a><a class="headerlink" href="#detecting-misspecification-in-summary-space" title="Link to this heading">#</a></h3>
 <p>As proposed in our paper [2], we will detect the deviating observed data as deviations in the structured summary space. Therefore, we compute the learned summary statistics of the well-specified data <span class="math notranslate nohighlight">\(h_{\psi}(x)\)</span> and for the observed data <span class="math notranslate nohighlight">\(h_{\psi}(x_{\text{obs}})\)</span> by a simple pass through the trainer’s summary network <span class="math notranslate nohighlight">\(h_{\psi}\)</span>.</p>
 <p>[2] Schmitt et al (2021): https://arxiv.org/abs/2112.08866</p>
 <div class="cell docutils container">
@@ -737,7 +776,7 @@ The larger the MMD, the more do the samples deviate.</p>
 </section>
 </section>
 <section id="hypothesis-test-for-observed-data">
-<h2><span class="section-number">3.5. </span>Hypothesis test for observed data<a class="headerlink" href="#hypothesis-test-for-observed-data" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">3.6. </span>Hypothesis test for observed data <a class="anchor" id="hypothesis_test_for"></a><a class="headerlink" href="#hypothesis-test-for-observed-data" title="Link to this heading">#</a></h2>
 <p>In real-life modeling scenarios, a researcher might desire to perform inference on observed data <span class="math notranslate nohighlight">\(x_{\text{obs}}\)</span>. After training the neural posterior estimator with samples from a generative model <span class="math notranslate nohighlight">\(\mathcal{M}\)</span>, the natural question arises: “Is the model <span class="math notranslate nohighlight">\(\mathcal{M}\)</span> well-specified for the observed data <span class="math notranslate nohighlight">\(x_{\text{obs}}\)</span>?”</p>
 <p>To answer this question, we can perform a frequentist hypothesis test on the summary MMD distances. First, we need to gather samples from the sampling distribution of MMD under a well-specified model. This is straight-forward because by definition the model <span class="math notranslate nohighlight">\(\mathcal{M}\)</span> is well-specified with respect to itself. Thus, we will generate a reference sample from the training model <span class="math notranslate nohighlight">\(\mathcal{M}\)</span> and estimate the summary MMD to samples from <span class="math notranslate nohighlight">\(\mathcal{M}\)</span> itself.</p>
 <p><strong>Note:</strong> It is important that the number of simulated data sets to estimate the sampling distribution of the summary under the null hypothesis matches the number of observed data sets. This is because the MMD estimator is biased and we need comparable values for the sampling distribution and the observed summary MMD. Therefore, the <code class="docutils literal notranslate"><span class="pre">bayesflow.computational_utilities.compute_mmd_hypothesis_test</span></code> function needs either <code class="docutils literal notranslate"><span class="pre">observed_data</span></code> or <code class="docutils literal notranslate"><span class="pre">n_observed_data_sets</span></code> directly to determine the number of data sets for the estimation of the MMD sampling distribution.</p>
@@ -795,7 +834,7 @@ The larger the MMD, the more do the samples deviate.</p>
 </div>
 </section>
 <section id="sensitivity-to-misspecification">
-<h2><span class="section-number">3.6. </span>Sensitivity to Misspecification<a class="headerlink" href="#sensitivity-to-misspecification" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">3.7. </span>Sensitivity to Misspecification <a class="anchor" id="sensitivity_to_misspecification"></a><a class="headerlink" href="#sensitivity-to-misspecification" title="Link to this heading">#</a></h2>
 <p>The submodule <code class="docutils literal notranslate"><span class="pre">bayesflow.sensitivity</span></code> contains functions to analyze the sensitivity of a converged <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> (i.e., the neural posterior estimator) to model misspecification.</p>
 <p>We start by redefining the generative model with the possibility to increase the model’s misspecification through two settings <code class="docutils literal notranslate"><span class="pre">p1</span></code> and <code class="docutils literal notranslate"><span class="pre">p2</span></code>. Therefore, we define a function <code class="docutils literal notranslate"><span class="pre">generative_model_misspecified(p1,</span> <span class="pre">p2)</span></code>. The function takes the settings <code class="docutils literal notranslate"><span class="pre">p1</span></code> and <code class="docutils literal notranslate"><span class="pre">p2</span></code> as input and returns a (potentially misspecified) generative model.</p>
 <p>In our Gaussian example, we let <code class="docutils literal notranslate"><span class="pre">p1</span></code> control the prior location (<span class="math notranslate nohighlight">\(\mu_0=\mathtt{p1}\)</span>) while <code class="docutils literal notranslate"><span class="pre">p2</span></code> controls the scale of a diagonal covariance matrix <span class="math notranslate nohighlight">\(\Sigma_0\)</span> such that <span class="math notranslate nohighlight">\(\Sigma_0=\mathtt{p2}\cdot\mathbb{I}\)</span>. In this example, both settings cause prior misspecification. Inducing other types of misspecification (e.g., simulator or noise) follows the same principle.</p>
@@ -842,7 +881,7 @@ The larger the MMD, the more do the samples deviate.</p>
 </div>
 </div>
 <section id="computing-sensitivity">
-<h3><span class="section-number">3.6.1. </span>Computing Sensitivity<a class="headerlink" href="#computing-sensitivity" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">3.7.1. </span>Computing Sensitivity <a class="anchor" id="computing_sensitivity"></a><a class="headerlink" href="#computing-sensitivity" title="Link to this heading">#</a></h3>
 <p>As described above, the <code class="docutils literal notranslate"><span class="pre">bf.sensitivity.misspecification_experiment</span></code> function requires the converged <code class="docutils literal notranslate"><span class="pre">Trainer</span></code>, the factory for misspecified models, and meta-information on the settings. In addition, the number of posterior samples per simulated data set as well as the total number of simulated data sets per setting configuration can be specified.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -865,7 +904,7 @@ The larger the MMD, the more do the samples deviate.</p>
 </div>
 </section>
 <section id="plotting-the-results">
-<h3><span class="section-number">3.6.2. </span>Plotting the results<a class="headerlink" href="#plotting-the-results" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">3.7.2. </span>Plotting the results <a class="anchor" id="plotting_the_results"></a><a class="headerlink" href="#plotting-the-results" title="Link to this heading">#</a></h3>
 <p>Model misspecification with respect to both prior location <span class="math notranslate nohighlight">\(\mu_0\)</span> and scale <span class="math notranslate nohighlight">\(\tau_0\)</span> worsen the average posterior recovery in terms of aggregated RMSE. However, the converged posterior approximator seems to be relatively robust against moderate misspecifications in these parameters.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -934,29 +973,31 @@ The larger the MMD, the more do the samples deviate.</p>
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
   <div class="sidebar-secondary-item">
   <div class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">3.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-specification">3.2. Model specification</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training">3.3. Training</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#training-loop">3.3.1. Training loop</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#diagnostics">3.3.2. Diagnostics</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-summary-space">3.3.3. Inspecting the summary space</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">3.1. Table of Contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">3.2. Introduction <a class="anchor" id="introduction"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-specification">3.3. Model specification <a class="anchor" id="model_specification"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training">3.4. Training <a class="anchor" id="training"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#training-loop">3.4.1. Training loop <a class="anchor" id="training_loop"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#diagnostics">3.4.2. Diagnostics <a class="anchor" id="diagnostics"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-summary-space">3.4.3. Inspecting the summary space <a class="anchor" id="inspecting_the_summary"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#observed-data-misspecification-detection">3.4. Observed Data: Misspecification Detection</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-in-data-space">3.4.1. Visualization in data space</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#detecting-misspecification-in-summary-space">3.4.2. Detecting misspecification in summary space</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#observed-data-misspecification-detection">3.5. Observed Data: Misspecification Detection <a class="anchor" id="observed_data__misspecification"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-in-data-space">3.5.1. Visualization in data space <a class="anchor" id="visualization_in_data"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#detecting-misspecification-in-summary-space">3.5.2. Detecting misspecification in summary space <a class="anchor" id="detecting_misspecification_in"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hypothesis-test-for-observed-data">3.5. Hypothesis test for observed data</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sensitivity-to-misspecification">3.6. Sensitivity to Misspecification</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#computing-sensitivity">3.6.1. Computing Sensitivity</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-the-results">3.6.2. Plotting the results</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hypothesis-test-for-observed-data">3.6. Hypothesis test for observed data <a class="anchor" id="hypothesis_test_for"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sensitivity-to-misspecification">3.7. Sensitivity to Misspecification <a class="anchor" id="sensitivity_to_misspecification"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#computing-sensitivity">3.7.1. Computing Sensitivity <a class="anchor" id="computing_sensitivity"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-the-results">3.7.2. Plotting the results <a class="anchor" id="plotting_the_results"></a></a></li>
 </ul>
 </li>
 </ul>
@@ -1003,8 +1044,8 @@ The larger the MMD, the more do the samples deviate.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
   </footer>

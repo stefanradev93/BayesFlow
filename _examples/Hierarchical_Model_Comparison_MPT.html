@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>8. Hierarchical Model Comparison for Cognitive Models &#8212; BayesFlow: Amortized Bayesian Inference</title>
   
@@ -19,35 +18,35 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/Hierarchical_Model_Comparison_MPT';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="canonical" href="https://www.bayesflow.org/_examples/Hierarchical_Model_Comparison_MPT.html" />
     <link rel="icon" href="../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../about.html" />
@@ -64,10 +63,9 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>
@@ -108,11 +106,14 @@
 </form></div>
   </div>
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
-    </nav>
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -146,7 +147,18 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">BayesFlow</a></li>
@@ -418,15 +430,16 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">8.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">8.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperpriors-and-priors">8.2.1. Hyperpriors and Priors</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-the-simulators">8.2.2. Creating the Simulators</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">8.2.3. Prior Predictive Checks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">8.1. Table of Contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">8.2. Introduction <a class="anchor" id="introduction"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">8.3. Generative Model Definition <a class="anchor" id="generative_model_definition"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperpriors-and-priors">8.3.1. Hyperpriors and Priors <a class="anchor" id="hyperpriors_and_priors"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-the-simulators">8.3.2. Creating the Simulators <a class="anchor" id="creating_the_simulators"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">8.3.3. Prior Predictive Checks <a class="anchor" id="prior_predictive_checks"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-training-validating-the-neural-approximator">8.3. Defining, Training &amp; Validating the Neural Approximator</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">8.4. Network Application</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-training-validating-the-neural-approximator">8.4. Defining, Training &amp; Validating the Neural Approximator <a class="anchor" id="defining__training__"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">8.5. Network Application <a class="anchor" id="network_application"></a></a></li>
 </ul>
             </nav>
         </div>
@@ -436,14 +449,27 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="hierarchical-model-comparison-for-cognitive-models">
-<h1><span class="section-number">8. </span>Hierarchical Model Comparison for Cognitive Models<a class="headerlink" href="#hierarchical-model-comparison-for-cognitive-models" title="Permalink to this heading">#</a></h1>
+<h1><span class="section-number">8. </span>Hierarchical Model Comparison for Cognitive Models<a class="headerlink" href="#hierarchical-model-comparison-for-cognitive-models" title="Link to this heading">#</a></h1>
 <p>Part 2: Hierarchical Model Comparison</p>
 <p>by Lasse Elsemüller</p>
-<h1>Table of Contents<span class="tocSkip"></span></h1>
-<div class="toc"><ul class="toc-item"><li><span><a href="#Introduction" data-toc-modified-id="Introduction-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>Introduction</a></span></li><li><span><a href="#Generative-Model-Definition" data-toc-modified-id="Generative-Model-Definition-2"><span class="toc-item-num">2&nbsp;&nbsp;</span>Generative Model Definition</a></span><ul class="toc-item"><li><span><a href="#Hyperpriors-and-Priors" data-toc-modified-id="Hyperpriors-and-Priors-2.1"><span class="toc-item-num">2.1&nbsp;&nbsp;</span>Hyperpriors and Priors</a></span></li><li><span><a href="#Creating-the-Simulators" data-toc-modified-id="Creating-the-Simulators-2.2"><span class="toc-item-num">2.2&nbsp;&nbsp;</span>Creating the Simulators</a></span></li><li><span><a href="#Prior-Predictive-Checks" data-toc-modified-id="Prior-Predictive-Checks-2.3"><span class="toc-item-num">2.3&nbsp;&nbsp;</span>Prior Predictive Checks</a></span></li></ul></li><li><span><a href="#Defining,-Training-&amp;-Validating-the-Neural-Approximator" data-toc-modified-id="Defining,-Training-&amp;-Validating-the-Neural-Approximator-3"><span class="toc-item-num">3&nbsp;&nbsp;</span>Defining, Training &amp; Validating the Neural Approximator</a></span></li><li><span><a href="#Network-Application" data-toc-modified-id="Network-Application-4"><span class="toc-item-num">4&nbsp;&nbsp;</span>Network Application</a></span></li></ul></div><div class="cell docutils container">
+<section id="table-of-contents">
+<h2><span class="section-number">8.1. </span>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#introduction"><span class="xref myst">Introduction</span></a></p></li>
+<li><p><a class="reference internal" href="#generative_model_definition"><span class="xref myst">Generative Model Definition</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#hyperpriors_and_priors"><span class="xref myst">Hyperpriors and Priors</span></a></p></li>
+<li><p><a class="reference internal" href="#creating_the_simulators"><span class="xref myst">Creating the Simulators</span></a></p></li>
+<li><p><a class="reference internal" href="#prior_predictive_checks"><span class="xref myst">Prior Predictive Checks</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#defining__training__"><span class="xref myst">Defining, Training &amp; Validating the Neural Approximator</span></a></p></li>
+<li><p><a class="reference internal" href="#network_application"><span class="xref myst">Network Application</span></a></p></li>
+</ul>
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
@@ -458,13 +484,14 @@ document.write(`
 </div>
 </div>
 </div>
+</section>
 <section id="introduction">
-<h2><span class="section-number">8.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">8.2. </span>Introduction <a class="anchor" id="introduction"></a><a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
 <p>This is the second part of the tutorial series covering amortized model comparison with BayesFlow! The general workflow, the scenario and the cognitive models were introduced in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a> and are assumed to be known, so here we will focus on the new elements introduced when comparing hierarchical models.</p>
 <p>In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>, we only conducted model comparison for a single participant at a time. Let us now consider all participants and their nested observations simultaneously in our model comparison!</p>
 </section>
 <section id="generative-model-definition">
-<h2><span class="section-number">8.2. </span>Generative Model Definition<a class="headerlink" href="#generative-model-definition" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">8.3. </span>Generative Model Definition <a class="anchor" id="generative_model_definition"></a><a class="headerlink" href="#generative-model-definition" title="Link to this heading">#</a></h2>
 <p>To extend our MPT models to hierarchical ones, we need to introduce a superordinate level that encodes our assumptions about the relationships between individuals. We use the most popular hierarchical MPT framework, the latent-trait approach by <a class="reference external" href="https://link.springer.com/article/10.1007/s11336-009-9141-0">Klauer (2010)</a>. Here, we replace our non-hierarchical Beta priors by a multivariate normal distribution, which allows us to model correlations between our parameters. We afterwards use the cumulative distribution function of the standard normal distribution, <span class="math notranslate nohighlight">\(\Phi\)</span>, to transform from the real-line to probabilities. Let’s write out our new model components explicitly with <span class="math notranslate nohighlight">\(m \in M\)</span> denoting the participants:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
@@ -478,7 +505,7 @@ g_m &amp;= \Phi(g_m') \text{ for } m=1,\dots,M\\
 \end{align}
 \end{split}\]</div>
 <section id="hyperpriors-and-priors">
-<h3><span class="section-number">8.2.1. </span>Hyperpriors and Priors<a class="headerlink" href="#hyperpriors-and-priors" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">8.3.1. </span>Hyperpriors and Priors <a class="anchor" id="hyperpriors_and_priors"></a><a class="headerlink" href="#hyperpriors-and-priors" title="Link to this heading">#</a></h3>
 <p>We now have to define hyperpriors for the parameters of the multivariate normal prior distribution. For the covariance matrix <span class="math notranslate nohighlight">\(\Sigma\)</span>, the latent-trait approach employs a scaled inverse Wishart distribution. The <span class="math notranslate nohighlight">\(Q\)</span> parameter controls the correlation between our parameters <span class="math notranslate nohighlight">\(d\)</span> and <span class="math notranslate nohighlight">\(g\)</span>, while the variances are determined jointly with the scaling parameters <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
@@ -557,7 +584,7 @@ Q &amp;\sim InvWishart(\mathbb{I}, 10)\\
 </div>
 </section>
 <section id="creating-the-simulators">
-<h3><span class="section-number">8.2.2. </span>Creating the Simulators<a class="headerlink" href="#creating-the-simulators" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">8.3.2. </span>Creating the Simulators <a class="anchor" id="creating_the_simulators"></a><a class="headerlink" href="#creating-the-simulators" title="Link to this heading">#</a></h3>
 <p>At this point, it is important to stress again our new definition of a data set: In <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>, we analyzed participants separately, so each data set contained a single participant. With hierarchical models, we can now take all of our experimental data simultaneously into consideration, so each data set contains several participants with nested observations each. We could also have other hierarchical models, such as students nested into classes or employees nested into organizations, so we refer to the higher order units with the general term <em>groups</em>. For this tutorial, we consider a scenario with 50 participants performing 100 trials each.</p>
 <p>We continue our known workflow by first specifying simulator functions, then creating our generative models with the <code class="docutils literal notranslate"><span class="pre">GenerativeModel</span></code> wrapper and finally combining them with the <code class="docutils literal notranslate"><span class="pre">MultiGenerativeModel</span></code> wrapper.</p>
 <div class="cell docutils container">
@@ -708,7 +735,7 @@ First 3 rows of first 2 participants in first data set:
 </div>
 </section>
 <section id="prior-predictive-checks">
-<h3><span class="section-number">8.2.3. </span>Prior Predictive Checks<a class="headerlink" href="#prior-predictive-checks" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">8.3.3. </span>Prior Predictive Checks <a class="anchor" id="prior_predictive_checks"></a><a class="headerlink" href="#prior-predictive-checks" title="Link to this heading">#</a></h3>
 <p>The interplay between parameters on several levels adds more complexity to the behavior of hierarchical models. Therefore, prior predictive or pushfoward checks become even more crucial for inspecting whether the chosen parametrization matches one’s expectations. Our simulated data sets now contain <code class="docutils literal notranslate"><span class="pre">NUM_GROUPS</span></code> participants and <code class="docutils literal notranslate"><span class="pre">NUM_OBS</span></code> observations each. If we want to simulate 1000 participants as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>, we now need only 20 simulations from a model, as each data set contains 50 participants. Afterwards, we calculate the hit rates and false alarm rates for each simulated participant as before and plot them.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -771,7 +798,7 @@ First 3 rows of first 2 participants in first data set:
 </section>
 </section>
 <section id="defining-training-validating-the-neural-approximator">
-<h2><span class="section-number">8.3. </span>Defining, Training &amp; Validating the Neural Approximator<a class="headerlink" href="#defining-training-validating-the-neural-approximator" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">8.4. </span>Defining, Training &amp; Validating the Neural Approximator <a class="anchor" id="defining__training__"></a><a class="headerlink" href="#defining-training-validating-the-neural-approximator" title="Link to this heading">#</a></h2>
 <p>We adapt the neural network architecture to this new symmetry by changing only a single part, the summary network. We now use a <code class="docutils literal notranslate"><span class="pre">HierarchicalNetwork</span></code> which we pass one summary network for each level. The majority of hierarchical models in cognitive modeling assume IID data on all levels, so we simply use one <code class="docutils literal notranslate"><span class="pre">DeepSet</span></code> network for each level. If we would have, for instance, temporal dependencies within each participant, we would exchange the first network to one that is specialized for processing time series data, such as a <code class="docutils literal notranslate"><span class="pre">TimeSeriesTransformer</span></code>.</p>
 <p>The first summary network summarizes the information contained within the participants separately and passes the resulting embeddings to the second summary network. The second network then further compresses all participant embeddings to a single vector of learned summary statistics, so we equip it with a sufficient number of summary dimensions to avoid a bottleneck.</p>
 <p>After these adjustments, all subsequent elements of the training and validation process stay the same as in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>.</p>
@@ -855,7 +882,7 @@ INFO:root:Done.
 <p>Our neural network quickly learned to discriminate between the two hierarchical models and shows excellent performance when validated on simulated data. The calibration curves look a bit shaky, but the marginal bin histograms tell us that this is due to the majority of the predicted probabilities being close to 0 or 1, leaving the middle (‘uncertain’) bins quite abandonded.</p>
 </section>
 <section id="network-application">
-<h2><span class="section-number">8.4. </span>Network Application<a class="headerlink" href="#network-application" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">8.5. </span>Network Application <a class="anchor" id="network_application"></a><a class="headerlink" href="#network-application" title="Link to this heading">#</a></h2>
 <p>As in <a class="reference internal" href="Model_Comparison_MPT.html"><span class="std std-doc">Part 1</span></a>, we apply our trained model to a synthetic data set from the <strong>2HT</strong> model. We again redefine our simulator with fixed random seeds for reproducible results:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -969,21 +996,23 @@ INFO:root:Done.
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
   <div class="sidebar-secondary-item">
   <div class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">8.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">8.2. Generative Model Definition</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperpriors-and-priors">8.2.1. Hyperpriors and Priors</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-the-simulators">8.2.2. Creating the Simulators</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">8.2.3. Prior Predictive Checks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">8.1. Table of Contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">8.2. Introduction <a class="anchor" id="introduction"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-definition">8.3. Generative Model Definition <a class="anchor" id="generative_model_definition"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperpriors-and-priors">8.3.1. Hyperpriors and Priors <a class="anchor" id="hyperpriors_and_priors"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-the-simulators">8.3.2. Creating the Simulators <a class="anchor" id="creating_the_simulators"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prior-predictive-checks">8.3.3. Prior Predictive Checks <a class="anchor" id="prior_predictive_checks"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-training-validating-the-neural-approximator">8.3. Defining, Training &amp; Validating the Neural Approximator</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">8.4. Network Application</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-training-validating-the-neural-approximator">8.4. Defining, Training &amp; Validating the Neural Approximator <a class="anchor" id="defining__training__"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#network-application">8.5. Network Application <a class="anchor" id="network_application"></a></a></li>
 </ul>
   </nav></div>
 
@@ -1028,8 +1057,8 @@ INFO:root:Done.
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
   </footer>

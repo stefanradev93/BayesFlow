@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>5. Posterior Estimation for ODEs &#8212; BayesFlow: Amortized Bayesian Inference</title>
   
@@ -19,35 +18,35 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/Linear_ODE_system';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="canonical" href="https://www.bayesflow.org/_examples/Linear_ODE_system.html" />
     <link rel="icon" href="../_static/bayesflow_hex.ico"/>
     <link rel="author" title="About these documents" href="../about.html" />
@@ -64,10 +63,9 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>
@@ -108,11 +106,14 @@
 </form></div>
   </div>
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
-    </nav>
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -146,7 +147,18 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">BayesFlow</a></li>
@@ -418,25 +430,26 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">5.1. Introduction</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analytical-solution">5.1.1. Analytical Solution</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stability-of-solutions">5.1.2. Stability of Solutions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">5.1. Table of Contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">5.2. Introduction <a class="anchor" id="introduction"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analytical-solution">5.2.1. Analytical Solution <a class="anchor" id="analytical_solution"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stability-of-solutions">5.2.2. Stability of Solutions <a class="anchor" id="stability_of_solutions"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-structure">5.2. Generative Model Structure</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow-architecture">5.3. BayesFlow Architecture</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">5.3.1. Summary Network</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">5.3.2. Inference Network</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-structure">5.3. Generative Model Structure <a class="anchor" id="generative_model_structure"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow-architecture">5.4. BayesFlow Architecture <a class="anchor" id="bayesflow_architecture"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">5.4.1. Summary Network <a class="anchor" id="summary_network"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">5.4.2. Inference Network <a class="anchor" id="inference_network"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preproccessing">5.4. Preproccessing</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training">5.5. Training</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validating-the-results">5.6. Validating the Results</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#latent-space-inspection">5.6.1. Latent Space Inspection</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">5.6.2. Simulation-Based Calibration</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-recoverability">5.6.3. Parameter Recoverability</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#individual-posteriors-and-information-gain">5.6.4. Individual Posteriors and Information Gain</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#posterior-predictions-re-simulation">5.6.5. Posterior Predictions (Re-Simulation)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preproccessing">5.5. Preproccessing <a class="anchor" id="preproccessing"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training">5.6. Training <a class="anchor" id="training"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validating-the-results">5.7. Validating the Results <a class="anchor" id="validating_the_results"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#latent-space-inspection">5.7.1. Latent Space Inspection <a class="anchor" id="latent_space_inspection"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">5.7.2. Simulation-Based Calibration <a class="anchor" id="simulation_based_calibration"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-recoverability">5.7.3. Parameter Recoverability <a class="anchor" id="parameter_recoverability"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#individual-posteriors-and-information-gain">5.7.4. Individual Posteriors and Information Gain <a class="anchor" id="individual_posteriors_and"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#posterior-predictions-re-simulation">5.7.5. Posterior Predictions (Re-Simulation) <a class="anchor" id="posterior_predictions__re_simulation_"></a></a></li>
 </ul>
 </li>
 </ul>
@@ -448,12 +461,39 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="posterior-estimation-for-odes">
-<h1><span class="section-number">5. </span>Posterior Estimation for ODEs<a class="headerlink" href="#posterior-estimation-for-odes" title="Permalink to this heading">#</a></h1>
-<h1>Table of Contents<span class="tocSkip"></span></h1>
-<div class="toc"><ul class="toc-item"><li><span><a href="#Introduction" data-toc-modified-id="Introduction-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>Introduction</a></span><ul class="toc-item"><li><span><a href="#Analytical-Solution" data-toc-modified-id="Analytical-Solution-1.1"><span class="toc-item-num">1.1&nbsp;&nbsp;</span>Analytical Solution</a></span></li><li><span><a href="#Stability-of-Solutions" data-toc-modified-id="Stability-of-Solutions-1.2"><span class="toc-item-num">1.2&nbsp;&nbsp;</span>Stability of Solutions</a></span></li></ul></li><li><span><a href="#Generative-Model-Structure" data-toc-modified-id="Generative-Model-Structure-2"><span class="toc-item-num">2&nbsp;&nbsp;</span>Generative Model Structure</a></span></li><li><span><a href="#BayesFlow-Architecture" data-toc-modified-id="BayesFlow-Architecture-3"><span class="toc-item-num">3&nbsp;&nbsp;</span>BayesFlow Architecture</a></span><ul class="toc-item"><li><span><a href="#Summary-Network" data-toc-modified-id="Summary-Network-3.1"><span class="toc-item-num">3.1&nbsp;&nbsp;</span>Summary Network</a></span></li><li><span><a href="#Inference-Network" data-toc-modified-id="Inference-Network-3.2"><span class="toc-item-num">3.2&nbsp;&nbsp;</span>Inference Network</a></span></li></ul></li><li><span><a href="#Preproccessing" data-toc-modified-id="Preproccessing-4"><span class="toc-item-num">4&nbsp;&nbsp;</span>Preproccessing</a></span></li><li><span><a href="#Training" data-toc-modified-id="Training-5"><span class="toc-item-num">5&nbsp;&nbsp;</span>Training</a></span></li><li><span><a href="#Validating-the-Results" data-toc-modified-id="Validating-the-Results-6"><span class="toc-item-num">6&nbsp;&nbsp;</span>Validating the Results</a></span><ul class="toc-item"><li><span><a href="#Latent-Space-Inspection" data-toc-modified-id="Latent-Space-Inspection-6.1"><span class="toc-item-num">6.1&nbsp;&nbsp;</span>Latent Space Inspection</a></span></li><li><span><a href="#Simulation-Based-Calibration" data-toc-modified-id="Simulation-Based-Calibration-6.2"><span class="toc-item-num">6.2&nbsp;&nbsp;</span>Simulation-Based Calibration</a></span></li><li><span><a href="#Parameter-Recoverability" data-toc-modified-id="Parameter-Recoverability-6.3"><span class="toc-item-num">6.3&nbsp;&nbsp;</span>Parameter Recoverability</a></span></li><li><span><a href="#Individual-Posteriors-and-Information-Gain" data-toc-modified-id="Individual-Posteriors-and-Information-Gain-6.4"><span class="toc-item-num">6.4&nbsp;&nbsp;</span>Individual Posteriors and Information Gain</a></span></li><li><span><a href="#Posterior-Predictions-(Re-Simulation)" data-toc-modified-id="Posterior-Predictions-(Re-Simulation)-6.5"><span class="toc-item-num">6.5&nbsp;&nbsp;</span>Posterior Predictions (Re-Simulation)</a></span></li></ul></li></ul></div><div class="cell docutils container">
+<h1><span class="section-number">5. </span>Posterior Estimation for ODEs<a class="headerlink" href="#posterior-estimation-for-odes" title="Link to this heading">#</a></h1>
+<section id="table-of-contents">
+<h2><span class="section-number">5.1. </span>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#introduction"><span class="xref myst">Introduction</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#analytical_solution"><span class="xref myst">Analytical Solution</span></a></p></li>
+<li><p><a class="reference internal" href="#stability_of_solutions"><span class="xref myst">Stability of Solutions</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#generative_model_structure"><span class="xref myst">Generative Model Structure</span></a></p></li>
+<li><p><a class="reference internal" href="#bayesflow_architecture"><span class="xref myst">BayesFlow Architecture</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#summary_network"><span class="xref myst">Summary Network</span></a></p></li>
+<li><p><a class="reference internal" href="#inference_network"><span class="xref myst">Inference Network</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#preproccessing"><span class="xref myst">Preproccessing</span></a></p></li>
+<li><p><a class="reference internal" href="#training"><span class="xref myst">Training</span></a></p></li>
+<li><p><a class="reference internal" href="#validating_the_results"><span class="xref myst">Validating the Results</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#latent_space_inspection"><span class="xref myst">Latent Space Inspection</span></a></p></li>
+<li><p><a class="reference internal" href="#simulation_based_calibration"><span class="xref myst">Simulation-Based Calibration</span></a></p></li>
+<li><p><a class="reference internal" href="#parameter_recoverability"><span class="xref myst">Parameter Recoverability</span></a></p></li>
+<li><p><a class="reference internal" href="#individual_posteriors_and"><span class="xref myst">Individual Posteriors and Information Gain</span></a></p></li>
+<li><p><a class="reference internal" href="#posterior_predictions__re_simulation_"><span class="xref myst">Posterior Predictions (Re-Simulation)</span></a></p></li>
+</ul>
+</li>
+</ul>
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
@@ -481,8 +521,9 @@ document.write(`
 </div>
 </div>
 </div>
+</section>
 <section id="introduction">
-<h2><span class="section-number">5.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">5.2. </span>Introduction <a class="anchor" id="introduction"></a><a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
 <p>In this tutorial, we will look at a simple linear ODE system:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
@@ -497,7 +538,7 @@ v(t=0) = v_0
 \end{split}\]</div>
 <p>Given the solutions <span class="math notranslate nohighlight">\(u(t)\)</span> and <span class="math notranslate nohighlight">\(v(t)\)</span>, we want to use BayesFlow to estimate the parameters <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span> of the ODE equations as well as the boundary conditions <span class="math notranslate nohighlight">\(u_0\)</span> and <span class="math notranslate nohighlight">\(v_0\)</span> over all possible solutions of the system.</p>
 <section id="analytical-solution">
-<h3><span class="section-number">5.1.1. </span>Analytical Solution<a class="headerlink" href="#analytical-solution" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">5.2.1. </span>Analytical Solution <a class="anchor" id="analytical_solution"></a><a class="headerlink" href="#analytical-solution" title="Link to this heading">#</a></h3>
 <p>The advantage of such a simple ODE system is, that the analytical solutions for <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(v\)</span> are known:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
@@ -542,7 +583,7 @@ The constants <span class="math notranslate nohighlight">\(C_1\)</span> and <spa
 \end{split}\]</div>
 </section>
 <section id="stability-of-solutions">
-<h3><span class="section-number">5.1.2. </span>Stability of Solutions<a class="headerlink" href="#stability-of-solutions" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">5.2.2. </span>Stability of Solutions <a class="anchor" id="stability_of_solutions"></a><a class="headerlink" href="#stability-of-solutions" title="Link to this heading">#</a></h3>
 <p>The solution <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(v\)</span> will be of the form:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
@@ -559,7 +600,7 @@ v = v_{12} C_1 e^{\gamma_1 t} \left[ \cos(\omega_1 t) + i \sin(\omega_1 t) \righ
 </section>
 </section>
 <section id="generative-model-structure">
-<h2><span class="section-number">5.2. </span>Generative Model Structure<a class="headerlink" href="#generative-model-structure" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">5.3. </span>Generative Model Structure <a class="anchor" id="generative_model_structure"></a><a class="headerlink" href="#generative-model-structure" title="Link to this heading">#</a></h2>
 <p>We have to generate some simulated data to train our BayesFlow architecture. The first step is to randomly draw combinations of <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span>, <span class="math notranslate nohighlight">\(d\)</span>, <span class="math notranslate nohighlight">\(u_0\)</span> and <span class="math notranslate nohighlight">\(v_0\)</span> from a uniform prior distribution. By computing the eigenvalues, we can preemptively reject prior samples that will lead to unstable solutions. Note, that this will also change the prior. Additionally, we estimate the prior means and standard deviations for standardization later. The standardization step is just a convenience, since neural networks like well-scaled data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -660,10 +701,10 @@ INFO:root:No optional simulation batchable context provided.
 </div>
 </section>
 <section id="bayesflow-architecture">
-<h2><span class="section-number">5.3. </span>BayesFlow Architecture<a class="headerlink" href="#bayesflow-architecture" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">5.4. </span>BayesFlow Architecture <a class="anchor" id="bayesflow_architecture"></a><a class="headerlink" href="#bayesflow-architecture" title="Link to this heading">#</a></h2>
 <p>The BayesFlow architecture consists of a summary network and an invertible neural network. The summary network learns summary statistics for each input, such that the summary network output will have dimensions <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">summary_dim)</span></code>. The invertible inference neural network is conditioned on the summary statistic of the summary network.</p>
 <section id="summary-network">
-<h3><span class="section-number">5.3.1. </span>Summary Network<a class="headerlink" href="#summary-network" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">5.4.1. </span>Summary Network <a class="anchor" id="summary_network"></a><a class="headerlink" href="#summary-network" title="Link to this heading">#</a></h3>
 <p>For this tutorial, we will use a small <code class="docutils literal notranslate"><span class="pre">LSTM</span></code> summary network followed by two <code class="docutils literal notranslate"><span class="pre">Dense</span></code> layers.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -694,7 +735,7 @@ INFO:root:No optional simulation batchable context provided.
 </div>
 </section>
 <section id="inference-network">
-<h3><span class="section-number">5.3.2. </span>Inference Network<a class="headerlink" href="#inference-network" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">5.4.2. </span>Inference Network <a class="anchor" id="inference_network"></a><a class="headerlink" href="#inference-network" title="Link to this heading">#</a></h3>
 <p>For the inference network, we will use a 8-layer conditional invertible neural network (cINN):</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -720,7 +761,7 @@ INFO:root:No optional simulation batchable context provided.
 </section>
 </section>
 <section id="preproccessing">
-<h2><span class="section-number">5.4. </span>Preproccessing<a class="headerlink" href="#preproccessing" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">5.5. </span>Preproccessing <a class="anchor" id="preproccessing"></a><a class="headerlink" href="#preproccessing" title="Link to this heading">#</a></h2>
 <p>Before we feed the simulation data to our BayesFlow amortizer, we want to perform some preprocessing such as normalization, logscale conversion for stability, and removing nan/infinite samples.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -758,7 +799,7 @@ INFO:root:No optional simulation batchable context provided.
 </div>
 </section>
 <section id="training">
-<h2><span class="section-number">5.5. </span>Training<a class="headerlink" href="#training" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">5.6. </span>Training <a class="anchor" id="training"></a><a class="headerlink" href="#training" title="Link to this heading">#</a></h2>
 <p>To train our BayesFlow amortizer, we first have to define a <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> instance, which will take care of simulation-based training. Note, that we also use a piecewise constant decay learning rate scheduler to reduce the learning rate after a pre-selected number of training steps.</p>
 <p>In order to save the networks, you can specify a <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code> argument (networks will be saved after each epoch) or manually call the <code class="docutils literal notranslate"><span class="pre">save_weights</span></code> method of the <code class="docutils literal notranslate"><span class="pre">AmortizedPosterior</span></code> following training.</p>
 <div class="cell docutils container">
@@ -823,10 +864,10 @@ Note: For the purpose of this tutorial, we tried to restrict notebook runtime to
 </div>
 </section>
 <section id="validating-the-results">
-<h2><span class="section-number">5.6. </span>Validating the Results<a class="headerlink" href="#validating-the-results" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">5.7. </span>Validating the Results <a class="anchor" id="validating_the_results"></a><a class="headerlink" href="#validating-the-results" title="Link to this heading">#</a></h2>
 <p>After training our BayesFlow architecture, we want to validate the results. Our first step is to inspect the latent space <span class="math notranslate nohighlight">\(z\)</span>, which we enforce to be Gaussian using the default Kullback-Leibler (KL) loss during training.</p>
 <section id="latent-space-inspection">
-<h3><span class="section-number">5.6.1. </span>Latent Space Inspection<a class="headerlink" href="#latent-space-inspection" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">5.7.1. </span>Latent Space Inspection <a class="anchor" id="latent_space_inspection"></a><a class="headerlink" href="#latent-space-inspection" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">diagnose_latent2d</span><span class="p">(</span><span class="n">plot_args</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">})</span>
@@ -839,7 +880,7 @@ Note: For the purpose of this tutorial, we tried to restrict notebook runtime to
 </div>
 </section>
 <section id="simulation-based-calibration">
-<h3><span class="section-number">5.6.2. </span>Simulation-Based Calibration<a class="headerlink" href="#simulation-based-calibration" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">5.7.2. </span>Simulation-Based Calibration <a class="anchor" id="simulation_based_calibration"></a><a class="headerlink" href="#simulation-based-calibration" title="Link to this heading">#</a></h3>
 <p>Next we can perform simulation-based calibration (SBC) as proposed by <a class="reference external" href="https://arxiv.org/pdf/1804.06788.pdf">Talts et al. (2020)</a>:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -868,7 +909,7 @@ Note: For the purpose of this tutorial, we tried to restrict notebook runtime to
 <p>Most imporantly, the SBC diagnostic is <strong>interpretable</strong>. The slightly bell-shaped histograms and slightly sigmoid-like ECDFs suggest that the posteriors are <em>underconfident</em>, that is, they do not achieve the optimal uncertainty reduction. You can train longer and see how this underconfidence gradually disappears.</p>
 </section>
 <section id="parameter-recoverability">
-<h3><span class="section-number">5.6.3. </span>Parameter Recoverability<a class="headerlink" href="#parameter-recoverability" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">5.7.3. </span>Parameter Recoverability <a class="anchor" id="parameter_recoverability"></a><a class="headerlink" href="#parameter-recoverability" title="Link to this heading">#</a></h3>
 <p>During inference, BayesFlow will provide us with a posterior distribution for every hidden parameter and every possible solution. To get a point estimate from BayesFlow, we will simply take the mean value of the posterior. For validation, we can plot the posterior mean value against the ground truth and compute the R Squared for our model. In the ideal case, all predicted values should lie on the diagonal line (posterior standard deviations are also plotted for an uncertainty measure):</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -882,7 +923,7 @@ Note: For the purpose of this tutorial, we tried to restrict notebook runtime to
 </div>
 </section>
 <section id="individual-posteriors-and-information-gain">
-<h3><span class="section-number">5.6.4. </span>Individual Posteriors and Information Gain<a class="headerlink" href="#individual-posteriors-and-information-gain" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">5.7.4. </span>Individual Posteriors and Information Gain <a class="anchor" id="individual_posteriors_and"></a><a class="headerlink" href="#individual-posteriors-and-information-gain" title="Link to this heading">#</a></h3>
 <p>For single solutions, we can also visualize the bivariate posteriors for all hidden parameters and compare them to their corresponding priors. This is a quick way to gather how much information gain (equiv. uncertainty reduction) we have achieved by replacing the prior with the posterior. Naturally, due to the simplicity of our forward model, the information gain is enormous.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -897,7 +938,7 @@ Note: For the purpose of this tutorial, we tried to restrict notebook runtime to
 </div>
 </section>
 <section id="posterior-predictions-re-simulation">
-<h3><span class="section-number">5.6.5. </span>Posterior Predictions (Re-Simulation)<a class="headerlink" href="#posterior-predictions-re-simulation" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">5.7.5. </span>Posterior Predictions (Re-Simulation) <a class="anchor" id="posterior_predictions__re_simulation_"></a><a class="headerlink" href="#posterior-predictions-re-simulation" title="Link to this heading">#</a></h3>
 <p>The last check we will perform here is re-simulation (also known as posterior predictive checks or generative performance). Given a set of linear ODE solutions of <span class="math notranslate nohighlight">\(u(t)\)</span> and <span class="math notranslate nohighlight">\(v(t)\)</span>, we predict the posterior of <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span>, <span class="math notranslate nohighlight">\(d\)</span>, <span class="math notranslate nohighlight">\(u_0\)</span> and <span class="math notranslate nohighlight">\(v_0\)</span>. All parameter posterior samples will then be passed to the simulator to re-simulate <span class="math notranslate nohighlight">\(\hat{u}_i(t)\)</span> and <span class="math notranslate nohighlight">\(\hat{v}_i(t)\)</span>. Finally, we compute the median and quantile between all <span class="math notranslate nohighlight">\(\hat{u}_i(t)\)</span> and <span class="math notranslate nohighlight">\(\hat{v}_i(t)\)</span> and compare to the ground truth solutions <span class="math notranslate nohighlight">\(u(t)\)</span> and <span class="math notranslate nohighlight">\(v(t)\)</span>:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1012,31 +1053,33 @@ Note: For the purpose of this tutorial, we tried to restrict notebook runtime to
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
   <div class="sidebar-secondary-item">
   <div class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">5.1. Introduction</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analytical-solution">5.1.1. Analytical Solution</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stability-of-solutions">5.1.2. Stability of Solutions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">5.1. Table of Contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">5.2. Introduction <a class="anchor" id="introduction"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analytical-solution">5.2.1. Analytical Solution <a class="anchor" id="analytical_solution"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stability-of-solutions">5.2.2. Stability of Solutions <a class="anchor" id="stability_of_solutions"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-structure">5.2. Generative Model Structure</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow-architecture">5.3. BayesFlow Architecture</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">5.3.1. Summary Network</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">5.3.2. Inference Network</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generative-model-structure">5.3. Generative Model Structure <a class="anchor" id="generative_model_structure"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow-architecture">5.4. BayesFlow Architecture <a class="anchor" id="bayesflow_architecture"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-network">5.4.1. Summary Network <a class="anchor" id="summary_network"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-network">5.4.2. Inference Network <a class="anchor" id="inference_network"></a></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preproccessing">5.4. Preproccessing</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training">5.5. Training</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validating-the-results">5.6. Validating the Results</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#latent-space-inspection">5.6.1. Latent Space Inspection</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">5.6.2. Simulation-Based Calibration</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-recoverability">5.6.3. Parameter Recoverability</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#individual-posteriors-and-information-gain">5.6.4. Individual Posteriors and Information Gain</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#posterior-predictions-re-simulation">5.6.5. Posterior Predictions (Re-Simulation)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preproccessing">5.5. Preproccessing <a class="anchor" id="preproccessing"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training">5.6. Training <a class="anchor" id="training"></a></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validating-the-results">5.7. Validating the Results <a class="anchor" id="validating_the_results"></a></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#latent-space-inspection">5.7.1. Latent Space Inspection <a class="anchor" id="latent_space_inspection"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-based-calibration">5.7.2. Simulation-Based Calibration <a class="anchor" id="simulation_based_calibration"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-recoverability">5.7.3. Parameter Recoverability <a class="anchor" id="parameter_recoverability"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#individual-posteriors-and-information-gain">5.7.4. Individual Posteriors and Information Gain <a class="anchor" id="individual_posteriors_and"></a></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#posterior-predictions-re-simulation">5.7.5. Posterior Predictions (Re-Simulation) <a class="anchor" id="posterior_predictions__re_simulation_"></a></a></li>
 </ul>
 </li>
 </ul>
@@ -1083,8 +1126,8 @@ Note: For the purpose of this tutorial, we tried to restrict notebook runtime to
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
   </footer>
