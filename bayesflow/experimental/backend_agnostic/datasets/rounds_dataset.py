@@ -1,0 +1,34 @@
+
+import keras
+
+from bayesflow.experimental.backend_agnostic.simulation.generative_model import GenerativeModel
+
+
+class RoundsDataset(keras.utils.PyDataset):
+    """
+    A dataset that is generated on-the-fly at the beginning of each epoch.
+    """
+    def __init__(self, generative_model: GenerativeModel, batch_size: int, batches_per_epoch: int, **kwargs):
+        super().__init__(**kwargs)
+        self.generative_model = generative_model
+        self.batch_size = batch_size
+        self.batches_per_epoch = batches_per_epoch
+
+        self.data = None
+
+        self.regenerate()
+
+    def __getitem__(self, item: int) -> tuple:
+        """ Get a batch of pre-simulated data """
+        data = self.data[item]
+        return (data,)
+
+    def __len__(self) -> int:
+        return self.batches_per_epoch
+
+    def on_epoch_end(self) -> None:
+        self.regenerate()
+
+    def regenerate(self) -> None:
+        """ Sample batches of data from the generative model """
+        self.data = [self.generative_model.sample((self.batch_size,)) for _ in range(self.batches_per_epoch)]
