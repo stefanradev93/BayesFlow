@@ -1,6 +1,7 @@
 
 from .contexts import SampleContextsMixin
+from .generative_model import GenerativeModel
 from .likelihood import SampleLikelihoodMixin
-from .observations import SampleObservationsMixin
+from .observables import SampleObservablesMixin
 from .parameters import SampleParametersMixin
 from .posterior import SamplePosteriorMixin

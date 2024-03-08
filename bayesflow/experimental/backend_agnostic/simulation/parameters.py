@@ -1,5 +1,5 @@
 
-from ..types import Contexts, Parameters, Shape
+from bayesflow.experimental.backend_agnostic.types import Contexts, Parameters, Shape
 
 
 class SampleParametersMixin:
