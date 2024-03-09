@@ -21,7 +21,6 @@
 import logging
 from abc import ABC, abstractmethod
 from functools import partial
-from warnings import warn
 
 logging.basicConfig()
 
@@ -429,7 +428,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
 
         # Throw, if summary loss without a summary network provided
         if loss_fun is not None and self.summary_net is None:
-            raise ConfigurationError('You need to provide a summary_net if you want to use a summary_loss_fun.')
+            raise ConfigurationError("You need to provide a summary_net if you want to use a summary_loss_fun.")
 
         # If callable, return provided loss
         if loss_fun is None or callable(loss_fun):
@@ -1216,17 +1215,155 @@ class TwoLevelAmortizedPosterior(tf.keras.Model, AmortizedTarget):
         return local_summaries, global_summaries
 
 
-class SingleModelAmortizer(AmortizedPosterior):
-    """Deprecated class for amortizer posterior estimation."""
+class AmortizedPointEstimator(tf.keras.Model):
+    """An interface to connect a neural point estimator for Bayesian estimation with an optional summary network [1].
 
-    def __init_subclass__(cls, **kwargs):
-        warn(f"{cls.__name__} will be deprecated. Use `AmortizedPosterior` instead.", DeprecationWarning, stacklevel=2)
-        super().__init_subclass__(**kwargs)
+    [1] Sainsbury-Dale, M., Zammit-Mangion, A., & Huser, R. (2024).
+    Likelihood-free parameter estimation with neural Bayes estimators.
+    The American Statistician, 78(1), 1-14.
+    """
 
-    def __init__(self, *args, **kwargs):
-        warn(
-            f"{self.__class__.__name__} will be deprecated. Use `AmortizedPosterior` instead.",
-            DeprecationWarning,
-            stacklevel=2,
+    def __init__(self, inference_net, summary_net=None, norm_ord=2, loss_fun=None):
+        """Initializes a composite neural architecture for amortized bayesian model comparison.
+
+        Parameters
+        ----------
+        inference_net     : tf.keras.Model
+            A neural network whose final output dimension equals that of the target quantities.
+        summary_net       : tf.keras.Model or None, optional, default: None
+            An optional summary network
+        norm_ord          : int or np.inf, optional, default: 2
+            The order of the norm used as a loss function for the point estimator. Should be in ``[1, 2, np.inf]``.
+        loss_fun          : callable or None, optional, default: None
+            If not None, it overrides the norm keyword argument.
+
+        Important
+        ----------
+        - If no ``summary_net`` is provided, then the output dictionary of your generative model should not contain
+        any `sumamry_conditions`, i.e., ``summary_conditions`` should be set to None, otherwise these will be ignored.
+
+        - If no custom ``loss_fun`` is provided, the loss function will be the log loss for the means of a Dirichlet
+        distribution or softmax outputs.
+        """
+
+        super().__init__()
+
+        self.inference_net = inference_net
+        self.summary_net = summary_net
+        self.loss_fn = self._determine_loss(loss_fun, norm_ord)
+
+    def call(self, input_dict, return_summary=False, **kwargs):
+        """Performs a forward pass through the summary and inference network given an input dictionary.
+
+        Parameters
+        ----------
+        input_dict     : dict
+            Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
+            ``parameters``         - the latent model parameters over which a condition density is learned
+            ``summary_conditions`` - the conditioning variables (including data) that are first passed through a summary network
+            ``direct_conditions``  - the conditioning variables that the directly passed to the inference network
+        return_summary : bool, optional, default: False
+            A flag which determines whether the learnable data summaries (representations) are returned or not.
+        **kwargs       : dict, optional, default: {}
+            Additional keyword arguments passed to the networks
+            For instance, ``kwargs={'training': True}`` is passed automatically during training.
+
+        Returns
+        -------
+        net_out or (net_out, summary_out) : tuple of tf.Tensor
+            The outputs of ``inference_net(summary_net(x, c_s), c_d)``, usually a batch of point estimates,
+            that is, a tensor ``estimates`` or ``(sum_outputs, estimates)`` if ``return_summary`` is set
+            to True and a summary network is defined.
+        """
+
+        # Concatenate conditions, if given
+        summary_out, full_cond = self._compute_summary_condition(
+            input_dict.get(DEFAULT_KEYS["summary_conditions"]),
+            input_dict.get(DEFAULT_KEYS["direct_conditions"]),
+            **kwargs,
         )
-        super().__init__(*args, **kwargs)
+
+        # Compute output of inference net
+        net_out = self.inference_net(full_cond, **kwargs)
+
+        # Return summary outputs or not, depending on parameter
+        if return_summary:
+            return net_out, summary_out
+        return net_out
+
+    def estimate(self, input_dict, to_numpy=True, **kwargs):
+        """Obtains Bayesian point estimates given the data in input_dict.
+
+        Parameters
+        ----------
+        input_dict  : dict
+            Input dictionary containing at least one of the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
+            ``summary_conditions`` : the conditioning variables (including data) that are first passed through a summary network
+            ``direct_conditions``  : the conditioning variables that the directly passed to the inference network
+        to_numpy    : bool, optional, default: True
+            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``tf.Tensor``.
+        **kwargs    : dict, optional, default: {}
+            Additional keyword arguments passed to the networks.
+
+        Returns
+        -------
+        estimates : tf.Tensor or np.ndarray of shape (num_data_sets, num_params)
+            The point estimates of the parameters for each data set.
+        """
+
+        estimates = self(input_dict, **kwargs)
+        if to_numpy:
+            return estimates.numpy()
+        return estimates
+
+    def compute_loss(self, input_dict, **kwargs):
+        """Computes the loss of the posterior amortizer given an input dictionary, which will
+        typically be the output of a Bayesian ``GenerativeModel`` instance.
+
+        Parameters
+        ----------
+        input_dict : dict
+            Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
+            ``parameters``         - the latent model parameters over which a condition density is learned
+            ``summary_conditions`` - the conditioning variables that are first passed through a summary network
+            ``direct_conditions``  - the conditioning variables that the directly passed to the inference network
+        **kwargs   : dict, optional, default: {}
+            Additional keyword arguments passed to the networks
+            For instance, ``kwargs={'training': True}`` is passed automatically during training.
+
+        Returns
+        -------
+        total_loss : tf.Tensor of shape (1,) - the total computed loss given input variables
+        """
+
+        net_out = self(input_dict, **kwargs)
+        loss = tf.reduce_mean(self.loss_fn(net_out - input_dict[DEFAULT_KEYS["parameters"]]))
+        return loss
+
+    def _compute_summary_condition(self, summary_conditions, direct_conditions, **kwargs):
+        """Determines how to concatenate the provided conditions."""
+
+        # Compute learnable summaries, if given
+        if self.summary_net is not None:
+            sum_condition = self.summary_net(summary_conditions, **kwargs)
+        else:
+            sum_condition = None
+
+        # Concatenate learnable summaries with fixed summaries
+        if sum_condition is not None and direct_conditions is not None:
+            full_cond = tf.concat([sum_condition, direct_conditions], axis=-1)
+        elif sum_condition is not None:
+            full_cond = sum_condition
+        elif direct_conditions is not None:
+            full_cond = direct_conditions
+        else:
+            raise SummaryStatsError("Could not concatenarte or determine conditioning inputs...")
+        return sum_condition, full_cond
+
+    def _determine_loss(self, loss_fun, norm_ord):
+        """Determines which loss function to use and defaults to the norm_ord=2 as specified by the ``__init__`` method."""
+
+        # In case of user-provided loss, override norm order
+        if loss_fun is not None:
+            return loss_fun
+        return partial(tf.norm, ord=norm_ord, axis=-1)

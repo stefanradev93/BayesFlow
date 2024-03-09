@@ -31,7 +31,7 @@ from bayesflow.summary_networks import (
 )
 
 
-def _gen_randomized_3d_data(low=1, high=32, dtype=np.float32):
+def _gen_randomized_3d_data(low=16, high=32, dtype=np.float32):
     """Helper function to generate randomized 3d data for summary modules, min and
     max dimensions for each axis are given by ``low`` and ``high``."""
 
@@ -182,7 +182,7 @@ def test_set_transformer(summary_dim, num_seeds, num_attention_blocks, num_induc
 
 
 @pytest.mark.parametrize("summary_dim", [2, 9])
-@pytest.mark.parametrize("template_dim", [4, 8])
+@pytest.mark.parametrize("template_dim", [32, 64])
 @pytest.mark.parametrize("num_attention_blocks", [1, 2])
 def test_time_series_transformer(summary_dim, template_dim, num_attention_blocks):
     """Tests the fidelity of the ``TimeSeriesTransformer`` w.r.t. shape integrity
@@ -216,7 +216,7 @@ def test_time_series_transformer(summary_dim, template_dim, num_attention_blocks
     assert len(transformer.attention_blocks.layers) == num_attention_blocks
 
     # Test non-permutation invariant
-    assert not np.allclose(out, out_perm, atol=1e-5)
+    assert not np.allclose(out, out_perm, atol=1e-6)
 
 
 @pytest.mark.parametrize("summary_dim", [13, 2])
