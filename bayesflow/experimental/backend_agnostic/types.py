@@ -17,9 +17,11 @@ except ModuleNotFoundError:
 Context = Tensor
 Observable = Tensor
 Parameter = Tensor
+Summary = Tensor
 
 Contexts = dict[str, Context]
 Observables = dict[str, Observable]
 Parameters = dict[str, Parameter]
+Summaries = dict[str, Summary]
 
-Data = dict[str, Contexts | Observables | Parameters]
+Data = dict[str, Contexts | Observables | Parameters | Summaries]
