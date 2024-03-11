@@ -1,22 +1,25 @@
 
 import keras
 
-from bayesflow.experimental.backend_agnostic.simulation import SamplePosteriorMixin, SampleLikelihoodMixin
-from bayesflow.experimental.backend_agnostic.types import Contexts, Data, Observables, Parameters, Shape
+from bayesflow.experimental.backend_agnostic.networks import InferenceNetwork, SummaryNetwork, SurrogateNetwork
+from bayesflow.experimental.backend_agnostic.simulation import GenerativeModel, SamplePosteriorMixin, \
+    SampleLikelihoodMixin
+from bayesflow.experimental.backend_agnostic.types import Data, Observables, Parameters, Shape
 from .amortized_likelihood import AmortizedLikelihood
 from .amortized_posterior import AmortizedPosterior
 
 
 class AmortizedPosteriorLikelihood(keras.Model, SamplePosteriorMixin, SampleLikelihoodMixin):
     """ Convenience wrapper for joint amortized posterior and likelihood training """
-    def __init__(self, surrogate_network: keras.Model, inference_network: keras.Model, summary_network: keras.Model = None):
+    def __init__(self, generative_model: GenerativeModel, surrogate_network: SurrogateNetwork, inference_network: InferenceNetwork, summary_network: SummaryNetwork = None):
         super().__init__()
+        self.generative_model = generative_model
         self.summary_network = summary_network
         self.inference_network = inference_network
         self.surrogate_network = surrogate_network
 
-        self.amortized_likelihood = AmortizedLikelihood(surrogate_network=surrogate_network)
-        self.amortized_posterior = AmortizedPosterior(inference_network=inference_network, summary_network=summary_network)
+        self.amortized_likelihood = AmortizedLikelihood(generative_model=generative_model, surrogate_network=surrogate_network)
+        self.amortized_posterior = AmortizedPosterior(generative_model=generative_model, inference_network=inference_network, summary_network=summary_network)
 
     def build(self, input_shape):
         self.amortized_posterior.build(input_shape)
@@ -43,8 +46,8 @@ class AmortizedPosteriorLikelihood(keras.Model, SamplePosteriorMixin, SampleLike
 
         return metrics
 
-    def sample_posterior(self, batch_shape: Shape, observables: Observables, contexts: Contexts = None) -> Parameters:
-        return self.amortized_posterior.sample_posterior(batch_shape, observables, contexts)
+    def sample_posterior(self, batch_shape: Shape, data: Data = None) -> Parameters:
+        return self.amortized_posterior.sample_posterior(batch_shape, data)
 
-    def sample_likelihood(self, batch_shape: Shape, parameters: Parameters, contexts: Contexts = None) -> Observables:
-        return self.amortized_likelihood.sample_likelihood(batch_shape, parameters, contexts)
+    def sample_likelihood(self, batch_shape: Shape, data: Data = None) -> Observables:
+        return self.amortized_likelihood.sample_likelihood(batch_shape, data)
