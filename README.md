@@ -18,6 +18,7 @@ For starters, check out some of our walk-through notebooks:
 6. [Posterior estimation for SIR-like models](examples/Covid19_Initial_Posterior_Estimation.ipynb)
 7. [Model comparison for cognitive models](examples/Model_Comparison_MPT.ipynb)
 8. [Hierarchical model comparison for cognitive models](examples/Hierarchical_Model_Comparison_MPT.ipynb)
+9. [Posterior estimation using an SBML-model](examples/SBML_Model_Posterior_Estimation.ipynb)
 
 ## Documentation \& Help
 
