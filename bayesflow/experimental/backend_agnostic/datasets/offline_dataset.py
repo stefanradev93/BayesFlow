@@ -2,16 +2,7 @@
 import keras
 
 from bayesflow.experimental.backend_agnostic.simulation.generative_model import GenerativeModel
-
-
-def nested_getitem(data, item):
-    result = {}
-    for key, value in data.items():
-        if isinstance(value, dict):
-            result[key] = nested_getitem(value, item)
-        else:
-            result[key] = value[item]
-    return result
+from bayesflow.experimental.backend_agnostic.utils import nested_getitem
 
 
 class OfflineDataset(keras.utils.PyDataset):
