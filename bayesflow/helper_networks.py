@@ -332,7 +332,7 @@ class ActNorm(tf.keras.Model):
 
         super().__init__(**kwargs)
 
-        # Initialize scale and bias with zeros and ones if no batch for initalization was provided.
+        # Initialize scale and bias with zeros and ones if no batch for initialization was provided.
         if act_norm_init is None:
             self.scale = tf.Variable(tf.ones((latent_dim,)), trainable=True, name="act_norm_scale")
 

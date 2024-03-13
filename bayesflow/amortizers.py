@@ -412,7 +412,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         elif direct_conditions is not None:
             full_cond = direct_conditions
         else:
-            raise SummaryStatsError("Could not concatenarte or determine conditioning inputs...")
+            raise SummaryStatsError("Could not concatenate or determine conditioning inputs...")
         return sum_condition, full_cond
 
     def _determine_latent_dist(self, latent_dist):
