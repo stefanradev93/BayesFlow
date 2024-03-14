@@ -435,6 +435,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.kl_dirichlet"><code class="docutils literal notranslate"><span class="pre">kl_dirichlet()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.mmd_summary_space"><code class="docutils literal notranslate"><span class="pre">mmd_summary_space()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.log_loss"><code class="docutils literal notranslate"><span class="pre">log_loss()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.norm_diff"><code class="docutils literal notranslate"><span class="pre">norm_diff()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -579,6 +580,24 @@ normalized (False, default)</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="bayesflow.losses.norm_diff">
+<span class="sig-prename descclassname"><span class="pre">bayesflow.losses.</span></span><span class="sig-name descname"><span class="pre">norm_diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tensor_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'euclidean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayesflow/losses.html#norm_diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bayesflow.losses.norm_diff" title="Link to this definition">#</a></dt>
+<dd><p>Wrapper around tf.norm that computes the norm of the difference between two tensors along the specified axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>tensor_a</strong><span class="classifier">A Tensor.</span></dt><dd></dd>
+<dt><strong>tensor_b</strong><span class="classifier">A Tensor. Must be the same shape as tensor_a.</span></dt><dd></dd>
+<dt><strong>axis</strong><span class="classifier">Any or None</span></dt><dd><p>Axis along which to compute the norm of the difference. Default is None.</p>
+</dd>
+<dt><strong>ord</strong><span class="classifier">int or str</span></dt><dd><p>Order of the norm. Supports ‘euclidean’ and other norms supported by tf.norm. Default is ‘euclidean’.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
@@ -631,6 +650,7 @@ normalized (False, default)</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.kl_dirichlet"><code class="docutils literal notranslate"><span class="pre">kl_dirichlet()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.mmd_summary_space"><code class="docutils literal notranslate"><span class="pre">mmd_summary_space()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.log_loss"><code class="docutils literal notranslate"><span class="pre">log_loss()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bayesflow.losses.norm_diff"><code class="docutils literal notranslate"><span class="pre">norm_diff()</span></code></a></li>
 </ul>
   </nav></div>
 

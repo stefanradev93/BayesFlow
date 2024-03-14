@@ -739,7 +739,7 @@ document.write(`
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># Initialize scale and bias with zeros and ones if no batch for initalization was provided.</span>
+        <span class="c1"># Initialize scale and bias with zeros and ones if no batch for initialization was provided.</span>
         <span class="k">if</span> <span class="n">act_norm_init</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">latent_dim</span><span class="p">,)),</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;act_norm_scale&quot;</span><span class="p">)</span>
 
@@ -1037,7 +1037,15 @@ document.write(`
 <div class="viewcode-block" id="ConfigurableMLP.__init__">
 <a class="viewcode-back" href="../../api/bayesflow.helper_networks.html#bayesflow.helper_networks.ConfigurableMLP.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">num_hidden</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="n">residual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_dim</span><span class="p">,</span>
+        <span class="n">hidden_dim</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+        <span class="n">output_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_hidden</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+        <span class="n">residual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates an instance of a flexible and simple MLP with optional residual connections and dropout.</span>
@@ -1048,6 +1056,8 @@ document.write(`
 <span class="sd">            The input dimensionality</span>
 <span class="sd">        hidden_dim     : int, optional, default: 512</span>
 <span class="sd">            The dimensionality of the hidden layers</span>
+<span class="sd">        output_dim     : int, optional, default: None</span>
+<span class="sd">            The output dimensionality. If None is passed, `output_dim` is set to `input_dim`</span>
 <span class="sd">        num_hidden     : int, optional, default: 2</span>
 <span class="sd">            The number of hidden layers (minimum: 1)</span>
 <span class="sd">        activation     : string, optional, default: &#39;relu&#39;</span>
@@ -1061,6 +1071,7 @@ document.write(`
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="n">input_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_dim</span> <span class="o">=</span> <span class="n">input_dim</span> <span class="k">if</span> <span class="n">output_dim</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">output_dim</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
             <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_rate</span><span class="p">)]</span>
         <span class="p">)</span>
@@ -1073,7 +1084,7 @@ document.write(`
                     <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">input_dim</span><span class="p">))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dim</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="ConfigurableMLP.call">

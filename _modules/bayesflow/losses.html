@@ -566,6 +566,26 @@ document.write(`
     <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">model_indices</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">preds</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">loss</span></div>
 
+
+
+<div class="viewcode-block" id="norm_diff">
+<a class="viewcode-back" href="../../api/bayesflow.losses.html#bayesflow.losses.norm_diff">[docs]</a>
+<span class="k">def</span> <span class="nf">norm_diff</span><span class="p">(</span><span class="n">tensor_a</span><span class="p">,</span> <span class="n">tensor_b</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrapper around tf.norm that computes the norm of the difference between two tensors along the specified axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tensor_a : A Tensor.</span>
+<span class="sd">    tensor_b : A Tensor. Must be the same shape as tensor_a.</span>
+<span class="sd">    axis     : Any or None</span>
+<span class="sd">        Axis along which to compute the norm of the difference. Default is None.</span>
+<span class="sd">    ord      : int or str</span>
+<span class="sd">        Order of the norm. Supports &#39;euclidean&#39; and other norms supported by tf.norm. Default is &#39;euclidean&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">difference</span> <span class="o">=</span> <span class="n">tensor_a</span> <span class="o">-</span> <span class="n">tensor_b</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">difference</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="nb">ord</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span></div>
+
 </pre></div>
 
                 </article>
