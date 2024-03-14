@@ -31,7 +31,7 @@ import tensorflow_probability as tfp
 from bayesflow.default_settings import DEFAULT_KEYS
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
 from bayesflow.helper_functions import check_tensor_sanity
-from bayesflow.losses import log_loss, mmd_summary_space
+from bayesflow.losses import log_loss, mmd_summary_space, norm_diff
 from bayesflow.networks import EvidentialNetwork
 
 
@@ -412,7 +412,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         elif direct_conditions is not None:
             full_cond = direct_conditions
         else:
-            raise SummaryStatsError("Could not concatenarte or determine conditioning inputs...")
+            raise SummaryStatsError("Could not concatenate or determine conditioning inputs...")
         return sum_condition, full_cond
 
     def _determine_latent_dist(self, latent_dist):
@@ -1337,7 +1337,7 @@ class AmortizedPointEstimator(tf.keras.Model):
         """
 
         net_out = self(input_dict, **kwargs)
-        loss = tf.reduce_mean(self.loss_fn(net_out - input_dict[DEFAULT_KEYS["parameters"]]))
+        loss = tf.reduce_mean(self.loss_fn(net_out, input_dict[DEFAULT_KEYS["parameters"]]))
         return loss
 
     def _compute_summary_condition(self, summary_conditions, direct_conditions, **kwargs):
@@ -1366,4 +1366,4 @@ class AmortizedPointEstimator(tf.keras.Model):
         # In case of user-provided loss, override norm order
         if loss_fun is not None:
             return loss_fun
-        return partial(tf.norm, ord=norm_ord, axis=-1)
+        return partial(norm_diff, ord=norm_ord, axis=-1)
