@@ -43,7 +43,7 @@ class ContextGenerator:
     The interface distinguishes between two types of context: batchable and non-batchable.
 
     - Batchable context variables differ for each simulation in each training batch
-    - Non-batchable context varibales stay the same for each simulation in a batch, but differ across batches
+    - Non-batchable context variables stay the same for each simulation in a batch, but differ across batches
 
     Examples for batchable context variables include experimental design variables, design matrices, etc.
     Examples for non-batchable context variables include the number of observations in an experiment, positional
@@ -190,10 +190,10 @@ class Prior:
         Parameters
         ----------
         batch_prior_fun     : callable
-            A function (callbale object) with optional control arguments responsible for generating batches
+            A function (callable object) with optional control arguments responsible for generating batches
             of per-simulation parameters.
         prior_fun           : callable
-            A function (callbale object) with optional control arguments responsible for generating
+            A function (callable object) with optional control arguments responsible for generating
             per-simulation parameters.
         context generator   : callable, optional, (default None, recommended instance of ContextGenerator)
             An optional function (ideally an instance of ContextGenerator) for generating prior context variables.
@@ -226,7 +226,7 @@ class Prior:
 
         Returns
         -------
-        out_dict - a dictionary with the quantities generated from the prior + context funcitons.
+        out_dict - a dictionary with the quantities generated from the prior + context functions.
         """
 
         # Prepare placeholder output dictionary
@@ -315,7 +315,7 @@ class Prior:
         return out_dict
 
     def plot_prior2d(self, **kwargs):
-        """Generates a 2D plot representing bivariate prior ditributions. Uses the function
+        """Generates a 2D plot representing bivariate prior distributions. Uses the function
         ``bayesflow.diagnostics.plot_prior2d()`` internally for generating the plot.
 
         Parameters
@@ -392,12 +392,12 @@ class TwoLevelPrior:
         Parameters
         ----------
         hyper_prior_fun         : callable
-            A function (callbale object) which generates random draws from a hyperprior (unconditional)
+            A function (callable object) which generates random draws from a hyperprior (unconditional)
         local_prior_fun         : callable
             A function (callable object) which generates random draws from a conditional prior
             given hyperparameters sampled from the hyperprior and optional context (e.g., variable number of groups)
         shared_prior_fun        : callable or None, optional, default: None
-            A function (callable object) which generates random draws from an uncondtional prior.
+            A function (callable object) which generates random draws from an unconditional prior.
             Represents optional shared parameters.
         local_context_generator : callable or None, optional, default: None
             An optional function (ideally an instance of ``ContextGenerator``) for generating control variables
@@ -535,10 +535,10 @@ class Simulator:
         Parameters
         ----------
         batch_simulator_fun  : callable
-            A function (callbale object) with optional control arguments responsible for generating a batch of simulations
+            A function (callable object) with optional control arguments responsible for generating a batch of simulations
             given a batch of parameters and optional context variables.
         simulator_fun       : callable
-            A function (callable object) with optional control arguments responsible for generating a simulaiton given
+            A function (callable object) with optional control arguments responsible for generating a simulation given
             a single parameter vector and optional variables.
         context_generator   : callable (default None, recommended instance of ContextGenerator)
             An optional function (ideally an instance of ``ContextGenerator``) for generating prior context variables.
@@ -723,14 +723,14 @@ class GenerativeModel:
             prior knowledge about plausible parameter ranges
         simulator            : callable or bayesflow.simulation.Simulator
             A function accepting parameter draws, optional context, and optional arguments as input
-            and returning obseravble data
+            and returning observable data
         skip_test            : bool, optional, default: False
             If True, a forward inference pass will be performed.
         prior_is_batched     : bool, optional, default: False
             Only relevant and mandatory if providing a custom prior without the ``Prior`` wrapper.
         simulator_is_batched : bool or None, optional, default: None
             Only relevant and mandatory if providing a custom simulator without he ``Simulator`` wrapper.
-        name                 : str (default - "anonoymous")
+        name                 : str (default - "anonymous")
             An optional name for the generative model. If kept default (None), 'anonymous' is set as name.
 
         Notes

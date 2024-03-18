@@ -1259,7 +1259,6 @@ class AmortizedPointEstimator(tf.keras.Model):
         ----------
         input_dict     : dict
             Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
-            ``parameters``         - the latent model parameters over which a condition density is learned
             ``summary_conditions`` - the conditioning variables (including data) that are first passed through a summary network
             ``direct_conditions``  - the conditioning variables that the directly passed to the inference network
         return_summary : bool, optional, default: False
