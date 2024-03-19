@@ -184,3 +184,20 @@ def log_loss(model_indices, preds, evidential=False, label_smoothing=0.01):
     # Actual loss + regularization (if given)
     loss = -tf.reduce_mean(tf.reduce_sum(model_indices * tf.math.log(preds), axis=1))
     return loss
+
+
+def norm_diff(tensor_a, tensor_b, axis=None, ord='euclidean'):
+    """
+    Wrapper around tf.norm that computes the norm of the difference between two tensors along the specified axis.
+
+    Parameters
+    ----------
+    tensor_a : A Tensor.
+    tensor_b : A Tensor. Must be the same shape as tensor_a.
+    axis     : Any or None
+        Axis along which to compute the norm of the difference. Default is None.
+    ord      : int or str
+        Order of the norm. Supports 'euclidean' and other norms supported by tf.norm. Default is 'euclidean'.
+    """
+    difference = tensor_a - tensor_b
+    return tf.norm(difference, ord=ord, axis=axis)
