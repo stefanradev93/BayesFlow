@@ -1,7 +1,6 @@
 
 import keras
 
-from bayesflow.experimental.backend_agnostic.networks import InferenceNetwork, SummaryNetwork, SurrogateNetwork
 from bayesflow.experimental.backend_agnostic.simulation import GenerativeModel, SamplePosteriorMixin, \
     SampleLikelihoodMixin
 from bayesflow.experimental.backend_agnostic.types import Data, Observables, Parameters, Shape
@@ -11,7 +10,7 @@ from .amortized_posterior import AmortizedPosterior
 
 class AmortizedPosteriorLikelihood(keras.Model, SamplePosteriorMixin, SampleLikelihoodMixin):
     """ Convenience wrapper for joint amortized posterior and likelihood training """
-    def __init__(self, generative_model: GenerativeModel, surrogate_network: SurrogateNetwork, inference_network: InferenceNetwork, summary_network: SummaryNetwork = None):
+    def __init__(self, generative_model: GenerativeModel, surrogate_network: keras.Model, inference_network: keras.Model, summary_network: keras.Model = None):
         super().__init__()
         self.generative_model = generative_model
         self.summary_network = summary_network
