@@ -1,12 +1,13 @@
 
 import keras
 
-from bayesflow.experimental.backend_agnostic.simulation import GenerativeModel, SampleLikelihoodMixin
+from bayesflow.experimental.backend_agnostic.simulation import GenerativeModel
+from bayesflow.experimental.backend_agnostic.simulation.distributions import LikelihoodDistributionMixin
 from bayesflow.experimental.backend_agnostic.types import Data, Observables, Shape
 from bayesflow.experimental.backend_agnostic.utils import nested_merge
 
 
-class AmortizedLikelihood(keras.Model, SampleLikelihoodMixin):
+class AmortizedLikelihood(keras.Model, LikelihoodDistributionMixin):
     def __init__(self, generative_model: GenerativeModel, surrogate_network: keras.Model):
         super().__init__()
         self.generative_model = generative_model
@@ -25,12 +26,8 @@ class AmortizedLikelihood(keras.Model, SampleLikelihoodMixin):
     def compute_metrics(self, x: Data = None, *args, **kwargs):
         return self.surrogate_network.compute_metrics(x, *args, **kwargs)
 
-    def sample_likelihood(self, batch_shape: Shape, data: Data = None, surrogate_kwargs: dict = None) -> Observables:
-        if data is None:
-            data = self.generative_model.sample(batch_shape)
-        else:
-            data = nested_merge(data, self.generative_model.sample(batch_shape))
+    def sample(self, *args, **kwargs):
+        return self.surrogate_network.sample(*args, **kwargs)
 
-        surrogate_kwargs = surrogate_kwargs or {}
-
-        return {"observables": self.surrogate_network.sample(batch_shape, data, **surrogate_kwargs)}
+    def log_prob(self, *args, **kwargs):
+        return self.surrogate_network.log_prob(*args, **kwargs)

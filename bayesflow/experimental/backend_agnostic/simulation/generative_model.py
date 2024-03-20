@@ -1,18 +1,12 @@
 
 from bayesflow.experimental.backend_agnostic.types import Data, Shape
-from .contexts import SampleContextsMixin
-from .observables import SampleObservablesMixin
-from .parameters import SampleParametersMixin
+
+from .distributions import ContextDistributionMixin as CDM, ObservableDistributionMixin as ODM, ParameterDistributionMixin as PDM
 
 
 class GenerativeModel:
     """ Generate Observables Unconditionally: x ~ p(x) = ∫∫ p(x|θ,c) p(θ|c) p(c) dθ dc """
-    def __init__(
-            self,
-            prior: SampleParametersMixin,
-            simulator: SampleObservablesMixin,
-            context_prior: SampleContextsMixin = None
-    ):
+    def __init__(self, parameter_distribution: PDM, observable_distribution: ODM, context_distribution: CDM = None):
         """
         Parameters
         ----------
@@ -24,9 +18,9 @@ class GenerativeModel:
             The context prior to use to generate contexts. See :py:class:`SampleContextsMixin`.
         """
         super().__init__()
-        self.context_prior = context_prior
-        self.prior = prior
-        self.simulator = simulator
+        self.context_distribution = context_distribution
+        self.observable_distribution = observable_distribution
+        self.parameter_distribution = parameter_distribution
 
     def sample(self, batch_shape: Shape) -> Data:
         if self.context_prior is None:

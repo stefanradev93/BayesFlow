@@ -1,4 +1,7 @@
-Shape = int | tuple[int, ...]
+
+from typing import NotRequired, TypedDict
+
+Shape = tuple[int, ...]
 
 # this is ugly, but:
 # 1. it is recognized by static type checkers (not possible with if-else branching)
@@ -24,4 +27,13 @@ Observables = dict[str, Observable]
 Parameters = dict[str, Parameter]
 Summaries = dict[str, Summary]
 
+
+data_keys = frozenset(["contexts", "observables", "parameters", "summaries"])
+
+
 Data = dict[str, Contexts | Observables | Parameters | Summaries]
+
+class DataDict(TypedDict):
+    contexts: NotRequired[Contexts]
+    observables: NotRequired[Observables]
+    parameters: NotRequired[Parameters]

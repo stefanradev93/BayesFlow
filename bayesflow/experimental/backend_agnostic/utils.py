@@ -18,3 +18,16 @@ def nested_merge(a: dict, b: dict) -> dict:
         else:
             b[key] = value
     return b
+
+
+def apply_nested(fn: callable, data: dict) -> dict:
+    """ Apply a function to all non-dictionaries in a nested dictionary """
+    result = {}
+    for key, value in data.items():
+        if isinstance(value, dict):
+            result[key] = apply_nested(fn, value)
+        else:
+            # TODO: consuming version? this is not memory efficient
+            result[key] = fn(value)
+
+    return result

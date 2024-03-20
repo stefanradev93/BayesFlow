@@ -27,6 +27,9 @@ from bayesflow.helper_functions import build_meta_dict
 from bayesflow.helper_networks import MCDropout
 
 
+# TODO: rename to coupling flows etc.
+# TODO: talk to Marvin & Lasse about state of new networks
+
 class InvertibleNetwork(tf.keras.Model):
     """Implements a chain of conditional invertible coupling layers for conditional density estimation."""
 
