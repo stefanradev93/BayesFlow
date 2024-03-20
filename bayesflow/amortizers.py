@@ -1259,7 +1259,6 @@ class AmortizedPointEstimator(tf.keras.Model):
         ----------
         input_dict     : dict
             Input dictionary containing the following mandatory keys, if ``DEFAULT_KEYS`` unchanged:
-            ``parameters``         - the latent model parameters over which a condition density is learned
             ``summary_conditions`` - the conditioning variables (including data) that are first passed through a summary network
             ``direct_conditions``  - the conditioning variables that the directly passed to the inference network
         return_summary : bool, optional, default: False
@@ -1315,6 +1314,100 @@ class AmortizedPointEstimator(tf.keras.Model):
         if to_numpy:
             return estimates.numpy()
         return estimates
+
+    def bootstrap_sample(self, forward_dict, n_bootstrap, simulator, configurator, to_numpy=True, **kwargs):
+        """Obtain bootstrap samples with parametric bootstrap for all provided estimates.
+
+        Parameters
+        ----------
+        forward_dict: dict
+            Output of a ``GenerativeModel`` instance containing prior and simulator draws, as well as context variables.
+        n_bootstrap         : int
+            Number of bootstrap samples to draw for every estimate.
+        simulator           : bayesflow.simulation.Simulator
+            A data generator accepting parameter draws, optional context, and optional arguments as input
+            and returning observable data.
+        configurator        : callable
+            A callable object transforming and combining the outputs of the generative model into inputs for a BayesFlow
+            amortizer. Typically, this is the same callable as bayesflow.trainers.Trainer.configurator.
+        to_numpy            : bool, optional, default: True
+
+        Returns
+        -------
+        bootstrap_estimates : tf.Tensor or np.ndarray of shape (num_data_sets, n_bootstrap, num_params)
+            Estimated parameter values from parametric bootstrap samples.
+        """
+
+        # Obtain estimates
+        estimates = self.estimate(configurator(forward_dict), **kwargs)
+
+        # Prepare for bootstrap simulations based on estimates: Tile estimates
+        estimates_tiled = np.tile(estimates, (n_bootstrap,1))
+
+        # Prepare placeholder dictionary for simulation based on n_bootstrap datasets for every estimate
+        sim_dict = {
+            DEFAULT_KEYS["sim_data"]: None,
+            DEFAULT_KEYS["batchable_context"]: None,
+            DEFAULT_KEYS["non_batchable_context"]: None,
+        }
+
+        # Populate dictionary with batchable context from forward_dict or leave at None
+        if DEFAULT_KEYS["sim_batchable_context"] in forward_dict.keys() and forward_dict[DEFAULT_KEYS["sim_batchable_context"]] is not None:
+
+            sim_batchable_context = tf.constant(forward_dict[DEFAULT_KEYS["sim_batchable_context"]])
+
+            # If sim_batchable_context is a 1D tensor, i.e. single element per dataset, add an axis before tiling
+            if sim_batchable_context.ndim == 1:
+                sim_batchable_context_tiled = tf.tile(sim_batchable_context[:,None], (n_bootstrap, 1))
+            else:
+                sim_batchable_context_tiled = tf.tile(sim_batchable_context, (n_bootstrap, 1))
+
+            sim_dict[DEFAULT_KEYS["batchable_context"]] = sim_batchable_context_tiled
+
+        # Populate dictionary with non-batchable context from forward_dict or leave at None
+        if DEFAULT_KEYS["sim_non_batchable_context"] in forward_dict.keys() and forward_dict[DEFAULT_KEYS["sim_non_batchable_context"]] is not None:
+            sim_dict[DEFAULT_KEYS["non_batchable_context"]] = forward_dict[DEFAULT_KEYS["sim_non_batchable_context"]]
+
+        # Simulate data based on estimates and context, both tiled `n_bootstrap` times
+        if simulator.is_batched:
+            sim_dict = simulator._simulate_batched(estimates_tiled, sim_dict, **kwargs.pop("sim_args", {}))    # TODO: think again: for now intentionally left out *args compared to simulator.__call__(), bc could bring unintended behavior
+        else:
+            sim_dict = simulator._simulate_non_batched(estimates_tiled, sim_dict, **kwargs.pop("sim_args", {})) # TODO: test if sim_args are passed successfully
+
+        # To ensure proper configuration prior to estimation, we need to tile prior_batchable_context as well
+        forward_dict = forward_dict.copy()
+        if DEFAULT_KEYS["prior_batchable_context"] in forward_dict.keys() and forward_dict[DEFAULT_KEYS["prior_batchable_context"]] is not None:
+
+            prior_batchable_context = tf.constant(forward_dict[DEFAULT_KEYS["prior_batchable_context"]])
+
+            # If prior_batchable_context is a 1D tensor, i.e. single element per dataset, add an axis before tiling
+            if prior_batchable_context.ndim == 1:
+                prior_batchable_context_tiled = tf.tile(prior_batchable_context[:,None], (n_bootstrap, 1))
+            else:
+                prior_batchable_context_tiled = tf.tile(prior_batchable_context, (n_bootstrap, 1))
+
+            forward_dict[DEFAULT_KEYS["prior_batchable_context"]] = prior_batchable_context_tiled
+
+        # The estimates are now used as parameters, or prior draws in the context of the forward process
+        forward_dict[DEFAULT_KEYS["prior_draws"]] = estimates_tiled
+
+        # Include bootstrap simulations; non_batchable_context remains unchanged
+        forward_dict[DEFAULT_KEYS["sim_batchable_context"]] = sim_dict[DEFAULT_KEYS["batchable_context"]]
+        forward_dict[DEFAULT_KEYS["sim_data"]] = sim_dict[DEFAULT_KEYS["sim_data"]]
+
+        # Obtain bootstrap estimates from the new forward_dict
+        configured_dict = configurator(forward_dict)
+        bootstrap_estimates_tiled = self.estimate(configured_dict)
+
+        # Reshape and reorder to (num_data_sets, n_bootstrap, num_params)
+        bootstrap_estimates = tf.transpose(
+            tf.reshape(bootstrap_estimates_tiled, (n_bootstrap, estimates.shape[0], estimates.shape[1])),
+            perm=[1,0,2]
+        )
+
+        if to_numpy:
+            return bootstrap_estimates.numpy()
+        return bootstrap_estimates
 
     def compute_loss(self, input_dict, **kwargs):
         """Computes the loss of the posterior amortizer given an input dictionary, which will
