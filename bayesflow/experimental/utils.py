@@ -1,4 +1,9 @@
 
+import keras
+
+from bayesflow.experimental.types import Tensor
+
+
 def nested_getitem(data: dict, item: int) -> dict:
     """ Get the item-th element from a nested dictionary """
     result = {}
@@ -31,3 +36,15 @@ def apply_nested(fn: callable, data: dict) -> dict:
             result[key] = fn(value)
 
     return result
+
+
+def expand_left(tensor: Tensor, n: int) -> Tensor:
+    """ Expand a tensor to the left n times """
+    idx = [None] * n + [slice(None)] * keras.ops.ndim(tensor)
+    return tensor[idx]
+
+
+def expand_right(tensor: Tensor, n: int) -> Tensor:
+    """ Expand a tensor to the right n times """
+    idx = [slice(None)] * keras.ops.ndim(tensor) + [None] * n
+    return tensor[idx]

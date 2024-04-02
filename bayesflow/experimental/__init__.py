@@ -1,7 +1,20 @@
 
-from .backend_agnostic import amortization
-from .backend_agnostic import datasets
-from .backend_agnostic import simulation
+from . import (
+    amortization,
+    datasets,
+    models,
+    simulation,
+)
 
-from .backend_agnostic.amortization import AmortizedLikelihood, AmortizedPosterior, AmortizedPosteriorLikelihood#
-from .backend_agnostic.simulation import prior, simulator
+from .amortization import (
+    AmortizedLikelihood,
+    AmortizedPosterior,
+    AmortizedPosteriorLikelihood,
+)
+
+from .simulation import (
+    GenerativeModel,
+    LikelihoodDecorator as Likelihood,
+    PriorDecorator as Prior,
+)
+
