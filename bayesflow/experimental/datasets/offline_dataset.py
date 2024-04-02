@@ -1,8 +1,9 @@
 
 import keras
 
-from bayesflow.experimental.backend_agnostic.utils import nested_getitem
-from bayesflow.experimental.backend_agnostic.types import Data
+from bayesflow.experimental.configurator import Configurator
+from bayesflow.experimental.types import Data
+from bayesflow.experimental.utils import nested_getitem
 
 
 class OfflineDataset(keras.utils.PyDataset):
@@ -19,7 +20,7 @@ class OfflineDataset(keras.utils.PyDataset):
 
         self.shuffle()
 
-    def __getitem__(self, item: int) -> tuple:
+    def __getitem__(self, item: int) -> (Data,):
         """ Get a batch of pre-simulated data """
         item = slice(item * self.batch_size, (item + 1) * self.batch_size)
         item = self.indices[item]
