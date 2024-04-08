@@ -5,15 +5,12 @@ channels:
 - defaults
 dependencies:
 - aesara
-- black
 - flake8>=6.1.0
 - ipywidgets
-- isort
 - jupyter
 - matplotlib
 - minikanren
 - mypy>=1.5.1
-- nbqa
 - pandas
 - pip
 - pytest>=7.2.0
