@@ -9,6 +9,10 @@ class JointAmortizer(keras.Model):
         super().__init__()
         self.amortizers = amortizers
 
+    def build(self, input_shape):
+        for amortizer in self.amortizers.values():
+            amortizer.build(input_shape)
+
     def call(self, *args, **kwargs):
         return {name: amortizer(*args, **kwargs) for name, amortizer in self.amortizers.items()}
 
