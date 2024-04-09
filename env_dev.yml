@@ -8,6 +8,7 @@ dependencies:
 - flake8>=6.1.0
 - ipywidgets
 - jupyter
+- jupytext
 - matplotlib
 - minikanren
 - mypy>=1.5.1
