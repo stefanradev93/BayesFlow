@@ -1,7 +1,3 @@
 
-from .amortizer import AmortizedModel
-from .amortized_posterior_likelihood import AmortizedPosteriorLikelihood
-
-
-AmortizedPosterior = AmortizedModel
-AmortizedLikelihood = AmortizedModel
+from .amortized_likelihood import AmortizedLikelihood
+from .amortized_posterior import AmortizedPosterior

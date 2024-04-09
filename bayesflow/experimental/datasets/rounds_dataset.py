@@ -1,7 +1,6 @@
 
 import keras
 
-from bayesflow.experimental.configurator import Configurator
 from bayesflow.experimental.simulation.distributions.generative_model import GenerativeModel
 
 
@@ -9,7 +8,7 @@ class RoundsDataset(keras.utils.PyDataset):
     """
     A dataset that is generated on-the-fly at the beginning of every n-th epoch.
     """
-    def __init__(self, generative_model: GenerativeModel, batch_size: int, batches_per_epoch: int, epochs_per_round: int, configurator: Configurator = Configurator(), **kwargs):
+    def __init__(self, generative_model: GenerativeModel, batch_size: int, batches_per_epoch: int, epochs_per_round: int, **kwargs):
         super().__init__(**kwargs)
         self.generative_model = generative_model
         self.batch_size = batch_size

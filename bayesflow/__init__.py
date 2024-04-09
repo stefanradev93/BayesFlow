@@ -18,13 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import logging
-
-# Add easy access imports
-try:
-    from bayesflow import amortizers, default_settings, diagnostics, losses, networks, trainers, sensitivity
-except ImportError as err:
-    logger = logging.getLogger()
-    logger.setLevel(logging.WARNING)
-    logger.warn("Some dependencies failed to load. BayesFlow modules may not work properly!")
-    logger.warn(str(err))
+import amortizers
+import default_settings
+import diagnostics
+import losses
+import networks
+import sensitivity
+import trainers
