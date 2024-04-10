@@ -31,7 +31,7 @@ import tensorflow_probability as tfp
 from bayesflow.default_settings import DEFAULT_KEYS
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
 from bayesflow.helper_functions import check_tensor_sanity
-from bayesflow.losses import log_loss, mmd_summary_space, norm_diff
+from bayesflow.losses import log_loss, mmd_summary_space, norm_diff, quantile_loss
 from bayesflow.networks import EvidentialNetwork
 
 
@@ -1223,7 +1223,7 @@ class AmortizedPointEstimator(tf.keras.Model):
     The American Statistician, 78(1), 1-14.
     """
 
-    def __init__(self, inference_net, summary_net=None, norm_ord=2, loss_fun=None):
+    def __init__(self, inference_net, summary_net=None, norm_ord=2, quantile_levels=None, loss_fun=None):
         """Initializes a composite neural architecture for amortized bayesian model comparison.
 
         Parameters
@@ -1250,7 +1250,7 @@ class AmortizedPointEstimator(tf.keras.Model):
 
         self.inference_net = inference_net
         self.summary_net = summary_net
-        self.loss_fn = self._determine_loss(loss_fun, norm_ord)
+        self.loss_fn = self._determine_loss(loss_fun, norm_ord, quantile_levels)
 
     def call(self, input_dict, return_summary=False, **kwargs):
         """Performs a forward pass through the summary and inference network given an input dictionary.
@@ -1342,7 +1342,7 @@ class AmortizedPointEstimator(tf.keras.Model):
         estimates = self.estimate(configurator(forward_dict), **kwargs)
 
         # Prepare for bootstrap simulations based on estimates: Tile estimates
-        estimates_tiled = np.tile(estimates, (n_bootstrap,1))
+        estimates_tiled = np.tile(estimates, (n_bootstrap, 1))
 
         # Prepare placeholder dictionary for simulation based on n_bootstrap datasets for every estimate
         sim_dict = {
@@ -1352,37 +1352,48 @@ class AmortizedPointEstimator(tf.keras.Model):
         }
 
         # Populate dictionary with batchable context from forward_dict or leave at None
-        if DEFAULT_KEYS["sim_batchable_context"] in forward_dict.keys() and forward_dict[DEFAULT_KEYS["sim_batchable_context"]] is not None:
-
+        if (
+            DEFAULT_KEYS["sim_batchable_context"] in forward_dict.keys()
+            and forward_dict[DEFAULT_KEYS["sim_batchable_context"]] is not None
+        ):
             sim_batchable_context = tf.constant(forward_dict[DEFAULT_KEYS["sim_batchable_context"]])
 
             # If sim_batchable_context is a 1D tensor, i.e. single element per dataset, add an axis before tiling
             if sim_batchable_context.ndim == 1:
-                sim_batchable_context_tiled = tf.tile(sim_batchable_context[:,None], (n_bootstrap, 1))
+                sim_batchable_context_tiled = tf.tile(sim_batchable_context[:, None], (n_bootstrap, 1))
             else:
                 sim_batchable_context_tiled = tf.tile(sim_batchable_context, (n_bootstrap, 1))
 
             sim_dict[DEFAULT_KEYS["batchable_context"]] = sim_batchable_context_tiled
 
         # Populate dictionary with non-batchable context from forward_dict or leave at None
-        if DEFAULT_KEYS["sim_non_batchable_context"] in forward_dict.keys() and forward_dict[DEFAULT_KEYS["sim_non_batchable_context"]] is not None:
+        if (
+            DEFAULT_KEYS["sim_non_batchable_context"] in forward_dict.keys()
+            and forward_dict[DEFAULT_KEYS["sim_non_batchable_context"]] is not None
+        ):
             sim_dict[DEFAULT_KEYS["non_batchable_context"]] = forward_dict[DEFAULT_KEYS["sim_non_batchable_context"]]
 
         # Simulate data based on estimates and context, both tiled `n_bootstrap` times
         if simulator.is_batched:
-            sim_dict = simulator._simulate_batched(estimates_tiled, sim_dict, **kwargs.pop("sim_args", {}))    # TODO: think again: for now intentionally left out *args compared to simulator.__call__(), bc could bring unintended behavior
+            sim_dict = simulator._simulate_batched(
+                estimates_tiled, sim_dict, **kwargs.pop("sim_args", {})
+            )  # TODO: think again: for now intentionally left out *args compared to simulator.__call__(), bc could bring unintended behavior
         else:
-            sim_dict = simulator._simulate_non_batched(estimates_tiled, sim_dict, **kwargs.pop("sim_args", {})) # TODO: test if sim_args are passed successfully
+            sim_dict = simulator._simulate_non_batched(
+                estimates_tiled, sim_dict, **kwargs.pop("sim_args", {})
+            )  # TODO: test if sim_args are passed successfully
 
         # To ensure proper configuration prior to estimation, we need to tile prior_batchable_context as well
         forward_dict = forward_dict.copy()
-        if DEFAULT_KEYS["prior_batchable_context"] in forward_dict.keys() and forward_dict[DEFAULT_KEYS["prior_batchable_context"]] is not None:
-
+        if (
+            DEFAULT_KEYS["prior_batchable_context"] in forward_dict.keys()
+            and forward_dict[DEFAULT_KEYS["prior_batchable_context"]] is not None
+        ):
             prior_batchable_context = tf.constant(forward_dict[DEFAULT_KEYS["prior_batchable_context"]])
 
             # If prior_batchable_context is a 1D tensor, i.e. single element per dataset, add an axis before tiling
             if prior_batchable_context.ndim == 1:
-                prior_batchable_context_tiled = tf.tile(prior_batchable_context[:,None], (n_bootstrap, 1))
+                prior_batchable_context_tiled = tf.tile(prior_batchable_context[:, None], (n_bootstrap, 1))
             else:
                 prior_batchable_context_tiled = tf.tile(prior_batchable_context, (n_bootstrap, 1))
 
@@ -1401,8 +1412,7 @@ class AmortizedPointEstimator(tf.keras.Model):
 
         # Reshape and reorder to (num_data_sets, n_bootstrap, num_params)
         bootstrap_estimates = tf.transpose(
-            tf.reshape(bootstrap_estimates_tiled, (n_bootstrap, estimates.shape[0], estimates.shape[1])),
-            perm=[1,0,2]
+            tf.reshape(bootstrap_estimates_tiled, (n_bootstrap, estimates.shape[0], estimates.shape[1])), perm=[1, 0, 2]
         )
 
         if to_numpy:
@@ -1453,10 +1463,12 @@ class AmortizedPointEstimator(tf.keras.Model):
             raise SummaryStatsError("Could not concatenarte or determine conditioning inputs...")
         return sum_condition, full_cond
 
-    def _determine_loss(self, loss_fun, norm_ord):
+    def _determine_loss(self, loss_fun, norm_ord, quantile_levels):
         """Determines which loss function to use and defaults to the norm_ord=2 as specified by the ``__init__`` method."""
 
         # In case of user-provided loss, override norm order
         if loss_fun is not None:
             return loss_fun
+        if quantile_levels is not None:
+            return partial(quantile_loss, quantile_levels=quantile_levels)
         return partial(norm_diff, ord=norm_ord, axis=-1)
