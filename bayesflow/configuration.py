@@ -43,7 +43,7 @@ class DefaultJointConfigurator:
 
 
 class DefaultLikelihoodConfigurator:
-    """Fallback class for a generic configrator for amortized likelihood approximation."""
+    """Fallback class for a generic configurator for amortized likelihood approximation."""
 
     def __init__(self, default_float_type=np.float32):
         self.default_float_type = default_float_type
@@ -214,7 +214,7 @@ class DefaultCombiner:
 
 
 class DefaultPosteriorConfigurator:
-    """Fallback class for a generic configrator for amortized posterior approximation."""
+    """Fallback class for a generic configurator for amortized posterior approximation."""
 
     def __init__(self, default_float_type=np.float32):
         self.default_float_type = default_float_type

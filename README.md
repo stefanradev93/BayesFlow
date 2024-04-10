@@ -106,10 +106,10 @@ the model-amortizer combination on unseen simulations:
 # Generate 500 new simulated data sets
 new_sims = trainer.configurator(generative_model(500))
 
-# Obtain 100 posteriors draws per data set instantly
+# Obtain 100 posterior draws per data set instantly
 posterior_draws = amortized_posterior.sample(new_sims, n_samples=100)
 
-# Diagnoze calibration
+# Diagnose calibration
 fig = bf.diagnostics.plot_sbc_histograms(posterior_draws, new_sims['parameters'])
 ```
 
@@ -303,7 +303,7 @@ This project is currently managed by researchers from Rensselaer Polytechnic Ins
 You can cite BayesFlow along the lines of:
 
 - We approximated the posterior with neural posterior estimation and learned summary statistics (NPE; Radev et al., 2020), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023a).
-- We approximated the likelihood with neural likelihood estimation (NLE; Papamakarios et al., 2019) without hand-cafted summary statistics, as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
+- We approximated the likelihood with neural likelihood estimation (NLE; Papamakarios et al., 2019) without hand-crafted summary statistics, as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
 - We performed simultaneous posterior and likelihood estimation with jointly amortized neural approximation (JANA; Radev et al., 2023a), as implemented in the BayesFlow software for amortized Bayesian workflows (Radev et al., 2023b).
 
 1. Radev, S. T., Schmitt, M., Schumacher, L., Elsemüller, L., Pratz, V., Schälte, Y., Köthe, U., & Bürkner, P.-C. (2023a). BayesFlow: Amortized Bayesian workflows with neural networks. *The Journal of Open Source Software, 8(89)*, 5702.([arXiv](https://arxiv.org/abs/2306.16015))([JOSS](https://joss.theoj.org/papers/10.21105/joss.05702))

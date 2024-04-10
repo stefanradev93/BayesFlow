@@ -332,7 +332,7 @@ class ActNorm(tf.keras.Model):
 
         super().__init__(**kwargs)
 
-        # Initialize scale and bias with zeros and ones if no batch for initalization was provided.
+        # Initialize scale and bias with zeros and ones if no batch for initialization was provided.
         if act_norm_init is None:
             self.scale = tf.Variable(tf.ones((latent_dim,)), trainable=True, name="act_norm_scale")
 
@@ -594,7 +594,15 @@ class ConfigurableMLP(tf.keras.Model):
     """Implements a simple configurable MLP with optional residual connections and dropout."""
 
     def __init__(
-        self, input_dim, hidden_dim=512, num_hidden=2, activation="relu", residual=True, dropout_rate=0.05, **kwargs
+        self,
+        input_dim,
+        hidden_dim=512,
+        output_dim=None,
+        num_hidden=2,
+        activation="relu",
+        residual=True,
+        dropout_rate=0.05,
+        **kwargs,
     ):
         """
         Creates an instance of a flexible and simple MLP with optional residual connections and dropout.
@@ -605,6 +613,8 @@ class ConfigurableMLP(tf.keras.Model):
             The input dimensionality
         hidden_dim     : int, optional, default: 512
             The dimensionality of the hidden layers
+        output_dim     : int, optional, default: None
+            The output dimensionality. If None is passed, `output_dim` is set to `input_dim`
         num_hidden     : int, optional, default: 2
             The number of hidden layers (minimum: 1)
         activation     : string, optional, default: 'relu'
@@ -618,6 +628,7 @@ class ConfigurableMLP(tf.keras.Model):
         super().__init__(**kwargs)
 
         self.input_dim = input_dim
+        self.output_dim = input_dim if output_dim is None else output_dim
         self.model = tf.keras.Sequential(
             [tf.keras.layers.Dense(hidden_dim, activation=activation), tf.keras.layers.Dropout(dropout_rate)]
         )
@@ -630,7 +641,7 @@ class ConfigurableMLP(tf.keras.Model):
                     dropout_rate=dropout_rate,
                 )
             )
-        self.model.add(tf.keras.layers.Dense(input_dim))
+        self.model.add(tf.keras.layers.Dense(self.output_dim))
 
     def call(self, inputs, **kwargs):
         return self.model(inputs, **kwargs)
