@@ -662,3 +662,56 @@ class ConfigurableHiddenBlock(tf.keras.Model):
         if self.residual:
             x = x + inputs
         return self.act_fn(x)
+
+
+class QuantileActivation(tf.keras.layers.Layer):
+    """Inductive bias activation function for ordered quantiles anchored at a central quantile."""
+
+    def __init__(self, quantiles, *args, **kwargs):
+        """Creates an activation function that ensures ordered quantiles anchored at a central quantile.
+
+        Parameters
+        ----------
+        quantiles : list
+            List of quantiles to be used
+        *args  : list
+            Additional positional arguments passed to the base class tf.keras.layers.Layer
+        **kwargs  : dict
+            Additional keyword arguments passed to the base class tf.keras.layers.Layer
+        """
+        super(QuantileActivation, self).__init__(*args, **kwargs)
+        self.quantiles = quantiles
+        self.anchor_quantile_index = len(quantiles) // 2
+
+    def call(self, inputs):
+        """Forward pass through the activation function.
+
+        Parameters
+        ----------
+        inputs : tf.Tensor of shape (batch_size, n_quantiles*num_params)
+            The tensor containing the pre-activation to be transformed by the activation function.
+
+        Returns
+        -------
+        outputs : tf.Tensor of shape (batch_size, n_quantiles, num_params)
+            The transformed output tensor.
+        """
+
+        # Reshape to separate n_quantiles from n_params
+        assert inputs.shape[-1] % len(self.quantiles) == 0, "Number of quantiles must divide number of parameters"
+        inputs = tf.reshape(inputs, [-1, len(self.quantiles), inputs.shape[-1] // len(self.quantiles)])
+
+        # Divide in anchor, below and above
+        below_inputs = inputs[:, : self.anchor_quantile_index, :]
+        anchor_input = inputs[:, self.anchor_quantile_index, :][:, None, :]
+        above_inputs = inputs[:, self.anchor_quantile_index + 1 :, :]
+
+        # Apply exponential activation and cumulate to ensure ordered quantiles
+        below = tf.exp(below_inputs)
+        above = tf.exp(above_inputs)
+        below = anchor_input - tf.cumsum(below_inputs, axis=1)
+        above = anchor_input + tf.cumsum(above_inputs, axis=1)
+
+        # Concatenate and reshape back
+        x = tf.concat([below, anchor_input, above], axis=1)
+        return x

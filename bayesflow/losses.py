@@ -186,9 +186,10 @@ def log_loss(model_indices, preds, evidential=False, label_smoothing=0.01):
     return loss
 
 
-def norm_diff(tensor_a, tensor_b, axis=None, ord='euclidean'):
+def norm_diff(tensor_a, tensor_b, axis=None, ord="euclidean"):
     """
-    Wrapper around tf.norm that computes the norm of the difference between two tensors along the specified axis.
+    Wrapper around tf.norm that computes the norm of the difference between
+    two tensors along the specified axis.
 
     Parameters
     ----------
@@ -197,7 +198,49 @@ def norm_diff(tensor_a, tensor_b, axis=None, ord='euclidean'):
     axis     : Any or None
         Axis along which to compute the norm of the difference. Default is None.
     ord      : int or str
-        Order of the norm. Supports 'euclidean' and other norms supported by tf.norm. Default is 'euclidean'.
+        Order of the norm. Supports 'euclidean' and other norms supported by tf.norm.
+        Default is 'euclidean'.
     """
     difference = tensor_a - tensor_b
     return tf.norm(difference, ord=ord, axis=axis)
+
+
+def quantile_loss(y_pred, y_true, quantile_levels=[0.05, 0.95]):
+    """Quantile loss as described in [1].
+
+    [1] Gneiting, T., & Raftery, A. E. (2007). Strictly Proper Scoring Rules, Prediction,
+    and Estimation. Journal of the American Statistical Association, 102(477), 359–378.
+
+    Parameters
+    ----------
+    y_pred : tf.Tensor of shape (n_batch, n_quantiles, n_params)
+        Neural estimates of each quantile and each parameter.
+    y_true : tf.Tensor of shape (n_batch, n_params)
+        True values for each parameter.
+    quantile_levels : list, optional
+        Desired quantile levels. Number of quantile levels must match second-to-last dimension of `y_pred`.
+        Default is [0.05, 0.95].
+
+    Returns
+    -------
+    loss : tf.Tensor
+        A single scalar Monte-Carlo approximation of the quantile-loss, shape (,)
+    """
+    n_params = y_true.shape[-1]
+    tau = tf.constant(quantile_levels, dtype=tf.float32)
+    n_quantiles = tau.shape[0]
+
+    # If requested, reshape to separate n_quantiles from n_params
+    assert (
+        y_pred.shape[-2] == n_quantiles
+    ), "Second-to-last dimension of network output should contain quantiles for different quantile levels! The dimension does not match with the specified quantile levels."
+
+    assert (
+        y_pred.shape[-1] == n_params
+    ), "Last dimension should contain quantiles for different parameters! The dimension does not match with the number of parameters."
+
+    pointwise_diff = y_pred - y_true[:, None, :]  # (n_batch, n_quantiles, n_params)
+
+    loss = pointwise_diff * (tf.cast(pointwise_diff > 0, tf.float32) - tau[None, :, None])
+
+    return tf.reduce_mean(loss)
