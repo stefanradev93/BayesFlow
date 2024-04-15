@@ -1,65 +1,74 @@
 
-import keras
-
 from typing import Self, Sequence
 
-from bayesflow.experimental.types import Tensor
+import keras
 
-from .coupling import Coupling
+from bayesflow.experimental.simulation.distributions import DistributionMixin
+from bayesflow.experimental.types import Shape, Tensor
+from .couplings import DualCoupling
+from .transforms import Transform
 
 
-class CouplingFlow(keras.Model):
-    def __init__(self, couplings: Sequence[Coupling], latent_distribution):
-        super().__init__()
-
-        self.couplings = list(couplings)
-        self.latent_distribution = latent_distribution
+class CouplingFlow(keras.Sequential):
+    """ Implements a coupling flow as a sequence of dual couplings with swap permutations """
+    def __init__(self, couplings: Sequence[DualCoupling], base_distribution: DistributionMixin):
+        super().__init__(couplings)
+        self.base_distribution = base_distribution
 
     @classmethod
-    def from_coupling(cls, coupling: Coupling, depth: int) -> Self:
-        # TODO: add some convenience construction methods with clear names
-        ...
+    def uniform(
+            cls,
+            subnet_constructor: callable,
+            features: int,
+            conditions: int,
+            num_layers: int,
+            transform: type(Transform),
+            base_distribution: DistributionMixin,
+    ) -> Self:
+        """ Construct a uniform coupling flow, consisting of dual couplings with a single type of transform. """
+        couplings = []
+        for _ in range(num_layers):
+            c = DualCoupling(subnet_constructor, features, conditions, transform())
+            couplings.append(c)
 
-    def forward(self, x: Tensor) -> Tensor:
-        z = x
-        for coupling in self.couplings:
-            z = coupling.forward(z)
+        return cls(couplings, base_distribution)
 
-        return z
+    def call(self, *args, **kwargs):
+        return self.forward(*args, **kwargs)
 
-    def inverse(self, z: Tensor) -> Tensor:
-        x = z
-        for coupling in reversed(self.couplings):
-            x = coupling.inverse(x)
+    def compute_loss(self, x=None, y=None, y_pred=None, **kwargs):
+        z, logdet = y_pred
+        log_prob = self.base_distribution.log_prob(z)
+        nll = -keras.ops.mean(log_prob + logdet, axis=0)
 
-        return x
+        return nll
 
-    def forward_jacobian(self, x: Tensor) -> (Tensor, Tensor):
+    def forward(self, x, c=None):
         z = x
         logdet = keras.ops.zeros(keras.ops.shape(x)[0])
-        for coupling in self.couplings:
-            z, det = coupling.forward_jacobian(z)
+        for coupling in self.layers:
+            z, det = coupling.forward(z, c)
             logdet += det
 
         return z, logdet
 
-    def inverse_jacobian(self, z: Tensor) -> (Tensor, Tensor):
+    def inverse(self, z, c=None):
         x = z
         logdet = keras.ops.zeros(keras.ops.shape(x)[0])
-        for coupling in reversed(self.couplings):
-            x, det = coupling.inverse_jacobian(x)
+        for coupling in reversed(self.layers):
+            x, det = coupling.inverse(x, c)
             logdet += det
 
         return x, logdet
 
-    def call(self, x):
-        return self.forward_jacobian(x)
+    def sample(self, batch_shape: Shape):
+        z = self.base_distribution.sample(batch_shape)
+        x, _ = self.inverse(z)
 
-    def compute_loss(self, x=None, y=None, y_pred=None, **kwargs):
-        z, logdet = y_pred
-        log_prob = self.latent_distribution.log_prob(z)
+        return x
 
-        # change of variables
-        nll = -(log_prob + logdet)
+    def log_prob(self, x: Tensor) -> Tensor:
+        z, logdet = self.forward(x)
+        log_prob = self.base_distribution.log_prob(z)
 
-        return keras.ops.mean(nll, axis=0)
+        return log_prob + logdet

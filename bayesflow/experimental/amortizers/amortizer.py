@@ -25,7 +25,7 @@ class Amortizer(keras.Model):
             summary_outputs = None
 
         inference_conditions = self.configure_inference_conditions(x, summary_outputs)
-        inference_outputs = self.inference_network(inferred_variables, observed_variables, inference_conditions, summary_outputs)
+        inference_outputs = self.inference_network(inferred_variables, inference_conditions)
 
         return {
             "inference_outputs": inference_outputs,
@@ -48,7 +48,7 @@ class Amortizer(keras.Model):
 
         inference_conditions = self.configure_inference_conditions(x, y_pred.get("summary_outputs"))
         inference_loss = self.inference_network.compute_loss(
-            x=(inferred_variables, observed_variables, inference_conditions, y_pred.get("summary_outputs")),
+            x=(inferred_variables, inference_conditions),
             y=y.get("inference_targets"),
             y_pred=y_pred.get("inference_outputs")
         )
@@ -71,7 +71,7 @@ class Amortizer(keras.Model):
 
         inference_conditions = self.configure_inference_conditions(x, y_pred.get("summary_outputs"))
         inference_metrics = self.inference_network.compute_metrics(
-            x=(inferred_variables, observed_variables, inference_conditions, y_pred.get("summary_outputs")),
+            x=(inferred_variables, inference_conditions),
             y=y.get("inference_targets"),
             y_pred=y_pred.get("inference_outputs")
         )
