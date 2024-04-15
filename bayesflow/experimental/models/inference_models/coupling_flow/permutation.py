@@ -1,34 +1,29 @@
 
 import keras
 
+from bayesflow.experimental.types import Tensor
 
-class Permutation(keras.Layer):
-    def __init__(self, indices):
+
+class Permutation(keras.layers.Layer):
+    def __init__(self, indices: Tensor):
         super().__init__()
         self.indices = indices
         self.inverse_indices = keras.ops.argsort(indices, axis=0)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         return x[:, self.indices]
 
-    def inverse(self, x):
-        return x[:, self.inverse_indices]
+    def inverse(self, z: Tensor) -> Tensor:
+        return z[:, self.inverse_indices]
 
     @classmethod
-    def identity(cls, num_features):
-        return cls(keras.ops.arange(num_features))
-
-    @classmethod
-    def random(cls, num_features):
-        indices = keras.random.shuffle(keras.ops.arange(num_features))
+    def swap(cls, features: int):
+        indices = keras.ops.arange(0, features)
+        indices = keras.ops.roll(indices, shift=features // 2, axis=0)
         return cls(indices)
 
     @classmethod
-    def reverse(cls, num_features):
-        return cls(keras.ops.arange(num_features)[::-1])
-
-    @classmethod
-    def swap(cls, num_features):
-        indices = keras.ops.arange(num_features)
-        indices = keras.ops.roll(indices, num_features // 2)
+    def random(cls, features: int):
+        indices = keras.ops.arange(0, features)
+        indices = keras.random.shuffle(indices)
         return cls(indices)
