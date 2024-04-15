@@ -1,6 +1,7 @@
 
 import keras
 
+from bayesflow.experimental.simulation.distributions import generative_model
 from bayesflow.experimental.simulation.distributions.generative_model import GenerativeModel
 
 
@@ -26,7 +27,8 @@ class RoundsDataset(keras.utils.PyDataset):
         return (data,)
 
     def __len__(self) -> int:
-        return self.batches_per_epoch
+        # signals infinite dataset
+        return -1
 
     def on_epoch_end(self) -> None:
         self.epoch += 1
