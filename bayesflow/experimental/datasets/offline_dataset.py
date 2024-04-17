@@ -1,8 +1,6 @@
 
 import keras
 
-from bayesflow.experimental.configurator import Configurator
-from bayesflow.experimental.types import Data
 from bayesflow.experimental.utils import nested_getitem
 
 
