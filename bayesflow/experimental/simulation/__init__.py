@@ -1,7 +1,3 @@
 
-from .distribution_decorators import (
-    LikelihoodDecorator,
-    PriorDecorator,
-)
-
-from bayesflow.experimental.simulation.distributions.generative_model import GenerativeModel
+from .decorators import DistributionDecorator as distribution
+from .distributions import Distribution, find_distribution, GenerativeModel
