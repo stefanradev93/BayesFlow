@@ -3,15 +3,16 @@ from typing import Self, Sequence
 
 import keras
 
-from bayesflow.experimental.simulation.distributions import DistributionMixin
+from bayesflow.experimental.simulation import Distribution, find_distribution
 from bayesflow.experimental.types import Shape, Tensor
+
 from .couplings import DualCoupling
-from .transforms import Transform
+from .transforms import find_transform
 
 
 class CouplingFlow(keras.Sequential):
     """ Implements a coupling flow as a sequence of dual couplings with swap permutations """
-    def __init__(self, couplings: Sequence[DualCoupling], base_distribution: DistributionMixin):
+    def __init__(self, couplings: Sequence[DualCoupling], base_distribution: Distribution):
         super().__init__(couplings)
         self.base_distribution = base_distribution
 
@@ -21,14 +22,17 @@ class CouplingFlow(keras.Sequential):
             subnet_constructor: callable,
             features: int,
             conditions: int,
-            num_layers: int,
-            transform: type(Transform),
-            base_distribution: DistributionMixin,
+            layers: int,
+            transform="affine",
+            base_distribution="normal",
     ) -> Self:
         """ Construct a uniform coupling flow, consisting of dual couplings with a single type of transform. """
+        transform = find_transform(transform)
+        base_distribution = find_distribution(base_distribution, shape=(features,))
+
         couplings = []
-        for _ in range(num_layers):
-            c = DualCoupling(subnet_constructor, features, conditions, transform())
+        for _ in range(layers):
+            c = DualCoupling(subnet_constructor, features, conditions, transform)
             couplings.append(c)
 
         return cls(couplings, base_distribution)
@@ -42,6 +46,9 @@ class CouplingFlow(keras.Sequential):
         nll = -keras.ops.mean(log_prob + logdet, axis=0)
 
         return nll
+
+    def compute_metrics(self, x, y, y_pred, **kwargs):
+        return {}
 
     def forward(self, x, c=None):
         z = x

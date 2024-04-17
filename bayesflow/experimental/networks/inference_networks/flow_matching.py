@@ -6,10 +6,10 @@ from bayesflow.experimental.types import Tensor
 
 
 class FlowMatching(keras.Model):
-    def __init__(self, network: keras.Layer, base_distribution: DistributionMixin):
+    def __init__(self, network: keras.Layer, base_distribution):
         super().__init__()
         self.network = network
-        self.base_distribution = base_distribution
+        self.base_distribution = find_distribution(base_distribution)
 
     def call(self, inferred_variables, inference_conditions):
         return self.network(keras.ops.concatenate([inferred_variables, inference_conditions], axis=1))

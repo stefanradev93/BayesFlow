@@ -11,10 +11,10 @@ class Permutation(keras.layers.Layer):
         self.inverse_indices = keras.ops.argsort(indices, axis=0)
 
     def forward(self, x: Tensor) -> Tensor:
-        return x[:, self.indices]
+        return keras.ops.take(x, self.indices, axis=1)
 
     def inverse(self, z: Tensor) -> Tensor:
-        return z[:, self.inverse_indices]
+        return keras.ops.take(z, self.inverse_indices, axis=1)
 
     @classmethod
     def swap(cls, features: int):

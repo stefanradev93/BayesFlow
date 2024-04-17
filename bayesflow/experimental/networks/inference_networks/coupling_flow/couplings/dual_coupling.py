@@ -15,8 +15,8 @@ class DualCoupling(keras.Layer):
         self.coupling2 = Coupling(subnet_constructor, features, conditions, transform, permutation=Permutation.swap(features))
 
     def forward(self, x, c=None):
-        z, det1 = self.coupling1(x, c)
-        z, det2 = self.coupling2(z, c)
+        z, det1 = self.coupling1.forward(x, c)
+        z, det2 = self.coupling2.forward(z, c)
 
         return z, det1 + det2
 

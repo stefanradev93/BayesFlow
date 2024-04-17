@@ -18,10 +18,10 @@ class Coupling(keras.Layer):
 
         z1 = x1
         parameters = self.get_parameters(x1, c)
-        z2, logdet = self.transform(x2, **parameters)
+        z2, logdet = self.transform.forward(x2, parameters)
 
-        z = keras.ops.concatenate([z1, z2], dim=1)
-        z = self.permutation(z)
+        z = keras.ops.concatenate([z1, z2], axis=1)
+        z = self.permutation.forward(z)
 
         return z, logdet
 
@@ -32,9 +32,9 @@ class Coupling(keras.Layer):
 
         x1 = z1
         parameters = self.get_parameters(x1, c)
-        x2, logdet = self.transform.inverse(z2, **parameters)
+        x2, logdet = self.transform.inverse(z2, parameters)
 
-        x = keras.ops.concatenate([x1, x2], dim=1)
+        x = keras.ops.concatenate([x1, x2], axis=1)
 
         return x, logdet
 
@@ -43,7 +43,6 @@ class Coupling(keras.Layer):
             x = keras.ops.concatenate([x, c], axis=1)
 
         parameters = self.subnet(x)
-        parameters = self.transform.split_parameters(parameters)
         parameters = self.transform.constrain_parameters(parameters)
 
         return parameters
