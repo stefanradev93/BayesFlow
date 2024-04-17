@@ -8,7 +8,7 @@ class OfflineDataset(keras.utils.PyDataset):
     """
     A dataset that is pre-simulated and stored in memory.
     """
-    def __init__(self, data: Data, batch_size: int, batches_per_epoch: int, **kwargs):
+    def __init__(self, data: dict, batch_size: int, batches_per_epoch: int, **kwargs):
         super().__init__(**kwargs)
         self.batch_size = batch_size
         self.batches_per_epoch = batches_per_epoch
@@ -18,12 +18,12 @@ class OfflineDataset(keras.utils.PyDataset):
 
         self.shuffle()
 
-    def __getitem__(self, item: int) -> (Data,):
+    def __getitem__(self, item: int) -> (dict, dict):
         """ Get a batch of pre-simulated data """
         item = slice(item * self.batch_size, (item + 1) * self.batch_size)
         item = self.indices[item]
         data = nested_getitem(self.data, item)
-        return (data,)
+        return data, {}
 
     def __len__(self) -> int:
         return self.batches_per_epoch

@@ -1,23 +1,23 @@
 
 import keras
 
-from bayesflow.experimental.simulation.distributions.generative_model import GenerativeModel
+from bayesflow.experimental.simulation.distributions.joint_distribution import JointDistribution
 
 
 class OnlineDataset(keras.utils.PyDataset):
     """
     A dataset that is generated on-the-fly.
     """
-    def __init__(self, generative_model: GenerativeModel, batch_size: int, **kwargs):
+    def __init__(self, joint_distribution: JointDistribution, batch_size: int, steps_per_epoch: int, **kwargs):
         super().__init__(**kwargs)
-        self.generative_model = generative_model
+        self.joint_distribution = joint_distribution
         self.batch_size = batch_size
+        self.steps_per_epoch = steps_per_epoch
 
-    def __getitem__(self, item: int) -> (dict,):
-        """ Sample a batch of data from the generative model """
-        data = self.generative_model.sample((self.batch_size,))
-        return (data,)
+    def __getitem__(self, item: int) -> (dict, dict):
+        """ Sample a batch of data from the joint distribution unconditionally """
+        data = self.joint_distribution.sample((self.batch_size,))
+        return data, {}
 
     def __len__(self) -> int:
-        # signals infinite dataset
-        return -1
+        return self.steps_per_epoch
