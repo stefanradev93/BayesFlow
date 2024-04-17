@@ -449,8 +449,31 @@ Once the approximator has passed all consistency checks, we can go ahead and app
 However, we're gonna show you how to pass your real data to your calibrated estimator. We'll use simulated data again, but when you'll do it with real data, it'll just be a drop-in replacement. You can also check out the [SIR-model notebook](https://bayesflow.org/_examples/Covid19_Initial_Posterior_Estimation.html) to see how to use a trained network to real data.
 
 ```python
-# CODE COMING SOON HERE
+# Generate fake data
+# You wouldn't do that with real data
+fake_data = trainer.configurator(model(batch_size=1))
 ```
+
+```python
+# Obtain 1000 posterior draws given real data
+post_samples = amortizer.sample(fake_data, 1000)
+```
+
+Using the `plot_posterior_2d` function from the `diagnostics` module, we can look at the bivariate posteriors in isolation:
+
+```python
+fig = bf.diagnostics.plot_posterior_2d(post_samples)
+```
+
+We can even look at the "Bayesian surprise", i.e. how different the prior and posterior parameters look like. For that, just supply the prior object to `plot_posterior_2d`:
+
+```python
+fig = bf.diagnostics.plot_posterior_2d(post_samples, prior=prior)
+```
+
+Here of course, the results look great, because 1) we know the model is well calibrated thanks to the SBC we just did, and 2) we sampled from data that were very much expected by the model, since they came from prior draws.
+
+In a real analysis, you'd go on with your own bespoke plots and metrics, to make sense of the model's predictions, as showed in the [SIR-model notebook](https://bayesflow.org/_examples/Covid19_Initial_Posterior_Estimation.html).
 
 ```python
 %load_ext watermark
