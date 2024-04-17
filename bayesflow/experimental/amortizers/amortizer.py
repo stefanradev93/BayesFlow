@@ -33,6 +33,10 @@ class Amortizer(keras.Model):
         }
 
     def compute_loss(self, x: dict = None, y: dict = None, y_pred: dict = None, **kwargs):
+        x = x or {}
+        y = y or {}
+        y_pred = y_pred or {}
+
         inferred_variables = self.configure_inferred_variables(x)
         observed_variables = self.configure_observed_variables(x)
 

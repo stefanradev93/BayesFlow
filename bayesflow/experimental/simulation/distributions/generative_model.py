@@ -1,48 +1,55 @@
 
-from bayesflow.experimental.types import Data, Shape
+import inspect
 
-from .distribution_mixin import DistributionMixin
-from .likelihood_mixin import LikelihoodMixin
-from .prior_mixin import PriorMixin, UnconditionalPriorMixin
+from bayesflow.experimental.types import Shape, Distribution
+
+from .joint_distribution import JointDistribution
 
 
-class GenerativeModel(DistributionMixin):
+class GenerativeModel(JointDistribution):
     """ Generate Observables Unconditionally: x ~ p(x) = ∫∫ p(x|θ,c) p(θ|c) p(c) dθ dc """
-    is_conditional = False
-
-    def __init__(self, prior: PriorMixin, simulator: LikelihoodMixin, context_prior: UnconditionalPriorMixin = None):
-        """
-        Parameters
-        ----------
-        prior : SampleParametersMixin
-            The prior to use to generate parameters. See :py:class:`SampleParametersMixin`.
-        simulator : SampleObservablesMixin
-            The simulator to use to generate observables. See :py:class:`SampleObservablesMixin`.
-        context_prior : SampleContextsMixin, optional, default: None
-            The context prior to use to generate contexts. See :py:class:`SampleContextsMixin`.
-        """
+    # TODO: move to informed joint distribution
+    def __init__(self, global_context=None, local_context=None, prior=None, likelihood=None):
+        self.global_context = global_context
+        self.local_context = local_context
         self.prior = prior
-        self.simulator = simulator
-        self.context_prior = context_prior
+        self.likelihood = likelihood
 
-        if self.context_prior is None and self.prior.is_conditional or self.simulator.is_conditional:
-            raise ValueError(f"Received a conditional prior or simulator but no conditions.")
-
-    def sample(self, batch_shape: Shape) -> Data:
-        if self.context_prior is None:
-            contexts = {}
+    def sample(self, batch_shape: Shape) -> dict:
+        if self.global_context is None:
+            global_context = {}
         else:
-            contexts = self.context_prior.sample(batch_shape)
+            global_context = self.global_context.sample(batch_shape)
 
-        # TODO: this can be improved if contexts is always at least an empty dictionary
-        if self.prior.is_conditional:
-            parameters = self.prior.sample(batch_shape, contexts)
+        if self.local_context is None:
+            local_context = {}
         else:
-            parameters = self.prior.sample(batch_shape)
+            candidates = global_context
+            args = self._get_args(candidates, self.local_context)
+            local_context = self.local_context.sample(batch_shape, *args)
 
-        if self.simulator.is_conditional:
-            observables = self.simulator.sample(batch_shape, parameters, contexts)
+        candidates = global_context | local_context
+        args = self._get_args(candidates, self.prior)
+        parameters = self.prior.sample(batch_shape, *args)
+
+        candidates = global_context | local_context | parameters
+        args = self._get_args(candidates, self.likelihood)
+        observables = self.likelihood.sample(batch_shape, *args)
+
+        return dict(
+            global_context=global_context,
+            local_context=local_context,
+            parameters=parameters,
+            observables=observables,
+        )
+
+    def _get_args(self, candidates: dict, distribution: Distribution) -> list:
+        if hasattr(distribution.__class__, "_raw_sample_fn"):
+            signature = inspect.signature(distribution.__class__._raw_sample_fn)
         else:
-            observables = self.simulator.sample(batch_shape, parameters)
+            signature = inspect.signature(distribution.sample)
 
-        return Data(contexts=contexts, parameters=parameters, observables=observables)
+        args = []
+        for key in signature.parameters:
+            args.append(candidates[key])
+        return args
