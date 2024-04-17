@@ -12,7 +12,7 @@ def batch_shape():
 
 @pytest.fixture(scope="module")
 def two_moons_conditions():
-    @bf.Prior()
+    @bf.distribution
     def prior():
         r = np.random.normal(0.1, 0.01)
         alpha = np.random.uniform(-0.5 * np.pi, 0.5 * np.pi)
@@ -23,7 +23,7 @@ def two_moons_conditions():
 
 @pytest.fixture(scope="module")
 def two_moons_prior():
-    @bf.Prior()
+    @bf.distribution
     def prior():
         theta = np.random.uniform(-1.0, 1.0, size=2)
         return {"theta": theta}
@@ -32,11 +32,11 @@ def two_moons_prior():
 
 
 def test_unconditional_prior(batch_shape):
-    @bf.Prior()
+    @bf.distribution
     def unconditional_prior():
         return {"theta": np.random.normal(size=2)}
 
-    parameters = unconditional_prior(batch_shape)
+    parameters = unconditional_prior.sample(batch_shape)
 
     assert isinstance(parameters, dict)
     assert list(parameters.keys()) == ["theta"]
@@ -45,7 +45,7 @@ def test_unconditional_prior(batch_shape):
 
 
 def test_conditional_prior(batch_shape, two_moons_conditions):
-    @bf.Prior()
+    @bf.distribution
     def conditional_prior(conditions):
         assert isinstance(conditions, dict)
         assert "r" in conditions
@@ -58,7 +58,7 @@ def test_conditional_prior(batch_shape, two_moons_conditions):
         return {"theta": np.random.normal(size=2)}
 
     conditions = two_moons_conditions(batch_shape)
-    parameters = conditional_prior(batch_shape, conditions)
+    parameters = conditional_prior.sample(batch_shape, **conditions)
 
     assert isinstance(parameters, dict)
     assert list(parameters.keys()) == ["theta"]
@@ -67,7 +67,7 @@ def test_conditional_prior(batch_shape, two_moons_conditions):
 
 
 def test_conditional_prior_with_kwargs(batch_shape, two_moons_conditions):
-    @bf.Prior()
+    @bf.distribution
     def conditional_prior(r, alpha):
         assert keras.ops.is_tensor(r)
         assert keras.ops.is_tensor(alpha)
@@ -76,16 +76,9 @@ def test_conditional_prior_with_kwargs(batch_shape, two_moons_conditions):
         return {"theta": np.random.normal(size=2)}
 
     conditions = two_moons_conditions(batch_shape)
-    parameters = conditional_prior(batch_shape, conditions)
+    parameters = conditional_prior.sample(batch_shape, **conditions)
 
     assert isinstance(parameters, dict)
     assert list(parameters.keys()) == ["theta"]
     assert keras.ops.is_tensor(parameters["theta"])
     assert keras.ops.shape(parameters["theta"]) == batch_shape + (2,)
-
-
-def test_missing_parentheses():
-    with pytest.raises(RuntimeError):
-        @bf.Prior  # missing parentheses here
-        def unconditional_prior():
-            return {"theta": np.random.normal(size=2)}
