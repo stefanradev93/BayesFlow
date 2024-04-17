@@ -18,10 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import amortizers
-import default_settings
-import diagnostics
-import losses
-import networks
-import sensitivity
-import trainers
+from . import (
+    amortizers,
+    default_settings,
+    diagnostics,
+    losses,
+    networks,
+    sensitivity,
+    trainers,
+)

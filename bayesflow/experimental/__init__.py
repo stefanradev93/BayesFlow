@@ -1,20 +1,20 @@
 
 from . import (
-    amortization,
+    amortizers,
     datasets,
-    models,
+    diagnostics,
+    networks,
     simulation,
 )
 
-from .amortization import (
+from .amortizers import (
     AmortizedLikelihood,
     AmortizedPosterior,
-    AmortizedPosteriorLikelihood,
+    Amortizer,
 )
 
-from .simulation import (
+from .simulation import(
+    distribution,
     GenerativeModel,
-    LikelihoodDecorator as Likelihood,
-    PriorDecorator as Prior,
 )
 
