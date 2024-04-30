@@ -1,12 +1,30 @@
 
 import keras
+import keras.saving
 
 
+@keras.saving.register_keras_serializable(package="bayesflow.amortizers")
 class Amortizer(keras.Model):
-    def __init__(self, inference_network, summary_network=None):
-        super().__init__()
+    def __init__(self, inference_network, summary_network=None, **kwargs):
+        super().__init__(**kwargs)
         self.inference_network = inference_network
         self.summary_network = summary_network
+
+    @classmethod
+    def from_config(cls, config, custom_objects=None):
+        inference_network = keras.saving.deserialize_keras_object(config.pop("inference_network"), custom_objects)
+        summary_network = keras.saving.deserialize_keras_object(config.pop("summary_network"), custom_objects)
+        return cls(inference_network, summary_network, **config)
+
+    def get_config(self):
+        base_config = super().get_config()
+
+        config = {
+            "inference_network": keras.saving.serialize_keras_object(self.inference_network),
+            "summary_network": keras.saving.serialize_keras_object(self.summary_network),
+        }
+
+        return base_config | config
 
     def build(self, input_shape):
         if self.summary_network is not None:

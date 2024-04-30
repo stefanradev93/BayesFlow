@@ -1,11 +1,11 @@
 
-from . import (
-    amortizers,
-    datasets,
-    diagnostics,
-    networks,
-    simulation,
-)
+# from . import (
+#    amortizers,
+#    datasets,
+#    diagnostics,
+#    networks,
+#    simulation,
+#)
 
 from .amortizers import (
     AmortizedLikelihood,
@@ -15,6 +15,6 @@ from .amortizers import (
 
 from .simulation import(
     distribution,
-    GenerativeModel,
+    GenerativeModel as JointDistribution,
 )
 
