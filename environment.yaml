@@ -1,0 +1,16 @@
+name: bayesflow
+dependencies:
+  - jupyter
+  - jupyterlab
+  - keras = 3
+  - numpy
+  - matplotlib
+  - pytest
+  - pytest-cov
+  - pytest-xdist
+  - python >= 3.10, < 3.12
+  - seaborn
+  - scikit-learn
+  - scipy
+  - tqdm
+  - tox
