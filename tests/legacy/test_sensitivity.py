@@ -5,9 +5,9 @@ from unittest.mock import MagicMock, Mock
 import numpy as np
 import pytest
 import tensorflow as tf
+from tests.test_trainers import _create_training_setup, _prior, _simulator
 
 from bayesflow import computational_utilities, sensitivity, simulation
-from tests.test_trainers import _create_training_setup, _prior, _simulator
 
 tf.random.set_seed(1)
 

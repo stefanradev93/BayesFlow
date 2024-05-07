@@ -2,8 +2,12 @@
 import keras.callbacks
 
 
+class FitInterruptedError(Exception):
+    pass
+
+
 class InterruptFitCallback(keras.callbacks.Callback):
-    def __init__(self, batches=None, epochs=None, error_type=RuntimeError):
+    def __init__(self, batches=None, epochs=None, error_type=FitInterruptedError):
         super().__init__()
         if batches is None and epochs is None:
             raise ValueError("Either batches or epochs must be specified.")

@@ -1,8 +1,12 @@
 
-import bayesflow.experimental as bf
 import keras
 import numpy as np
 import pytest
+
+import bayesflow.experimental as bf
+
+
+# TODO: @Chase outdated (local/global context, WIP)
 
 
 @pytest.fixture(scope="module")

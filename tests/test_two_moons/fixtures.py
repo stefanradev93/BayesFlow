@@ -1,8 +1,9 @@
 
-import bayesflow.experimental as bf
 import keras
 import numpy as np
 import pytest
+
+import bayesflow.experimental as bf
 
 
 @pytest.fixture(scope="module")
@@ -86,10 +87,3 @@ def two_moons_amortized_posterior(two_moons_inference_network):
     return bf.AmortizedPosterior(
         inference_network=two_moons_inference_network
     )
-
-
-def test_fit(two_moons_amortized_posterior, two_moons_online_dataset):
-    two_moons_amortized_posterior.fit(two_moons_online_dataset, epochs=10, steps_per_epoch=10, batch_size=32)
-
-
-

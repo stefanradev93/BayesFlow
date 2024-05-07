@@ -1,11 +1,9 @@
-from unittest.mock import Mock
-
-import pytest
 import numpy as np
-from bayesflow import computational_utilities
-from bayesflow.exceptions import ArgumentError, ShapeError
-from bayesflow.trainers import Trainer
+import pytest
 import tensorflow as tf
+
+from bayesflow import computational_utilities
+from bayesflow.exceptions import ShapeError
 
 
 @pytest.mark.parametrize("x_true, x_pred, output",
