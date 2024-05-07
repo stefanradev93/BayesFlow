@@ -87,7 +87,11 @@ def test_conditional_prior_with_kwargs(batch_shape, two_moons_conditions):
     assert keras.ops.is_tensor(parameters["theta"])
     assert keras.ops.shape(parameters["theta"]) == batch_shape + (2,)
 
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> a60e6f8 (Add tests for randomness of unbatched and batched priors)
 def test_randomness_of_unbatched_prior(batch_shape):
     @bf.distribution(is_batched=False)
     def prior():
@@ -110,4 +114,8 @@ def test_randomness_of_batched_prior(batch_shape):
 
     # check that individual values in the batch are not all same
     assert not keras.ops.all(keras.ops.isclose(sample_arr, sample_arr[0]))
+<<<<<<< HEAD
 """
+=======
+"""
+>>>>>>> a60e6f8 (Add tests for randomness of unbatched and batched priors)
