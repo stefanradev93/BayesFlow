@@ -6,13 +6,13 @@ import keras
 from bayesflow.experimental.simulation import Distribution, find_distribution
 from bayesflow.experimental.types import Shape, Tensor
 
-from .couplings import DualCoupling
+from .couplings import AllInOneCoupling
 from .transforms import find_transform
 
 
 class CouplingFlow(keras.Sequential):
     """ Implements a coupling flow as a sequence of dual couplings with swap permutations """
-    def __init__(self, couplings: Sequence[DualCoupling], base_distribution: Distribution):
+    def __init__(self, couplings: Sequence[AllInOneCoupling], base_distribution: Distribution):
         super().__init__(couplings)
         self.base_distribution = base_distribution
 
@@ -20,20 +20,22 @@ class CouplingFlow(keras.Sequential):
     def uniform(
             cls,
             subnet_constructor: callable,
-            features: int,
-            conditions: int,
-            layers: int,
+            target_dim: int,
+            num_layers: int,
             transform="affine",
+            permutation='fixed',
+            act_norm=True,
             base_distribution="normal",
     ) -> Self:
         """ Construct a uniform coupling flow, consisting of dual couplings with a single type of transform. """
+
         transform = find_transform(transform)
-        base_distribution = find_distribution(base_distribution, shape=(features,))
+        base_distribution = find_distribution(base_distribution, shape=(target_dim,))
 
         couplings = []
-        for _ in range(layers):
-            c = DualCoupling(subnet_constructor, features, conditions, transform)
-            couplings.append(c)
+        for _ in range(num_layers):
+            layer = AllInOneCoupling(subnet_constructor, target_dim, transform, permutation, act_norm)
+            couplings.append(layer)
 
         return cls(couplings, base_distribution)
 
@@ -41,9 +43,9 @@ class CouplingFlow(keras.Sequential):
         return self.forward(*args, **kwargs)
 
     def compute_loss(self, x=None, y=None, y_pred=None, **kwargs):
-        z, logdet = y_pred
+        z, log_det = y_pred
         log_prob = self.base_distribution.log_prob(z)
-        nll = -keras.ops.mean(log_prob + logdet, axis=0)
+        nll = -keras.ops.mean(log_prob + log_det, axis=0)
 
         return nll
 
@@ -52,21 +54,21 @@ class CouplingFlow(keras.Sequential):
 
     def forward(self, x, c=None):
         z = x
-        logdet = keras.ops.zeros(keras.ops.shape(x)[0])
+        log_det = 0.
         for coupling in self.layers:
             z, det = coupling.forward(z, c)
-            logdet += det
+            log_det += det
 
-        return z, logdet
+        return z, log_det
 
     def inverse(self, z, c=None):
         x = z
-        logdet = keras.ops.zeros(keras.ops.shape(x)[0])
+        log_det = 0.
         for coupling in reversed(self.layers):
             x, det = coupling.inverse(x, c)
-            logdet += det
+            log_det += det
 
-        return x, logdet
+        return x, log_det
 
     def sample(self, batch_shape: Shape):
         z = self.base_distribution.sample(batch_shape)
@@ -74,8 +76,8 @@ class CouplingFlow(keras.Sequential):
 
         return x
 
-    def log_prob(self, x: Tensor) -> Tensor:
-        z, logdet = self.forward(x)
+    def log_prob(self, x: Tensor, **kwargs) -> Tensor:
+        z, log_det = self.forward(x, **kwargs)
         log_prob = self.base_distribution.log_prob(z)
 
-        return log_prob + logdet
+        return log_prob + log_det

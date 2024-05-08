@@ -32,18 +32,18 @@ class Amortizer(keras.Model):
 
         self.inference_network.build(input_shape)
 
-    def call(self, x: dict, training=False):
+    def call(self, x: dict, **kwargs):
         inferred_variables = self.configure_inferred_variables(x)
         observed_variables = self.configure_observed_variables(x)
 
         if self.summary_network:
             summary_conditions = self.configure_summary_conditions(x)
-            summary_outputs = self.summary_network(observed_variables, summary_conditions)
+            summary_outputs = self.summary_network(observed_variables, summary_conditions, **kwargs)
         else:
             summary_outputs = None
 
         inference_conditions = self.configure_inference_conditions(x, summary_outputs)
-        inference_outputs = self.inference_network(inferred_variables, inference_conditions)
+        inference_outputs = self.inference_network(inferred_variables, inference_conditions, **kwargs)
 
         return {
             "inference_outputs": inference_outputs,
