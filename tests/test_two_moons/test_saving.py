@@ -1,9 +1,7 @@
 
 import keras
-import keras.saving
 
 from tests.utils import assert_models_equal
-from .fixtures import amortizer
 
 
 def test_save_and_load(tmp_path, amortizer):

@@ -6,7 +6,7 @@ import pytest
 import bayesflow.experimental as bf
 
 
-# TODO: @Chase outdated (local/global context, WIP)
+# TODO: @Chase outdated
 
 
 @pytest.fixture(scope="module")
