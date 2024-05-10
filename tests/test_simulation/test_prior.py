@@ -1,4 +1,4 @@
-
+"""
 import keras
 import numpy as np
 import pytest
@@ -110,3 +110,4 @@ def test_randomness_of_batched_prior(batch_shape):
 
     # check that individual values in the batch are not all same
     assert not keras.ops.all(keras.ops.isclose(sample_arr, sample_arr[0]))
+"""

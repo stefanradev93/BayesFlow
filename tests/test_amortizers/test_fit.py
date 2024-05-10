@@ -1,20 +1,24 @@
 
 import keras
-import keras.callbacks
-import keras.saving
 import pytest
 
 from tests.utils import InterruptFitCallback, FitInterruptedError
-from .fixtures import amortizer, dataset
+from .fixtures import *
+
+
+def test_compile(amortizer):
+    amortizer.compile(optimizer="AdamW")
 
 
 def test_fit(amortizer, dataset):
     # TODO: verify the model learns something by comparing some metric before and after training
+    amortizer.compile(optimizer="AdamW")
     amortizer.fit(dataset, epochs=2)
 
 
 def test_interrupt_and_resume_fit(tmp_path, amortizer, dataset):
     # TODO: test the InterruptFitCallback
+    amortizer.compile(optimizer="AdamW")
 
     callbacks = [
         InterruptFitCallback(epochs=1, error_type=FitInterruptedError),
@@ -38,6 +42,8 @@ def test_interrupt_and_resume_fit(tmp_path, amortizer, dataset):
 def test_extended_fit(amortizer, dataset):
     # TODO: verify that the model state is used to actually resume the fit
     #  might require test code change
+    amortizer.compile(optimizer="AdamW")
+
     # initial fit (epochs 0-2)
     amortizer.fit(dataset, epochs=2)
 

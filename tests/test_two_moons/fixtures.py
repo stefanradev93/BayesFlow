@@ -44,8 +44,8 @@ def two_moons_likelihood():
 
 
 @pytest.fixture(scope="module")
-def two_moons_generative_model(two_moons_global_context, two_moons_local_context, two_moons_prior, two_moons_likelihood):
-    return bf.GenerativeModel(
+def two_moons_joint_distribution(two_moons_global_context, two_moons_local_context, two_moons_prior, two_moons_likelihood):
+    return bf.simulation.DefaultJointDistribution(
         global_context=two_moons_global_context,
         local_context=two_moons_local_context,
         prior=two_moons_prior,
@@ -53,12 +53,13 @@ def two_moons_generative_model(two_moons_global_context, two_moons_local_context
     )
 
 
-@pytest.fixture(scope="module")
-def two_moons_online_dataset(two_moons_generative_model):
-    return bf.datasets.OnlineDataset(two_moons_generative_model, workers=4, use_multiprocessing=True, max_queue_size=16)
+@pytest.fixture()
+def two_moons_online_dataset(two_moons_joint_distribution):
+    # TODO: do not use hard-coded batch size
+    return bf.datasets.OnlineDataset(two_moons_joint_distribution, workers=4, use_multiprocessing=True, max_queue_size=16, batch_size=16)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def two_moons_inference_network():
     class Subnet(keras.Layer):
         def __init__(self, in_features, out_features):
@@ -82,7 +83,7 @@ def two_moons_inference_network():
     )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def two_moons_amortized_posterior(two_moons_inference_network):
     return bf.AmortizedPosterior(
         inference_network=two_moons_inference_network
