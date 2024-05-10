@@ -1,12 +1,12 @@
 
 import keras
+import math
 
 from .coupling import Coupling
 from ..transforms import Transform
 
 
 class DualCoupling(keras.Layer):
-    """.Implements a dual coupling layer."""
     def __init__(
         self,
         subnet_constructor: callable,
@@ -15,17 +15,14 @@ class DualCoupling(keras.Layer):
     ):
         super().__init__()
 
-        coupling1_dim = target_dim // 2
-        coupling2_dim = target_dim // 2 if target_dim % 2 == 0 else target_dim // 2 + 1
-
         self.coupling1 = Coupling(
             subnet_constructor=subnet_constructor,
-            target_dim=coupling1_dim,
+            target_dim=math.floor(target_dim / 2),
             transform=transform,
         )
         self.coupling2 = Coupling(
             subnet_constructor=subnet_constructor,
-            target_dim=coupling2_dim,
+            target_dim=math.ceil(target_dim / 2),
             transform=transform,
         )
 
