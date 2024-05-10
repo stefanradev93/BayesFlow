@@ -15,6 +15,6 @@ from .amortizers import (
 
 from .simulation import (
     distribution,
-    DefaultJointDistribution,
+    JointDistribution,
 )
 
