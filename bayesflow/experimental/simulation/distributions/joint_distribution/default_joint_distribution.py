@@ -1,14 +1,13 @@
 
 import inspect
 
-from bayesflow.experimental.types import Shape, Distribution
-
+from bayesflow.experimental.types import Distribution, Shape
 from .joint_distribution import JointDistribution
 
 
-class GenerativeModel(JointDistribution):
+class DefaultJointDistribution(JointDistribution):
     """ Generate Observables Unconditionally: x ~ p(x) = ∫∫ p(x|θ,c) p(θ|c) p(c) dθ dc """
-    # TODO: move to informed joint distribution
+    # TODO: name and code is WIP
     def __init__(self, global_context=None, local_context=None, prior=None, likelihood=None):
         self.global_context = global_context
         self.local_context = local_context

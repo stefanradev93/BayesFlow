@@ -13,8 +13,8 @@ from .amortizers import (
     Amortizer,
 )
 
-from .simulation import(
+from .simulation import (
     distribution,
-    GenerativeModel as JointDistribution,
+    DefaultJointDistribution,
 )
 
