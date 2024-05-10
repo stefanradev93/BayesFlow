@@ -1,8 +1,7 @@
-name: bayesflow
 dependencies:
   - jupyter
   - jupyterlab
-  - keras = 3
+  - keras ~= 3.3.0
   - numpy
   - matplotlib
   - pytest
@@ -13,4 +12,4 @@ dependencies:
   - scikit-learn
   - scipy
   - tqdm
-  - tox
+  - tox ~= 4.15
