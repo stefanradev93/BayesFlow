@@ -55,7 +55,7 @@ Stable version:
 ```bash
 git clone https://github.com/stefanradev93/bayesflow
 cd bayesflow
-conda env create -f environment.yaml
+conda env create --file environment.yaml --name bayesflow
 ```
 
 Development version:
@@ -64,7 +64,7 @@ Development version:
 git clone https://github.com/stefanradev93/bayesflow
 cd bayesflow
 git checkout dev
-conda env create -f environment.yaml
+conda env create --file environment.yaml --name bayesflow
 ```
 
 
