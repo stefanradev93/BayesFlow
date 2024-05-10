@@ -230,7 +230,6 @@ def quantile_loss(y_pred, y_true, quantile_levels=[0.05, 0.95]):
     tau = tf.constant(quantile_levels, dtype=tf.float32)
     n_quantiles = tau.shape[0]
 
-    # If requested, reshape to separate n_quantiles from n_params
     assert (
         y_pred.shape[-2] == n_quantiles
     ), "Second-to-last dimension of network output should contain quantiles for different quantile levels! The dimension does not match with the specified quantile levels."
