@@ -38,11 +38,11 @@ def prior1():
     return dict(a=keras.random.normal(), b=keras.random.normal())
 
 @bf.distribution
-def prior3(a):
+def prior2(a):
     return dict(c=keras.random.normal(a))
 
 @bf.distribution
-def prior4(a, b, c):
+def prior3(a, b, c):
     return dict(d=keras.random.normal(a + b + c))
 ```
 
@@ -62,11 +62,12 @@ Then clone your fork and install the development environment with conda:
 git clone https://github.com/<your-username>/bayesflow
 cd bayesflow
 git checkout dev
-conda env create -f environment.yaml
+conda env create --file environment.yaml --name bayesflow
 conda activate bayesflow
 ```
 
 We recommend using the PyTorch backend for development.
+Be careful not to downgrade your keras version when installing the backend.
 
 ### 3. Implement your changes
 
@@ -81,10 +82,10 @@ You can run tests for your installed environment using `pytest`:
 pytest tests/
 ```
 
-Make sure to occasionally also run multi-backend tests using [tox](https://tox.readthedocs.io/en/latest/):
+Make sure to occasionally also run multi-backend tests for your OS using [tox](https://tox.readthedocs.io/en/latest/):
 
 ```bash
-tox
+tox --parallel auto
 ```
 
 See [tox.ini](tox.ini) for details on the environment configurations.
