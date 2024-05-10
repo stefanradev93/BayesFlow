@@ -8,6 +8,7 @@ class OfflineDataset(keras.utils.PyDataset):
     """
     A dataset that is pre-simulated and stored in memory.
     """
+    # TODO: fix
     def __init__(self, data: dict, batch_size: int, batches_per_epoch: int, **kwargs):
         super().__init__(**kwargs)
         self.batch_size = batch_size
