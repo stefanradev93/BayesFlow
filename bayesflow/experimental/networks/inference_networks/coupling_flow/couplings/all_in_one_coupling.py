@@ -3,12 +3,12 @@ import keras
 
 from .dual_coupling import DualCoupling
 
-from ..permutation import FixedPermutation, LearnablePermutation
+from ..permutations import FixedPermutation, OrthogonalPermutation
 from ..actnorm import ActNorm
 from ..transforms import Transform
 
 
-class AllInOneCoupling(keras.layers.Layer):
+class AllInOneCoupling(keras.Layer):
     """ Implements a single coupling layer, followed by a permutation. """
     def __init__(
         self,
@@ -24,7 +24,7 @@ class AllInOneCoupling(keras.layers.Layer):
         if permutation == "fixed":
             self.permutation = FixedPermutation.swap(target_dim)
         else:
-            self.permutation = LearnablePermutation(target_dim)
+            self.permutation = OrthogonalPermutation(target_dim)
         if act_norm:
             self.act_norm = ActNorm(target_dim)
         else:

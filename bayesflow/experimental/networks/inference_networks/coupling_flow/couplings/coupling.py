@@ -1,8 +1,6 @@
 
 import keras
 
-from ..permutation import FixedPermutation, LearnablePermutation
-from ..actnorm import ActNorm
 from ..transforms import Transform
 
 
@@ -29,7 +27,6 @@ class Coupling(keras.Layer):
         return z, log_det
 
     def inverse(self, z, c=None):
-
         z1, z2 = keras.ops.split(z, 2, axis=-1)
         x1 = z1
         parameters = self.get_parameters(x1, c)
