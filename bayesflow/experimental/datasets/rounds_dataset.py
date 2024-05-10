@@ -25,9 +25,10 @@ class RoundsDataset(keras.utils.PyDataset):
         data = self.data[item]
         return data, {}
 
-    def __len__(self) -> int:
-        # signals infinite dataset
-        return -1
+    @property
+    def num_batches(self):
+        # infinite dataset
+        return None
 
     def on_epoch_end(self) -> None:
         self.epoch += 1
