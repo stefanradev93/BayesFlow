@@ -709,8 +709,8 @@ class QuantileActivation(tf.keras.layers.Layer):
         # Apply exponential activation and cumulate to ensure ordered quantiles
         below = tf.exp(below_inputs)
         above = tf.exp(above_inputs)
-        below = anchor_input - tf.cumsum(below_inputs, axis=1)
-        above = anchor_input + tf.cumsum(above_inputs, axis=1)
+        below = anchor_input - tf.cumsum(below, axis=1)[:, ::-1, :]
+        above = anchor_input + tf.cumsum(above, axis=1)
 
         # Concatenate and reshape back
         x = tf.concat([below, anchor_input, above], axis=1)
