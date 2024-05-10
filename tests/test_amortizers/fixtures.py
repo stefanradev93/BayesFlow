@@ -27,5 +27,5 @@ def amortizer(inference_network, summary_network):
 
 @pytest.fixture()
 def dataset():
-    # TODO: construct a dummy dataset
-    raise NotImplementedError
+    # TODO: do not hard-code
+    return keras.ops.zeros(shape=(128, 2))

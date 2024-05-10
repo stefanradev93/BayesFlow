@@ -1,4 +1,4 @@
-
+"""
 import keras
 import numpy as np
 import pytest
@@ -86,3 +86,5 @@ def test_conditional_prior_with_kwargs(batch_shape, two_moons_conditions):
     assert list(parameters.keys()) == ["theta"]
     assert keras.ops.is_tensor(parameters["theta"])
     assert keras.ops.shape(parameters["theta"]) == batch_shape + (2,)
+
+"""

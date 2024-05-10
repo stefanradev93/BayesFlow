@@ -16,18 +16,18 @@ def joint_distribution():
             return dict(x=keras.random.normal(batch_shape + (2,)))
 
         def log_prob(self, x):
-            raise NotImplementedError()
+            raise NotImplementedError
 
     return JointDistribution()
 
 
 @pytest.fixture()
 def online_dataset(joint_distribution):
-    return bf.datasets.OnlineDataset(joint_distribution)
+    return bf.datasets.OnlineDataset(joint_distribution, batch_size=1)
 
 
-@pytest.fixture()
-def offline_dataset(tmp_path, joint_distribution):
-    samples = joint_distribution.sample((32,))
-    ...  # ?
-    return bf.datasets.OfflineDataset(joint_distribution)
+# @pytest.fixture()
+# def offline_dataset(tmp_path, joint_distribution):
+#     samples = joint_distribution.sample((32,))
+#     ...  # ?
+#     return bf.datasets.OfflineDataset(joint_distribution, batch_size=1, batches_per_epoch=None)
