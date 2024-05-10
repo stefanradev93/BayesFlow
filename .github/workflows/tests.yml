@@ -60,4 +60,4 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest tests -n auto
+          python -m pytest tests/ -n auto -v
