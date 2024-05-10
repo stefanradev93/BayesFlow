@@ -1,6 +1,6 @@
 
 import keras
-from keras import ops
+from keras import ops as K
 
 from bayesflow.experimental.types import Tensor
 
@@ -73,12 +73,12 @@ class ActNorm(keras.Layer):
         else:
             return self.inverse(target)
 
-    def forward(self, target: Tensor) -> Tensor:
-        z = self.scale * target + self.bias
-        ldj = ops.sum(ops.log(ops.abs(self.scale)), axis=-1)
-        return z, ldj
+    def forward(self, x: Tensor) -> Tensor:
+        z = self.scale * x + self.bias
+        logdet = K.sum(K.log(K.abs(self.scale)), axis=-1)
+        return z, logdet
 
     def inverse(self, z: Tensor) -> Tensor:
-        target = (z - self.bias) / self.scale
-        ldj = -ops.sum(ops.log(ops.abs(self.scale)), axis=-1)
-        return target, ldj
+        x = (z - self.bias) / self.scale
+        logdet = -K.sum(K.log(K.abs(self.scale)), axis=-1)
+        return x, logdet

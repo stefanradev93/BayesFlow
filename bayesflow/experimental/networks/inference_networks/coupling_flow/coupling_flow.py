@@ -23,7 +23,7 @@ class CouplingFlow(keras.Sequential):
             target_dim: int,
             num_layers: int,
             transform="affine",
-            permutation='fixed',
+            permutation="fixed",
             act_norm=True,
             base_distribution="normal",
     ) -> "CouplingFlow":
