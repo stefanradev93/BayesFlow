@@ -21,7 +21,7 @@ class AllInOneCoupling(keras.layers.Layer):
         super().__init__()
         self.dual_coupling = DualCoupling(subnet_constructor, target_dim, transform)
 
-        if permutation == 'fixed':
+        if permutation == "fixed":
             self.permutation = FixedPermutation.swap(target_dim)
         else:
             self.permutation = LearnablePermutation(target_dim)

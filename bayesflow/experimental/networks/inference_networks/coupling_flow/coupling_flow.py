@@ -1,5 +1,5 @@
 
-from typing import Self, Sequence
+from typing import Sequence
 
 import keras
 
@@ -26,7 +26,7 @@ class CouplingFlow(keras.Sequential):
             permutation='fixed',
             act_norm=True,
             base_distribution="normal",
-    ) -> Self:
+    ) -> "CouplingFlow":
         """ Construct a uniform coupling flow, consisting of dual couplings with a single type of transform. """
 
         transform = find_transform(transform)
