@@ -2,7 +2,7 @@
 import keras
 from bayesflow.experimental.types import Distribution, Shape
 
-from .joint_distribution import DefaultJointDistribution, JointDistribution
+from .joint_distribution import JointDistribution
 
 
 def find_distribution(distribution: str | Distribution | type(Distribution), shape: Shape) -> Distribution:
