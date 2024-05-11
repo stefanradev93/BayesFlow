@@ -1,6 +1,6 @@
 
 import keras
-from keras import ops as K
+from keras import ops
 
 from bayesflow.experimental.types import Tensor
 
@@ -53,18 +53,18 @@ class OrthogonalPermutation(keras.Layer):
         return self.inverse(target)
 
     def forward(self, target: Tensor) -> Tensor:
-        shape = K.shape(target)
-        z = K.matmul(target, self.W)
-        log_det = K.log(K.abs(K.det(self.W)))
+        shape = ops.shape(target)
+        z = ops.matmul(target, self.W)
+        log_det = ops.log(ops.abs(ops.det(self.W)))
         if len(shape) > 2:
-            log_det = K.multiply(log_det, shape[1])
+            log_det = ops.multiply(log_det, shape[1])
         return z, log_det
 
     def inverse(self, z: Tensor) -> Tensor:
-        shape = K.shape(z)
-        W_inv = K.inv(self.W)
-        x = K.matmul(z, W_inv)
-        log_det = -K.log(K.abs(K.det(self.W)))
+        shape = ops.shape(z)
+        W_inv = ops.inv(self.W)
+        x = ops.matmul(z, W_inv)
+        log_det = -ops.log(ops.abs(ops.det(self.W)))
         if len(shape) > 2:
-            log_det = K.multiply(log_det, shape[1])
+            log_det = ops.multiply(log_det, shape[1])
         return x, log_det
