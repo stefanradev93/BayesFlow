@@ -52,11 +52,11 @@ class CouplingFlow(keras.Sequential):
     def compute_metrics(self, x, y, y_pred, **kwargs):
         return {}
 
-    def forward(self, x, c=None):
+    def forward(self, x, c=None, **kwargs):
         z = x
         log_det = 0.
         for coupling in self.layers:
-            z, det = coupling.forward(z, c)
+            z, det = coupling.forward(z, c, **kwargs)
             log_det += det
 
         return z, log_det
