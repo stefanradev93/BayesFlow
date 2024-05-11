@@ -11,6 +11,11 @@ class FixedPermutation(keras.layers.Layer):
         self.indices = indices
         self.inverse_indices = ops.argsort(indices, axis=0)
 
+    def call(self, x: Tensor, forward=True) -> Tensor:
+        if forward:
+            return self.forward(x)
+        return self.inverse(x)
+
     def forward(self, x: Tensor) -> Tensor:
         return ops.take(x, self.indices, axis=-1)
 

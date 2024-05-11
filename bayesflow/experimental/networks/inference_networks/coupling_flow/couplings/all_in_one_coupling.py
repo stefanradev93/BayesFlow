@@ -12,14 +12,14 @@ class AllInOneCoupling(keras.Layer):
     """ Implements a single coupling layer, followed by a permutation. """
     def __init__(
         self,
-        subnet_constructor: callable,
+        subnet: keras.Model | keras.layers.Layer,
         target_dim: int,
         transform: Transform,
         permutation: str,
         act_norm: bool,
     ):
         super().__init__()
-        self.dual_coupling = DualCoupling(subnet_constructor, target_dim, transform)
+        self.dual_coupling = DualCoupling(subnet, target_dim, transform)
 
         if permutation == "fixed":
             self.permutation = FixedPermutation.swap(target_dim)
@@ -30,8 +30,8 @@ class AllInOneCoupling(keras.Layer):
         else:
             self.act_norm = None
 
-    def call(self, x, c=None, inverse=False, **kwargs):
-        if not inverse:
+    def call(self, x, c=None, forward=True, **kwargs):
+        if forward:
             self.forward(x, c, **kwargs)
         self.inverse(x, c)
 
