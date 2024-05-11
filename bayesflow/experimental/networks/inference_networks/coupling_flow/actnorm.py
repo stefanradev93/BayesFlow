@@ -1,6 +1,6 @@
 
 import keras
-from keras import ops as K
+from keras import ops
 
 from bayesflow.experimental.types import Tensor
 
@@ -64,7 +64,7 @@ class ActNorm(keras.Layer):
         (z, log_det_J)          :  tuple(tf.Tensor, tf.Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
             v shape: (batch_size, inp_dim), log_det_J shape: (,)
-        (target, log_det_J)     :  tf.Tensor
+        (target, -log_det_J)     :  tf.Tensor
             If inverse=True: The inversely transformed targets, shape == target.shape
         """
 
@@ -75,10 +75,10 @@ class ActNorm(keras.Layer):
 
     def forward(self, x: Tensor) -> Tensor:
         z = self.scale * x + self.bias
-        logdet = K.sum(K.log(K.abs(self.scale)), axis=-1)
-        return z, logdet
+        log_det = ops.sum(ops.log(ops.abs(self.scale)), axis=-1)
+        return z, log_det
 
     def inverse(self, z: Tensor) -> Tensor:
         x = (z - self.bias) / self.scale
-        logdet = -K.sum(K.log(K.abs(self.scale)), axis=-1)
-        return x, logdet
+        log_det = -ops.sum(ops.log(ops.abs(self.scale)), axis=-1)
+        return x, log_det
