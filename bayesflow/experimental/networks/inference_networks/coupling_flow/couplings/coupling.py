@@ -8,14 +8,21 @@ class Coupling(keras.Layer):
     """ Implements a single coupling layer, followed by a permutation. """
     def __init__(
         self,
-        subnet_constructor: callable,
+        subnet: keras.Model | keras.layers.Layer,
         target_dim: int,
         transform: Transform,
         **kwargs
     ):
-        super().__init__()
-        self.subnet = subnet_constructor(target_dim, **kwargs.pop('subnet_kwargs', {}))
+        super().__init__(**kwargs)
+
+        self.dim = target_dim
+        self.subnet = subnet
         self.transform = transform
+
+    def call(self, x, c=None, forward=True, **kwargs):
+        if forward:
+            self.forward(x, c, **kwargs)
+        self.inverse(x, c)
 
     def forward(self, x, c=None, **kwargs):
 

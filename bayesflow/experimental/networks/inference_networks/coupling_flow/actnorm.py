@@ -48,7 +48,7 @@ class ActNorm(keras.Layer):
             trainable=True
         )
 
-    def call(self, target: Tensor, inverse=False) -> Tensor:
+    def call(self, target: Tensor, forward=True) -> Tensor:
         """Performs one pass through the activation normalization layer (either inverse or forward) and normalizes
         the last axis of `target`.
 
@@ -56,22 +56,21 @@ class ActNorm(keras.Layer):
         ----------
         target     : keras.Tensor of shape (batch_size, ...)
             the target variables of interest, i.e., parameters for posterior estimation
-        inverse    : bool, optional, default: False
-            Flag indicating whether to run the block forward or backwards
+        forward    : bool, optional, default: False
+            Controls if the current pass is forward (``forward=True``) or inverse (``forward=False``).
 
         Returns
         -------
-        (z, log_det_J)          :  tuple(tf.Tensor, tf.Tensor)
+        (z, log_det_J)           :  tuple(tf.Tensor, tf.Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
             v shape: (batch_size, inp_dim), log_det_J shape: (,)
         (target, -log_det_J)     :  tf.Tensor
             If inverse=True: The inversely transformed targets, shape == target.shape
         """
 
-        if not inverse:
+        if forward:
             return self.forward(target)
-        else:
-            return self.inverse(target)
+        return self.inverse(target)
 
     def forward(self, x: Tensor) -> Tensor:
         z = self.scale * x + self.bias

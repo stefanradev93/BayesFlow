@@ -12,7 +12,6 @@ class OrthogonalPermutation(keras.Layer):
     [1] Kingma, D. P., & Dhariwal, P. (2018). Glow: Generative flow with invertible 1x1
     convolutions. Advances in neural information processing systems, 31.
     """
-    # TODO: this is not really a permutation - maybe we should move it to transforms instead?
 
     def __init__(self, input_dim):
         """Creates an invertible orthogonal transformation (generalized permutation)
@@ -31,7 +30,7 @@ class OrthogonalPermutation(keras.Layer):
             trainable=True
         )
 
-    def call(self, target: Tensor, inverse=False) -> Tensor:
+    def call(self, target: Tensor, forward=True) -> Tensor:
         """Transforms a batch of target vectors over the last axis through an approximately
         orthogonal transform.
 
@@ -39,8 +38,8 @@ class OrthogonalPermutation(keras.Layer):
         ----------
         target   : tf.Tensor of shape (batch_size, ...)
             The target vector to be rotated over its last axis.
-        inverse  : bool, optional, default: False
-            Controls if the current pass is forward (``inverse=False``) or inverse (``inverse=True``).
+        forward  : bool, optional, default: False
+            Controls if the current pass is forward (``forward=True``) or inverse (``forward=False``).
 
         Returns
         -------
@@ -48,7 +47,7 @@ class OrthogonalPermutation(keras.Layer):
             The (un-)rotated target vector.
         """
 
-        if not inverse:
+        if forward:
             return self.forward(target)
         return self.inverse(target)
 
