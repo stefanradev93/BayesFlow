@@ -34,8 +34,9 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
     def get_config(self):
         config = super().get_config()
         config.update({
-            "units": self.activation_fn,
             "residual": self.residual,
-            "spectral_norm": self.spectral_norm
+            "spectral_norm": self.spectral_norm,
+            "activation_fn": keras.saving.serialize_keras_object(self.activation_fn),
+            "dense_with_dropout": keras.saving.serialize_keras_object(self.dense_with_dropout)
         })
         return config
