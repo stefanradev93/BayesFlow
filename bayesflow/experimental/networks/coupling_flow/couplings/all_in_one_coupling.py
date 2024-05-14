@@ -2,9 +2,8 @@
 import keras
 
 from .dual_coupling import DualCoupling
-
-from ..permutations import FixedPermutation, OrthogonalPermutation
 from ..actnorm import ActNorm
+from ..permutations import FixedPermutation, OrthogonalPermutation
 from ..transforms import Transform
 
 

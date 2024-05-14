@@ -3,13 +3,10 @@ from typing import Sequence
 
 import keras
 
-from bayesflow.experimental.networks import ConditionalResidualBlock
-
 from bayesflow.experimental.simulation import Distribution, find_distribution
 from bayesflow.experimental.types import Shape, Tensor
-
-from subnets import find_subnet
 from .couplings import AllInOneCoupling
+from .subnets import find_subnet
 from .transforms import find_transform
 
 
@@ -20,7 +17,7 @@ class CouplingFlow(keras.Sequential):
         self.base_distribution = base_distribution
 
     @classmethod
-    def uniform(
+    def all_in_one(
             cls,
             target_dim: int,
             num_layers: int,

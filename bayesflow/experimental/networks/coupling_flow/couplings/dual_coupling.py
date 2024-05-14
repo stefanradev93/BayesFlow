@@ -1,11 +1,11 @@
 
-import keras
 import math
 
-from .coupling import Coupling
-from ..transforms import Transform
+import keras
 
 from bayesflow.experimental.types import Tensor
+from .coupling import Coupling
+from ..transforms import Transform
 
 
 class DualCoupling(keras.Layer):
