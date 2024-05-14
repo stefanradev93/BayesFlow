@@ -6,6 +6,7 @@ on:
     branches:
       - master
       - dev
+      - streamlined-backend
 
 
 jobs:
