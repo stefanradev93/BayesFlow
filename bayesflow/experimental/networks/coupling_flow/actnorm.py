@@ -16,14 +16,14 @@ class ActNorm(keras.Layer):
     References
     ----------
 
-    .. [1] Kingma, Diederik P., and Prafulla Dhariwal.
-       "Glow: Generative flow with invertible 1x1 convolutions."
-       arXiv preprint arXiv:1807.03039 (2018).
+    .. [1] Kingma, D. P., & Dhariwal, P. (2018). 
+        Glow: Generative flow with invertible 1x1 convolutions. 
+        Advances in Neural Information Processing Systems, 31.
 
-    .. [2] Salimans, Tim, and Durk P. Kingma.
-       "Weight normalization: A simple reparameterization to accelerate
-       training of deep neural networks."
-       Advances in neural information processing systems 29 (2016): 901-909.
+    .. [2] Salimans, Tim, and Durk P. Kingma. (2016).
+       Weight normalization: A simple reparameterization to accelerate
+       training of deep neural networks.
+       Advances in Neural Information Processing Systems, 29.
     """
 
     def __init__(self, target_dim: int, **kwargs):

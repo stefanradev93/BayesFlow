@@ -8,7 +8,16 @@ from ..transforms import Transform
 
 
 class AllInOneCoupling(keras.Layer):
-    """ Implements a single coupling layer, followed by a permutation. """
+    """ 
+    Implements a single coupling layer, preceeeded by an optional activation normalization,
+    followed by a permutation [1]. The layer implements two coupling transformations, such that
+    the entire input is transformed following a forward / inverse call.
+
+    [1] Kingma, D. P., & Dhariwal, P. (2018). 
+        Glow: Generative flow with invertible 1x1 convolutions. 
+        Advances in Neural Information Processing Systems, 31.
+    """
+
     def __init__(
         self,
         subnet: keras.Model | keras.layers.Layer,
