@@ -1,9 +1,9 @@
+import math
+
 import keras
+import pytest
 from keras import ops as K
 from keras import random as R
-
-import math
-import pytest
 
 import bayesflow.experimental as bf
 
@@ -62,7 +62,7 @@ def subnet_constructor():
 
 @pytest.fixture()
 def inference_network(subnet_constructor):
-    return bf.networks.CouplingFlow.uniform(
+    return bf.networks.CouplingFlow.all_in_one(
         subnet_constructor=subnet_constructor,
         target_dim=2,
         num_layers=2,
