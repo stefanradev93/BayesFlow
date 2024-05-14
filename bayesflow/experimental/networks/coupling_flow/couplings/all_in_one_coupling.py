@@ -20,14 +20,15 @@ class AllInOneCoupling(keras.Layer):
 
     def __init__(
         self,
-        subnet: keras.Model | keras.layers.Layer,
+        subnet_builder: str,
         target_dim: int,
-        transform: Transform,
+        transform: str,
         permutation: str,
         act_norm: bool,
+        **kwargs
     ):
         super().__init__()
-        self.dual_coupling = DualCoupling(subnet, target_dim, transform)
+        self.dual_coupling = DualCoupling(subnet_builder, target_dim, transform, **kwargs)
 
         if permutation == "fixed":
             self.permutation = FixedPermutation.swap(target_dim)
