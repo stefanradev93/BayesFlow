@@ -19,8 +19,10 @@
 # SOFTWARE.
 
 import tensorflow as tf
+import numpy as np
 from numpy import e as EULER_CONST
 from numpy import pi as PI_CONST
+import keras
 
 from bayesflow import default_settings
 from bayesflow.exceptions import ConfigurationError
@@ -28,7 +30,7 @@ from bayesflow.helper_functions import build_meta_dict
 from bayesflow.helper_networks import ActNorm, DenseCouplingNet, Orthogonal, Permutation
 
 
-class AffineCoupling(tf.keras.Model):
+class AffineCoupling(keras.Model):
     """Implements a conditional affine coupling block according to [1, 2], with additional
     options, such as residual blocks or Monte Carlo Dropout.
 
@@ -88,11 +90,11 @@ class AffineCoupling(tf.keras.Model):
 
         Parameters
         ----------
-        split1      : tf.Tensor of shape (batch_size, ..., input_dim//2)
+        split1      : Tensor of shape (batch_size, ..., input_dim//2)
             The first partition of the input vector(s)
-        split2      : tf.Tensor of shape (batch_size, ..., ceil[input_dim//2])
+        split2      : Tensor of shape (batch_size, ..., ceil[input_dim//2])
             The second partition of the input vector(s)
-        condition   : tf.Tensor or None
+        condition   : Tensor or None
             The conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, ...).
             If ``condition is None``, then the layer reduces to an unconditional coupling.
         inverse     : bool, optional, default: False
@@ -100,11 +102,11 @@ class AffineCoupling(tf.keras.Model):
 
         Returns
         -------
-        (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+        (z, log_det_J)  :  tuple(Tensor, Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
             z shape: (batch_size, ..., input_dim//2), log_det_J shape: (batch_size, ...)
 
-        target          :  tf.Tensor
+        target          :  Tensor
             If inverse=True: The back-transformed z, shape (batch_size, ..., inp_dim//2)
         """
 
@@ -117,17 +119,17 @@ class AffineCoupling(tf.keras.Model):
 
         Parameters
         ----------
-        v1        : tf.Tensor of shape (batch_size, ..., dim_1)
+        v1        : Tensor of shape (batch_size, ..., dim_1)
             The first partition of the input
-        v2        : tf.Tensor of shape (batch_size, ..., dim_2)
+        v2        : Tensor of shape (batch_size, ..., dim_2)
             The second partition of the input
-        condition : tf.Tensor of shape (batch_size, ..., dim_condition) or None
+        condition : Tensor of shape (batch_size, ..., dim_condition) or None
             The optional conditioning vector. Batch size must match the batch size
             of the partitions.
 
         Returns
         -------
-        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+        (v, log_det_J)  :  tuple(Tensor, Tensor)
             The transformed input and the corresponding Jacobian of the transformation.
         """
 
@@ -144,17 +146,17 @@ class AffineCoupling(tf.keras.Model):
 
         Parameters
         ----------
-        v1        : tf.Tensor of shape (batch_size, ..., dim_1)
+        v1        : Tensor of shape (batch_size, ..., dim_1)
             The first partition of the latent vector
-        v2        : tf.Tensor of shape (batch_size, ..., dim_2)
+        v2        : Tensor of shape (batch_size, ..., dim_2)
             The second partition of the latent vector
-        condition : tf.Tensor of shape (batch_size, ..., dim_condition)
+        condition : Tensor of shape (batch_size, ..., dim_condition)
             The optional conditioning vector. Batch size must match the batch size
             of the partitions.
 
         Returns
         -------
-        u  :  tf.Tensor of shape (batch_size, ..., dim_1)
+        u  :  Tensor of shape (batch_size, ..., dim_1)
             The back-transformed input.
         """
 
@@ -166,7 +168,7 @@ class AffineCoupling(tf.keras.Model):
         return u
 
 
-class SplineCoupling(tf.keras.Model):
+class SplineCoupling(keras.Model):
     """Implements a conditional spline coupling block according to [1, 2], with additional
     options, such as residual blocks or Monte Carlo Dropout.
 
@@ -227,11 +229,11 @@ class SplineCoupling(tf.keras.Model):
 
         Parameters
         ----------
-        split1      : tf.Tensor of shape (batch_size, ..., input_dim//2)
+        split1      : Tensor of shape (batch_size, ..., input_dim//2)
             The first partition of the input vector(s)
-        split2      : tf.Tensor of shape (batch_size, ..., ceil[input_dim//2])
+        split2      : Tensor of shape (batch_size, ..., ceil[input_dim//2])
             The second partition of the input vector(s)
-        condition   : tf.Tensor or None
+        condition   : Tensor or None
             The conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, ...).
             If ``condition is None``, then the layer recuces to an unconditional coupling.
         inverse     : bool, optional, default: False
@@ -239,11 +241,11 @@ class SplineCoupling(tf.keras.Model):
 
         Returns
         -------
-        (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+        (z, log_det_J)  :  tuple(Tensor, Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
             z shape: (batch_size, ..., input_dim//2), log_det_J shape: (batch_size, ...)
 
-        target          :  tf.Tensor
+        target          :  Tensor
             If inverse=True: The back-transformed z, shape (batch_size, ..., inp_dim//2)
         """
 
@@ -256,17 +258,17 @@ class SplineCoupling(tf.keras.Model):
 
         Parameters
         ----------
-        v1        : tf.Tensor of shape (batch_size, ..., dim_1)
+        v1        : Tensor of shape (batch_size, ..., dim_1)
             The first partition of the input
-        v2        : tf.Tensor of shape (batch_size, ..., dim_2)
+        v2        : Tensor of shape (batch_size, ..., dim_2)
             The second partition of the input
-        condition : tf.Tensor of shape (batch_size, ..., dim_condition) or None
+        condition : Tensor of shape (batch_size, ..., dim_condition) or None
             The optional conditioning vector. Batch size must match the batch size
             of the partitions.
 
         Returns
         -------
-        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+        (v, log_det_J)  :  tuple(Tensor, Tensor)
             The transformed input and the corresponding Jacobian of the transformation.
         """
 
@@ -281,17 +283,17 @@ class SplineCoupling(tf.keras.Model):
 
         Parameters
         ----------
-        v1        : tf.Tensor of shape (batch_size, ..., dim_1)
+        v1        : Tensor of shape (batch_size, ..., dim_1)
             The first partition of the latent vector
-        v2        : tf.Tensor of shape (batch_size, ..., dim_2)
+        v2        : Tensor of shape (batch_size, ..., dim_2)
             The second partition of the latent vector
-        condition : tf.Tensor of shape (batch_size, ..., dim_condition)
+        condition : Tensor of shape (batch_size, ..., dim_condition)
             The optional conditioning vector. Batch size must match the batch size
             of the partitions.
 
         Returns
         -------
-        u  :  tf.Tensor of shape (batch_size, ..., dim_1)
+        u  :  Tensor of shape (batch_size, ..., dim_1)
             The back-transformed input.
         """
 
@@ -301,6 +303,7 @@ class SplineCoupling(tf.keras.Model):
         u = self._calculate_spline(v2, spline_params, inverse=True)
         return u
 
+    @tf.function
     def _calculate_spline(self, target, spline_params, inverse=False):
         """Computes both directions of a rational quadratic spline (RQS) as in:
         https://github.com/vislearn/FrEIA/blob/master/FrEIA/modules/splines/rational_quadratic.py
@@ -310,9 +313,9 @@ class SplineCoupling(tf.keras.Model):
 
         Parameters
         ----------
-        target         : tf.Tensor of shape (batch_size, ..., dim_2)
+        target         : Tensor of shape (batch_size, ..., dim_2)
             The target partition of the input vector to transform.
-        spline_params  : tuple(tf.Tensor,...)
+        spline_params  : tuple(Tensor,...)
             A tuple with tensors corresponding to the learnable spline features:
             (left_edge, bottom_edge, widths, heights, derivatives)
         inverse        : bool, optional, default: False
@@ -320,11 +323,11 @@ class SplineCoupling(tf.keras.Model):
 
         Returns
         -------
-        (result, log_det_J) :  tuple(tf.Tensor, tf.Tensor)
+        (result, log_det_J) :  tuple(Tensor, Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
             result shape: (batch_size, ..., dim_2), log_det_J shape: (batch_size, ...)
 
-        result              :  tf.Tensor
+        result              :  Tensor
             If inverse=True: The back-transformed latent, shape (batch_size, ..., dim_2)
         """
 
@@ -436,7 +439,7 @@ class SplineCoupling(tf.keras.Model):
         """
 
         shape = tf.shape(parameters)
-        rank = len(shape)
+        rank = parameters.shape.rank
         if rank == 2:
             new_shape = (shape[0], self.dim_out, -1)
         elif rank == 3:
@@ -492,7 +495,7 @@ class SplineCoupling(tf.keras.Model):
         return left_edge, bottom_edge, widths, heights, derivatives
 
 
-class CouplingLayer(tf.keras.Model):
+class CouplingLayer(keras.Model):
     """General wrapper for a coupling layer (either affine or spline) with different settings."""
 
     def __init__(
@@ -527,7 +530,7 @@ class CouplingLayer(tf.keras.Model):
         act_norm_init         : np.ndarray of shape (num_simulations, num_params) or None, optional, default: None
             Optional data-dependent initialization for the internal ``ActNorm`` layers.
         **kwargs              : dict
-            Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.
+            Optional keyword arguments (e.g., name) passed to the keras.Model __init__ method.
         """
 
         super().__init__(**kwargs)
@@ -585,9 +588,9 @@ class CouplingLayer(tf.keras.Model):
 
         Parameters
         ----------
-        target_or_z      : tf.Tensor
+        target_or_z      : Tensor
             The estimation quantities of interest or latent representations z ~ p(z), shape (batch_size, ...)
-        condition        : tf.Tensor or None
+        condition        : Tensor or None
             The conditioning data of interest, for instance, x = summary_fun(x), shape (batch_size, ...).
             If `condition is None`, then the layer reduces to an unconditional ACL.
         inverse          : bool, optional, default: False
@@ -595,11 +598,11 @@ class CouplingLayer(tf.keras.Model):
 
         Returns
         -------
-        (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+        (z, log_det_J)  :  tuple(Tensor, Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
             z shape: (batch_size, inp_dim), log_det_J shape: (batch_size, )
 
-        target          :  tf.Tensor
+        target          :  Tensor
             If inverse=True: The back-transformed z, shape (batch_size, inp_dim)
 
         Notes
@@ -617,15 +620,15 @@ class CouplingLayer(tf.keras.Model):
 
         Parameters
         ----------
-        target     : tf.Tensor
+        target     : Tensor
             The estimation quantities of interest, for instance, parameter vector of shape (batch_size, theta_dim)
-        condition  : tf.Tensor or None
+        condition  : Tensor or None
             The conditioning vector of interest, for instance, x = summary(x), shape (batch_size, summary_dim)
             If `None`, transformation amounts to unconditional estimation.
 
         Returns
         -------
-        (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+        (z, log_det_J)  :  tuple(Tensor, Tensor)
             The transformed input and the corresponding Jacobian of the transformation.
         """
 
@@ -654,15 +657,15 @@ class CouplingLayer(tf.keras.Model):
 
         Parameters
         ----------
-        z          : tf.Tensor
+        z          : Tensor
             latent variables z ~ p(z), shape (batch_size, theta_dim)
-        condition  : tf.Tensor or None
+        condition  : Tensor or None
             The conditioning vector of interest, for instance, x = summary(x), shape (batch_size, summary_dim).
             If `None`, transformation amounts to unconditional estimation.
 
         Returns
         -------
-        target  :  tf.Tensor
+        target  :  Tensor
             The back-transformed latent variable z.
         """
 
@@ -678,15 +681,15 @@ class CouplingLayer(tf.keras.Model):
 
         Parameters
         ----------
-        target     : tf.Tensor
+        target     : Tensor
             The estimation quantities of interest, for instance, parameter vector of shape (batch_size, theta_dim)
-        condition  : tf.Tensor or None
+        condition  : Tensor or None
             The conditioning vector of interest, for instance, x = summary(x), shape (batch_size, summary_dim)
             If `None`, transformation amounts to unconditional estimation.
 
         Returns
         -------
-        (v, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+        (v, log_det_J)  :  tuple(Tensor, Tensor)
             The transformed input and the corresponding Jacobian of the transformation.
         """
 
@@ -705,15 +708,15 @@ class CouplingLayer(tf.keras.Model):
 
         Parameters
         ----------
-        latent       : tf.Tensor
+        latent       : Tensor
             latent variables z ~ p(z), shape (batch_size, theta_dim)
-        condition    : tf.Tensor or None
+        condition    : Tensor or None
             The conditioning vector of interest, for instance, x = summary(x), shape (batch_size, summary_dim).
             If `None`, transformation amounts to unconditional estimation.
 
         Returns
         -------
-        u  :  tf.Tensor
+        u  :  Tensor
             The back-transformed input.
         """
 

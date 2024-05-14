@@ -20,17 +20,19 @@
 
 import numpy as np
 import tensorflow as tf
+import keras
 
 from bayesflow import default_settings
 from bayesflow.coupling_networks import CouplingLayer
 from bayesflow.helper_functions import build_meta_dict
 from bayesflow.helper_networks import MCDropout
+from bayesflow.experimental.types import Tensor
 
 
 # TODO: rename to coupling flows etc.
 # TODO: talk to Marvin & Lasse about state of new networks
 
-class InvertibleNetwork(tf.keras.Model):
+class InvertibleNetwork(keras.Model):
     """Implements a chain of conditional invertible coupling layers for conditional density estimation."""
 
     available_designs = ("affine", "spline", "interleaved")
@@ -128,7 +130,7 @@ class InvertibleNetwork(tf.keras.Model):
             The bounds of the continuous uniform distribution from which the noise scale would be sampled
             at each iteration. Only relevant when ``use_soft_flow=True``.
         **kwargs              : dict
-            Optional keyword arguments (e.g., name) passed to the tf.keras.Model __init__ method.
+            Optional keyword arguments (e.g., name) passed to the keras.Model __init__ method.
         """
 
         super().__init__(**kwargs)
@@ -154,20 +156,20 @@ class InvertibleNetwork(tf.keras.Model):
 
         Parameters
         ----------
-        targets   : tf.Tensor
+        targets   : Tensor
             The estimation quantities of interest, shape (batch_size, ...)
-        condition : tf.Tensor
+        condition : Tensor
             The conditional data x, shape (batch_size, summary_dim)
         inverse   : bool, default: False
             Flag indicating whether to run the chain forward or backwards
 
         Returns
         -------
-        (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+        (z, log_det_J)  :  tuple(Tensor, Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
             v shape: (batch_size, ...), log_det_J shape: (batch_size, ...)
 
-        target          :  tf.Tensor
+        target          :  Tensor
             If inverse=True: The transformed out, shape (batch_size, ...)
 
         Notes
@@ -187,8 +189,8 @@ class InvertibleNetwork(tf.keras.Model):
         # not in call(), since methods are public
         if self.soft_flow and condition is not None:
             # Extract shapes of tensors
-            target_shape = tf.shape(targets)
-            condition_shape = tf.shape(condition)
+            target_shape = keras.backend.shape(targets)
+            condition_shape = keras.backend.shape(condition)
 
             # Needs to be concatinable with condition
             if len(condition_shape) == 2:
@@ -198,19 +200,19 @@ class InvertibleNetwork(tf.keras.Model):
 
             # Case training mode
             if kwargs.get("training"):
-                noise_scale = tf.random.uniform(shape=shape_scale, minval=self.soft_low, maxval=self.soft_high)
+                noise_scale = keras.backend.random_uniform(shape=shape_scale, minval=self.soft_low, maxval=self.soft_high)
             # Case inference mode
             else:
-                noise_scale = tf.zeros(shape=shape_scale) + self.soft_low
+                noise_scale = keras.backend.zeros(shape=shape_scale) + self.soft_low
 
             # Perturb data with noise (will broadcast to all dimensions)
             if len(shape_scale) == 2 and len(target_shape) == 3:
-                targets += tf.expand_dims(noise_scale, axis=1) * tf.random.normal(shape=target_shape)
+                targets += keras.backend.expand_dims(noise_scale, axis=1) * keras.backend.random_normal(shape=target_shape)
             else:
-                targets += noise_scale * tf.random.normal(shape=target_shape)
+                targets += noise_scale * keras.backend.random_normal(shape=target_shape)
 
             # Augment condition with noise scale variate
-            condition = tf.concat((condition, noise_scale), axis=-1)
+            condition = keras.backend.concatenate((condition, noise_scale), axis=-1)
 
         z = targets
         log_det_Js = []
@@ -219,7 +221,7 @@ class InvertibleNetwork(tf.keras.Model):
             log_det_Js.append(log_det_J)
 
         # Sum Jacobian determinants for all layers (coupling blocks) to obtain total Jacobian.
-        log_det_J = tf.add_n(log_det_Js)
+        log_det_J = keras.layers.add(log_det_Js)
         return z, log_det_J
 
     def inverse(self, z, condition, **kwargs):
@@ -233,10 +235,10 @@ class InvertibleNetwork(tf.keras.Model):
             shape_scale = (
                 (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
             )
-            noise_scale = tf.zeros(shape=shape_scale) + 2.0 * self.soft_low
+            noise_scale = keras.backend.zeros(shape=shape_scale) + 2.0 * self.soft_low
 
             # Augment condition with noise scale variate
-            condition = tf.concat((condition, noise_scale), axis=-1)
+            condition = keras.backend.concatenate((condition, noise_scale), axis=-1)
 
         target = z
         for layer in reversed(self.coupling_layers):

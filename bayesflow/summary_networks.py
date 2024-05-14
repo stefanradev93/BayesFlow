@@ -21,8 +21,10 @@
 from warnings import warn
 
 import tensorflow as tf
-from tensorflow.keras.layers import GRU, LSTM, Bidirectional, Dense
-from tensorflow.keras.models import Sequential
+import keras
+from keras.api.layers import GRU, LSTM, Bidirectional, Dense
+from keras import Sequential
+from bayesflow.experimental.types import Tensor
 
 from bayesflow import default_settings as defaults
 from bayesflow.attention import (
@@ -34,7 +36,7 @@ from bayesflow.attention import (
 from bayesflow.helper_networks import EquivariantModule, InvariantModule, MultiConv1D
 
 
-class TimeSeriesTransformer(tf.keras.Model):
+class TimeSeriesTransformer(keras.Model):
     """Implements a many-to-one transformer architecture for time series encoding.
     Some ideas can be found in [1]:
 
@@ -165,12 +167,12 @@ class TimeSeriesTransformer(tf.keras.Model):
 
         Parameters
         ----------
-        x   : tf.Tensor
+        x   : Tensor
             Time series input of shape (batch_size, num_time_points, input_dim)
 
         Returns
         -------
-        out : tf.Tensor
+        out : Tensor
             Output of shape (batch_size, summary_dim)
         """
 
@@ -182,7 +184,7 @@ class TimeSeriesTransformer(tf.keras.Model):
         return out
 
 
-class SetTransformer(tf.keras.Model):
+class SetTransformer(keras.Model):
     """Implements the set transformer architecture from [1] which ultimately represents
     a learnable permutation-invariant function. Designed to naturally model interactions in
     the input set, which may be hard to capture with the simpler ``DeepSet`` architecture.
@@ -254,7 +256,7 @@ class SetTransformer(tf.keras.Model):
             summary of the entire set. If you use ``num_seeds > 1``, the resulting seeds will be flattened
             into a 2-dimensional output, which will have a dimensionality of ``num_seeds * summary_dim``.
         **kwargs             : dict, optional, default: {}
-            Optional keyword arguments passed to the __init__() method of tf.keras.Model
+            Optional keyword arguments passed to the __init__() method of keras.Model
         """
 
         super().__init__(**kwargs)
@@ -288,12 +290,12 @@ class SetTransformer(tf.keras.Model):
 
         Parameters
         ----------
-        x   : tf.Tensor
+        x   : Tensor
             The input set of shape (batch_size, set_size, input_dim)
 
         Returns
         -------
-        out : tf.Tensor
+        out : Tensor
             Output of shape (batch_size, summary_dim * num_seeds)
         """
 
@@ -302,7 +304,7 @@ class SetTransformer(tf.keras.Model):
         return out
 
 
-class DeepSet(tf.keras.Model):
+class DeepSet(keras.Model):
     """Implements a deep permutation-invariant network according to [1] and [2].
 
     [1] Zaheer, M., Kottur, S., Ravanbakhsh, S., Poczos, B., Salakhutdinov, R. R., & Smola, A. J. (2017).
@@ -343,20 +345,20 @@ class DeepSet(tf.keras.Model):
         dense_s1_args : dict or None, optional, default: None
             The arguments for the dense layers of s1 (inner, pre-pooling function). If `None`,
             defaults will be used (see `default_settings`). Otherwise, all arguments for a
-            tf.keras.layers.Dense layer are supported.
+            keras.layers.Dense layer are supported.
         dense_s2_args : dict or None, optional, default: None
             The arguments for the dense layers of s2 (outer, post-pooling function). If `None`,
             defaults will be used (see `default_settings`). Otherwise, all arguments for a
-            tf.keras.layers.Dense layer are supported.
+            keras.layers.Dense layer are supported.
         dense_s3_args : dict or None, optional, default: None
             The arguments for the dense layers of s3 (equivariant function). If `None`,
             defaults will be used (see `default_settings`). Otherwise, all arguments for a
-            tf.keras.layers.Dense layer are supported.
+            keras.layers.Dense layer are supported.
         pooling_fun   : str of callable, optional, default: 'mean'
             If string argument provided, should be one in ['mean', 'max']. In addition, ac actual
             neural network can be passed for learnable pooling.
         **kwargs      : dict, optional, default: {}
-            Optional keyword arguments passed to the __init__() method of tf.keras.Model.
+            Optional keyword arguments passed to the __init__() method of keras.Model.
         """
 
         super().__init__(**kwargs)
@@ -386,12 +388,12 @@ class DeepSet(tf.keras.Model):
 
         Parameters
         ----------
-        x : tf.Tensor
+        x : Tensor
             Input of shape (batch_size, n_obs, data_dim)
 
         Returns
         -------
-        out : tf.Tensor
+        out : Tensor
             Output of shape (batch_size, out_dim)
         """
 
@@ -424,7 +426,7 @@ class InvariantNetwork(DeepSet):
         super().__init__(*args, **kwargs)
 
 
-class SequenceNetwork(tf.keras.Model):
+class SequenceNetwork(keras.Model):
     """Implements a sequence of `MultiConv1D` layers followed by an (bidirectional) LSTM network.
 
     For details and rationale, see [1]:
@@ -455,14 +457,14 @@ class SequenceNetwork(tf.keras.Model):
             The arguments passed to the `MultiConv1D` internal networks. If `None`,
             defaults will be used from `default_settings`. If a dictionary is provided,
             it should contain the following keys:
-            - layer_args      (dict) : arguments for `tf.keras.layers.Conv1D` without kernel_size
+            - layer_args      (dict) : arguments for `keras.layers.Conv1D` without kernel_size
             - min_kernel_size (int)  : the minimum kernel size (>= 1)
             - max_kernel_size (int)  : the maximum kernel size
         bidirectional   : bool, optional, default: False
             Indicates whether the involved LSTM network is bidirectional (forward and backward in time)
             or unidirectional (forward in time). Defaults to False, but may increase performance.
         **kwargs        : dict
-            Optional keyword arguments passed to the __init__() method of tf.keras.Model
+            Optional keyword arguments passed to the __init__() method of keras.Model
         """
 
         super().__init__(**kwargs)
@@ -483,12 +485,12 @@ class SequenceNetwork(tf.keras.Model):
 
         Parameters
         ----------
-        x : tf.Tensor
+        x : Tensor
             Input of shape (batch_size, n_time_steps, n_time_series)
 
         Returns
         -------
-        out : tf.Tensor
+        out : Tensor
             Output of shape (batch_size, summary_dim)
         """
 
@@ -514,7 +516,7 @@ class SequentialNetwork(SequenceNetwork):
         super().__init__(*args, **kwargs)
 
 
-class SplitNetwork(tf.keras.Model):
+class SplitNetwork(keras.Model):
     """Implements a vertical stack of networks and concatenates their individual outputs. Allows for splitting
     of data to provide an individual network for each split of the data.
     """
@@ -549,7 +551,7 @@ class SplitNetwork(tf.keras.Model):
         network_kwargs          : dict, optional, default: {}
             A dictionary containing the configuration for the networks.
         **kwargs
-            Optional keyword arguments to be passed to the `tf.keras.Model` superclass.
+            Optional keyword arguments to be passed to the `keras.Model` superclass.
         """
 
         super().__init__(**kwargs)
@@ -563,12 +565,12 @@ class SplitNetwork(tf.keras.Model):
 
         Parameters
         ----------
-        x : tf.Tensor
+        x : Tensor
             Input of shape (batch_size, n_obs, data_dim)
 
         Returns
         -------
-        out : tf.Tensor
+        out : Tensor
             Output of shape (batch_size, out_dim)
         """
 
@@ -577,7 +579,7 @@ class SplitNetwork(tf.keras.Model):
         return out
 
 
-class HierarchicalNetwork(tf.keras.Model):
+class HierarchicalNetwork(keras.Model):
     """Implements a hierarchical summary network according to [1].
 
     [1] Elsemüller, L., Schnuerch, M., Bürkner, P. C., & Radev, S. T. (2023).
@@ -600,7 +602,7 @@ class HierarchicalNetwork(tf.keras.Model):
         ----------
 
         Parameters:
-        networks_list : list of tf.keras.Model:
+        networks_list : list of keras.Model:
             The list of summary networks (one per hierarchical level), starting from the lowest hierarchical level
         """
 
@@ -613,7 +615,7 @@ class HierarchicalNetwork(tf.keras.Model):
 
         Parameters
         ----------
-        x          : tf.Tensor of shape (batch_size, ..., data_dim)
+        x          : Tensor of shape (batch_size, ..., data_dim)
             Example, hierarchical data sets with two levels:
             (batch_size, D, L, x_dim) -> reduces to (batch_size, out_dim).
         return_all : boolean, optional, default: False
@@ -622,7 +624,7 @@ class HierarchicalNetwork(tf.keras.Model):
 
         Returns
         -------
-        out : tf.Tensor
+        out : Tensor
             Output of shape ``(batch_size, out_dim) if return_all=False`` else a tuple
             of ``len(outputs) == len(networks)`` corresponding to all outputs of all networks.
         """

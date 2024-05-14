@@ -21,7 +21,8 @@
 import copy
 
 import tensorflow as tf
-from tensorflow.keras.optimizers.schedules import LearningRateSchedule
+import keras
+from keras.api.optimizers.schedules import LearningRateSchedule
 
 from bayesflow import default_settings
 from bayesflow.exceptions import ConfigurationError, ShapeError
@@ -100,7 +101,7 @@ def extract_current_lr(optimizer):
 
     Parameters
     ----------
-    optimizer  : instance of subclass of `tf.keras.optimizers.Optimizer`
+    optimizer  : instance of subclass of `keras.optimizers.Optimizer`
         Optimizer to extract the learning rate from
 
     Returns
@@ -109,12 +110,12 @@ def extract_current_lr(optimizer):
         Current learning rate, or `None` if it can't be determined
     """
 
-    if isinstance(optimizer.lr, LearningRateSchedule):
+    if isinstance(optimizer.learning_rate, LearningRateSchedule):
         # LearningRateSchedule instances need number of iterations
-        current_lr = optimizer.lr(optimizer.iterations).numpy()
-    elif hasattr(optimizer.lr, "numpy"):
+        current_lr = optimizer.learning_rate(optimizer.iterations).numpy()
+    elif hasattr(optimizer.learning_rate, "numpy"):
         # Convert learning rate to numpy
-        current_lr = optimizer.lr.numpy()
+        current_lr = optimizer.learning_rate.numpy()
     else:
         # Unable to extract numerical value from optimizer.lr
         current_lr = None

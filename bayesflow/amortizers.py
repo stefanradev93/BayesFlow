@@ -27,6 +27,7 @@ logging.basicConfig()
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
+import keras
 
 from bayesflow.default_settings import DEFAULT_KEYS
 from bayesflow.exceptions import ConfigurationError, SummaryStatsError
@@ -65,7 +66,7 @@ class AmortizedTarget(ABC):
         check_tensor_sanity(tensor, logger)
 
 
-class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
+class AmortizedPosterior(keras.Model, AmortizedTarget):
     """A wrapper to connect an inference network for parameter estimation with an optional summary network
     as in the original BayesFlow set-up described in the paper:
 
@@ -106,9 +107,9 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
 
         Parameters
         ----------
-        inference_net     : tf.keras.Model
+        inference_net     : keras.Model
             An (invertible) inference network which processes the outputs of a generative model
-        summary_net       : tf.keras.Model or None, optional, default: None
+        summary_net       : keras.Model or None, optional, default: None
             An optional summary network to compress non-vector data structures.
         latent_dist       : callable or None, optional, default: None
             The latent distribution towards which to optimize the networks. Defaults to
@@ -136,7 +137,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         any ``summary_conditions``, i.e., ``summary_conditions`` should be set to ``None``, otherwise these will be ignored.
         """
 
-        tf.keras.Model.__init__(self, **kwargs)
+        keras.Model.__init__(self, **kwargs)
 
         self.inference_net = inference_net
         self.summary_net = summary_net
@@ -145,7 +146,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         self.summary_loss = self._determine_summary_loss(summary_loss_fun)
         self.latent_dist = self._determine_latent_dist(latent_dist)
 
-    def call(self, input_dict, return_summary=False, **kwargs):
+    def __call__(self, input_dict, return_summary=False, **kwargs):
         """Performs a forward pass through the summary and inference network given an input dictionary.
 
         Parameters
@@ -163,7 +164,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
 
         Returns
         -------
-        net_out or (net_out, summary_out) : tuple of tf.Tensor
+        net_out or (net_out, summary_out) : tuple of Tensor
             the outputs of ``inference_net(theta, summary_net(x, c_s), c_d)``, usually a latent variable and
             log(det(Jacobian)), that is a tuple ``(z, log_det_J) or (sum_outputs, (z, log_det_J))`` if
             ``return_summary`` is set to True and a summary network is defined.``
@@ -201,7 +202,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
 
         Returns
         -------
-        total_loss : tf.Tensor of shape (1,) - the total computed loss given input variables
+        total_loss : Tensor of shape (1,) - the total computed loss given input variables
         """
 
         # Get amortizer outputs
@@ -269,13 +270,13 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         n_samples   : int
             The number of posterior draws (samples) to obtain from the approximate posterior
         to_numpy    : bool, optional, default: True
-            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``tf.Tensor``.
+            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``Tensor``.
         **kwargs    : dict, optional, default: {}
             Additional keyword arguments passed to the networks
 
         Returns
         -------
-        post_samples : tf.Tensor or np.ndarray of shape (n_data_sets, n_samples, n_params)
+        post_samples : Tensor or np.ndarray of shape (n_data_sets, n_samples, n_params)
             The sampled parameters from the approximate posterior of each data set
         """
 
@@ -325,13 +326,13 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
         n_samples   : int
             The number of posterior draws (samples) to obtain from the approximate posterior
         to_numpy    : bool, optional, default: True
-            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``tf.Tensor``
+            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``Tensor``
         **kwargs    : dict, optional, default: {}
             Additional keyword arguments passed to the networks
 
         Returns
         -------
-        post_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, n_params)
+        post_samples : Tensor or np.ndarray of shape (n_datasets, n_samples, n_params)
             The sampled parameters from the approximate posterior of each data set
         """
 
@@ -354,13 +355,13 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
             ``summary_conditions`` : the conditioning variables (including data) that are first passed through a summary network
             ``direct_conditions``  : the conditioning variables that are directly passed to the inference network
         to_numpy   : bool, optional, default: True
-            Flag indicating whether to return the lpdf values as a ``np.ndarray`` or a ``tf.Tensor``
+            Flag indicating whether to return the lpdf values as a ``np.ndarray`` or a ``Tensor``
         **kwargs   : dict, optional, default: {}
             Additional keyword arguments passed to the networks
 
         Returns
         -------
-        log_post   : tf.Tensor or np.ndarray of shape (batch_size, n_obs)
+        log_post   : Tensor or np.ndarray of shape (batch_size, n_obs)
             the approximate log-posterior density of each each parameter
         """
 
@@ -447,7 +448,7 @@ class AmortizedPosterior(tf.keras.Model, AmortizedTarget):
             )
 
 
-class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
+class AmortizedLikelihood(keras.Model, AmortizedTarget):
     """An interface for a surrogate model of a simulator, or an implicit likelihood
     ``p(data | parameters, context)``.
     """
@@ -458,16 +459,16 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
 
         Parameters
         ----------
-        surrogate_net : tf.keras.Model
+        surrogate_net : keras.Model
             An (invertible) inference network which processes the outputs of the generative model.
         latent_dist       : callable or None, optional, default: None
             The latent distribution towards which to optimize the surrogate network outputs. Defaults to
             a multivariate unit Gaussian.
         **kwargs          : dict, optional, default: {}
-            Additional keyword arguments passed to the ``__init__`` method of a ``tf.keras.Model`` instance.
+            Additional keyword arguments passed to the ``__init__`` method of a ``keras.Model`` instance.
         """
 
-        tf.keras.Model.__init__(self, **kwargs)
+        keras.Model.__init__(self, **kwargs)
 
         self.surrogate_net = surrogate_net
         self.latent_dim = self.surrogate_net.latent_dim
@@ -514,7 +515,7 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
 
         Returns
         -------
-        net_out or (net_out, summary_out) : tuple of tf.Tensor
+        net_out or (net_out, summary_out) : tuple of Tensor
             the outputs of ``inference_net(theta, summary_net(x, c_s), c_d)``, usually a latent variable and
             log(det(Jacobian)), that is a tuple ``(z, log_det_J)``.
         """
@@ -537,13 +538,13 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
         n_samples   : int
             The number of posterior samples to obtain from the approximate posterior
         to_numpy    : bool, optional, default: True
-            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``tf.Tensor``
+            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``Tensor``
         **kwargs    : dict, optional, default: {}
             Additional keyword arguments passed to the network
 
         Returns
         -------
-        lik_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, None)
+        lik_samples : Tensor or np.ndarray of shape (n_datasets, n_samples, None)
             A simulated batch of observables from the surrogate likelihood.
         """
 
@@ -579,13 +580,13 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
         n_samples    : int
             The number of posterior draws (samples) to obtain from the approximate posterior
         to_numpy     : bool, optional, default: True
-            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+            Flag indicating whether to return the samples as a `np.array` or a `Tensor`
         **kwargs     : dict, optional, default: {}
             Additional keyword arguments passed to the network
 
         Returns
         -------
-        post_samples : tf.Tensor or np.ndarray of shape (n_data_sets, n_samples, data_dim)
+        post_samples : Tensor or np.ndarray of shape (n_data_sets, n_samples, data_dim)
             the sampled parameters per data set
         """
 
@@ -607,13 +608,13 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
             ``observables`` - the variables over which a condition density is learned (i.e., the observables)
             ``conditions``  - the conditioning variables that the directly passed to the inference network
         to_numpy   : bool, optional, default: True
-            Boolean flag indicating whether to return the log-lik values as a ``np.ndarray`` or a ``tf.Tensor``
+            Boolean flag indicating whether to return the log-lik values as a ``np.ndarray`` or a ``Tensor``
         **kwargs   : dict, optional, default: {}
             Additional keyword arguments passed to the network
 
         Returns
         -------
-        log_lik    : tf.Tensor or np.ndarray of shape (batch_size, n_obs)
+        log_lik    : Tensor or np.ndarray of shape (batch_size, n_obs)
             the approximate log-likelihood of each data point in each data set
         """
 
@@ -651,7 +652,7 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
 
         Returns
         -------
-        loss        : tf.Tensor of shape (1,) - the total computed loss given input variables
+        loss        : Tensor of shape (1,) - the total computed loss given input variables
         """
 
         z, log_det_J = self(input_dict, **kwargs)
@@ -667,7 +668,7 @@ class AmortizedLikelihood(tf.keras.Model, AmortizedTarget):
             return latent_dist
 
 
-class AmortizedPosteriorLikelihood(tf.keras.Model, AmortizedTarget):
+class AmortizedPosteriorLikelihood(keras.Model, AmortizedTarget):
     """An interface for jointly learning a surrogate model of the simulator and an approximate
     posterior given a generative model, as proposed by:
 
@@ -681,15 +682,15 @@ class AmortizedPosteriorLikelihood(tf.keras.Model, AmortizedTarget):
 
         Parameters
         ----------
-        amortized_posterior  : an instance of AmortizedPosterior or a custom tf.keras.Model
+        amortized_posterior  : an instance of AmortizedPosterior or a custom keras.Model
             The generative neural posterior approximator
-        amortized_likelihood : an instance of AmortizedLikelihood or a custom tf.keras.Model
+        amortized_likelihood : an instance of AmortizedLikelihood or a custom keras.Model
             The generative neural likelihood approximator
         **kwargs          : dict, optional, default: {}
-            Additional keyword arguments passed to the ``__init__`` method of a ``tf.keras.Model`` instance
+            Additional keyword arguments passed to the ``__init__`` method of a ``keras.Model`` instance
         """
 
-        tf.keras.Model.__init__(self, **kwargs)
+        keras.Model.__init__(self, **kwargs)
 
         self.amortized_posterior = amortized_posterior
         self.amortized_likelihood = amortized_likelihood
@@ -750,11 +751,11 @@ class AmortizedPosteriorLikelihood(tf.keras.Model, AmortizedTarget):
 
             OR a nested dictionary with key `likelihood_inputs` containing the above input dictionary
         to_numpy   : bool, optional, default: True
-            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+            Flag indicating whether to return the samples as a `np.array` or a `Tensor`
 
         Returns
         -------
-        log_lik     : tf.Tensor of shape (batch_size, n_obs)
+        log_lik     : Tensor of shape (batch_size, n_obs)
             the approximate log-likelihood of each data point in each data set
         """
 
@@ -781,7 +782,7 @@ class AmortizedPosteriorLikelihood(tf.keras.Model, AmortizedTarget):
 
         Returns
         -------
-        log_post    : tf.Tensor of shape (batch_size, n_obs)
+        log_post    : Tensor of shape (batch_size, n_obs)
             the approximate log-likelihood of each data point in each data set
         """
 
@@ -824,7 +825,7 @@ class AmortizedPosteriorLikelihood(tf.keras.Model, AmortizedTarget):
 
         Returns
         -------
-        lik_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, None)
+        lik_samples : Tensor or np.ndarray of shape (n_datasets, n_samples, None)
             Simulated observables from the surrogate likelihood.
         """
 
@@ -849,11 +850,11 @@ class AmortizedPosteriorLikelihood(tf.keras.Model, AmortizedTarget):
         n_samples    : int
             The number of posterior samples to obtain from the approximate posterior
         to_numpy     : bool, optional, default: True
-            Boolean flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+            Boolean flag indicating whether to return the samples as a `np.array` or a `Tensor`
 
         Returns
         -------
-        post_samples : tf.Tensor or np.ndarray of shape (n_datasets, n_samples, n_params)
+        post_samples : Tensor or np.ndarray of shape (n_datasets, n_samples, n_params)
             the sampled parameters per data set
         """
 
@@ -878,7 +879,7 @@ class AmortizedPosteriorLikelihood(tf.keras.Model, AmortizedTarget):
         return out_dict
 
 
-class AmortizedModelComparison(tf.keras.Model):
+class AmortizedModelComparison(keras.Model):
     """An interface to connect an evidential network for Bayesian model comparison with an optional summary network,
     as described in the original paper on evidential neural networks for model comparison according to [1, 2]:
 
@@ -900,9 +901,9 @@ class AmortizedModelComparison(tf.keras.Model):
 
         Parameters
         ----------
-        inference_net     : tf.keras.Model
+        inference_net     : keras.Model
             A neural network which outputs model evidences.
-        summary_net       : tf.keras.Model or None, optional, default: None
+        summary_net       : keras.Model or None, optional, default: None
             An optional summary network
         loss_fun          : callable or None, optional, default: None
             The loss function which accepts the outputs of the amortizer. If None, the loss will be the log-loss.
@@ -923,7 +924,7 @@ class AmortizedModelComparison(tf.keras.Model):
         self.loss = self._determine_loss(loss_fun)
         self.num_models = self.inference_net.num_models
 
-    def call(self, input_dict, return_summary=False, **kwargs):
+    def __call__(self, input_dict, return_summary=False, **kwargs):
         """Performs a forward pass through both networks.
 
         Parameters
@@ -938,7 +939,7 @@ class AmortizedModelComparison(tf.keras.Model):
 
         Returns
         -------
-        net_out : tf.Tensor of shape (batch_size, num_models) or tuple of (net_out (batch_size, num_models),
+        net_out : Tensor of shape (batch_size, num_models) or tuple of (net_out (batch_size, num_models),
                   summary_out (batch_size, summary_dim)), the latter being the summary network outputs, if
                   ``return_summary is True``.
         """
@@ -966,13 +967,13 @@ class AmortizedModelComparison(tf.keras.Model):
             `summary_conditions` - the conditioning variables that are first passed through a summary network
             `direct_conditions`  - the conditioning variables that the directly passed to the evidential network
         to_numpy    : bool, optional, default: True
-            Flag indicating whether to return the PMPs a ``np.ndarray`` or a ``tf.Tensor``
+            Flag indicating whether to return the PMPs a ``np.ndarray`` or a ``Tensor``
         **kwargs    : dict, optional, default: {}
             Additional keyword arguments passed to the networks
 
         Returns
         -------
-        out       : tf.Tensor of shape (batch_size, ..., num_models)
+        out       : Tensor of shape (batch_size, ..., num_models)
             The approximated PMPs
         """
 
@@ -999,7 +1000,7 @@ class AmortizedModelComparison(tf.keras.Model):
 
         Returns
         -------
-        loss  : tf.Tensor of shape (1,) - the total computed loss given input variables
+        loss  : Tensor of shape (1,) - the total computed loss given input variables
         """
 
         preds = self(input_dict, **kwargs)
@@ -1039,7 +1040,7 @@ class AmortizedModelComparison(tf.keras.Model):
             )
 
 
-class TwoLevelAmortizedPosterior(tf.keras.Model, AmortizedTarget):
+class TwoLevelAmortizedPosterior(keras.Model, AmortizedTarget):
     """An interface for estimating arbitrary two level hierarchical Bayesian models."""
 
     def __init__(self, local_amortizer, global_amortizer, summary_net=None, **kwargs):
@@ -1056,10 +1057,10 @@ class TwoLevelAmortizedPosterior(tf.keras.Model, AmortizedTarget):
             of an entire hierarchical data set. If both hyper- and shared parameters are present,
             the first dimensions correspond to the hyperparameters and the remaining ones correspond
             to the shared parameters.
-        summary_net       : tf.keras.Model or None, optional, default: None
+        summary_net       : keras.Model or None, optional, default: None
             An optional summary network to compress non-vector data structures.
         **kwargs          : dict, optional, default: {}
-            Additional keyword arguments passed to the ``__init__`` method of a ``tf.keras.Model`` instance.
+            Additional keyword arguments passed to the ``__init__`` method of a ``keras.Model`` instance.
         """
 
         super().__init__(**kwargs)
@@ -1102,7 +1103,7 @@ class TwoLevelAmortizedPosterior(tf.keras.Model, AmortizedTarget):
         n_samples    : int
             The number of posterior draws (samples) to obtain from the approximate posterior
         to_numpy     : bool, optional, default: True
-            Flag indicating whether to return the samples as a `np.array` or a `tf.Tensor`
+            Flag indicating whether to return the samples as a `np.array` or a `Tensor`
         **kwargs     : dict, optional, default: {}
             Additional keyword arguments passed to the summary network as the amortizers
 
@@ -1215,7 +1216,7 @@ class TwoLevelAmortizedPosterior(tf.keras.Model, AmortizedTarget):
         return local_summaries, global_summaries
 
 
-class AmortizedPointEstimator(tf.keras.Model):
+class AmortizedPointEstimator(keras.Model):
     """An interface to connect a neural point estimator for Bayesian estimation with an optional summary network [1].
 
     [1] Sainsbury-Dale, M., Zammit-Mangion, A., & Huser, R. (2024).
@@ -1228,9 +1229,9 @@ class AmortizedPointEstimator(tf.keras.Model):
 
         Parameters
         ----------
-        inference_net     : tf.keras.Model
+        inference_net     : keras.Model
             A neural network whose final output dimension equals that of the target quantities.
-        summary_net       : tf.keras.Model or None, optional, default: None
+        summary_net       : keras.Model or None, optional, default: None
             An optional summary network
         norm_ord          : int or np.inf, optional, default: 2
             The order of the norm used as a loss function for the point estimator. Should be in ``[1, 2, np.inf]``.
@@ -1270,7 +1271,7 @@ class AmortizedPointEstimator(tf.keras.Model):
 
         Returns
         -------
-        net_out or (net_out, summary_out) : tuple of tf.Tensor
+        net_out or (net_out, summary_out) : tuple of Tensor
             The outputs of ``inference_net(summary_net(x, c_s), c_d)``, usually a batch of point estimates,
             that is, a tensor ``estimates`` or ``(sum_outputs, estimates)`` if ``return_summary`` is set
             to True and a summary network is defined.
@@ -1301,13 +1302,13 @@ class AmortizedPointEstimator(tf.keras.Model):
             ``summary_conditions`` : the conditioning variables (including data) that are first passed through a summary network
             ``direct_conditions``  : the conditioning variables that the directly passed to the inference network
         to_numpy    : bool, optional, default: True
-            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``tf.Tensor``.
+            Flag indicating whether to return the samples as a ``np.ndarray`` or a ``Tensor``.
         **kwargs    : dict, optional, default: {}
             Additional keyword arguments passed to the networks.
 
         Returns
         -------
-        estimates : tf.Tensor or np.ndarray of shape (num_data_sets, num_params)
+        estimates : Tensor or np.ndarray of shape (num_data_sets, num_params)
             The point estimates of the parameters for each data set.
         """
 
@@ -1333,7 +1334,7 @@ class AmortizedPointEstimator(tf.keras.Model):
 
         Returns
         -------
-        total_loss : tf.Tensor of shape (1,) - the total computed loss given input variables
+        total_loss : Tensor of shape (1,) - the total computed loss given input variables
         """
 
         net_out = self(input_dict, **kwargs)

@@ -19,17 +19,19 @@
 # SOFTWARE.
 
 from functools import partial
+from bayesflow.experimental.types import Tensor
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.layers import Conv1D, Dense, Dropout
-from tensorflow.keras.models import Sequential
+import keras
+from keras.api.layers import Conv1D, Dense, Dropout
+from keras.api.models import Sequential
 
 from bayesflow.exceptions import ConfigurationError
 from bayesflow.wrappers import SpectralNormalization
 
 
-class DenseCouplingNet(tf.keras.Model):
+class DenseCouplingNet(keras.Model):
     """Implements a conditional version of a standard fully connected (FC) network.
     Would also work as an unconditional estimator."""
 
@@ -48,7 +50,7 @@ class DenseCouplingNet(tf.keras.Model):
             Number of outputs of the coupling net. Determined internally by the
             consumer classes.
         **kwargs : dict, optional, default: {}
-            Optional keyword arguments passed to the `tf.keras.Model` constructor.
+            Optional keyword arguments passed to the `keras.Model` constructor.
         """
 
         super().__init__(**kwargs)
@@ -90,16 +92,16 @@ class DenseCouplingNet(tf.keras.Model):
             self.fc.add(Dense(dim_out, kernel_initializer="zeros"))
             self.residual_output = None
 
-        self.fc.build(input_shape=())
+        self.fc.build()
 
     def call(self, target, condition, **kwargs):
         """Concatenates target and condition and performs a forward pass through the coupling net.
 
         Parameters
         ----------
-        target      : tf.Tensor
+        target      : Tensor
           The split estimation quntities, for instance, parameters :math:`\\theta \sim p(\\theta)` of interest, shape (batch_size, ...)
-        condition   : tf.Tensor or None
+        condition   : Tensor or None
             the conditioning vector of interest, for instance ``x = summary(x)``, shape (batch_size, summary_dim)
         """
 
@@ -112,7 +114,7 @@ class DenseCouplingNet(tf.keras.Model):
 
         # Handle 3D case for a set-flow and repeat condition over
         # the second `time` or `n_observations` axis of `target``
-        if len(tf.shape(target)) == 3 and len(tf.shape(condition)) == 2:
+        if target.ndim == 3 and condition.ndim == 2:
             shape = tf.shape(target)
             condition = tf.expand_dims(condition, 1)
             condition = tf.tile(condition, [1, shape[1], 1])
@@ -124,7 +126,7 @@ class DenseCouplingNet(tf.keras.Model):
         return out
 
 
-class Permutation(tf.keras.Model):
+class Permutation(keras.Model):
     """Implements a layer to permute the inputs entering a (conditional) coupling layer. Uses
     fixed permutations, as these perform equally well compared to learned permutations."""
 
@@ -153,14 +155,14 @@ class Permutation(tf.keras.Model):
 
         Parameters
         ----------
-        target   : tf.Tensor of shape (batch_size, ...)
+        target   : Tensor of shape (batch_size, ...)
             The target vector to be permuted over its last axis.
         inverse  : bool, optional, default: False
             Controls if the current pass is forward (``inverse=False``) or inverse (``inverse=True``).
 
         Returns
         -------
-        out      : tf.Tensor of the same shape as `target`.
+        out      : Tensor of the same shape as `target`.
             The (un-)permuted target vector.
         """
 
@@ -178,7 +180,7 @@ class Permutation(tf.keras.Model):
         return tf.gather(target, self.inv_permutation, axis=-1)
 
 
-class Orthogonal(tf.keras.Model):
+class Orthogonal(keras.Model):
     """Implements a learnable orthogonal transformation according to [1]. Can be
     used as an alternative to a fixed ``Permutation`` layer.
 
@@ -197,7 +199,7 @@ class Orthogonal(tf.keras.Model):
 
         super().__init__()
 
-        init = tf.keras.initializers.Orthogonal()
+        init = keras.initializers.Orthogonal()
         self.W = tf.Variable(
             initial_value=init(shape=(input_dim, input_dim)), trainable=True, dtype=tf.float32, name="learnable_permute"
         )
@@ -208,14 +210,14 @@ class Orthogonal(tf.keras.Model):
 
         Parameters
         ----------
-        target   : tf.Tensor of shape (batch_size, ...)
+        target   : Tensor of shape (batch_size, ...)
             The target vector to be rotated over its last axis.
         inverse  : bool, optional, default: False
             Controls if the current pass is forward (``inverse=False``) or inverse (``inverse=True``).
 
         Returns
         -------
-        out      : tf.Tensor of the same shape as `target`.
+        out      : Tensor of the same shape as `target`.
             The (un-)rotated target vector.
         """
 
@@ -228,7 +230,7 @@ class Orthogonal(tf.keras.Model):
         """Performs a learnable generalized permutation over the last axis."""
 
         shape = tf.shape(target)
-        rank = len(shape)
+        rank = target.ndim
         log_det = tf.math.log(tf.math.abs(tf.linalg.det(self.W)))
         if rank == 2:
             z = tf.linalg.matmul(target, self.W)
@@ -247,7 +249,7 @@ class Orthogonal(tf.keras.Model):
         return tf.tensordot(z, W_inv, [[rank - 1], [0]])
 
 
-class MCDropout(tf.keras.Model):
+class MCDropout(keras.Model):
     """Implements Monte Carlo Dropout as a Bayesian approximation according to [1].
 
     Perhaps not the best approximation, but arguably the cheapest one out there!
@@ -264,7 +266,7 @@ class MCDropout(tf.keras.Model):
         Parameters
         ----------
         dropout_prob  : float, optional, default: 0.1
-            The dropout rate to be passed to ``tf.keras.layers.Dropout()``.
+            The dropout rate to be passed to ``keras.layers.Dropout()``.
         """
 
         super().__init__(**kwargs)
@@ -275,12 +277,12 @@ class MCDropout(tf.keras.Model):
 
         Parameters
         ----------
-        inputs : tf.Tensor
+        inputs : Tensor
             Input of shape (batch_size, ...)
 
         Returns
         -------
-        out    : tf.Tensor
+        out    : Tensor
             Output of shape (batch_size, ...), same as ``inputs``.
 
         """
@@ -289,7 +291,7 @@ class MCDropout(tf.keras.Model):
         return out
 
 
-class ActNorm(tf.keras.Model):
+class ActNorm(keras.Model):
     """Implements an Activation Normalization (ActNorm) Layer.
     Activation Normalization is learned invertible normalization, using
     a Scale (s) and Bias (b) vector::
@@ -346,17 +348,17 @@ class ActNorm(tf.keras.Model):
 
         Parameters
         ----------
-        target     : tf.Tensor of shape (batch_size, ...)
+        target     : Tensor of shape (batch_size, ...)
             the target variables of interest, i.e., parameters for posterior estimation
         inverse    : bool, optional, default: False
             Flag indicating whether to run the block forward or backwards
 
         Returns
         -------
-        (z, log_det_J)  :  tuple(tf.Tensor, tf.Tensor)
+        (z, log_det_J)  :  tuple(Tensor, Tensor)
             If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
             v shape: (batch_size, inp_dim), log_det_J shape: (,)
-        target          :  tf.Tensor
+        target          :  Tensor
             If inverse=True: The inversely transformed targets, shape == target.shape
 
         Notes
@@ -396,7 +398,7 @@ class ActNorm(tf.keras.Model):
 
         Parameters
         ----------
-        init_data    : tf.Tensor of shape (batch size, number of parameters)
+        init_data    : Tensor of shape (batch size, number of parameters)
             Initiall values to estimate the scale and bias parameters by computing
             the mean and standard deviation along the first dimension of `init_data`.
         """
@@ -423,7 +425,7 @@ class ActNorm(tf.keras.Model):
         self.bias = tf.Variable(bias, trainable=True, name="act_norm_bias")
 
 
-class InvariantModule(tf.keras.Model):
+class InvariantModule(keras.Model):
     """Implements an invariant module performing a permutation-invariant transform.
 
     For details and rationale, see:
@@ -467,12 +469,12 @@ class InvariantModule(tf.keras.Model):
 
         Parameters
         ----------
-        x : tf.Tensor
+        x : Tensor
             Input of shape (batch_size,..., x_dim)
 
         Returns
         -------
-        out : tf.Tensor
+        out : Tensor
             Output of shape (batch_size,..., out_dim)
         """
 
@@ -481,7 +483,7 @@ class InvariantModule(tf.keras.Model):
         return out
 
 
-class EquivariantModule(tf.keras.Model):
+class EquivariantModule(keras.Model):
     """Implements an equivariant module performing an equivariant transform.
 
     For details and justification, see:
@@ -499,7 +501,7 @@ class EquivariantModule(tf.keras.Model):
         settings : dict
             A dictionary holding the configuration settings for the module.
         **kwargs : dict, optional, default: {}
-            Optional keyword arguments passed to the ``tf.keras.Model`` constructor.
+            Optional keyword arguments passed to the ``keras.Model`` constructor.
         """
 
         super().__init__(**kwargs)
@@ -512,22 +514,23 @@ class EquivariantModule(tf.keras.Model):
 
         Parameters
         ----------
-        x   : tf.Tensor
+        x   : Tensor
             Input of shape (batch_size, ..., x_dim)
 
         Returns
         -------
-        out : tf.Tensor
+        out : Tensor
             Output of shape (batch_size, ..., equiv_dim)
         """
 
         # Store shape of x, will be (batch_size, ..., some_dim)
-        shape = tf.shape(x)
+        shape = x.shape
+        ndim = x.ndim
 
         # Example: Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
         out_inv = self.invariant_module(x, **kwargs)
         out_inv = tf.expand_dims(out_inv, -2)
-        tiler = [1] * len(shape)
+        tiler = [1] * ndim
         tiler[-2] = shape[-2]
         out_inv_rep = tf.tile(out_inv, tiler)
 
@@ -539,7 +542,7 @@ class EquivariantModule(tf.keras.Model):
         return out
 
 
-class MultiConv1D(tf.keras.Model):
+class MultiConv1D(keras.Model):
     """Implements an inception-inspired 1D convolutional layer using different kernel sizes."""
 
     def __init__(self, settings, **kwargs):
@@ -571,12 +574,12 @@ class MultiConv1D(tf.keras.Model):
 
         Parameters
         ----------
-        x   : tf.Tensor
+        x   : Tensor
             Input of shape (batch_size, n_time_steps, n_time_series)
 
         Returns
         -------
-        out : tf.Tensor
+        out : Tensor
             Output of shape (batch_size, n_time_steps, n_filters)
         """
 
@@ -590,7 +593,7 @@ class MultiConv1D(tf.keras.Model):
         return tf.concat([conv(x, **kwargs) for conv in self.convs], axis=-1)
 
 
-class ConfigurableMLP(tf.keras.Model):
+class ConfigurableMLP(keras.Model):
     """Implements a simple configurable MLP with optional residual connections and dropout."""
 
     def __init__(
@@ -629,8 +632,8 @@ class ConfigurableMLP(tf.keras.Model):
 
         self.input_dim = input_dim
         self.output_dim = input_dim if output_dim is None else output_dim
-        self.model = tf.keras.Sequential(
-            [tf.keras.layers.Dense(hidden_dim, activation=activation), tf.keras.layers.Dropout(dropout_rate)]
+        self.model = keras.Sequential(
+            [keras.layers.Dense(hidden_dim, activation=activation), keras.layers.Dropout(dropout_rate)]
         )
         for _ in range(num_hidden):
             self.model.add(
@@ -641,20 +644,20 @@ class ConfigurableMLP(tf.keras.Model):
                     dropout_rate=dropout_rate,
                 )
             )
-        self.model.add(tf.keras.layers.Dense(self.output_dim))
+        self.model.add(keras.layers.Dense(self.output_dim))
 
     def call(self, inputs, **kwargs):
         return self.model(inputs, **kwargs)
 
 
-class ConfigurableHiddenBlock(tf.keras.Model):
+class ConfigurableHiddenBlock(keras.Model):
     def __init__(self, num_units, activation="relu", residual=True, dropout_rate=0.0):
         super().__init__()
 
-        self.act_fn = tf.keras.activations.get(activation)
+        self.act_fn = keras.activations.get(activation)
         self.residual = residual
-        self.dense_with_dropout = tf.keras.Sequential(
-            [tf.keras.layers.Dense(num_units, activation=None), tf.keras.layers.Dropout(dropout_rate)]
+        self.dense_with_dropout = keras.Sequential(
+            [keras.layers.Dense(num_units, activation=None), keras.layers.Dropout(dropout_rate)]
         )
 
     def call(self, inputs, **kwargs):

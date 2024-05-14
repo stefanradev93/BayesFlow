@@ -24,6 +24,7 @@ from pickle import load as pickle_load
 
 import numpy as np
 import tensorflow as tf
+import keras
 from tqdm.autonotebook import tqdm
 
 from bayesflow.amortizers import (
@@ -368,8 +369,8 @@ class Trainer:
         save_checkpoint      : bool, default: True
             A flag to decide whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
-        optimizer            : tf.keras.optimizer.Optimizer or None
-            Optimizer for the neural network. ``None`` will result in ``tf.keras.optimizers.Adam``
+        optimizer            : keras.optimizer.Optimizer or None
+            Optimizer for the neural network. ``None`` will result in ``keras.optimizers.Adam``
             using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
             will override default learning rate and schedule settings.
         reuse_optimizer      : bool, optional, default: False
@@ -494,8 +495,8 @@ class Trainer:
         save_checkpoint  : bool, default: True
            Determines whether to save checkpoints after each epoch,
            if a checkpoint_path provided during initialization, otherwise ignored.
-        optimizer         : tf.keras.optimizer.Optimizer or None
-           Optimizer for the neural network. ``None`` will result in ``tf.keras.optimizers.Adam``
+        optimizer         : keras.optimizer.Optimizer or None
+           Optimizer for the neural network. ``None`` will result in ``keras.optimizers.Adam``
            using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
            will override default learning rate and schedule settings.
         reuse_optimizer   : bool, optional, default: False
@@ -636,7 +637,7 @@ class Trainer:
             simulation_dict objects using pickle.dump, the _default_loader (default for custom_load) will
             load them using pickle.load.
             Training parameters like number of iterations and batch size are inferred from the files during training.
-        optimizer            : tf.keras.optimizer.Optimizer
+        optimizer            : keras.optimizer.Optimizer
             Optimizer for the neural network training. Since for this training, it is impossible to guess the number of
             iterations beforehead, an optimizer must be provided.
         save_checkpoint      : bool, optional, default : True
@@ -803,8 +804,8 @@ class Trainer:
         save_checkpoint      : bool, optional, default: True
             A flag to decide whether to save checkpoints after each epoch,
             if a ``checkpoint_path`` provided during initialization, otherwise ignored.
-        optimizer            : tf.keras.optimizer.Optimizer or None
-            Optimizer for the neural network. ``None`` will result in ``tf.keras.optimizers.Adam``
+        optimizer            : keras.optimizer.Optimizer or None
+            Optimizer for the neural network. ``None`` will result in ``keras.optimizers.Adam``
             using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
             will override default learning rate and schedule settings.
         reuse_optimizer      : bool, optional, default: False
@@ -953,8 +954,8 @@ class Trainer:
         save_checkpoint : bool, optional, default: True
             A flag to decide whether to save checkpoints after each epoch,
             if a checkpoint_path provided during initialization, otherwise ignored.
-        optimizer            : tf.keras.optimizer.Optimizer or None
-            Optimizer for the neural network training. ``None`` will result in ``tf.keras.optimizers.Adam``
+        optimizer            : keras.optimizer.Optimizer or None
+            Optimizer for the neural network training. ``None`` will result in ``keras.optimizers.Adam``
             using a learning rate of 5e-4 and a cosine decay from 5e-4 to 0. A custom optimizer
             will override default learning rate and schedule settings.
         reuse_optimizer      : bool, optional, default: False
@@ -1155,10 +1156,10 @@ class Trainer:
             # No optimizer so far and None provided
             if self.optimizer is None:
                 # Calculate decay steps for default cosine decay
-                schedule = tf.keras.optimizers.schedules.CosineDecay(
+                schedule = keras.optimizers.schedules.CosineDecay(
                     self.default_lr, iterations_per_epoch * epochs, name="lr_decay"
                 )
-                self.optimizer = tf.keras.optimizers.Adam(schedule, **OPTIMIZER_DEFAULTS)
+                self.optimizer = keras.optimizers.Adam(schedule, **OPTIMIZER_DEFAULTS)
             # No optimizer provided, but optimizer exists, that is,
             # has been declared as persistent, so do nothing
             else:
