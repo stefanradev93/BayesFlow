@@ -7,7 +7,7 @@ from typing import Callable
 from ...resnet.residual_block import ConditionalResidualBlock
 
 
-def find_subnet(subnet: str | Callable, transform: str, target_dim: int, **kwargs):
+def find_subnet(subnet: str | Callable, transform: str, output_dim: int, **kwargs):
 
     match subnet:
         case str() as name:
@@ -25,7 +25,7 @@ def find_subnet(subnet: str | Callable, transform: str, target_dim: int, **kwarg
         case str() as name:
             match name.lower():
                 case "affine":
-                    output_dim = target_dim * 2
+                    output_dim = output_dim * 2
                 case other:
                     raise NotImplementedError(f"Unsupported transform name: '{other}'.")
         case other:

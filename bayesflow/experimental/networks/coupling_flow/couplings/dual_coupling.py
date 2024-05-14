@@ -5,27 +5,29 @@ import keras
 
 from bayesflow.experimental.types import Tensor
 from .coupling import Coupling
-from ..transforms import Transform
 
 
 class DualCoupling(keras.Layer):
     def __init__(
         self,
-        subnet: keras.Model | keras.layers.Layer,
+        subnet_builder: str,
         target_dim: int,
-        transform: Transform
+        transform: str,
+        **kwargs
     ):
         super().__init__()
 
         self.coupling1 = Coupling(
-            subnet=subnet,
-            target_dim=math.floor(target_dim / 2),
+            subnet_builder=subnet_builder,
+            half_dim=math.floor(target_dim / 2),
             transform=transform,
+            **kwargs
         )
         self.coupling2 = Coupling(
-            subnet=subnet,
-            target_dim=math.ceil(target_dim / 2),
+            subnet_builder=subnet_builder,
+            half_dim=math.ceil(target_dim / 2),
             transform=transform,
+            **kwargs
         )
 
     def call(self, x: Tensor, c=None, forward=True, **kwargs) -> (Tensor, Tensor):

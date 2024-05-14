@@ -6,8 +6,6 @@ import keras
 from bayesflow.experimental.simulation import Distribution, find_distribution
 from bayesflow.experimental.types import Shape, Tensor
 from .couplings import AllInOneCoupling
-from .subnets import find_subnet
-from .transforms import find_transform
 
 
 class CouplingFlow(keras.Sequential):
@@ -21,7 +19,7 @@ class CouplingFlow(keras.Sequential):
             cls,
             target_dim: int,
             num_layers: int,
-            subnet="default",
+            subnet_builder="default",
             transform="affine",
             permutation="fixed",
             act_norm=True,
@@ -30,13 +28,11 @@ class CouplingFlow(keras.Sequential):
     ) -> "CouplingFlow":
         """ Construct a uniform coupling flow, consisting of dual couplings with a single type of transform. """
 
-        subnet = find_subnet(subnet, transform, target_dim, **kwargs.pop("subnet_kwargs", {}))
-        transform = find_transform(transform)
         base_distribution = find_distribution(base_distribution, shape=(target_dim,))
 
         couplings = []
         for _ in range(num_layers):
-            layer = AllInOneCoupling(subnet, target_dim, transform, permutation, act_norm)
+            layer = AllInOneCoupling(subnet_builder, target_dim, transform, permutation, act_norm, **kwargs)
             couplings.append(layer)
 
         return cls(couplings, base_distribution)

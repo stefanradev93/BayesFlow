@@ -2,7 +2,7 @@
 import keras
 
 
-class ConfigurableHiddenBlock(keras.Layer):
+class ConfigurableHiddenBlock(keras.layers.Layer):
     def __init__(
         self,
         num_units,
@@ -16,15 +16,26 @@ class ConfigurableHiddenBlock(keras.Layer):
 
         self.activation_fn = keras.activations.get(activation)
         self.residual = residual
+        self.spectral_norm = spectral_norm
         self.dense_with_dropout = keras.Sequential()
+
         if spectral_norm:
             self.dense_with_dropout.add(keras.layers.SpectralNormalization(keras.layers.Dense(num_units)))
         else:
             self.dense_with_dropout.add(keras.layers.Dense(num_units))
         self.dense_with_dropout.add(keras.layers.Dropout(dropout_rate))
 
-    def call(self, inputs, **kwargs):
-        x = self.dense_with_dropout(inputs, **kwargs)
+    def call(self, inputs, training=False):
+        x = self.dense_with_dropout(inputs, training=training)
         if self.residual:
             x = x + inputs
         return self.activation_fn(x)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "units": self.activation_fn,
+            "residual": self.residual,
+            "spectral_norm": self.spectral_norm
+        })
+        return config
