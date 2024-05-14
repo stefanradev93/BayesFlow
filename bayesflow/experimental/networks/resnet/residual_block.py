@@ -74,3 +74,12 @@ class ConditionalResidualBlock(keras.layers.Layer):
     def call(self, inputs, training=False):
         out = self.res_blocks(inputs, training=training)
         return self.output_layer(out)
+    
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "dim": self.dim,
+            "res_blocks": keras.saving.serialize_keras_object(self.res_blocks),
+            "output_layer": keras.saving.serialize_keras_object(self.output_layer)
+        })
+        return config
