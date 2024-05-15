@@ -103,8 +103,15 @@ class Amortizer(keras.Model):
 
         return inference_metrics | summary_metrics
 
-    def sample(self, *args, **kwargs):
-        return self.inference_network.sample(*args, **kwargs)
+    def sample(self, data: dict, num_samples: int, sample_summaries=False, **kwargs):
+        
+        # Configure everything -> inference conditions / summary conditions
+        configured_observables = None
+
+        # Decide whether summaries are present or not / whether sumamry network is present or not
+        # ...
+
+        return self.inference_network.sample(conditions=configured_observables, **kwargs)
 
     def log_prob(self, *args, **kwargs):
         return self.inference_network.log_prob(*args, **kwargs)
