@@ -44,26 +44,9 @@ def dataset(joint_distribution):
 
 
 @pytest.fixture()
-def subnet_constructor():
-    class Subnet(keras.Layer):
-        def __init__(self, out_features):
-            super().__init__()
-            self.network = keras.Sequential([
-                keras.layers.Dense(32, activation="relu"),
-                keras.layers.Dense(out_features, kernel_initializer=keras.initializers.Zeros(),
-                                   bias_initializer=keras.initializers.Zeros())
-            ])
-
-        def call(self, x):
-            return self.network(x)
-
-    return Subnet
-
-
-@pytest.fixture()
-def inference_network(subnet_constructor):
+def inference_network():
     return bf.networks.CouplingFlow.all_in_one(
-        subnet_constructor=subnet_constructor,
+        subnet_builder="default",
         target_dim=2,
         num_layers=2,
         transform="affine",
