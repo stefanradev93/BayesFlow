@@ -26,12 +26,6 @@ class Amortizer(keras.Model):
 
         return base_config | config
 
-    def build(self, input_shape):
-        if self.summary_network is not None:
-            self.summary_network.build(input_shape)
-
-        self.inference_network.build(input_shape)
-
     def call(self, x: dict, **kwargs):
         inferred_variables = self.configure_inferred_variables(x)
         observed_variables = self.configure_observed_variables(x)
