@@ -9,6 +9,7 @@ class Amortizer(keras.Model):
         super().__init__(**kwargs)
         self.inference_network = inference_network
         self.summary_network = summary_network
+        self.loss_tracker = keras.metrics.Mean(name='loss')
 
     @classmethod
     def from_config(cls, config, custom_objects=None):
@@ -69,7 +70,16 @@ class Amortizer(keras.Model):
             y_pred=y_pred.get("inference_outputs")
         )
 
-        return inference_loss + summary_loss
+        total_loss = inference_loss + summary_loss
+        self.loss_tracker.update_state(total_loss)
+        return total_loss
+
+    def reset_metrics(self):
+        self.loss_tracker.reset_state()
+
+    @property
+    def metrics(self):
+        return [self.loss_tracker]
 
     def compute_metrics(self, x: dict, y: dict, y_pred: dict, **kwargs):
         inferred_variables = self.configure_inferred_variables(x)

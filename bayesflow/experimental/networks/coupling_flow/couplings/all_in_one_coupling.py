@@ -41,8 +41,8 @@ class AllInOneCoupling(keras.Layer):
 
     def call(self, x, c=None, forward=True, **kwargs):
         if forward:
-            self.forward(x, c, **kwargs)
-        self.inverse(x, c)
+            return self.forward(x, c, **kwargs)
+        return self.inverse(x, c)
 
     def forward(self, x, c=None, **kwargs):
         """Performs a forward pass through the chain: optional activation normalization -> coupling -> permutation."""

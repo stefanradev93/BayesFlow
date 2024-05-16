@@ -1,5 +1,5 @@
 
-from math import pi as PI_CONST
+import math
 
 from keras import ops
 
@@ -9,7 +9,8 @@ from .transform import Transform
 
 class AffineTransform(Transform):
 
-    def __init__(self, clamp_factor=1.9):
+    def __init__(self, clamp_factor=10.0, **kwargs):
+        super().__init__(**kwargs)
         self.clamp_factor = clamp_factor
 
     def split_parameters(self, parameters: Tensor) -> dict[str, Tensor]:
@@ -18,19 +19,19 @@ class AffineTransform(Transform):
         return {"scale": scale, "shift": shift}
 
     def constrain_parameters(self, parameters: dict[str, Tensor]) -> dict[str, Tensor]:
-        s = (2.0 * self.clamp_factor / PI_CONST) * ops.arctan(parameters["scale"] / self.clamp_factor)
-        parameters["scale"] = ops.exp(s)
+        shift = math.log(math.e - 1)
+        parameters["scale"] = self.clamp_factor * ops.sigmoid(ops.softplus(parameters["scale"] + shift))
 
         return parameters
 
     def forward(self, x: Tensor, parameters: dict[str, Tensor]) -> (Tensor, Tensor):
         z = parameters["scale"] * x + parameters["shift"]
-        log_det = ops.mean(parameters["scale"], axis=-1)
+        log_det = ops.sum(ops.log(parameters["scale"]), axis=-1)
 
         return z, log_det
 
     def inverse(self, z: Tensor, parameters: dict[str, Tensor]) -> (Tensor, Tensor):
         x = (z - parameters["shift"]) / parameters["scale"]
-        log_det = -ops.mean(parameters["scale"], axis=-1)
+        log_det = -ops.sum(ops.log(parameters["scale"]), axis=-1)
 
         return x, log_det

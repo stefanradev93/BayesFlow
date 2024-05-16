@@ -32,8 +32,8 @@ class DualCoupling(keras.Layer):
 
     def call(self, x: Tensor, c=None, forward=True, **kwargs) -> (Tensor, Tensor):
         if forward:
-            self.forward(x, c, **kwargs)
-        self.inverse(x, c)
+            return self.forward(x, c, **kwargs)
+        return self.inverse(x, c)
 
     def forward(self, x: Tensor, c=None, **kwargs) -> (Tensor, Tensor):
         z, det1 = self.coupling1.forward(x, c, **kwargs)
