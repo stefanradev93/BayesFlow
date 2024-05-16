@@ -9,7 +9,7 @@ from .transform import Transform
 
 class AffineTransform(Transform):
 
-    def __init__(self, clamp_factor=10.0, **kwargs):
+    def __init__(self, clamp_factor=5.0, **kwargs):
         super().__init__(**kwargs)
         self.clamp_factor = clamp_factor
 
@@ -19,8 +19,10 @@ class AffineTransform(Transform):
         return {"scale": scale, "shift": shift}
 
     def constrain_parameters(self, parameters: dict[str, Tensor]) -> dict[str, Tensor]:
-        shift = math.log(math.e - 1)
-        parameters["scale"] = self.clamp_factor * ops.sigmoid(ops.softplus(parameters["scale"] + shift))
+        # shift = math.log(math.e - 1)
+        s = parameters["scale"]
+        # parameters["scale"] = self.clamp_factor * ops.sigmoid(ops.softplus(parameters["scale"] + shift))
+        parameters["scale"] = 1 / (1 + ops.exp(-s)) * ops.sqrt(1 + ops.abs(s + self.clamp_factor))
 
         return parameters
 
