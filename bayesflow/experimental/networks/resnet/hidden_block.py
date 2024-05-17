@@ -6,7 +6,7 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
     def __init__(
         self,
         num_units,
-        activation="relu",
+        activation="gelu",
         residual=True,
         dropout_rate=0.05,
         spectral_norm=False,

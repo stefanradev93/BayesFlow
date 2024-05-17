@@ -19,9 +19,7 @@ class AffineTransform(Transform):
         return {"scale": scale, "shift": shift}
 
     def constrain_parameters(self, parameters: dict[str, Tensor]) -> dict[str, Tensor]:
-        # shift = math.log(math.e - 1)
         s = parameters["scale"]
-        # parameters["scale"] = self.clamp_factor * ops.sigmoid(ops.softplus(parameters["scale"] + shift))
         parameters["scale"] = 1 / (1 + ops.exp(-s)) * ops.sqrt(1 + ops.abs(s + self.clamp_factor))
 
         return parameters
