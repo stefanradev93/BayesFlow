@@ -15,14 +15,14 @@ class Coupling(keras.Layer):
         transform: str,
         **kwargs
     ):
-        super().__init__(**kwargs)
+        super().__init__()
 
         self.half_dim = half_dim
         self.subnet = find_subnet(
             subnet=subnet_builder,
             transform=transform,
             output_dim=half_dim,
-            **kwargs.pop('subnet_kwargs', {})
+            **kwargs.pop('subnet_settings', {})
         )
         self.transform = find_transform(transform)
 
