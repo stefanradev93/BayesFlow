@@ -39,7 +39,7 @@ class CouplingFlow(keras.Sequential):
     def all_in_one(
             cls,
             target_dim: int,
-            num_layers: 6,
+            num_layers=6,
             subnet_builder="default",
             transform="affine",
             permutation="fixed",
