@@ -167,7 +167,9 @@ class CouplingFlow(keras.Sequential):
 
         return targets, log_det
 
-    def sample(self, batch_shape: Shape, conditions=None) -> Tensor:
+    def sample(self, batch_shape: Shape | int, conditions=None) -> Tensor:
+        if type(batch_shape) is int:
+            batch_shape = (batch_shape, )
         latents = self.base_distribution.sample(batch_shape)
         targets, _ = self.inverse(latents, conditions)
 
