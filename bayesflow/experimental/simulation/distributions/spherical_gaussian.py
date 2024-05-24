@@ -11,13 +11,13 @@ class SphericalGaussian(Distribution):
     """Utility class for a backend-agnostic spherical Gaussian distribution.
 
     Note:
-        - ``log_unnormalized_pdf`` method is used as a loss function
-        - ``log_pdf`` is used for density computation
+        - ``log_unnormalized_prob`` method is used as a loss function
+        - ``log_prob`` is used for density computation
     """
     def __init__(self, shape: Shape):
         self.shape = shape
         self.dim = int(self.shape[0])
-        self._norm_const = 0.5 * self.dim * math.log(2.0 * math.pi)
+        self.log_norm_const = 0.5 * self.dim * math.log(2.0 * math.pi)
 
     def sample(self, batch_shape: Shape):
         return keras.random.normal(shape=batch_shape + self.shape, mean=0.0, stddev=1.0)
@@ -27,4 +27,4 @@ class SphericalGaussian(Distribution):
 
     def log_prob(self, tensor: Tensor):
         log_unnorm_pdf = self.log_unnormalized_prob(tensor)
-        return log_unnorm_pdf - self._norm_const
+        return log_unnorm_pdf - self.log_norm_const
