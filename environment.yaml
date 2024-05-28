@@ -1,3 +1,6 @@
+channels:
+  - defaults
+  - conda-forge
 dependencies:
   - jupyter
   - jupyterlab
