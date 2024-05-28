@@ -1,35 +1,28 @@
-
 import keras
-from keras import ops
+from keras.saving import (
+    register_keras_serializable,
+)
 
-from bayesflow.experimental.types import Tensor
+from bayesflow.experimental.types import Shape, Tensor
+from ..invertible_layer import InvertibleLayer
 
 
-class FixedPermutation(keras.layers.Layer):
-    def __init__(self, indices: Tensor):
-        super().__init__()
-        self.indices = indices
-        self.inverse_indices = ops.argsort(indices, axis=0)
+@register_keras_serializable(package="bayesflow.networks.coupling_flow")
+class FixedPermutation(InvertibleLayer):
+    def __init__(self, forward_indices=None, inverse_indices=None, **kwargs):
+        super().__init__(**kwargs)
+        self.forward_indices = forward_indices
+        self.inverse_indices = inverse_indices
 
-    def call(self, x: Tensor, forward=True) -> Tensor:
-        if forward:
-            return self.forward(x)
-        return self.inverse(x)
+    def build(self, input_shape: Shape) -> None:
+        raise NotImplementedError
 
-    def forward(self, x: Tensor) -> Tensor:
-        return ops.take(x, self.indices, axis=-1)
+    def _forward(self, x: Tensor) -> (Tensor, Tensor):
+        z = keras.ops.take(x, self.forward_indices, axis=-1)
+        log_det = keras.ops.zeros(keras.ops.shape(x)[0])
+        return z, log_det
 
-    def inverse(self, z: Tensor) -> Tensor:
-        return ops.take(z, self.inverse_indices, axis=-1)
-
-    @classmethod
-    def swap(cls, target_dim: int):
-        indices = ops.arange(0, target_dim)
-        indices = ops.roll(indices, shift=target_dim // 2, axis=0)
-        return cls(indices)
-
-    @classmethod
-    def random(cls, target_dim: int):
-        indices = ops.arange(0, target_dim)
-        indices = keras.random.shuffle(indices)
-        return cls(indices)
+    def _inverse(self, z: Tensor) -> (Tensor, Tensor):
+        x = keras.ops.take(z, self.inverse_indices, axis=-1)
+        log_det = keras.ops.zeros(keras.ops.shape(z)[0])
+        return x, log_det
