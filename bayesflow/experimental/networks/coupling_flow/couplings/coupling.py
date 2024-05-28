@@ -17,7 +17,7 @@ class Coupling(keras.Layer):
     ):
         super().__init__()
 
-        self.transform = find_transform(transform, **kwargs.pop("transform_settings"))
+        self.transform = find_transform(transform, **kwargs.pop("transform_settings", {}))
         self.half_dim = half_dim
         self.subnet = find_subnet(
             subnet=subnet_builder,
