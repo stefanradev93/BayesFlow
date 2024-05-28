@@ -1,11 +1,10 @@
-
-import keras
 from keras import ops
 
 from bayesflow.experimental.types import Tensor
+from .invertible_layer import InvertibleLayer
 
 
-class ActNorm(keras.Layer):
+class ActNorm(InvertibleLayer):
     """Implements an Activation Normalization (ActNorm) Layer.
     Activation Normalization is learned invertible normalization, using
     a Scale (s) and Bias (b) vector::
@@ -25,59 +24,26 @@ class ActNorm(keras.Layer):
        training of deep neural networks.
        Advances in Neural Information Processing Systems, 29.
     """
-
-    def __init__(self, target_dim: int, **kwargs):
-        """Creates an instance of an ActNorm Layer as proposed by [1].
-
-        Parameters
-        ----------
-        target_dim            : int
-            The dimensionality of the target (e.g., parameter) space
-        """
-
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.scale = None
+        self.bias = None
 
-        self.scale = self.add_weight(
-            shape=(target_dim, ),
-            initializer='ones',
-            trainable=True
-        )
-        self.bias = self.add_weight(
-            shape=(target_dim, ),
-            initializer='zeros',
-            trainable=True
-        )
+    def build(self, input_shape):
+        self.scale = self.add_weight(shape=(input_shape[-1],), initializer="ones", name="scale")
+        self.bias = self.add_weight(shape=(input_shape[-1],), initializer="zeros", name="bias")
 
-    def call(self, target: Tensor, forward=True) -> Tensor:
-        """Performs one pass through the activation normalization layer (either inverse or forward) and normalizes
-        the last axis of `target`.
+    def call(self, xz: Tensor, inverse: bool = False):
+        if inverse:
+            return self._inverse(xz)
+        return self._forward(xz)
 
-        Parameters
-        ----------
-        target     : keras.Tensor of shape (batch_size, ...)
-            the target variables of interest, i.e., parameters for posterior estimation
-        forward    : bool, optional, default: False
-            Controls if the current pass is forward (``forward=True``) or inverse (``forward=False``).
-
-        Returns
-        -------
-        (z, log_det_J)           :  tuple(tf.Tensor, tf.Tensor)
-            If inverse=False: The transformed input and the corresponding Jacobian of the transformation,
-            v shape: (batch_size, inp_dim), log_det_J shape: (,)
-        (target, -log_det_J)     :  tf.Tensor
-            If inverse=True: The inversely transformed targets, shape == target.shape
-        """
-
-        if forward:
-            return self.forward(target)
-        return self.inverse(target)
-
-    def forward(self, x: Tensor) -> Tensor:
+    def _forward(self, x: Tensor) -> (Tensor, Tensor):
         z = self.scale * x + self.bias
         log_det = ops.sum(ops.log(ops.abs(self.scale)), axis=-1)
         return z, log_det
 
-    def inverse(self, z: Tensor) -> Tensor:
+    def _inverse(self, z: Tensor) -> (Tensor, Tensor):
         x = (z - self.bias) / self.scale
         log_det = -ops.sum(ops.log(ops.abs(self.scale)), axis=-1)
         return x, log_det
