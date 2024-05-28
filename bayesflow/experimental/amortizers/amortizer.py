@@ -81,32 +81,6 @@ class Amortizer(keras.Model):
     def metrics(self):
         return [self.loss_tracker]
 
-    def compute_metrics(self, x: dict, y: dict, y_pred: dict, **kwargs):
-        inferred_variables = self.configure_inferred_variables(x)
-        observed_variables = self.configure_observed_variables(x)
-
-        if self.summary_network:
-            summary_conditions = self.configure_summary_conditions(x)
-            summary_metrics = self.summary_network.compute_metrics(
-                x=(observed_variables, summary_conditions),
-                y=y.get("summary_targets"),
-                y_pred=y_pred.get("summary_outputs")
-            )
-        else:
-            summary_metrics = {}
-
-        inference_conditions = self.configure_inference_conditions(x, y_pred.get("summary_outputs"))
-        inference_metrics = self.inference_network.compute_metrics(
-            x=(inferred_variables, inference_conditions),
-            y=y.get("inference_targets"),
-            y_pred=y_pred.get("inference_outputs")
-        )
-
-        summary_metrics = {f"summary/{key}": value for key, value in summary_metrics.items()}
-        inference_metrics = {f"inference/{key}": value for key, value in inference_metrics.items()}
-
-        return inference_metrics | summary_metrics
-
     def sample(self, data: dict, num_samples: int, sample_summaries=False, **kwargs):
         
         # Configure everything -> inference conditions / summary conditions
