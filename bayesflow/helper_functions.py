@@ -21,7 +21,7 @@
 import copy
 
 import tensorflow as tf
-from tensorflow.keras.optimizers.schedules import LearningRateSchedule
+from keras.optimizers.schedules import LearningRateSchedule
 
 from bayesflow import default_settings
 from bayesflow.exceptions import ConfigurationError, ShapeError
