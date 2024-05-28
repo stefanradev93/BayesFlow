@@ -1,6 +1,5 @@
 import math
 
-import keras
 import pytest
 from keras import ops as K
 from keras import random as R
@@ -9,14 +8,22 @@ import bayesflow.experimental as bf
 
 
 @pytest.fixture()
-def prior():
-    class Prior:
+def context():
+    class ContextPrior:
         def sample(self, batch_shape):
             r = R.normal(shape=batch_shape + (1,), mean=0.1, stddev=0.01)
             alpha = R.uniform(shape=batch_shape + (1,), minval=-0.5 * math.pi, maxval=0.5 * math.pi)
+
+            return dict(r=r, alpha=alpha)
+
+
+@pytest.fixture()
+def prior():
+    class Prior:
+        def sample(self, batch_shape):
             theta = R.uniform(shape=batch_shape + (2,), minval=-1.0, maxval=1.0)
 
-            return dict(r=r, alpha=alpha, theta=theta)
+            return dict(theta=theta)
 
     return Prior()
 
@@ -33,8 +40,8 @@ def likelihood():
 
 
 @pytest.fixture()
-def joint_distribution(prior, likelihood):
-    return bf.simulation.JointDistribution(prior, likelihood)
+def joint_distribution(context, prior, likelihood):
+    return bf.simulation.JointDistribution(context, prior, likelihood)
 
 
 @pytest.fixture()
