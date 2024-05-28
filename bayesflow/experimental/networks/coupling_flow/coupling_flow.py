@@ -2,13 +2,20 @@
 from typing import Sequence
 
 import keras
+from keras.saving import (
+    deserialize_keras_object,
+    register_keras_serializable,
+    serialize_keras_object,
+)
 
-from bayesflow.experimental.simulation import Distribution, find_distribution
 from bayesflow.experimental.types import Shape, Tensor
-from .couplings import AllInOneCoupling
+from .actnorm import ActNorm
+from .couplings import DualCoupling
+from .invertible_layer import InvertibleLayer
 
 
-class CouplingFlow(keras.Sequential):
+@register_keras_serializable(package="bayesflow.networks")
+class CouplingFlow(keras.Model, InvertibleLayer):
     """ Implements a coupling flow as a sequence of dual couplings with permutations and activation
     normalization. Incorporates ideas from [1-4].
 
@@ -31,113 +38,84 @@ class CouplingFlow(keras.Sequential):
     Robust model training and generalisation with Studentising flows.
     arXiv preprint arXiv:2006.06599.
     """
-    def __init__(self, couplings: Sequence[AllInOneCoupling], base_distribution: Distribution):
-        super().__init__(couplings)
+    def __init__(self, invertible_layers: Sequence[InvertibleLayer], base_distribution: str = "normal", **kwargs):
+        super().__init__(**kwargs)
+        self.invertible_layers = list(invertible_layers)
         self.base_distribution = base_distribution
 
+        # register variables
+        for layer in self.invertible_layers:
+            for variable in layer.variables:
+                print(f"{variable=}")
+                self._track_variable(variable)
+
     @classmethod
-    def all_in_one(
-            cls,
-            target_dim: int,
-            num_layers=6,
-            subnet_builder="default",
-            transform="affine",
-            permutation="fixed",
-            act_norm=True,
-            base_distribution="normal",
-            **kwargs
-    ) -> "CouplingFlow":
-        """Construct a coupling flow, consisting of dual couplings with a single type of transform.
+    def new(cls, depth: int = 6, subnet: str = "resnet", transform: str = "affine", base_distribution: str = "normal", use_actnorm: bool = True, **kwargs):
+        layers = []
 
-        Parameters
-        ----------
-        target_dim : int
-            The dimensionality of the latent space, e.g., for estimating a model with 2 parameters, set
-            ``target_dim=2``
-        num_layers : int, optional, default: 6
-            The number of dual coupling layers in the coupling flow. More layers will result in better
-            performance for some applications at the cost of increased training time.
-        subnet_builder : str or callable, optional, default: "default"
-            Determines the structure of the internal networks used to generate the internal parameters
-            for the coupling transforms. You can also pass a function that accepts a ``target_dim`` parameter
-            and generates a custom architecture accordingly.
+        for i in range(depth):
+            if use_actnorm:
+                layers.append(ActNorm())
 
-            The default builder will suffice for most applications. You can control the settings of the
-            default networks by passing them as a dictionary into the ````subnet_settings```` optional keyword
-            argument. For instance, to increase the dropout rate, you can do:
-            subnet_settings=dict(dropout_rate=0.05).
+            layers.append(DualCoupling.new(subnet, transform))
 
-            See below for a full list of settings.
-        transform : str or callable, optional, default: "affine"
-            The type of coupling transform used. Custom transforms can be passed as callable objects
-            that implement a ``forward()`` and an ``inverse()`` method.
+        return cls(layers, base_distribution, **kwargs)
 
-            Note: The string options are ``["affine", "spline"]``, where "spline" will typically result in
-            better performance for low-dimensional problems at the cost of ~1.5x increase in training time.
-        permutation : str, optional, default: "fixed"
-            The type of permutation to apply between layers. Should be in ``["fixed", "learnable"]``
-            Specifying a learnable permutation is advisable when you have many parameters and very few
-            coupling layers to ensure proper mixing between dimensions (i.e., representation of correlations).
-        act_norm : bool, optional, default: True
-            A flag indicating whether to apply an invertible activation normalization layer prior to each
-            coupling transformation. Don't touch unless you know what you are doing.
-        base_distribution: str or callable, optional, default: "gaussian"
-            The latent space distribution into which your targets are transformed. Currently implemented are:
+    @classmethod
+    def from_config(cls, config, custom_objects=None):
+        couplings = deserialize_keras_object(config.pop("invertible_layers"))
+        base_distribution = config.pop("base_distribution")
 
-            - "gaussian" : The standard choice, don't touch unless you know what you are doing.
+        return cls(couplings, base_distribution, **config)
 
-            - "student": : Can help stabilize training by controlling the influence function of
-                potentially problematic inputs in the training data, as suggested by [5].
+    def get_config(self):
+        base_config = super().get_config()
 
-            - "mixture"  : Can help with learning multimodal distribution, especially when using
-                ``transform="affine"``, and you have some prior knowledge about the number of modes
+        config = {
+            "invertible_layers": serialize_keras_object(self.invertible_layers),
+            "base_distribution": self.base_distribution,
+        }
 
-            - callable   : Any other custom distribution implemented appropriately.
-        **kwargs : dict, optional, default: {}
+        return base_config | config
 
-            Optional keyword arguments that will be passed to the ``subnet_builder`` or to the ``base_distribution``.
+    def build(self, input_shape):
+        # nothing to do here, since we do not know the conditions yet
+        pass
 
-            For the ``subnet_builder``, you can pass a ``subnet_settings`` dictionary which can modify
-            the following default settings:
+    def call(self, x: Tensor, conditions: any = None, inverse: bool = False) -> (Tensor, Tensor):
+        if inverse:
+            return self._inverse(x, conditions)
+        return self._forward(x, conditions)
 
-            ``default_settings=dict(
-                hidden_dim=512,
-                num_hidden=2,
-                activation="gelu",
-                residual=True,
-                spectral_norm=False,
-                dropout_rate=0.05,
-                zero_output_init=True
-            )``
+    def _forward(self, x: Tensor, conditions: any = None) -> (Tensor, Tensor):
+        z = x
+        log_det = 0.0
+        for layer in self.invertible_layers:
+            z, det = layer(z, conditions=conditions)
+            log_det += det
 
-            For instance, to increase regularization for small data sets, you can pass:
+        return z, log_det
 
-             ``default_settings=dict(dropout_rate=0.2)``
+    def _inverse(self, z: Tensor, conditions: any = None) -> (Tensor, Tensor):
+        x = z
+        log_det = 0.0
+        for layer in reversed(self.invertible_layers):
+            x, det = layer(x, conditions=conditions, inverse=True)
+            log_det += det
 
-            See the implementation of ``bayesflow.resnet.ConditionalResidualBlock`` for more details.
+        return x, log_det
 
-            For the ``base_distribution``  you can provide a ``base_distribution_parameters`` dictionary which is
-            specific for each type of base distribution using.
+    def sample(self, batch_shape: Shape, conditions=None) -> Tensor:
+        z = self.base_distribution.sample(batch_shape)
+        x, _ = self(z, conditions, inverse=True)
 
-            #TODO
+        return x
 
-        Returns
-        -------
-        flow : bayesflow.networks.CouplingFlow
-            The callable coupling flow which be seamlessly interact with other keras objects.
-        """
+    def log_prob(self, x: Tensor, conditions=None) -> Tensor:
+        z, log_det = self(x, conditions)
+        log_prob = self.base_distribution.log_prob(z)
 
-        base_distribution = find_distribution(base_distribution, shape=(target_dim,))
-
-        couplings = []
-        for _ in range(num_layers):
-            layer = AllInOneCoupling(subnet_builder, target_dim, transform, permutation, act_norm, **kwargs)
-            couplings.append(layer)
-
-        return cls(couplings, base_distribution)
-
-    def call(self, *args, **kwargs):
-        return self.forward(*args, **kwargs)
+        return log_prob + log_det
 
     def compute_loss(self, x=None, y=None, y_pred=None, **kwargs):
         z, log_det = y_pred
@@ -148,35 +126,3 @@ class CouplingFlow(keras.Sequential):
 
     def compute_metrics(self, x, y, y_pred, **kwargs):
         return {}
-
-    def forward(self, targets, conditions=None, **kwargs) -> (Tensor, Tensor):
-        latents = targets
-        log_det = 0.
-        for coupling in self.layers:
-            latents, det = coupling.forward(latents, conditions, **kwargs)
-            log_det += det
-
-        return latents, log_det
-
-    def inverse(self, latents, conditions=None) -> (Tensor, Tensor):
-        targets = latents
-        log_det = 0.
-        for coupling in reversed(self.layers):
-            targets, det = coupling.inverse(targets, conditions)
-            log_det += det
-
-        return targets, log_det
-
-    def sample(self, batch_shape: Shape | int, conditions=None) -> Tensor:
-        if type(batch_shape) is int:
-            batch_shape = (batch_shape, )
-        latents = self.base_distribution.sample(batch_shape)
-        targets, _ = self.inverse(latents, conditions)
-
-        return targets
-
-    def log_prob(self, targets: Tensor, conditions=None, **kwargs) -> Tensor:
-        latents, log_det = self.forward(targets, conditions, **kwargs)
-        log_prob = self.base_distribution.log_prob(latents)
-
-        return log_prob + log_det
