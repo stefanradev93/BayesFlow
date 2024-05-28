@@ -2,7 +2,7 @@
 import keras
 from keras import ops
 
-from ..transforms import Transform, find_transform
+from ..transforms import find_transform
 from ..subnets import find_subnet
 
 
@@ -17,14 +17,14 @@ class Coupling(keras.Layer):
     ):
         super().__init__()
 
+        self.transform = find_transform(transform, **kwargs.pop("transform_settings"))
         self.half_dim = half_dim
         self.subnet = find_subnet(
             subnet=subnet_builder,
-            transform=transform,
+            transform=self.transform,
             output_dim=half_dim,
-            **kwargs.pop('subnet_settings', {})
+            **kwargs.pop("subnet_settings", {})
         )
-        self.transform = find_transform(transform)
 
     def call(self, x, c=None, forward=True, **kwargs):
         if forward:

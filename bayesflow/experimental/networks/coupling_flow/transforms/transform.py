@@ -5,6 +5,11 @@ from bayesflow.experimental.types import Tensor
 
 
 class Transform(keras.layers.Layer):
+
+    @property
+    def params_per_dim(self) -> int:
+        raise NotImplementedError
+
     def split_parameters(self, parameters: Tensor) -> dict[str, Tensor]:
         raise NotImplementedError
 

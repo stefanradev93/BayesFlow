@@ -1,6 +1,4 @@
 
-import math
-
 from keras import ops
 
 from bayesflow.experimental.types import Tensor
@@ -12,6 +10,11 @@ class AffineTransform(Transform):
     def __init__(self, clamp_factor=5.0, **kwargs):
         super().__init__(**kwargs)
         self.clamp_factor = clamp_factor
+        self._params_per_dim = 2
+
+    @property
+    def params_per_dim(self):
+        return self._params_per_dim
 
     def split_parameters(self, parameters: Tensor) -> dict[str, Tensor]:
         scale, shift = ops.split(parameters, 2, axis=-1)
