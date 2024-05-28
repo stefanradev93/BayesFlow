@@ -8,7 +8,6 @@ from .transform import Transform
 
 
 class SplineTransform(Transform):
-
     def __init__(self, bins=16, default_domain=(-5., 5., -5., 5.), **kwargs):
         super().__init__(**kwargs)
 
