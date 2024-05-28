@@ -1,4 +1,4 @@
 
-from .all_in_one_coupling import AllInOneCoupling
-from .coupling import Coupling
 from .dual_coupling import DualCoupling
+from .single_coupling import SingleCoupling
+
