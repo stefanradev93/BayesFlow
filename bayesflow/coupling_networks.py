@@ -439,7 +439,7 @@ class SplineCoupling(keras.Model):
         """
 
         shape = tf.shape(parameters)
-        rank = parameters.shape.rank
+        rank = keras.ops.ndim(parameters)        
         if rank == 2:
             new_shape = (shape[0], self.dim_out, -1)
         elif rank == 3:

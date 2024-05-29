@@ -115,7 +115,7 @@ def extract_current_lr(optimizer):
         current_lr = optimizer.learning_rate(optimizer.iterations).numpy()
     elif hasattr(optimizer.learning_rate, "numpy"):
         # Convert learning rate to numpy
-        current_lr = optimizer.learning_rate.numpy()
+        current_lr = keras.ops.convert_to_numpy(optimizer.learning_rate)
     else:
         # Unable to extract numerical value from optimizer.lr
         current_lr = None

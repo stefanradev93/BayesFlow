@@ -189,8 +189,8 @@ class InvertibleNetwork(keras.Model):
         # not in call(), since methods are public
         if self.soft_flow and condition is not None:
             # Extract shapes of tensors
-            target_shape = keras.backend.shape(targets)
-            condition_shape = keras.backend.shape(condition)
+            target_shape = keras.ops.shape(targets)
+            condition_shape = keras.ops.shape(condition)
 
             # Needs to be concatinable with condition
             if len(condition_shape) == 2:
