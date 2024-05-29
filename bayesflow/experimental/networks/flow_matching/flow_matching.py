@@ -1,12 +1,38 @@
 
 import keras
+from keras.saving import (
+    deserialize_keras_object,
+    register_keras_serializable,
+    serialize_keras_object,
+)
 from scipy.integrate import solve_ivp
 
 from bayesflow.experimental.types import Tensor
 from ..inference_network import InferenceNetwork
 
 
+@register_keras_serializable(package="bayesflow.networks")
 class FlowMatching(InferenceNetwork):
+    def __init__(self, network: keras.Layer, **kwargs):
+        super().__init__(**kwargs)
+        self.network = network
+
+    @classmethod
+    def from_config(cls, config: dict, custom_objects=None) -> "FlowMatching":
+        # TODO: the base distribution must be savable and loadable
+        #  ideally we also don't want to have to manually deserialize it in every subclass of InferenceNetwork
+        base_distribution = deserialize_keras_object(config.pop("base_distribution"))
+        network = deserialize_keras_object(config.pop("network"))
+        return cls(network, base_distribution=base_distribution, **config)
+
+    def get_config(self) -> dict:
+        base_config = super().get_config()
+        config = {"network": serialize_keras_object(self.network)}
+        return base_config | config
+
+    def build(self, input_shape):
+        self.network.build(input_shape)
+
     def train_step(self, data):
         # hack to avoid the call method in super().train_step()
         # maybe you have a better idea? Seems the train_step is not backend-agnostic since it requires gradient tracking
@@ -30,6 +56,7 @@ class FlowMatching(InferenceNetwork):
         raise NotImplementedError
 
 
+# TODO: see below for reference implementation
 
 
 class FlowMatching(keras.Model):
