@@ -58,8 +58,6 @@ class DualCoupling(InvertibleLayer):
         self.coupling1.build((x1_shape, x2_shape))
         self.coupling2.build((x2_shape, x1_shape))
 
-        self.built = True
-
     def call(self, xz: Tensor, conditions: any = None, inverse: bool = False) -> (Tensor, Tensor):
         if inverse:
             return self._inverse(xz, conditions=conditions)

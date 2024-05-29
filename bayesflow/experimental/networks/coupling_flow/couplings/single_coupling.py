@@ -3,7 +3,7 @@ import keras
 from keras.saving import (
     deserialize_keras_object,
     register_keras_serializable,
-    serialize_keras_object,
+    serialize_keras_object
 )
 
 from bayesflow.experimental.types import Tensor

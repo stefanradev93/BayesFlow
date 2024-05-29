@@ -1,9 +1,15 @@
 
 import keras
 
+from keras.saving import (
+    deserialize_keras_object,
+    register_keras_serializable,
+    serialize_keras_object,
+)
+
 from .mab import MultiHeadAttentionBlock
 
-
+@register_keras_serializable(package="bayesflow.networks")
 class SetAttentionBlock(keras.layers.Layer):
     """Implements the SAB block from [1] which represents learnable self-attention.
 

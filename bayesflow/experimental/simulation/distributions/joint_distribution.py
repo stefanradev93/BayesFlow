@@ -1,7 +1,7 @@
 
 from bayesflow.experimental.types import Shape
 
-
+#TODO - Make the distribution a layer!
 class JointDistribution:
     def __init__(self, prior, likelihood):
         self.prior = prior

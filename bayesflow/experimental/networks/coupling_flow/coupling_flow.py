@@ -13,6 +13,8 @@ from .actnorm import ActNorm
 from .couplings import DualCoupling
 from .invertible_layer import InvertibleLayer
 
+from ...simulation.distributions import find_distribution
+
 
 @register_keras_serializable(package="bayesflow.networks")
 class CouplingFlow(keras.Model, InvertibleLayer):
@@ -41,12 +43,7 @@ class CouplingFlow(keras.Model, InvertibleLayer):
     def __init__(self, invertible_layers: Sequence[InvertibleLayer], base_distribution: str = "normal", **kwargs):
         super().__init__(**kwargs)
         self.invertible_layers = list(invertible_layers)
-        self.base_distribution = base_distribution
-
-        # register variables
-        for layer in self.invertible_layers:
-            for variable in layer.variables:
-                self._track_variable(variable)
+        self.base_distribution = find_distribution(base_distribution)
 
     @classmethod
     def new(
@@ -70,7 +67,7 @@ class CouplingFlow(keras.Model, InvertibleLayer):
     @classmethod
     def from_config(cls, config, custom_objects=None):
         couplings = deserialize_keras_object(config.pop("invertible_layers"))
-        base_distribution = config.pop("base_distribution")
+        base_distribution = deserialize_keras_object(config.pop("base_distribution"))
 
         return cls(couplings, base_distribution, **config)
 
@@ -79,14 +76,14 @@ class CouplingFlow(keras.Model, InvertibleLayer):
 
         config = {
             "invertible_layers": serialize_keras_object(self.invertible_layers),
-            "base_distribution": self.base_distribution,
+            "base_distribution": serialize_keras_object(self.base_distribution),
         }
 
         return base_config | config
 
     def build(self, input_shape):
         # nothing to do here, since we do not know the conditions yet
-        pass
+        self.base_distribution.build(input_shape)
 
     def call(self, x: Tensor, conditions: any = None, inverse: bool = False) -> (Tensor, Tensor):
         if inverse:
