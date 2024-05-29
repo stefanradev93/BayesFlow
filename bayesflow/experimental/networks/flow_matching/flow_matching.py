@@ -1,4 +1,6 @@
 
+from typing import Tuple, Union
+
 import keras
 from keras.saving import (
     deserialize_keras_object,
@@ -7,7 +9,7 @@ from keras.saving import (
 )
 from scipy.integrate import solve_ivp
 
-from bayesflow.experimental.types import Tensor
+from bayesflow.experimental.types import Shape, Tensor
 from ..inference_network import InferenceNetwork
 
 
@@ -48,12 +50,12 @@ class FlowMatching(InferenceNetwork):
         super().train_step(data)
         self.call = call
 
-    def _forward(self, x: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45") -> Tensor | (Tensor, Tensor):
+    def _forward(self, x: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45") -> Union[Tensor, Tuple[Tensor, Tensor]]:
         # implement conditions = None and jacobian = False first
         # then work your way up
         raise NotImplementedError
 
-    def _inverse(self, z: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45") -> Tensor | (Tensor, Tensor):
+    def _inverse(self, z: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45") -> Union[Tensor, Tuple[Tensor, Tensor]]:
         raise NotImplementedError
 
     def compute_loss(self, x=None, **kwargs):

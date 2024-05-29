@@ -1,4 +1,6 @@
 
+from typing import Tuple, Union
+
 import keras
 from keras.saving import (
     register_keras_serializable,
@@ -21,15 +23,15 @@ class InferenceNetwork(keras.Model):
         config = {"base_distribution": serialize_keras_object(self.base_distribution)}
         return base_config | config
 
-    def call(self, xz: Tensor, inverse: bool = False, **kwargs) -> Tensor | (Tensor, Tensor):
+    def call(self, xz: Tensor, inverse: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         if inverse:
             return self._inverse(xz, **kwargs)
         return self._forward(xz, **kwargs)
 
-    def _forward(self, x: Tensor, **kwargs) -> Tensor | (Tensor, Tensor):
+    def _forward(self, x: Tensor, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         raise NotImplementedError
 
-    def _inverse(self, z: Tensor, **kwargs) -> Tensor | (Tensor, Tensor):
+    def _inverse(self, z: Tensor, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         raise NotImplementedError
 
     def sample(self, num_samples: int, **kwargs) -> Tensor:
