@@ -46,17 +46,23 @@ class CouplingFlow(keras.Model, InvertibleLayer):
         # register variables
         for layer in self.invertible_layers:
             for variable in layer.variables:
-                print(f"{variable=}")
                 self._track_variable(variable)
 
     @classmethod
-    def new(cls, depth: int = 6, subnet: str = "resnet", transform: str = "affine", base_distribution: str = "normal", use_actnorm: bool = True, **kwargs):
-        layers = []
+    def new(
+        cls,
+        depth: int = 6,
+        subnet: str = "resnet",
+        transform: str = "affine",
+        base_distribution: str = "normal",
+        use_actnorm: bool = True,
+        **kwargs
+    ):
 
+        layers = []
         for i in range(depth):
             if use_actnorm:
                 layers.append(ActNorm())
-
             layers.append(DualCoupling.new(subnet, transform))
 
         return cls(layers, base_distribution, **kwargs)

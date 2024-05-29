@@ -1,3 +1,4 @@
+
 from keras import ops
 
 from bayesflow.experimental.types import Shape, Tensor
@@ -23,6 +24,11 @@ class OrthogonalPermutation(InvertibleLayer):
             initializer="orthogonal",
             trainable=True
         )
+
+    def call(self, xz: Tensor, inverse: bool = False):
+        if inverse:
+            return self._inverse(xz)
+        return self._forward(xz)
 
     def _forward(self, x: Tensor) -> (Tensor, Tensor):
         z = ops.matmul(x, self.weight)

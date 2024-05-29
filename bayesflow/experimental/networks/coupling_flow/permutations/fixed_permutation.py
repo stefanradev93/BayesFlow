@@ -1,3 +1,4 @@
+
 import keras
 from keras.saving import (
     register_keras_serializable,
@@ -13,6 +14,11 @@ class FixedPermutation(InvertibleLayer):
         super().__init__(**kwargs)
         self.forward_indices = forward_indices
         self.inverse_indices = inverse_indices
+
+    def call(self, xz: Tensor, inverse: bool = False):
+        if inverse:
+            return self._inverse(xz)
+        return self._forward(xz)
 
     def build(self, input_shape: Shape) -> None:
         raise NotImplementedError
