@@ -200,19 +200,19 @@ class InvertibleNetwork(keras.Model):
 
             # Case training mode
             if kwargs.get("training"):
-                noise_scale = keras.backend.random_uniform(shape=shape_scale, minval=self.soft_low, maxval=self.soft_high)
+                keras.random.uniform(shape=shape_scale, minval=self.soft_low, maxval=self.soft_high)
             # Case inference mode
             else:
-                noise_scale = keras.backend.zeros(shape=shape_scale) + self.soft_low
+                noise_scale = keras.ops.zeros(shape=shape_scale) + self.soft_low
 
             # Perturb data with noise (will broadcast to all dimensions)
             if len(shape_scale) == 2 and len(target_shape) == 3:
-                targets += keras.backend.expand_dims(noise_scale, axis=1) * keras.backend.random_normal(shape=target_shape)
+                targets += keras.ops.expand_dims(noise_scale, axis=1) * keras.random.uniform(shape=target_shape)
             else:
-                targets += noise_scale * keras.backend.random_normal(shape=target_shape)
+                targets += noise_scale * keras.random.uniform(shape=target_shape)
 
             # Augment condition with noise scale variate
-            condition = keras.backend.concatenate((condition, noise_scale), axis=-1)
+            condition = keras.ops.concatenate((condition, noise_scale), axis=-1)
 
         z = targets
         log_det_Js = []
@@ -235,10 +235,10 @@ class InvertibleNetwork(keras.Model):
             shape_scale = (
                 (condition.shape[0], 1) if len(condition.shape) == 2 else (condition.shape[0], condition.shape[1], 1)
             )
-            noise_scale = keras.backend.zeros(shape=shape_scale) + 2.0 * self.soft_low
+            noise_scale = keras.ops.zeros(shape=shape_scale) + 2.0 * self.soft_low
 
             # Augment condition with noise scale variate
-            condition = keras.backend.concatenate((condition, noise_scale), axis=-1)
+            condition = keras.ops.concatenate((condition, noise_scale), axis=-1)
 
         target = z
         for layer in reversed(self.coupling_layers):
