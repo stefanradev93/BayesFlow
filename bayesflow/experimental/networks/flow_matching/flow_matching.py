@@ -18,6 +18,13 @@ class FlowMatching(InferenceNetwork):
         self.network = network
 
     @classmethod
+    def new(cls, network: str = "resnet", base_distribution: str = "normal"):
+        # TODO: we probably want to provide a factory method like this, since the other networks use it
+        #  for high-level input parameters
+        # network = find_network(network)
+        return cls(network, base_distribution=base_distribution)
+
+    @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "FlowMatching":
         # TODO: the base distribution must be savable and loadable
         #  ideally we also don't want to have to manually deserialize it in every subclass of InferenceNetwork

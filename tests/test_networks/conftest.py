@@ -14,6 +14,12 @@ def coupling_flow():
     return CouplingFlow.new()
 
 
+@pytest.fixture()
+def flow_matching():
+    from bayesflow.experimental.networks import FlowMatching
+    return FlowMatching.new()
+
+
 @pytest.fixture(params=["coupling_flow"])
 def inference_network(request):
     return request.getfixturevalue(request.param)
