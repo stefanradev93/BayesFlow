@@ -3,6 +3,33 @@ import keras
 from scipy.integrate import solve_ivp
 
 from bayesflow.experimental.types import Tensor
+from ..inference_network import InferenceNetwork
+
+
+class FlowMatching(InferenceNetwork):
+    def train_step(self, data):
+        # hack to avoid the call method in super().train_step()
+        # maybe you have a better idea? Seems the train_step is not backend-agnostic since it requires gradient tracking
+        call = self.call
+        self.call = lambda *args, **kwargs: None
+        super().train_step(data)
+        self.call = call
+
+    def _forward(self, x: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45") -> Tensor | (Tensor, Tensor):
+        # implement conditions = None and jacobian = False first
+        # then work your way up
+        raise NotImplementedError
+
+    def _inverse(self, z: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45") -> Tensor | (Tensor, Tensor):
+        raise NotImplementedError
+
+    def compute_loss(self, x=None, **kwargs):
+        # x should ideally contain both x0 and x1,
+        # where the optimal transport matching already happened in the worker process
+        # this is possible, but might not be super user-friendly. We will have to see.
+        raise NotImplementedError
+
+
 
 
 class FlowMatching(keras.Model):
