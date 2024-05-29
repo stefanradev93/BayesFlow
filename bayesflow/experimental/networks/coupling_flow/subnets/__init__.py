@@ -12,9 +12,7 @@ def find_subnet(subnet: str | keras.Layer | Callable, **kwargs) -> keras.Layer:
         case str() as name:
             match name.lower():
                 case "resnet":
-                    resnet = networks.ResNet.new(**kwargs)
-                    resnet.output_layer.units = None
-                    return resnet
+                    return networks.ResNet(**kwargs)
                 case other:
                     raise NotImplementedError(f"Unsupported subnet name: '{other}'.")
         case keras.Layer() as layer:

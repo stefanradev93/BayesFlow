@@ -4,8 +4,8 @@ from bayesflow.experimental.types import Shape
 #TODO - Make the distribution a layer!
 class JointDistribution:
     def __init__(self, prior, likelihood):
-        self.prior = prior
-        self.likelihood = likelihood
+        self.prior = utils.make_distribution(prior)
+        self.likelihood = utils.make_distribution(likelihood)
 
     def sample(self, batch_shape: Shape) -> dict:
         parameters = self.prior.sample(batch_shape)

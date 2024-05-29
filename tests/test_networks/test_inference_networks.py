@@ -35,8 +35,8 @@ def test_variable_batch_size(inference_network, random_samples):
         inference_network(new_input, inverse=True)
 
 
-def test_output_structure(invertible_layer, random_input):
-    output = invertible_layer(random_input)
+def test_output_structure(inference_network, random_input):
+    output = inference_network(random_input)
 
     assert isinstance(output, tuple)
     assert len(output) == 2
@@ -47,13 +47,13 @@ def test_output_structure(invertible_layer, random_input):
     assert keras.ops.is_tensor(forward_log_det)
 
 
-def test_output_shape(invertible_layer, random_input):
-    forward_output, forward_log_det = invertible_layer(random_input)
+def test_output_shape(inference_network, random_input):
+    forward_output, forward_log_det = inference_network(random_input)
 
     assert keras.ops.shape(forward_output) == keras.ops.shape(random_input)
     assert keras.ops.shape(forward_log_det) == (keras.ops.shape(random_input)[0],)
 
-    inverse_output, inverse_log_det = invertible_layer(random_input, inverse=True)
+    inverse_output, inverse_log_det = inference_network(random_input, inverse=True)
 
     assert keras.ops.shape(inverse_output) == keras.ops.shape(random_input)
     assert keras.ops.shape(inverse_log_det) == (keras.ops.shape(random_input)[0],)
@@ -69,11 +69,11 @@ def test_cycle_consistency(inference_network, random_samples):
 
 
 @pytest.mark.torch
-def test_jacobian_numerically(invertible_layer, random_input):
+def test_jacobian_numerically(inference_network, random_input):
     import torch
 
-    forward_output, forward_log_det = invertible_layer(random_input, jacobian=True)
-    numerical_forward_jacobian, _ = torch.autograd.functional.jacobian(invertible_layer, random_input, vectorize=True)
+    forward_output, forward_log_det = inference_network(random_input, jacobian=True)
+    numerical_forward_jacobian, _ = torch.autograd.functional.jacobian(inference_network, random_input, vectorize=True)
 
     # TODO: torch is somehow permuted wrt keras
     numerical_forward_log_det = [keras.ops.log(keras.ops.abs(keras.ops.det(numerical_forward_jacobian[i, :, i, :]))) for i in range(keras.ops.shape(random_input)[0])]
@@ -81,9 +81,9 @@ def test_jacobian_numerically(invertible_layer, random_input):
 
     assert keras.ops.all(keras.ops.isclose(forward_log_det, numerical_forward_log_det))
 
-    inverse_output, inverse_log_det = invertible_layer(random_input, inverse=True, jacobian=True)
+    inverse_output, inverse_log_det = inference_network(random_input, inverse=True, jacobian=True)
 
-    numerical_inverse_jacobian, _ = torch.autograd.functional.jacobian(functools.partial(invertible_layer, inverse=True), random_input, vectorize=True)
+    numerical_inverse_jacobian, _ = torch.autograd.functional.jacobian(functools.partial(inference_network, inverse=True), random_input, vectorize=True)
 
     # TODO: torch is somehow permuted wrt keras
     numerical_inverse_log_det = [keras.ops.log(keras.ops.abs(keras.ops.det(numerical_inverse_jacobian[i, :, i, :]))) for i in range(keras.ops.shape(random_input)[0])]

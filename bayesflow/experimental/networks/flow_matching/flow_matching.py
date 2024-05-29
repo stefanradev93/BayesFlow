@@ -42,14 +42,6 @@ class FlowMatching(InferenceNetwork):
     def build(self, input_shape):
         self.network.build(input_shape)
 
-    def train_step(self, data):
-        # hack to avoid the call method in super().train_step()
-        # maybe you have a better idea? Seems the train_step is not backend-agnostic since it requires gradient tracking
-        call = self.call
-        self.call = lambda *args, **kwargs: None
-        super().train_step(data)
-        self.call = call
-
     def _forward(self, x: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45") -> Union[Tensor, Tuple[Tensor, Tensor]]:
         # implement conditions = None and jacobian = False first
         # then work your way up
@@ -62,7 +54,17 @@ class FlowMatching(InferenceNetwork):
         # x should ideally contain both x0 and x1,
         # where the optimal transport matching already happened in the worker process
         # this is possible, but might not be super user-friendly. We will have to see.
-        raise NotImplementedError
+        x0, x1, t = x
+
+        xt = t * x1 + (1 - t) * x0
+
+        # get velocity at xt
+        v = ...
+
+        # target velocity:
+        vstar = x1 - x0
+
+        # return mse between v and vstar
 
 
 # TODO: see below for reference implementation

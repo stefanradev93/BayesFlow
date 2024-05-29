@@ -1,7 +1,7 @@
 
 import keras
 
-from bayesflow.experimental.simulation.distributions.joint_distribution import JointDistribution
+from bayesflow.experimental.simulation import JointDistribution
 
 
 class RoundsDataset(keras.utils.PyDataset):

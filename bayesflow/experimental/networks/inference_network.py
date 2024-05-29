@@ -4,9 +4,9 @@ from typing import Tuple, Union
 import keras
 from keras.saving import (
     register_keras_serializable,
-    serialize_keras_object,
 )
 
+from bayesflow.experimental.distributions import find_distribution
 from bayesflow.experimental.types import Tensor
 
 
@@ -14,14 +14,11 @@ from bayesflow.experimental.types import Tensor
 class InferenceNetwork(keras.Model):
     def __init__(self, base_distribution: str = "normal", **kwargs):
         super().__init__(**kwargs)
-        # TODO: get the actual distribution object from the string representation
-        self.base_distribution = base_distribution
+        self.base_distribution = find_distribution(base_distribution)
 
-    def get_config(self) -> dict:
-        base_config = super().get_config()
-        # TODO: get the string representation of the distribution object
-        config = {"base_distribution": serialize_keras_object(self.base_distribution)}
-        return base_config | config
+    def build(self, input_shape):
+        super().build(input_shape)
+        self.base_distribution.build(input_shape)
 
     def call(self, xz: Tensor, inverse: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         if inverse:
@@ -42,3 +39,12 @@ class InferenceNetwork(keras.Model):
         samples, log_det = self(x, inverse=False, jacobian=True, **kwargs)
         log_prob = self.base_distribution.log_prob(samples)
         return log_prob + log_det
+
+    def train_step(self, data):
+        # hack to avoid the call method in super().train_step()
+        call = self.call
+        self.call = lambda *args, **kwargs: None
+        rv = super().train_step(data)
+        self.call = call
+
+        return rv

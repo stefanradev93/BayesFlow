@@ -17,7 +17,7 @@ def batch_size(request):
 @pytest.fixture()
 def dual_coupling():
     from bayesflow.experimental.networks.coupling_flow.couplings import DualCoupling
-    return DualCoupling.new()
+    return DualCoupling()
 
 
 @pytest.fixture(params=["actnorm", "dual_coupling"])
@@ -38,4 +38,4 @@ def random_input(batch_size, num_features):
 @pytest.fixture()
 def single_coupling():
     from bayesflow.experimental.networks.coupling_flow.couplings import SingleCoupling
-    return SingleCoupling.new()
+    return SingleCoupling()

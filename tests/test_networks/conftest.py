@@ -11,16 +11,16 @@ def batch_size(request):
 @pytest.fixture()
 def coupling_flow():
     from bayesflow.experimental.networks import CouplingFlow
-    return CouplingFlow.new()
+    return CouplingFlow()
 
 
 @pytest.fixture()
 def flow_matching():
     from bayesflow.experimental.networks import FlowMatching
-    return FlowMatching.new()
+    return FlowMatching()
 
 
-@pytest.fixture(params=["coupling_flow"])
+@pytest.fixture(params=["coupling_flow", "flow_matching"])
 def inference_network(request):
     return request.getfixturevalue(request.param)
 
@@ -37,7 +37,7 @@ def num_features(request):
 
 @pytest.fixture()
 def random_samples(batch_size, num_features):
-    return keras.random.normal()
+    return keras.random.normal((batch_size, num_features))
 
 
 @pytest.fixture()
@@ -48,7 +48,7 @@ def random_set(batch_size, set_size, num_features):
 @pytest.fixture()
 def resnet():
     from bayesflow.experimental.networks import ResNet
-    return ResNet.new()
+    return ResNet()
 
 
 @pytest.fixture(params=[2, 3])

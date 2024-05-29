@@ -1,9 +1,7 @@
 
 import keras
 from keras.saving import (
-    deserialize_keras_object,
     register_keras_serializable,
-    serialize_keras_object,
 )
 
 from bayesflow.experimental.types import Tensor
@@ -13,50 +11,14 @@ from ..invertible_layer import InvertibleLayer
 
 @register_keras_serializable(package="bayesflow.networks.coupling_flow")
 class DualCoupling(InvertibleLayer):
-    def __init__(self, coupling1: SingleCoupling, coupling2: SingleCoupling, pivot: int = None, **kwargs):
-        super().__init__(**kwargs)
-        self.coupling1 = coupling1
-        self.coupling2 = coupling2
-        self.pivot = pivot
-
-    @classmethod
-    def new(cls, *args, **kwargs) -> "DualCoupling":
-        """ Construct a new DualCoupling from hyperparameters. """
-        coupling1 = SingleCoupling.new(*args, **kwargs)
-        coupling2 = SingleCoupling.new(*args, **kwargs)
-
-        return cls(coupling1, coupling2, **kwargs)
-
-    @classmethod
-    def from_config(cls, config: dict, custom_objects=None) -> "DualCoupling":
-        coupling1 = deserialize_keras_object(config.pop("coupling1"))
-        coupling2 = deserialize_keras_object(config.pop("coupling2"))
-        pivot = config.pop("pivot")
-
-        return cls(coupling1, coupling2, pivot=pivot, **config)
-
-    def get_config(self) -> dict:
-        base_config = super().get_config()
-
-        config = {
-            "coupling1": serialize_keras_object(self.coupling1),
-            "coupling2": serialize_keras_object(self.coupling2),
-            "pivot": self.pivot,
-        }
-
-        return base_config | config
+    def __init__(self, subnet: str = "resnet", transform: str = "affine"):
+        super().__init__()
+        self.coupling1 = SingleCoupling(subnet, transform)
+        self.coupling2 = SingleCoupling(subnet, transform)
+        self.pivot = None
 
     def build(self, input_shape):
         self.pivot = input_shape[-1] // 2
-
-        x1_shape = list(input_shape)
-        x2_shape = list(input_shape)
-
-        x1_shape[-1] = self.pivot
-        x2_shape[-1] = input_shape[-1] - self.pivot
-
-        self.coupling1.build((x1_shape, x2_shape))
-        self.coupling2.build((x2_shape, x1_shape))
 
     def call(self, xz: Tensor, conditions: any = None, inverse: bool = False) -> (Tensor, Tensor):
         if inverse:

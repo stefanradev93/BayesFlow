@@ -1,14 +1,9 @@
 
 import functools
-import inspect
+
 import keras
 
-from functools import wraps
-
-from bayesflow.experimental.types import Shape
-from bayesflow.experimental.simulation.distributions import Distribution
-
-from bayesflow.experimental import utils
+from bayesflow.experimental.distributions import Distribution
 
 
 class DistributionDecorator:

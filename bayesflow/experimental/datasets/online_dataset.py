@@ -1,7 +1,7 @@
 
 import keras
 
-from bayesflow.experimental.simulation.distributions import JointDistribution
+from bayesflow.experimental.simulation import JointDistribution
 
 
 class OnlineDataset(keras.utils.PyDataset):
