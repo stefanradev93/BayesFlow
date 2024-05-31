@@ -1,7 +1,3 @@
-
-from typing import Protocol, runtime_checkable
-
-
 Shape = tuple[int, ...]
 
 # this is ugly, but:
@@ -17,12 +13,3 @@ except ModuleNotFoundError:
     except ModuleNotFoundError:
         import torch
         Tensor: type(torch.Tensor) = torch.Tensor
-
-
-@runtime_checkable
-class Distribution(Protocol):
-    def sample(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def log_prob(self, *args, **kwargs):
-        raise NotImplementedError

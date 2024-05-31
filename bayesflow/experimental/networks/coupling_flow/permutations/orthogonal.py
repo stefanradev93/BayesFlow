@@ -1,10 +1,14 @@
 
 from keras import ops
+from keras.saving import (
+    register_keras_serializable,
+)
 
 from bayesflow.experimental.types import Shape, Tensor
 from ..invertible_layer import InvertibleLayer
 
 
+@register_keras_serializable(package="bayesflow.networks.coupling_flow")
 class OrthogonalPermutation(InvertibleLayer):
     """Implements a learnable orthogonal transformation according to [1]. Can be
     used as an alternative to a fixed ``Permutation`` layer.
@@ -25,7 +29,7 @@ class OrthogonalPermutation(InvertibleLayer):
             trainable=True
         )
 
-    def call(self, xz: Tensor, inverse: bool = False):
+    def call(self, xz: Tensor, inverse: bool = False, **kwargs):
         if inverse:
             return self._inverse(xz)
         return self._forward(xz)

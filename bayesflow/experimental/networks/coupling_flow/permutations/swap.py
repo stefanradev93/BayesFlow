@@ -1,5 +1,8 @@
 
 import keras
+from keras.saving import (
+    register_keras_serializable,
+)
 
 from bayesflow.experimental.types import Shape
 from .fixed_permutation import FixedPermutation

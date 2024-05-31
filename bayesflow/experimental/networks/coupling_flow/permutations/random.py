@@ -14,13 +14,13 @@ class RandomPermutation(FixedPermutation):
         forward_indices = keras.random.shuffle(keras.ops.arange(input_shape[-1]))
         inverse_indices = keras.ops.argsort(forward_indices)
 
-        self.forward_indices = self.add_variable(
+        self.forward_indices = self.add_weight(
             shape=(input_shape[-1],),
             initializer=keras.initializers.Constant(forward_indices),
             trainable=False
         )
 
-        self.inverse_indices = self.add_variable(
+        self.inverse_indices = self.add_weight(
             shape=(input_shape[-1],),
             initializer=keras.initializers.Constant(inverse_indices),
             trainable=False
