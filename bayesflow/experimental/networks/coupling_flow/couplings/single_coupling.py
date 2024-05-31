@@ -23,8 +23,9 @@ class SingleCoupling(InvertibleLayer):
         self.subnet = find_subnet(subnet)
         self.transform = find_transform(transform)
 
-    def build(self, input_shape):
-        self.dense.units = self.transform.params_per_dim * input_shape[-1]
+    # noinspection PyMethodOverriding
+    def build(self, x1_shape, x2_shape):
+        self.dense.units = self.transform.params_per_dim * x2_shape[-1]
 
     def call(self, x1: Tensor, x2: Tensor, conditions: any = None, inverse: bool = False) -> ((Tensor, Tensor), Tensor):
         if inverse:
