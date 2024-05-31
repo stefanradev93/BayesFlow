@@ -1,9 +1,13 @@
 
 import keras
+from keras.saving import (
+    register_keras_serializable,
+)
 
 from .hidden_block import ConfigurableHiddenBlock
 
 
+@register_keras_serializable(package="bayesflow.networks.resnet")
 class ConditionalResidualBlock(keras.layers.Layer):
     """
     Implements a simple configurable MLP with optional residual connections and dropout.
@@ -14,14 +18,12 @@ class ConditionalResidualBlock(keras.layers.Layer):
 
     def __init__(
         self,
-        output_dim: int,
-        hidden_dim=512,
-        num_hidden=2,
-        activation="gelu",
-        residual=True,
-        spectral_norm=False,
-        dropout_rate=0.05,
-        zero_output_init=True,
+        hidden_dim: int = 256,
+        num_hidden: int = 2,
+        activation: str | callable = "gelu",
+        residual: bool = True,
+        spectral_norm: bool = False,
+        dropout_rate: float = 0.05,
         **kwargs
     ):
         """
@@ -29,8 +31,6 @@ class ConditionalResidualBlock(keras.layers.Layer):
 
         Parameters:
         -----------
-        output_dim       : int
-            The output dimensionality, needs to be specified according to the model's function.
         hidden_dim       : int, optional, default: 256
             The dimensionality of the hidden layers
         num_hidden       : int, optional, default: 2
@@ -38,20 +38,16 @@ class ConditionalResidualBlock(keras.layers.Layer):
         activation       : string, optional, default: 'gelu'
             The activation function of the dense layers
         residual         : bool, optional, default: True
-            Use residual connections in the MLP.
+            Use residual connections in the internal layers.
         spectral_norm    : bool, optional, default: False
             Use spectral normalization for the network weights, which can make
             the learned function smoother and hence more robust to perturbations.
         dropout_rate     : float, optional, default: 0.05
-            Dropout rate for the hidden layers in the MLP
-        zero_output_init : bool, optional, default: True
-            Will initialize the last layer's kernel to zeros, which can be helpful
-            when used in conjunction with coupling layers.
+            Dropout rate for the hidden layers in the internal layers.
         """
 
         super().__init__(**kwargs)
 
-        self.dim = output_dim
         self.res_blocks = keras.Sequential(
             [keras.layers.Dense(hidden_dim, activation=activation), keras.layers.Dropout(dropout_rate)]
         )
@@ -65,21 +61,6 @@ class ConditionalResidualBlock(keras.layers.Layer):
                     spectral_norm=spectral_norm
                 )
             )
-        if zero_output_init:
-            output_initializer = "zeros"
-        else:
-            output_initializer = "glorot_uniform"
-        self.output_layer = keras.layers.Dense(output_dim, kernel_initializer=output_initializer)
 
     def call(self, inputs, training=False):
-        out = self.res_blocks(inputs, training=training)
-        return self.output_layer(out)
-    
-    def get_config(self):
-        config = super().get_config()
-        config.update({
-            "dim": self.dim,
-            "res_blocks": keras.saving.serialize_keras_object(self.res_blocks),
-            "output_layer": keras.saving.serialize_keras_object(self.output_layer)
-        })
-        return config
+        return self.res_blocks(inputs, training=training)
