@@ -5,8 +5,8 @@ from keras.saving import (
 )
 
 from bayesflow.experimental.types import Tensor
+from bayesflow.experimental.utils import find_network
 from ..invertible_layer import InvertibleLayer
-from ..subnets import find_subnet
 from ..transforms import find_transform
 
 
@@ -17,10 +17,10 @@ class SingleCoupling(InvertibleLayer):
 
     Subnet output tensors are linearly mapped to the correct dimension.
     """
-    def __init__(self, subnet: str = "resnet", transform: str = "affine", **kwargs):
+    def __init__(self, network: str = "resnet", transform: str = "affine", **kwargs):
         super().__init__(**kwargs)
         self.dense = keras.layers.Dense(None, kernel_initializer="zeros", bias_initializer="zeros")
-        self.subnet = find_subnet(subnet)
+        self.network = find_network(network)
         self.transform = find_transform(transform)
 
     # noinspection PyMethodOverriding
@@ -53,7 +53,7 @@ class SingleCoupling(InvertibleLayer):
         if keras.ops.is_tensor(conditions):
             x = keras.ops.concatenate([x, conditions], axis=-1)
 
-        parameters = self.dense(self.subnet(x))
+        parameters = self.dense(self.network(x))
         parameters = self.transform.split_parameters(parameters)
         parameters = self.transform.constrain_parameters(parameters)
 

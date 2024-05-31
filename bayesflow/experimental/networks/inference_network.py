@@ -6,8 +6,8 @@ from keras.saving import (
     register_keras_serializable,
 )
 
-from bayesflow.experimental.distributions import find_distribution
 from bayesflow.experimental.types import Tensor
+from bayesflow.experimental.utils import find_distribution
 
 
 @register_keras_serializable(package="bayesflow.networks")
