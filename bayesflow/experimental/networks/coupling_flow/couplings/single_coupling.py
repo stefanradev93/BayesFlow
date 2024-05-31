@@ -19,7 +19,7 @@ class SingleCoupling(InvertibleLayer):
     """
     def __init__(self, subnet: str = "resnet", transform: str = "affine", **kwargs):
         super().__init__(**kwargs)
-        self.dense = keras.layers.Dense(None)
+        self.dense = keras.layers.Dense(None, kernel_initializer="zeros", bias_initializer="zeros")
         self.subnet = find_subnet(subnet)
         self.transform = find_transform(transform)
 
