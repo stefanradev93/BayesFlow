@@ -20,16 +20,23 @@ class DualCoupling(InvertibleLayer):
     def build(self, input_shape):
         self.pivot = input_shape[-1] // 2
 
-    def call(self, xz: Tensor, conditions: any = None, inverse: bool = False) -> (Tensor, Tensor):
+    def call(
+        self,
+        xz: Tensor,
+        conditions: any = None,
+        inverse: bool = False,
+        training: bool = False
+    ) -> (Tensor, Tensor):
+
         if inverse:
             return self._inverse(xz, conditions=conditions)
-        return self._forward(xz, conditions=conditions)
+        return self._forward(xz, conditions=conditions, training=training)
 
-    def _forward(self, x: Tensor, conditions: any = None) -> (Tensor, Tensor):
+    def _forward(self, x: Tensor, conditions: any = None, training: bool = False) -> (Tensor, Tensor):
         """ Transform (x1, x2) -> (g(x1; f(x2; x1)), f(x2; x1)) """
         x1, x2 = x[..., :self.pivot], x[..., self.pivot:]
-        (z1, z2), log_det1 = self.coupling1(x1, x2, conditions=conditions)
-        (z2, z1), log_det2 = self.coupling2(z2, z1, conditions=conditions)
+        (z1, z2), log_det1 = self.coupling1(x1, x2, conditions=conditions, training=training)
+        (z2, z1), log_det2 = self.coupling2(z2, z1, conditions=conditions, training=training)
 
         z = keras.ops.concatenate([z1, z2], axis=-1)
         log_det = log_det1 + log_det2

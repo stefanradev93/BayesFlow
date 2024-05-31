@@ -1,9 +1,14 @@
+
 from keras import ops
+from keras.saving import (
+    register_keras_serializable,
+)
 
 from bayesflow.experimental.types import Tensor
 from .invertible_layer import InvertibleLayer
 
 
+@register_keras_serializable(package="bayesflow.networks")
 class ActNorm(InvertibleLayer):
     """Implements an Activation Normalization (ActNorm) Layer.
     Activation Normalization is learned invertible normalization, using
@@ -33,7 +38,7 @@ class ActNorm(InvertibleLayer):
         self.scale = self.add_weight(shape=(input_shape[-1],), initializer="ones", name="scale")
         self.bias = self.add_weight(shape=(input_shape[-1],), initializer="zeros", name="bias")
 
-    def call(self, xz: Tensor, inverse: bool = False):
+    def call(self, xz: Tensor, inverse: bool = False, **kwargs):
         if inverse:
             return self._inverse(xz)
         return self._forward(xz)

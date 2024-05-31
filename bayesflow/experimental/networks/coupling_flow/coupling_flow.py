@@ -9,6 +9,7 @@ from keras.saving import (
 from bayesflow.experimental.types import Tensor
 from .actnorm import ActNorm
 from .couplings import DualCoupling
+from .permutations import OrthogonalPermutation, RandomPermutation, Swap
 from ..inference_network import InferenceNetwork
 
 
@@ -37,11 +38,13 @@ class CouplingFlow(InferenceNetwork):
     arXiv preprint arXiv:2006.06599.
     """
     def __init__(
-            self,
-            depth: int = 6,
-            subnet: str = "resnet",
-            transform: str = "affine",
-            use_actnorm: bool = True, **kwargs
+        self,
+        depth: int = 6,
+        subnet: str = "resnet",
+        transform: str = "affine",
+        permutation: str = "random",
+        use_actnorm: bool = True,
+        **kwargs
     ):
         super().__init__(**kwargs)
 
@@ -50,6 +53,12 @@ class CouplingFlow(InferenceNetwork):
             if use_actnorm:
                 self._layers.append(ActNorm())
             self._layers.append(DualCoupling(subnet, transform))
+            if permutation.lower() == "random":
+                self._layers.append(RandomPermutation())
+            elif permutation.lower() == "swap":
+                self._layers.append(Swap())
+            elif permutation.lower() == "learnable":
+                self._layers.append(OrthogonalPermutation())
 
     def build(self, input_shape):
         super().build(input_shape)
