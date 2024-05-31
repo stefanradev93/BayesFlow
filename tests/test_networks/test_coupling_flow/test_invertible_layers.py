@@ -68,7 +68,7 @@ def test_jacobian_numerically(invertible_layer, random_input):
     import torch
 
     forward_output, forward_log_det = invertible_layer(random_input)
-    numerical_forward_jacobian, _ = torch.autograd.functional.jacobian(invertible_layer, random_input, vectorize=True)
+    numerical_forward_jacobian, *_ = torch.autograd.functional.jacobian(invertible_layer, random_input, vectorize=True)
 
     # TODO: torch is somehow permuted wrt keras
     numerical_forward_log_det = [keras.ops.log(keras.ops.abs(keras.ops.det(numerical_forward_jacobian[i, :, i, :]))) for i in range(keras.ops.shape(random_input)[0])]
@@ -78,7 +78,7 @@ def test_jacobian_numerically(invertible_layer, random_input):
 
     inverse_output, inverse_log_det = invertible_layer(random_input, inverse=True)
 
-    numerical_inverse_jacobian, _ = torch.autograd.functional.jacobian(functools.partial(invertible_layer, inverse=True), random_input, vectorize=True)
+    numerical_inverse_jacobian, *_ = torch.autograd.functional.jacobian(functools.partial(invertible_layer, inverse=True), random_input, vectorize=True)
 
     # TODO: torch is somehow permuted wrt keras
     numerical_inverse_log_det = [keras.ops.log(keras.ops.abs(keras.ops.det(numerical_inverse_jacobian[i, :, i, :]))) for i in range(keras.ops.shape(random_input)[0])]
