@@ -19,13 +19,13 @@ class SingleCoupling(InvertibleLayer):
     """
     def __init__(self, network: str = "resnet", transform: str = "affine", **kwargs):
         super().__init__(**kwargs)
-        self.dense = keras.layers.Dense(None, kernel_initializer="zeros", bias_initializer="zeros")
+        self.output_projector = keras.layers.Dense(None, kernel_initializer="zeros", bias_initializer="zeros")
         self.network = find_network(network)
         self.transform = find_transform(transform)
 
     # noinspection PyMethodOverriding
     def build(self, x1_shape, x2_shape):
-        self.dense.units = self.transform.params_per_dim * x2_shape[-1]
+        self.output_projector.units = self.transform.params_per_dim * x2_shape[-1]
 
     def call(self, x1: Tensor, x2: Tensor, conditions: any = None, inverse: bool = False) -> ((Tensor, Tensor), Tensor):
         if inverse:
@@ -53,7 +53,7 @@ class SingleCoupling(InvertibleLayer):
         if keras.ops.is_tensor(conditions):
             x = keras.ops.concatenate([x, conditions], axis=-1)
 
-        parameters = self.dense(self.network(x))
+        parameters = self.output_projector(self.network(x))
         parameters = self.transform.split_parameters(parameters)
         parameters = self.transform.constrain_parameters(parameters)
 
