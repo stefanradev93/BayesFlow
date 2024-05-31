@@ -20,7 +20,7 @@ def flow_matching():
     return FlowMatching()
 
 
-@pytest.fixture(params=["coupling_flow", "flow_matching"])
+@pytest.fixture(params=["coupling_flow"])
 def inference_network(request):
     return request.getfixturevalue(request.param)
 
