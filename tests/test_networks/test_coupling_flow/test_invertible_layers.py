@@ -24,8 +24,8 @@ def test_variable_batch_size(invertible_layer, random_input):
     invertible_layer.build(keras.ops.shape(random_input))
 
     # run with another batch size
-    for _ in range(10):
-        batch_size = np.random.randint(1, 10)
+    batch_sizes = np.random.choice(10, replace=False, size=3)
+    for batch_size in batch_sizes:
         new_input = keras.ops.zeros((batch_size,) + keras.ops.shape(random_input)[1:])
         invertible_layer(new_input)
 

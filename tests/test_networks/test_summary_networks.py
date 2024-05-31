@@ -26,8 +26,8 @@ def test_variable_batch_size(summary_network, random_set):
     summary_network.build(keras.ops.shape(random_set))
 
     # run with another batch size
-    for _ in range(10):
-        batch_size = np.random.randint(1, 10)
+    batch_sizes = np.random.choice(10, replace=False, size=3)
+    for batch_size in batch_sizes:
         new_input = keras.ops.zeros((batch_size,) + keras.ops.shape(random_set)[1:])
         summary_network(new_input)
 

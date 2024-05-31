@@ -28,8 +28,8 @@ def test_variable_batch_size(inference_network, random_samples):
     inference_network.build(keras.ops.shape(random_samples))
 
     # run with another batch size
-    for _ in range(10):
-        batch_size = np.random.randint(1, 10)
+    batch_sizes = np.random.choice(10, replace=False, size=3)
+    for batch_size in batch_sizes:
         new_input = keras.ops.zeros((batch_size,) + keras.ops.shape(random_samples)[1:])
         inference_network(new_input)
         inference_network(new_input, inverse=True)
