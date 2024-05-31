@@ -1,5 +1,6 @@
 
 import keras
+from keras import layers, regularizers
 from keras.saving import (
     register_keras_serializable,
 )
@@ -8,11 +9,14 @@ from keras.saving import (
 class ConfigurableHiddenBlock(keras.layers.Layer):
     def __init__(
         self,
-        num_units,
-        activation="gelu",
-        residual=True,
-        dropout_rate=0.05,
-        spectral_norm=False,
+        units: int = 256,
+        activation: str = "gelu",
+        kernel_regularizer: regularizers.Regularizer | None = None,
+        bias_regularizer: regularizers.Regularizer | None = None,
+        kernel_initializer: str = "he_uniform",
+        residual: bool = True,
+        dropout_rate: float = 0.05,
+        spectral_norm: bool = False,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -21,11 +25,16 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
         self.residual = residual
         self.spectral_norm = spectral_norm
         self.dense_with_dropout = keras.Sequential()
-
+        dense = layers.Dense(
+            units=units,
+            kernel_regularizer=kernel_regularizer,
+            kernel_initializer=kernel_initializer,
+            bias_regularizer=bias_regularizer
+        )
         if spectral_norm:
-            self.dense_with_dropout.add(keras.layers.SpectralNormalization(keras.layers.Dense(num_units)))
+            self.dense_with_dropout.add(layers.SpectralNormalization(dense))
         else:
-            self.dense_with_dropout.add(keras.layers.Dense(num_units))
+            self.dense_with_dropout.add(dense)
         self.dense_with_dropout.add(keras.layers.Dropout(dropout_rate))
 
     def call(self, inputs, training=False):

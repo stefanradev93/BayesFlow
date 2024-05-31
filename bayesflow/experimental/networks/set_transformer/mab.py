@@ -1,6 +1,6 @@
 
 import keras
-
+from keras import layers, regularizers
 from keras.saving import (
     deserialize_keras_object,
     register_keras_serializable,
@@ -22,10 +22,17 @@ class MultiHeadAttentionBlock(keras.Layer):
     def __init__(
         self,
         input_dim: int,
-        attention_settings: dict,
-        num_dense_fc: int,
-        dense_settings: dict,
-        layer_norm: bool,
+        key_dim: int = 64,
+        num_heads: int = 4,
+        dropout: float = 0.05,
+        num_dense_fc: int = 2,
+        dense_units: int = 128,
+        dense_activation: str | callable = "gelu",
+        kernel_regularizer: regularizers.Regularizer | None = None,
+        kernel_initializer: str = "he_uniform",
+        bias_regularizer: regularizers.Regularizer | None = None,
+        use_bias=True,
+        layer_norm: bool = True,
         **kwargs
     ):
         """Creates a multi-head attention block which will typically be used as part of a
@@ -50,11 +57,28 @@ class MultiHeadAttentionBlock(keras.Layer):
 
         super().__init__(**kwargs)
 
-        self.att = keras.layers.MultiHeadAttention(**attention_settings)
-        self.ln_pre = keras.layers.LayerNormalization() if layer_norm else None
-        self.fc = keras.Sequential([keras.layers.Dense(**dense_settings) for _ in range(num_dense_fc)])
-        self.fc.add(keras.layers.Dense(input_dim))
-        self.ln_post = keras.layers.LayerNormalization() if layer_norm else None
+        self.att = layers.MultiHeadAttention(
+            num_heads=num_heads,
+            key_dim=key_dim,
+            dropout=dropout,
+            use_bias=use_bias,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer
+        )
+        self.ln_pre = layers.LayerNormalization() if layer_norm else None
+        self.fc = keras.Sequential()
+        for _ in range(num_dense_fc):
+            self.fc.add(layers.Dense(
+                units=dense_units,
+                activation=dense_activation,
+                kernel_regularizer=kernel_regularizer,
+                kernel_initializer=kernel_initializer,
+                bias_regularizer=bias_regularizer,
+                use_bias=use_bias
+            ))
+            self.fc.add(layers.Dropout(dropout))
+        self.fc.add(layers.Dense(input_dim))
+        self.ln_post = layers.LayerNormalization() if layer_norm else None
 
     def call(self, x: Tensor, y: Tensor, **kwargs):
         """Performs the forward pass through the attention layer.
