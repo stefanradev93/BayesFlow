@@ -18,7 +18,6 @@ class OrthogonalPermutation(InvertibleLayer):
     """
 
     def __init__(self, **kwargs):
-        # TODO: saving and loading
         super().__init__(**kwargs)
         self.weight = None
 
