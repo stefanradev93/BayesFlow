@@ -9,7 +9,7 @@ from .distribution import Distribution
 
 
 @keras.saving.register_keras_serializable(package="bayesflow.simulation")
-class SphericalGaussian(Distribution):
+class DiagonalNormal(Distribution):
     """Utility class for a backend-agnostic spherical Gaussian distribution.
 
     Note:

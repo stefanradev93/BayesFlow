@@ -71,7 +71,7 @@ class CouplingFlow(InferenceNetwork):
 
     def _forward(self, x: Tensor, jacobian: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         z = x
-        log_det = keras.ops.zeros((keras.ops.shape(x)[0],))
+        log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
         for layer in self._layers:
             z, det = layer(z, inverse=False, **kwargs)
             log_det += det
@@ -82,7 +82,7 @@ class CouplingFlow(InferenceNetwork):
 
     def _inverse(self, z: Tensor, jacobian: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         x = z
-        log_det = keras.ops.zeros((keras.ops.shape(z)[0],))
+        log_det = keras.ops.zeros(keras.ops.shape(z)[:-1])
         for layer in reversed(self._layers):
             x, det = layer(x, inverse=True, **kwargs)
             log_det += det

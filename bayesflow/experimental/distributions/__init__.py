@@ -1,3 +1,3 @@
 
 from .distribution import Distribution
-from .normal import Normal
+from .diagonal_normal import DiagonalNormal

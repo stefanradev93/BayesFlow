@@ -2,20 +2,17 @@ from typing import Callable
 
 import keras
 
-import bayesflow.experimental.distributions as D
-import bayesflow.experimental.networks as N
 
-
-def find_distribution(distribution: str | D.Distribution | Callable, **kwargs) -> D.Distribution:
+def find_distribution(distribution: str | Callable, **kwargs):
+    #TODO -> return type
     match distribution:
         case str() as name:
             match name.lower():
                 case "normal":
-                    distribution = D.Normal()
+                    from bayesflow.experimental.distributions import DiagonalNormal
+                    distribution = DiagonalNormal(**kwargs)
                 case other:
                     raise NotImplementedError(f"Unsupported distribution name: '{other}'.")
-        case D.Distribution() as distribution:
-            pass
         case Callable() as constructor:
             distribution = constructor(**kwargs)
         case other:
@@ -29,7 +26,8 @@ def find_network(network: str | keras.Layer | Callable, **kwargs) -> keras.Layer
         case str() as name:
             match name.lower():
                 case "resnet":
-                    network = N.ResNet(**kwargs)
+                    from bayesflow.experimental.networks import ResNet
+                    network = ResNet(**kwargs)
                 case other:
                     raise NotImplementedError(f"Unsupported network name: '{other}'.")
         case keras.Layer() as network:

@@ -17,12 +17,13 @@ class RandomPermutation(FixedPermutation):
         self.forward_indices = self.add_weight(
             shape=(input_shape[-1],),
             initializer=keras.initializers.Constant(forward_indices),
-            trainable=False
+            trainable=False,
+            dtype="int32"
         )
 
         self.inverse_indices = self.add_weight(
             shape=(input_shape[-1],),
             initializer=keras.initializers.Constant(inverse_indices),
-            trainable=False
+            trainable=False,
+            dtype="int32"
         )
-

@@ -25,10 +25,10 @@ class FixedPermutation(InvertibleLayer):
 
     def _forward(self, x: Tensor) -> (Tensor, Tensor):
         z = keras.ops.take(x, self.forward_indices, axis=-1)
-        log_det = 0.
+        log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
         return z, log_det
 
     def _inverse(self, z: Tensor) -> (Tensor, Tensor):
         x = keras.ops.take(z, self.inverse_indices, axis=-1)
-        log_det = 0.
+        log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
         return x, log_det
