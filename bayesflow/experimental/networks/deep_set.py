@@ -1,11 +1,11 @@
-from ..summary_network import SummaryNetwork
-# from ..helper_networks import InvariantModule, EquivariantModule # use this when InvariantModule is implemented
-from bayesflow.helper_networks import InvariantModule, EquivariantModule # remove this when above is satisfied
+from .invariant_module import InvariantModule
+from .equivariant_module import EquivariantModule
 from bayesflow import default_settings as defaults
 from keras.api.layers import Dense
 from keras import Sequential
+import keras
 
-class DeepSet(SummaryNetwork):
+class DeepSet(keras.Model):
     def __init__(
         self,
         summary_dim: int = 10,
