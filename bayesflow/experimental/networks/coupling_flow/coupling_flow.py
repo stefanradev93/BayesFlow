@@ -46,6 +46,7 @@ class CouplingFlow(InferenceNetwork):
         use_actnorm: bool = True,
         **kwargs
     ):
+        # TODO - propagate optional keyword arguments to find_network and ResNet respectively
         super().__init__(**kwargs)
 
         self._layers = []
@@ -54,11 +55,11 @@ class CouplingFlow(InferenceNetwork):
                 self._layers.append(ActNorm(name=f"ActNorm{i}"))
             self._layers.append(DualCoupling(subnet, transform, name=f"DualCoupling{i}"))
             if permutation.lower() == "random":
-                self._layers.append(RandomPermutation())
+                self._layers.append(RandomPermutation(name=f"RandomPermutation{i}"))
             elif permutation.lower() == "swap":
-                self._layers.append(Swap())
+                self._layers.append(Swap(name=f"Swap{i}"))
             elif permutation.lower() == "learnable":
-                self._layers.append(OrthogonalPermutation())
+                self._layers.append(OrthogonalPermutation(name=f"OrthogonalPermutation{i}"))
 
     # noinspection PyMethodOverriding
     def build(self, xz_shape, conditions_shape=None):
@@ -77,7 +78,10 @@ class CouplingFlow(InferenceNetwork):
         z = x
         log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
         for layer in self._layers:
-            z, det = layer(z, conditions=conditions, inverse=False, **kwargs)
+            if isinstance(layer, DualCoupling):
+                z, det = layer(z, conditions=conditions, inverse=False, **kwargs)
+            else:
+                z, det = layer(z, inverse=False, **kwargs)
             log_det += det
 
         if jacobian:
@@ -88,7 +92,10 @@ class CouplingFlow(InferenceNetwork):
         x = z
         log_det = keras.ops.zeros(keras.ops.shape(z)[:-1])
         for layer in reversed(self._layers):
-            x, det = layer(x, conditions=conditions, inverse=True, **kwargs)
+            if isinstance(layer, DualCoupling):
+                x, det = layer(x, conditions=conditions, inverse=True, **kwargs)
+            else:
+                x, det = layer(x,  inverse=True, **kwargs)
             log_det += det
 
         if jacobian:

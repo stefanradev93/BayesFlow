@@ -31,12 +31,12 @@ class InferenceNetwork(keras.Model):
     def _inverse(self, z: Tensor, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         raise NotImplementedError
 
-    def sample(self, num_samples: int, **kwargs) -> Tensor:
+    def sample(self, num_samples: int, conditions: Tensor = None, **kwargs) -> Tensor:
         samples = self.base_distribution.sample((num_samples,))
-        return self(samples, inverse=True, jacobian=False, **kwargs)
+        return self(samples, conditions=conditions, inverse=True, jacobian=False, **kwargs)
 
-    def log_prob(self, x: Tensor, **kwargs) -> Tensor:
-        samples, log_det = self(x, inverse=False, jacobian=True, **kwargs)
+    def log_prob(self, x: Tensor, conditions: Tensor = None, **kwargs) -> Tensor:
+        samples, log_det = self(x, conditions=conditions, inverse=False, jacobian=True, **kwargs)
         log_prob = self.base_distribution.log_prob(samples)
         return log_prob + log_det
 

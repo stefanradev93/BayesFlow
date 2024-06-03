@@ -16,7 +16,7 @@ class DiagonalNormal(Distribution):
         - ``_log_unnormalized_prob`` method is used as a loss function
         - ``log_prob`` is used for density computation
     """
-    def __init__(self, mean: float = 0.0, std: float = 1.0, **kwargs):
+    def __init__(self, mean: float | Tensor = 0.0, std: float | Tensor = 1.0, **kwargs):
         super().__init__(**kwargs)
         self.mean = mean
         self.std = std

@@ -36,9 +36,9 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
             self.dense = layers.SpectralNormalization(self.dense)
         self.dropout = keras.layers.Dropout(dropout_rate)
 
-    def call(self, inputs: Tensor, **kwargs):
-        x = self.dense(inputs, **kwargs)
-        x = self.dropout(x, **kwargs)
+    def call(self, inputs: Tensor, training=False):
+        x = self.dense(inputs, training=training)
+        x = self.dropout(x, training=training)
         if self.residual:
             x = x + inputs
         return self.activation_fn(x)

@@ -80,5 +80,5 @@ class ResNet(keras.layers.Layer):
             )
 
     def call(self, inputs: Tensor, **kwargs):
-        return self.res_blocks(inputs, **kwargs)
+        return self.res_blocks(inputs, training=kwargs.get("training", False))
 
