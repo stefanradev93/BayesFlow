@@ -43,12 +43,17 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
             x = x + inputs
         return self.activation_fn(x)
 
+    def build(self, input_shape):
+        super().build(input_shape)
+        self(keras.KerasTensor(input_shape))
+
     def get_config(self):
         config = super().get_config()
         config.update({
             "residual": self.residual,
             "spectral_norm": self.spectral_norm,
             "activation_fn": keras.saving.serialize_keras_object(self.activation_fn),
-            "dense_with_dropout": keras.saving.serialize_keras_object(self.dense_with_dropout)
+            "dense": keras.saving.serialize_keras_object(self.dense),
+            "dropout": keras.saving.serialize_keras_object(self.dropout)
         })
         return config
