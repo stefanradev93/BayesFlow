@@ -5,6 +5,7 @@ from keras.saving import (
     register_keras_serializable,
 )
 
+from bayesflow.experimental.types import Tensor
 from .hidden_block import ConfigurableHiddenBlock
 
 
@@ -78,5 +79,5 @@ class ResNet(keras.layers.Layer):
                 )
             )
 
-    def call(self, inputs, training=False):
-        return self.res_blocks(inputs, training=training)
+    def call(self, inputs: Tensor, **kwargs):
+        return self.res_blocks(inputs, **kwargs)
