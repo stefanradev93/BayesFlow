@@ -1,5 +1,5 @@
 import keras
-from keras import Sequential, Model
+from keras import Sequential
 from keras.api.layers import Dense
 from bayesflow.exceptions import ConfigurationError
 from functools import partial
