@@ -40,16 +40,16 @@ class ActNorm(InvertibleLayer):
 
     def call(self, xz: Tensor, inverse: bool = False, **kwargs):
         if inverse:
-            return self._inverse(xz)
-        return self._forward(xz)
+            return self._inverse(xz, **kwargs)
+        return self._forward(xz, **kwargs)
 
-    def _forward(self, x: Tensor) -> (Tensor, Tensor):
+    def _forward(self, x: Tensor, **kwargs) -> (Tensor, Tensor):
         z = self.scale * x + self.bias
         log_det = ops.sum(ops.log(ops.abs(self.scale)), axis=-1)
         log_det = ops.broadcast_to(log_det, ops.shape(x)[:-1])
         return z, log_det
 
-    def _inverse(self, z: Tensor) -> (Tensor, Tensor):
+    def _inverse(self, z: Tensor, **kwargs) -> (Tensor, Tensor):
         x = (z - self.bias) / self.scale
         log_det = -ops.sum(ops.log(ops.abs(self.scale)), axis=-1)
         log_det = ops.broadcast_to(log_det, ops.shape(z)[:-1])

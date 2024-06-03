@@ -49,10 +49,10 @@ class CouplingFlow(InferenceNetwork):
         super().__init__(**kwargs)
 
         self._layers = []
-        for _ in range(depth):
+        for i in range(depth):
             if use_actnorm:
-                self._layers.append(ActNorm())
-            self._layers.append(DualCoupling(subnet, transform))
+                self._layers.append(ActNorm(name=f"ActNorm{i}"))
+            self._layers.append(DualCoupling(subnet, transform, name=f"DualCoupling{i}"))
             if permutation.lower() == "random":
                 self._layers.append(RandomPermutation())
             elif permutation.lower() == "swap":
@@ -60,39 +60,43 @@ class CouplingFlow(InferenceNetwork):
             elif permutation.lower() == "learnable":
                 self._layers.append(OrthogonalPermutation())
 
-    def build(self, input_shape):
-        super().build(input_shape)
-        self.call(keras.KerasTensor(input_shape))
+    # noinspection PyMethodOverriding
+    def build(self, xz_shape, conditions_shape=None):
+        super().build(xz_shape)
+        if conditions_shape is None:
+            self.call(keras.KerasTensor(xz_shape))
+        else:
+            self.call(keras.KerasTensor(xz_shape), conditions=keras.KerasTensor(conditions_shape))
 
-    def call(self, xz: Tensor, inverse: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def call(self, xz: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         if inverse:
-            return self._inverse(xz, **kwargs)
-        return self._forward(xz, **kwargs)
+            return self._inverse(xz, conditions=conditions, **kwargs)
+        return self._forward(xz, conditions=conditions, **kwargs)
 
-    def _forward(self, x: Tensor, jacobian: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def _forward(self, x: Tensor, conditions: Tensor = None, jacobian: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         z = x
         log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
         for layer in self._layers:
-            z, det = layer(z, inverse=False, **kwargs)
+            z, det = layer(z, conditions=conditions, inverse=False, **kwargs)
             log_det += det
 
         if jacobian:
             return z, log_det
         return z
 
-    def _inverse(self, z: Tensor, jacobian: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def _inverse(self, z: Tensor, conditions: Tensor = None, jacobian: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         x = z
         log_det = keras.ops.zeros(keras.ops.shape(z)[:-1])
         for layer in reversed(self._layers):
-            x, det = layer(x, inverse=True, **kwargs)
+            x, det = layer(x, conditions=conditions, inverse=True, **kwargs)
             log_det += det
 
         if jacobian:
             return x, log_det
         return x
 
-    def compute_loss(self, x: Tensor = None, **kwargs):
-        z, log_det = self(x, inverse=False, jacobian=True, **kwargs)
+    def compute_loss(self, x: Tensor = None, conditions: Tensor = None, **kwargs):
+        z, log_det = self(x, conditions=conditions, inverse=False, jacobian=True, **kwargs)
         log_prob = self.base_distribution.log_prob(z)
         nll = -keras.ops.mean(log_prob + log_det)
 

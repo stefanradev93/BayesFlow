@@ -32,9 +32,6 @@ class AffineTransform(Transform):
 
         return base_config | config
 
-    def compute_subnet_output_shape(self, input_shape):
-        return *input_shape[:-1], 2 * input_shape[-1]
-
     def split_parameters(self, parameters: Tensor) -> dict[str, Tensor]:
         scale, shift = ops.split(parameters, 2, axis=-1)
 

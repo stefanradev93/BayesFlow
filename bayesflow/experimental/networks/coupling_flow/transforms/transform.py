@@ -7,9 +7,6 @@ class Transform(InvertibleLayer):
     def params_per_dim(self) -> int:
         raise NotImplementedError
 
-    def compute_subnet_output_shape(self, input_shape):
-        raise NotImplementedError
-
     def split_parameters(self, parameters: Tensor) -> dict[str, Tensor]:
         raise NotImplementedError
 
