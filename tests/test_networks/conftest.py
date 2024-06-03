@@ -31,8 +31,21 @@ def network(request):
 
 
 @pytest.fixture(params=[2, 3])
+def num_conditions(request):
+    return request.param
+
+
+@pytest.fixture(params=[2, 3])
 def num_features(request):
     return request.param
+
+
+@pytest.fixture(params=[False])
+def random_conditions(request, batch_size, num_conditions):
+    if not request.param:
+        return None
+
+    return keras.random.normal((batch_size, num_conditions))
 
 
 @pytest.fixture()
