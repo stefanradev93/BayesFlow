@@ -5,6 +5,8 @@ from keras.saving import (
     register_keras_serializable,
 )
 
+from bayesflow.experimental.types import Tensor
+
 @register_keras_serializable(package="bayesflow.networks.resnet")
 class ConfigurableHiddenBlock(keras.layers.Layer):
     def __init__(
@@ -24,21 +26,19 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
         self.activation_fn = keras.activations.get(activation)
         self.residual = residual
         self.spectral_norm = spectral_norm
-        self.dense_with_dropout = keras.Sequential()
-        dense = layers.Dense(
+        self.dense = layers.Dense(
             units=units,
             kernel_regularizer=kernel_regularizer,
             kernel_initializer=kernel_initializer,
             bias_regularizer=bias_regularizer
         )
         if spectral_norm:
-            self.dense_with_dropout.add(layers.SpectralNormalization(dense))
-        else:
-            self.dense_with_dropout.add(dense)
-        self.dense_with_dropout.add(keras.layers.Dropout(dropout_rate))
+            self.dense = layers.SpectralNormalization(self.dense)
+        self.dropout = keras.layers.Dropout(dropout_rate)
 
-    def call(self, inputs, training=False):
-        x = self.dense_with_dropout(inputs, training=training)
+    def call(self, inputs: Tensor, **kwargs):
+        x = self.dense(inputs, **kwargs)
+        x = self.dropout(x, **kwargs)
         if self.residual:
             x = x + inputs
         return self.activation_fn(x)
