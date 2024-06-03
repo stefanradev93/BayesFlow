@@ -40,7 +40,7 @@ def num_features(request):
     return request.param
 
 
-@pytest.fixture(params=[False])
+@pytest.fixture(params=[True, False])
 def random_conditions(request, batch_size, num_conditions):
     if not request.param:
         return None
