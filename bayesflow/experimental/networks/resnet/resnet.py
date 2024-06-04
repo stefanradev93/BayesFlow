@@ -52,9 +52,7 @@ class ResNet(keras.layers.Layer):
         self.res_blocks = keras.Sequential()
         projector = layers.Dense(
             units=hidden_dim,
-            kernel_regularizer=kernel_regularizer,
             kernel_initializer=kernel_initializer,
-            bias_regularizer=bias_regularizer,
         )
         if spectral_normalization:
             projector = layers.SpectralNormalization(projector)
