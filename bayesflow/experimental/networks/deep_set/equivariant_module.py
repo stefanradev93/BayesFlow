@@ -1,9 +1,17 @@
-from .invariant_module import InvariantModule
-from keras import Sequential
-from keras.api.layers import Dense
-import keras
 
-class EquivariantModule(keras.Model):
+import keras
+from keras import ops, layers, regularizers
+from keras.saving import (
+    register_keras_serializable,
+    serialize_keras_object
+)
+
+from bayesflow.experimental.types import Tensor
+from .invariant_module import InvariantModule
+
+
+@register_keras_serializable(package="bayesflow.networks.deep_set")
+class EquivariantModule(keras.Layer):
     """Implements an equivariant module performing an equivariant transform.
 
     For details and justification, see:
@@ -12,50 +20,98 @@ class EquivariantModule(keras.Model):
     J. Mach. Learn. Res., 21, 90-1. https://www.jmlr.org/papers/volume21/19-322/19-322.pdf
     """
 
-    def __init__(self, settings, **kwargs):
+    def __init__(
+        self,
+        num_dense_equivariant: int = 2,
+        num_dense_invariant_inner: int = 2,
+        num_dense_invariant_outer: int = 2,
+        units_equivariant: int = 128,
+        units_invariant_inner: int = 128,
+        units_invariant_outer: int = 128,
+        pooling: str = "mean",
+        activation: str | callable = "gelu",
+        kernel_regularizer: regularizers.Regularizer | None = None,
+        kernel_initializer: str = "he_uniform",
+        bias_regularizer: regularizers.Regularizer | None = None,
+        dropout: float = 0.05,
+        spectral_normalization: bool = False,
+        **kwargs
+    ):
         """Creates an equivariant module according to [1] which combines equivariant transforms
         with nested invariant transforms, thereby enabling interactions between set members.
 
         Parameters
         ----------
-        settings : dict
-            A dictionary holding the configuration settings for the module.
-        **kwargs : dict, optional, default: {}
-            Optional keyword arguments passed to the ``tf.keras.Model`` constructor.
+        #TODO
         """
 
         super().__init__(**kwargs)
 
-        self.invariant_module = InvariantModule(settings)
-        self.s3 = Sequential([Dense(**settings["dense_s3_args"]) for _ in range(settings["num_dense_s3"])])
+        self.invariant_module = InvariantModule(
+            num_dense_inner=num_dense_invariant_inner,
+            num_dense_outer=num_dense_invariant_outer,
+            units_inner=units_invariant_inner,
+            units_outer=units_invariant_outer,
+            activation=activation,
+            kernel_regularizer=kernel_regularizer,
+            kernel_initializer=kernel_initializer,
+            bias_regularizer=bias_regularizer,
+            dropout=dropout,
+            pooling=pooling,
+            spectral_normalization=spectral_normalization,
+            name="InnerInvariantModule"
+        )
 
-    def call(self, x, **kwargs):
+        self.equivariant_fc = keras.Sequential(name="EquivariantFC")
+        for _ in range(num_dense_equivariant):
+            layer = layers.Dense(
+                units=units_equivariant,
+                activation=activation,
+                kernel_regularizer=kernel_regularizer,
+                kernel_initializer=kernel_initializer,
+                bias_regularizer=bias_regularizer
+            )
+            if spectral_normalization:
+                layer = layers.SpectralNormalization(layer)
+            self.equivariant_fc.add(layer)
+
+    def call(self, input_set: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass of a learnable equivariant transform.
 
         Parameters
         ----------
-        x   : tf.Tensor
-            Input of shape (batch_size, ..., x_dim)
+        #TODO
 
         Returns
         -------
-        out : tf.Tensor
-            Output of shape (batch_size, ..., equiv_dim)
+        #TODO
         """
 
         # Store shape of x, will be (batch_size, ..., some_dim)
-        shape = keras.ops.shape(x)
+        shape = ops.shape(input_set)
 
-        # Example: Output dim is (batch_size, inv_dim) - > (batch_size, N, inv_dim)
-        out_inv = self.invariant_module(x, **kwargs)
-        out_inv = keras.ops.expand_dims(out_inv, -2)
+        # Example: Output dim is (batch_size, inv_dim) - > (batch_size, ..., inv_dim)
+        out_inv = self.invariant_module(input_set, training=kwargs.get("training", False))
+        out_inv = ops.expand_dims(out_inv, -2)
         tiler = [1] * len(shape)
         tiler[-2] = shape[-2]
-        out_inv_rep = keras.ops.tile(out_inv, tiler)
+        out_inv_rep = ops.tile(out_inv, tiler)
 
-        # Concatenate each x with the repeated invariant embedding
-        out_c = keras.ops.concatenate([x, out_inv_rep], axis=-1)
+        # Concatenate each input entry with the repeated invariant embedding
+        out_c = ops.concatenate([input_set, out_inv_rep], axis=-1)
 
         # Pass through equivariant func
-        out = self.s3(out_c, **kwargs)
+        out = self.equivariant_fc(out_c, training=kwargs.get("training", False))
         return out
+
+    def build(self, input_shape):
+        super().build(input_shape)
+        self(keras.KerasTensor(input_shape))
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "invariant_module": serialize_keras_object(self.invariant_module),
+            "equivariant_fc": serialize_keras_object(self.equivariant_fc)
+        })
+        return config

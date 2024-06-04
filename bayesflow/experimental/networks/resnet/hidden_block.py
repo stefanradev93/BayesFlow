@@ -7,6 +7,7 @@ from keras.saving import (
 
 from bayesflow.experimental.types import Tensor
 
+
 @register_keras_serializable(package="bayesflow.networks.resnet")
 class ConfigurableHiddenBlock(keras.layers.Layer):
     def __init__(
@@ -18,21 +19,20 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
         kernel_initializer: str = "he_uniform",
         residual: bool = True,
         dropout_rate: float = 0.05,
-        spectral_norm: bool = False,
+        spectral_normalization: bool = False,
         **kwargs
     ):
         super().__init__(**kwargs)
 
         self.activation_fn = keras.activations.get(activation)
         self.residual = residual
-        self.spectral_norm = spectral_norm
         self.dense = layers.Dense(
             units=units,
             kernel_regularizer=kernel_regularizer,
             kernel_initializer=kernel_initializer,
             bias_regularizer=bias_regularizer
         )
-        if spectral_norm:
+        if spectral_normalization:
             self.dense = layers.SpectralNormalization(self.dense)
         self.dropout = keras.layers.Dropout(dropout_rate)
 
@@ -51,7 +51,6 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
         config = super().get_config()
         config.update({
             "residual": self.residual,
-            "spectral_norm": self.spectral_norm,
             "activation_fn": keras.saving.serialize_keras_object(self.activation_fn),
             "dense": keras.saving.serialize_keras_object(self.dense),
             "dropout": keras.saving.serialize_keras_object(self.dropout)

@@ -1,97 +1,115 @@
+
+import keras
+from keras import layers, regularizers
+from keras.saving import (
+    register_keras_serializable,
+    serialize_keras_object
+)
+
+from bayesflow.experimental.types import Tensor
 from .invariant_module import InvariantModule
 from .equivariant_module import EquivariantModule
-from bayesflow import default_settings as defaults
-from keras.api.layers import Dense
-from keras import Sequential
-import keras
 
+
+@register_keras_serializable(package="bayesflow.networks.deep_set")
 class DeepSet(keras.Model):
     def __init__(
         self,
         summary_dim: int = 10,
-        num_dense_s1: int = 2,
-        num_dense_s2: int = 2,
-        num_dense_s3: int = 3,
-        num_equiv: int = 2,
-        dense_s1_args=None,
-        dense_s2_args=None,
-        dense_s3_args=None,
-        pooling_fun: str = "mean",
+        depth: int = 2,
+        num_dense_equivariant: int = 2,
+        num_dense_invariant_inner: int = 2,
+        num_dense_invariant_outer: int = 2,
+        units_equivariant: int = 128,
+        units_invariant_inner: int = 128,
+        units_invariant_outer: int = 128,
+        pooling: str = "mean",
+        activation: str | callable = "gelu",
+        kernel_regularizer: regularizers.Regularizer | None = None,
+        kernel_initializer: str = "he_uniform",
+        bias_regularizer: regularizers.Regularizer | None = None,
+        dropout: float = 0.05,
+        spectral_normalization: bool = False,
         **kwargs
     ):
-        """Creates a stack of 'num_equiv' equivariant layers followed by a final invariant layer.
-
-        Parameters
-        ----------
-        summary_dim   : int, optional, default: 10
-            The number of learned summary statistics.
-        num_dense_s1  : int, optional, default: 2
-            The number of dense layers in the inner function of a deep set.
-        num_dense_s2  : int, optional, default: 2
-            The number of dense layers in the outer function of a deep set.
-        num_dense_s3  : int, optional, default: 2
-            The number of dense layers in an equivariant layer.
-        num_equiv     : int, optional, default: 2
-            The number of equivariant layers in the network.
-        dense_s1_args : dict or None, optional, default: None
-            The arguments for the dense layers of s1 (inner, pre-pooling function). If `None`,
-            defaults will be used (see `default_settings`). Otherwise, all arguments for a
-            tf.keras.layers.Dense layer are supported.
-        dense_s2_args : dict or None, optional, default: None
-            The arguments for the dense layers of s2 (outer, post-pooling function). If `None`,
-            defaults will be used (see `default_settings`). Otherwise, all arguments for a
-            tf.keras.layers.Dense layer are supported.
-        dense_s3_args : dict or None, optional, default: None
-            The arguments for the dense layers of s3 (equivariant function). If `None`,
-            defaults will be used (see `default_settings`). Otherwise, all arguments for a
-            tf.keras.layers.Dense layer are supported.
-        pooling_fun   : str of callable, optional, default: 'mean'
-            If string argument provided, should be one in ['mean', 'max']. In addition, ac actual
-            neural network can be passed for learnable pooling.
-        **kwargs      : dict, optional, default: {}
-            Optional keyword arguments passed to the __init__() method of tf.keras.Model.
+        """
+        #TODO
         """
 
         super().__init__(**kwargs)
-        
-        # Prepare settings dictionary
-        settings = dict(
-            num_dense_s1=num_dense_s1,
-            num_dense_s2=num_dense_s2,
-            num_dense_s3=num_dense_s3,
-            dense_s1_args=defaults.DEFAULT_SETTING_DENSE_DEEP_SET if dense_s1_args is None else dense_s1_args,
-            dense_s2_args=defaults.DEFAULT_SETTING_DENSE_DEEP_SET if dense_s2_args is None else dense_s2_args,
-            dense_s3_args=defaults.DEFAULT_SETTING_DENSE_DEEP_SET if dense_s3_args is None else dense_s3_args,
-            pooling_fun=pooling_fun,
+
+        # Stack of equivariant modules for a many-to-many learnable transformation
+        self.equivariant_modules = keras.Sequential()
+        for i in range(depth):
+            equivariant_module = EquivariantModule(
+                num_dense_equivariant=num_dense_equivariant,
+                num_dense_invariant_inner=num_dense_invariant_inner,
+                num_dense_invariant_outer=num_dense_invariant_outer,
+                units_equivariant=units_equivariant,
+                units_invariant_inner=units_invariant_inner,
+                units_invariant_outer=units_invariant_outer,
+                activation=activation,
+                kernel_regularizer=kernel_regularizer,
+                kernel_initializer=kernel_initializer,
+                bias_regularizer=bias_regularizer,
+                spectral_normalization=spectral_normalization,
+                dropout=dropout,
+                pooling=pooling,
+                name=f"EquivariantModule{i}"
+            )
+            self.equivariant_modules.add(equivariant_module)
+
+        # Invariant module for a many-to-one transformation
+        self.invariant_module = InvariantModule(
+            num_dense_inner=num_dense_invariant_inner,
+            num_dense_outer=num_dense_invariant_outer,
+            units_inner=units_invariant_inner,
+            units_outer=units_invariant_outer,
+            activation=activation,
+            kernel_regularizer=kernel_regularizer,
+            kernel_initializer=kernel_initializer,
+            bias_regularizer=bias_regularizer,
+            dropout=dropout,
+            pooling=pooling,
+            spectral_normalization=spectral_normalization,
+            name="OutputInvariantModule"
         )
 
-        # Create equivariant layers and final invariant layer
-        self.equiv_layers = Sequential([EquivariantModule(settings) for _ in range(num_equiv)])
-        self.inv = InvariantModule(settings)
-
-        # Output layer to output "summary_dim" learned summary statistics
-        self.out_layer = Dense(summary_dim, activation="linear")
+        # Output linear layer to project set representation down to "summary_dim" learned summary statistics
+        self.output_projector = layers.Dense(summary_dim, activation="linear", name="OutputLayer")
         self.summary_dim = summary_dim
 
-    def call(self, x, **kwargs):
+    def call(self, input_set: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass of a learnable deep invariant transformation consisting of
         a sequence of equivariant transforms followed by an invariant transform.
 
         Parameters
         ----------
-        x : tf.Tensor
-            Input of shape (batch_size, n_obs, data_dim)
+        input_set : KerasTensor
+            Input set of shape (batch_size, ..., set_size, obs_dim)
 
         Returns
         -------
-        out : tf.Tensor
-            Output of shape (batch_size, out_dim)
+        out : KerasTensor
+            Output representation of shape (batch_size, ..., set_size, obs_dim)
         """
 
-        # Pass through series of augmented equivariant transforms
-        out_equiv = self.equiv_layers(x, **kwargs)
+        transformed_set = self.equivariant_modules(input_set, **kwargs)
+        set_representation = self.invariant_module(transformed_set, **kwargs)
+        set_representation = self.output_projector(set_representation)
 
-        # Pass through final invariant layer
-        out = self.out_layer(self.inv(out_equiv, **kwargs), **kwargs)
+        return set_representation
 
-        return out
+    def build(self, input_shape):
+        super().build(input_shape)
+        self(keras.KerasTensor(input_shape))
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "invariant_module": serialize_keras_object(self.equivariant_modules),
+            "equivariant_fc": serialize_keras_object(self.invariant_module),
+            "output_projector": serialize_keras_object(self.output_projector),
+            "summary_dim": serialize_keras_object(self.summary_dim)
+        })
+        return config
