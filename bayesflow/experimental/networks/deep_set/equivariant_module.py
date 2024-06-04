@@ -1,12 +1,10 @@
 
 import keras
 from keras import ops, layers, regularizers
-from keras.saving import (
-    register_keras_serializable,
-    serialize_keras_object
-)
+from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
+from bayesflow.experimental.utils import keras_kwargs
 from .invariant_module import InvariantModule
 
 
@@ -45,7 +43,7 @@ class EquivariantModule(keras.Layer):
         #TODO
         """
 
-        super().__init__(**kwargs)
+        super().__init__(**keras_kwargs(kwargs))
 
         self.invariant_module = InvariantModule(
             num_dense_inner=num_dense_invariant_inner,
@@ -59,7 +57,7 @@ class EquivariantModule(keras.Layer):
             dropout=dropout,
             pooling=pooling,
             spectral_normalization=spectral_normalization,
-            name="InnerInvariantModule"
+            **kwargs
         )
 
         self.equivariant_fc = keras.Sequential(name="EquivariantFC")
@@ -87,31 +85,23 @@ class EquivariantModule(keras.Layer):
         #TODO
         """
 
-        # Store shape of x, will be (batch_size, ..., some_dim)
+        # Store shape of input_set, will be (batch_size, ..., set_size, some_dim)
         shape = ops.shape(input_set)
 
-        # Example: Output dim is (batch_size, inv_dim) - > (batch_size, ..., inv_dim)
-        out_inv = self.invariant_module(input_set, training=kwargs.get("training", False))
-        out_inv = ops.expand_dims(out_inv, -2)
+        # Example: Output dim is (batch_size, ..., set_size, representation_dim)
+        invariant_summary = self.invariant_module(input_set, training=kwargs.get("training", False))
+        invariant_summary = ops.expand_dims(invariant_summary, axis=-2)
         tiler = [1] * len(shape)
         tiler[-2] = shape[-2]
-        out_inv_rep = ops.tile(out_inv, tiler)
+        invariant_summary = ops.tile(invariant_summary, tiler)
 
         # Concatenate each input entry with the repeated invariant embedding
-        out_c = ops.concatenate([input_set, out_inv_rep], axis=-1)
+        output_set = ops.concatenate([input_set, invariant_summary], axis=-1)
 
-        # Pass through equivariant func
-        out = self.equivariant_fc(out_c, training=kwargs.get("training", False))
-        return out
+        # Pass through final equivariant transform
+        output_set = self.equivariant_fc(output_set, training=kwargs.get("training", False))
+        return output_set
 
     def build(self, input_shape):
         super().build(input_shape)
         self(keras.KerasTensor(input_shape))
-
-    def get_config(self):
-        config = super().get_config()
-        config.update({
-            "invariant_module": serialize_keras_object(self.invariant_module),
-            "equivariant_fc": serialize_keras_object(self.equivariant_fc)
-        })
-        return config

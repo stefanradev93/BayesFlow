@@ -7,6 +7,7 @@ from keras.saving import (
 )
 
 from bayesflow.experimental.types import Tensor
+from bayesflow.experimental.utils import keras_kwargs
 from .invariant_module import InvariantModule
 from .equivariant_module import EquivariantModule
 
@@ -36,10 +37,10 @@ class DeepSet(keras.Model):
         #TODO
         """
 
-        super().__init__(**kwargs)
+        super().__init__(**keras_kwargs(kwargs))
 
         # Stack of equivariant modules for a many-to-many learnable transformation
-        self.equivariant_modules = keras.Sequential()
+        self.equivariant_modules = keras.Sequential(name="EquivariantStack")
         for i in range(depth):
             equivariant_module = EquivariantModule(
                 num_dense_equivariant=num_dense_equivariant,
@@ -55,7 +56,7 @@ class DeepSet(keras.Model):
                 spectral_normalization=spectral_normalization,
                 dropout=dropout,
                 pooling=pooling,
-                name=f"EquivariantModule{i}"
+                **kwargs
             )
             self.equivariant_modules.add(equivariant_module)
 
@@ -72,7 +73,7 @@ class DeepSet(keras.Model):
             dropout=dropout,
             pooling=pooling,
             spectral_normalization=spectral_normalization,
-            name="OutputInvariantModule"
+            **kwargs
         )
 
         # Output linear layer to project set representation down to "summary_dim" learned summary statistics

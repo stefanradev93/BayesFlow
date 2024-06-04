@@ -1,12 +1,10 @@
 
 import keras
 from keras import layers, regularizers
-from keras.saving import (
-    register_keras_serializable,
-    serialize_keras_object
-)
+from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
+from bayesflow.experimental.utils import keras_kwargs
 from bayesflow.experimental.utils import find_pooling
 
 
@@ -41,8 +39,12 @@ class InvariantModule(keras.Layer):
         Parameters
         ----------
         # TODO
+
+        **kwargs: dict
+            Optional keyword arguments can be passed to the pooling layer as a dictionary into the
+            reserved key ``pooling_kwargs``. Example: #TODO
         """
-        super().__init__(**kwargs)
+        super().__init__(**keras_kwargs(kwargs))
 
         # Inner fully connected net for sum decomposition: inner( pooling( inner(set) ) )
         self.inner_fc = keras.Sequential(name="InvariantInnerFC")
@@ -76,7 +78,7 @@ class InvariantModule(keras.Layer):
             self.outer_fc.add(layer)
 
         # Pooling function as keras layer for sum decomposition: inner( pooling( inner(set) ) )
-        self.pooling_layer = find_pooling(pooling, **kwargs)
+        self.pooling_layer = find_pooling(pooling, **kwargs.get("pooling_kwargs", {}))
 
     def call(self, input_set: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass of a learnable invariant transform.
@@ -100,12 +102,3 @@ class InvariantModule(keras.Layer):
     def build(self, input_shape):
         super().build(input_shape)
         self(keras.KerasTensor(input_shape))
-
-    def get_config(self):
-        config = super().get_config()
-        config.update({
-            "inner_fc": serialize_keras_object(self.inner_fc),
-            "outer_fc": serialize_keras_object(self.outer_fc),
-            "pooling_layer": serialize_keras_object(self.pooling_layer)
-        })
-        return config
