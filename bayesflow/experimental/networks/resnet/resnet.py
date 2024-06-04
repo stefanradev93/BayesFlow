@@ -1,9 +1,7 @@
 
 import keras
-from keras import layers, regularizers
-from keras.saving import (
-    register_keras_serializable,
-)
+from keras import layers
+from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
 from .hidden_block import ConfigurableHiddenBlock
@@ -23,8 +21,6 @@ class ResNet(keras.layers.Layer):
         num_hidden: int = 2,
         hidden_dim: int = 256,
         activation: str = "gelu",
-        kernel_regularizer: regularizers.Regularizer | None = None,
-        bias_regularizer: regularizers.Regularizer | None = None,
         kernel_initializer: str = "he_uniform",
         residual: bool = True,
         dropout_rate: float = 0.05,
@@ -70,9 +66,7 @@ class ResNet(keras.layers.Layer):
                 ConfigurableHiddenBlock(
                     units=hidden_dim,
                     activation=activation,
-                    kernel_regularizer=kernel_regularizer,
                     kernel_initializer=kernel_initializer,
-                    bias_regularizer=bias_regularizer,
                     residual=residual,
                     dropout_rate=dropout_rate,
                     spectral_normalization=spectral_normalization
