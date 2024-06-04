@@ -1,11 +1,9 @@
 
 import keras
-from keras.saving import (
-    register_keras_serializable
-)
+from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
-from bayesflow.experimental.utils import find_network
+from bayesflow.experimental.utils import find_network, keras_kwargs
 from ..invertible_layer import InvertibleLayer
 from ..transforms import find_transform
 
@@ -17,11 +15,20 @@ class SingleCoupling(InvertibleLayer):
 
     Subnet output tensors are linearly mapped to the correct dimension.
     """
-    def __init__(self, network: str = "resnet", transform: str = "affine", **kwargs):
-        super().__init__(**kwargs)
-        self.output_projector = keras.layers.Dense(None, kernel_initializer="zeros", bias_initializer="zeros")
-        self.network = find_network(network)
-        self.transform = find_transform(transform)
+    def __init__(
+        self,
+        network: str = "resnet",
+        transform: str = "affine",
+        output_layer_kernel_init: str = "zeros",
+        **kwargs
+    ):
+        super().__init__(**keras_kwargs(kwargs))
+        self.output_projector = keras.layers.Dense(
+            units=None,
+            kernel_initializer=output_layer_kernel_init,
+        )
+        self.network = find_network(network, **kwargs.get("subnet_kwargs", {}))
+        self.transform = find_transform(transform, **kwargs.get("transform_kwargs", {}))
 
     # noinspection PyMethodOverriding
     def build(self, x1_shape, x2_shape):
