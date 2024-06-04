@@ -28,7 +28,7 @@ class ResNet(keras.layers.Layer):
         kernel_initializer: str = "he_uniform",
         residual: bool = True,
         dropout_rate: float = 0.05,
-        spectral_norm: bool = False,
+        spectral_normalization: bool = False,
         **kwargs
     ):
         """
@@ -44,7 +44,7 @@ class ResNet(keras.layers.Layer):
             The activation function of the dense layers
         residual         : bool, optional, default: True
             Use residual connections in the internal layers.
-        spectral_norm    : bool, optional, default: False
+        spectral_normalization    : bool, optional, default: False
             Use spectral normalization for the network weights, which can make
             the learned function smoother and hence more robust to perturbations.
         dropout_rate     : float, optional, default: 0.05
@@ -60,7 +60,7 @@ class ResNet(keras.layers.Layer):
             kernel_initializer=kernel_initializer,
             bias_regularizer=bias_regularizer,
         )
-        if spectral_norm:
+        if spectral_normalization:
             projector = layers.SpectralNormalization(projector)
         self.res_blocks.add(projector)
         self.res_blocks.add(layers.Dropout(dropout_rate))
@@ -75,7 +75,7 @@ class ResNet(keras.layers.Layer):
                     bias_regularizer=bias_regularizer,
                     residual=residual,
                     dropout_rate=dropout_rate,
-                    spectral_norm=spectral_norm
+                    spectral_normalization=spectral_normalization
                 )
             )
 
