@@ -1,7 +1,10 @@
-from .invariant_module import InvariantModule
+
+import keras
 from keras import Sequential
 from keras.api.layers import Dense
-import keras
+
+from .invariant_module import InvariantModule
+
 
 class EquivariantModule(keras.Model):
     """Implements an equivariant module performing an equivariant transform.

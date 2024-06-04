@@ -1,9 +1,13 @@
-from .invariant_module import InvariantModule
-from .equivariant_module import EquivariantModule
-from bayesflow import default_settings as defaults
+
+import keras
 from keras.api.layers import Dense
 from keras import Sequential
-import keras
+
+from bayesflow import default_settings as defaults
+
+from .invariant_module import InvariantModule
+from .equivariant_module import EquivariantModule
+
 
 class DeepSet(keras.Model):
     def __init__(

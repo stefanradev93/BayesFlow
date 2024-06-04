@@ -1,9 +1,10 @@
 import keras
 from keras import Sequential
 from keras.api.layers import Dense
-from bayesflow.exceptions import ConfigurationError
 from functools import partial
-import tensorflow as tf
+
+from bayesflow.exceptions import ConfigurationError
+
 
 class InvariantModule(keras.Model):
     """Implements an invariant module performing a permutation-invariant transform.
@@ -34,9 +35,9 @@ class InvariantModule(keras.Model):
 
         # Pick pooling function
         if settings["pooling_fun"] == "mean":
-            pooling_fun = partial(tf.reduce_mean, axis=-2)
+            pooling_fun = partial(keras.ops.mean, axis=-2)
         elif settings["pooling_fun"] == "max":
-            pooling_fun = partial(tf.reduce_max, axis=-2)
+            pooling_fun = partial(keras.ops.max, axis=-2)
         else:
             if callable(settings["pooling_fun"]):
                 pooling_fun = settings["pooling_fun"]

@@ -1,5 +1,6 @@
 
 from .coupling_flow import CouplingFlow
+from .deep_set import DeepSet
 from .flow_matching import FlowMatching
 from .resnet import ResNet
 from .set_transformer import SetTransformer
