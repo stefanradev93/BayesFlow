@@ -94,7 +94,7 @@ class InvariantModule(keras.Layer):
 
         set_summary = self.inner_fc(input_set, training=kwargs.get("training", False))
         set_summary = self.pooling_layer(set_summary, training=kwargs.get("training", False))
-        set_summary= self.outer_fc(set_summary, training=kwargs.get("training", False))
+        set_summary = self.outer_fc(set_summary, training=kwargs.get("training", False))
         return set_summary
 
     def build(self, input_shape):
