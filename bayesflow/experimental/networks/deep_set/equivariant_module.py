@@ -28,7 +28,7 @@ class EquivariantModule(keras.Layer):
         units_invariant_outer: int = 128,
         pooling: str | keras.Layer = "mean",
         activation: str = "gelu",
-        kernel_initializer: str = "he_uniform",
+        kernel_initializer: str = "he_normal",
         dropout: float = 0.05,
         spectral_normalization: bool = False,
         **kwargs

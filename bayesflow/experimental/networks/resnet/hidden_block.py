@@ -11,10 +11,10 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
     def __init__(
         self,
         units: int = 256,
-        activation: str = "gelu",
-        kernel_initializer: str = "he_uniform",
+        activation: str = "mish",
+        kernel_initializer: str = "he_normal",
         residual: bool = True,
-        dropout_rate: float = 0.05,
+        dropout: float = 0.05,
         spectral_normalization: bool = False,
         **kwargs
     ):
@@ -28,7 +28,7 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
         )
         if spectral_normalization:
             self.dense = layers.SpectralNormalization(self.dense)
-        self.dropout = keras.layers.Dropout(dropout_rate)
+        self.dropout = keras.layers.Dropout(dropout)
 
     def call(self, inputs: Tensor, training=False):
         x = self.dense(inputs, training=training)

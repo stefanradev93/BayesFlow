@@ -20,10 +20,10 @@ class ResNet(keras.layers.Layer):
         self,
         num_hidden: int = 2,
         hidden_dim: int = 256,
-        activation: str = "gelu",
-        kernel_initializer: str = "he_uniform",
+        activation: str = "mish",
+        kernel_initializer: str = "he_normal",
         residual: bool = True,
-        dropout_rate: float = 0.05,
+        dropout: float = 0.05,
         spectral_normalization: bool = False,
         **kwargs
     ):
@@ -43,7 +43,7 @@ class ResNet(keras.layers.Layer):
         spectral_normalization    : bool, optional, default: False
             Use spectral normalization for the network weights, which can make
             the learned function smoother and hence more robust to perturbations.
-        dropout_rate     : float, optional, default: 0.05
+        dropout          : float, optional, default: 0.05
             Dropout rate for the hidden layers in the internal layers.
         """
 
@@ -57,7 +57,7 @@ class ResNet(keras.layers.Layer):
         if spectral_normalization:
             projector = layers.SpectralNormalization(projector)
         self.res_blocks.add(projector)
-        self.res_blocks.add(layers.Dropout(dropout_rate))
+        self.res_blocks.add(layers.Dropout(dropout))
 
         for _ in range(num_hidden):
             self.res_blocks.add(
@@ -66,7 +66,7 @@ class ResNet(keras.layers.Layer):
                     activation=activation,
                     kernel_initializer=kernel_initializer,
                     residual=residual,
-                    dropout_rate=dropout_rate,
+                    dropout=dropout,
                     spectral_normalization=spectral_normalization
                 )
             )

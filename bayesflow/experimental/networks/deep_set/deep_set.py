@@ -27,7 +27,7 @@ class DeepSet(keras.Model):
         units_invariant_inner: int = 128,
         units_invariant_outer: int = 128,
         activation: str = "gelu",
-        kernel_initializer: str = "he_uniform",
+        kernel_initializer: str = "he_normal",
         dropout: float = 0.05,
         spectral_normalization: bool = False,
         **kwargs

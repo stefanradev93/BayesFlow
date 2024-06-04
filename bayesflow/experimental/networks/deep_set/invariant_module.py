@@ -25,7 +25,7 @@ class InvariantModule(keras.Layer):
         units_inner: int = 128,
         units_outer: int = 128,
         activation: str = "gelu",
-        kernel_initializer: str = "he_uniform",
+        kernel_initializer: str = "he_normal",
         dropout: float = 0.05,
         pooling: str | keras.Layer = "mean",
         spectral_normalization: bool = False,
