@@ -18,13 +18,14 @@ class DeepSet(keras.Model):
         self,
         summary_dim: int = 10,
         depth: int = 2,
+        inner_pooling: str = "mean",
+        output_pooling: str = "mean",
         num_dense_equivariant: int = 2,
         num_dense_invariant_inner: int = 2,
         num_dense_invariant_outer: int = 2,
         units_equivariant: int = 128,
         units_invariant_inner: int = 128,
         units_invariant_outer: int = 128,
-        pooling: str = "mean",
         activation: str | callable = "gelu",
         kernel_regularizer: regularizers.Regularizer | None = None,
         kernel_initializer: str = "he_uniform",
@@ -55,7 +56,7 @@ class DeepSet(keras.Model):
                 bias_regularizer=bias_regularizer,
                 spectral_normalization=spectral_normalization,
                 dropout=dropout,
-                pooling=pooling,
+                pooling=inner_pooling,
                 **kwargs
             )
             self.equivariant_modules.add(equivariant_module)
@@ -71,7 +72,7 @@ class DeepSet(keras.Model):
             kernel_initializer=kernel_initializer,
             bias_regularizer=bias_regularizer,
             dropout=dropout,
-            pooling=pooling,
+            pooling=output_pooling,
             spectral_normalization=spectral_normalization,
             **kwargs
         )
