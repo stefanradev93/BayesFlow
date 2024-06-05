@@ -25,14 +25,14 @@ def test_variable_batch_size(inference_network, random_samples, random_condition
 
     # run with another batch size
     batch_sizes = np.random.choice(10, replace=False, size=3)
-    for batch_size in batch_sizes:
-        new_input = keras.ops.zeros((batch_size,) + keras.ops.shape(random_samples)[1:])
+    for bs in batch_sizes:
+        new_input = keras.ops.zeros((bs,) + keras.ops.shape(random_samples)[1:])
         if random_conditions is None:
             new_conditions = None
         else:
-            new_conditions = keras.ops.zeros((batch_size,), + keras.ops.shape(random_conditions)[1:])
+            new_conditions = keras.ops.zeros((bs,) + keras.ops.shape(random_conditions)[1:])
 
-        inference_network(new_input)
+        inference_network(new_input, conditions=new_conditions)
         inference_network(new_input, conditions=new_conditions, inverse=True)
 
 
