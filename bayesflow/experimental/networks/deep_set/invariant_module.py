@@ -1,6 +1,6 @@
 
 import keras
-from keras import layers, regularizers
+from keras import layers
 from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
@@ -24,12 +24,10 @@ class InvariantModule(keras.Layer):
         num_dense_outer: int = 2,
         units_inner: int = 128,
         units_outer: int = 128,
-        activation: str | callable = "gelu",
-        kernel_regularizer: regularizers.Regularizer | None = None,
-        kernel_initializer: str = "he_uniform",
-        bias_regularizer: regularizers.Regularizer | None = None,
+        activation: str = "gelu",
+        kernel_initializer: str = "he_normal",
         dropout: float = 0.05,
-        pooling: str = "mean",
+        pooling: str | keras.Layer = "mean",
         spectral_normalization: bool = False,
         **kwargs
     ):
@@ -52,9 +50,7 @@ class InvariantModule(keras.Layer):
             layer = layers.Dense(
                 units=units_inner,
                 activation=activation,
-                kernel_regularizer=kernel_regularizer,
                 kernel_initializer=kernel_initializer,
-                bias_regularizer=bias_regularizer
             )
             if spectral_normalization:
                 layer = layers.SpectralNormalization(layer)
@@ -69,9 +65,7 @@ class InvariantModule(keras.Layer):
             layer = layers.Dense(
                 units=units_outer,
                 activation=activation,
-                kernel_regularizer=kernel_regularizer,
                 kernel_initializer=kernel_initializer,
-                bias_regularizer=bias_regularizer
             )
             if spectral_normalization:
                 layer = layers.SpectralNormalization(layer)

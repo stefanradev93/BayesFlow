@@ -1,6 +1,6 @@
 
 import keras
-from keras import layers, regularizers
+from keras import layers
 from keras.saving import (
     register_keras_serializable,
     serialize_keras_object
@@ -18,18 +18,16 @@ class DeepSet(keras.Model):
         self,
         summary_dim: int = 10,
         depth: int = 2,
-        inner_pooling: str = "mean",
-        output_pooling: str = "mean",
+        inner_pooling: str | keras.Layer = "mean",
+        output_pooling: str | keras.Layer = "mean",
         num_dense_equivariant: int = 2,
         num_dense_invariant_inner: int = 2,
         num_dense_invariant_outer: int = 2,
         units_equivariant: int = 128,
         units_invariant_inner: int = 128,
         units_invariant_outer: int = 128,
-        activation: str | callable = "gelu",
-        kernel_regularizer: regularizers.Regularizer | None = None,
-        kernel_initializer: str = "he_uniform",
-        bias_regularizer: regularizers.Regularizer | None = None,
+        activation: str = "gelu",
+        kernel_initializer: str = "he_normal",
         dropout: float = 0.05,
         spectral_normalization: bool = False,
         **kwargs
@@ -51,9 +49,7 @@ class DeepSet(keras.Model):
                 units_invariant_inner=units_invariant_inner,
                 units_invariant_outer=units_invariant_outer,
                 activation=activation,
-                kernel_regularizer=kernel_regularizer,
                 kernel_initializer=kernel_initializer,
-                bias_regularizer=bias_regularizer,
                 spectral_normalization=spectral_normalization,
                 dropout=dropout,
                 pooling=inner_pooling,
@@ -68,9 +64,7 @@ class DeepSet(keras.Model):
             units_inner=units_invariant_inner,
             units_outer=units_invariant_outer,
             activation=activation,
-            kernel_regularizer=kernel_regularizer,
             kernel_initializer=kernel_initializer,
-            bias_regularizer=bias_regularizer,
             dropout=dropout,
             pooling=output_pooling,
             spectral_normalization=spectral_normalization,

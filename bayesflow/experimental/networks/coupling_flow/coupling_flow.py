@@ -2,11 +2,10 @@
 from typing import Tuple, Union
 
 import keras
-from keras.saving import (
-    register_keras_serializable,
-)
+from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
+from bayesflow.experimental.utils import keras_kwargs
 from .actnorm import ActNorm
 from .couplings import DualCoupling
 from .permutations import OrthogonalPermutation, RandomPermutation, Swap
@@ -46,20 +45,21 @@ class CouplingFlow(InferenceNetwork):
         use_actnorm: bool = True,
         **kwargs
     ):
-        # TODO - propagate optional keyword arguments to find_network and ResNet respectively
-        super().__init__(**kwargs)
+        """TODO"""
+
+        super().__init__(**keras_kwargs(kwargs))
 
         self._layers = []
         for i in range(depth):
             if use_actnorm:
-                self._layers.append(ActNorm(name=f"ActNorm{i}"))
-            self._layers.append(DualCoupling(subnet, transform, name=f"DualCoupling{i}"))
+                self._layers.append(ActNorm())
+            self._layers.append(DualCoupling(subnet, transform, **kwargs))
             if permutation.lower() == "random":
-                self._layers.append(RandomPermutation(name=f"RandomPermutation{i}"))
+                self._layers.append(RandomPermutation())
             elif permutation.lower() == "swap":
-                self._layers.append(Swap(name=f"Swap{i}"))
+                self._layers.append(Swap())
             elif permutation.lower() == "learnable":
-                self._layers.append(OrthogonalPermutation(name=f"OrthogonalPermutation{i}"))
+                self._layers.append(OrthogonalPermutation())
 
     # noinspection PyMethodOverriding
     def build(self, xz_shape, conditions_shape=None):
