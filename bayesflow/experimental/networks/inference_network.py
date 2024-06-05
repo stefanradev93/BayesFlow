@@ -2,16 +2,12 @@
 from typing import Tuple, Union
 
 import keras
-from keras.saving import (
-    register_keras_serializable,
-)
 
 from bayesflow.experimental.types import Tensor
 from bayesflow.experimental.utils import find_distribution
 
 
-@register_keras_serializable(package="bayesflow.networks")
-class InferenceNetwork(keras.Model):
+class InferenceNetwork(keras.Layer):
     def __init__(self, base_distribution: str = "normal", **kwargs):
         super().__init__(**kwargs)
         self.base_distribution = find_distribution(base_distribution)
@@ -40,11 +36,8 @@ class InferenceNetwork(keras.Model):
         log_prob = self.base_distribution.log_prob(samples)
         return log_prob + log_det
 
-    def train_step(self, data):
-        # hack to avoid the call method in super().train_step()
-        call = self.call
-        self.call = lambda *args, **kwargs: None
-        rv = super().train_step(data)
-        self.call = call
+    def compute_loss(self, inferred_variables: Tensor, inference_conditions: Tensor = None, **kwargs) -> Tensor:
+        raise NotImplementedError
 
-        return rv
+    def compute_metrics(self, inferred_variables: Tensor, inference_conditions: Tensor = None, **kwargs) -> dict:
+        return {}

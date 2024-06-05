@@ -1,18 +1,12 @@
 
-from typing import Tuple, Union
-
 import keras
-from keras.saving import (
-    register_keras_serializable,
-    serialize_keras_object,
-)
 
 from bayesflow.experimental.types import Tensor
 
 
-class SummaryNetwork(keras.Model):
-    def call(self, *args, **kwargs) -> Tensor:
-        raise NotImplementedError
+class SummaryNetwork(keras.Layer):
+    def compute_loss(self, observed_variables: Tensor, summary_conditions: Tensor = None, **kwargs) -> Tensor:
+        return keras.ops.zeros(())
 
-    def compute_loss(self, **kwargs) -> Tensor:
-        raise NotImplementedError
+    def compute_metrics(self, observed_variables: Tensor, summary_conditions: Tensor = None, **kwargs) -> dict:
+        return {}
