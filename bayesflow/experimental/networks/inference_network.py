@@ -29,15 +29,16 @@ class InferenceNetwork(keras.Layer):
 
     def sample(self, num_samples: int, conditions: Tensor = None, **kwargs) -> Tensor:
         samples = self.base_distribution.sample((num_samples,))
-        return self(samples, conditions=conditions, inverse=True, jacobian=False, **kwargs)
+        samples = self(samples, conditions=conditions, inverse=True, jacobian=False, **kwargs)
+        return samples
 
-    def log_prob(self, x: Tensor, conditions: Tensor = None, **kwargs) -> Tensor:
-        samples, log_det = self(x, conditions=conditions, inverse=False, jacobian=True, **kwargs)
+    def log_prob(self, samples: Tensor, conditions: Tensor = None, **kwargs) -> Tensor:
+        samples, log_det = self(samples, conditions=conditions, inverse=False, jacobian=True, **kwargs)
         log_prob = self.base_distribution.log_prob(samples)
         return log_prob + log_det
 
-    def compute_loss(self, targets: Tensor, conditions: Tensor = None, **kwargs) -> Tensor:
+    def compute_loss(self, inference_variables: Tensor, inference_conditions: Tensor = None, **kwargs) -> Tensor:
         raise NotImplementedError
 
-    def compute_metrics(self, targets: Tensor, conditions: Tensor = None, **kwargs) -> dict:
+    def compute_metrics(self, inference_variables: Tensor, inference_conditions: Tensor = None, **kwargs) -> dict:
         return {}
