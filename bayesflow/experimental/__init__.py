@@ -1,20 +1,16 @@
 
 from . import (
-   amortizers,
-   datasets,
-   diagnostics,
-   networks,
-   simulation,
+    approximators,
+    datasets,
+    diagnostics,
+    distributions,
+    networks,
+    simulation,
 )
 
-from .amortizers import (
-    AmortizedLikelihood,
-    AmortizedPosterior,
-    Amortizer,
-)
+from .approximators import Approximator
 
-from .simulation import (
-    distribution,
-    JointDistribution,
+from .datasets import (
+    OnlineDataset,
+    OfflineDataset,
 )
-
