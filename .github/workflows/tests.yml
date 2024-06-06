@@ -20,6 +20,7 @@ jobs:
     defaults:
       run:
         shell: bash -el {0}
+    env: ${{ matrix.backend }}
 
     steps:
       - name: Checkout code
@@ -35,22 +36,18 @@ jobs:
         if: ${{ matrix.backend == 'jax' }}
         run: |
           pip install -U "jax[cpu]"
-          conda env config vars set KERAS_BACKEND=jax
       - name: Install NumPy
         if: ${{ matrix.backend == 'numpy' }}
         run: |
           conda install numpy
-          conda env config vars set KERAS_BACKEND=numpy
       - name: Install Tensorflow
         if: ${{ matrix.backend == 'tensorflow' }}
         run: |
           pip install -U tensorflow
-          conda env config vars set KERAS_BACKEND=tensorflow
       - name: Install PyTorch
         if: ${{ matrix.backend == 'torch' }}
         run: |
           conda install pytorch torchvision torchaudio cpuonly -c pytorch
-          conda env config vars set KERAS_BACKEND=torch
 
       - name: Show Environment Info
         run: |
