@@ -35,22 +35,22 @@ jobs:
         if: ${{ matrix.backend == 'jax' }}
         run: |
           pip install -U "jax[cpu]"
-          export KERAS_BACKEND=jax
+          conda env config vars set KERAS_BACKEND=jax
       - name: Install NumPy
         if: ${{ matrix.backend == 'numpy' }}
         run: |
           conda install numpy
-          export KERAS_BACKEND=numpy
+          conda env config vars set KERAS_BACKEND=numpy
       - name: Install Tensorflow
         if: ${{ matrix.backend == 'tensorflow' }}
         run: |
           pip install -U tensorflow
-          export KERAS_BACKEND=tensorflow
+          conda env config vars set KERAS_BACKEND=tensorflow
       - name: Install PyTorch
         if: ${{ matrix.backend == 'torch' }}
         run: |
           conda install pytorch torchvision torchaudio cpuonly -c pytorch
-          export KERAS_BACKEND=torch
+          conda env config vars set KERAS_BACKEND=torch
 
       - name: Show Environment Info
         run: |
