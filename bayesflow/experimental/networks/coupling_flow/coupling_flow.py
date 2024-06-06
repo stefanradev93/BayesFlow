@@ -69,12 +69,25 @@ class CouplingFlow(InferenceNetwork):
         else:
             self.call(keras.KerasTensor(xz_shape), conditions=keras.KerasTensor(conditions_shape))
 
-    def call(self, xz: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def call(
+        self,
+        xz: Tensor,
+        conditions: Tensor = None,
+        inverse: bool = False, **kwargs
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+
         if inverse:
             return self._inverse(xz, conditions=conditions, **kwargs)
         return self._forward(xz, conditions=conditions, **kwargs)
 
-    def _forward(self, x: Tensor, conditions: Tensor = None, jacobian: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def _forward(
+        self,
+        x: Tensor,
+        conditions: Tensor = None,
+        jacobian: bool = False,
+        **kwargs
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+
         z = x
         log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
         for layer in self._layers:
