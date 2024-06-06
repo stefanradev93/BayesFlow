@@ -19,10 +19,16 @@ def inference_network():
     return network
 
 
-@pytest.fixture(params=[bf.AmortizedPosterior, bf.AmortizedLikelihood])
-def amortizer(request, inference_network, summary_network):
-    Amortizer = request.param
-    return Amortizer(inference_network, summary_network)
+@pytest.fixture()
+def approximator(inference_network, summary_network):
+    return bf.Approximator(
+        inference_network=inference_network,
+        summary_network=summary_network,
+        inference_variables=[],
+        inference_conditions=[],
+        summary_variables=[],
+        summary_conditions=[],
+    )
 
 
 @pytest.fixture()
