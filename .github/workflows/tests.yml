@@ -17,6 +17,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python-version: ["3.10", "3.11"]
         backend: ["jax", "numpy", "tensorflow", "torch"]
+    defaults:
+      run:
+        shell: bash -el {0}
 
     steps:
       - name: Checkout code
