@@ -9,11 +9,11 @@ from keras.saving import (
 
 from bayesflow.experimental.types import Tensor
 
-from .base_amortizer import BaseAmortizer
+from .base_approximator import BaseApproximator
 
 
-@register_keras_serializable(package="bayesflow.amortizers")
-class Amortizer(BaseAmortizer):
+@register_keras_serializable(package="bayesflow.approximators")
+class Approximator(BaseApproximator):
     def __init__(
         self,
         inference_variables: list[str],
@@ -29,6 +29,8 @@ class Amortizer(BaseAmortizer):
         The complete semantics of this class allow for flexible estimation of the following distribution:
 
         Q(inference_variables | H(summary_variables; summary_conditions), inference_conditions),
+
+        #TODO - math notation
 
         where all quantities to the right of the "given" symbol | are optional and H refers to the optional
         summary /embedding network used to compress high-dimensional data into lower-dimensional summary
@@ -67,6 +69,24 @@ class Amortizer(BaseAmortizer):
         self.inference_conditions = inference_conditions or []
         self.summary_variables = summary_variables or []
         self.summary_conditions = summary_conditions or []
+
+    def configure_full_conditions(
+        self,
+        summary_outputs: Tensor | None,
+        inference_conditions: Tensor | None,
+    ) -> Tensor:
+        """
+        Combine the (optional) inference conditions with the (optional) outputs
+        of the (optional) summary network.
+        """
+
+        if summary_outputs is None:
+            return inference_conditions
+        if inference_conditions is None:
+            return summary_outputs
+        return keras.ops.concatenate(
+            (summary_outputs, inference_conditions), axis=-1
+        )
 
     def configure_inference_variables(self, data: dict[str, Tensor]) -> Tensor:
         return ops.concatenate([data[key] for key in self.inference_variables])
