@@ -6,7 +6,7 @@ from keras.saving import register_keras_serializable
 from bayesflow.experimental.types import Tensor
 
 
-@register_keras_serializable(package="bayesflow.networks.resnet")
+@register_keras_serializable(package="bayesflow.networks")
 class ConfigurableHiddenBlock(keras.layers.Layer):
     def __init__(
         self,
@@ -38,8 +38,8 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
         return self.activation_fn(x)
 
     def build(self, input_shape):
-        super().build(input_shape)
-        self(keras.KerasTensor(input_shape))
+        # build nested layers with forward pass
+        self.call(keras.KerasTensor(input_shape))
 
     def get_config(self):
         config = super().get_config()
