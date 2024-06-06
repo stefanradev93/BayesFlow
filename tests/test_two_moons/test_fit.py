@@ -14,7 +14,7 @@ def test_compile(amortizer):
 def test_fit(amortizer, dataset):
     # TODO: verify the model learns something by comparing a metric before and after training
     amortizer.compile(optimizer="AdamW")
-    amortizer.fit(dataset, epochs=10, steps_per_epoch=10, batch_size=32)
+    amortizer.fit(dataset, epochs=10, steps_per_epoch=10)
 
 
 @pytest.mark.skip(reason="not implemented")
