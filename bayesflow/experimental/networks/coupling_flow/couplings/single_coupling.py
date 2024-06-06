@@ -17,22 +17,32 @@ class SingleCoupling(InvertibleLayer):
     """
     def __init__(
         self,
-        network: str = "resnet",
+        subnet: str = "resnet",
         transform: str = "affine",
-        output_layer_kernel_init: str = "zeros",
         **kwargs
     ):
         super().__init__(**keras_kwargs(kwargs))
-        self.output_projector = keras.layers.Dense(
-            units=None,
-            kernel_initializer=output_layer_kernel_init,
-        )
-        self.network = find_network(network, **kwargs.get("subnet_kwargs", {}))
+
+        self.network = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
         self.transform = find_transform(transform, **kwargs.get("transform_kwargs", {}))
 
+        output_projector_kwargs = kwargs.get("output_projector_kwargs", {})
+        output_projector_kwargs.setdefault("kernel_initializer", "zeros")
+        self.output_projector = keras.layers.Dense(units=None, **output_projector_kwargs)
+
     # noinspection PyMethodOverriding
-    def build(self, x1_shape, x2_shape):
+    def build(self, x1_shape, x2_shape, conditions_shape=None):
         self.output_projector.units = self.transform.params_per_dim * x2_shape[-1]
+
+        x1 = keras.KerasTensor(x1_shape)
+        x2 = keras.KerasTensor(x2_shape)
+        if conditions_shape is None:
+            conditions = None
+        else:
+            conditions = keras.KerasTensor(conditions_shape)
+
+        # build nested layers with forward pass
+        self.call(x1, x2, conditions=conditions)
 
     def call(self, x1: Tensor, x2: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs) -> ((Tensor, Tensor), Tensor):
         if inverse:

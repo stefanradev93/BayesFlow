@@ -16,8 +16,18 @@ class DualCoupling(InvertibleLayer):
         self.coupling2 = SingleCoupling(subnet, transform, **kwargs)
         self.pivot = None
 
-    def build(self, input_shape):
-        self.pivot = input_shape[-1] // 2
+    # noinspection PyMethodOverriding
+    def build(self, xz_shape, conditions_shape=None):
+        self.pivot = xz_shape[-1] // 2
+
+        xz = keras.KerasTensor(xz_shape)
+        if conditions_shape is None:
+            conditions = None
+        else:
+            conditions = keras.KerasTensor(conditions_shape)
+
+        # build nested layers with forward pass
+        self.call(xz, conditions=conditions)
 
     def call(self, xz: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs) -> (Tensor, Tensor):
         if inverse:
