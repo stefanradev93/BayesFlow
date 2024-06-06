@@ -28,7 +28,7 @@ jobs:
           activate-environment: bayesflow
           environment-file: environment.yaml
           python-version: ${{ matrix.python-version }}
-          auto-active-base: false
+          auto-activate-base: false
 
       - name: Install JAX
         if: ${{ matrix.backend == 'jax' }}
