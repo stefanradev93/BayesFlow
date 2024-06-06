@@ -25,11 +25,8 @@ jobs:
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          activate-environment: bayesflow
           environment-file: environment.yaml
           python-version: ${{ matrix.python-version }}
-          auto-activate-base: false
-          use-mamba: true
 
       - name: Install JAX
         if: ${{ matrix.backend == 'jax' }}
