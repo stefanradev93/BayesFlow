@@ -1,19 +1,25 @@
 
 import torch
 
-
 from .base_approximator import BaseApproximator
 
 
 class TorchApproximator(BaseApproximator):
     def train_step(self, data):
         with torch.enable_grad():
-            metrics = self.compute_metrics(data, mode="training")
+            metrics = self.compute_metrics(data, stage="training")
 
-        loss = metrics.pop("loss")
+        loss = metrics["loss"]
 
-        self.optimizer.zero_grad()
+        # noinspection PyUnresolvedReferences
+        self.zero_grad()
         loss.backward()
-        self.optimizer.step()
+
+        trainable_weights = self.trainable_weights[:]
+        gradients = [v.value.grad for v in trainable_weights]
+
+        # Update weights
+        with torch.no_grad():
+            self.optimizer.apply(gradients, trainable_weights)
 
         return metrics
