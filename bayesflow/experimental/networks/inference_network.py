@@ -37,8 +37,5 @@ class InferenceNetwork(keras.Layer):
         log_prob = self.base_distribution.log_prob(samples)
         return log_prob + log_det
 
-    def compute_loss(self, inference_variables: Tensor, inference_conditions: Tensor = None, **kwargs) -> Tensor:
+    def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
         raise NotImplementedError
-
-    def compute_metrics(self, inference_variables: Tensor, inference_conditions: Tensor = None, **kwargs) -> dict:
-        return {}

@@ -5,7 +5,7 @@ import keras
 from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
-from bayesflow.experimental.utils import find_permutation
+from bayesflow.experimental.utils import find_permutation, keras_kwargs
 from .actnorm import ActNorm
 from .couplings import DualCoupling
 from ..inference_network import InferenceNetwork
@@ -42,21 +42,21 @@ class CouplingFlow(InferenceNetwork):
         transform: str = "affine",
         permutation: str | None = None,
         use_actnorm: bool = True,
+        base_distribution: str = "normal",
         **kwargs
     ):
-        # TODO - propagate optional keyword arguments to find_network and ResNet respectively
-        super().__init__(**kwargs)
+        super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
 
         self.depth = depth
 
         self.invertible_layers = []
         for i in range(depth):
             if use_actnorm:
-                self.invertible_layers.append(ActNorm(name=f"ActNorm{i}"))
+                self.invertible_layers.append(ActNorm(**kwargs))
 
-            self.invertible_layers.append(DualCoupling(subnet, transform, name=f"DualCoupling{i}"))
+            self.invertible_layers.append(DualCoupling(subnet, transform, **kwargs))
 
-            if (p := find_permutation(permutation, name=f"Permutation{i}")) is not None:
+            if (p := find_permutation(permutation, **kwargs)) is not None:
                 self.invertible_layers.append(p)
 
     # noinspection PyMethodOverriding
@@ -99,9 +99,12 @@ class CouplingFlow(InferenceNetwork):
             return x, log_det
         return x
 
-    def compute_loss(self, inference_variables: Tensor, inference_conditions: Tensor = None, **kwargs) -> Tensor:
-        z, log_det = self(inference_variables, conditions=inference_conditions, inverse=False, jacobian=True, **kwargs)
-        log_prob = self.base_distribution.log_prob(z)
-        nll = -keras.ops.mean(log_prob + log_det)
+    def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
+        inference_variables = data["inference_variables"]
+        inference_conditions = data.get("inference_conditions")
 
-        return nll
+        z, log_det = self(inference_variables, conditions=inference_conditions, inverse=False, jacobian=True)
+        log_prob = self.base_distribution.log_prob(z)
+        loss = -keras.ops.mean(log_prob + log_det)
+
+        return {"loss": loss}
