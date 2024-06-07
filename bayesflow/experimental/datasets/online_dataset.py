@@ -15,8 +15,7 @@ class OnlineDataset(keras.utils.PyDataset):
 
     def __getitem__(self, item: int) -> (dict, dict):
         """ Sample a batch of data from the joint distribution unconditionally """
-        data = self.distribution.sample((self.batch_size,))
-        return data, {}
+        return self.distribution.sample((self.batch_size,))
 
     @property
     def num_batches(self):

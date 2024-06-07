@@ -23,8 +23,7 @@ class OfflineDataset(keras.utils.PyDataset):
         """ Get a batch of pre-simulated data """
         item = slice(item * self.batch_size, (item + 1) * self.batch_size)
         item = self.indices[item]
-        data = nested_getitem(self.data, item)
-        return data, {}
+        return nested_getitem(self.data, item)
 
     def __len__(self) -> int:
         return math.ceil(len(self.indices) / self.batch_size)

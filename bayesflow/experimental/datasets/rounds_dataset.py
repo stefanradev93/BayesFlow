@@ -22,8 +22,7 @@ class RoundsDataset(keras.utils.PyDataset):
 
     def __getitem__(self, item: int) -> (dict, dict):
         """ Get a batch of pre-simulated data """
-        data = self.data[item]
-        return data, {}
+        return self.data[item]
 
     @property
     def num_batches(self):
