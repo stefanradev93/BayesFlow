@@ -5,5 +5,5 @@ from .flow_matching import FlowMatching
 from .inference_network import InferenceNetwork
 from .mlp import MLP
 from .resnet import ResNet
-from .set_transformer import SetTransformer
+from .transformers import SetTransformer
 from .summary_network import SummaryNetwork
