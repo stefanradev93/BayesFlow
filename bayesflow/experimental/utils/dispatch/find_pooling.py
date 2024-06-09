@@ -19,8 +19,8 @@ def _(name: str, **kwargs):
         case "min":
             pooling = keras.layers.Lambda(lambda inp: keras.ops.min(inp, axis=-2))
         case "learnable" | "pma" | "attention":
-            from bayesflow.experimental.networks.set_transformer.pma import PoolingByMultiheadAttention
-            pooling = PoolingByMultiheadAttention(**kwargs)
+            from bayesflow.experimental.networks.transformers.pma import PoolingByMultiHeadAttention
+            pooling = PoolingByMultiHeadAttention(**kwargs)
         case other:
             raise ValueError(f"Unsupported pooling name: '{other}'.")
 
