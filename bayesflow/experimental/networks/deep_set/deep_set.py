@@ -16,7 +16,7 @@ from .equivariant_module import EquivariantModule
 class DeepSet(keras.Model):
     def __init__(
         self,
-        summary_dim: int = 10,
+        summary_dim: int = 16,
         depth: int = 2,
         inner_pooling: str | keras.Layer = "mean",
         output_pooling: str | keras.Layer = "mean",
