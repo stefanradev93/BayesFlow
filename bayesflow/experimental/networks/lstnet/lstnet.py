@@ -22,10 +22,13 @@ class LSTNet(keras.Model):
     def __init__(
         self,
         num_filters: int,
+        num_time_steps: int,
         kernel_size: int = 4,
         kernel_initializer: str = "glorot_uniform",
         kernel_regularizer: regularizers.Regularizer | None = None,
         activation: str = "relu",
+        conv_out: int = 64,
+        skip_step: int = 4,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -33,66 +36,56 @@ class LSTNet(keras.Model):
         # TODO: Tidy code and condense comments
         
         # Define model sequencer
-        model = Sequential()
+        self.model = Sequential()
                 
-        # 1D convolution layer with ReLU activation
+        # 1D convolution layer with custom activation
         conv1 = layers.Conv1D(
             filters=num_filters,
             kernel_size=kernel_size,
-            activation="relu",
+            activation=activation,
             kernel_initializer=kernel_initializer,
             kernel_regularizer=kernel_regularizer
         )
         
         # Batch normalization layer
-        bnorm = layers.BatchNormalization() # any custom ars here? 
+        bnorm = layers.BatchNormalization() # TODO: any custom args here?
         
-        # GRU layers (create some sort of functional to add to Sequencer)
-        full_gru = layers.GRU(...) # temp for gru.py
-        skip_gru = layers.GRU(...)
-        comb_gru = layers.Concatenate(axis=-1)
+        # Reshaping layers
+        # TODO: skeptical on these dimensions being correct
+        self.keep_reshape = layers.Reshape((-1, num_time_steps - num_filters + 1, conv_out))
+        self.skip_reshape = layers.Reshape((-1, (num_time_steps - num_filters + 1) // skip_step, conv_out * skip_step))
+        
+        # GRU layers
+        self.keep_gru = layers.GRU(4) # temp for gru.py
+        self.skip_gru = layers.GRU(4) # temp for skip_gru.py
+        self.gru_concat = layers.Concatenate(axis=-1)
         
         # Final dense layer
-        final_dense = layers.Dense(...)
+        self.final_dense = layers.Dense(activation="relu") # TODO: upgrade to ResNet
         
         # Aggregate layers
-        model.add(conv1)
-        model.add(bnorm)
+        self.model.add(conv1)
+        self.model.add(bnorm)
         
         # How to send to different channels for GRU(s)?
-        
-        model.add(final_dense)
-        
-        
-        
-        
-        # Add in ResNet instead of final dense layer? (test for performance)
-        
-        
-        pass
     
     def call(self, x: Tensor) -> Tensor:
-        
-        # Run through top layers
-        # 2d convolution layer: (try 1d conv)
-        
-        # ReLU activation layer:
-        
-        # 2d batch norm layer:
-        
-        # Reshape
-        
-        # gru selection (calls gru and skip_gru classes)
-        
-        # combine results of above to dense layer
-        
-        pass
+        # Conv and batch norm
+        x = self.model(x)
+        # Reshape into parallel channels
+        x_keep = self.keep_reshape(x)
+        x_skip = self.skip_reshape(x)
+        # Parallel GRU and Skip GRU
+        x_keep = self.keep_gru(x_keep)
+        x_skip = self.skip_gru(x_skip)
+        # Concatenate results
+        x = self.gru_concat([x_keep, x_skip])
+        # Final dense and return
+        x = self.final_dense(x)
+        return x
     
     
     def build(self, input_shape):
         # Built in reference to deepset changes
         super().build(input_shape)
         self(keras.KerasTensor(input_shape))
-    
-    
-    # get_config???
