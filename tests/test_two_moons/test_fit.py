@@ -5,6 +5,8 @@ import pytest
 from tests.utils import InterruptFitCallback, FitInterruptedError
 
 
+# TODO: implement for other backends and remove marker
+@pytest.mark.torch
 def test_fit(approximator, train_dataset, validation_dataset):
     # TODO: verify the model learns something by comparing a metric before and after training
     approximator.compile(optimizer="AdamW")
