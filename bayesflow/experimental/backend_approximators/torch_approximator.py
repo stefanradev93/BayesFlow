@@ -22,4 +22,6 @@ class TorchApproximator(BaseApproximator):
         with torch.no_grad():
             self.optimizer.apply(gradients, trainable_weights)
 
+        self._loss_tracker.update_state(loss)
+
         return metrics

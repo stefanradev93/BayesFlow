@@ -5,10 +5,14 @@ import pytest
 from tests.utils import InterruptFitCallback, FitInterruptedError
 
 
-def test_fit(approximator, dataset):
+def test_fit(approximator, train_dataset, validation_dataset):
     # TODO: verify the model learns something by comparing a metric before and after training
     approximator.compile(optimizer="AdamW")
-    approximator.fit(dataset, epochs=10, steps_per_epoch=10)
+    approximator.fit(
+        x=train_dataset,
+        validation_data=validation_dataset,
+        epochs=2,
+    )
 
 
 @pytest.mark.skip(reason="not implemented")

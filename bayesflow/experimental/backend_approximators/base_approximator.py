@@ -1,5 +1,6 @@
 
 import keras
+import warnings
 
 from bayesflow.experimental.configurators import BaseConfigurator
 from bayesflow.experimental.networks import InferenceNetwork, SummaryNetwork
@@ -23,7 +24,23 @@ class BaseApproximator(keras.Model):
         raise NotImplementedError
 
     def test_step(self, data: dict[str, Tensor]) -> dict[str, Tensor]:
-        return self.compute_metrics(data)
+        metrics = self.compute_metrics(data, stage="validation")
+        self._loss_tracker.update_state(metrics["loss"])
+        return metrics
+
+    def evaluate(self, *args, **kwargs):
+        val_logs = super().evaluate(*args, **kwargs)
+
+        if val_logs is None:
+            # https://github.com/keras-team/keras/issues/19835
+            warnings.warn(f"Found no validation logs due to a bug in keras. "
+                          f"Applying workaround, but incorrect loss values may be logged. "
+                          f"If possible, increase the size of your dataset, "
+                          f"or lower the number of validation steps used.")
+
+            val_logs = {}
+
+        return val_logs
 
     # noinspection PyMethodOverriding
     def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:

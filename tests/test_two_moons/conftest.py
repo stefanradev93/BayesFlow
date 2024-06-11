@@ -28,9 +28,17 @@ def simulator():
 
 
 @pytest.fixture()
-def dataset(simulator):
-    from bayesflow.experimental.datasets import OnlineDataset
-    return OnlineDataset(simulator, workers=4, max_queue_size=16, batch_size=16)
+def train_dataset(simulator, batch_size):
+    from bayesflow.experimental.datasets import OfflineDataset
+    data = simulator.sample((16 * batch_size,))
+    return OfflineDataset(data, workers=4, max_queue_size=16, batch_size=batch_size)
+
+
+@pytest.fixture()
+def validation_dataset(simulator, batch_size):
+    from bayesflow.experimental.datasets import OfflineDataset
+    data = simulator.sample((4 * batch_size,))
+    return OfflineDataset(data, workers=4, max_queue_size=16, batch_size=batch_size)
 
 
 @pytest.fixture()
