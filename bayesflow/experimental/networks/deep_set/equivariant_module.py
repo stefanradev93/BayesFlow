@@ -107,5 +107,4 @@ class EquivariantModule(keras.Layer):
         return output_set
 
     def build(self, input_shape):
-        super().build(input_shape)
-        self(keras.KerasTensor(input_shape))
+        self.call(keras.ops.zeros(input_shape))

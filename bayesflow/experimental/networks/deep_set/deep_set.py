@@ -97,8 +97,7 @@ class DeepSet(keras.Model):
         return set_representation
 
     def build(self, input_shape):
-        super().build(input_shape)
-        self(keras.KerasTensor(input_shape))
+        self.call(keras.ops.zeros(input_shape))
 
     def get_config(self):
         config = super().get_config()

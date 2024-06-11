@@ -94,5 +94,4 @@ class InvariantModule(keras.Layer):
         return set_summary
 
     def build(self, input_shape):
-        super().build(input_shape)
-        self(keras.KerasTensor(input_shape))
+        self.call(keras.ops.zeros(input_shape))

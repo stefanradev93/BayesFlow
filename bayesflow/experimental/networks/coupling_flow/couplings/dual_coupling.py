@@ -20,11 +20,11 @@ class DualCoupling(InvertibleLayer):
     def build(self, xz_shape, conditions_shape=None):
         self.pivot = xz_shape[-1] // 2
 
-        xz = keras.KerasTensor(xz_shape)
+        xz = keras.ops.zeros(xz_shape)
         if conditions_shape is None:
             conditions = None
         else:
-            conditions = keras.KerasTensor(conditions_shape)
+            conditions = keras.ops.zeros(conditions_shape)
 
         # build nested layers with forward pass
         self.call(xz, conditions=conditions)

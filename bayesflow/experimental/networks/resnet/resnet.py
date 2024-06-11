@@ -17,7 +17,7 @@ class ResNet(keras.Layer):
 
     def build(self, input_shape):
         # build nested layers with forward pass
-        self.call(keras.KerasTensor(input_shape))
+        self.call(keras.ops.zeros(input_shape))
 
     def call(self, x: Tensor, **kwargs) -> Tensor:
         x = self.input_layer(x)

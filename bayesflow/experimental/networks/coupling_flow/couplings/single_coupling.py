@@ -34,12 +34,12 @@ class SingleCoupling(InvertibleLayer):
     def build(self, x1_shape, x2_shape, conditions_shape=None):
         self.output_projector.units = self.transform.params_per_dim * x2_shape[-1]
 
-        x1 = keras.KerasTensor(x1_shape)
-        x2 = keras.KerasTensor(x2_shape)
+        x1 = keras.ops.zeros(x1_shape)
+        x2 = keras.ops.zeros(x2_shape)
         if conditions_shape is None:
             conditions = None
         else:
-            conditions = keras.KerasTensor(conditions_shape)
+            conditions = keras.ops.zeros(conditions_shape)
 
         # build nested layers with forward pass
         self.call(x1, x2, conditions=conditions)

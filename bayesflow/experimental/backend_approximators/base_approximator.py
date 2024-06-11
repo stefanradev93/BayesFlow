@@ -16,7 +16,7 @@ class BaseApproximator(keras.Model):
 
     # noinspect PyMethodOverriding
     def build(self, data_shapes: dict[str, Shape]):
-        data = {key: keras.KerasTensor(val) for key, val in data_shapes.items()}
+        data = {name: keras.ops.zeros(shape) for name, shape in data_shapes.items()}
         self.compute_metrics(data, stage="training")
 
     def train_step(self, data: dict[str, Tensor]) -> dict[str, Tensor]:
