@@ -4,6 +4,8 @@ from tensorflow import Tensor # TODO: remove, temp to stop strange Notebook erro
 from bayesflow.experimental.utils import keras_kwargs
 from keras import layers, Sequential, regularizers
 from keras.saving import (register_keras_serializable)
+from .skip_gru import SkipGRU
+from ...networks.resnet import ResNet
 
 @register_keras_serializable(package="bayesflow.networks.lstnet")
 class LSTNet(keras.Model):
@@ -37,7 +39,7 @@ class LSTNet(keras.Model):
         
         # TODO: Tidy code and condense comments
         
-        # Define model sequencer
+        # Define model
         self.model = Sequential()
         
         # 1D convolution layer with custom activation
@@ -50,23 +52,22 @@ class LSTNet(keras.Model):
         )
         
         # Batch normalization layer
-        self.bnorm = layers.BatchNormalization() # TODO: any custom args here?
+        self.bnorm = layers.BatchNormalization()
         
-        # GRU layers
-        self.keep_gru = layers.GRU(gru_out) # temp for gru.py
-        self.skip_gru = layers.GRU(gru_out) # temp for skip_gru.py
-        self.gru_add = layers.Add()
-        # self.gru_concat = layers.Concatenate(axis=-1)
+        # Skip GRU
+        self.skip_gru = SkipGRU(gru_out, [2])
         
         # Final dense layer
         self.final_dense = layers.Dense(dense_out, activation="relu") # TODO: upgrade to ResNet
         
-        # Aggregate layers
-        #                                In:  (batch, time steps, num series)
+        self.resnet = ResNet(width=dense_out)
+        
+        # Aggregate layers               In:  (batch, time steps, num series)
         self.model.add(self.conv1)       # -> (batch, reduced time steps, cnn_out)
         self.model.add(self.bnorm)       # -> (batch, reduced time steps, cnn_out)
-        self.model.add(self.keep_gru)    # -> (batch, gru_out)
-        self.model.add(self.final_dense) # -> (batch, gru_out)
+        self.model.add(self.skip_gru)    # -> (batch, gru_out) ...ideally
+        # self.model.add(self.final_dense) # -> (batch, gru_out)
+        self.model.add(self.resnet)
     
     
     def call(self, x: Tensor) -> Tensor:
