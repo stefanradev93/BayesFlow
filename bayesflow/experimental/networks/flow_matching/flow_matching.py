@@ -8,15 +8,16 @@ from keras.saving import (
 from scipy.integrate import solve_ivp
 
 from bayesflow.experimental.types import Tensor
-from bayesflow.experimental.utils import find_network
+from bayesflow.experimental.utils import find_network, keras_kwargs
+
 from ..inference_network import InferenceNetwork
 
 
 @register_keras_serializable(package="bayesflow.networks")
 class FlowMatching(InferenceNetwork):
     def __init__(self, network: str = "resnet", **kwargs):
-        super().__init__(**kwargs)
-        self.network = find_network(network)
+        super().__init__(**keras_kwargs(kwargs))
+        self.network = find_network(network, **kwargs)
 
     def velocity(self, x: Tensor, t: Tensor, conditions: any = None):
         if conditions is None:

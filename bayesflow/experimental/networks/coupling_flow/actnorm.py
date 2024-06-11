@@ -3,6 +3,8 @@ from keras import ops
 from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
+from bayesflow.experimental.utils import keras_kwargs
+
 from .invertible_layer import InvertibleLayer
 
 
@@ -28,7 +30,7 @@ class ActNorm(InvertibleLayer):
        Advances in Neural Information Processing Systems, 29.
     """
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(**keras_kwargs(kwargs))
         self.scale = None
         self.bias = None
 
