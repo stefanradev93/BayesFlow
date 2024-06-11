@@ -1,1 +1,1 @@
-from lstnet import LSTNet
+from .lstnet import LSTNet
