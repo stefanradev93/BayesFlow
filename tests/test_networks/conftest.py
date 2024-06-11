@@ -11,13 +11,13 @@ def batch_size(request):
 @pytest.fixture()
 def coupling_flow():
     from bayesflow.experimental.networks import CouplingFlow
-    return CouplingFlow()
+    return CouplingFlow(depth=2, subnet_kwargs=dict(depth=2, width=64))
 
 
 @pytest.fixture()
 def flow_matching():
     from bayesflow.experimental.networks import FlowMatching
-    return FlowMatching()
+    return FlowMatching(network_kwargs=dict(depth=2, width=64))
 
 
 @pytest.fixture(params=["coupling_flow"])
