@@ -2,16 +2,12 @@
 from typing import Tuple, Union
 
 import keras
-from keras.saving import (
-    register_keras_serializable,
-)
 
 from bayesflow.experimental.types import Tensor
 from bayesflow.experimental.utils import find_distribution
 
 
-@register_keras_serializable(package="bayesflow.networks")
-class InferenceNetwork(keras.Model):
+class InferenceNetwork(keras.Layer):
     def __init__(self, base_distribution: str = "normal", **kwargs):
         super().__init__(**kwargs)
         self.base_distribution = find_distribution(base_distribution)
@@ -33,18 +29,13 @@ class InferenceNetwork(keras.Model):
 
     def sample(self, num_samples: int, conditions: Tensor = None, **kwargs) -> Tensor:
         samples = self.base_distribution.sample((num_samples,))
-        return self(samples, conditions=conditions, inverse=True, jacobian=False, **kwargs)
+        samples = self(samples, conditions=conditions, inverse=True, jacobian=False, **kwargs)
+        return samples
 
-    def log_prob(self, x: Tensor, conditions: Tensor = None, **kwargs) -> Tensor:
-        samples, log_det = self(x, conditions=conditions, inverse=False, jacobian=True, **kwargs)
+    def log_prob(self, samples: Tensor, conditions: Tensor = None, **kwargs) -> Tensor:
+        samples, log_det = self(samples, conditions=conditions, inverse=False, jacobian=True, **kwargs)
         log_prob = self.base_distribution.log_prob(samples)
         return log_prob + log_det
 
-    def train_step(self, data):
-        # hack to avoid the call method in super().train_step()
-        call = self.call
-        self.call = lambda *args, **kwargs: None
-        rv = super().train_step(data)
-        self.call = call
-
-        return rv
+    def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
+        raise NotImplementedError

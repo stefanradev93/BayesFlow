@@ -1,9 +1,8 @@
 
 import keras
-from keras.saving import (
-    register_keras_serializable,
-)
+from keras.saving import register_keras_serializable
 
+from bayesflow.experimental.utils import keras_kwargs
 from bayesflow.experimental.types import Tensor
 from .single_coupling import SingleCoupling
 from ..invertible_layer import InvertibleLayer
@@ -12,13 +11,23 @@ from ..invertible_layer import InvertibleLayer
 @register_keras_serializable(package="bayesflow.networks.coupling_flow")
 class DualCoupling(InvertibleLayer):
     def __init__(self, subnet: str = "resnet", transform: str = "affine", **kwargs):
-        super().__init__(**kwargs)
-        self.coupling1 = SingleCoupling(subnet, transform, name=f"CouplingA")
-        self.coupling2 = SingleCoupling(subnet, transform, name=f"CouplingB")
+        super().__init__(**keras_kwargs(kwargs))
+        self.coupling1 = SingleCoupling(subnet, transform, **kwargs)
+        self.coupling2 = SingleCoupling(subnet, transform, **kwargs)
         self.pivot = None
 
-    def build(self, input_shape):
-        self.pivot = input_shape[-1] // 2
+    # noinspection PyMethodOverriding
+    def build(self, xz_shape, conditions_shape=None):
+        self.pivot = xz_shape[-1] // 2
+
+        xz = keras.KerasTensor(xz_shape)
+        if conditions_shape is None:
+            conditions = None
+        else:
+            conditions = keras.KerasTensor(conditions_shape)
+
+        # build nested layers with forward pass
+        self.call(xz, conditions=conditions)
 
     def call(self, xz: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs) -> (Tensor, Tensor):
         if inverse:

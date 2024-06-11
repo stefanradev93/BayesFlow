@@ -1,11 +1,9 @@
 
 import keras
-from keras.saving import (
-    register_keras_serializable
-)
+from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
-from bayesflow.experimental.utils import find_network
+from bayesflow.experimental.utils import find_network, keras_kwargs
 from ..invertible_layer import InvertibleLayer
 from ..transforms import find_transform
 
@@ -17,15 +15,34 @@ class SingleCoupling(InvertibleLayer):
 
     Subnet output tensors are linearly mapped to the correct dimension.
     """
-    def __init__(self, network: str = "resnet", transform: str = "affine", **kwargs):
-        super().__init__(**kwargs)
-        self.output_projector = keras.layers.Dense(None, kernel_initializer="zeros", bias_initializer="zeros")
-        self.network = find_network(network)
-        self.transform = find_transform(transform)
+    def __init__(
+        self,
+        subnet: str = "resnet",
+        transform: str = "affine",
+        **kwargs
+    ):
+        super().__init__(**keras_kwargs(kwargs))
+
+        self.network = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
+        self.transform = find_transform(transform, **kwargs.get("transform_kwargs", {}))
+
+        output_projector_kwargs = kwargs.get("output_projector_kwargs", {})
+        output_projector_kwargs.setdefault("kernel_initializer", "zeros")
+        self.output_projector = keras.layers.Dense(units=None, **output_projector_kwargs)
 
     # noinspection PyMethodOverriding
-    def build(self, x1_shape, x2_shape):
+    def build(self, x1_shape, x2_shape, conditions_shape=None):
         self.output_projector.units = self.transform.params_per_dim * x2_shape[-1]
+
+        x1 = keras.KerasTensor(x1_shape)
+        x2 = keras.KerasTensor(x2_shape)
+        if conditions_shape is None:
+            conditions = None
+        else:
+            conditions = keras.KerasTensor(conditions_shape)
+
+        # build nested layers with forward pass
+        self.call(x1, x2, conditions=conditions)
 
     def call(self, x1: Tensor, x2: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs) -> ((Tensor, Tensor), Tensor):
         if inverse:

@@ -17,6 +17,11 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python-version: ["3.10", "3.11"]
         backend: ["jax", "numpy", "tensorflow", "torch"]
+    defaults:
+      run:
+        shell: bash -el {0}
+    env:
+      KERAS_BACKEND: ${{ matrix.backend }}
 
     steps:
       - name: Checkout code
@@ -25,31 +30,25 @@ jobs:
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          activate-environment: bayesflow
           environment-file: environment.yaml
           python-version: ${{ matrix.python-version }}
-          auto-active-base: false
 
       - name: Install JAX
         if: ${{ matrix.backend == 'jax' }}
         run: |
           pip install -U "jax[cpu]"
-          export KERAS_BACKEND=jax
       - name: Install NumPy
         if: ${{ matrix.backend == 'numpy' }}
         run: |
           conda install numpy
-          export KERAS_BACKEND=numpy
       - name: Install Tensorflow
         if: ${{ matrix.backend == 'tensorflow' }}
         run: |
           pip install -U tensorflow
-          export KERAS_BACKEND=tensorflow
       - name: Install PyTorch
         if: ${{ matrix.backend == 'torch' }}
         run: |
           conda install pytorch torchvision torchaudio cpuonly -c pytorch
-          export KERAS_BACKEND=torch
 
       - name: Show Environment Info
         run: |
@@ -59,6 +58,22 @@ jobs:
           conda config --show
           printenv | sort
 
-      - name: Run tests
+      - name: Run JAX Tests
+        if: ${{ matrix.backend == 'jax' }}
         run: |
-          python -m pytest tests/ -n auto -v
+          python -m pytest tests/ -n auto -v -m "not (numpy or tensorflow or torch)"
+
+      - name: Run NumPy Tests
+        if: ${{ matrix.backend == 'numpy' }}
+        run: |
+          python -m pytest tests/ -n auto -v -m "not (jax or tensorflow or torch)"
+
+      - name: Run TensorFlow Tests
+        if: ${{ matrix.backend == 'tensorflow' }}
+        run: |
+          python -m pytest tests/ -n auto -v -m "not (jax or numpy or torch)"
+
+      - name: Run PyTorch Tests
+        if: ${{ matrix.backend == 'torch' }}
+        run: |
+          python -m pytest tests/ -n auto -v -m "not (jax or numpy or tensorflow)"
