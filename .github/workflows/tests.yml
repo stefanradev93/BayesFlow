@@ -61,19 +61,19 @@ jobs:
       - name: Run JAX Tests
         if: ${{ matrix.backend == 'jax' }}
         run: |
-          python -m pytest tests/ -n auto -v -m "not (numpy or tensorflow or torch)"
+          python -m pytest tests/ -v -m "not (numpy or tensorflow or torch)"
 
       - name: Run NumPy Tests
         if: ${{ matrix.backend == 'numpy' }}
         run: |
-          python -m pytest tests/ -n auto -v -m "not (jax or tensorflow or torch)"
+          python -m pytest tests/ -v -m "not (jax or tensorflow or torch)"
 
       - name: Run TensorFlow Tests
         if: ${{ matrix.backend == 'tensorflow' }}
         run: |
-          python -m pytest tests/ -n auto -v -m "not (jax or numpy or torch)"
+          python -m pytest tests/ -v -m "not (jax or numpy or torch)"
 
       - name: Run PyTorch Tests
         if: ${{ matrix.backend == 'torch' }}
         run: |
-          python -m pytest tests/ -n auto -v -m "not (jax or numpy or tensorflow)"
+          python -m pytest tests/ -v -m "not (jax or numpy or tensorflow)"
