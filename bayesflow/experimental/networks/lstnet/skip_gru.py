@@ -17,9 +17,7 @@ class SkipGRU(keras.Model):
         # Standard GRU
         # In: (batch, reduced time steps, cnn_out)
         gru = self.gru(x) # -> (batch, gru_out)
-        
-        # x = C, gru = R
-        
+                
         # Skip GRU
         batch_size = x.shape[0]
         reduced_steps = x.shape[1]
@@ -27,13 +25,13 @@ class SkipGRU(keras.Model):
             # Reshape, remove skipped time points
             skip_length = reduced_steps // skip_step
             s = x[:, -skip_length * skip_step:, :] # -> (batch, shrinked time steps, cnn_out)
-            s1 = keras.ops.reshape(s, (s.shape[0], s.shape[2], skip_length, skip_step)) # -> (batch, cnn_out, skip_length, skip_step)
+            s1 = keras.ops.reshape(s, (-1, s.shape[2], skip_length, skip_step)) # -> (batch, cnn_out, skip_length, skip_step)
             s2 = keras.ops.transpose(s1, [0, 3, 2, 1]) # -> (batch, skip step, skip_length, cnn_out)
-            s3 = keras.ops.reshape(s2, (s2.shape[0] * s2.shape[1], s2.shape[2], s2.shape[3])) # -> (batch * skip step, skip_length, cnn_out)
+            s3 = keras.ops.reshape(s2, (-1, s2.shape[2], s2.shape[3])) # -> (batch * skip step, skip_length, cnn_out)
             
             # GRU on remaining data
             s4 = self.skip_grus[i](s3) # -> (batch * skip step, gru_out)
-            s5 = keras.ops.reshape(s4, (batch_size, skip_step * s4.shape[1])) # -> (batch, skip step * gru_out)
+            s5 = keras.ops.reshape(s4, (-1, skip_step * s4.shape[1])) # -> (batch, skip step * gru_out)
             
             # Concat
             gru = keras.ops.concatenate([gru, s5], axis=1) # -> (batch, gru_out * skip step * 2)
@@ -41,5 +39,4 @@ class SkipGRU(keras.Model):
         return gru    
     
     def build(self, input_shape):
-        super().build(input_shape)
-        self(keras.KerasTensor(input_shape))
+        self.call(keras.ops.zeros(input_shape))
