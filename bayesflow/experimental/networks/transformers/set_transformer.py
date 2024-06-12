@@ -18,6 +18,9 @@ class SetTransformer(keras.Layer):
     [1] Lee, J., Lee, Y., Kim, J., Kosiorek, A., Choi, S., & Teh, Y. W. (2019).
         Set transformer: A framework for attention-based permutation-invariant neural networks.
         In International conference on machine learning (pp. 3744-3753). PMLR.
+
+    Note: Currently works only on 3D inputs but can easily be expanded by changing
+    the internals slightly or using ``keras.layers.TimeDistributed``.
     """
 
     def __init__(
