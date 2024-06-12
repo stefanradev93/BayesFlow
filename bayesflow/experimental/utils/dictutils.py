@@ -14,12 +14,12 @@ def nested_getitem(data: dict, item: int) -> dict:
     return result
 
 
-def concatenate_tensors(tensor_dict: dict[str, Tensor], filter_list: list, axis: int = -1):
-    """ Concatenates all tensors from tensor_dict using only keys from filter_list.
+def concatenate_tensors(tensor_dict: dict[str, Tensor], keys_list: list, axis: int = -1):
+    """ Concatenates all tensors from tensor_dict using only keys from keys_list.
     An optional axis can be specified (default: last axis).
     """
 
-    return ops.concatenate([v for k, v in tensor_dict.items() if k in filter_list], axis=axis)
+    return ops.concatenate([v for k, v in tensor_dict.items() if k in keys_list], axis=axis)
 
 
 def keras_kwargs(kwargs: dict):
