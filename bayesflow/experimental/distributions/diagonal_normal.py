@@ -8,7 +8,7 @@ from bayesflow.experimental.types import Shape, Tensor
 from .distribution import Distribution
 
 
-@keras.saving.register_keras_serializable(package="bayesflow.simulation")
+@keras.saving.register_keras_serializable(package="bayesflow.distributions")
 class DiagonalNormal(Distribution):
     """Utility class for a backend-agnostic spherical Gaussian distribution.
 
