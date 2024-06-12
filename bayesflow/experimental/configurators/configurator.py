@@ -22,7 +22,7 @@ class Configurator(BaseConfigurator):
 
     def configure_inference_variables(self, data: dict[str, Tensor]) -> Tensor:
         try:
-            data["inference_variables"] = concatenate_tensors(data, self.inference_variables)
+            data["inference_variables"] = concatenate_tensors(data, keys_list=self.inference_variables)
         except ValueError as e:
             raise ValueError(f"Cannot trivially concatenate inference variables.") from e
 
@@ -36,7 +36,7 @@ class Configurator(BaseConfigurator):
                 data["inference_conditions"] = data["summary_outputs"]
         else:
             try:
-                specified_conditions = concatenate_tensors(data, self.inference_conditions)
+                specified_conditions = concatenate_tensors(data, keys_list=self.inference_conditions)
             except ValueError as e:
                 raise ValueError(f"Cannot trivially concatenate inference conditions.") from e
 
@@ -66,6 +66,6 @@ class Configurator(BaseConfigurator):
             return
 
         try:
-            data["summary_conditions"] = concatenate_tensors(data, self.summary_conditions)
+            data["summary_conditions"] = concatenate_tensors(data, keys_list=self.summary_conditions)
         except ValueError as e:
             raise ValueError(f"Cannot trivially concatenate summary conditions along last axis.") from e

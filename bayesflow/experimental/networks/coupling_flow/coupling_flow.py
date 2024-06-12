@@ -6,6 +6,7 @@ from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
 from bayesflow.experimental.utils import find_permutation, keras_kwargs
+
 from .actnorm import ActNorm
 from .couplings import DualCoupling
 from ..inference_network import InferenceNetwork

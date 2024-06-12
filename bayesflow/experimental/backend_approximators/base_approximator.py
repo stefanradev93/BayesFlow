@@ -44,18 +44,20 @@ class BaseApproximator(keras.Model):
 
     # noinspection PyMethodOverriding
     def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
+
         if self.summary_network is None:
             self.configurator.configure_inference_variables(data)
             self.configurator.configure_inference_conditions(data)
-
             return self.inference_network.compute_metrics(data, stage=stage)
 
         self.configurator.configure_summary_variables(data)
         self.configurator.configure_summary_conditions(data)
+
         summary_metrics = self.summary_network.compute_metrics(data, stage=stage)
 
         self.configurator.configure_inference_variables(data)
         self.configurator.configure_inference_conditions(data)
+
         inference_metrics = self.inference_network.compute_metrics(data, stage=stage)
 
         metrics = {"loss": summary_metrics["loss"] + inference_metrics["loss"]}

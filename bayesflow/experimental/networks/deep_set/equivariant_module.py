@@ -69,7 +69,7 @@ class EquivariantModule(keras.Layer):
                 layer = layers.SpectralNormalization(layer)
             self.equivariant_fc.add(layer)
 
-        self.ln = layers.LayerNormalization() if layer_norm else None
+        self.layer_norm = layers.LayerNormalization() if layer_norm else None
 
     def call(self, input_set: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass of a learnable equivariant transform.
@@ -101,8 +101,8 @@ class EquivariantModule(keras.Layer):
 
         # Pass through final equivariant transform + residual
         output_set = input_set + self.equivariant_fc(output_set, training=training)
-        if self.ln is not None:
-            output_set = self.ln(output_set, training=training)
+        if self.layer_norm is not None:
+            output_set = self.layer_norm(output_set, training=training)
 
         return output_set
 
