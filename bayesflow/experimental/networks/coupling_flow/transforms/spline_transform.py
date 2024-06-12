@@ -2,11 +2,13 @@
 import math
 
 from keras import ops
+from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
 from .transform import Transform
 
 
+@register_keras_serializable(package="bayesflow.networks.coupling_flow")
 class SplineTransform(Transform):
     def __init__(self, bins=16, default_domain=(-5., 5., -5., 5.), **kwargs):
         super().__init__(**kwargs)

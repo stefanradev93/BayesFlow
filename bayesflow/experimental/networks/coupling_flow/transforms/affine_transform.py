@@ -1,7 +1,6 @@
+
 import keras.ops as ops
-from keras.saving import (
-    register_keras_serializable,
-)
+from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
 from .transform import Transform
