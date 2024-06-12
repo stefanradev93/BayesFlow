@@ -1,6 +1,4 @@
 
-import keras
-
 from bayesflow.experimental.types import Tensor
 from bayesflow.experimental.utils import filter_concatenate
 
