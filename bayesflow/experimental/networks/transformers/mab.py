@@ -1,11 +1,7 @@
 
 import keras
 from keras import layers
-from keras.saving import (
-    deserialize_keras_object,
-    register_keras_serializable,
-    serialize_keras_object,
-)
+from keras.saving import register_keras_serializable
 
 from bayesflow.experimental.types import Tensor
 
