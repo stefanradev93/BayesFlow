@@ -8,7 +8,7 @@ from bayesflow.experimental.utils import keras_kwargs
 from bayesflow.experimental.utils import find_pooling
 
 
-@register_keras_serializable(package="bayesflow.networks.deep_set")
+@register_keras_serializable(package="bayesflow.networks")
 class InvariantModule(keras.Layer):
     """Implements an invariant module performing a permutation-invariant transform.
 

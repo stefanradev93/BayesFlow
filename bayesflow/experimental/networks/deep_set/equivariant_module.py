@@ -8,7 +8,7 @@ from bayesflow.experimental.utils import keras_kwargs
 from .invariant_module import InvariantModule
 
 
-@register_keras_serializable(package="bayesflow.networks.deep_set")
+@register_keras_serializable(package="bayesflow.networks")
 class EquivariantModule(keras.Layer):
     """Implements an equivariant module performing an equivariant transform.
 
