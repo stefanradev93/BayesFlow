@@ -1,6 +1,10 @@
 
+from bayesflow.experimental.types import Tensor
+from keras import ops
+
+
 def nested_getitem(data: dict, item: int) -> dict:
-    """ Get the item-th element from a nested dictionary """
+    """ Get the item-th element from a nested dictionary. """
     result = {}
     for key, value in data.items():
         if isinstance(value, dict):
@@ -8,6 +12,14 @@ def nested_getitem(data: dict, item: int) -> dict:
         else:
             result[key] = value[item]
     return result
+
+
+def concatenate_tensors(tensor_dict: dict[str, Tensor], filter_list: list, axis: int = -1):
+    """ Concatenates all tensors from tensor_dict using only keys from filter_list.
+    An optional axis can be specified (default: last axis).
+    """
+
+    return ops.concatenate([v for k, v in tensor_dict.items() if k in filter_list])
 
 
 def keras_kwargs(kwargs: dict):
