@@ -62,7 +62,7 @@ class MultiHeadAttentionBlock(keras.Layer):
         self.feedforward.add(layers.Dense(output_dim))
         self.ln_post = layers.LayerNormalization() if layer_norm else None
 
-    def call(self, set_x: Tensor, set_y: Tensor, **kwargs):
+    def call(self, set_x: Tensor, set_y: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass through the attention layer.
 
         Parameters

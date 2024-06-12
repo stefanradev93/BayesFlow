@@ -63,7 +63,7 @@ class InducedSetAttentionBlock(keras.Layer):
         self.mab0 = MultiHeadAttentionBlock(**mab_kwargs)
         self.mab1 = MultiHeadAttentionBlock(**mab_kwargs)
 
-    def call(self, set_x: Tensor, **kwargs):
+    def call(self, set_x: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass through the self-attention layer.
 
         Parameters

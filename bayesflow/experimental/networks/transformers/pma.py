@@ -75,7 +75,7 @@ class PoolingByMultiHeadAttention(keras.Layer):
                 use_bias=use_bias
             ))
 
-    def call(self, set_x: Tensor, **kwargs):
+    def call(self, set_x: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass through the PMA block.
 
         Parameters
