@@ -72,12 +72,25 @@ class CouplingFlow(InferenceNetwork):
         # build nested layers with forward pass
         self.call(xz, conditions=conditions)
 
-    def call(self, xz: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def call(
+        self,
+        xz: Tensor,
+        conditions: Tensor = None,
+        inverse: bool = False,
+        **kwargs
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+
         if inverse:
             return self._inverse(xz, conditions=conditions, **kwargs)
         return self._forward(xz, conditions=conditions, **kwargs)
 
-    def _forward(self, x: Tensor, conditions: Tensor = None, jacobian: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def _forward(
+        self, x: Tensor,
+        conditions: Tensor = None,
+        jacobian: bool = False,
+        **kwargs
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+
         z = x
         log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
         for layer in self.invertible_layers:
@@ -88,7 +101,13 @@ class CouplingFlow(InferenceNetwork):
             return z, log_det
         return z
 
-    def _inverse(self, z: Tensor, conditions: Tensor = None, jacobian: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def _inverse(
+        self, z: Tensor,
+        conditions: Tensor = None,
+        jacobian: bool = False,
+        **kwargs
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+
         x = z
         log_det = keras.ops.zeros(keras.ops.shape(z)[:-1])
         for layer in reversed(self.invertible_layers):
