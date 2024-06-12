@@ -1,13 +1,13 @@
 import keras
 from keras.saving import register_keras_serializable
 from keras import layers, Sequential
-# from bayesflow.experimental.types import Tensor
-from tensorflow import Tensor
+from bayesflow.experimental.types import Tensor
+from bayesflow.experimental.utils import keras_kwargs
 
 @register_keras_serializable(package="bayesflow.networks.skip_gru")
 class SkipGRU(keras.Model):
     def __init__(self, gru_out: int, skip_steps: list[int], **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(**keras_kwargs(kwargs))
         self.gru_out = gru_out
         self.skip_steps = skip_steps
         self.gru = layers.GRU(gru_out)
@@ -19,11 +19,9 @@ class SkipGRU(keras.Model):
         gru = self.gru(x) # -> (batch, gru_out)
                 
         # Skip GRU
-        batch_size = x.shape[0]
-        reduced_steps = x.shape[1]
         for i, skip_step in enumerate(self.skip_steps):
             # Reshape, remove skipped time points
-            skip_length = reduced_steps // skip_step
+            skip_length = x.shape[1] // skip_step
             s = x[:, -skip_length * skip_step:, :] # -> (batch, shrinked time steps, cnn_out)
             s1 = keras.ops.reshape(s, (-1, s.shape[2], skip_length, skip_step)) # -> (batch, cnn_out, skip_length, skip_step)
             s2 = keras.ops.transpose(s1, [0, 3, 2, 1]) # -> (batch, skip step, skip_length, cnn_out)

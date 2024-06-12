@@ -1,6 +1,5 @@
 import keras
-# from bayesflow.experimental.types import Tensor
-from tensorflow import Tensor # TODO: remove, temp to stop strange Notebook errors
+from bayesflow.experimental.types import Tensor
 from bayesflow.experimental.utils import keras_kwargs
 from keras import layers, Sequential, regularizers
 from keras.saving import (register_keras_serializable)
@@ -19,22 +18,20 @@ class LSTNet(keras.Model):
     TODO: Add proper docstring
     
     """
-    
-    # TODO: use new kwargs system
-    
+        
     def __init__(
         self,
-        cnn_out: int, # C | R | O
-        kernel_size: int = 4, # F
+        cnn_out: int,
+        kernel_size: int = 4,
         kernel_initializer: str = "glorot_uniform",
         kernel_regularizer: regularizers.Regularizer | None = None,
         activation: str = "relu",
         gru_out: int = 64,
         resnet_out: int = 32,
-        skip_steps: list[int] = [2], # S
+        skip_steps: list[int] = [2],
         **kwargs
     ):
-        super().__init__(**kwargs)
+        super().__init__(**keras_kwargs(kwargs))
                 
         # Define model
         self.model = Sequential()
