@@ -1,8 +1,8 @@
 
-from keras import ops
+import keras
 
 from bayesflow.experimental.types import Tensor
-from bayesflow.experimental.utils import concatenate_tensors
+from bayesflow.experimental.utils import filter_concatenate
 
 from .base_configurator import BaseConfigurator
 
@@ -20,52 +20,18 @@ class Configurator(BaseConfigurator):
         self.summary_variables = summary_variables or []
         self.summary_conditions = summary_conditions or []
 
-    def configure_inference_variables(self, data: dict[str, Tensor]) -> Tensor:
-        try:
-            data["inference_variables"] = concatenate_tensors(data, keys_list=self.inference_variables)
-        except ValueError as e:
-            raise ValueError(f"Cannot trivially concatenate inference variables.") from e
+    def configure_inference_variables(self, data: dict[str, Tensor]) -> Tensor | None:
+        return filter_concatenate(data, keys=self.inference_variables)
 
-    def configure_inference_conditions(self, data: dict[str, Tensor]) -> Tensor:
-        if not self.inference_conditions:
-            if "summary_outputs" not in data:
-                # case 1: no conditions at all
-                return
-            else:
-                # case 2: just the summaries
-                data["inference_conditions"] = data["summary_outputs"]
-        else:
-            try:
-                specified_conditions = concatenate_tensors(data, keys_list=self.inference_conditions)
-            except ValueError as e:
-                raise ValueError(f"Cannot trivially concatenate inference conditions.") from e
+    def configure_inference_conditions(self, data: dict[str, Tensor]) -> Tensor | None:
+        keys = self.inference_conditions.copy()
+        if "summary_outputs" in data and "summary_outputs" not in keys:
+            keys.append("summary_outputs")
 
-            if "summary_outputs" not in data:
-                # case 3: just the direct inference conditions
-                data["inference_conditions"] = specified_conditions
-            else:
-                # case 4: summaries and direct inference conditions
-                try:
-                    data["inference_conditions"] = ops.concatenate(
-                        [data["summary_outputs"], specified_conditions], axis=-1
-                    )
-                except ValueError as e:
-                    raise ValueError(f"Cannot trivially concatenate summary outputs to inference conditions.") from e
+        return filter_concatenate(data, keys=keys)
 
-    def configure_summary_variables(self, data: dict[str, Tensor]) -> Tensor:
-        if not self.summary_variables:
-            return
+    def configure_summary_variables(self, data: dict[str, Tensor]) -> Tensor | None:
+        return filter_concatenate(data, keys=self.summary_variables)
 
-        try:
-            data["summary_variables"] = concatenate_tensors(data, self.summary_variables)
-        except ValueError as e:
-            raise ValueError(f"Cannot trivially concatenate summary variables along last axis.") from e
-
-    def configure_summary_conditions(self, data: dict[str, Tensor]) -> Tensor:
-        if not self.summary_conditions:
-            return
-
-        try:
-            data["summary_conditions"] = concatenate_tensors(data, keys_list=self.summary_conditions)
-        except ValueError as e:
-            raise ValueError(f"Cannot trivially concatenate summary conditions along last axis.") from e
+    def configure_summary_conditions(self, data: dict[str, Tensor]) -> Tensor | None:
+        return filter_concatenate(data, keys=self.summary_conditions)
