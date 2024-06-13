@@ -2,20 +2,17 @@
 import keras
 import math
 
-from bayesflow.experimental.utils import nested_getitem
-
 
 class OfflineDataset(keras.utils.PyDataset):
     """
     A dataset that is pre-simulated and stored in memory.
     """
-    # TODO: fix
     def __init__(self, data: dict, batch_size: int, **kwargs):
         super().__init__(**kwargs)
         self.batch_size = batch_size
 
         self.data = data
-        self.indices = keras.ops.arange(len(data[next(iter(data.keys()))]))
+        self.indices = keras.ops.arange(len(data[next(iter(data.keys()))]), dtype="int64")
 
         self.shuffle()
 
@@ -23,7 +20,8 @@ class OfflineDataset(keras.utils.PyDataset):
         """ Get a batch of pre-simulated data """
         item = slice(item * self.batch_size, (item + 1) * self.batch_size)
         item = self.indices[item]
-        return nested_getitem(self.data, item)
+
+        return {key: keras.ops.take(value, item, axis=0) for key, value in self.data.items()}
 
     def __len__(self) -> int:
         return math.ceil(len(self.indices) / self.batch_size)
