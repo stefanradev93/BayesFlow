@@ -5,7 +5,7 @@ from . import (
     diagnostics,
     distributions,
     networks,
-    simulation,
+    simulators,
 )
 
 from .approximators import Approximator

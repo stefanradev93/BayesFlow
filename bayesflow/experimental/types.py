@@ -1,3 +1,7 @@
+
+from typing import Callable
+
+
 Shape = tuple[int, ...]
 
 # this is ugly, but:
@@ -13,3 +17,11 @@ except ModuleNotFoundError:
     except ModuleNotFoundError:
         import torch
         Tensor: type(torch.Tensor) = torch.Tensor
+
+
+BatchedConditionalSampler = Callable[[Shape, Tensor, ...], dict[str, Tensor]]
+BatchedUnconditionalSampler = Callable[[Shape], dict[str, Tensor]]
+UnbatchedConditionalSampler = Callable[[Tensor, ...], dict[str, Tensor]]
+UnbatchedUnconditionalSampler = Callable[[], dict[str, Tensor]]
+
+Sampler = BatchedConditionalSampler | UnbatchedConditionalSampler | UnbatchedConditionalSampler | UnbatchedUnconditionalSampler
