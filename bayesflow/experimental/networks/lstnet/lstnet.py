@@ -21,16 +21,20 @@ class LSTNet(keras.Model):
         
     def __init__(
         self,
-        cnn_out: int,
+        cnn_out: int = 128,
         kernel_size: int = 4,
         kernel_initializer: str = "glorot_uniform",
         kernel_regularizer: regularizers.Regularizer | None = None,
         activation: str = "relu",
         gru_out: int = 64,
-        resnet_out: int = 32,
+        skip_outs: list[int] = [32],
         skip_steps: list[int] = [2],
+        resnet_out: int = 32,
         **kwargs
     ):
+        if len(skip_outs) != len(skip_steps):
+            raise ValueError("hidden_out must have same length as skip_steps")
+        
         super().__init__(**keras_kwargs(kwargs))
                 
         # Define model
@@ -43,13 +47,13 @@ class LSTNet(keras.Model):
             kernel_regularizer=kernel_regularizer
         )        
         self.bnorm = layers.BatchNormalization()        
-        self.skip_gru = SkipGRU(gru_out, skip_steps)        
+        self.skip_gru = SkipGRU(gru_out, skip_outs, skip_steps)        
         self.resnet = ResNet(width=resnet_out)
         
         # Aggregate layers               In:  (batch, time steps, num series)
         self.model.add(self.conv1)       # -> (batch, reduced time steps, cnn_out)
         self.model.add(self.bnorm)       # -> (batch, reduced time steps, cnn_out)
-        self.model.add(self.skip_gru)    # -> (batch, gru_out)
+        self.model.add(self.skip_gru)    # -> (batch, _)
         self.model.add(self.resnet)      # -> (batch, resnet_out)
     
     def call(self, x: Tensor) -> Tensor:
