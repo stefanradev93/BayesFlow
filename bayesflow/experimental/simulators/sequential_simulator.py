@@ -48,6 +48,8 @@ class SequentialSimulator(Simulator):
                                        f"vectorization for samplers with arguments. Note that the arguments passed "
                                        f"to the samplers are always tensors, which may live on the GPU. "
                                        f"Performing numpy operations on these is prohibited.") from e
+                else:
+                    raise e
 
         for key, value in data.items():
             if keras.ops.ndim(value) == 1:
