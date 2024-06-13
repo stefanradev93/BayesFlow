@@ -50,10 +50,6 @@ def batched_call(f, batch_size, *args, **kwargs):
     try:
         data = f((batch_size,), *args, **kwargs)
         data = {key: keras.ops.convert_to_tensor(value) for key, value in data.items()}
-        for key, value in data.items():
-            if keras.ops.ndim(value) == 1:
-                data[key] = keras.ops.expand_dims(value, -1)
-
         return data
     except TypeError:
         pass
@@ -61,9 +57,6 @@ def batched_call(f, batch_size, *args, **kwargs):
     def vectorized(elements):
         data = f(*elements[1:])
         data = {key: keras.ops.convert_to_tensor(value) for key, value in data.items()}
-        for key, value in data.items():
-            if keras.ops.ndim(value) == 0:
-                data[key] = keras.ops.expand_dims(value, 0)
         return data
 
     args = convert_args(f, *args, **kwargs)

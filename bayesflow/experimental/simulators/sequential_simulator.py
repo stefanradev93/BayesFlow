@@ -1,4 +1,6 @@
 
+import keras
+
 from typing import Sequence
 
 from bayesflow.experimental.types import Sampler, Shape, Tensor
@@ -35,7 +37,20 @@ class SequentialSimulator(Simulator):
 
     def sample(self, shape: Shape) -> dict[str, Tensor]:
         data = {}
+
         for sampler in self.samplers:
-            data |= batched_call(sampler, shape[0], **data)
+            try:
+                data |= batched_call(sampler, shape[0], **data)
+            except TypeError as e:
+                if keras.backend.backend() == "torch" and "device" in str(e):
+                    raise RuntimeError(f"Encountered an unexpected device error when sampling. "
+                                       f"This can happen when you use numpy in conjunction with automatic "
+                                       f"vectorization for samplers with arguments. Note that the arguments passed "
+                                       f"to the samplers are always tensors, which may live on the GPU. "
+                                       f"Performing numpy operations on these is prohibited.") from e
+
+        for key, value in data.items():
+            if keras.ops.ndim(value) == 1:
+                data[key] = keras.ops.expand_dims(value, -1)
 
         return data
