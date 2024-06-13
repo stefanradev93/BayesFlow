@@ -67,9 +67,6 @@ def batched_call(f, batch_size, *args, **kwargs):
         return data
 
     args = convert_args(f, *args, **kwargs)
-
-    print(args)
-
     dummy = keras.ops.zeros((batch_size, 0))
     return keras.ops.vectorized_map(vectorized, (dummy, *args))
 
