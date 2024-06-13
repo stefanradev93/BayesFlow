@@ -12,6 +12,6 @@ dependencies:
   - python >= 3.10, < 3.12
   - seaborn
   - scikit-learn
-  - scipy
+  - scipy ~= 1.13
   - tqdm
   - tox ~= 4.15

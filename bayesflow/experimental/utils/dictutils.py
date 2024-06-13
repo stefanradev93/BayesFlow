@@ -1,6 +1,9 @@
 
-from bayesflow.experimental.types import Tensor
 from keras import ops
+
+from typing import Sequence
+
+from bayesflow.experimental.types import Tensor
 
 
 def nested_getitem(data: dict, item: int) -> dict:
@@ -14,12 +17,21 @@ def nested_getitem(data: dict, item: int) -> dict:
     return result
 
 
-def concatenate_tensors(tensor_dict: dict[str, Tensor], keys_list: list, axis: int = -1):
-    """ Concatenates all tensors from tensor_dict using only keys from keys_list.
+def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int = -1) -> Tensor:
+    """ Filters and then concatenates all tensors from data using only keys from the given sequence.
     An optional axis can be specified (default: last axis).
     """
+    if not keys:
+        return None
 
-    return ops.concatenate([v for k, v in tensor_dict.items() if k in keys_list], axis=axis)
+    # ensure every key is present
+    tensors = [data[key] for key in keys]
+
+    try:
+        return ops.concatenate(tensors, axis=axis)
+    except ValueError as e:
+        shapes = [t.shape for t in tensors]
+        raise ValueError(f"Cannot trivially concatenate tensors {keys} with shapes {shapes}") from e
 
 
 def keras_kwargs(kwargs: dict):

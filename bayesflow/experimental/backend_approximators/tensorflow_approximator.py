@@ -17,5 +17,6 @@ class TensorFlowApproximator(BaseApproximator):
         grads = tape.gradient(loss, self.trainable_variables)
         self.optimizer.apply_gradients(zip(grads, self.trainable_variables))
 
-        return metrics
+        self._loss_tracker.update_state(loss)
 
+        return metrics
