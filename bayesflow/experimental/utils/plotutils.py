@@ -1,6 +1,6 @@
+
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 from ..utils.exceptions import ShapeError
 
@@ -159,23 +159,23 @@ def initialize_figure(
         Initialized figures
     """
     if n_row == 1 and n_col == 1:
-        f, axarr = plt.subplots(1, 1, figsize=fig_size)
+        f, ax = plt.subplots(1, 1, figsize=fig_size)
     else:
         if fig_size is None:
             fig_size = (int(5 * n_col), int(5 * n_row))
         
-        f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
+        f, ax = plt.subplots(n_row, n_col, figsize=fig_size)
     
-    return f, axarr
+    return f, ax
 
 
-def collapse_axes(axarr, n_row: int = 1, n_col: int = 1):
+def collapse_axes(axs, n_row: int = 1, n_col: int = 1):
     """
     Collapse a 2D array of subplot Axes into a 1D array
 
     Parameters
     ----------
-    axarr      : 2D array of Axes
+    axs      : 2D array of Axes
         An array of axes for subplots
     n_row      : int, default: 1
         Number of rows for the axes
@@ -188,12 +188,12 @@ def collapse_axes(axarr, n_row: int = 1, n_col: int = 1):
         Collapsed axes for subplots
     """
     
-    ax = np.atleast_1d(axarr)
-    # turn axarr into 1D list
+    ax = np.atleast_1d(axs)
+    # turn ax into 1D list
     if n_row > 1 or n_col > 1:
-        ax = axarr.flat
+        ax = axs.flat
     else:
-        ax = axarr
+        ax = axs
     
     return ax
 
@@ -249,6 +249,7 @@ def remove_unused_axes(axarr_it, n_params: int = None):
 def preprocess(
     post_samples,
     prior_samples,
+    param_names: list[str] = None,
     fig_size: tuple = None,
     stacked: bool = False,
     collapse: bool = True
@@ -264,6 +265,8 @@ def preprocess(
         The posterior draws obtained from n_data_sets
     prior_samples     : np.ndarray of shape (n_data_sets, n_params)
         The prior draws obtained for generating n_data_sets
+    param_names      : list[str], default: None
+        The list of parameter names to use in the posterior draws
     fig_size          : tuple, optional, default: None
         Size of the figure adjusting to the display resolution
     stacked          : bool, optional, default: False
@@ -282,15 +285,15 @@ def preprocess(
     n_row, n_col = configure_layout(n_params)
 
     # Initialize figure
-    f, axarr = initialize_figure(n_row, n_col, fig_size=fig_size)
+    f, ax = initialize_figure(n_row, n_col, fig_size=fig_size)
 
     # turn axarr into 1D list
     if collapse:
-        axarr_it = collapse_axes(axarr, n_row, n_col)
+        ax_it = collapse_axes(ax, n_row, n_col)
     else:
-        axarr_it = axarr
+        ax_it = ax
     
-    return f, axarr, axarr_it, n_row, n_col, n_params, param_names
+    return f, ax, ax_it, n_row, n_col, n_params, param_names
 
 
 def postprocess(*args):
