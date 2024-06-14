@@ -1,9 +1,9 @@
 # BayesFlow <img src="img/bayesflow_hex.png" style="float: right; width: 20%; height: 20%;" alt="BayesFlow Logo" />
 
-[![Actions Status](https://github.com/stefanradev93/bayesflow/workflows/Tests/badge.svg)](https://github.com/stefanradev93/bayesflow/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://joss.theoj.org/papers/10.21105/joss.05702/status.svg)](https://doi.org/10.21105/joss.05702)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwyl/esta/issues)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/stefanradev93/bayesflow/tests.yaml?style=for-the-badge&label=Tests)
+![Codecov](https://img.shields.io/codecov/c/github/stefanradev93/bayesflow?style=for-the-badge)
+[![DOI](https://img.shields.io/badge/DOI-10.21105%2Fjoss.05702-blue?style=for-the-badge)](https://doi.org/10.21105/joss.05702)
+![PyPI - License](https://img.shields.io/pypi/l/bayesflow?style=for-the-badge)
 
 BayesFlow is a Python library for simulation-based **Amortized Bayesian Inference** with neural networks.
 It provides users with:
