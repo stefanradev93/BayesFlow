@@ -10,4 +10,5 @@ from .dispatch import (
     find_network,
     find_permutation,
     find_pooling,
+    find_recurrent_net
 )

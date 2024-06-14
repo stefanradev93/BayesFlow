@@ -1,10 +1,14 @@
+
 import keras
+from keras import layers, Sequential
+from keras.saving import register_keras_serializable
+
 from bayesflow.experimental.types import Tensor
 from bayesflow.experimental.utils import keras_kwargs
-from keras import layers, Sequential, regularizers
-from keras.saving import (register_keras_serializable)
-from .skip_gru import SkipGRU
-from ...networks.resnet import ResNet
+
+from .skip_recurrent import SkipRecurrentNet
+from ...networks import MLP
+
 
 @register_keras_serializable(package="bayesflow.networks.lstnet")
 class LSTNet(keras.Model):
@@ -21,44 +25,64 @@ class LSTNet(keras.Model):
         
     def __init__(
         self,
-        cnn_out: int = 128,
-        kernel_size: int = 4,
-        kernel_initializer: str = "glorot_uniform",
-        kernel_regularizer: regularizers.Regularizer | None = None,
+        summary_dim: int = 16,
+        filters: int | list | tuple = 32,
+        kernel_sizes: int | list | tuple = 3,
+        strides: int | list | tuple = 1,
         activation: str = "relu",
-        gru_out: int = 64,
-        skip_outs: list[int] = [32],
-        skip_steps: list[int] = [2],
-        resnet_out: int = 32,
+        kernel_initializer: str = "glorot_uniform",
+        groups: int = 8,
+        recurrent_type: str | keras.Layer = "gru",
+        recurrent_dim: int = 128,
+        bidirectional: bool = True,
+        dropout: float = 0.05,
+        skip_steps: int = 4,
         **kwargs
     ):
-        if len(skip_outs) != len(skip_steps):
-            raise ValueError("hidden_out must have same length as skip_steps")
-        
+
         super().__init__(**keras_kwargs(kwargs))
-                
-        # Define model
-        self.model = Sequential()
-        self.conv1 = layers.Conv1D(
-            filters=cnn_out,
-            kernel_size=kernel_size,
-            activation=activation,
-            kernel_initializer=kernel_initializer,
-            kernel_regularizer=kernel_regularizer
-        )        
-        self.bnorm = layers.BatchNormalization()        
-        self.skip_gru = SkipGRU(gru_out, skip_outs, skip_steps)        
-        self.resnet = ResNet(width=resnet_out)
-        
-        # Aggregate layers               In:  (batch, time steps, num series)
-        self.model.add(self.conv1)       # -> (batch, reduced time steps, cnn_out)
-        self.model.add(self.bnorm)       # -> (batch, reduced time steps, cnn_out)
-        self.model.add(self.skip_gru)    # -> (batch, _)
-        self.model.add(self.resnet)      # -> (batch, resnet_out)
-    
-    def call(self, x: Tensor) -> Tensor:
-        x = self.model(x)
-        return x
+
+        # Convolutional backbone -> can be extended with inception-like structure
+        if not isinstance(filters, (list, tuple)):
+            filters = (filter, )
+        if not isinstance(kernel_sizes, (list, tuple)):
+            kernel_sizes = (kernel_sizes, )
+        if not isinstance(strides, (list, tuple)):
+            strides = (strides, )
+        self.conv = Sequential()
+        for f, k, s in zip(filters, kernel_sizes, strides):
+            self.conv.add(
+                layers.Conv1D(
+                    filters=f,
+                    kernel_size=k,
+                    strides=s,
+                    activation=activation,
+                    kernel_initializer=kernel_initializer,
+                )
+            )
+            self.conv.add(
+                layers.GroupNormalization(groups=groups)
+            )
+
+        # Recurrent and feedforward backbones
+        self.recurrent = SkipRecurrentNet(
+            hidden_dim=recurrent_dim,
+            recurrent_type=recurrent_type,
+            bidirectional=bidirectional,
+            input_channels=filters[-1],
+            skip_steps=skip_steps,
+            dropout=dropout
+        )
+        self.feedforward = MLP(**kwargs.get("mlp_kwargs", {}))
+
+        self.output_projector = layers.Dense(summary_dim)
+
+    def call(self, time_series: Tensor, **kwargs) -> Tensor:
+        summary = self.conv(time_series, **kwargs)
+        summary = self.recurrent(summary, **kwargs)
+        summary = self.feedforward(summary, **kwargs)
+        summary = self.output_projector(summary)
+        return summary
     
     def build(self, input_shape):
         self.call(keras.ops.zeros(input_shape))
