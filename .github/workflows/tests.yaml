@@ -77,3 +77,8 @@ jobs:
         if: ${{ matrix.backend == 'torch' }}
         run: |
           python -m pytest tests/ -v -m "not (jax or numpy or tensorflow)"
+
+      - name: Upload Coverage Reports to CodeCov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
