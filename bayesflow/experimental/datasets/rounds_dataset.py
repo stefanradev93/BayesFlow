@@ -1,16 +1,22 @@
 
 import keras
 
-from bayesflow.experimental.simulation import JointDistribution
+from bayesflow.experimental.simulators import Simulator
 
 
 class RoundsDataset(keras.utils.PyDataset):
     """
     A dataset that is generated on-the-fly at the beginning of every n-th epoch.
     """
-    def __init__(self, joint_distribution: JointDistribution, batch_size: int, batches_per_epoch: int, epochs_per_round: int, **kwargs):
+    def __init__(self, simulator: Simulator, batch_size: int, batches_per_epoch: int, epochs_per_round: int, **kwargs):
         super().__init__(**kwargs)
-        self.joint_distribution = joint_distribution
+
+        if kwargs.get("use_multiprocessing"):
+            # keras workaround: https://github.com/keras-team/keras/issues/19346
+            import multiprocessing as mp
+            mp.set_start_method("spawn", force=True)
+
+        self.simulator = simulator
         self.batch_size = batch_size
         self.batches_per_epoch = batches_per_epoch
         self.epochs_per_round = epochs_per_round
@@ -36,4 +42,4 @@ class RoundsDataset(keras.utils.PyDataset):
 
     def regenerate(self) -> None:
         """ Sample new batches of data from the joint distribution unconditionally """
-        self.data = [self.joint_distribution.sample((self.batch_size,)) for _ in range(self.batches_per_epoch)]
+        self.data = [self.simulator.sample((self.batch_size,)) for _ in range(self.batches_per_epoch)]

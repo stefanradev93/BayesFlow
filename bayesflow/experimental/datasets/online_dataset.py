@@ -1,21 +1,26 @@
 
 import keras
 
-from bayesflow.experimental.simulation import JointDistribution
+from bayesflow.experimental.simulators import Simulator
 
 
 class OnlineDataset(keras.utils.PyDataset):
     """
     A dataset that is generated on-the-fly.
     """
-    def __init__(self, distribution, batch_size: int, **kwargs):
+    def __init__(self, simulator: Simulator, batch_size: int, **kwargs):
         super().__init__(**kwargs)
-        self.distribution = distribution
+
+        if kwargs.get("use_multiprocessing"):
+            # keras workaround: https://github.com/keras-team/keras/issues/19346
+            import multiprocessing as mp
+            mp.set_start_method("spawn", force=True)
+
+        self.simulator = simulator
         self.batch_size = batch_size
 
     def __getitem__(self, item: int) -> (dict, dict):
-        """ Sample a batch of data from the joint distribution unconditionally """
-        return self.distribution.sample((self.batch_size,))
+        return self.simulator.sample((self.batch_size,))
 
     @property
     def num_batches(self):

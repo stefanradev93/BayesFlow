@@ -1,8 +1,8 @@
 
 from .dictutils import (
+    batched_call,
     filter_concatenate,
     keras_kwargs,
-    nested_getitem,
 )
 
 from .dispatch import (
