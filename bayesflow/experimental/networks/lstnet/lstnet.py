@@ -44,7 +44,7 @@ class LSTNet(keras.Model):
 
         # Convolutional backbone -> can be extended with inception-like structure
         if not isinstance(filters, (list, tuple)):
-            filters = (filter, )
+            filters = (filters, )
         if not isinstance(kernel_sizes, (list, tuple)):
             kernel_sizes = (kernel_sizes, )
         if not isinstance(strides, (list, tuple)):
