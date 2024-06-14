@@ -19,6 +19,7 @@
 # SOFTWARE.
 
 import logging
+from os import remove
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -32,7 +33,10 @@ from sklearn.metrics import confusion_matrix, r2_score
 logging.basicConfig()
 
 from bayesflow.computational_utilities import expected_calibration_error, simultaneous_ecdf_bands
-from bayesflow.helper_functions import check_posterior_prior_shapes
+from bayesflow.helper_functions import preprocess, postprocess, remove_unused_axes, initialize_figure, configure_layout
+
+
+# ================================================================
 
 
 def plot_recovery(
@@ -121,40 +125,15 @@ def plot_recovery(
         If there is a deviation from the expected shapes of ``post_samples`` and ``prior_samples``.
     """
 
-    # Sanity check
-    check_posterior_prior_shapes(post_samples, prior_samples)
+    # Preprocess
+    f, axarr, axarr_it, n_row, n_col, n_params, param_names = preprocess(post_samples, prior_samples)
 
     # Compute point estimates and uncertainties
     est = point_agg(post_samples, axis=1)
     if uncertainty_agg is not None:
         u = uncertainty_agg(post_samples, axis=1)
 
-    # Determine n params and param names if None given
-    n_params = prior_samples.shape[-1]
-    if param_names is None:
-        param_names = [f"$\\theta_{{{i}}}$" for i in range(1, n_params + 1)]
-
-    # Determine number of rows and columns for subplots based on inputs
-    if n_row is None and n_col is None:
-        n_row = int(np.ceil(n_params / 6))
-        n_col = int(np.ceil(n_params / n_row))
-    elif n_row is None and n_col is not None:
-        n_row = int(np.ceil(n_params / n_col))
-    elif n_row is not None and n_col is None:
-        n_col = int(np.ceil(n_params / n_row))
-
-    # Initialize figure
-    if fig_size is None:
-        fig_size = (int(4 * n_col), int(4 * n_row))
-    f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
-    
-    # turn axarr into 1D list
-    axarr = np.atleast_1d(axarr)
-    if n_col > 1 or n_row > 1:
-        axarr_it = axarr.flat
-    else:
-        axarr_it = axarr
-
+    # Loop and plot
     for i, ax in enumerate(axarr_it):
         if i >= n_params:
             break
@@ -210,22 +189,7 @@ def plot_recovery(
         ax.tick_params(axis="both", which="major", labelsize=tick_fontsize)
         ax.tick_params(axis="both", which="minor", labelsize=tick_fontsize)
 
-    # Only add x-labels to the bottom row
-    bottom_row = axarr if n_row == 1 else axarr[0] if n_col == 1 else axarr[n_row - 1, :]
-    for _ax in bottom_row:
-        _ax.set_xlabel(xlabel, fontsize=label_fontsize)
-
-    # Only add y-labels to right left-most row
-    if n_row == 1:  # if there is only one row, the ax array is 1D
-        axarr[0].set_ylabel(ylabel, fontsize=label_fontsize)
-    # If there is more than one row, the ax array is 2D
-    else:
-        for _ax in axarr[:, 0]:
-            _ax.set_ylabel(ylabel, fontsize=label_fontsize)
-
-    # Remove unused axes entirely
-    for _ax in axarr_it[n_params:]:
-        _ax.remove()
+    postprocess(axarr, axarr_it, n_row, n_col, n_params, xlabel, ylabel, label_fontsize)
 
     f.tight_layout()
     return f
@@ -240,6 +204,8 @@ def plot_z_score_contraction(
     title_fontsize=18,
     tick_fontsize=12,
     color="#8f2727",
+    xlabel="Posterior contraction",
+    ylabel="Posterior z-score",
     n_col=None,
     n_row=None,
 ):
@@ -303,8 +269,7 @@ def plot_z_score_contraction(
         If there is a deviation from the expected shapes of ``post_samples`` and ``prior_samples``.
     """
 
-    # Sanity check for shape integrity
-    check_posterior_prior_shapes(post_samples, prior_samples)
+    f, axarr, axarr_it, n_row, n_col, n_params, param_names = preprocess(post_samples, prior_samples)
 
     # Estimate posterior means and stds
     post_means = post_samples.mean(axis=1)
@@ -320,32 +285,6 @@ def plot_z_score_contraction(
     # Compute posterior z score
     z_score = (post_means - prior_samples) / post_stds
 
-    # Determine number of params and param names if None given
-    n_params = prior_samples.shape[-1]
-    if param_names is None:
-        param_names = [f"$\\theta_{{{i}}}$" for i in range(1, n_params + 1)]
-
-    # Determine number of rows and columns for subplots based on inputs
-    if n_row is None and n_col is None:
-        n_row = int(np.ceil(n_params / 6))
-        n_col = int(np.ceil(n_params / n_row))
-    elif n_row is None and n_col is not None:
-        n_row = int(np.ceil(n_params / n_col))
-    elif n_row is not None and n_col is None:
-        n_col = int(np.ceil(n_params / n_row))
-
-    # Initialize figure
-    if fig_size is None:
-        fig_size = (int(4 * n_col), int(4 * n_row))
-    f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
-
-    # turn axarr into 1D list
-    axarr = np.atleast_1d(axarr)
-    if n_col > 1 or n_row > 1:
-        axarr_it = axarr.flat
-    else:
-        axarr_it = axarr
-
     # Loop and plot
     for i, ax in enumerate(axarr_it):
         if i >= n_params:
@@ -359,22 +298,7 @@ def plot_z_score_contraction(
         ax.tick_params(axis="both", which="minor", labelsize=tick_fontsize)
         ax.set_xlim([-0.05, 1.05])
 
-    # Only add x-labels to the bottom row
-    bottom_row = axarr if n_row == 1 else axarr[0] if n_col == 1 else axarr[n_row - 1, :]
-    for _ax in bottom_row:
-        _ax.set_xlabel("Posterior contraction", fontsize=label_fontsize)
-
-    # Only add y-labels to right left-most row
-    if n_row == 1:  # if there is only one row, the ax array is 1D
-        axarr[0].set_ylabel("Posterior z-score", fontsize=label_fontsize)
-    # If there is more than one row, the ax array is 2D
-    else:
-        for _ax in axarr[:, 0]:
-            _ax.set_ylabel("Posterior z-score", fontsize=label_fontsize)
-
-    # Remove unused axes entirely
-    for _ax in axarr_it[n_params:]:
-        _ax.remove()
+    postprocess(axarr, axarr_it, n_row, n_col, n_params, xlabel, ylabel, label_fontsize)
 
     f.tight_layout()
     return f
@@ -453,36 +377,12 @@ def plot_sbc_ecdf(
         If there is a deviation form the expected shapes of `post_samples` and `prior_samples`.
     """
 
-    # Sanity checks
-    check_posterior_prior_shapes(post_samples, prior_samples)
+    f, ax, ax_it, n_row, n_col, n_params, param_names = preprocess(post_samples, prior_samples, collapse=False)
 
-    # Store reference to number of parameters
-    n_params = post_samples.shape[-1]
 
     # Compute fractional ranks (using broadcasting)
     ranks = np.sum(post_samples < prior_samples[:, np.newaxis, :], axis=1) / post_samples.shape[1]
 
-    # Prepare figure
-    if stacked:
-        n_row, n_col = 1, 1
-        f, ax = plt.subplots(1, 1, figsize=fig_size)
-    else:
-        # Determine number of rows and columns for subplots based on inputs
-        if n_row is None and n_col is None:
-            n_row = int(np.ceil(n_params / 6))
-            n_col = int(np.ceil(n_params / n_row))
-        elif n_row is None and n_col is not None:
-            n_row = int(np.ceil(n_params / n_col))
-        elif n_row is not None and n_col is None:
-            n_col = int(np.ceil(n_params / n_row))
-
-        # Determine fig_size dynamically, if None
-        if fig_size is None:
-            fig_size = (int(5 * n_col), int(5 * n_row))
-
-        # Initialize figure
-        f, ax = plt.subplots(n_row, n_col, figsize=fig_size)
-        ax = np.atleast_1d(ax)
 
     # Plot individual ecdf of parameters
     for j in range(ranks.shape[-1]):
@@ -551,8 +451,7 @@ def plot_sbc_ecdf(
             _ax.set_ylabel(ylab, fontsize=label_fontsize)
 
     # Remove unused axes entirely
-    for _ax in axes[n_params:]:
-        _ax.remove()
+    remove_unused_axes(ax)
 
     f.tight_layout()
     return f
@@ -619,11 +518,10 @@ def plot_sbc_histograms(
         If there is a deviation form the expected shapes of `post_samples` and `prior_samples`.
     """
 
-    # Sanity check
-    check_posterior_prior_shapes(post_samples, prior_samples)
+    f, axarr, ax, n_row, n_col, n_params, param_names = preprocess(post_samples, prior_samples)
 
     # Determine the ratio of simulations to prior draws
-    n_sim, n_draws, n_params = post_samples.shape
+    n_sim, n_draws, _ = post_samples.shape
     ratio = int(n_sim / n_draws)
 
     # Log a warning if N/B ratio recommended by Talts et al. (2018) < 20
@@ -642,25 +540,6 @@ def plot_sbc_histograms(
         # Attempt a fix if a single bin is determined so plot still makes sense
         if num_bins == 1:
             num_bins = 5
-
-    # Determine n params and param names if None given
-    if param_names is None:
-        param_names = [f"$\\theta_{{{i}}}$" for i in range(1, n_params + 1)]
-
-    # Determine number of rows and columns for subplots based on inputs
-    if n_row is None and n_col is None:
-        n_row = int(np.ceil(n_params / 6))
-        n_col = int(np.ceil(n_params / n_row))
-    elif n_row is None and n_col is not None:
-        n_row = int(np.ceil(n_params / n_col))
-    elif n_row is not None and n_col is None:
-        n_col = int(np.ceil(n_params / n_row))
-
-    # Initialize figure
-    if fig_size is None:
-        fig_size = (int(5 * n_col), int(5 * n_row))
-    f, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
-    axarr = np.atleast_1d(axarr)
     
     # Compute ranks (using broadcasting)
     ranks = np.sum(post_samples < prior_samples[:, np.newaxis, :], axis=1)
@@ -673,10 +552,6 @@ def plot_sbc_histograms(
     mean = N / num_bins  # corresponds to binom.mean(N, 1 / num_bins)
 
     # Plot marginal histograms in a loop
-    if n_row > 1:
-        ax = axarr.flat
-    else:
-        ax = axarr
     for j in range(len(param_names)):
         ax[j].axhspan(endpoints[0], endpoints[1], facecolor="gray", alpha=0.3)
         ax[j].axhline(mean, color="gray", zorder=0, alpha=0.9)
@@ -695,11 +570,118 @@ def plot_sbc_histograms(
         _ax.set_xlabel("Rank statistic", fontsize=label_fontsize)
 
     # Remove unused axes entirely
-    for _ax in axarr[n_params:]:
-        _ax.remove()
+    remove_unused_axes(axarr, n_params)
 
     f.tight_layout()
     return f
+
+
+def plot_calibration_curves(
+    true_models,
+    pred_models,
+    model_names=None,
+    num_bins=10,
+    label_fontsize=16,
+    legend_fontsize=14,
+    title_fontsize=18,
+    tick_fontsize=12,
+    epsilon=0.02,
+    fig_size=None,
+    color="#8f2727",
+    xlabel="Predicted probability",
+    ylabel="True probability",
+    n_row=None,
+    n_col=None,
+):
+    """Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities
+    for a model comparison problem. The marginal histograms inform about the fraction of predictions in each bin.
+    Depends on the ``expected_calibration_error`` function for computing the ECE.
+
+    Parameters
+    ----------
+    true_models       : np.ndarray of shape (num_data_sets, num_models)
+        The one-hot-encoded true model indices per data set.
+    pred_models       : np.ndarray of shape (num_data_sets, num_models)
+        The predicted posterior model probabilities (PMPs) per data set.
+    model_names       : list or None, optional, default: None
+        The model names for nice plot titles. Inferred if None.
+    num_bins          : int, optional, default: 10
+        The number of bins to use for the calibration curves (and marginal histograms).
+    label_fontsize    : int, optional, default: 16
+        The font size of the y-label and y-label texts
+    legend_fontsize   : int, optional, default: 14
+        The font size of the legend text (ECE value)
+    title_fontsize    : int, optional, default: 18
+        The font size of the title text. Only relevant if `stacked=False`
+    tick_fontsize     : int, optional, default: 12
+        The font size of the axis ticklabels
+    epsilon           : float, optional, default: 0.02
+        A small amount to pad the [0, 1]-bounded axes from both side.
+    fig_size          : tuple or None, optional, default: None
+        The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
+    color             : str, optional, default: '#8f2727'
+        The color of the calibration curves
+    n_row             : int, optional, default: None
+        The number of rows for the subplots. Dynamically determined if None.
+    n_col             : int, optional, default: None
+        The number of columns for the subplots. Dynamically determined if None.
+
+    Returns
+    -------
+    fig : plt.Figure - the figure instance for optional saving
+    """
+
+    f, axarr, ax, n_row, n_col, num_models, model_names = preprocess(true_models, pred_models)
+    # Compute calibration
+    cal_errs, probs_true, probs_pred = expected_calibration_error(true_models, pred_models, num_bins)
+
+    # Get the number of models and create names for each
+    # num_models, model_names = get_count_and_names(true_models, symbol="M")
+
+    # Plot marginal calibration curves in a loop
+    for j in range(num_models):
+        # Plot calibration curve
+        ax[j].plot(probs_pred[j], probs_true[j], "o-", color=color)
+
+        # Plot PMP distribution over bins
+        uniform_bins = np.linspace(0.0, 1.0, num_bins + 1)
+        norm_weights = np.ones_like(pred_models) / len(pred_models)
+        ax[j].hist(pred_models[:, j], bins=uniform_bins, weights=norm_weights[:, j], color="grey", alpha=0.3)
+
+        # Plot AB line
+        ax[j].plot((0, 1), (0, 1), "--", color="black", alpha=0.9)
+
+        # Tweak plot
+        ax[j].tick_params(axis="both", which="major", labelsize=tick_fontsize)
+        ax[j].tick_params(axis="both", which="minor", labelsize=tick_fontsize)
+        ax[j].set_title(model_names[j], fontsize=title_fontsize)
+        ax[j].spines["right"].set_visible(False)
+        ax[j].spines["top"].set_visible(False)
+        ax[j].set_xlim([0 - epsilon, 1 + epsilon])
+        ax[j].set_ylim([0 - epsilon, 1 + epsilon])
+        ax[j].set_xticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+        ax[j].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+        ax[j].grid(alpha=0.5)
+
+        # Add ECE label
+        ax[j].text(
+            0.1,
+            0.9,
+            r"$\widehat{{\mathrm{{ECE}}}}$ = {0:.3f}".format(cal_errs[j]),
+            horizontalalignment="left",
+            verticalalignment="center",
+            transform=ax[j].transAxes,
+            size=legend_fontsize,
+        )
+
+    # Post-processing
+    postprocess(axarr, ax, n_row, n_col, num_models, xlabel, ylabel, label_fontsize)
+
+    f.tight_layout()
+    return f
+
+
+# ================================================================
 
 
 def plot_posterior_2d(
@@ -804,7 +786,7 @@ def plot_posterior_2d(
             Line2D(xdata=[], ydata=[], color=post_color, lw=3, alpha=post_alpha),
             Line2D(xdata=[], ydata=[], color=prior_color, lw=3, alpha=prior_alpha),
         ]
-        g.fig.legend(handles, ["Posterior", "Prior"], fontsize=legend_fontsize, loc="center right")
+        g.legend(handles, ["Posterior", "Prior"], fontsize=legend_fontsize, loc="center right")
 
     # Remove upper axis
     for i, j in zip(*np.triu_indices_from(g.axes, 1)):
@@ -826,7 +808,143 @@ def plot_posterior_2d(
             g.axes[i, j].grid(alpha=0.5)
 
     g.tight_layout()
-    return g.fig
+    return g
+
+
+def plot_prior_2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f2727", **kwargs):
+    """Creates pair-plots for a given joint prior.
+
+    Parameters
+    ----------
+    prior       : callable
+        The prior object which takes a single integer argument and generates random draws.
+    param_names : list of str or None, optional, default None
+        An optional list of strings which
+    n_samples   : int, optional, default: 1000
+        The number of random draws from the joint prior
+    height      : float, optional, default: 2.5
+        The height of the pair plot
+    color       : str, optional, default : '#8f2727'
+        The color of the plot
+    **kwargs    : dict, optional
+        Additional keyword arguments passed to the sns.PairGrid constructor
+
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
+    """
+
+    # Generate prior draws
+    prior_samples = prior(n_samples)
+
+    # Handle dict type
+    if type(prior_samples) is dict:
+        prior_samples = prior_samples["prior_draws"]
+
+    plot_distribution_2d(prior_samples, context="Prior", height=height, color=color, param_names=param_names, render=True, **kwargs)
+
+
+def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
+    """Creates pair plots for the latent space learned by the inference network. Enables
+    visual inspection of the latent space and whether its structure corresponds to the
+    one enforced by the optimization criterion.
+
+    Parameters
+    ----------
+    z_samples   : np.ndarray or tf.Tensor of shape (n_sim, n_params)
+        The latent samples computed through a forward pass of the inference network.
+    height      : float, optional, default: 2.5
+        The height of the pair plot.
+    color       : str, optional, default : '#8f2727'
+        The color of the plot
+    **kwargs    : dict, optional
+        Additional keyword arguments passed to the sns.PairGrid constructor
+
+    Returns
+    -------
+    f : plt.Figure - the figure instance for optional saving
+    """
+
+    # Try to convert z_samples, if eventually tf.Tensor is passed
+    if type(z_samples) is not np.ndarray:
+        z_samples = z_samples.numpy()
+    
+    plot_distribution_2d(z_samples, context="Latent Dim", height=height, color=color, render=True, **kwargs)
+
+
+def plot_distribution_2d(
+    samples,
+    context, 
+    height=2.5,
+    color="#8f2727",
+    alpha=0.9,
+    param_names=None,
+    render=True, 
+    **kwargs
+):
+    """
+    A more flexible pairplot function for multiple distributions based upon collected samples.
+
+    Parameters
+    ----------
+    samples     : np.ndarray or tf.Tensor of shape (n_sim, n_params)
+        Sample draws from any dataset
+    context     : str
+        The context that the sample represents
+    height      : float, optional, default: 2.5
+        The height of the pair plot
+    color       : str, optional, default : '#8f2727'
+        The color of the plot
+    alpha       : float in [0, 1], optonal, default: 0.9
+        The opacity of the plot
+    param_names : list or None, optional, default: None
+        The parameter names for nice plot titles. Inferred if None
+    render      : bool, optional, default: True
+        The boolean that determines whether to render the plot visually. If true, then the plot will render; otherwise, the plot will go through further steps for postprocessing
+    **kwargs    : dict, optional
+        Additional keyword arguments passed to the sns.PairGrid constructor
+    """
+    # Get latent dimensions
+    dim = samples.shape[-1]
+
+    # Get number of params
+    if n_params is None:
+        n_params = dim
+
+    # Generate titles
+    if param_names is None:
+        titles = [f"{context} Param. {i}" for i in range(1, dim + 1)]
+    else:
+        titles = [f"{context} {p}" for p in param_names]
+    
+    # Convert samples to pd.DataFrame
+    data_to_plot = pd.DataFrame(samples, columns=titles)
+
+    # Generate plots
+    g = sns.PairGrid(data_to_plot, height=height, **kwargs)
+
+    g.map_diag(sns.histplot, fill=True, color=color, alpha=alpha, kde=True)
+
+    # Incorporate exceptions for generating KDE plots
+    try: 
+        g.map_lower(sns.kdeplot, fill=True, color=color, alpha=alpha)
+    except Exception as e:
+        logging.warning("KDE failed due to the following exception:\n" + repr(e) + "\nSubstituting scatter plot.")
+        g.map_lower(sns.scatterplot, alpha=0.6, s=40, edgecolor="k", color=color)
+    
+    g.map_upper(sns.scatterplot, alpha=0.6, s=40, edgecolor="k", color=color)
+
+    if render:
+        # Generate grids
+        for i in range(dim):
+            for j in range(dim):
+                g.axes[i, j].grid(alpha=0.5)
+        
+        # Return figure
+        g.tight_layout()
+        return g
+
+# ================================================================
 
 
 def plot_losses(
@@ -895,9 +1013,11 @@ def plot_losses(
     n_row = len(train_losses.columns)
 
     # Initialize figure
-    if fig_size is None:
-        fig_size = (16, int(4 * n_row))
-    f, axarr = plt.subplots(n_row, 1, figsize=fig_size)
+    f, axarr = initialize_figure(n_row=n_row, n_col=1, fig_size=(16, int(4 * n_row)))
+
+    # if fig_size is None:
+    #     fig_size = (16, int(4 * n_row))
+    # f, axarr = plt.subplots(n_row, 1, figsize=fig_size)
 
     # Get the number of steps as an array
     train_step_index = np.arange(1, len(train_losses) + 1)
@@ -942,246 +1062,6 @@ def plot_losses(
             ax.legend(fontsize=legend_fontsize)
     f.tight_layout()
     return f
-
-
-def plot_prior2d(prior, param_names=None, n_samples=2000, height=2.5, color="#8f2727", **kwargs):
-    """Creates pair-plots for a given joint prior.
-
-    Parameters
-    ----------
-    prior       : callable
-        The prior object which takes a single integer argument and generates random draws.
-    param_names : list of str or None, optional, default None
-        An optional list of strings which
-    n_samples   : int, optional, default: 1000
-        The number of random draws from the joint prior
-    height      : float, optional, default: 2.5
-        The height of the pair plot
-    color       : str, optional, default : '#8f2727'
-        The color of the plot
-    **kwargs    : dict, optional
-        Additional keyword arguments passed to the sns.PairGrid constructor
-
-    Returns
-    -------
-    f : plt.Figure - the figure instance for optional saving
-    """
-
-    # Generate prior draws
-    prior_samples = prior(n_samples)
-
-    # Handle dict type
-    if type(prior_samples) is dict:
-        prior_samples = prior_samples["prior_draws"]
-
-    # Get latent dimensionality and prepare titles
-    dim = prior_samples.shape[-1]
-
-    # Convert samples to a pandas data frame
-    if param_names is None:
-        titles = [f"Prior Param. {i}" for i in range(1, dim + 1)]
-    else:
-        titles = [f"Prior {p}" for p in param_names]
-    data_to_plot = pd.DataFrame(prior_samples, columns=titles)
-
-    # Generate plots
-    g = sns.PairGrid(data_to_plot, height=height, **kwargs)
-    g.map_diag(sns.histplot, fill=True, color=color, alpha=0.9, kde=True)
-
-    # Kernel density estimation (KDE) may not always be possible
-    # (e.g. with parameters whose correlation is close to 1 or -1).
-    # In this scenario, a scatter-plot is generated instead.
-    try:
-        g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
-    except Exception as e:
-        logging.warning("KDE failed due to the following exception:\n" + repr(e) + "\nSubstituting scatter plot.")
-        g.map_lower(sns.scatterplot, alpha=0.6, s=40, edgecolor="k", color=color)
-    g.map_upper(sns.scatterplot, alpha=0.6, s=40, edgecolor="k", color=color)
-
-    # Add grids
-    for i in range(dim):
-        for j in range(dim):
-            g.axes[i, j].grid(alpha=0.5)
-    g.tight_layout()
-    return g.fig
-
-
-def plot_latent_space_2d(z_samples, height=2.5, color="#8f2727", **kwargs):
-    """Creates pair plots for the latent space learned by the inference network. Enables
-    visual inspection of the latent space and whether its structure corresponds to the
-    one enforced by the optimization criterion.
-
-    Parameters
-    ----------
-    z_samples   : np.ndarray or tf.Tensor of shape (n_sim, n_params)
-        The latent samples computed through a forward pass of the inference network.
-    height      : float, optional, default: 2.5
-        The height of the pair plot.
-    color       : str, optional, default : '#8f2727'
-        The color of the plot
-    **kwargs    : dict, optional
-        Additional keyword arguments passed to the sns.PairGrid constructor
-
-    Returns
-    -------
-    f : plt.Figure - the figure instance for optional saving
-    """
-
-    # Try to convert z_samples, if eventually tf.Tensor is passed
-    if type(z_samples) is not np.ndarray:
-        z_samples = z_samples.numpy()
-
-    # Get latent dimensionality and prepare titles
-    z_dim = z_samples.shape[-1]
-
-    # Convert samples to a pandas data frame
-    titles = [f"Latent Dim. {i}" for i in range(1, z_dim + 1)]
-    data_to_plot = pd.DataFrame(z_samples, columns=titles)
-
-    # Generate plots
-    g = sns.PairGrid(data_to_plot, height=height, **kwargs)
-    g.map_diag(sns.histplot, fill=True, color=color, alpha=0.9, kde=True)
-    g.map_lower(sns.kdeplot, fill=True, color=color, alpha=0.9)
-    g.map_upper(sns.scatterplot, alpha=0.6, s=40, edgecolor="k", color=color)
-
-    # Add grids
-    for i in range(z_dim):
-        for j in range(z_dim):
-            g.axes[i, j].grid(alpha=0.5)
-    g.tight_layout()
-    return g.fig
-
-
-def plot_calibration_curves(
-    true_models,
-    pred_models,
-    model_names=None,
-    num_bins=10,
-    label_fontsize=16,
-    legend_fontsize=14,
-    title_fontsize=18,
-    tick_fontsize=12,
-    epsilon=0.02,
-    fig_size=None,
-    color="#8f2727",
-    n_row=None,
-    n_col=None,
-):
-    """Plots the calibration curves, the ECEs and the marginal histograms of predicted posterior model probabilities
-    for a model comparison problem. The marginal histograms inform about the fraction of predictions in each bin.
-    Depends on the ``expected_calibration_error`` function for computing the ECE.
-
-    Parameters
-    ----------
-    true_models       : np.ndarray of shape (num_data_sets, num_models)
-        The one-hot-encoded true model indices per data set.
-    pred_models       : np.ndarray of shape (num_data_sets, num_models)
-        The predicted posterior model probabilities (PMPs) per data set.
-    model_names       : list or None, optional, default: None
-        The model names for nice plot titles. Inferred if None.
-    num_bins          : int, optional, default: 10
-        The number of bins to use for the calibration curves (and marginal histograms).
-    label_fontsize    : int, optional, default: 16
-        The font size of the y-label and y-label texts
-    legend_fontsize   : int, optional, default: 14
-        The font size of the legend text (ECE value)
-    title_fontsize    : int, optional, default: 18
-        The font size of the title text. Only relevant if `stacked=False`
-    tick_fontsize     : int, optional, default: 12
-        The font size of the axis ticklabels
-    epsilon           : float, optional, default: 0.02
-        A small amount to pad the [0, 1]-bounded axes from both side.
-    fig_size          : tuple or None, optional, default: None
-        The figure size passed to the ``matplotlib`` constructor. Inferred if ``None``
-    color             : str, optional, default: '#8f2727'
-        The color of the calibration curves
-    n_row             : int, optional, default: None
-        The number of rows for the subplots. Dynamically determined if None.
-    n_col             : int, optional, default: None
-        The number of columns for the subplots. Dynamically determined if None.
-
-    Returns
-    -------
-    fig : plt.Figure - the figure instance for optional saving
-    """
-
-    num_models = true_models.shape[-1]
-    if model_names is None:
-        model_names = [rf"$M_{{{m}}}$" for m in range(1, num_models + 1)]
-
-    # Determine number of rows and columns for subplots based on inputs
-    if n_row is None and n_col is None:
-        n_row = int(np.ceil(num_models / 6))
-        n_col = int(np.ceil(num_models / n_row))
-    elif n_row is None and n_col is not None:
-        n_row = int(np.ceil(num_models / n_col))
-    elif n_row is not None and n_col is None:
-        n_col = int(np.ceil(num_models / n_row))
-
-    # Compute calibration
-    cal_errs, probs_true, probs_pred = expected_calibration_error(true_models, pred_models, num_bins)
-
-    # Initialize figure
-    if fig_size is None:
-        fig_size = (int(5 * n_col), int(5 * n_row))
-    fig, axarr = plt.subplots(n_row, n_col, figsize=fig_size)
-    if n_row > 1:
-        ax = axarr.flat
-
-    # Plot marginal calibration curves in a loop
-    if n_row > 1:
-        ax = axarr.flat
-    else:
-        ax = axarr
-    for j in range(num_models):
-        # Plot calibration curve
-        ax[j].plot(probs_pred[j], probs_true[j], "o-", color=color)
-
-        # Plot PMP distribution over bins
-        uniform_bins = np.linspace(0.0, 1.0, num_bins + 1)
-        norm_weights = np.ones_like(pred_models) / len(pred_models)
-        ax[j].hist(pred_models[:, j], bins=uniform_bins, weights=norm_weights[:, j], color="grey", alpha=0.3)
-
-        # Plot AB line
-        ax[j].plot((0, 1), (0, 1), "--", color="black", alpha=0.9)
-
-        # Tweak plot
-        ax[j].tick_params(axis="both", which="major", labelsize=tick_fontsize)
-        ax[j].tick_params(axis="both", which="minor", labelsize=tick_fontsize)
-        ax[j].set_title(model_names[j], fontsize=title_fontsize)
-        ax[j].spines["right"].set_visible(False)
-        ax[j].spines["top"].set_visible(False)
-        ax[j].set_xlim([0 - epsilon, 1 + epsilon])
-        ax[j].set_ylim([0 - epsilon, 1 + epsilon])
-        ax[j].set_xticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
-        ax[j].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
-        ax[j].grid(alpha=0.5)
-
-        # Add ECE label
-        ax[j].text(
-            0.1,
-            0.9,
-            r"$\widehat{{\mathrm{{ECE}}}}$ = {0:.3f}".format(cal_errs[j]),
-            horizontalalignment="left",
-            verticalalignment="center",
-            transform=ax[j].transAxes,
-            size=legend_fontsize,
-        )
-
-    # Only add x-labels to the bottom row
-    bottom_row = axarr if n_row == 1 else axarr[0] if n_col == 1 else axarr[n_row - 1, :]
-    for _ax in bottom_row:
-        _ax.set_xlabel("Predicted probability", fontsize=label_fontsize)
-
-    # Only add y-labels to left-most row
-    if n_row == 1:  # if there is only one row, the ax array is 1D
-        ax[0].set_ylabel("True probability", fontsize=label_fontsize)
-    else:  # if there is more than one row, the ax array is 2D
-        for _ax in axarr[:, 0]:
-            _ax.set_ylabel("True probability", fontsize=label_fontsize)
-
-    fig.tight_layout()
-    return fig
 
 
 def plot_confusion_matrix(
@@ -1254,7 +1134,8 @@ def plot_confusion_matrix(
         cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
 
     # Initialize figure
-    fig, ax = plt.subplots(1, 1, figsize=fig_size)
+    fig, ax = initialize_figure(1, 1, fig_size=fig_size)
+    # fig, ax = plt.subplots(1, 1, figsize=fig_size)
     im = ax.imshow(cm, interpolation="nearest", cmap=cmap)
     cbar = ax.figure.colorbar(im, ax=ax, shrink=0.75)
 
@@ -1383,3 +1264,5 @@ def plot_mmd_hypothesis_test(
     sns.despine()
 
     return f
+
+
