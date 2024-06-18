@@ -1,74 +1,48 @@
-import keras
+from keras import ops
 import pytest
-from bayesflow.experimental.configurators import Configurator
 
 
-# Test for correct construction of Configurator with all args
-def test_configurator_init(test_params, configurator: Configurator):
-    config = configurator
-    assert config.inference_variables == test_params['inference_variables']
-    assert config.inference_conditions == test_params['inference_conditions']
-    assert config.summary_variables == test_params['summary_variables']
-    assert config.summary_conditions == test_params['summary_conditions']
+def test_inference_vars_filter(random_data, configurator):
+    # Tests for correct output shape when querying inference variables
+    filtered_data = configurator.configure_inference_variables(random_data)
+    expected = ops.concatenate([random_data[v] for v in configurator.inference_variables], axis=-1)
+    assert filtered_data.shape == expected.shape
 
 
-# Test for correct construction of Configurator with only inference_vars
-def test_sparse_configurator_init(test_params, configurator_sparse: Configurator):
-    config = configurator_sparse
-    assert config.inference_variables == test_params['inference_variables']
-    assert config.inference_conditions == []
-    assert config.summary_variables == []
-    assert config.summary_conditions == []
+def test_inferences_conds_filter(random_data, configurator):
+    # Tests for correct output shape when querying inference conditions w.r.t. summary_outputs
+    if not configurator.inference_conditions:
+        if "summary_outputs" in random_data:
+            assert configurator.configure_inference_conditions(random_data).shape == random_data["summary_outputs"].shape
+        else:
+            assert configurator.configure_inference_conditions(random_data) is None
+    elif not "summary_outputs" in random_data and "summary_outputs" in configurator.inference_conditions:
+        with pytest.raises(KeyError):
+            filtered_data = configurator.configure_inference_conditions(random_data)
+    else:
+        filtered_data = configurator.configure_inference_conditions(random_data)
+        tensors = [random_data[v] for v in configurator.inference_conditions]
+        if "summary_outputs" in random_data and not "summary_outputs" in configurator.inference_conditions:
+            tensors.append(random_data["summary_outputs"])
+        expected = ops.concatenate(tensors, axis=-1)
+        assert filtered_data.shape == expected.shape
 
 
-# Test successful configure_inference_variables()
-def test_inference_vars_filter(random_data, configurator: Configurator, test_shape):
-    config = configurator
-    filtered_data = config.configure_inference_variables(random_data)
-    assert filtered_data.shape == test_shape
+def test_summary_vars_filter(random_data, configurator):
+    # Tests for correct output shape when querying summary variables
+    if not configurator.summary_variables:
+        assert configurator.configure_summary_variables(random_data) is None
+    else:
+        filtered_data = configurator.configure_summary_variables(random_data)
+        expected = ops.concatenate([random_data[v] for v in configurator.summary_variables], axis=-1)
+        assert filtered_data.shape == expected.shape
 
 
-# Test successful configure_inference_conditions w/o summary_outputs in either
-def test_inferences_conds_filter_no_outputs(random_data_no_output, configurator_no_output: Configurator, test_shape):
-    config = configurator_no_output
-    filtered_data = config.configure_inference_conditions(random_data_no_output)
-    assert filtered_data.shape == (test_shape[0], test_shape[1] * 2)
-
-
-# Test successful configure_inference_conditions w/ summary_outputs in data, not in keys
-def test_inferences_conds_filter_partial_outputs(random_data, configurator_no_output: Configurator, test_shape):
-    config = configurator_no_output
-    filtered_data = config.configure_inference_conditions(random_data)
-    assert filtered_data.shape == (test_shape[0], test_shape[1] * 3)
-
-
-# Test successful configure_inference_conditions w/ summary_outputs in both
-def test_inferences_conds_filter_with_outputs(random_data, configurator: Configurator, test_shape):
-    config = configurator
-    filtered_data = config.configure_inference_conditions(random_data)
-    assert filtered_data.shape == (test_shape[0], test_shape[1] * 3)
-
-
-# Test successful configure_summary_variables()
-def test_summary_vars_filter(random_data, configurator: Configurator, test_shape):
-    config = configurator
-    filtered_data = config.configure_summary_variables(random_data)
-    assert filtered_data.shape == test_shape
-
-
-# Test successful configure_summary_conditions()
-def test_summary_conds_filter(random_data, configurator: Configurator, test_shape):
-    config = configurator
-    filtered_data = config.configure_summary_conditions(random_data)
-    assert filtered_data.shape == test_shape
-
-
-# Test return None for filters when configuring sparse Configurator
-def test_null_vars_and_conds(random_data_no_output, configurator_sparse: Configurator):
-    config = configurator_sparse
-    filtered_inference_conds = config.configure_inference_conditions(random_data_no_output)
-    filtered_summary_vars = config.configure_summary_variables(random_data_no_output)
-    filtered_summary_conds = config.configure_summary_conditions(random_data_no_output)
-    assert filtered_inference_conds == None
-    assert filtered_summary_vars == None
-    assert filtered_summary_conds == None
+def test_summary_conds_filter(random_data, configurator):
+    # Tests for correct output shape when querying summary conditions
+    if not configurator.summary_conditions:
+        assert configurator.configure_summary_conditions(random_data) is None
+    else:
+        filtered_data = configurator.configure_summary_conditions(random_data)
+        expected = ops.concatenate([random_data[v] for v in configurator.summary_conditions], axis=-1)
+        assert filtered_data.shape == expected.shape
