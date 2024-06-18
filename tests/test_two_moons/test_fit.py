@@ -6,13 +6,15 @@ from tests.utils import InterruptFitCallback, FitInterruptedError
 
 
 def test_fit(approximator, train_dataset, validation_dataset):
-    # TODO: verify the model learns something by comparing a metric before and after training
+    # Test model loss decreases after training
     approximator.compile(optimizer="AdamW")
-    approximator.fit(
+    pre_loss = approximator.compute_metrics(validation_dataset.data)["loss"].numpy()
+    history = approximator.fit(
         x=train_dataset,
         validation_data=validation_dataset,
         epochs=2,
     )
+    assert history.history["loss"][-1] < pre_loss
 
 
 @pytest.mark.skip(reason="not implemented")
