@@ -44,6 +44,10 @@ class BaseApproximator(keras.Model):
 
     # noinspection PyMethodOverriding
     def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
+        # compiled modes do not allow in-place operations on the data object
+        # we perform a shallow copy here, which is cheap
+        data = data.copy()
+
         if self.summary_network is None:
             data["inference_variables"] = self.configurator.configure_inference_variables(data)
             data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
