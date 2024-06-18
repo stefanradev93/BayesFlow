@@ -8,7 +8,6 @@ from .base_approximator import BaseApproximator
 
 class TensorFlowApproximator(BaseApproximator):
     def train_step(self, data: dict[str, Tensor]) -> dict[str, Tensor]:
-        # TODO: not functional yet
         with tf.GradientTape() as tape:
             metrics = self.compute_metrics(data)
 
