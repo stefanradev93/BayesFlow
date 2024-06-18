@@ -21,7 +21,7 @@ def simulator():
         return dict(r=r, alpha=alpha)
 
     def parameters():
-        theta = np.random.uniform(-1.0, 1.0, size=2)
+        theta = np.random.uniform(-1.0, 1.0, size=2).astype(np.float32)
 
         return dict(theta=theta)
 
