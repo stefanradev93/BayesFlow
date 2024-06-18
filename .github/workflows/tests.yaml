@@ -61,19 +61,29 @@ jobs:
       - name: Run JAX Tests
         if: ${{ matrix.backend == 'jax' }}
         run: |
-          python -m pytest tests/ -v -m "not (numpy or tensorflow or torch)"
+          pytest --cov bayesflow tests/ -v -m "not (numpy or tensorflow or torch)"
 
       - name: Run NumPy Tests
         if: ${{ matrix.backend == 'numpy' }}
         run: |
-          python -m pytest tests/ -v -m "not (jax or tensorflow or torch)"
+          pytest --cov bayesflow tests/ -v -m "not (jax or tensorflow or torch)"
 
       - name: Run TensorFlow Tests
         if: ${{ matrix.backend == 'tensorflow' }}
         run: |
-          python -m pytest tests/ -v -m "not (jax or numpy or torch)"
+          pytest --cov bayesflow tests/ -v -m "not (jax or numpy or torch)"
 
       - name: Run PyTorch Tests
         if: ${{ matrix.backend == 'torch' }}
         run: |
-          python -m pytest tests/ -v -m "not (jax or numpy or tensorflow)"
+          pytest --cov bayesflow tests/ -v -m "not (jax or numpy or tensorflow)"
+
+      - name: Create Coverage Report
+        run: |
+          coverage xml
+
+      - name: Upload Coverage Reports to CodeCov
+        uses: codecov/codecov-action@v4
+        with:
+          # do not use the files attribute here, otherwise the reports are not merged correctly
+          token: ${{ secrets.CODECOV_TOKEN }}

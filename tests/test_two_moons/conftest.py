@@ -1,6 +1,7 @@
 import math
 
 import keras
+import numpy as np
 import pytest
 
 
@@ -11,20 +12,43 @@ def batch_size():
 
 @pytest.fixture()
 def simulator():
-    class Simulator:
-        def sample(self, batch_shape):
-            r = keras.random.normal(shape=batch_shape + (1,), mean=0.1, stddev=0.01)
-            alpha = keras.random.uniform(shape=batch_shape + (1,), minval=-0.5 * math.pi, maxval=0.5 * math.pi)
-            theta = keras.random.uniform(shape=batch_shape + (2,), minval=-1.0, maxval=1.0)
+    from bayesflow.experimental.simulators import SequentialSimulator
 
-            x1 = -keras.ops.abs(theta[..., :1] + theta[..., 1:]) / keras.ops.sqrt(2.0) + r * keras.ops.cos(alpha) + 0.25
-            x2 = (-theta[..., :1] + theta[..., 1:]) / keras.ops.sqrt(2.0) + r * keras.ops.sin(alpha)
+    def contexts():
+        r = np.random.normal(0.1, 0.01)
+        alpha = np.random.uniform(-0.5 * np.pi, 0.5 * np.pi)
 
-            x = keras.ops.concatenate([x1, x2], axis=-1)
+        return dict(r=r, alpha=alpha)
 
-            return dict(r=r, alpha=alpha, theta=theta, x=x)
+    def parameters():
+        theta = np.random.uniform(-1.0, 1.0, size=2)
 
-    return Simulator()
+        return dict(theta=theta)
+
+    def observables(r, alpha, theta):
+        x1 = -keras.ops.abs(theta[0] + theta[1]) / np.sqrt(2.0) + r * keras.ops.cos(alpha) + 0.25
+        x2 = (-theta[0] + theta[1]) / np.sqrt(2.0) + r * keras.ops.sin(alpha)
+
+        return dict(x=keras.ops.stack([x1, x2]))
+
+    simulator = SequentialSimulator([contexts, parameters, observables])
+
+    return simulator
+
+    # class Simulator:
+    #     def sample(self, batch_shape):
+    #         r = keras.random.normal(shape=batch_shape + (1,), mean=0.1, stddev=0.01)
+    #         alpha = keras.random.uniform(shape=batch_shape + (1,), minval=-0.5 * math.pi, maxval=0.5 * math.pi)
+    #         theta = keras.random.uniform(shape=batch_shape + (2,), minval=-1.0, maxval=1.0)
+    #
+    #         x1 = -keras.ops.abs(theta[..., :1] + theta[..., 1:]) / keras.ops.sqrt(2.0) + r * keras.ops.cos(alpha) + 0.25
+    #         x2 = (-theta[..., :1] + theta[..., 1:]) / keras.ops.sqrt(2.0) + r * keras.ops.sin(alpha)
+    #
+    #         x = keras.ops.concatenate([x1, x2], axis=-1)
+    #
+    #         return dict(r=r, alpha=alpha, theta=theta, x=x)
+    #
+    # return Simulator()
 
 
 @pytest.fixture()

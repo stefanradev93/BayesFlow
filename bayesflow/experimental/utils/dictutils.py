@@ -1,20 +1,67 @@
 
-from keras import ops
+import inspect
+import keras
 
 from typing import Sequence
 
 from bayesflow.experimental.types import Tensor
 
 
-def nested_getitem(data: dict, item: int) -> dict:
-    """ Get the item-th element from a nested dictionary. """
-    result = {}
-    for key, value in data.items():
-        if isinstance(value, dict):
-            result[key] = nested_getitem(value, item)
-        else:
-            result[key] = value[item]
-    return result
+def convert_kwargs(f, *args, **kwargs) -> dict[str, any]:
+    """ Convert positional and keyword arguments to just keyword arguments for f """
+    if not args:
+        return kwargs
+
+    signature = inspect.signature(f)
+
+    parameters = dict(zip(signature.parameters, args))
+
+    for name, value in kwargs.items():
+        if name in parameters:
+            raise TypeError(f"{f.__name__}() got multiple arguments for argument '{name}'")
+
+        parameters[name] = value
+
+    return parameters
+
+
+def convert_args(f, *args, **kwargs) -> tuple[any, ...]:
+    """ Convert positional and keyword arguments to just positional arguments for f """
+    if not kwargs:
+        return args
+
+    signature = inspect.signature(f)
+
+    # convert to just kwargs first
+    kwargs = convert_kwargs(f, *args, **kwargs)
+
+    parameters = []
+    for name, param in signature.parameters.items():
+        if param.kind in [param.VAR_POSITIONAL, param.VAR_KEYWORD]:
+            continue
+
+        parameters.append(kwargs.get(name, param.default))
+
+    return tuple(parameters)
+
+
+def batched_call(f, batch_size, *args, **kwargs):
+    """ Call f, automatically vectorizing to batch_size if required """
+    try:
+        data = f((batch_size,), *args, **kwargs)
+        data = {key: keras.ops.convert_to_tensor(value) for key, value in data.items()}
+        return data
+    except TypeError:
+        pass
+
+    def vectorized(elements):
+        data = f(*elements[1:])
+        data = {key: keras.ops.convert_to_tensor(value) for key, value in data.items()}
+        return data
+
+    args = convert_args(f, *args, **kwargs)
+    dummy = keras.ops.zeros((batch_size, 0))
+    return keras.ops.vectorized_map(vectorized, (dummy, *args))
 
 
 def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int = -1) -> Tensor:
@@ -28,7 +75,7 @@ def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int =
     tensors = [data[key] for key in keys]
 
     try:
-        return ops.concatenate(tensors, axis=axis)
+        return keras.ops.concatenate(tensors, axis=axis)
     except ValueError as e:
         shapes = [t.shape for t in tensors]
         raise ValueError(f"Cannot trivially concatenate tensors {keys} with shapes {shapes}") from e

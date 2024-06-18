@@ -1,6 +1,7 @@
 
 from keras.saving import register_keras_serializable
 
+from bayesflow.experimental.types import Tensor
 from .mab import MultiHeadAttentionBlock
 
 
@@ -13,7 +14,7 @@ class SetAttentionBlock(MultiHeadAttentionBlock):
         In International conference on machine learning (pp. 3744-3753). PMLR.
     """
 
-    def call(self, set_x, **kwargs):
+    def call(self, set_x: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass through the self-attention layer.
 
         Parameters

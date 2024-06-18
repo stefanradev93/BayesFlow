@@ -1,8 +1,8 @@
 
 from .dictutils import (
+    batched_call,
     filter_concatenate,
     keras_kwargs,
-    nested_getitem,
 )
 
 from .dispatch import (
@@ -10,4 +10,5 @@ from .dispatch import (
     find_network,
     find_permutation,
     find_pooling,
+    find_recurrent_net
 )
