@@ -6,15 +6,19 @@ from tests.utils import InterruptFitCallback, FitInterruptedError
 
 
 def test_fit(approximator, train_dataset, validation_dataset):
-    # Test model loss decreases after training
+    # Test weights have not vainished and loss decreases after training
     approximator.compile(optimizer="AdamW")
-    pre_loss = approximator.compute_metrics(validation_dataset.data)["loss"].numpy()
     history = approximator.fit(
         x=train_dataset,
         validation_data=validation_dataset,
         epochs=2,
-    )
-    assert history.history["loss"][-1] < pre_loss
+    ).history
+    
+    for layer in approximator.layers:
+        for weight in layer.weights:
+            assert not keras.ops.any(keras.ops.isnan(weight)).numpy()
+    
+    assert history["loss"][-1] < history["loss"][0]
 
 
 @pytest.mark.skip(reason="not implemented")
