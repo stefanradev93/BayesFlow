@@ -58,25 +58,9 @@ jobs:
           conda config --show
           printenv | sort
 
-      - name: Run JAX Tests
-        if: ${{ matrix.backend == 'jax' }}
+      - name: Run Tests
         run: |
-          pytest --cov bayesflow tests/ -v -m "not (numpy or tensorflow or torch)"
-
-      - name: Run NumPy Tests
-        if: ${{ matrix.backend == 'numpy' }}
-        run: |
-          pytest --cov bayesflow tests/ -v -m "not (jax or tensorflow or torch)"
-
-      - name: Run TensorFlow Tests
-        if: ${{ matrix.backend == 'tensorflow' }}
-        run: |
-          pytest --cov bayesflow tests/ -v -m "not (jax or numpy or torch)"
-
-      - name: Run PyTorch Tests
-        if: ${{ matrix.backend == 'torch' }}
-        run: |
-          pytest --cov bayesflow tests/ -v -m "not (jax or numpy or tensorflow)"
+          pytest
 
       - name: Create Coverage Report
         run: |
