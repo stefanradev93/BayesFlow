@@ -1,173 +1,93 @@
 
 import keras
-from keras.saving import (
-    deserialize_keras_object,
-    register_keras_serializable,
-    serialize_keras_object,
-)
+import warnings
 
-from bayesflow.experimental.types import Tensor
+from bayesflow.experimental.configurators import BaseConfigurator
 from bayesflow.experimental.networks import InferenceNetwork, SummaryNetwork
+from bayesflow.experimental.types import Shape, Tensor
 
 
 class BaseApproximator(keras.Model):
-    def __init__(
-        self,
-        inference_network: InferenceNetwork,
-        summary_network: SummaryNetwork = None,
-        **kwargs
-    ):
-
+    # TODO: why does this work without the register serializable decorator?
+    def __init__(self, inference_network: InferenceNetwork, summary_network: SummaryNetwork, configurator: BaseConfigurator, **kwargs):
         super().__init__(**kwargs)
         self.inference_network = inference_network
         self.summary_network = summary_network
+        self.configurator = configurator
 
-    def sample(self, num_samples: int, **kwargs) -> dict[str, Tensor]:
-        # TODO
-        return {}
+    # noinspect PyMethodOverriding
+    def build(self, data_shapes: dict[str, Shape]):
+        data = {name: keras.ops.zeros(shape) for name, shape in data_shapes.items()}
+        self.build_from_data(data)
 
-    def log_prob(self, samples: dict[str, Tensor], **kwargs) -> Tensor:
-        # TODO
-        return {}
+    def build_from_data(self, data: dict[str, Tensor]):
+        self.compute_metrics(data, stage="training")
+        self.built = True
 
-    def call(self, *, training=False, **data):
-        if not training:
-            # user-called
-            raise NotImplementedError(
-                f"{self.__class__.__name__}.call is not well-defined and thus intentionally not implemented.\n"
-                f"For high-level sampling, use the `sample` and `log_prob` methods instead.\n"
-                f"For a low-level forward-pass, use the internal `inference_network` and `summary_network` directly."
-            )
-
-        # possibly keras-internal called, so we cannot raise
-        return None
-
-    def compute_loss(self, **data):
-
-        # Configure dict outputs into tensors
-        inference_variables = self.configure_inference_variables(data)
-        inference_conditions = self.configure_inference_conditions(data)
-        summary_variables = self.configure_summary_variables(data)
-        summary_conditions = self.configure_summary_conditions(data)
-
-        # Obtain summary outputs and summary loss (if present)
-        if self.summary_network:
-            summary_outputs = self.summary_network(summary_variables, summary_conditions)
-            summary_loss = self.summary_network.compute_loss(summary_outputs)
-        else:
-            summary_outputs = None
-            summary_loss = keras.ops.zeros(())
-
-        # Combine summary outputs and inference conditions
-        full_conditions = self.configure_full_conditions(summary_outputs, inference_conditions)
-
-        # Compute inference loss
-        inference_loss = self.inference_network.compute_loss(
-            targets=inference_variables,
-            conditions=full_conditions,
-        )
-
-        return inference_loss + summary_loss
-
-    def compute_metrics(self, **data):
-        #TODO
-        base_metrics = super().compute_metrics(**data)
-        return base_metrics
-
-        # inference_variables = self.configure_inference_variables(data)
-        # inference_conditions = self.configure_inference_conditions(data)
-        # summary_variables = self.configure_summary_variables(data)
-        # summary_conditions = self.configure_summary_conditions(data)
-        #
-        # if self.summary_network:
-        #     summary_metrics = self.summary_network.compute_metrics(
-        #         summary_variables=summary_variables,
-        #         summary_conditions=summary_conditions,
-        #     )
-        # else:
-        #     summary_metrics = {}
-        #
-        # inference_metrics = self.inference_network.compute_metrics(
-        #     inference_variables=inference_variables,
-        #     conditions=conditions,
-        # )
-        #
-        # summary_metrics = {f"summary/{key}": value for key, value in summary_metrics.items()}
-        # inference_metrics = {f"inference/{key}": value for key, value in inference_metrics.items()}
-
-        # return base_metrics | inference_metrics | summary_metrics
-
-    def configure_full_conditions(
-        self,
-        summary_outputs: Tensor | None,
-        inference_conditions: Tensor | None,
-    ) -> Tensor:
-        """
-        Combine the (optional) inference conditions with the (optional) outputs
-        of the (optional) summary network.
-        """
-
+    def train_step(self, data: dict[str, Tensor]) -> dict[str, Tensor]:
+        # we cannot provide a backend-agnostic implementation due to reliance on autograd
         raise NotImplementedError
 
-    def configure_inference_variables(self, data: dict) -> any:
-        """
-        Return the inferred variables, given the data.
-        Inferred variables are passed as input to the inference network.
+    def test_step(self, data: dict[str, Tensor]) -> dict[str, Tensor]:
+        metrics = self.compute_metrics(data, stage="validation")
+        self._loss_tracker.update_state(metrics["loss"])
+        return metrics
 
-        This method must be efficient and deterministic.
-        Best practice is to prepare the output in dataset.__getitem__,
-        which is run in a worker process, and then simply fetch a key from the data dictionary here.
-        """
-        raise NotImplementedError
+    def evaluate(self, *args, **kwargs):
+        val_logs = super().evaluate(*args, **kwargs)
 
-    def configure_inference_conditions(self, data: dict) -> any:
-        """
-        Return the inference conditions, given the data.
-        Inference conditions are passed as conditional input to the inference network.
+        if val_logs is None:
+            # https://github.com/keras-team/keras/issues/19835
+            warnings.warn(f"Found no validation logs due to a bug in keras. "
+                          f"Applying workaround, but incorrect loss values may be logged. "
+                          f"If possible, increase the size of your dataset, "
+                          f"or lower the number of validation steps used.")
 
-        If summary outputs are provided, they should be concatenated to the return value.
+            val_logs = {}
 
-        This method must be efficient and deterministic.
-        Best practice is to prepare the output in dataset.__getitem__,
-        which is run in a worker process, and then simply fetch a key from the data dictionary here.
-        """
-        raise NotImplementedError
+        return val_logs
 
-    def configure_summary_variables(self, data: dict) -> any:
-        """
-        Return the observed variables, given the data.
-        Observed variables are passed as input to the summary and/or inference networks.
+    # noinspection PyMethodOverriding
+    def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
+        # compiled modes do not allow in-place operations on the data object
+        # we perform a shallow copy here, which is cheap
+        data = data.copy()
 
-        This method must be efficient and deterministic.
-        Best practice is to prepare the output in dataset.__getitem__,
-        which is run in a worker process, and then simply fetch a key from the data dictionary here.
-        """
-        raise NotImplementedError
+        if self.summary_network is None:
+            data["inference_variables"] = self.configurator.configure_inference_variables(data)
+            data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
+            return self.inference_network.compute_metrics(data, stage=stage)
 
-    def configure_summary_conditions(self, data: dict) -> any:
-        """
-        Return the summary conditions, given the data.
-        Summary conditions are passed as conditional input to the summary network.
+        data["summary_variables"] = self.configurator.configure_summary_variables(data)
+        data["summary_conditions"] = self.configurator.configure_summary_conditions(data)
 
-        This method must be efficient and deterministic.
-        Best practice is to prepare the output in dataset.__getitem__,
-        which is run in a worker process, and then simply fetch a key from the data dictionary here.
-        """
-        raise NotImplementedError
+        summary_metrics = self.summary_network.compute_metrics(data, stage=stage)
 
-    @classmethod
-    def from_config(cls, config: dict, custom_objects=None) -> "BaseApproximator":
-        inference_network = deserialize_keras_object(config.pop("inference_network"), custom_objects=custom_objects)
-        summary_network = deserialize_keras_object(config.pop("summary_network"), custom_objects=custom_objects)
+        data["summary_outputs"] = summary_metrics.pop("outputs")
 
-        return cls(inference_network, summary_network, **config)
+        data["inference_variables"] = self.configurator.configure_inference_variables(data)
+        data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
 
-    def get_config(self):
-        base_config = super().get_config()
+        inference_metrics = self.inference_network.compute_metrics(data, stage=stage)
 
-        config = {
-            "inference_network": serialize_keras_object(self.inference_network),
-            "summary_network": serialize_keras_object(self.summary_network),
-        }
+        metrics = {"loss": summary_metrics["loss"] + inference_metrics["loss"]}
 
-        return base_config | config
+        summary_metrics = {f"summary/{key}": val for key, val in summary_metrics.items()}
+        inference_metrics = {f"inference/{key}": val for key, val in inference_metrics.items()}
+
+        return metrics | summary_metrics | inference_metrics
+
+    def compute_loss(self, *args, **kwargs):
+        raise RuntimeError(f"Use compute_metrics()['loss'] instead.")
+
+    def fit(self, *args, **kwargs):
+        if not self.built:
+            try:
+                dataset = kwargs.get("x") or args[0]
+                self.build_from_data(dataset[0])
+            except Exception:
+                raise RuntimeError(f"Could not automatically build the approximator. Please pass a dataset as the "
+                                   f"first argument to `approximator.fit()` or manually call `approximator.build()` "
+                                   f"with a dictionary specifying your data shapes.")
+
+        return super().fit(*args, **kwargs)

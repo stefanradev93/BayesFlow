@@ -1,27 +1,32 @@
 
 import keras
-from keras import ops
-from keras.saving import (
-    deserialize_keras_object,
-    register_keras_serializable,
-    serialize_keras_object,
-)
 
+from bayesflow.experimental.configurators import Configurator
 from bayesflow.experimental.types import Tensor
 
-from .base_approximator import BaseApproximator
+match keras.backend.backend():
+    case "jax":
+        from .jax_approximator import JAXApproximator as BaseApproximator
+    case "numpy":
+        from .numpy_approximator import NumpyApproximator as BaseApproximator
+    case "tensorflow":
+        from .tensorflow_approximator import TensorFlowApproximator as BaseApproximator
+    case "torch":
+        from .torch_approximator import TorchApproximator as BaseApproximator
+    case other:
+        raise NotImplementedError(f"BayesFlow does not currently support backend '{other}'.")
 
 
-@register_keras_serializable(package="bayesflow.approximators")
 class Approximator(BaseApproximator):
     def __init__(
-        self,
-        inference_variables: list[str],
-        inference_conditions: list[str] = None,
-        summary_variables: list[str] = None,
-        summary_conditions: list[str] = None,
-        **kwargs
+            self,
+            inference_variables: list[str],
+            inference_conditions: list[str] = None,
+            summary_variables: list[str] = None,
+            summary_conditions: list[str] = None,
+            **kwargs
     ):
+
         """ The main workhorse for learning amortized neural approximators for distributions arising
         in inverse problems and Bayesian inference (e.g., posterior distributions, likelihoods, marginal
         likelihoods).
@@ -64,44 +69,6 @@ class Approximator(BaseApproximator):
         #TODO
         """
 
-        super().__init__(**kwargs)
-        self.inference_variables = inference_variables
-        self.inference_conditions = inference_conditions or []
-        self.summary_variables = summary_variables or []
-        self.summary_conditions = summary_conditions or []
-
-    def configure_full_conditions(
-        self,
-        summary_outputs: Tensor | None,
-        inference_conditions: Tensor | None,
-    ) -> Tensor:
-        """
-        Combine the (optional) inference conditions with the (optional) outputs
-        of the (optional) summary network.
-        """
-
-        if summary_outputs is None:
-            return inference_conditions
-        if inference_conditions is None:
-            return summary_outputs
-        return keras.ops.concatenate(
-            (summary_outputs, inference_conditions), axis=-1
-        )
-
-    def configure_inference_variables(self, data: dict[str, Tensor]) -> Tensor:
-        return ops.concatenate([data[key] for key in self.inference_variables])
-
-    def configure_inference_conditions(self, data: dict[str, Tensor]) -> Tensor | None:
-        if not self.inference_conditions:
-            return None
-        return ops.concatenate([data[key] for key in self.inference_conditions])
-
-    def configure_summary_variables(self, data: dict[str, Tensor]) -> Tensor | None:
-        if not self.summary_variables:
-            return None
-        return ops.concatenate([data[key] for key in self.summary_variables])
-
-    def configure_summary_conditions(self, data: dict[str, Tensor]) -> Tensor | None:
-        if not self.summary_conditions:
-            return None
-        return ops.concatenate([data[key] for key in self.summary_conditions])
+        configurator = Configurator(inference_variables, inference_conditions, summary_variables, summary_conditions)
+        kwargs.setdefault("summary_network", None)
+        super().__init__(configurator=configurator, **kwargs)
