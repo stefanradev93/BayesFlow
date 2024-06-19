@@ -13,12 +13,12 @@ def set_size(request):
     return request.param
 
 
-@pytest.fixture(params=[2,3])
+@pytest.fixture(params=[2, 3])
 def num_features(request):
     return request.param
 
 
-@pytest.fixture(params=[True, False])
+@pytest.fixture(params=[False, True])
 def random_data(request, batch_size, set_size, num_features):
     data = {
         "var1": keras.random.normal((batch_size, set_size, num_features)),
@@ -32,7 +32,7 @@ def random_data(request, batch_size, set_size, num_features):
     return data
 
 
-@pytest.fixture(params=[True, False])
+@pytest.fixture(params=[False, True])
 def test_params(request):
     args = {
         "inference_variables": ["var1"],
@@ -45,7 +45,7 @@ def test_params(request):
     return args
 
 
-@pytest.fixture(params=[True, False])
+@pytest.fixture(params=[False, True])
 def configurator(request, test_params):
     if request.param:
         return Configurator(
