@@ -2,7 +2,7 @@
 import keras
 import pytest
 
-import bayesflow.experimental as bf
+import bayesflow as bf
 
 
 @pytest.fixture()

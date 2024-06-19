@@ -31,7 +31,7 @@ def model():
 
 @pytest.fixture()
 def offline_dataset(simulator, batch_size, workers, use_multiprocessing):
-    from bayesflow.experimental import OfflineDataset
+    from bayesflow import OfflineDataset
 
     # TODO: there is a bug in keras where if len(dataset) == 1 batch
     #  fit will error because no logs are generated
@@ -42,7 +42,7 @@ def offline_dataset(simulator, batch_size, workers, use_multiprocessing):
 
 @pytest.fixture()
 def online_dataset(simulator, batch_size, workers, use_multiprocessing):
-    from bayesflow.experimental import OnlineDataset
+    from bayesflow import OnlineDataset
 
     return OnlineDataset(simulator, batch_size=batch_size, workers=workers, use_multiprocessing=use_multiprocessing)
 
@@ -81,7 +81,7 @@ def sample_observables_batched(shape, r, alpha, theta, **kwargs):
 
 @pytest.fixture(params=["class", "batched_sequential", "unbatched_sequential"])
 def simulator(request):
-    from bayesflow.experimental.simulators import SequentialSimulator
+    from bayesflow.simulators import SequentialSimulator
 
     if request.param == "class":
         simulator = Simulator()

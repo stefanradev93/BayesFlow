@@ -18,9 +18,6 @@ def test_dataset_is_picklable(dataset):
     assert keras.ops.shape(samples) == keras.ops.shape(pickled_samples)
 
 
-# TODO: implement jax train loop
-@pytest.mark.torch
-@pytest.mark.tensorflow
 def test_dataset_works_in_fit(model, dataset):
     model.fit(dataset, epochs=1, steps_per_epoch=1)
 

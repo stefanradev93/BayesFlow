@@ -1,6 +1,6 @@
 import keras
 import pytest
-from bayesflow.experimental.configurators import Configurator
+from bayesflow.configurators import Configurator
 
 
 @pytest.fixture(params=[2, 3])

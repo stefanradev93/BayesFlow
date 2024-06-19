@@ -32,7 +32,6 @@ def test_serialize_deserialize(tmp_path, approximator, random_samples, jit_compi
     assert_models_equal(approximator, loaded_approximator)
 
 
-
 @pytest.mark.skip(reason="not implemented")
 def test_interrupt_and_resume_fit(tmp_path, amortizer, dataset):
     # TODO: test the InterruptFitCallback
