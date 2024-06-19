@@ -14,8 +14,8 @@ class TwoMoonsSimulator(Simulator):
 
         theta = keras.random.uniform(batch_shape + (2,), -1.0, 1.0)
 
-        x1 = -keras.ops.abs(theta[:, 0] + theta[:, 1]) / np.sqrt(2.0) + r * keras.ops.cos(alpha) + 0.25
-        x2 = (-theta[:, 0] + theta[:, 1]) / np.sqrt(2.0) + r * keras.ops.sin(alpha)
+        x1 = -keras.ops.abs(theta[..., :1] + theta[..., 1:]) / np.sqrt(2.0) + r * keras.ops.cos(alpha) + 0.25
+        x2 = (-theta[..., :1] + theta[..., 1:]) / np.sqrt(2.0) + r * keras.ops.sin(alpha)
 
         x = keras.ops.concatenate([x1, x2], axis=-1)
 
