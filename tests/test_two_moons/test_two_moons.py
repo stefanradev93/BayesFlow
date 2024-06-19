@@ -2,17 +2,35 @@
 import keras
 import pytest
 
+from tests.utils import assert_models_equal
 from tests.utils import InterruptFitCallback, FitInterruptedError
 
 
-def test_fit(approximator, train_dataset, validation_dataset):
+@pytest.mark.parametrize("jit_compile", [False, True])
+def test_compile(approximator, random_samples, jit_compile):
+    approximator.compile(jit_compile=jit_compile)
+
+
+@pytest.mark.parametrize("jit_compile", [False, True])
+def test_fit(approximator, train_dataset, validation_dataset, jit_compile):
     # TODO: verify the model learns something by comparing a metric before and after training
-    approximator.compile(optimizer="AdamW")
+    approximator.compile(jit_compile=jit_compile)
     approximator.fit(
-        x=train_dataset,
+        train_dataset,
         validation_data=validation_dataset,
         epochs=2,
     )
+
+
+@pytest.mark.parametrize("jit_compile", [False, True])
+def test_serialize_deserialize(tmp_path, approximator, random_samples, jit_compile):
+    approximator.build_from_data(random_samples)
+
+    keras.saving.save_model(approximator, tmp_path / "model.keras")
+    loaded_approximator = keras.saving.load_model(tmp_path / "model.keras")
+
+    assert_models_equal(approximator, loaded_approximator)
+
 
 
 @pytest.mark.skip(reason="not implemented")
