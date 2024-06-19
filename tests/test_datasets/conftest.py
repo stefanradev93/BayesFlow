@@ -20,11 +20,11 @@ def model():
         def call(self, *args, **kwargs):
             pass
 
-        def compute_loss(self, **kwargs):
+        def compute_loss(self, *args, **kwargs):
             return keras.ops.zeros(())
 
     model = Model()
-    model.compile(optimizer=None)
+    model.compile()
 
     return model
 
