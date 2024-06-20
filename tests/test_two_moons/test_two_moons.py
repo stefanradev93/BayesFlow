@@ -1,8 +1,25 @@
 import keras
 import pytest
+import numpy as np
 
 from tests.utils import assert_models_equal
 from tests.utils import InterruptFitCallback, FitInterruptedError
+
+
+def test_simulator(simulator):
+    # Test for randomness between data points
+    data = simulator.sample((10,))
+    assert len(np.unique(data["r"].numpy())) > 1
+    assert len(np.unique(data["alpha"].numpy())) > 1
+    assert len(np.unique(data["theta"].numpy())) > 1
+    assert len(np.unique(data["x"].numpy())) > 1
+    
+    # Test data points follow formula: f(r, alpha, theta) = x
+    for r, alpha, theta, x in zip(data["r"], data["alpha"], data["theta"], data["x"]):
+        x1 = -keras.ops.abs(theta[..., :1] + theta[..., 1:]) / keras.ops.sqrt(2.0) + r * keras.ops.cos(alpha) + 0.25
+        x2 = (-theta[..., :1] + theta[..., 1:]) / keras.ops.sqrt(2.0) + r * keras.ops.sin(alpha)
+        assert round(x1.numpy()[0], 7) == round(x[0].numpy(), 7)
+        assert round(x2.numpy()[0], 7) == round(x[1].numpy(), 7)
 
 
 @pytest.mark.parametrize("jit_compile", [False, True])
