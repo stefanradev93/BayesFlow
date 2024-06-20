@@ -10,6 +10,7 @@ dependencies:
   - pytest-cov
   - pytest-xdist
   - python >= 3.10, < 3.12
+  - ruff
   - seaborn
   - scikit-learn
   - scipy ~= 1.13
