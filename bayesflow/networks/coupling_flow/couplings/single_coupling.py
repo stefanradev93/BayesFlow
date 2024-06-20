@@ -17,7 +17,7 @@ class SingleCoupling(InvertibleLayer):
     """
     def __init__(
         self,
-        subnet: str = "resnet",
+        subnet: str = "mlp",
         transform: str = "affine",
         **kwargs
     ):

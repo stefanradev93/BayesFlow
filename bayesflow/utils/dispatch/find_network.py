@@ -15,7 +15,7 @@ def _(name: str, **kwargs):
         case "mlp" | "default":
             from bayesflow.networks import MLP
             network = MLP(**kwargs)
-        #TODO - remove, since MLP encompasses the functionality
+        # TODO - remove, since MLP encompasses the functionality
         case "resnet":
             from bayesflow.networks import ResNet
             network = ResNet(**kwargs)

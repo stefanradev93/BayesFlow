@@ -39,9 +39,9 @@ class CouplingFlow(InferenceNetwork):
     def __init__(
         self,
         depth: int = 6,
-        subnet: str = "default",
+        subnet: str | keras.Layer = "mlp",
         transform: str = "affine",
-        permutation: str | None = None,
+        permutation: str | None = "random",
         use_actnorm: bool = True,
         base_distribution: str = "normal",
         **kwargs
