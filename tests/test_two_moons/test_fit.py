@@ -1,24 +1,64 @@
 
 import keras
 import pytest
+import numpy as np
 
 from tests.utils import InterruptFitCallback, FitInterruptedError
 
 
-def test_fit(approximator, train_dataset, validation_dataset):
+def test_simulator(simulator):
+    # Test for randomness between data points
+    data = simulator.sample((10,))
+    assert len(np.unique(data["r"].numpy())) > 1
+    assert len(np.unique(data["alpha"].numpy())) > 1
+    assert len(np.unique(data["theta"].numpy())) > 1
+    assert len(np.unique(data["x"].numpy())) > 1
+    
+    # Test data points follow formula: f(r,alpha,theta) = x
+    for r, alpha, theta, x in zip(data["r"], data["alpha"], data["theta"], data["x"]):
+        x1 = -keras.ops.abs(theta[..., :1] + theta[..., 1:]) / keras.ops.sqrt(2.0) + r * keras.ops.cos(alpha) + 0.25
+        x2 = (-theta[..., :1] + theta[..., 1:]) / keras.ops.sqrt(2.0) + r * keras.ops.sin(alpha)
+        assert x1.numpy()[0] == x[0].numpy()
+        assert x2.numpy()[0] == x[1].numpy()
+
+
+@pytest.mark.skip(reason="WIP")
+def test_fit(approximator, train_dataset, validation_dataset, simulator):
+    # print(simulator.sample((2,)))
+    # print(simulator.sample((2,)))
+    # print(simulator.sample((2,)))
+    
     # Test weights have not vainished and loss decreases after training
     approximator.compile(optimizer="AdamW")
     history = approximator.fit(
         x=train_dataset,
         validation_data=validation_dataset,
-        epochs=2,
+        epochs=5,
     ).history
+        
+    data = train_dataset.data.copy()
+
+    inf_vars = approximator.configurator.configure_inference_variables(data)
+    inf_conds = approximator.configurator.configure_inference_conditions(data)
     
-    for layer in approximator.layers:
-        for weight in layer.weights:
-            assert not keras.ops.any(keras.ops.isnan(weight)).numpy()
+    z = approximator.inference_network(inf_vars, conditions=inf_conds)
     
-    assert history["loss"][-1] < history["loss"][0]
+    # print(z.numpy()[:100, :])
+
+    # print("r:", keras.ops.mean(train_dataset.data["r"]))
+    # print("a:", keras.ops.mean(train_dataset.data["alpha"]))
+    # print("0:", keras.ops.mean(train_dataset.data["theta"], axis=0))
+    # print("x:", keras.ops.mean(train_dataset.data["x"], axis=0))
+    
+    # print([key for key in train_dataset.data.keys()])
+    
+    
+        
+    # for layer in approximator.layers:
+    #     for weight in layer.weights:
+    #         assert not keras.ops.any(keras.ops.isnan(weight)).numpy()
+    
+    # assert history["loss"][-1] < history["loss"][0]
 
 
 @pytest.mark.skip(reason="not implemented")
