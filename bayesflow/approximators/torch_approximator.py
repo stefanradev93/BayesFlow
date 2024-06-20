@@ -1,4 +1,3 @@
-
 import torch
 
 from .base_approximator import BaseApproximator

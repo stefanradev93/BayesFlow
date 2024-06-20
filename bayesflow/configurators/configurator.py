@@ -1,4 +1,3 @@
-
 from keras.saving import register_keras_serializable
 
 from bayesflow.types import Tensor
@@ -14,7 +13,7 @@ class Configurator(BaseConfigurator):
         inference_variables: list[str],
         inference_conditions: list[str] = None,
         summary_variables: list[str] = None,
-        summary_conditions: list[str] = None
+        summary_conditions: list[str] = None,
     ):
         self.inference_variables = inference_variables
         self.inference_conditions = inference_conditions or []
@@ -30,7 +29,7 @@ class Configurator(BaseConfigurator):
             "inference_variables": self.inference_variables,
             "inference_conditions": self.inference_conditions,
             "summary_variables": self.summary_variables,
-            "summary_conditions": self.summary_conditions
+            "summary_conditions": self.summary_conditions,
         }
 
     def configure_inference_variables(self, data: dict[str, Tensor]) -> Tensor | None:

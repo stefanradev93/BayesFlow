@@ -1,4 +1,3 @@
-
 import math
 
 from keras import ops
@@ -10,7 +9,7 @@ from .transform import Transform
 
 @register_keras_serializable(package="bayesflow.networks.coupling_flow")
 class SplineTransform(Transform):
-    def __init__(self, bins=16, default_domain=(-5., 5., -5., 5.), **kwargs):
+    def __init__(self, bins=16, default_domain=(-5.0, 5.0, -5.0, 5.0), **kwargs):
         super().__init__(**kwargs)
 
         self.bins = bins
@@ -33,7 +32,6 @@ class SplineTransform(Transform):
         self.softplus_shift = math.log(math.e - 1.0)
 
     def split_parameters(self, parameters: Tensor) -> dict[str, Tensor]:
-
         # Ensure spline works for 2D (batch_size, dim) and 3D (batch_size, num_reps, dim)
         shape = ops.shape(parameters)
         rank = len(shape)
@@ -52,7 +50,7 @@ class SplineTransform(Transform):
             bottom_edge=parameters[1],
             widths=parameters[2],
             heights=parameters[3],
-            derivatives=parameters[4]
+            derivatives=parameters[4],
         )
         return parameters
 
@@ -61,7 +59,6 @@ class SplineTransform(Transform):
         return self._params_per_dim
 
     def constrain_parameters(self, parameters: dict[str, Tensor]) -> dict[str, Tensor]:
-
         # Set lower corners of domain relative to default domain
         parameters["left_edge"] = parameters["left_edge"] + self.default_domain[0]
         parameters["bottom_edge"] = parameters["bottom_edge"] + self.default_domain[2]

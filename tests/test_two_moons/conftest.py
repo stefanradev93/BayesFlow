@@ -4,6 +4,7 @@ import pytest
 @pytest.fixture()
 def approximator(inference_network):
     from bayesflow import Approximator
+
     return Approximator(
         inference_network=inference_network,
         inference_variables=["theta"],
@@ -19,6 +20,7 @@ def batch_size():
 @pytest.fixture()
 def inference_network():
     from bayesflow.networks import CouplingFlow
+
     return CouplingFlow()
 
 
@@ -30,12 +32,14 @@ def random_samples(batch_size, simulator):
 @pytest.fixture()
 def simulator():
     from bayesflow.simulators import TwoMoonsSimulator
+
     return TwoMoonsSimulator()
 
 
 @pytest.fixture()
 def train_dataset(simulator, batch_size):
     from bayesflow import OfflineDataset
+
     num_batches = 16
     data = simulator.sample((num_batches * batch_size,))
     return OfflineDataset(data, workers=4, max_queue_size=num_batches, batch_size=batch_size)
@@ -44,6 +48,7 @@ def train_dataset(simulator, batch_size):
 @pytest.fixture()
 def validation_dataset(simulator, batch_size):
     from bayesflow import OfflineDataset
+
     num_batches = 4
     data = simulator.sample((4 * batch_size,))
     return OfflineDataset(data, workers=4, max_queue_size=num_batches, batch_size=batch_size)

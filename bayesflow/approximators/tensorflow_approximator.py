@@ -1,4 +1,3 @@
-
 import tensorflow as tf
 
 from bayesflow.types import Tensor

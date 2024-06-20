@@ -1,4 +1,3 @@
-
 from keras import ops
 from keras.saving import register_keras_serializable
 
@@ -14,14 +13,14 @@ class ActNorm(InvertibleLayer):
     Activation Normalization is learned invertible normalization, using
     a Scale (s) and Bias (b) vector::
 
-       y = s * x + b (forward)
-       x = (y - b) / s (inverse)
+       y = s * x + b(forward)
+       x = (y - b) / s(inverse)
 
     References
     ----------
 
-    .. [1] Kingma, D. P., & Dhariwal, P. (2018). 
-        Glow: Generative flow with invertible 1x1 convolutions. 
+    .. [1] Kingma, D. P., & Dhariwal, P. (2018).
+        Glow: Generative flow with invertible 1x1 convolutions.
         Advances in Neural Information Processing Systems, 31.
 
     .. [2] Salimans, Tim, and Durk P. Kingma. (2016).
@@ -29,6 +28,7 @@ class ActNorm(InvertibleLayer):
        training of deep neural networks.
        Advances in Neural Information Processing Systems, 29.
     """
+
     def __init__(self, **kwargs):
         super().__init__(**keras_kwargs(kwargs))
         self.scale = None

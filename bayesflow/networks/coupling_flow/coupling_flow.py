@@ -1,6 +1,3 @@
-
-from typing import Tuple, Union
-
 import keras
 from keras.saving import register_keras_serializable
 
@@ -14,7 +11,7 @@ from ..inference_network import InferenceNetwork
 
 @register_keras_serializable(package="bayesflow.networks")
 class CouplingFlow(InferenceNetwork):
-    """ Implements a coupling flow as a sequence of dual couplings with permutations and activation
+    """Implements a coupling flow as a sequence of dual couplings with permutations and activation
     normalization. Incorporates ideas from [1-5].
 
     [1] Kingma, D. P., & Dhariwal, P. (2018).
@@ -36,6 +33,7 @@ class CouplingFlow(InferenceNetwork):
     Robust model training and generalisation with Studentising flows.
     arXiv preprint arXiv:2006.06599.
     """
+
     def __init__(
         self,
         depth: int = 6,
@@ -44,7 +42,7 @@ class CouplingFlow(InferenceNetwork):
         permutation: str | None = "random",
         use_actnorm: bool = True,
         base_distribution: str = "normal",
-        **kwargs
+        **kwargs,
     ):
         super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
 
@@ -52,7 +50,6 @@ class CouplingFlow(InferenceNetwork):
 
         self.invertible_layers = []
         for i in range(depth):
-
             if (p := find_permutation(permutation, **kwargs)) is not None:
                 self.invertible_layers.append(p)
 
@@ -75,24 +72,15 @@ class CouplingFlow(InferenceNetwork):
         self.call(xz, conditions=conditions)
 
     def call(
-        self,
-        xz: Tensor,
-        conditions: Tensor = None,
-        inverse: bool = False,
-        **kwargs
-    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
-
+        self, xz: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs
+    ) -> Tensor | tuple[Tensor, Tensor]:
         if inverse:
             return self._inverse(xz, conditions=conditions, **kwargs)
         return self._forward(xz, conditions=conditions, **kwargs)
 
     def _forward(
-        self, x: Tensor,
-        conditions: Tensor = None,
-        jacobian: bool = False,
-        **kwargs
-    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
-
+        self, x: Tensor, conditions: Tensor = None, jacobian: bool = False, **kwargs
+    ) -> Tensor | tuple[Tensor, Tensor]:
         z = x
         log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
         for layer in self.invertible_layers:
@@ -104,12 +92,8 @@ class CouplingFlow(InferenceNetwork):
         return z
 
     def _inverse(
-        self, z: Tensor,
-        conditions: Tensor = None,
-        jacobian: bool = False,
-        **kwargs
-    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
-
+        self, z: Tensor, conditions: Tensor = None, jacobian: bool = False, **kwargs
+    ) -> Tensor | tuple[Tensor, Tensor]:
         x = z
         log_det = keras.ops.zeros(keras.ops.shape(z)[:-1])
         for layer in reversed(self.invertible_layers):

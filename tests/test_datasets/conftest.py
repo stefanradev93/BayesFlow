@@ -1,4 +1,3 @@
-
 import keras
 import numpy as np
 import pytest
@@ -86,9 +85,13 @@ def simulator(request):
     if request.param == "class":
         simulator = Simulator()
     elif request.param == "batched_sequential":
-        simulator = SequentialSimulator([sample_contexts_batched, sample_parameters_batched, sample_observables_batched])
+        simulator = SequentialSimulator(
+            [sample_contexts_batched, sample_parameters_batched, sample_observables_batched]
+        )
     elif request.param == "unbatched_sequential":
-        simulator = SequentialSimulator([sample_contexts_unbatched, sample_parameters_unbatched, sample_observables_unbatched])
+        simulator = SequentialSimulator(
+            [sample_contexts_unbatched, sample_parameters_unbatched, sample_observables_unbatched]
+        )
     else:
         raise NotImplementedError
 

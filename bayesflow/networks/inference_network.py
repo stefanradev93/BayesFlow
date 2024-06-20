@@ -1,6 +1,3 @@
-
-from typing import Tuple, Union
-
 import keras
 
 from bayesflow.types import Tensor
@@ -16,15 +13,15 @@ class InferenceNetwork(keras.Layer):
         super().build(input_shape)
         self.base_distribution.build(input_shape)
 
-    def call(self, xz: Tensor, inverse: bool = False, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def call(self, xz: Tensor, inverse: bool = False, **kwargs) -> Tensor | tuple[Tensor, Tensor]:
         if inverse:
             return self._inverse(xz, **kwargs)
         return self._forward(xz, **kwargs)
 
-    def _forward(self, x: Tensor, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def _forward(self, x: Tensor, **kwargs) -> Tensor | tuple[Tensor, Tensor]:
         raise NotImplementedError
 
-    def _inverse(self, z: Tensor, **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def _inverse(self, z: Tensor, **kwargs) -> Tensor | tuple[Tensor, Tensor]:
         raise NotImplementedError
 
     def sample(self, num_samples: int, conditions: Tensor = None, **kwargs) -> Tensor:

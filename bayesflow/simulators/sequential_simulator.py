@@ -1,7 +1,6 @@
-
 import keras
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from bayesflow.types import Sampler, Shape, Tensor
 from bayesflow.utils import batched_call
@@ -28,9 +27,12 @@ class SequentialSimulator(Simulator):
         >>>     return dict(observables=observables)
         >>> simulator = SequentialSimulator([sample_contexts, sample_parameters, sample_observables])
         >>> simulator.sample((2,))
-        {'contexts': tensor(..., shape=(2, 1)), 'parameters': tensor(..., shape=(2, 1)), 'observables': tensor(..., shape=(2, 1))}
+        {'contexts': tensor(..., shape=(2, 1)),
+        'parameters': tensor(..., shape=(2, 1)),
+        'observables': tensor(..., shape=(2, 1))}
 
     """
+
     def __init__(self, samplers: Sequence[Sampler]):
         super().__init__()
         self.samplers = list(samplers)
@@ -43,11 +45,13 @@ class SequentialSimulator(Simulator):
                 data |= batched_call(sampler, shape[0], **data)
             except TypeError as e:
                 if keras.backend.backend() == "torch" and "device" in str(e):
-                    raise RuntimeError(f"Encountered an unexpected device error when sampling. "
-                                       f"This can happen when you use numpy in conjunction with automatic "
-                                       f"vectorization for samplers with arguments. Note that the arguments passed "
-                                       f"to the samplers are always tensors, which may live on the GPU. "
-                                       f"Performing numpy operations on these is prohibited.") from e
+                    raise RuntimeError(
+                        "Encountered an unexpected device error when sampling. "
+                        "This can happen when you use numpy in conjunction with automatic "
+                        "vectorization for samplers with arguments. Note that the arguments passed "
+                        "to the samplers are always tensors, which may live on the GPU. "
+                        "Performing numpy operations on these is prohibited."
+                    ) from e
                 else:
                     raise e
 

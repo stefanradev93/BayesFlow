@@ -1,6 +1,3 @@
-
-import functools
-
 import keras
 import numpy as np
 import pytest
@@ -58,7 +55,9 @@ def test_output_shape(inference_network, random_samples, random_conditions):
     assert keras.ops.shape(forward_output) == keras.ops.shape(random_samples)
     assert keras.ops.shape(forward_log_det) == (keras.ops.shape(random_samples)[0],)
 
-    inverse_output, inverse_log_det = inference_network(random_samples, conditions=random_conditions, jacobian=True, inverse=True)
+    inverse_output, inverse_log_det = inference_network(
+        random_samples, conditions=random_conditions, jacobian=True, inverse=True
+    )
 
     assert keras.ops.shape(inverse_output) == keras.ops.shape(random_samples)
     assert keras.ops.shape(inverse_log_det) == (keras.ops.shape(random_samples)[0],)
@@ -67,7 +66,9 @@ def test_output_shape(inference_network, random_samples, random_conditions):
 def test_cycle_consistency(inference_network, random_samples, random_conditions):
     # cycle-consistency means the forward and inverse methods are inverses of each other
     forward_output, forward_log_det = inference_network(random_samples, conditions=random_conditions, jacobian=True)
-    inverse_output, inverse_log_det = inference_network(forward_output, conditions=random_conditions, jacobian=True, inverse=True)
+    inverse_output, inverse_log_det = inference_network(
+        forward_output, conditions=random_conditions, jacobian=True, inverse=True
+    )
 
     assert allclose(random_samples, inverse_output)
     assert allclose(forward_log_det, -inverse_log_det)
@@ -85,12 +86,17 @@ def test_jacobian_numerically(inference_network, random_samples, random_conditio
     numerical_forward_jacobian, *_ = torch.autograd.functional.jacobian(f, random_samples, vectorize=True)
 
     # TODO: torch is somehow permuted wrt keras
-    numerical_forward_log_det = [keras.ops.log(keras.ops.abs(keras.ops.det(numerical_forward_jacobian[:, i, :]))) for i in range(keras.ops.shape(random_samples)[0])]
+    numerical_forward_log_det = [
+        keras.ops.log(keras.ops.abs(keras.ops.det(numerical_forward_jacobian[:, i, :])))
+        for i in range(keras.ops.shape(random_samples)[0])
+    ]
     numerical_forward_log_det = keras.ops.stack(numerical_forward_log_det, axis=0)
 
     assert allclose(forward_log_det, numerical_forward_log_det, rtol=1e-4, atol=1e-5)
 
-    inverse_output, inverse_log_det = inference_network(random_samples, conditions=random_conditions, jacobian=True, inverse=True)
+    inverse_output, inverse_log_det = inference_network(
+        random_samples, conditions=random_conditions, jacobian=True, inverse=True
+    )
 
     def f(x):
         return inference_network(x, conditions=random_conditions, inverse=True)
@@ -98,7 +104,10 @@ def test_jacobian_numerically(inference_network, random_samples, random_conditio
     numerical_inverse_jacobian, *_ = torch.autograd.functional.jacobian(f, random_samples, vectorize=True)
 
     # TODO: torch is somehow permuted wrt keras
-    numerical_inverse_log_det = [keras.ops.log(keras.ops.abs(keras.ops.det(numerical_inverse_jacobian[:, i, :]))) for i in range(keras.ops.shape(random_samples)[0])]
+    numerical_inverse_log_det = [
+        keras.ops.log(keras.ops.abs(keras.ops.det(numerical_inverse_jacobian[:, i, :])))
+        for i in range(keras.ops.shape(random_samples)[0])
+    ]
     numerical_inverse_log_det = keras.ops.stack(numerical_inverse_log_det, axis=0)
 
     assert allclose(inverse_log_det, numerical_inverse_log_det, rtol=1e-4, atol=1e-5)

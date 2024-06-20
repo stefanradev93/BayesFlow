@@ -1,4 +1,3 @@
-
 import keras
 from keras import layers
 from keras.saving import register_keras_serializable
@@ -25,7 +24,7 @@ class MLP(keras.layers.Layer):
         residual: bool = True,
         dropout: float = 0.05,
         spectral_normalization: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """
         Creates an instance of a flexible and simple MLP with optional residual connections and dropout.
@@ -67,7 +66,7 @@ class MLP(keras.layers.Layer):
                     kernel_initializer=kernel_initializer,
                     residual=residual,
                     dropout=dropout,
-                    spectral_normalization=spectral_normalization
+                    spectral_normalization=spectral_normalization,
                 )
             )
 
@@ -77,4 +76,3 @@ class MLP(keras.layers.Layer):
 
     def call(self, inputs: Tensor, **kwargs) -> Tensor:
         return self.res_blocks(inputs, training=kwargs.get("training", False))
-

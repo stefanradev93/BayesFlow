@@ -1,4 +1,3 @@
-
 from bayesflow.types import Tensor
 from ..invertible_layer import InvertibleLayer
 

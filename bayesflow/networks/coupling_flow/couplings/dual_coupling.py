@@ -1,4 +1,3 @@
-
 import keras
 from keras.saving import register_keras_serializable
 
@@ -35,8 +34,8 @@ class DualCoupling(InvertibleLayer):
         return self._forward(xz, conditions=conditions, **kwargs)
 
     def _forward(self, x: Tensor, conditions: Tensor = None, **kwargs) -> (Tensor, Tensor):
-        """ Transform (x1, x2) -> (g(x1; f(x2; x1)), f(x2; x1)) """
-        x1, x2 = x[..., :self.pivot], x[..., self.pivot:]
+        """Transform (x1, x2) -> (g(x1; f(x2; x1)), f(x2; x1))"""
+        x1, x2 = x[..., : self.pivot], x[..., self.pivot :]
         (z1, z2), log_det1 = self.coupling1(x1, x2, conditions=conditions, **kwargs)
         (z2, z1), log_det2 = self.coupling2(z2, z1, conditions=conditions, **kwargs)
 
@@ -46,8 +45,8 @@ class DualCoupling(InvertibleLayer):
         return z, log_det
 
     def _inverse(self, z: Tensor, conditions: Tensor = None, **kwargs) -> (Tensor, Tensor):
-        """ Transform (g(x1; f(x2; x1)), f(x2; x1)) -> (x1, x2) """
-        z1, z2 = z[..., :self.pivot], z[..., self.pivot:]
+        """Transform (g(x1; f(x2; x1)), f(x2; x1)) -> (x1, x2)"""
+        z1, z2 = z[..., : self.pivot], z[..., self.pivot :]
         (z2, z1), log_det2 = self.coupling2(z2, z1, conditions=conditions, inverse=True, **kwargs)
         (x1, x2), log_det1 = self.coupling1(z1, z2, conditions=conditions, inverse=True, **kwargs)
 

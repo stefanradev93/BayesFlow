@@ -1,4 +1,3 @@
-
 import keras
 from keras import ops, layers
 from keras.saving import register_keras_serializable
@@ -32,7 +31,7 @@ class EquivariantModule(keras.Layer):
         dropout: float = 0.05,
         layer_norm: bool = True,
         spectral_normalization: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """Creates an equivariant module according to [1] which combines equivariant transforms
         with nested invariant transforms, thereby enabling interactions between set members.
@@ -54,7 +53,7 @@ class EquivariantModule(keras.Layer):
             dropout=dropout,
             pooling=pooling,
             spectral_normalization=spectral_normalization,
-            **kwargs
+            **kwargs,
         )
 
         self.input_projection = layers.Dense(units_equivariant)

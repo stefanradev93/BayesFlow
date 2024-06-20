@@ -1,4 +1,3 @@
-
 import keras
 import pytest
 
@@ -12,9 +11,7 @@ def summary_network():
 
 @pytest.fixture()
 def inference_network():
-    network = keras.Sequential([
-        keras.layers.Dense(10)
-    ])
+    network = keras.Sequential([keras.layers.Dense(10)])
     network.compile(loss="mse")
     return network
 

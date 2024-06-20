@@ -1,4 +1,3 @@
-
 import keras
 from keras.saving import register_keras_serializable
 
@@ -17,12 +16,12 @@ class Swap(FixedPermutation):
             shape=(input_shape[-1],),
             initializer=keras.initializers.Constant(forward_indices),
             trainable=False,
-            dtype="int32"
+            dtype="int32",
         )
 
         self.inverse_indices = self.add_variable(
             shape=(input_shape[-1],),
             initializer=keras.initializers.Constant(inverse_indices),
             trainable=False,
-            dtype="int32"
+            dtype="int32",
         )
