@@ -4,7 +4,8 @@ BayesFlow is a highly open source project. We welcome contributions from the com
 
 ## How to contribute
 
-Follow these steps to submit a contribution to BayesFlow:
+First, take some time to read this whole guide.
+Then, follow these steps to submit a contribution to BayesFlow:
 
 ### 1. Open an issue
 
@@ -21,7 +22,7 @@ Here is an example of a good issue:
 #### Motivation:
 
 There is currently a significant scientific push to use multi-level prior distributions for hierarchical models,
-for instance in [1] and [2]. This feature would allow users to research these models more easily. 
+for instance in [1] and [2]. This feature would allow users to research these models more easily.
 
 #### Possible Interface:
 
@@ -48,7 +49,7 @@ def prior3(a, b, c):
 
 #### References:
 
-[1]: Some paper   
+[1]: Some paper
 [2]: Some other paper
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -64,6 +65,7 @@ cd bayesflow
 git checkout dev
 conda env create --file environment.yaml --name bayesflow
 conda activate bayesflow
+pre-commit install
 ```
 
 We recommend using the PyTorch backend for development.
@@ -79,7 +81,7 @@ In general, we recommend a test-driven development approach:
 You can run tests for your installed environment using `pytest`:
 
 ```bash
-pytest tests/
+pytest
 ```
 
 Make sure to occasionally also run multi-backend tests for your OS using [tox](https://tox.readthedocs.io/en/latest/):
@@ -89,6 +91,7 @@ tox --parallel auto
 ```
 
 See [tox.ini](tox.ini) for details on the environment configurations.
+Multi-OS tests will automatically be run once you create a pull request.
 
 ### 4. Document your changes
 
@@ -100,8 +103,10 @@ The overall *structure* of the documentation is manually designed. This also app
 
 You can re-build the documentation with
 
-    cd docsrc/
-    make clean && make github
+```bash
+cd docsrc
+make clean && make github
+```
 
 The entry point of the rendered documentation will be at `docs/index.html`.
 
@@ -128,6 +133,6 @@ argument names of the sampling functions.
 
 ## Tutorial Notebooks
 
-New tutorial notebooks are always welcome! You can add your tutorial notebook file to `examples/` and add a reference 
-to the list of notebooks in `docsrc/source/examples.rst`. 
+New tutorial notebooks are always welcome! You can add your tutorial notebook file to `examples/` and add a reference
+to the list of notebooks in `docsrc/source/examples.rst`.
 Re-build the documentation (see above) and your notebook will be included.
