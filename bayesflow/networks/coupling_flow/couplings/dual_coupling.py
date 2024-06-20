@@ -10,7 +10,7 @@ from ..invertible_layer import InvertibleLayer
 
 @register_keras_serializable(package="bayesflow.networks.coupling_flow")
 class DualCoupling(InvertibleLayer):
-    def __init__(self, subnet: str = "resnet", transform: str = "affine", **kwargs):
+    def __init__(self, subnet: str = "mlp", transform: str = "affine", **kwargs):
         super().__init__(**keras_kwargs(kwargs))
         self.coupling1 = SingleCoupling(subnet, transform, **kwargs)
         self.coupling2 = SingleCoupling(subnet, transform, **kwargs)

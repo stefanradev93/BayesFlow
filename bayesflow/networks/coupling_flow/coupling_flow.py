@@ -39,9 +39,9 @@ class CouplingFlow(InferenceNetwork):
     def __init__(
         self,
         depth: int = 6,
-        subnet: str = "resnet",
+        subnet: str | keras.Layer = "mlp",
         transform: str = "affine",
-        permutation: str | None = None,
+        permutation: str | None = "random",
         use_actnorm: bool = True,
         base_distribution: str = "normal",
         **kwargs
@@ -52,13 +52,14 @@ class CouplingFlow(InferenceNetwork):
 
         self.invertible_layers = []
         for i in range(depth):
-            if use_actnorm:
-                self.invertible_layers.append(ActNorm(**kwargs))
-
-            self.invertible_layers.append(DualCoupling(subnet, transform, **kwargs))
 
             if (p := find_permutation(permutation, **kwargs)) is not None:
                 self.invertible_layers.append(p)
+
+            self.invertible_layers.append(DualCoupling(subnet, transform, **kwargs))
+
+            if use_actnorm:
+                self.invertible_layers.append(ActNorm(**kwargs))
 
     # noinspection PyMethodOverriding
     def build(self, xz_shape, conditions_shape=None):

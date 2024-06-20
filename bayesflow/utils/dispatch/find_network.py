@@ -12,6 +12,10 @@ def find_network(arg, **kwargs):
 @find_network.register
 def _(name: str, **kwargs):
     match name.lower():
+        case "mlp" | "default":
+            from bayesflow.networks import MLP
+            network = MLP(**kwargs)
+        # TODO - remove, since MLP encompasses the functionality
         case "resnet":
             from bayesflow.networks import ResNet
             network = ResNet(**kwargs)
