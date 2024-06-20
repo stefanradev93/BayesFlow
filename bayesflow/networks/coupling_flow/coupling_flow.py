@@ -87,7 +87,8 @@ class CouplingFlow(InferenceNetwork):
         return self._forward(xz, conditions=conditions, **kwargs)
 
     def _forward(
-        self, x: Tensor,
+        self,
+        x: Tensor,
         conditions: Tensor = None,
         jacobian: bool = False,
         **kwargs
@@ -104,7 +105,8 @@ class CouplingFlow(InferenceNetwork):
         return z
 
     def _inverse(
-        self, z: Tensor,
+        self,
+        z: Tensor,
         conditions: Tensor = None,
         jacobian: bool = False,
         **kwargs
