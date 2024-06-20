@@ -11,6 +11,35 @@ on:
 
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: environment.yaml
+          python-version: "3.10"
+
+      - name: Show Environment Info
+        run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
+          printenv | sort
+
+      - name: Run Linter
+        run: |
+          ruff check
+
+      - name: Run Formatter
+        run: |
+          ruff format --check
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
