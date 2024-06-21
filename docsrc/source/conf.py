@@ -35,7 +35,7 @@ extensions = [
     "myst_nb",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
-    "sphinx_design"
+    "sphinx_design",
 ]
 
 numpydoc_show_class_members = False
@@ -52,7 +52,7 @@ autodoc_default_options = {
     "special-members": "__call__,__init__",
     "undoc-members": True,
     "exclude-members": "__weakref__",
-    "member-order": "bysource"
+    "member-order": "bysource",
 }
 
 # Define shorthand for external links:
@@ -94,11 +94,9 @@ html_theme_options = {
     "logo": {"alt-text": "BayesFlow"},
 }
 html_logo = "_static/bayesflow_hex.png"
-html_favicon = '_static/bayesflow_hex.ico'
+html_favicon = "_static/bayesflow_hex.ico"
 html_baseurl = "https://www.bayesflow.org/"
-html_js_files = [
-    "https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"
-]
+html_js_files = ["https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"]
 
 todo_include_todos = True
 

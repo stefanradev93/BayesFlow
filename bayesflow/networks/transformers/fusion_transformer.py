@@ -1,0 +1,3 @@
+class FusionTransformer:
+    # TODO
+    pass

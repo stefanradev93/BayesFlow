@@ -1,4 +1,0 @@
-
-class FusionTransformer:
-    #TODO
-    pass

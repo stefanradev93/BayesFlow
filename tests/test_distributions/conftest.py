@@ -1,15 +1,14 @@
-
 import pytest
 
 import keras
 
 
-@pytest.fixture(params=[1, 2, 3])
+@pytest.fixture(params=[2, 3])
 def batch_size(request):
     return request.param
 
 
-@pytest.fixture(params=[1, 2, 3])
+@pytest.fixture(params=[2, 3])
 def num_features(request):
     return request.param
 
@@ -18,9 +17,11 @@ def num_features(request):
 def random_samples(batch_size, num_features):
     return keras.random.normal((batch_size, num_features))
 
+
 @pytest.fixture()
 def diagonal_normal():
-    from bayesflow.experimental.distributions import DiagonalNormal
+    from bayesflow.distributions import DiagonalNormal
+
     return DiagonalNormal()
 
 

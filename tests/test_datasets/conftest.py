@@ -1,4 +1,3 @@
-
 import keras
 import numpy as np
 import pytest
@@ -20,18 +19,18 @@ def model():
         def call(self, *args, **kwargs):
             pass
 
-        def compute_loss(self, **kwargs):
+        def compute_loss(self, *args, **kwargs):
             return keras.ops.zeros(())
 
     model = Model()
-    model.compile(optimizer=None)
+    model.compile()
 
     return model
 
 
 @pytest.fixture()
 def offline_dataset(simulator, batch_size, workers, use_multiprocessing):
-    from bayesflow.experimental import OfflineDataset
+    from bayesflow import OfflineDataset
 
     # TODO: there is a bug in keras where if len(dataset) == 1 batch
     #  fit will error because no logs are generated
@@ -42,7 +41,7 @@ def offline_dataset(simulator, batch_size, workers, use_multiprocessing):
 
 @pytest.fixture()
 def online_dataset(simulator, batch_size, workers, use_multiprocessing):
-    from bayesflow.experimental import OnlineDataset
+    from bayesflow import OnlineDataset
 
     return OnlineDataset(simulator, batch_size=batch_size, workers=workers, use_multiprocessing=use_multiprocessing)
 
@@ -81,14 +80,18 @@ def sample_observables_batched(shape, r, alpha, theta, **kwargs):
 
 @pytest.fixture(params=["class", "batched_sequential", "unbatched_sequential"])
 def simulator(request):
-    from bayesflow.experimental.simulators import SequentialSimulator
+    from bayesflow.simulators import SequentialSimulator
 
     if request.param == "class":
         simulator = Simulator()
     elif request.param == "batched_sequential":
-        simulator = SequentialSimulator([sample_contexts_batched, sample_parameters_batched, sample_observables_batched])
+        simulator = SequentialSimulator(
+            [sample_contexts_batched, sample_parameters_batched, sample_observables_batched]
+        )
     elif request.param == "unbatched_sequential":
-        simulator = SequentialSimulator([sample_contexts_unbatched, sample_parameters_unbatched, sample_observables_unbatched])
+        simulator = SequentialSimulator(
+            [sample_contexts_unbatched, sample_parameters_unbatched, sample_observables_unbatched]
+        )
     else:
         raise NotImplementedError
 
