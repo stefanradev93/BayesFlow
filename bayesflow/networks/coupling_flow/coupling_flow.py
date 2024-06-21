@@ -50,13 +50,13 @@ class CouplingFlow(InferenceNetwork):
 
         self.invertible_layers = []
         for i in range(depth):
-            if (p := find_permutation(permutation, **kwargs)) is not None:
+            if (p := find_permutation(permutation, **kwargs.get("permutation_kwargs", {}))) is not None:
                 self.invertible_layers.append(p)
 
-            self.invertible_layers.append(DualCoupling(subnet, transform, **kwargs))
+            self.invertible_layers.append(DualCoupling(subnet, transform, **kwargs.get("coupling_kwargs", {})))
 
             if use_actnorm:
-                self.invertible_layers.append(ActNorm(**kwargs))
+                self.invertible_layers.append(ActNorm(**kwargs.get("actnorm_kwargs", {})))
 
     # noinspection PyMethodOverriding
     def build(self, xz_shape, conditions_shape=None):
@@ -79,7 +79,7 @@ class CouplingFlow(InferenceNetwork):
         return self._forward(xz, conditions=conditions, **kwargs)
 
     def _forward(
-        self, x: Tensor, conditions: Tensor = None, jacobian: bool = False, **kwargs
+        self, x: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         z = x
         log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
@@ -87,12 +87,15 @@ class CouplingFlow(InferenceNetwork):
             z, det = layer(z, conditions=conditions, inverse=False, **kwargs)
             log_det += det
 
-        if jacobian:
-            return z, log_det
+        if density:
+            log_prob = self.base_distribution.log_prob(z)
+            log_density = log_prob + log_det
+            return z, log_density
+
         return z
 
     def _inverse(
-        self, z: Tensor, conditions: Tensor = None, jacobian: bool = False, **kwargs
+        self, z: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         x = z
         log_det = keras.ops.zeros(keras.ops.shape(z)[:-1])
@@ -100,16 +103,18 @@ class CouplingFlow(InferenceNetwork):
             x, det = layer(x, conditions=conditions, inverse=True, **kwargs)
             log_det += det
 
-        if jacobian:
-            return x, log_det
+        if density:
+            log_prob = self.base_distribution.log_prob(z)
+            log_density = log_prob - log_det
+            return x, log_density
+
         return x
 
     def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
         inference_variables = data["inference_variables"]
         inference_conditions = data.get("inference_conditions")
 
-        z, log_det = self(inference_variables, conditions=inference_conditions, inverse=False, jacobian=True)
-        log_prob = self.base_distribution.log_prob(z)
-        loss = -keras.ops.mean(log_prob + log_det)
+        z, log_density = self(inference_variables, conditions=inference_conditions, inverse=False, density=True)
+        loss = -keras.ops.mean(log_density)
 
         return {"loss": loss}

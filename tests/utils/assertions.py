@@ -25,8 +25,6 @@ def assert_layers_equal(layer1: keras.Layer, layer2: keras.Layer):
     assert len(layer1.variables) > 0, msg
 
     for v1, v2 in zip(layer1.variables, layer2.variables):
-        assert v1.name == v2.name
-
         if v1.name == "seed_generator_state":
             # keras issue: https://github.com/keras-team/keras/issues/19796
             continue

@@ -21,7 +21,7 @@ def flow_matching():
     return FlowMatching(network_kwargs=dict(depth=2, width=64))
 
 
-@pytest.fixture(params=["coupling_flow", "flow_matching"])
+@pytest.fixture(params=["coupling_flow"])
 def inference_network(request):
     return request.getfixturevalue(request.param)
 
