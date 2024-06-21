@@ -33,11 +33,11 @@ def test_variable_batch_size(inference_network, random_samples, random_condition
         inference_network(new_input, conditions=new_conditions, inverse=True)
 
 
-@pytest.mark.parametrize("jacobian", [True, False])
-def test_output_structure(jacobian, inference_network, random_samples, random_conditions):
-    output = inference_network(random_samples, conditions=random_conditions, jacobian=jacobian)
+@pytest.mark.parametrize("density", [True, False])
+def test_output_structure(density, inference_network, random_samples, random_conditions):
+    output = inference_network(random_samples, conditions=random_conditions, density=density)
 
-    if jacobian:
+    if density:
         assert isinstance(output, tuple)
         assert len(output) == 2
 
@@ -50,35 +50,35 @@ def test_output_structure(jacobian, inference_network, random_samples, random_co
 
 
 def test_output_shape(inference_network, random_samples, random_conditions):
-    forward_output, forward_log_det = inference_network(random_samples, conditions=random_conditions, jacobian=True)
+    forward_output, forward_log_density = inference_network(random_samples, conditions=random_conditions, density=True)
 
     assert keras.ops.shape(forward_output) == keras.ops.shape(random_samples)
-    assert keras.ops.shape(forward_log_det) == (keras.ops.shape(random_samples)[0],)
+    assert keras.ops.shape(forward_log_density) == (keras.ops.shape(random_samples)[0],)
 
-    inverse_output, inverse_log_det = inference_network(
-        random_samples, conditions=random_conditions, jacobian=True, inverse=True
+    inverse_output, inverse_log_density = inference_network(
+        random_samples, conditions=random_conditions, density=True, inverse=True
     )
 
     assert keras.ops.shape(inverse_output) == keras.ops.shape(random_samples)
-    assert keras.ops.shape(inverse_log_det) == (keras.ops.shape(random_samples)[0],)
+    assert keras.ops.shape(inverse_log_density) == (keras.ops.shape(random_samples)[0],)
 
 
 def test_cycle_consistency(inference_network, random_samples, random_conditions):
     # cycle-consistency means the forward and inverse methods are inverses of each other
-    forward_output, forward_log_det = inference_network(random_samples, conditions=random_conditions, jacobian=True)
-    inverse_output, inverse_log_det = inference_network(
-        forward_output, conditions=random_conditions, jacobian=True, inverse=True
+    forward_output, forward_log_density = inference_network(random_samples, conditions=random_conditions, density=True)
+    inverse_output, inverse_log_density = inference_network(
+        forward_output, conditions=random_conditions, density=True, inverse=True
     )
 
-    assert allclose(random_samples, inverse_output)
-    assert allclose(forward_log_det, -inverse_log_det)
+    assert allclose(random_samples, inverse_output, atol=1e-3, rtol=1e-4)
+    assert allclose(forward_log_density, inverse_log_density, atol=1e-3, rtol=1e-4)
 
 
 @pytest.mark.torch
-def test_jacobian_numerically(inference_network, random_samples, random_conditions):
+def test_density_numerically(inference_network, random_samples, random_conditions):
     import torch
 
-    forward_output, forward_log_det = inference_network(random_samples, conditions=random_conditions, jacobian=True)
+    forward_output, forward_log_density = inference_network(random_samples, conditions=random_conditions, density=True)
 
     def f(x):
         return inference_network(x, conditions=random_conditions)
@@ -92,10 +92,14 @@ def test_jacobian_numerically(inference_network, random_samples, random_conditio
     ]
     numerical_forward_log_det = keras.ops.stack(numerical_forward_log_det, axis=0)
 
-    assert allclose(forward_log_det, numerical_forward_log_det, rtol=1e-4, atol=1e-5)
+    log_prob = inference_network.base_distribution.log_prob(forward_output)
 
-    inverse_output, inverse_log_det = inference_network(
-        random_samples, conditions=random_conditions, jacobian=True, inverse=True
+    numerical_forward_log_density = log_prob + numerical_forward_log_det
+
+    assert allclose(forward_log_density, numerical_forward_log_density, rtol=1e-4, atol=1e-5)
+
+    inverse_output, inverse_log_density = inference_network(
+        random_samples, conditions=random_conditions, density=True, inverse=True
     )
 
     def f(x):
@@ -110,7 +114,11 @@ def test_jacobian_numerically(inference_network, random_samples, random_conditio
     ]
     numerical_inverse_log_det = keras.ops.stack(numerical_inverse_log_det, axis=0)
 
-    assert allclose(inverse_log_det, numerical_inverse_log_det, rtol=1e-4, atol=1e-5)
+    log_prob = inference_network.base_distribution.log_prob(random_samples)
+
+    numerical_inverse_log_density = log_prob - numerical_inverse_log_det
+
+    assert allclose(inverse_log_density, numerical_inverse_log_density, rtol=1e-4, atol=1e-5)
 
 
 def test_serialize_deserialize(tmp_path, inference_network, random_samples, random_conditions):

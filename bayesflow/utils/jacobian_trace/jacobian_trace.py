@@ -22,7 +22,9 @@ def jacobian_trace(f: callable, x: Tensor, samples: int = 1) -> (Tensor, Tensor)
     :return: Tensor of shape (n,)
         An unbiased estimate of the trace of the Jacobian of f.
     """
-
+    # copy here to avoid causing outside side effects
+    # TODO: this may not be necessary for every backend
+    x = keras.ops.copy(x)
     batch_size, dims = keras.ops.shape(x)
 
     match keras.backend.backend():
@@ -86,8 +88,9 @@ def jacobian_trace(f: callable, x: Tensor, samples: int = 1) -> (Tensor, Tensor)
         case "torch":
             import torch
 
+            x.requires_grad_(True)
+
             with torch.enable_grad():
-                x.requires_grad = True
                 fx = f(x)
 
             trace = keras.ops.zeros(keras.ops.shape(x)[0])
