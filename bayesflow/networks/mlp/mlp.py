@@ -3,11 +3,13 @@ from keras import layers
 from keras.saving import register_keras_serializable
 
 from bayesflow.types import Tensor
+from bayesflow.utils import keras_kwargs
+
 from .hidden_block import ConfigurableHiddenBlock
 
 
 @register_keras_serializable(package="bayesflow.networks")
-class MLP(keras.layers.Layer):
+class MLP(keras.Layer):
     """
     Implements a simple configurable MLP with optional residual connections and dropout.
 
@@ -17,8 +19,8 @@ class MLP(keras.layers.Layer):
 
     def __init__(
         self,
-        num_hidden: int = 2,
-        hidden_dim: int = 256,
+        depth: int = 2,
+        width: int = 256,
         activation: str = "mish",
         kernel_initializer: str = "he_normal",
         residual: bool = True,
@@ -46,11 +48,11 @@ class MLP(keras.layers.Layer):
             Dropout rate for the hidden layers in the internal layers.
         """
 
-        super().__init__(**kwargs)
+        super().__init__(**keras_kwargs(kwargs))
 
         self.res_blocks = keras.Sequential()
         projector = layers.Dense(
-            units=hidden_dim,
+            units=width,
             kernel_initializer=kernel_initializer,
         )
         if spectral_normalization:
@@ -58,10 +60,10 @@ class MLP(keras.layers.Layer):
         self.res_blocks.add(projector)
         self.res_blocks.add(layers.Dropout(dropout))
 
-        for _ in range(num_hidden):
+        for _ in range(depth):
             self.res_blocks.add(
                 ConfigurableHiddenBlock(
-                    units=hidden_dim,
+                    units=width,
                     activation=activation,
                     kernel_initializer=kernel_initializer,
                     residual=residual,
