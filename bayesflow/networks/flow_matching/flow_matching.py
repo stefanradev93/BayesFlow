@@ -1,4 +1,3 @@
-
 from typing import Tuple, Union
 
 import keras
@@ -27,14 +26,18 @@ class FlowMatching(InferenceNetwork):
 
         return self.network(xtc)
 
-    def _forward(self, x: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45") -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def _forward(
+        self, x: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45"
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         def dfdt(t: float, x: Tensor):
             t = keras.ops.full((keras.ops.shape(x)[0], 1), t)
             return self.velocity(x, t, conditions)
 
         return solve_ivp(dfdt, t_span=(1.0, 0.0), y0=x, method=method, vectorized=True)[1]
 
-    def _inverse(self, z: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45") -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def _inverse(
+        self, z: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45"
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         def dfdt(t: float, x: Tensor):
             t = keras.ops.full((keras.ops.shape(x)[0], 1), t)
             return self.velocity(x, t, conditions)
@@ -83,12 +86,14 @@ class FlowMatching(InferenceNetwork):
 #     def build(self, input_shape):
 #         self.network.build(input_shape)
 #
-#     def _forward(self, x: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45") -> Union[Tensor, Tuple[Tensor, Tensor]]:
+#     def _forward(self, x: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100,
+#               method: str = "RK45") -> Union[Tensor, Tuple[Tensor, Tensor]]:
 #         # implement conditions = None and jacobian = False first
 #         # then work your way up
 #         raise NotImplementedError
 #
-#     def _inverse(self, z: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100, method: str = "RK45") -> Union[Tensor, Tuple[Tensor, Tensor]]:
+#     def _inverse(self, z: Tensor, conditions: any = None, jacobian: bool = False, steps: int = 100,
+#               method: str = "RK45") -> Union[Tensor, Tuple[Tensor, Tensor]]:
 #         raise NotImplementedError
 #
 #     def compute_loss(self, x=None, **kwargs):
