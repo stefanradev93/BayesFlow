@@ -93,6 +93,37 @@ tox --parallel auto
 See [tox.ini](tox.ini) for details on the environment configurations.
 Multi-OS tests will automatically be run once you create a pull request.
 
+Note that to be backend-agnostic, your code must not:
+1. Use code from a specific machine learning backend
+2. Use code from the `keras.backend` module
+3. Rely on the specific tensor object type or semantics
+
+Examples of bad code:
+```py3
+# bad: do not use specific backends
+import tensorflow as tf
+x = tf.zeros(3)
+
+# bad: do not use keras.backend
+shape = keras.backend.shape(x)  # will error under torch backend
+
+# bad: do not use tensor methods directly
+z = x.numpy()  # will error under torch backend if device is cuda
+```
+
+Use instead:
+```py3
+# good: use keras instead of specific backends
+import keras
+x = keras.ops.zeros(3)
+
+# good: use keras.ops, keras.random, etc.
+shape = keras.ops.shape(x)
+
+# good: use keras methods instead of direct tensor methods
+z = keras.ops.convert_to_numpy(x)
+```
+
 ### 4. Document your changes
 
 The documentation uses [sphinx](https://www.sphinx-doc.org/) and relies on [numpy style docstrings](https://numpydoc.readthedocs.io/en/latest/format.html) in classes and functions.
