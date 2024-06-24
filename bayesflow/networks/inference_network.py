@@ -26,13 +26,12 @@ class InferenceNetwork(keras.Layer):
 
     def sample(self, num_samples: int, conditions: Tensor = None, **kwargs) -> Tensor:
         samples = self.base_distribution.sample((num_samples,))
-        samples = self(samples, conditions=conditions, inverse=True, jacobian=False, **kwargs)
+        samples = self(samples, conditions=conditions, inverse=True, density=False, **kwargs)
         return samples
 
     def log_prob(self, samples: Tensor, conditions: Tensor = None, **kwargs) -> Tensor:
-        samples, log_det = self(samples, conditions=conditions, inverse=False, jacobian=True, **kwargs)
-        log_prob = self.base_distribution.log_prob(samples)
-        return log_prob + log_det
+        samples, log_density = self(samples, conditions=conditions, inverse=False, density=True, **kwargs)
+        return log_density
 
     def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
         raise NotImplementedError
