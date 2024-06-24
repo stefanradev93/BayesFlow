@@ -1,9 +1,6 @@
-import math
-
 from scipy.stats import t as scipy_student_t
 
 import keras
-from keras import ops
 
 from bayesflow.types import Shape, Tensor
 from .distribution import Distribution
@@ -31,13 +28,13 @@ class DiagonalStudentT(Distribution):
         return dist.rvs(size=batch_shape)
 
     def log_prob(self, tensor: Tensor) -> Tensor:
-        #TODO
+        # TODO
         pass
 
     def build(self, input_shape: Shape) -> None:
-        #TODO
+        # TODO
         pass
 
     def _log_unnormalized_prob(self, tensor: Tensor) -> Tensor:
-        #TODO
+        # TODO
         pass
