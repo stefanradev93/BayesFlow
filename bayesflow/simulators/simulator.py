@@ -1,4 +1,3 @@
-
 from bayesflow.types import Shape, Tensor
 
 

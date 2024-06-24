@@ -1,4 +1,3 @@
-
 import keras
 from keras.saving import register_keras_serializable
 
@@ -15,12 +14,8 @@ class SingleCoupling(InvertibleLayer):
 
     Subnet output tensors are linearly mapped to the correct dimension.
     """
-    def __init__(
-        self,
-        subnet: str = "mlp",
-        transform: str = "affine",
-        **kwargs
-    ):
+
+    def __init__(self, subnet: str = "mlp", transform: str = "affine", **kwargs):
         super().__init__(**keras_kwargs(kwargs))
 
         self.network = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
@@ -44,13 +39,15 @@ class SingleCoupling(InvertibleLayer):
         # build nested layers with forward pass
         self.call(x1, x2, conditions=conditions)
 
-    def call(self, x1: Tensor, x2: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs) -> ((Tensor, Tensor), Tensor):
+    def call(
+        self, x1: Tensor, x2: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs
+    ) -> ((Tensor, Tensor), Tensor):
         if inverse:
             return self._inverse(x1, x2, conditions=conditions, **kwargs)
         return self._forward(x1, x2, conditions=conditions, **kwargs)
 
     def _forward(self, x1: Tensor, x2: Tensor, conditions: Tensor = None, **kwargs) -> ((Tensor, Tensor), Tensor):
-        """ Transform (x1, x2) -> (x1, f(x2; x1)) """
+        """Transform (x1, x2) -> (x1, f(x2; x1))"""
         z1 = x1
         parameters = self.get_parameters(x1, conditions=conditions, **kwargs)
         z2, log_det = self.transform(x2, parameters=parameters)
@@ -58,7 +55,7 @@ class SingleCoupling(InvertibleLayer):
         return (z1, z2), log_det
 
     def _inverse(self, z1: Tensor, z2: Tensor, conditions: Tensor = None, **kwargs) -> ((Tensor, Tensor), Tensor):
-        """ Transform (x1, f(x2; x1)) -> (x1, x2) """
+        """Transform (x1, f(x2; x1)) -> (x1, x2)"""
         x1 = z1
         parameters = self.get_parameters(x1, conditions=conditions, **kwargs)
         x2, log_det = self.transform(z2, parameters=parameters, inverse=True)

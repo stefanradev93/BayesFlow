@@ -1,4 +1,3 @@
-
 from functools import singledispatch
 
 
@@ -8,11 +7,12 @@ def find_distribution(arg, **kwargs):
 
 
 @find_distribution.register
-def _(name: str, **kwargs):
+def _(name: str, *args, **kwargs):
     match name.lower():
         case "normal":
             from bayesflow.distributions import DiagonalNormal
-            distribution = DiagonalNormal(**kwargs)
+
+            distribution = DiagonalNormal(*args, **kwargs)
         case other:
             raise ValueError(f"Unsupported distribution name '{other}'.")
 
@@ -20,5 +20,5 @@ def _(name: str, **kwargs):
 
 
 @find_distribution.register
-def _(constructor: type, **kwargs):
-    return constructor(**kwargs)
+def _(constructor: type, *args, **kwargs):
+    return constructor(*args, **kwargs)

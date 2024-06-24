@@ -1,4 +1,3 @@
-
 from keras import ops
 from keras.saving import register_keras_serializable
 
@@ -21,9 +20,7 @@ class OrthogonalPermutation(InvertibleLayer):
 
     def build(self, input_shape: Shape) -> None:
         self.weight = self.add_weight(
-            shape=(input_shape[-1], input_shape[-1]),
-            initializer="orthogonal",
-            trainable=True
+            shape=(input_shape[-1], input_shape[-1]), initializer="orthogonal", trainable=True
         )
 
     def call(self, xz: Tensor, inverse: bool = False, **kwargs):

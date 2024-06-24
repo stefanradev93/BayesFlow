@@ -1,4 +1,3 @@
-
 import keras
 import keras.ops as ops
 from keras.saving import register_keras_serializable
@@ -30,7 +29,7 @@ class InducedSetAttentionBlock(keras.Layer):
         kernel_initializer: str = "he_normal",
         use_bias=True,
         layer_norm: bool = True,
-        **kwargs
+        **kwargs,
     ):
         """Creates a self-attention attention block with inducing points (ISAB) which will typically
         be used as part of a set transformer architecture according to [1].
@@ -46,7 +45,7 @@ class InducedSetAttentionBlock(keras.Layer):
         self.inducing_points = self.add_weight(
             shape=(self.num_inducing_points, output_dim if output_dim is not None else key_dim),
             initializer="glorot_uniform",
-            trainable=True
+            trainable=True,
         )
         mab_kwargs = dict(
             key_dim=key_dim,
@@ -58,7 +57,7 @@ class InducedSetAttentionBlock(keras.Layer):
             dense_activation=dense_activation,
             kernel_initializer=kernel_initializer,
             use_bias=use_bias,
-            layer_norm=layer_norm
+            layer_norm=layer_norm,
         )
         self.mab0 = MultiHeadAttentionBlock(**mab_kwargs)
         self.mab1 = MultiHeadAttentionBlock(**mab_kwargs)
@@ -84,4 +83,3 @@ class InducedSetAttentionBlock(keras.Layer):
         inducing_points_tiled = ops.tile(inducing_points_expanded, [batch_size, 1, 1])
         h = self.mab0(inducing_points_tiled, set_x, **kwargs)
         return self.mab1(set_x, h, **kwargs)
-

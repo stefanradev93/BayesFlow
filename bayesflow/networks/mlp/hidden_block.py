@@ -1,4 +1,3 @@
-
 import keras
 from keras import layers
 from keras.saving import register_keras_serializable
@@ -16,7 +15,7 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
         residual: bool = True,
         dropout: float = 0.05,
         spectral_normalization: bool = False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
 
@@ -43,10 +42,12 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            "residual": self.residual,
-            "activation_fn": keras.saving.serialize_keras_object(self.activation_fn),
-            "dense": keras.saving.serialize_keras_object(self.dense),
-            "dropout": keras.saving.serialize_keras_object(self.dropout)
-        })
+        config.update(
+            {
+                "residual": self.residual,
+                "activation_fn": keras.saving.serialize_keras_object(self.activation_fn),
+                "dense": keras.saving.serialize_keras_object(self.dense),
+                "dropout": keras.saving.serialize_keras_object(self.dropout),
+            }
+        )
         return config

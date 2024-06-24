@@ -1,2 +1,1 @@
-
 from .approximator import Approximator

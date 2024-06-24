@@ -66,20 +66,30 @@ def test_jacobian_numerically(invertible_layer, random_samples, random_condition
     import torch
 
     forward_output, forward_log_det = invertible_layer(random_samples)
-    numerical_forward_jacobian, *_ = torch.autograd.functional.jacobian(invertible_layer, random_samples, vectorize=True)
+    numerical_forward_jacobian, *_ = torch.autograd.functional.jacobian(
+        invertible_layer, random_samples, vectorize=True
+    )
 
     # TODO: torch is somehow permuted wrt keras
-    numerical_forward_log_det = [keras.ops.log(keras.ops.abs(keras.ops.det(numerical_forward_jacobian[i, :, i, :]))) for i in range(keras.ops.shape(random_samples)[0])]
+    numerical_forward_log_det = [
+        keras.ops.log(keras.ops.abs(keras.ops.det(numerical_forward_jacobian[i, :, i, :])))
+        for i in range(keras.ops.shape(random_samples)[0])
+    ]
     numerical_forward_log_det = keras.ops.stack(numerical_forward_log_det, axis=0)
 
     assert allclose(forward_log_det, numerical_forward_log_det, rtol=1e-4, atol=1e-5)
 
     inverse_output, inverse_log_det = invertible_layer(random_samples, inverse=True)
 
-    numerical_inverse_jacobian, *_ = torch.autograd.functional.jacobian(functools.partial(invertible_layer, inverse=True), random_samples, vectorize=True)
+    numerical_inverse_jacobian, *_ = torch.autograd.functional.jacobian(
+        functools.partial(invertible_layer, inverse=True), random_samples, vectorize=True
+    )
 
     # TODO: torch is somehow permuted wrt keras
-    numerical_inverse_log_det = [keras.ops.log(keras.ops.abs(keras.ops.det(numerical_inverse_jacobian[i, :, i, :]))) for i in range(keras.ops.shape(random_samples)[0])]
+    numerical_inverse_log_det = [
+        keras.ops.log(keras.ops.abs(keras.ops.det(numerical_inverse_jacobian[i, :, i, :])))
+        for i in range(keras.ops.shape(random_samples)[0])
+    ]
     numerical_inverse_log_det = keras.ops.stack(numerical_inverse_log_det, axis=0)
 
     assert allclose(inverse_log_det, numerical_inverse_log_det, rtol=1e-4, atol=1e-5)

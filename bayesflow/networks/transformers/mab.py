@@ -1,4 +1,3 @@
-
 import keras
 from keras import layers
 from keras.saving import register_keras_serializable
@@ -27,7 +26,7 @@ class MultiHeadAttentionBlock(keras.Layer):
         kernel_initializer: str = "he_normal",
         use_bias=True,
         layer_norm: bool = True,
-        **kwargs
+        **kwargs,
     ):
         """Creates a multi-head attention block which will typically be used as part of a
         set transformer architecture according to [1]. Corresponds to standard cross-attention.
@@ -52,12 +51,14 @@ class MultiHeadAttentionBlock(keras.Layer):
         self.ln_pre = layers.LayerNormalization() if layer_norm else None
         self.feedforward = keras.Sequential()
         for _ in range(num_dense_feedforward):
-            self.feedforward.add(layers.Dense(
-                units=dense_units,
-                activation=dense_activation,
-                kernel_initializer=kernel_initializer,
-                use_bias=use_bias
-            ))
+            self.feedforward.add(
+                layers.Dense(
+                    units=dense_units,
+                    activation=dense_activation,
+                    kernel_initializer=kernel_initializer,
+                    use_bias=use_bias,
+                )
+            )
             self.feedforward.add(layers.Dropout(dropout))
         self.feedforward.add(layers.Dense(output_dim))
         self.ln_post = layers.LayerNormalization() if layer_norm else None

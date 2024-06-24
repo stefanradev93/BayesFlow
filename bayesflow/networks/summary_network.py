@@ -1,4 +1,3 @@
-
 import keras
 
 from bayesflow.types import Tensor

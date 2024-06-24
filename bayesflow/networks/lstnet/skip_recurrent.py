@@ -1,23 +1,24 @@
-
 import keras
 from keras.saving import register_keras_serializable
 
 from bayesflow.types import Tensor
 from bayesflow.utils import keras_kwargs, find_recurrent_net
 
+
 @register_keras_serializable(package="bayesflow.networks")
 class SkipRecurrentNet(keras.Model):
     """
     Implements a Skip recurrent layer as described in [1], but allowing a more flexible
     recurrent backbone and a more flexible implementation.
-    
-    [1] Y. Zhang and L. Mikelsons, Solving Stochastic Inverse Problems with Stochastic BayesFlow, 
-    2023 IEEE/ASME International Conference on Advanced Intelligent Mechatronics (AIM), 
+
+    [1] Y. Zhang and L. Mikelsons, Solving Stochastic Inverse Problems with Stochastic BayesFlow,
+    2023 IEEE/ASME International Conference on Advanced Intelligent Mechatronics (AIM),
     Seattle, WA, USA, 2023, pp. 966-972, doi: 10.1109/AIM46323.2023.10196190.
-    
+
     TODO: Add proper docstring
 
     """
+
     def __init__(
         self,
         hidden_dim: int = 256,
@@ -26,26 +27,20 @@ class SkipRecurrentNet(keras.Model):
         input_channels: int = 64,
         skip_steps: int = 4,
         dropout: float = 0.05,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**keras_kwargs(kwargs))
 
         recurrent_constructor = find_recurrent_net(recurrent_type)
 
         self.recurrent = recurrent_constructor(
-            units=hidden_dim // 2 if bidirectional else hidden_dim,
-            dropout=dropout,
-            recurrent_dropout=dropout
+            units=hidden_dim // 2 if bidirectional else hidden_dim, dropout=dropout, recurrent_dropout=dropout
         )
         self.skip_conv = keras.layers.Conv1D(
-            filters=input_channels*skip_steps,
-            kernel_size=skip_steps,
-            strides=skip_steps
+            filters=input_channels * skip_steps, kernel_size=skip_steps, strides=skip_steps
         )
         self.skip_recurrent = recurrent_constructor(
-            units=hidden_dim // 2 if bidirectional else hidden_dim,
-            dropout=dropout,
-            recurrent_dropout=dropout
+            units=hidden_dim // 2 if bidirectional else hidden_dim, dropout=dropout, recurrent_dropout=dropout
         )
         self.input_channels = input_channels
 

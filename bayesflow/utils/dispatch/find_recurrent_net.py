@@ -1,16 +1,15 @@
-
 import keras
 
 from functools import singledispatch
 
 
 @singledispatch
-def find_recurrent_net(arg, **kwargs):
+def find_recurrent_net(arg, *args, **kwargs):
     raise TypeError(f"Cannot infer network from {arg!r}.")
 
 
 @find_recurrent_net.register
-def _(name: str, **kwargs):
+def _(name: str, *args, **kwargs):
     match name.lower():
         case "lstm":
             constructor = keras.layers.LSTM
@@ -23,5 +22,5 @@ def _(name: str, **kwargs):
 
 
 @find_recurrent_net.register
-def _(network: keras.Layer):
+def _(network: keras.Layer, *args, **kwargs):
     return network

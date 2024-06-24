@@ -1,4 +1,3 @@
-
 import keras
 from keras.saving import (
     deserialize_keras_object,
@@ -15,7 +14,13 @@ from bayesflow.utils import keras_kwargs
 
 @register_keras_serializable(package="bayesflow.approximators")
 class BaseApproximator(keras.Model):
-    def __init__(self, inference_network: InferenceNetwork, summary_network: SummaryNetwork, configurator: BaseConfigurator, **kwargs):
+    def __init__(
+        self,
+        inference_network: InferenceNetwork,
+        summary_network: SummaryNetwork,
+        configurator: BaseConfigurator,
+        **kwargs,
+    ):
         super().__init__(**keras_kwargs(kwargs))
         self.inference_network = inference_network
         self.summary_network = summary_network
@@ -23,7 +28,9 @@ class BaseApproximator(keras.Model):
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "BaseApproximator":
-        config["inference_network"] = deserialize_keras_object(config["inference_network"], custom_objects=custom_objects)
+        config["inference_network"] = deserialize_keras_object(
+            config["inference_network"], custom_objects=custom_objects
+        )
         config["summary_network"] = deserialize_keras_object(config["summary_network"], custom_objects=custom_objects)
         config["configurator"] = deserialize_keras_object(config["configurator"], custom_objects=custom_objects)
 
@@ -63,10 +70,12 @@ class BaseApproximator(keras.Model):
 
         if val_logs is None:
             # https://github.com/keras-team/keras/issues/19835
-            warnings.warn(f"Found no validation logs due to a bug in keras. "
-                          f"Applying workaround, but incorrect loss values may be logged. "
-                          f"If possible, increase the size of your dataset, "
-                          f"or lower the number of validation steps used.")
+            warnings.warn(
+                "Found no validation logs due to a bug in keras. "
+                "Applying workaround, but incorrect loss values may be logged. "
+                "If possible, increase the size of your dataset, "
+                "or lower the number of validation steps used."
+            )
 
             val_logs = {}
 
@@ -103,7 +112,7 @@ class BaseApproximator(keras.Model):
         return metrics | summary_metrics | inference_metrics
 
     def compute_loss(self, *args, **kwargs):
-        raise RuntimeError(f"Use compute_metrics()['loss'] instead.")
+        raise RuntimeError("Use compute_metrics()['loss'] instead.")
 
     def fit(self, *args, **kwargs):
         if not self.built:
@@ -111,8 +120,10 @@ class BaseApproximator(keras.Model):
                 dataset = kwargs.get("x") or args[0]
                 self.build_from_data(dataset[0])
             except Exception:
-                raise RuntimeError(f"Could not automatically build the approximator. Please pass a dataset as the "
-                                   f"first argument to `approximator.fit()` or manually call `approximator.build()` "
-                                   f"with a dictionary specifying your data shapes.")
+                raise RuntimeError(
+                    "Could not automatically build the approximator. Please pass a dataset as the "
+                    "first argument to `approximator.fit()` or manually call `approximator.build()` "
+                    "with a dictionary specifying your data shapes."
+                )
 
         return super().fit(*args, **kwargs)

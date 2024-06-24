@@ -1,5 +1,5 @@
-
 import pytest
+
 
 @pytest.mark.skip(reason="not implemented")
 def test_compile(amortizer):
@@ -12,5 +12,3 @@ def test_fit(amortizer, dataset):
     amortizer.fit(dataset)
 
     assert amortizer.losses is not None
-
-

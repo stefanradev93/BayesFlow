@@ -1,2 +1,1 @@
-
 from .lstnet import LSTNet

@@ -1,4 +1,3 @@
-
 import keras
 from keras.saving import register_keras_serializable
 
@@ -40,7 +39,7 @@ class SetTransformer(keras.Layer):
         layer_norm: bool = True,
         set_attention_output_dim: int = None,
         seed_dim: int = None,
-        **kwargs
+        **kwargs,
     ):
         """
         #TODO
@@ -62,7 +61,7 @@ class SetTransformer(keras.Layer):
             dense_activation=dense_activation,
             kernel_initializer=kernel_initializer,
             use_bias=use_bias,
-            layer_norm=layer_norm
+            layer_norm=layer_norm,
         )
 
         for _ in range(num_attention_blocks):
@@ -75,11 +74,7 @@ class SetTransformer(keras.Layer):
         # Pooling will be applied as a final step to the abstract representations obtained from set attention
         attention_block_settings.pop("num_inducing_points")
         attention_block_settings.pop("output_dim")
-        pooling_settings = dict(
-            seed_dim=seed_dim,
-            num_seeds=num_seeds,
-            summary_dim=summary_dim
-        )
+        pooling_settings = dict(seed_dim=seed_dim, num_seeds=num_seeds, summary_dim=summary_dim)
         self.pooling_by_attention = PoolingByMultiHeadAttention(**attention_block_settings | pooling_settings)
 
         # Output projector is needed to keep output dimensions be summary_dim in case of num_seeds > 1

@@ -1,4 +1,3 @@
-
 import keras
 from keras import layers
 from keras.saving import register_keras_serializable
@@ -29,7 +28,7 @@ class InvariantModule(keras.Layer):
         dropout: float = 0.05,
         pooling: str | keras.Layer = "mean",
         spectral_normalization: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """Creates an invariant module according to [1] which represents a learnable permutation-invariant
         function with an option for learnable pooling.
@@ -59,7 +58,6 @@ class InvariantModule(keras.Layer):
         # Outer fully connected net for sum decomposition: inner( pooling( inner(set) ) )
         self.outer_fc = keras.Sequential(name="InvariantOuterFC")
         for _ in range(num_dense_outer):
-
             self.outer_fc.add(layers.Dropout(dropout))
 
             layer = layers.Dense(

@@ -1,4 +1,3 @@
-
 import jax
 import keras
 
@@ -13,7 +12,14 @@ class JAXApproximator(BaseApproximator):
     def test_step(self, *args, **kwargs):
         return self.stateless_test_step(*args, **kwargs)
 
-    def stateless_compute_metrics(self, trainable_variables: any, non_trainable_variables: any, metrics_variables: any, data: dict[str, Tensor], stage: str = "training") -> (Tensor, tuple):
+    def stateless_compute_metrics(
+        self,
+        trainable_variables: any,
+        non_trainable_variables: any,
+        metrics_variables: any,
+        data: dict[str, Tensor],
+        stage: str = "training",
+    ) -> (Tensor, tuple):
         """
         Things we do for jax:
         1. Accept trainable variables as the first argument
@@ -47,11 +53,13 @@ class JAXApproximator(BaseApproximator):
 
         grad_fn = jax.value_and_grad(self.stateless_compute_metrics, has_aux=True)
 
-        (loss, aux), grads = grad_fn(trainable_variables, non_trainable_variables, metrics_variables, data, stage="training")
+        (loss, aux), grads = grad_fn(
+            trainable_variables, non_trainable_variables, metrics_variables, data, stage="training"
+        )
         metrics, non_trainable_variables, metrics_variables = aux
 
-        trainable_variables, optimizer_variables = (
-            self.optimizer.stateless_apply(optimizer_variables, grads, trainable_variables)
+        trainable_variables, optimizer_variables = self.optimizer.stateless_apply(
+            optimizer_variables, grads, trainable_variables
         )
 
         metrics_variables = self._update_loss(loss, metrics_variables)
@@ -62,7 +70,9 @@ class JAXApproximator(BaseApproximator):
     def stateless_test_step(self, state: tuple, data: dict[str, Tensor]) -> (dict[str, Tensor], tuple):
         trainable_variables, non_trainable_variables, metrics_variables = state
 
-        loss, aux = self.stateless_compute_metrics(trainable_variables, non_trainable_variables, metrics_variables, data, stage="validation")
+        loss, aux = self.stateless_compute_metrics(
+            trainable_variables, non_trainable_variables, metrics_variables, data, stage="validation"
+        )
         metrics, non_trainable_variables, metrics_variables = aux
 
         metrics_variables = self._update_loss(loss, metrics_variables)

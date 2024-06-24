@@ -1,4 +1,3 @@
-
 import keras
 from keras.saving import register_keras_serializable
 
@@ -20,7 +19,7 @@ match keras.backend.backend():
 @register_keras_serializable(package="bayesflow.amortizers")
 class Approximator(BaseApproximator):
     def __init__(self, **kwargs):
-        """ The main workhorse for learning amortized neural approximators for distributions arising
+        """The main workhorse for learning amortized neural approximators for distributions arising
         in inverse problems and Bayesian inference (e.g., posterior distributions, likelihoods, marginal
         likelihoods).
 
@@ -64,14 +63,16 @@ class Approximator(BaseApproximator):
         if "configurator" not in kwargs:
             # try to set up a default configurator
             if "inference_variables" not in kwargs:
-                raise ValueError(f"You must specify either a configurator or arguments for the default configurator.")
+                raise ValueError("You must specify either a configurator or arguments for the default configurator.")
 
             inference_variables = kwargs.pop("inference_variables")
             inference_conditions = kwargs.pop("inference_conditions", None)
             summary_variables = kwargs.pop("summary_variables", None)
             summary_conditions = kwargs.pop("summary_conditions", None)
 
-            kwargs["configurator"] = Configurator(inference_variables, inference_conditions, summary_variables, summary_conditions)
+            kwargs["configurator"] = Configurator(
+                inference_variables, inference_conditions, summary_variables, summary_conditions
+            )
 
         kwargs.setdefault("summary_network", None)
         super().__init__(**kwargs)

@@ -1,7 +1,5 @@
-
 import keras
 import pickle
-import pytest
 
 
 def test_dataset_is_picklable(dataset):

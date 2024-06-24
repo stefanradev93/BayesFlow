@@ -1,14 +1,13 @@
-
 import inspect
 import keras
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from bayesflow.types import Tensor
 
 
 def convert_kwargs(f, *args, **kwargs) -> dict[str, any]:
-    """ Convert positional and keyword arguments to just keyword arguments for f """
+    """Convert positional and keyword arguments to just keyword arguments for f"""
     if not args:
         return kwargs
 
@@ -26,7 +25,7 @@ def convert_kwargs(f, *args, **kwargs) -> dict[str, any]:
 
 
 def convert_args(f, *args, **kwargs) -> tuple[any, ...]:
-    """ Convert positional and keyword arguments to just positional arguments for f """
+    """Convert positional and keyword arguments to just positional arguments for f"""
     if not kwargs:
         return args
 
@@ -46,7 +45,7 @@ def convert_args(f, *args, **kwargs) -> tuple[any, ...]:
 
 
 def batched_call(f, batch_size, *args, **kwargs):
-    """ Call f, automatically vectorizing to batch_size if required """
+    """Call f, automatically vectorizing to batch_size if required"""
     try:
         data = f((batch_size,), *args, **kwargs)
         data = {key: keras.ops.convert_to_tensor(value) for key, value in data.items()}
@@ -54,18 +53,20 @@ def batched_call(f, batch_size, *args, **kwargs):
     except TypeError:
         pass
 
-    def vectorized(elements):
-        data = f(*elements[1:])
-        data = {key: keras.ops.convert_to_tensor(value) for key, value in data.items()}
-        return data
+    # no way to get both randomness and support for numpy sampling without a for loop :(
+    data = [f(*args, **kwargs) for _ in range(batch_size)]
 
-    args = convert_args(f, *args, **kwargs)
-    dummy = keras.ops.zeros((batch_size, 0))
-    return keras.ops.vectorized_map(vectorized, (dummy, *args))
+    data_dict = {}
+    for key in data[0].keys():
+        # gather tensors for key into list
+        tensors = [data[i][key] for i in range(len(data))]
+        data_dict[key] = keras.ops.stack(tensors, axis=0)
+
+    return data_dict
 
 
 def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int = -1) -> Tensor:
-    """ Filters and then concatenates all tensors from data using only keys from the given sequence.
+    """Filters and then concatenates all tensors from data using only keys from the given sequence.
     An optional axis can be specified (default: last axis).
     """
     if not keys:
@@ -82,7 +83,7 @@ def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int =
 
 
 def keras_kwargs(kwargs: dict):
-    """ Keep dictionary keys that do not end with _kwargs. Used for propagating
+    """Keep dictionary keys that do not end with _kwargs. Used for propagating
     custom keyword arguments in custom models that inherit from keras.Model.
     """
     return {key: value for key, value in kwargs.items() if not key.endswith("_kwargs")}

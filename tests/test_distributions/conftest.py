@@ -1,4 +1,3 @@
-
 import pytest
 
 import keras
@@ -22,6 +21,7 @@ def random_samples(batch_size, num_features):
 @pytest.fixture()
 def diagonal_normal():
     from bayesflow.distributions import DiagonalNormal
+
     return DiagonalNormal()
 
 

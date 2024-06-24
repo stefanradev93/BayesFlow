@@ -1,4 +1,3 @@
-
 import keras
 import keras.ops as ops
 from keras import layers
@@ -35,7 +34,7 @@ class PoolingByMultiHeadAttention(keras.Layer):
         kernel_initializer: str = "he_normal",
         use_bias=True,
         layer_norm: bool = True,
-        **kwargs
+        **kwargs,
     ):
         """Creates a multi-head attention block (MAB) which will perform cross-attention between an input set
         and a set of seed vectors (typically one for a single summary) with summary_dim output dimensions.
@@ -59,21 +58,23 @@ class PoolingByMultiHeadAttention(keras.Layer):
             dense_activation=dense_activation,
             kernel_initializer=kernel_initializer,
             use_bias=use_bias,
-            layer_norm=layer_norm
+            layer_norm=layer_norm,
         )
         self.seed_vector = self.add_weight(
             shape=(num_seeds, seed_dim if seed_dim is not None else key_dim),
             initializer="glorot_uniform",
-            trainable=True
+            trainable=True,
         )
         self.feedforward = keras.Sequential()
         for _ in range(num_dense_feedforward):
-            self.feedforward.add(layers.Dense(
-                units=dense_units,
-                activation=dense_activation,
-                kernel_initializer=kernel_initializer,
-                use_bias=use_bias
-            ))
+            self.feedforward.add(
+                layers.Dense(
+                    units=dense_units,
+                    activation=dense_activation,
+                    kernel_initializer=kernel_initializer,
+                    use_bias=use_bias,
+                )
+            )
 
     def call(self, set_x: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass through the PMA block.

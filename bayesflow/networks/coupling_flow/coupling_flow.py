@@ -1,6 +1,3 @@
-
-from typing import Tuple, Union
-
 import keras
 from keras.saving import register_keras_serializable
 
@@ -14,7 +11,7 @@ from ..inference_network import InferenceNetwork
 
 @register_keras_serializable(package="bayesflow.networks")
 class CouplingFlow(InferenceNetwork):
-    """ Implements a coupling flow as a sequence of dual couplings with permutations and activation
+    """Implements a coupling flow as a sequence of dual couplings with permutations and activation
     normalization. Incorporates ideas from [1-5].
 
     [1] Kingma, D. P., & Dhariwal, P. (2018).
@@ -36,15 +33,16 @@ class CouplingFlow(InferenceNetwork):
     Robust model training and generalisation with Studentising flows.
     arXiv preprint arXiv:2006.06599.
     """
+
     def __init__(
         self,
         depth: int = 6,
-        subnet: str | keras.Layer = "mlp",
+        subnet: str = "mlp",
         transform: str = "affine",
         permutation: str | None = "random",
         use_actnorm: bool = True,
         base_distribution: str = "normal",
-        **kwargs
+        **kwargs,
     ):
         super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
 
@@ -52,14 +50,13 @@ class CouplingFlow(InferenceNetwork):
 
         self.invertible_layers = []
         for i in range(depth):
-
-            if (p := find_permutation(permutation, **kwargs)) is not None:
+            if (p := find_permutation(permutation, **kwargs.get("permutation_kwargs", {}))) is not None:
                 self.invertible_layers.append(p)
 
-            self.invertible_layers.append(DualCoupling(subnet, transform, **kwargs))
+            self.invertible_layers.append(DualCoupling(subnet, transform, **kwargs.get("coupling_kwargs", {})))
 
             if use_actnorm:
-                self.invertible_layers.append(ActNorm(**kwargs))
+                self.invertible_layers.append(ActNorm(**kwargs.get("actnorm_kwargs", {})))
 
     # noinspection PyMethodOverriding
     def build(self, xz_shape, conditions_shape=None):
@@ -75,59 +72,49 @@ class CouplingFlow(InferenceNetwork):
         self.call(xz, conditions=conditions)
 
     def call(
-        self,
-        xz: Tensor,
-        conditions: Tensor = None,
-        inverse: bool = False,
-        **kwargs
-    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
-
+        self, xz: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs
+    ) -> Tensor | tuple[Tensor, Tensor]:
         if inverse:
             return self._inverse(xz, conditions=conditions, **kwargs)
         return self._forward(xz, conditions=conditions, **kwargs)
 
     def _forward(
-        self,
-        x: Tensor,
-        conditions: Tensor = None,
-        jacobian: bool = False,
-        **kwargs
-    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
-
+        self, x: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
+    ) -> Tensor | tuple[Tensor, Tensor]:
         z = x
         log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
         for layer in self.invertible_layers:
             z, det = layer(z, conditions=conditions, inverse=False, **kwargs)
             log_det += det
 
-        if jacobian:
-            return z, log_det
+        if density:
+            log_prob = self.base_distribution.log_prob(z)
+            log_density = log_prob + log_det
+            return z, log_density
+
         return z
 
     def _inverse(
-        self,
-        z: Tensor,
-        conditions: Tensor = None,
-        jacobian: bool = False,
-        **kwargs
-    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
-
+        self, z: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
+    ) -> Tensor | tuple[Tensor, Tensor]:
         x = z
         log_det = keras.ops.zeros(keras.ops.shape(z)[:-1])
         for layer in reversed(self.invertible_layers):
             x, det = layer(x, conditions=conditions, inverse=True, **kwargs)
             log_det += det
 
-        if jacobian:
-            return x, log_det
+        if density:
+            log_prob = self.base_distribution.log_prob(z)
+            log_density = log_prob - log_det
+            return x, log_density
+
         return x
 
     def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
         inference_variables = data["inference_variables"]
         inference_conditions = data.get("inference_conditions")
 
-        z, log_det = self(inference_variables, conditions=inference_conditions, inverse=False, jacobian=True)
-        log_prob = self.base_distribution.log_prob(z)
-        loss = -keras.ops.mean(log_prob + log_det)
+        z, log_density = self(inference_variables, conditions=inference_conditions, inverse=False, density=True)
+        loss = -keras.ops.mean(log_density)
 
         return {"loss": loss}

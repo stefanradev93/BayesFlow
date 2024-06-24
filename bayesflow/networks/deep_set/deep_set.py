@@ -1,10 +1,6 @@
-
 import keras
 from keras import layers
-from keras.saving import (
-    register_keras_serializable,
-    serialize_keras_object
-)
+from keras.saving import register_keras_serializable, serialize_keras_object
 
 from bayesflow.types import Tensor
 from bayesflow.utils import keras_kwargs
@@ -30,7 +26,7 @@ class DeepSet(keras.Model):
         kernel_initializer: str = "he_normal",
         dropout: float = 0.05,
         spectral_normalization: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """
         #TODO
@@ -53,7 +49,7 @@ class DeepSet(keras.Model):
                 spectral_normalization=spectral_normalization,
                 dropout=dropout,
                 pooling=inner_pooling,
-                **kwargs
+                **kwargs,
             )
             self.equivariant_modules.add(equivariant_module)
 
@@ -68,7 +64,7 @@ class DeepSet(keras.Model):
             dropout=dropout,
             pooling=output_pooling,
             spectral_normalization=spectral_normalization,
-            **kwargs
+            **kwargs,
         )
 
         # Output linear layer to project set representation down to "summary_dim" learned summary statistics
@@ -101,10 +97,12 @@ class DeepSet(keras.Model):
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            "invariant_module": serialize_keras_object(self.equivariant_modules),
-            "equivariant_fc": serialize_keras_object(self.invariant_module),
-            "output_projector": serialize_keras_object(self.output_projector),
-            "summary_dim": serialize_keras_object(self.summary_dim)
-        })
+        config.update(
+            {
+                "invariant_module": serialize_keras_object(self.equivariant_modules),
+                "equivariant_fc": serialize_keras_object(self.invariant_module),
+                "output_projector": serialize_keras_object(self.output_projector),
+                "summary_dim": serialize_keras_object(self.summary_dim),
+            }
+        )
         return config
