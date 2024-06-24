@@ -118,7 +118,8 @@ class BaseApproximator(keras.Model):
         if not self.built:
             try:
                 dataset = kwargs.get("x") or args[0]
-                self.build_from_data(dataset[0])
+                data = next(iter(dataset))
+                self.build_from_data(data)
             except Exception:
                 raise RuntimeError(
                     "Could not automatically build the approximator. Please pass a dataset as the "
