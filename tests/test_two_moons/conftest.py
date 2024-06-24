@@ -50,5 +50,14 @@ def validation_dataset(simulator, batch_size):
     from bayesflow import OfflineDataset
 
     num_batches = 4
-    data = simulator.sample((4 * batch_size,))
+    data = simulator.sample((num_batches * batch_size,))
+    return OfflineDataset(data, workers=4, max_queue_size=num_batches, batch_size=batch_size)
+
+
+@pytest.fixture()
+def test_dataset(simulator, batch_size):
+    from bayesflow import OfflineDataset
+
+    num_batches = 16
+    data = simulator.sample((num_batches * batch_size,))
     return OfflineDataset(data, workers=4, max_queue_size=num_batches, batch_size=batch_size)

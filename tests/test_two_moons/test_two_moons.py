@@ -1,7 +1,7 @@
 import keras
 import pytest
 
-from tests.utils import assert_models_equal
+from tests.utils import assert_models_equal, max_mean_discrepancy
 from tests.utils import InterruptFitCallback, FitInterruptedError
 
 
@@ -11,14 +11,38 @@ def test_compile(approximator, random_samples, jit_compile):
 
 
 @pytest.mark.parametrize("jit_compile", [False, True])
-def test_fit(approximator, train_dataset, validation_dataset, jit_compile):
-    # TODO: verify the model learns something by comparing a metric before and after training
-    approximator.compile(jit_compile=jit_compile)
-    approximator.fit(
+def test_fit(approximator, train_dataset, validation_dataset, test_dataset, jit_compile):
+    # TODO: Refactor to use approximator.sample() when implemented (instead of calling the inference network directly)
+
+    approximator.compile(jit_compile=jit_compile, loss=keras.losses.KLDivergence())
+    inf_vars = approximator.configurator.configure_inference_variables(test_dataset.data)
+    inf_conds = approximator.configurator.configure_inference_conditions(test_dataset.data)
+    y = test_dataset.data["x"]
+
+    pre_loss = approximator.compute_metrics(train_dataset.data)["loss"]
+    pre_val_loss = approximator.compute_metrics(validation_dataset.data)["loss"]
+    x_before = approximator.inference_network(inf_vars, conditions=inf_conds)
+    mmd_before = max_mean_discrepancy(x_before, y)
+
+    history = approximator.fit(
         train_dataset,
         validation_data=validation_dataset,
-        epochs=2,
-    )
+        epochs=3,
+    ).history
+    x_after = approximator.inference_network(inf_vars, conditions=inf_conds)
+    mmd_after = max_mean_discrepancy(x_after, y)
+
+    # Test model weights have not vanished
+    for layer in approximator.layers:
+        for weight in layer.weights:
+            assert not keras.ops.any(keras.ops.isnan(weight)).numpy()
+
+    # Test KLD loss and validation loss decrease after training
+    assert history["loss"][-1] < pre_loss
+    assert history["val_loss"][-1] < pre_val_loss
+
+    # Test MMD improved after training
+    assert mmd_after < mmd_before
 
 
 @pytest.mark.parametrize("jit_compile", [False, True])
