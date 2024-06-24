@@ -13,7 +13,7 @@ class MixtureDistribution(Distribution):
     def __init__(
         self,
         distributions: list[Distribution],
-        mixture_probs: list[float] = None,
+        mixture_logits: list[float] = None,
         trainable_mixture: bool = False,
         **kwargs
     ):
@@ -23,12 +23,12 @@ class MixtureDistribution(Distribution):
 
         self.distributions = distributions
 
-        if mixture_probs is None:
-            mixture_probs = keras.ops.ones(shape=len(distributions))
+        if mixture_logits is None:
+            mixture_logits = keras.ops.ones(shape=len(distributions))
 
-        self.mixture_probs = self.add_weight(
+        self.mixture_logits = self.add_weight(
             shape=(len(distributions),),
-            initializer=keras.initializers.Constant(value=mixture_probs),
+            initializer=keras.initializers.Constant(value=mixture_logits),
             dtype="float32",
             trainable=trainable_mixture
         )
@@ -40,7 +40,7 @@ class MixtureDistribution(Distribution):
     def log_prob(self, tensor: Tensor) -> Tensor:
         log_prob = [distribution.log_prob(tensor) for distribution in self.distributions]
         log_prob = ops.stack(log_prob, axis=-1)
-        log_prob = ops.logsumexp(log_prob + ops.log_softmax(self.mixture_probs), axis=-1)
+        log_prob = ops.logsumexp(log_prob + ops.log_softmax(self.mixture_logits), axis=-1)
         return log_prob
 
     def build(self, input_shape: Shape) -> None:
