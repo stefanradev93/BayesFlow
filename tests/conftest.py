@@ -13,3 +13,10 @@ def pytest_runtest_setup(item):
 
     if test_backends and backend not in test_backends:
         pytest.skip(f"Skipping backend '{backend}' for test {item}, which is registered for backends {test_backends}.")
+
+
+@pytest.fixture(autouse=True, scope="function")
+def random_seed():
+    seed = 0
+    keras.utils.set_random_seed(seed)
+    return seed
