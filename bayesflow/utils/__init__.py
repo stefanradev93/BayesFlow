@@ -1,7 +1,16 @@
 from .dictutils import (
     batched_call,
+    concatenate_dicts,
     filter_concatenate,
+    filter_kwargs,
     keras_kwargs,
+    stack_dicts,
+)
+
+from .git import (
+    issue_url,
+    pull_url,
+    repo_url,
 )
 
 from .jacobian_trace import jacobian_trace
