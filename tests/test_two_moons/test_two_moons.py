@@ -1,3 +1,4 @@
+import copy
 import keras
 import pytest
 
@@ -19,11 +20,16 @@ def test_fit(approximator, train_dataset, validation_dataset, batch_size):
 
     approximator.build_from_data(train_dataset[0])
 
+    untrained_weights = copy.deepcopy(approximator.weights)
     untrained_metrics = approximator.evaluate(validation_dataset, return_dict=True)
 
     approximator.fit(train_dataset, epochs=20)
 
+    trained_weights = approximator.weights
     trained_metrics = approximator.evaluate(validation_dataset, return_dict=True)
+
+    # check weights have changed during training
+    assert any([keras.ops.any(~keras.ops.isclose(u, t)) for u, t in zip(untrained_weights, trained_weights)])
 
     assert isinstance(untrained_metrics, dict)
     assert isinstance(trained_metrics, dict)

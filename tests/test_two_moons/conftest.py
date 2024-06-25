@@ -18,13 +18,6 @@ def batch_size():
 
 
 @pytest.fixture()
-def inference_network():
-    from bayesflow.networks import CouplingFlow
-
-    return CouplingFlow()
-
-
-@pytest.fixture()
 def random_samples(batch_size, simulator):
     return simulator.sample((batch_size,))
 
