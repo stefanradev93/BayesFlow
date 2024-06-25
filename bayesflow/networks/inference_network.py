@@ -34,4 +34,15 @@ class InferenceNetwork(keras.Layer):
         return log_density
 
     def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
-        raise NotImplementedError
+        metrics = {}
+
+        if stage != "training" and any(self.metrics):
+            # compute sample-based metrics
+            targets = data["inference_variables"]
+            conditions = data.get("inference_conditions")
+            samples = self.sample(len(targets), conditions=conditions)
+
+            for metric in self.metrics:
+                metrics[metric.name] = metric(samples, targets)
+
+        return metrics
