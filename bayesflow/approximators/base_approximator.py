@@ -4,6 +4,7 @@ from keras.saving import (
     register_keras_serializable,
     serialize_keras_object,
 )
+from collections.abc import Sequence
 import warnings
 
 from bayesflow.configurators import BaseConfigurator
@@ -128,3 +129,13 @@ class BaseApproximator(keras.Model):
                 )
 
         return super().fit(*args, **kwargs)
+
+    def compile(
+        self, inference_metrics: Sequence[keras.Metric] = None, summary_metrics: Sequence[keras.Metric] = None, **kwargs
+    ) -> None:
+        self.inference_network._metrics = inference_metrics or []
+
+        if self.summary_network is not None:
+            self.summary_network._metrics = summary_metrics or []
+
+        return super().compile(**kwargs)
