@@ -6,7 +6,7 @@ from bayesflow.utils import issue_url
 
 def gaussian_kernel(x1: Tensor, x2: Tensor, scales: Tensor = keras.ops.logspace(-6, 6, 11)) -> Tensor:
     residuals = x1[:, None] - x2[None, :]
-    norms = keras.ops.norm(residuals, axis=list(range(2, keras.ops.ndim(residuals))))
+    norms = keras.ops.norm(residuals, axis=tuple(range(2, keras.ops.ndim(residuals))))
     exponent = norms[:, :, None] / (2.0 * scales[None, None, :])
     return keras.ops.mean(keras.ops.exp(-exponent), axis=2)
 

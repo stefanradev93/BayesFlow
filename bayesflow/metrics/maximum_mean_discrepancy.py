@@ -16,4 +16,6 @@ class MaximumMeanDiscrepancy(keras.Metric):
         self.values.append(mmd)
 
     def result(self):
+        if not self.values:
+            return float("nan")
         return keras.ops.mean(keras.ops.concatenate(self.values, axis=0))
