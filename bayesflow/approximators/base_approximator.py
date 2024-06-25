@@ -26,6 +26,18 @@ class BaseApproximator(keras.Model):
         self.summary_network = summary_network
         self.configurator = configurator
 
+    def sample(self, data: dict[str, Tensor], num_samples: int = 500) -> Tensor:
+        """"""
+
+        if self.summary_network is None:
+            conditions = self.configurator.configure_inference_conditions(data)
+
+
+    def log_prob(self, data: dict[str, Tensor]) -> Tensor:
+        """"""
+
+        #TODO
+
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "BaseApproximator":
         config["inference_network"] = deserialize_keras_object(
