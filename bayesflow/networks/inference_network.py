@@ -40,7 +40,7 @@ class InferenceNetwork(keras.Layer):
             # compute sample-based metrics
             targets = data["inference_variables"]
             conditions = data.get("inference_conditions")
-            samples = self.sample(len(targets), conditions=conditions)
+            samples = self.sample(keras.ops.shape(targets)[0], conditions=conditions)
 
             for metric in self.metrics:
                 metrics[metric.name] = metric(samples, targets)
