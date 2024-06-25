@@ -10,7 +10,6 @@ def _make_vjp_fn(f: callable, x: Tensor) -> (Tensor, callable):
 
             fx, _vjp_fn = jax.vjp(f, x)
 
-            @jax.jit
             def vjp_fn(projector):
                 return _vjp_fn(projector)[0]
         case "tensorflow":
