@@ -7,30 +7,6 @@ def batch_size(request):
     return request.param
 
 
-@pytest.fixture()
-def coupling_flow():
-    from bayesflow.networks import CouplingFlow
-
-    return CouplingFlow(depth=2, subnet_kwargs=dict(depth=2, width=64))
-
-
-@pytest.fixture()
-def flow_matching():
-    from bayesflow.networks import FlowMatching
-
-    return FlowMatching(network_kwargs=dict(depth=2, width=64))
-
-
-@pytest.fixture(params=["coupling_flow"])
-def inference_network(request):
-    return request.getfixturevalue(request.param)
-
-
-@pytest.fixture(params=["inference_network", "summary_network"])
-def network(request):
-    return request.getfixturevalue(request.param)
-
-
 @pytest.fixture(params=[2, 3])
 def num_conditions(request):
     return request.param
