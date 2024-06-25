@@ -73,6 +73,15 @@ class Approximator(BaseApproximator):
             kwargs["configurator"] = Configurator(
                 inference_variables, inference_conditions, summary_variables, summary_conditions
             )
+        else:
+            # the user passed a configurator, so we should not configure a default one
+            # check if the user also passed args for the default configurator
+            keys = ["inference_variables", "inference_conditions", "summary_variables", "summary_conditions"]
+            if any(key in kwargs for key in keys):
+                raise ValueError(
+                    "Received an ambiguous set of arguments: You are passing a configurator explicitly, "
+                    "but also providing arguments for the default configurator."
+                )
 
         kwargs.setdefault("summary_network", None)
         super().__init__(**kwargs)

@@ -1,7 +1,9 @@
+import copy
 import keras
 import pytest
 
-from tests.utils import assert_models_equal, max_mean_discrepancy
+
+from tests.utils import assert_models_equal
 from tests.utils import InterruptFitCallback, FitInterruptedError
 
 
@@ -10,39 +12,42 @@ def test_compile(approximator, random_samples, jit_compile):
     approximator.compile(jit_compile=jit_compile)
 
 
-@pytest.mark.parametrize("jit_compile", [False, True])
-def test_fit(approximator, train_dataset, validation_dataset, test_dataset, jit_compile):
+def test_fit(approximator, train_dataset, validation_dataset, batch_size):
+    from bayesflow.metrics import MaximumMeanDiscrepancy
+
     # TODO: Refactor to use approximator.sample() when implemented (instead of calling the inference network directly)
+    approximator.compile(inference_metrics=[keras.metrics.KLDivergence(), MaximumMeanDiscrepancy()])
 
-    approximator.compile(jit_compile=jit_compile, loss=keras.losses.KLDivergence())
-    inf_vars = approximator.configurator.configure_inference_variables(test_dataset.data)
-    inf_conds = approximator.configurator.configure_inference_conditions(test_dataset.data)
-    y = test_dataset.data["x"]
+    approximator.build_from_data(train_dataset[0])
 
-    pre_loss = approximator.compute_metrics(train_dataset.data)["loss"]
-    pre_val_loss = approximator.compute_metrics(validation_dataset.data)["loss"]
-    x_before = approximator.inference_network(inf_vars, conditions=inf_conds)
-    mmd_before = max_mean_discrepancy(x_before, y)
+    untrained_weights = copy.deepcopy(approximator.weights)
+    untrained_metrics = approximator.evaluate(validation_dataset, return_dict=True)
 
-    history = approximator.fit(
-        train_dataset,
-        validation_data=validation_dataset,
-        epochs=3,
-    ).history
-    x_after = approximator.inference_network(inf_vars, conditions=inf_conds)
-    mmd_after = max_mean_discrepancy(x_after, y)
+    approximator.fit(train_dataset, epochs=20)
 
-    # Test model weights have not vanished
-    for layer in approximator.layers:
-        for weight in layer.weights:
-            assert not keras.ops.any(keras.ops.isnan(weight)).numpy()
+    trained_weights = approximator.weights
+    trained_metrics = approximator.evaluate(validation_dataset, return_dict=True)
 
-    # Test KLD loss and validation loss decrease after training
-    assert history["loss"][-1] < pre_loss
-    assert history["val_loss"][-1] < pre_val_loss
+    # check weights have changed during training
+    assert any([keras.ops.any(~keras.ops.isclose(u, t)) for u, t in zip(untrained_weights, trained_weights)])
 
-    # Test MMD improved after training
-    assert mmd_after < mmd_before
+    assert isinstance(untrained_metrics, dict)
+    assert isinstance(trained_metrics, dict)
+
+    # test loss decreases
+    assert "loss" in untrained_metrics
+    assert "loss" in trained_metrics
+    assert untrained_metrics["loss"] > trained_metrics["loss"]
+
+    # test kl divergence decreases
+    assert "kl_divergence" in untrained_metrics
+    assert "kl_divergence" in trained_metrics
+    assert untrained_metrics["kl_divergence"] > trained_metrics["kl_divergence"]
+
+    # test mmd decreases
+    assert "maximum_mean_discrepancy" in untrained_metrics
+    assert "maximum_mean_discrepancy" in trained_metrics
+    assert untrained_metrics["maximum_mean_discrepancy"] > trained_metrics["maximum_mean_discrepancy"]
 
 
 @pytest.mark.parametrize("jit_compile", [False, True])

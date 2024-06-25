@@ -1,9 +1,10 @@
 import inspect
 import keras
+import numpy as np
 
 from collections.abc import Sequence
 
-from bayesflow.types import Tensor
+from bayesflow.types import Shape, Tensor
 
 
 def convert_kwargs(f, *args, **kwargs) -> dict[str, any]:
@@ -44,25 +45,51 @@ def convert_args(f, *args, **kwargs) -> tuple[any, ...]:
     return tuple(parameters)
 
 
-def batched_call(f, batch_size, *args, **kwargs):
-    """Call f, automatically vectorizing to batch_size if required"""
+def batched_call(f: callable, batch_shape: Shape, *args: Tensor, **kwargs: Tensor):
+    """Call f, automatically vectorizing to batch_shape if required.
+    f may accept any number of tensor or numpy array arguments.
+    :param f:
+    :param batch_shape:
+    :param args:
+    :param kwargs:
+    :return:
+    """
     try:
-        data = f((batch_size,), *args, **kwargs)
+        # already batched
+        data = f(batch_shape, *args, **kwargs)
+
+        # convert numpy to keras
         data = {key: keras.ops.convert_to_tensor(value) for key, value in data.items()}
-        return data
     except TypeError:
-        pass
+        # for loop fallback
+        batch_size = np.prod(batch_shape)
+        data = []
+        for b in range(batch_size):
+            # get args and kwargs for this index
+            args_i = [args[i][b] for i in range(len(args))]
+            kwargs_i = {k: v[b] for k, v in kwargs.items()}
 
-    # no way to get both randomness and support for numpy sampling without a for loop :(
-    data = [f(*args, **kwargs) for _ in range(batch_size)]
+            data_i = f(*args_i, **kwargs_i)
 
-    data_dict = {}
-    for key in data[0].keys():
-        # gather tensors for key into list
-        tensors = [data[i][key] for i in range(len(data))]
-        data_dict[key] = keras.ops.stack(tensors, axis=0)
+            # convert numpy to keras
+            data_i = {key: keras.ops.convert_to_tensor(value) for key, value in data_i.items()}
 
-    return data_dict
+            data.append(data_i)
+
+        data = stack_dicts(data, axis=0)
+
+        # reshape to batch_shape
+        data = {key: keras.ops.reshape(value, batch_shape + keras.ops.shape(value)[1:]) for key, value in data.items()}
+
+    return data
+
+
+def filter_kwargs(f: callable, kwargs: dict[str, any]) -> dict[str, any]:
+    """Filter keyword arguments for f"""
+    signature = inspect.signature(f)
+    kwargs = {key: value for key, value in kwargs.items() if key in signature.parameters}
+
+    return kwargs
 
 
 def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int = -1) -> Tensor:
@@ -87,3 +114,29 @@ def keras_kwargs(kwargs: dict):
     custom keyword arguments in custom models that inherit from keras.Model.
     """
     return {key: value for key, value in kwargs.items() if not key.endswith("_kwargs")}
+
+
+def concatenate_dicts(data: list[dict[str, Tensor]], axis: int = -1) -> dict[str, Tensor]:
+    """Concatenates tensors in multiple dictionaries into a single dictionary."""
+    if not all([d.keys() == data[0].keys() for d in data]):
+        raise ValueError("Dictionaries must have the same keys.")
+
+    result = {}
+
+    for key in data[0].keys():
+        result[key] = keras.ops.concatenate([d[key] for d in data], axis=axis)
+
+    return result
+
+
+def stack_dicts(data: list[dict[str, Tensor]], axis: int = 0) -> dict[str, Tensor]:
+    """Stacks tensors in multiple dictionaries into a single dictionary."""
+    if not all([d.keys() == data[0].keys() for d in data]):
+        raise ValueError("Dictionaries must have the same keys.")
+
+    result = {}
+
+    for key in data[0].keys():
+        result[key] = keras.ops.stack([d[key] for d in data], axis=axis)
+
+    return result

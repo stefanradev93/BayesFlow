@@ -23,9 +23,12 @@ class DiagonalNormal(Distribution):
         self.var = std**2
         self.dim = None
         self.log_norm_const = None
+        self.seed_generator = keras.random.SeedGenerator()
 
     def sample(self, batch_shape: Shape) -> Tensor:
-        return keras.random.normal(shape=batch_shape + (self.dim,), mean=self.mean, stddev=self.std)
+        return keras.random.normal(
+            shape=batch_shape + (self.dim,), mean=self.mean, stddev=self.std, seed=self.seed_generator
+        )
 
     def log_prob(self, tensor: Tensor) -> Tensor:
         log_unnorm_pdf = self._log_unnormalized_prob(tensor)

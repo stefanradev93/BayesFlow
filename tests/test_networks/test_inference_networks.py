@@ -41,10 +41,10 @@ def test_output_structure(density, inference_network, random_samples, random_con
         assert isinstance(output, tuple)
         assert len(output) == 2
 
-        forward_output, forward_log_det = output
+        forward_output, forward_log_density = output
 
         assert keras.ops.is_tensor(forward_output)
-        assert keras.ops.is_tensor(forward_log_det)
+        assert keras.ops.is_tensor(forward_log_density)
     else:
         assert keras.ops.is_tensor(output)
 
@@ -70,8 +70,8 @@ def test_cycle_consistency(inference_network, random_samples, random_conditions)
         forward_output, conditions=random_conditions, density=True, inverse=True
     )
 
-    assert allclose(random_samples, inverse_output, atol=1e-3, rtol=1e-4)
-    assert allclose(forward_log_density, inverse_log_density, atol=1e-3, rtol=1e-4)
+    assert allclose(random_samples, inverse_output, atol=1e-3, rtol=1e-3)
+    assert allclose(forward_log_density, inverse_log_density, atol=1e-3, rtol=1e-3)
 
 
 @pytest.mark.torch

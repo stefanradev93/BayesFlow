@@ -14,14 +14,7 @@ def approximator(inference_network):
 
 @pytest.fixture()
 def batch_size():
-    return 32
-
-
-@pytest.fixture()
-def inference_network():
-    from bayesflow.networks import CouplingFlow
-
-    return CouplingFlow()
+    return 128
 
 
 @pytest.fixture()
@@ -40,7 +33,7 @@ def simulator():
 def train_dataset(simulator, batch_size):
     from bayesflow import OfflineDataset
 
-    num_batches = 16
+    num_batches = 32
     data = simulator.sample((num_batches * batch_size,))
     return OfflineDataset(data, workers=4, max_queue_size=num_batches, batch_size=batch_size)
 
@@ -49,15 +42,6 @@ def train_dataset(simulator, batch_size):
 def validation_dataset(simulator, batch_size):
     from bayesflow import OfflineDataset
 
-    num_batches = 4
-    data = simulator.sample((num_batches * batch_size,))
-    return OfflineDataset(data, workers=4, max_queue_size=num_batches, batch_size=batch_size)
-
-
-@pytest.fixture()
-def test_dataset(simulator, batch_size):
-    from bayesflow import OfflineDataset
-
-    num_batches = 16
+    num_batches = 8
     data = simulator.sample((num_batches * batch_size,))
     return OfflineDataset(data, workers=4, max_queue_size=num_batches, batch_size=batch_size)

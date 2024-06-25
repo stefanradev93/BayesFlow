@@ -3,7 +3,7 @@ import keras
 from collections.abc import Sequence
 
 from bayesflow.types import Sampler, Shape, Tensor
-from bayesflow.utils import batched_call
+from bayesflow.utils import batched_call, filter_kwargs
 
 from .simulator import Simulator
 
@@ -41,8 +41,9 @@ class SequentialSimulator(Simulator):
         data = {}
 
         for sampler in self.samplers:
+            kwargs = filter_kwargs(sampler, data)
             try:
-                data |= batched_call(sampler, shape[0], **data)
+                data |= batched_call(sampler, shape, **kwargs)
             except TypeError as e:
                 if keras.backend.backend() == "torch" and "device" in str(e):
                     raise RuntimeError(
@@ -54,9 +55,5 @@ class SequentialSimulator(Simulator):
                     ) from e
                 else:
                     raise e
-
-        for key, value in data.items():
-            if keras.ops.ndim(value) == 1:
-                data[key] = keras.ops.expand_dims(value, -1)
 
         return data
