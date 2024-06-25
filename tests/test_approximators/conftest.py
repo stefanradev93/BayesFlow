@@ -1,7 +1,10 @@
 import keras
 import pytest
 
-import bayesflow as bf
+
+# @pytest.fixture()
+# def batch_size():
+#     return 32
 
 
 @pytest.fixture()
@@ -11,28 +14,44 @@ def summary_network():
 
 @pytest.fixture()
 def inference_network():
-    network = keras.Sequential([keras.layers.Dense(10)])
-    network.compile(loss="mse")
-    return network
+    from bayesflow.networks import CouplingFlow
+
+    return CouplingFlow()
 
 
 @pytest.fixture()
 def approximator(inference_network, summary_network):
-    return bf.Approximator(
+    from bayesflow import Approximator
+
+    return Approximator(
         inference_network=inference_network,
         summary_network=summary_network,
-        inference_variables=[],
-        inference_conditions=[],
-        summary_variables=[],
-        summary_conditions=[],
+        inference_variables=["mean", "std"],
+        inference_conditions=["x"],
     )
 
 
 @pytest.fixture()
+def train_dataset():
+    # TODO
+    return None
+
+
+@pytest.fixture()
+def validation_dataset():
+    # TODO
+    return None
+
+
+@pytest.fixture()
 def dataset():
+    # TODO: Parameterize over num_batches
+    # TODO: Write as simulator for train_dataset and validation_dataset
+    from bayesflow import OfflineDataset
+
     batch_size = 16
-    batches_per_epoch = 4
-    parameter_sets = batch_size * batches_per_epoch
+    num_batches = 4
+    parameter_sets = batch_size * num_batches
     observations_per_parameter_set = 32
 
     mean = keras.random.normal(mean=0.0, stddev=0.1, shape=(parameter_sets, 2))
@@ -45,6 +64,6 @@ def dataset():
 
     x = mean + std * noise
 
-    data = dict(observables=dict(x=x), parameters=dict(mean=mean, std=std))
+    data = dict(mean=mean, std=std, x=x)
 
-    return bf.datasets.OfflineDataset(data, batch_size=batch_size, batches_per_epoch=batches_per_epoch)
+    return OfflineDataset(data, workers=1, max_queue_size=10, batch_size=batch_size)
