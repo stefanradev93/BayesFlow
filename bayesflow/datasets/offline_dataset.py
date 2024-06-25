@@ -18,12 +18,16 @@ class OfflineDataset(keras.utils.PyDataset):
 
     def __getitem__(self, item: int) -> (dict, dict):
         """Get a batch of pre-simulated data"""
+        if not 0 <= item < self.num_batches:
+            raise IndexError(f"Index {item} is out of bounds for dataset with {self.num_batches} batches.")
+
         item = slice(item * self.batch_size, (item + 1) * self.batch_size)
         item = self.indices[item]
 
         return {key: keras.ops.take(value, item, axis=0) for key, value in self.data.items()}
 
-    def __len__(self) -> int:
+    @property
+    def num_batches(self):
         return math.ceil(len(self.indices) / self.batch_size)
 
     def on_epoch_end(self) -> None:

@@ -7,15 +7,14 @@ from .distribution import Distribution
 
 @keras.saving.register_keras_serializable(package="bayesflow.distributions")
 class MixtureDistribution(Distribution):
-    """Utility class for a backend-agnostic mixture distributions.
-    """
+    """Utility class for a backend-agnostic mixture distributions."""
 
     def __init__(
         self,
         distributions: list[Distribution],
         mixture_logits: list[float] = None,
         trainable_mixture: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """TODO"""
 
@@ -30,11 +29,11 @@ class MixtureDistribution(Distribution):
             shape=(len(distributions),),
             initializer=keras.initializers.Constant(value=mixture_logits),
             dtype="float32",
-            trainable=trainable_mixture
+            trainable=trainable_mixture,
         )
 
     def sample(self, batch_shape: Shape) -> Tensor:
-        #TODO - Implement efficiently
+        # TODO - Implement efficiently
         raise NotImplementedError
 
     def log_prob(self, tensor: Tensor) -> Tensor:

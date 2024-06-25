@@ -9,5 +9,5 @@ def test_sample_is_random(simulator, batch_size):
         array = keras.ops.convert_to_numpy(tensor)
 
         expected = keras.ops.size(tensor)
-        actual = len(np.unique(array))
+        actual = np.size(np.unique(array))
         assert actual == expected

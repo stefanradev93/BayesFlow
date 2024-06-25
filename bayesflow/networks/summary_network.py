@@ -10,4 +10,8 @@ class SummaryNetwork(keras.Layer):
     def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
         outputs = self(data, stage=stage)
 
+        if any(self.metrics):
+            # TODO: what should we do here?
+            raise NotImplementedError
+
         return {"loss": keras.ops.zeros(()), "outputs": outputs}

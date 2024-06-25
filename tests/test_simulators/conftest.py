@@ -22,10 +22,10 @@ def sequential_two_moons():
         return dict(theta=theta)
 
     def observables(r, alpha, theta):
-        x1 = -keras.ops.abs(theta[..., :1] + theta[..., 1:]) / np.sqrt(2.0) + r * keras.ops.cos(alpha) + 0.25
-        x2 = (-theta[..., :1] + theta[..., 1:]) / np.sqrt(2.0) + r * keras.ops.sin(alpha)
+        x1 = -keras.ops.abs(theta[..., 0] + theta[..., 1]) / np.sqrt(2.0) + r * keras.ops.cos(alpha) + 0.25
+        x2 = (-theta[..., 0] + theta[..., 1]) / np.sqrt(2.0) + r * keras.ops.sin(alpha)
 
-        x = keras.ops.concatenate([x1, x2], axis=-1)
+        x = keras.ops.stack([x1, x2])
 
         return dict(x=x)
 

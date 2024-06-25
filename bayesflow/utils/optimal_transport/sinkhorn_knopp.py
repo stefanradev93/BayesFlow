@@ -47,25 +47,3 @@ def sinkhorn_knopp(
     warnings.warn(f"Sinkhorn-Knopp did not converge after {max_steps} steps (badness: {badness:.1e}).")
 
     return log_plan
-
-    """
-    Computes the Sinkhorn-Knopp optimal transport plan for the given cost matrix.
-    This algorithm is stabilized by performing the computations in logarithmic space.
-
-    :param cost_matrix: Defines the transport costs between samples. Defaults to 1.0
-
-    cost_matrix : Tensor
-    Defines the transport costs between samples.
-
-    regularization : float, optional, default: 1.0
-    Optional entropic regularization parameter.
-    Controls the standard deviation of the Gaussian kernel.
-
-    max_steps : int, optional, default: 1000
-    Maximum number of iterations.
-
-    tolerance : float, optional, default: 1e-6
-    Absolute tolerance for convergence.
-
-
-    """
