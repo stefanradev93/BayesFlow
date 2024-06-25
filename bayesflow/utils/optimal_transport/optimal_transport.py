@@ -42,11 +42,11 @@ def optimal_transport(
             transport_plan = sinkhorn_knopp(cost_matrix, **kwargs)
             indices = keras.random.categorical(transport_plan, num_samples=1)
             indices = keras.ops.squeeze(indices)
-            x1 = x1[indices]
+            x1 = keras.ops.take(x1, indices, axis=0)
         case "random":
             m = keras.ops.shape(x2)[0]
             indices = keras.random.randint((m,))
-            x1 = x1[indices]
+            x1 = keras.ops.take(x1, indices, axis=0)
         case other:
             raise ValueError(f"Unsupported method name: '{other}'.")
 
