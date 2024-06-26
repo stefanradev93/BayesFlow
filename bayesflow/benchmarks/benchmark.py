@@ -17,10 +17,6 @@ class Benchmark(SequentialSimulator):
 
     @staticmethod
     def get_module(name):
-        """Loads the corresponding benchmark file under bayesflow.benchmarks.<benchmark_name> as a
-        module and returns it.
-        """
-
         try:
             benchmark_module = importlib.import_module(f"bayesflow.benchmarks.{name}")
             return benchmark_module
