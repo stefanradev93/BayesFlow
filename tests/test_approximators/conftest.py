@@ -1,10 +1,9 @@
-import keras
 import pytest
 
 
-# @pytest.fixture()
-# def batch_size():
-#     return 32
+@pytest.fixture()
+def batch_size():
+    return 8
 
 
 @pytest.fixture()
@@ -32,38 +31,25 @@ def approximator(inference_network, summary_network):
 
 
 @pytest.fixture()
-def train_dataset():
-    # TODO
-    return None
+def simulator():
+    from bayesflow.simulators import NormalSimulator
+
+    return NormalSimulator()
 
 
 @pytest.fixture()
-def validation_dataset():
-    # TODO
-    return None
-
-
-@pytest.fixture()
-def dataset():
-    # TODO: Parameterize over num_batches
-    # TODO: Write as simulator for train_dataset and validation_dataset
+def train_dataset(simulator, batch_size):
     from bayesflow import OfflineDataset
 
-    batch_size = 16
     num_batches = 4
-    parameter_sets = batch_size * num_batches
-    observations_per_parameter_set = 32
+    data = simulator.sample((num_batches * batch_size,))
+    return OfflineDataset(data, workers=4, max_queue_size=num_batches, batch_size=batch_size)
 
-    mean = keras.random.normal(mean=0.0, stddev=0.1, shape=(parameter_sets, 2))
-    std = keras.ops.exp(keras.random.normal(mean=0.0, stddev=0.1, shape=(parameter_sets, 2)))
 
-    mean = keras.ops.repeat(mean[:, None], observations_per_parameter_set, 1)
-    std = keras.ops.repeat(std[:, None], observations_per_parameter_set, 1)
+@pytest.fixture()
+def validation_dataset(simulator, batch_size):
+    from bayesflow import OfflineDataset
 
-    noise = keras.random.normal(shape=(parameter_sets, observations_per_parameter_set, 2))
-
-    x = mean + std * noise
-
-    data = dict(mean=mean, std=std, x=x)
-
-    return OfflineDataset(data, workers=1, max_queue_size=10, batch_size=batch_size)
+    num_batches = 2
+    data = simulator.sample((num_batches * batch_size,))
+    return OfflineDataset(data, workers=4, max_queue_size=num_batches, batch_size=batch_size)
