@@ -28,7 +28,7 @@ def test_loss_progress(approximator, train_dataset, validation_dataset):
     output = ostream.getvalue()
     ostream.close()
 
-    loss_output = [line for line in output.splitlines() if "loss" in line]
+    loss_output = [line.replace("\x08", "") for line in output.splitlines() if "loss" in line]
 
     # Test losses are not NaN and that epoch summaries match loss histories
     epoch = 0
