@@ -1,22 +1,22 @@
 import numpy as np
 
 
-def prior(lower_bound=-1.0, upper_bound=1.0, rng=None):
+def prior(lower_bound: float = -1.0, upper_bound: float = 1.0, rng: np.random.Generator = None):
     """Generates a random draw from a 2-dimensional uniform prior bounded between
     `lower_bound` and `upper_bound` which represents the two parameters of the two moons simulator.
 
     Parameters
     ----------
-    lower_bound : float, optional, default : -1
+    lower_bound: float, optional, default : -1.
         The lower bound of the uniform prior.
-    upper_bound : float, optional, default : 1
+    upper_bound: float, optional, default : 1.
         The upper bound of the uniform prior.
-    rng         : np.random.Generator or None, default: None
+    rng: np.random.Generator or None, default: None
         An optional random number generator to use.
 
     Returns
     -------
-    theta : np.ndarray of shape (2,)
+    theta: np.ndarray of shape (2,)
         A single draw from the 2-dimensional uniform prior.
     """
 
@@ -25,20 +25,20 @@ def prior(lower_bound=-1.0, upper_bound=1.0, rng=None):
     return rng.uniform(low=lower_bound, high=upper_bound, size=2)
 
 
-def observation_model(theta, rng=None):
+def observation_model(theta: np.ndarray, rng: np.random.Generator = None):
     """Implements data generation from the two-moons model with a bimodal posterior.
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.8
 
     Parameters
     ----------
-    theta   : np.ndarray of shape (2,)
+    theta: np.ndarray of shape (2, )
         The vector of two model parameters.
-    rng     : np.random.Generator or None, default: None
+    rng: np.random.Generator or None, default: None
         An optional random number generator to use.
 
     Returns
     -------
-    x : np.ndarray of shape (2,)
+    observables: np.ndarray of shape (2, )
         The 2D vector generated from the two moons simulator.
     """
 
