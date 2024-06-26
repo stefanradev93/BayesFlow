@@ -16,7 +16,7 @@ def prior(lower_bound: float = -1.0, upper_bound: float = 1.0, rng: np.random.Ge
 
     Returns
     -------
-    theta: np.ndarray of shape (2,)
+    params: np.ndarray of shape (2, )
         A single draw from the 2-dimensional uniform prior.
     """
 
@@ -25,13 +25,13 @@ def prior(lower_bound: float = -1.0, upper_bound: float = 1.0, rng: np.random.Ge
     return rng.uniform(low=lower_bound, high=upper_bound, size=2)
 
 
-def observation_model(theta: np.ndarray, rng: np.random.Generator = None):
+def observation_model(params: np.ndarray, rng: np.random.Generator = None):
     """Implements data generation from the two-moons model with a bimodal posterior.
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.8
 
     Parameters
     ----------
-    theta: np.ndarray of shape (2, )
+    params: np.ndarray of shape (2, )
         The vector of two model parameters.
     rng: np.random.Generator or None, default: None
         An optional random number generator to use.
@@ -51,7 +51,8 @@ def observation_model(theta: np.ndarray, rng: np.random.Generator = None):
     r = rng.normal(loc=0.1, scale=0.01)
 
     # Forward process
+
     rhs1 = np.array([r * np.cos(alpha) + 0.25, r * np.sin(alpha)])
-    rhs2 = np.array([-np.abs(theta[0] + theta[1]) / np.sqrt(2.0), (-theta[0] + theta[1]) / np.sqrt(2.0)])
+    rhs2 = np.array([-np.abs(params[0] + params[1]) / np.sqrt(2.0), (-params[0] + params[1]) / np.sqrt(2.0)])
 
     return rhs1 + rhs2
