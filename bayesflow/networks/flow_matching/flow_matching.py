@@ -14,10 +14,7 @@ class FlowMatching(InferenceNetwork):
     def __init__(self, subnet: str = "resnet", base_distribution: str = "normal", **kwargs):
         super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
         self.subnet = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
-
-        output_projector_kwargs = kwargs.get("output_projector_kwargs", {})
-        output_projector_kwargs.setdefault("bias_initializer", "zeros")
-        self.output_projector = keras.layers.Dense(None, **output_projector_kwargs)
+        self.output_projector = keras.layers.Dense(units=None, bias_initializer="zeros", kernel_initializer="zeros")
 
     def build(self, xz_shape, conditions_shape=None):
         super().build(xz_shape)
@@ -73,7 +70,7 @@ class FlowMatching(InferenceNetwork):
                 return self.velocity(arg, t, conditions)
 
             for _ in range(steps):
-                v, tr = jacobian_trace(f, z, kwargs.get("trace_samples", 100))
+                v, tr = jacobian_trace(f, z, kwargs.get("trace_steps", 5))
                 z += dt * v
                 trace += dt * tr
 
@@ -104,7 +101,7 @@ class FlowMatching(InferenceNetwork):
                 return self.velocity(arg, t, conditions)
 
             for _ in range(steps):
-                v, tr = jacobian_trace(f, x, kwargs.get("trace_samples", 100))
+                v, tr = jacobian_trace(f, x, kwargs.get("trace_steps", 5))
                 x += dt * v
                 trace += dt * tr
 
@@ -121,11 +118,21 @@ class FlowMatching(InferenceNetwork):
             return x
 
     def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
+        base_metrics = super().compute_metrics(data, stage=stage)
+
         x1 = data["inference_variables"]
         c = data.get("inference_conditions")
 
-        x0 = self.base_distribution.sample(keras.ops.shape(x1))
+        if not self.built:
+            # TODO: the base distribution is not yet built, but we need to sample from it (see below)
+            #  ideally, we want to build automatically before this method is called
+            xz_shape = keras.ops.shape(x1)
+            conditions_shape = None if c is None else keras.ops.shape(c)
+            self.build(xz_shape, conditions_shape)
 
+        x0 = self.base_distribution.sample((keras.ops.shape(x1)[0],))
+
+        # TODO: should move this to worker-process somehow
         x0, x1 = optimal_transport(x0, x1)
 
         t = keras.random.uniform((keras.ops.shape(x0)[0], 1))
@@ -136,5 +143,6 @@ class FlowMatching(InferenceNetwork):
         target_velocity = x1 - x0
 
         loss = keras.losses.mean_squared_error(predicted_velocity, target_velocity)
+        loss = keras.ops.mean(loss)
 
-        return {"loss": loss}
+        return base_metrics | {"loss": loss}

@@ -20,3 +20,22 @@ def random_seed():
     seed = 0
     keras.utils.set_random_seed(seed)
     return seed
+
+
+@pytest.fixture()
+def coupling_flow():
+    from bayesflow.networks import CouplingFlow
+
+    return CouplingFlow(depth=2, subnet_kwargs=dict(depth=2, width=64))
+
+
+@pytest.fixture()
+def flow_matching():
+    from bayesflow.networks import FlowMatching
+
+    return FlowMatching(network_kwargs=dict(depth=2, width=64))
+
+
+@pytest.fixture(params=["coupling_flow", "flow_matching"])
+def inference_network(request):
+    return request.getfixturevalue(request.param)
