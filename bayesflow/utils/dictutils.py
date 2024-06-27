@@ -47,12 +47,19 @@ def convert_args(f, *args, **kwargs) -> tuple[any, ...]:
 
 def batched_call(f: callable, batch_shape: Shape, *args: Tensor, **kwargs: Tensor):
     """Call f, automatically vectorizing to batch_shape if required.
-    f may accept any number of tensor or numpy array arguments.
-    :param f:
-    :param batch_shape:
-    :param args:
-    :param kwargs:
-    :return:
+
+    :param f: The function to call.
+        May accept any number of tensor or numpy array arguments.
+        Must return a dictionary of tensors or numpy arrays.
+
+    :param batch_shape: The shape of the batch. If f is not already batched, it will be called
+        prod(batch_shape) times.
+
+    :param args: Positional arguments to f
+
+    :param kwargs: Keyword arguments to f
+
+    :return: A dictionary of batched tensors or numpy arrays.
     """
     try:
         # already batched
