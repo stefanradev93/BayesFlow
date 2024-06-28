@@ -1,19 +1,19 @@
 import importlib
 from functools import partial
 
-from bayesflow.simulators import SequentialSimulator
+from bayesflow.utils import batched_call
 
 
-class Benchmark(SequentialSimulator):
+class Benchmark:
     def __init__(self, name: str, **kwargs):
         """#TODO"""
 
         self.name = name
         self.module = self.get_module(name)
+        self.simulator = partial(getattr(self.module, "simulator"), **kwargs)
 
-        prior = partial(getattr(self.module, "prior"), **kwargs.pop("prior_kwargs", {}))
-        obs_model = partial(getattr(self.module, "observation_model"), **kwargs.pop("observation_model_kwargs", {}))
-        super().__init__([prior, obs_model])
+    def sample(self, batch_size: int):
+        return batched_call(self.simulator, (batch_size,))
 
     @staticmethod
     def get_module(name):

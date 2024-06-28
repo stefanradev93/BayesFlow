@@ -10,7 +10,7 @@ import warnings
 from bayesflow.configurators import BaseConfigurator
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import keras_kwargs
+from bayesflow.utils import keras_kwargs, repeat_tensor
 
 
 @register_keras_serializable(package="bayesflow.approximators")
@@ -28,16 +28,23 @@ class BaseApproximator(keras.Model):
         self.configurator = configurator
 
     def sample(self, data: dict[str, Tensor], num_samples: int = 500) -> Tensor:
-        """"""
+        """TODO"""
 
         if self.summary_network is None:
             conditions = self.configurator.configure_inference_conditions(data)
+            conditions = repeat_tensor(conditions, num_repeats=num_samples, axis=1)
+            return self.inference_network.sample(num_samples, conditions)
 
+        # TODO
 
     def log_prob(self, data: dict[str, Tensor]) -> Tensor:
-        """"""
+        """TODO"""
 
-        #TODO
+        if self.summary_network is None:
+            conditions = self.configurator.configure_inference_conditions(data)
+            return self.inference_network.log_prob(conditions)
+
+        # TODO
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "BaseApproximator":
