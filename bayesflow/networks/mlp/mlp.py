@@ -50,18 +50,18 @@ class MLP(keras.Layer):
 
         super().__init__(**keras_kwargs(kwargs))
 
-        self.res_blocks = keras.Sequential()
+        self.res_blocks = []
         projector = layers.Dense(
             units=width,
             kernel_initializer=kernel_initializer,
         )
         if spectral_normalization:
             projector = layers.SpectralNormalization(projector)
-        self.res_blocks.add(projector)
-        self.res_blocks.add(layers.Dropout(dropout))
+        self.res_blocks.append(projector)
+        self.res_blocks.append(layers.Dropout(dropout))
 
         for _ in range(depth):
-            self.res_blocks.add(
+            self.res_blocks.append(
                 ConfigurableHiddenBlock(
                     units=width,
                     activation=activation,
@@ -77,4 +77,10 @@ class MLP(keras.Layer):
         self.call(keras.ops.zeros(input_shape))
 
     def call(self, inputs: Tensor, **kwargs) -> Tensor:
-        return self.res_blocks(inputs, training=kwargs.get("training", False))
+        for layer in self.res_blocks:
+            _kwargs = {}
+            if layer._call_has_training_arg:
+                _kwargs["training"] = kwargs.get("training", False)
+            outputs = layer(inputs, **kwargs)
+            inputs = outputs
+        return outputs
