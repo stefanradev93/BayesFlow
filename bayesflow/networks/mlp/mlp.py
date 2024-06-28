@@ -76,11 +76,7 @@ class MLP(keras.Layer):
         # build nested layers with forward pass
         self.call(keras.ops.zeros(input_shape))
 
-    def call(self, inputs: Tensor, **kwargs) -> Tensor:
+    def call(self, x: Tensor, **kwargs) -> Tensor:
         for layer in self.res_blocks:
-            _kwargs = {}
-            if layer._call_has_training_arg:
-                _kwargs["training"] = kwargs.get("training", False)
-            outputs = layer(inputs, **kwargs)
-            inputs = outputs
-        return outputs
+            x = layer(x, training=kwargs.get("training", False))
+        return x
