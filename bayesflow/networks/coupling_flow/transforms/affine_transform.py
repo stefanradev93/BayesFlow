@@ -7,7 +7,7 @@ from .transform import Transform
 
 @register_keras_serializable(package="bayesflow.networks.coupling_flow")
 class AffineTransform(Transform):
-    def __init__(self, clamp_factor: int | float = 5.0, **kwargs):
+    def __init__(self, clamp_factor: float | None = 5.0, **kwargs):
         super().__init__(**kwargs)
         self.clamp_factor = clamp_factor
 
@@ -36,8 +36,9 @@ class AffineTransform(Transform):
         return {"scale": scale, "shift": shift}
 
     def constrain_parameters(self, parameters: dict[str, Tensor]) -> dict[str, Tensor]:
-        s = parameters["scale"]
-        parameters["scale"] = 1 / (1 + ops.exp(-s)) * ops.sqrt(1 + ops.abs(s + self.clamp_factor))
+        if self.clamp_factor is not None:
+            s = parameters["scale"]
+            parameters["scale"] = 1 / (1 + ops.exp(-s)) * ops.sqrt(1 + ops.abs(s + self.clamp_factor))
 
         return parameters
 

@@ -30,8 +30,8 @@ class InferenceNetwork(keras.Layer):
         samples = self(samples, conditions=conditions, inverse=True, density=False, **kwargs)
         return samples
 
-    def log_prob(self, samples: Tensor, conditions: Tensor = None, **kwargs) -> Tensor:
-        _, log_density = self(samples, conditions=conditions, inverse=False, density=True, **kwargs)
+    def log_prob(self, targets: Tensor, conditions: Tensor = None, **kwargs) -> Tensor:
+        _, log_density = self(targets, conditions=conditions, inverse=False, density=True, **kwargs)
         return log_density
 
     def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:

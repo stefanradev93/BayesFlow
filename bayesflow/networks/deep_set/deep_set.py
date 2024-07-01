@@ -35,7 +35,7 @@ class DeepSet(keras.Model):
         super().__init__(**keras_kwargs(kwargs))
 
         # Stack of equivariant modules for a many-to-many learnable transformation
-        self.equivariant_modules = keras.Sequential(name="EquivariantStack")
+        self.equivariant_modules = keras.Sequential()
         for i in range(depth):
             equivariant_module = EquivariantModule(
                 num_dense_equivariant=num_dense_equivariant,
@@ -68,7 +68,7 @@ class DeepSet(keras.Model):
         )
 
         # Output linear layer to project set representation down to "summary_dim" learned summary statistics
-        self.output_projector = layers.Dense(summary_dim, activation="linear", name="OutputLayer")
+        self.output_projector = layers.Dense(summary_dim, activation="linear")
         self.summary_dim = summary_dim
 
     def call(self, input_set: Tensor, **kwargs) -> Tensor:

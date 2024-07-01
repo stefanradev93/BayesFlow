@@ -10,7 +10,7 @@ class Benchmark:
 
         self.name = name
         self.module = self.get_module(name)
-        self.simulator = partial(getattr(self.module, "simulator"), **kwargs)
+        self.simulator = partial(getattr(self.module, "simulator"), **kwargs.pop("prior_kwargs", {}))
 
     def sample(self, batch_size: int):
         return batched_call(self.simulator, (batch_size,))

@@ -1,9 +1,10 @@
 import numpy as np
 
 
-def simulator(lower_bound: float = -1.0, upper_bound: float = 1.0, rng: np.random.Generator = None):
-    prior_draws = prior(lower_bound, upper_bound, rng)
-    observables = observation_model(prior_draws, rng)
+def simulator():
+    """Non-configurable simulator running with default settings."""
+    prior_draws = prior()
+    observables = observation_model(prior_draws)
     return dict(parameters=prior_draws, observables=observables)
 
 
