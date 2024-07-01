@@ -1,10 +1,7 @@
 import keras
-
 from collections.abc import Sequence
-
 from bayesflow.types import Sampler, Shape, Tensor
 from bayesflow.utils import batched_call, filter_kwargs
-
 from .simulator import Simulator
 
 
