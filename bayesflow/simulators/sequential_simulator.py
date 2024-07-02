@@ -8,9 +8,8 @@ from ..types import Shape, Tensor
 
 
 class SequentialSimulator(Simulator):
-    def __init__(self, sample_fns: Sequence[callable], *, convert_dtypes: str = None, **kwargs):
+    def __init__(self, sample_fns: Sequence[callable], **kwargs):
         self.inner = CompositeSimulator([FunctionalSimulator(fn, **kwargs) for fn in sample_fns])
-        self.convert_dtypes = convert_dtypes
 
     def sample(self, batch_shape: Shape, **kwargs) -> dict[str, Tensor]:
         data = self.inner.sample(batch_shape, **kwargs)
