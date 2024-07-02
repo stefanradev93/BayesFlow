@@ -6,7 +6,13 @@ from bayesflow.utils import batched_call
 
 class Benchmark:
     def __init__(self, name: str, **kwargs):
-        """#TODO"""
+        """
+        Currently supported benchmarks:
+        - two_moons
+        - sir
+
+        # TODO
+        """
 
         self.name = name
         self.module = self.get_module(name)
