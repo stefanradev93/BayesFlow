@@ -15,20 +15,20 @@ def prior(rng: np.random.Generator = None):
 
     Parameters
     ----------
-    rng   : np.random.Generator or None, default: None
+    rng    : np.random.Generator or None, default: None
         An optional random number generator to use.
 
     Returns
     -------
-    theta : np.ndarray of shape (4,)
+    params : np.ndarray of shape (4,)
         A single draw from the 4-dimensional prior.
     """
 
     if rng is None:
         rng = np.random.default_rng()
 
-    theta = rng.lognormal(mean=[-0.125, -3, -0.125, -3], sigma=0.5)
-    return theta
+    params = rng.lognormal(mean=[-0.125, -3, -0.125, -3], sigma=0.5)
+    return params
 
 
 def _deriv(x, t, alpha, beta, gamma, delta):
@@ -41,7 +41,7 @@ def _deriv(x, t, alpha, beta, gamma, delta):
 
 
 def observation_model(
-    theta: np.ndarray,
+    params: np.ndarray,
     X0: int = 30,
     Y0: int = 1,
     T: int = 20,
@@ -51,13 +51,13 @@ def observation_model(
     rng: np.random.Generator = None,
 ):
     """Runs a Lotka-Volterra simulation for T time steps and returns `subsample` evenly spaced
-    points from the simulated trajectory, given contact parameters `theta`.
+    points from the simulated trajectory, given contact parameters `params`.
 
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.10.
 
     Parameters
     ----------
-    theta       : np.ndarray of shape (2,)
+    params      : np.ndarray of shape (2,)
         The 2-dimensional vector of disease parameters.
     X0          : int, optional, default: 30
         Initial number of prey species.
@@ -91,7 +91,7 @@ def observation_model(
     x0 = X0, Y0
 
     # Unpack parameter vector into scalars
-    alpha, beta, gamma, delta = theta
+    alpha, beta, gamma, delta = params
 
     # Prepate time vector between 0 and T of length T
     t_vec = np.linspace(0, T, T)

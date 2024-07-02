@@ -15,20 +15,20 @@ def prior(rng: np.random.Generator = None):
 
     Parameters
     ----------
-    rng   : np.random.Generator or None, default: None
+    rng    : np.random.Generator or None, default: None
         An optional random number generator to use.
 
     Returns
     -------
-    theta : np.ndarray of shape (2, )
+    params : np.ndarray of shape (2, )
         A single draw from the 2-dimensional prior.
     """
 
     if rng is None:
         rng = np.random.default_rng()
 
-    theta = rng.lognormal(mean=[np.log(0.4), np.log(1 / 8)], sigma=[0.5, 0.2])
-    return theta
+    params = rng.lognormal(mean=[np.log(0.4), np.log(1 / 8)], sigma=[0.5, 0.2])
+    return params
 
 
 def _deriv(x, t, N, beta, gamma):
@@ -42,7 +42,7 @@ def _deriv(x, t, N, beta, gamma):
 
 
 def observation_model(
-    theta: np.ndarray,
+    params: np.ndarray,
     N: float = 1e6,
     T: int = 160,
     I0: float = 1.0,
@@ -53,7 +53,7 @@ def observation_model(
     rng: np.random.Generator = None,
 ):
     """Runs a basic SIR model simulation for T time steps and returns `subsample` evenly spaced
-    points from the simulated trajectory, given disease parameters (contact and recovery rate) `theta`.
+    points from the simulated trajectory, given disease parameters (contact and recovery rate) `params`.
 
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.9.
 
@@ -61,7 +61,7 @@ def observation_model(
 
     Parameters
     ----------
-    theta          : np.ndarray of shape (2,)
+    params         : np.ndarray of shape (2,)
         The 2-dimensional vector of disease parameters.
     N              : float, optional, default: 1e6 = 1 000 000
         The size of the simulated population.
@@ -98,7 +98,7 @@ def observation_model(
     x0 = N - I0 - R0, I0, R0
 
     # Unpack parameter vector into scalars
-    beta, gamma = theta
+    beta, gamma = params
 
     # Prepate time vector between 0 and T of length T
     t_vec = np.linspace(0, T, T)
