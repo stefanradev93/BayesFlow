@@ -40,7 +40,16 @@ def _deriv(x, t, alpha, beta, gamma, delta):
     return dX, dY
 
 
-def observation_model(theta: np.ndarray, X0: int = 30, Y0: int = 1, T: int = 20, subsample: int = 10, flatten: bool = True, obs_noise: float = 0.1, rng: np.random.Generator = None):
+def observation_model(
+    theta: np.ndarray,
+    X0: int = 30,
+    Y0: int = 1,
+    T: int = 20,
+    subsample: int = 10,
+    flatten: bool = True,
+    obs_noise: float = 0.1,
+    rng: np.random.Generator = None,
+):
     """Runs a Lotka-Volterra simulation for T time steps and returns `subsample` evenly spaced
     points from the simulated trajectory, given contact parameters `theta`.
 
