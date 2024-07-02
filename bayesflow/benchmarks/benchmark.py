@@ -10,6 +10,7 @@ class Benchmark:
         Currently supported benchmarks:
         - two_moons
         - sir
+        - lotka_volterra
 
         # TODO
         """
