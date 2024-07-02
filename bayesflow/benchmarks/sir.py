@@ -41,8 +41,17 @@ def _deriv(x, t, N, beta, gamma):
     return dS, dI, dR
 
 
-def observation_model(theta: np.ndarray, N: float = 1e6, T: int = 160, I0: float = 1.0, R0: float = 0.0,
-        subsample: int = 10, total_count: int = 1000, scale_by_total: bool = True, rng: np.random.Generator = None):
+def observation_model(
+    theta: np.ndarray,
+    N: float = 1e6,
+    T: int = 160,
+    I0: float = 1.0,
+    R0: float = 0.0,
+    subsample: int = 10,
+    total_count: int = 1000,
+    scale_by_total: bool = True,
+    rng: np.random.Generator = None,
+):
     """Runs a basic SIR model simulation for T time steps and returns `subsample` evenly spaced
     points from the simulated trajectory, given disease parameters (contact and recovery rate) `theta`.
 
