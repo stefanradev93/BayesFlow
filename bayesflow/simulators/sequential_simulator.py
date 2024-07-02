@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 import keras
 
-from .composite_simulator import Compose
+from .composite_simulator import CompositeSimulator
 from .functional_simulator import FunctionalSimulator
 from .simulator import Simulator
 from ..types import Shape, Tensor
@@ -9,7 +9,7 @@ from ..types import Shape, Tensor
 
 class SequentialSimulator(Simulator):
     def __init__(self, sample_fns: Sequence[callable], *, convert_dtypes: str = None, **kwargs):
-        self.inner = Compose([FunctionalSimulator(fn, **kwargs) for fn in sample_fns])
+        self.inner = CompositeSimulator([FunctionalSimulator(fn, **kwargs) for fn in sample_fns])
         self.convert_dtypes = convert_dtypes
 
     def sample(self, batch_shape: Shape, **kwargs) -> dict[str, Tensor]:
