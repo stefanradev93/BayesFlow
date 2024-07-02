@@ -11,6 +11,7 @@ class Benchmark:
         - two_moons
         - sir
         - lotka_volterra
+        - inverse_kinematics
 
         # TODO
         """
