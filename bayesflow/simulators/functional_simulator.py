@@ -35,8 +35,6 @@ class FunctionalSimulator(Simulator):
         if not self.is_batched:
             sample_fn = self._convert_batched(sample_fn)
 
-        print(f"{sample_fn is self.sample_fn=}")
-
         return sample_fn(batch_shape, **kwargs)
 
     def _convert_batched(self, sample_fn: callable) -> callable:
