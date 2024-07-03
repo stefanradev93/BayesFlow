@@ -39,12 +39,12 @@ def observation_model(params: np.ndarray, n_obs: int = None, scale: float = 0.1,
     """Generates batched draws from a D-dimenional Gaussian distributions given a batch of
     location (mean) parameters of D dimensions. Assumes a spherical convariance matrix given
     by scale * I_D.
-    
+
     See Task T.2 from the paper https://arxiv.org/pdf/2101.04653.pdf
     NOTE: The paper description uses a variance of 0.1 for likelihood function
     but the implementation uses scale = 0.1 Our implmenetation uses a default scale
     of 0.1 for consistency with the implementation.
-    
+
     Parameters
     ----------
     params : np.ndarray of shape (params, D)

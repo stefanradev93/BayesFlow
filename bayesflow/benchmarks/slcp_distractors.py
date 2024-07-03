@@ -9,7 +9,9 @@ def simulator():
     return dict(parameters=prior_draws, observables=observables)
 
 
-def get_random_student_t(dim: int = 2, mu_scale: float = 15., shape_scale: float = 0.01, rng: np.random.Generator = None):
+def get_random_student_t(
+    dim: int = 2, mu_scale: float = 15.0, shape_scale: float = 0.01, rng: np.random.Generator = None
+):
     """A helper function to create a "frozen" multivariate student-t distribution of dimensions `dim`.
 
     Parameters
@@ -42,7 +44,9 @@ def get_random_student_t(dim: int = 2, mu_scale: float = 15., shape_scale: float
     return multivariate_t(loc=mu, shape=shape_scale, df=2, allow_singular=True, seed=rng)
 
 
-def draw_mixture_student_t(num_students: int, n_draws: int = 46, dim: int = 2, mu_scale: float = 15.0, rng: np.random.Generator = None):
+def draw_mixture_student_t(
+    num_students: int, n_draws: int = 46, dim: int = 2, mu_scale: float = 15.0, rng: np.random.Generator = None
+):
     """Helper function to generate `n_draws` random draws from a mixture of `num_students`
     multivariate Student-t distributions.
 
@@ -105,7 +109,15 @@ def prior(lower_bound: float = -3.0, upper_bound: float = 3.0, rng: np.random.Ge
     return rng.uniform(low=lower_bound, high=upper_bound, size=5)
 
 
-def observation_model(params: np.ndarray, n_obs: int = 4, n_dist: int = 46, dim: int = 2, mu_scale: float = 15.0, flatten: bool = True, rng: np.random.Generator = None):
+def observation_model(
+    params: np.ndarray,
+    n_obs: int = 4,
+    n_dist: int = 46,
+    dim: int = 2,
+    mu_scale: float = 15.0,
+    flatten: bool = True,
+    rng: np.random.Generator = None,
+):
     """Generates data from the SLCP model designed as a benchmark for a simple likelihood
     and a complex posterior due to a non-linear pushforward params -> x. In addition, it
     outputs uninformative distractor data.

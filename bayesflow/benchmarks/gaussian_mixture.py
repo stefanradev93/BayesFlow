@@ -35,7 +35,9 @@ def prior(lower_bound: float = -10.0, upper_bound: float = 10.0, D: int = 2, rng
     return rng.uniform(low=lower_bound, high=upper_bound, size=D)
 
 
-def observation_model(params: np.ndarray, prob: float = 0.5, scale_c1: float = 1.0, scale_c2: float = 0.1, rng: np.random.Generator = None):
+def observation_model(
+    params: np.ndarray, prob: float = 0.5, scale_c1: float = 1.0, scale_c2: float = 0.1, rng: np.random.Generator = None
+):
     """Simulates data from the Gaussian mixture model (GMM) with
     shared location vector. For more details, see
 
