@@ -34,10 +34,10 @@ def prior(rng: np.random.Generator = None):
 def _deriv(x, t, N, beta, gamma):
     """Helper function for scipy.integrate.odeint."""
 
-    S, I, R = x
-    dS = -beta * S * I / N
-    dI = beta * S * I / N - gamma * I
-    dR = gamma * I
+    s, i, r = x
+    dS = -beta * s * i / N
+    dI = beta * s * i / N - gamma * i
+    dR = gamma * i
     return dS, dI, dR
 
 
