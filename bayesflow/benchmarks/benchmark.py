@@ -8,12 +8,19 @@ class Benchmark:
     def __init__(self, name: str, **kwargs):
         """
         Currently supported benchmarks:
-        - two_moons
-        - sir
-        - lotka_volterra
+        - bernoulli_glm
+        - bernoulli_glm_raw
+        - gaussian_linear
+        - gaussian_linear_uniform
+        - gaussian_mixture
         - inverse_kinematics
+        - lotka_volterra
+        - sir
+        - slcp
+        - slcp_distractors
+        - two_moons
 
-        # TODO
+        TODO: Docs
         """
 
         self.name = name
