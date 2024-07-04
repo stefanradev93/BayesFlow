@@ -15,6 +15,44 @@ def pytest_runtest_setup(item):
         pytest.skip(f"Skipping backend '{backend}' for test {item}, which is registered for backends {test_backends}.")
 
 
+def pytest_make_parametrize_id(config, val, argname):
+    return f"{argname}={repr(val)}"
+
+
+@pytest.fixture(params=[1, 2, 3, 4], scope="session")
+def batch_size(request):
+    return request.param
+
+
+@pytest.fixture(scope="function")
+def coupling_flow():
+    from bayesflow.networks import CouplingFlow
+
+    return CouplingFlow(depth=2, subnet_kwargs=dict(depth=2, width=32))
+
+
+@pytest.fixture(params=["two_moons"], scope="session")
+def dataset(request):
+    return request.getfixturevalue(request.param)
+
+
+@pytest.fixture(scope="function")
+def flow_matching():
+    from bayesflow.networks import FlowMatching
+
+    return FlowMatching(network_kwargs=dict(depth=2, width=32))
+
+
+@pytest.fixture(params=["coupling_flow", "flow_matching"], scope="function")
+def inference_network(request):
+    return request.getfixturevalue(request.param)
+
+
+@pytest.fixture(params=["inference_network", "summary_network"], scope="function")
+def network(request):
+    return request.getfixturevalue(request.param)
+
+
 @pytest.fixture(autouse=True, scope="function")
 def random_seed():
     seed = 0
@@ -22,20 +60,18 @@ def random_seed():
     return seed
 
 
-@pytest.fixture()
-def coupling_flow():
-    from bayesflow.networks import CouplingFlow
-
-    return CouplingFlow(depth=2, subnet_kwargs=dict(depth=2, width=64))
-
-
-@pytest.fixture()
-def flow_matching():
-    from bayesflow.networks import FlowMatching
-
-    return FlowMatching(network_kwargs=dict(depth=2, width=64))
-
-
-@pytest.fixture(params=["coupling_flow", "flow_matching"])
-def inference_network(request):
+@pytest.fixture(params=[None], scope="function")
+def summary_network(request):
+    if request.param is None:
+        return None
     return request.getfixturevalue(request.param)
+
+
+@pytest.fixture(scope="session")
+def two_moons(batch_size):
+    from bayesflow.datasets import OfflineDataset
+    from bayesflow.simulators import TwoMoonsSimulator
+
+    simulator = TwoMoonsSimulator()
+    samples = simulator.sample((4 * batch_size,))
+    return OfflineDataset(samples, batch_size=batch_size)
