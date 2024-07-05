@@ -32,7 +32,7 @@ def approximator(inference_network, summary_network):
 
 @pytest.fixture()
 def simulator():
-    from bayesflow.simulators import NormalSimulator
+    from tests.utils.normal_simulator import NormalSimulator
 
     return NormalSimulator()
 
