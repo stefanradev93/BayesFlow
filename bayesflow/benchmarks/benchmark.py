@@ -6,7 +6,22 @@ from bayesflow.utils import batched_call
 
 class Benchmark:
     def __init__(self, name: str, **kwargs):
-        """#TODO"""
+        """
+        Currently supported benchmarks:
+        - bernoulli_glm
+        - bernoulli_glm_raw
+        - gaussian_linear
+        - gaussian_linear_uniform
+        - gaussian_mixture
+        - inverse_kinematics
+        - lotka_volterra
+        - sir
+        - slcp
+        - slcp_distractors
+        - two_moons
+
+        TODO: Docs
+        """
 
         self.name = name
         self.module = self.get_module(name)
