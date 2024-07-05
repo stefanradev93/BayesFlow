@@ -10,7 +10,7 @@ import warnings
 from bayesflow.configurators import BaseConfigurator
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import keras_kwargs, repeat_tensor, process_output
+from bayesflow.utils import keras_kwargs
 
 
 @register_keras_serializable(package="bayesflow.approximators")
@@ -27,68 +27,44 @@ class BaseApproximator(keras.Model):
         self.summary_network = summary_network
         self.configurator = configurator
 
-    def sample(self, data: dict[str, Tensor], num_samples: int = 500, as_numpy: bool = True) -> Tensor:
-        """Generates ``num_samples'' from the approximate distribution. Will typically be called only on
-        trained models.
+    def sample(self, num_samples: int = 1, data: dict[str, Tensor] = None) -> dict[str, Tensor]:
+        if data is None:
+            data = {}
+        else:
+            data = data.copy()
 
-        Parameters
-        ----------
-        data: dict[str: Tensor]
-            The data dictionary containing all keys used when constructing the Approximator except
-            ``inference_variables'', which is assumed to be absent during inference and will be ignored
-            if present.
-        num_samples: int, optional, default - 500
-            The number of samples per data set / instance in the data dictionary.
-        as_numpy: bool, optional, default - True
-            An optional flag to convert the samples to a numpy array before returning.
+        if self.summary_network is None:
+            inference_conditions = self.configurator.configure_inference_conditions(data)
+            samples = self.inference_network.sample(num_samples, conditions=inference_conditions)
 
-        Returns
-        -------
-        samples: Tensor
-            A tensor of shape (num_data_sets, num_samples, num_inference_variables) if data contains
-            multiple data sets / instances or of shape (num_samples, num_inference_variables) if data
-            contains a single data sets (i.e., a leading axis with one element in the corresponding
-            conditioning variables).
-        """
+            return self.configurator.deconfigure(samples)
 
+        data["summary_variables"] = self.configurator.configure_summary_variables(data)
+        data["summary_outputs"] = self.summary_network(data["summary_variables"])
+
+        inference_conditions = self.configurator.configure_inference_conditions(data)
+
+        samples = self.inference_network.sample(num_samples, conditions=inference_conditions)
+
+        return self.configurator.deconfigure(samples)
+
+    def log_prob(self, data: dict[str, Tensor]) -> Tensor:
         data = data.copy()
 
         if self.summary_network is None:
             data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
+            data["inference_variables"] = self.configurator.configure_inference_variables(data)
 
-        else:
-            data["summary_conditions"] = self.configurator.configure_summary_conditions(data)
-            data["summary_variables"] = self.configurator.configure_summary_variables(data)
-            summary_metrics = self.summary_network.compute_metrics(data, stage="inference")
-            data["summary_outputs"] = summary_metrics.get("outputs")
+            return self.inference_network.log_prob(data)
 
-            data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
+        data["summary_variables"] = self.configurator.configure_summary_variables(data)
+        summary_metrics = self.summary_network.compute_metrics(data, stage="inference")
+        data["summary_outputs"] = summary_metrics.get("outputs")
 
-        data["inference_conditions"] = repeat_tensor(data["inference_conditions"], num_repeats=num_samples, axis=1)
-        samples = self.inference_network.sample(num_samples, data["inference_conditions"])
-
-        return process_output(samples, convert_to_numpy=as_numpy)
-
-    def log_prob(self, data: dict[str, Tensor], as_numpy: bool = True) -> Tensor:
-        """TODO"""
-
-        data = data.copy()
-
-        if self.summary_network is None:
-            data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
-
-        else:
-            data["summary_conditions"] = self.configurator.configure_summary_conditions(data)
-            data["summary_variables"] = self.configurator.configure_summary_variables(data)
-            summary_metrics = self.summary_network.compute_metrics(data, stage="inference")
-            data["summary_outputs"] = summary_metrics.get("outputs")
-
-            data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
-
+        data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
         data["inference_variables"] = self.configurator.configure_inference_variables(data)
-        log_density = self.inference_network.log_prob(data["inference_variables"], data["inference_conditions"])
 
-        return process_output(log_density, convert_to_numpy=as_numpy)
+        return self.inference_network.log_prob(data)
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "BaseApproximator":
@@ -135,10 +111,8 @@ class BaseApproximator(keras.Model):
         if val_logs is None:
             # https://github.com/keras-team/keras/issues/19835
             warnings.warn(
-                "Found no validation logs due to a bug in keras. "
-                "Applying workaround, but incorrect loss values may be logged. "
-                "If possible, increase the size of your dataset, "
-                "or lower the number of validation steps used."
+                "Found no validation logs due to a bug in keras. Applying workaround, but incorrect loss values may be "
+                "logged. If possible, increase the size of your dataset, or lower the number of validation steps used."
             )
 
             val_logs = {}
@@ -157,7 +131,6 @@ class BaseApproximator(keras.Model):
             return self.inference_network.compute_metrics(data, stage=stage)
 
         data["summary_variables"] = self.configurator.configure_summary_variables(data)
-        data["summary_conditions"] = self.configurator.configure_summary_conditions(data)
 
         summary_metrics = self.summary_network.compute_metrics(data, stage=stage)
 
@@ -196,9 +169,13 @@ class BaseApproximator(keras.Model):
     def compile(
         self, inference_metrics: Sequence[keras.Metric] = None, summary_metrics: Sequence[keras.Metric] = None, **kwargs
     ) -> None:
-        self.inference_network._metrics = inference_metrics or []
+        if inference_metrics:
+            self.inference_network._metrics = inference_metrics
 
-        if self.summary_network is not None:
-            self.summary_network._metrics = summary_metrics or []
+        if summary_metrics:
+            if self.summary_network is None:
+                warnings.warn("Ignoring summary metrics because there is no summary network.")
+            else:
+                self.summary_network._metrics = summary_metrics
 
         return super().compile(**kwargs)

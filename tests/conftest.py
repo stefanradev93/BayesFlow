@@ -19,7 +19,7 @@ def pytest_make_parametrize_id(config, val, argname):
     return f"{argname}={repr(val)}"
 
 
-@pytest.fixture(params=[1, 2, 3, 4], scope="session")
+@pytest.fixture(params=[128, 256], scope="session", autouse=True)
 def batch_size(request):
     return request.param
 
@@ -28,7 +28,7 @@ def batch_size(request):
 def coupling_flow():
     from bayesflow.networks import CouplingFlow
 
-    return CouplingFlow(depth=2, subnet_kwargs=dict(depth=2, width=32))
+    return CouplingFlow(depth=4, subnet_kwargs=dict(depth=4, width=256))
 
 
 @pytest.fixture(params=["two_moons"], scope="session")
@@ -40,7 +40,7 @@ def dataset(request):
 def flow_matching():
     from bayesflow.networks import FlowMatching
 
-    return FlowMatching(network_kwargs=dict(depth=2, width=32))
+    return FlowMatching(network_kwargs=dict(depth=12, width=256))
 
 
 @pytest.fixture(params=["coupling_flow", "flow_matching"], scope="function")
@@ -53,11 +53,16 @@ def network(request):
     return request.getfixturevalue(request.param)
 
 
-@pytest.fixture(autouse=True, scope="function")
+@pytest.fixture(scope="function", autouse=True)
 def random_seed():
     seed = 0
     keras.utils.set_random_seed(seed)
     return seed
+
+
+@pytest.fixture(params=["two_moons"], scope="session")
+def simulator(request):
+    return request.getfixturevalue(request.param)
 
 
 @pytest.fixture(params=[None], scope="function")
@@ -68,10 +73,25 @@ def summary_network(request):
 
 
 @pytest.fixture(scope="session")
-def two_moons(batch_size):
+def training_dataset(simulator, batch_size):
     from bayesflow.datasets import OfflineDataset
+
+    num_batches = 128
+    samples = simulator.sample((num_batches * batch_size,))
+    return OfflineDataset(samples, batch_size=batch_size)
+
+
+@pytest.fixture(scope="session")
+def two_moons(batch_size):
     from bayesflow.simulators import TwoMoonsSimulator
 
-    simulator = TwoMoonsSimulator()
-    samples = simulator.sample((4 * batch_size,))
+    return TwoMoonsSimulator()
+
+
+@pytest.fixture(scope="session")
+def validation_dataset(simulator, batch_size):
+    from bayesflow.datasets import OfflineDataset
+
+    num_batches = 16
+    samples = simulator.sample((num_batches * batch_size,))
     return OfflineDataset(samples, batch_size=batch_size)

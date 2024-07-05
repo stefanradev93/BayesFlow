@@ -38,13 +38,3 @@ def test_summary_variables_shape(random_data, configurator):
         filtered_data = configurator.configure_summary_variables(random_data)
         expected = keras.ops.concatenate([random_data[v] for v in configurator.summary_variables], axis=-1)
         assert filtered_data.shape == expected.shape
-
-
-def test_summary_conditions_shape(random_data, configurator):
-    # Tests for correct output shape when querying summary conditions
-    if not configurator.summary_conditions:
-        assert configurator.configure_summary_conditions(random_data) is None
-    else:
-        filtered_data = configurator.configure_summary_conditions(random_data)
-        expected = keras.ops.concatenate([random_data[v] for v in configurator.summary_conditions], axis=-1)
-        assert filtered_data.shape == expected.shape
