@@ -19,7 +19,7 @@ def pytest_make_parametrize_id(config, val, argname):
     return f"{argname}={repr(val)}"
 
 
-@pytest.fixture(params=[128, 256], scope="session", autouse=True)
+@pytest.fixture(params=[2, 3], scope="session", autouse=True)
 def batch_size(request):
     return request.param
 
@@ -28,7 +28,7 @@ def batch_size(request):
 def coupling_flow():
     from bayesflow.networks import CouplingFlow
 
-    return CouplingFlow(depth=4, subnet_kwargs=dict(depth=4, width=256))
+    return CouplingFlow(depth=2, subnet_kwargs=dict(depth=2, width=32))
 
 
 @pytest.fixture(params=["two_moons"], scope="session")
@@ -40,7 +40,7 @@ def dataset(request):
 def flow_matching():
     from bayesflow.networks import FlowMatching
 
-    return FlowMatching(network_kwargs=dict(depth=12, width=256))
+    return FlowMatching(network_kwargs=dict(depth=2, width=32))
 
 
 @pytest.fixture(params=["coupling_flow", "flow_matching"], scope="function")
