@@ -1,10 +1,11 @@
 from collections.abc import Sequence
 import keras
 
+from bayesflow.types import Shape, Tensor
+
+from .simulator import Simulator
 from .composite_simulator import CompositeSimulator
 from .functional_simulator import FunctionalSimulator
-from .simulator import Simulator
-from ..types import Shape, Tensor
 
 
 class SequentialSimulator(Simulator):

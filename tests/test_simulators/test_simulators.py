@@ -1,6 +1,18 @@
 import keras
 
 
+def test_two_moons(simulator, batch_size):
+    samples = simulator.sample((batch_size,))
+
+    assert isinstance(samples, dict)
+    assert list(samples.keys()) == ["r", "alpha", "theta", "x"]
+
+    assert keras.ops.shape(samples["r"]) == (batch_size, 1)
+    assert keras.ops.shape(samples["alpha"]) == (batch_size, 1)
+    assert keras.ops.shape(samples["theta"]) == (batch_size, 2)
+    assert keras.ops.shape(samples["x"]) == (batch_size, 2)
+
+
 def test_sample(simulator, batch_size):
     samples = simulator.sample((batch_size,))
 
