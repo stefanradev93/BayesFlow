@@ -1,7 +1,7 @@
 import keras
 
-from .simulator import Simulator
-from ..types import Shape, Tensor
+from bayesflow.simulators import Simulator
+from bayesflow.types import Shape, Tensor
 
 
 class NormalSimulator(Simulator):
