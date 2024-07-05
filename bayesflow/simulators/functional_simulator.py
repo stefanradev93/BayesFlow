@@ -38,6 +38,7 @@ class FunctionalSimulator(Simulator):
         return sample_fn(batch_shape, **kwargs)
 
     def _convert_batched(self, sample_fn: callable) -> callable:
+        # use for loop, not vmap, because vmap does not preserve randomness for numpy
         @wraps(sample_fn)
         def wrapper(batch_shape, *args, **kwargs):
             batch_size = np.prod(batch_shape)
@@ -56,9 +57,11 @@ class FunctionalSimulator(Simulator):
     def _convert_numpy(self, sample_fn: callable) -> callable:
         @wraps(sample_fn)
         def wrapper(*args, **kwargs):
+            # convert to numpy because numpy functions expect numpy arguments
             args = [keras.ops.convert_to_numpy(arg) for arg in args]
             kwargs = {key: keras.ops.convert_to_numpy(value) for key, value in kwargs.items()}
             data = sample_fn(*args, **kwargs)
+            # convert to float32 to avoid 64-bit tensors on x64 systems (numpy default)
             return {key: keras.ops.convert_to_tensor(value, dtype="float32") for key, value in data.items()}
 
         return wrapper
