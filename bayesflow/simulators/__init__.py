@@ -1,2 +1,3 @@
 from .sequential_simulator import SequentialSimulator
 from .two_moons_simulator import TwoMoonsSimulator
+from .normal_simulator import NormalSimulator

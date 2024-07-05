@@ -1,6 +1,13 @@
 import numpy as np
 
 
+def simulator():
+    """Non-configurable simulator running with default settings."""
+    prior_draws = prior()
+    observables = observation_model(prior_draws)
+    return dict(parameters=prior_draws, observables=observables)
+
+
 def prior(lower_bound: float = -1.0, upper_bound: float = 1.0, rng: np.random.Generator = None):
     """Generates a random draw from a 2-dimensional uniform prior bounded between
     `lower_bound` and `upper_bound` which represents the two parameters of the two moons simulator.
@@ -51,7 +58,6 @@ def observation_model(params: np.ndarray, rng: np.random.Generator = None):
     r = rng.normal(loc=0.1, scale=0.01)
 
     # Forward process
-
     rhs1 = np.array([r * np.cos(alpha) + 0.25, r * np.sin(alpha)])
     rhs2 = np.array([-np.abs(params[0] + params[1]) / np.sqrt(2.0), (-params[0] + params[1]) / np.sqrt(2.0)])
 

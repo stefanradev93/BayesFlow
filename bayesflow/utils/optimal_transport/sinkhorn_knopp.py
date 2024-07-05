@@ -1,5 +1,5 @@
 import keras
-import warnings
+import logging
 
 from bayesflow.types import Tensor
 
@@ -44,6 +44,6 @@ def sinkhorn_knopp(
             return log_plan
 
     badness = keras.ops.max(keras.ops.abs(log_marginal))
-    warnings.warn(f"Sinkhorn-Knopp did not converge after {max_steps} steps (badness: {badness:.1e}).")
+    logging.warning(f"Sinkhorn-Knopp did not converge after {max_steps} steps (badness: {badness:.1e}).")
 
     return log_plan

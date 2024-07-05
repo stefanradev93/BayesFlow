@@ -7,6 +7,8 @@ from .dictutils import (
     stack_dicts,
 )
 
+from .tensor_utils import repeat_tensor, process_output
+
 from .git import (
     issue_url,
     pull_url,

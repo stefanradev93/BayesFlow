@@ -8,7 +8,7 @@ from ..types import Shape, Tensor
 class TwoMoonsSimulator(Simulator):
     """TODO: Docs"""
 
-    def sample(self, batch_shape: Shape) -> dict[str, Tensor]:
+    def sample(self, batch_shape: Shape, **kwargs) -> dict[str, Tensor]:
         r = keras.random.normal(batch_shape + (1,), 0.1, 0.01)
         alpha = keras.random.uniform(batch_shape + (1,), -0.5 * np.pi, 0.5 * np.pi)
 
