@@ -8,12 +8,14 @@ def test_dataset_is_picklable(dataset):
     assert type(pickled) is type(dataset)
 
     samples = dataset[0]  # dict of {param_name: param_value}
-    samples = next(iter(samples.values()))  # first param value
-
     pickled_samples = pickled[0]
-    pickled_samples = next(iter(pickled_samples.values()))
+    assert isinstance(samples, dict)
+    assert isinstance(pickled_samples, dict)
 
-    assert keras.ops.shape(samples) == keras.ops.shape(pickled_samples)
+    assert list(samples.keys()) == list(pickled_samples.keys())
+
+    for key in samples.keys():
+        assert keras.ops.shape(samples[key]) == keras.ops.shape(pickled_samples[key])
 
 
 def test_dataset_works_in_fit(model, dataset):

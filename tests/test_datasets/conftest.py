@@ -98,7 +98,7 @@ def simulator(request):
     return simulator
 
 
-@pytest.fixture(params=[True, False])
+@pytest.fixture(params=[False, True])
 def use_multiprocessing(request):
     return request.param
 
