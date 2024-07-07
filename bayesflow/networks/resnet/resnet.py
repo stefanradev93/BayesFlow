@@ -9,7 +9,7 @@ from bayesflow.utils import keras_kwargs
 class ResNet(keras.Layer):
     """Implements a super-simple ResNet"""
 
-    def __init__(self, depth: int = 6, width: int = 2, activation: str = "gelu", **kwargs):
+    def __init__(self, depth: int = 6, width: int = 256, activation: str = "gelu", **kwargs):
         super().__init__(**keras_kwargs(kwargs))
 
         self.input_layer = keras.layers.Dense(width)
