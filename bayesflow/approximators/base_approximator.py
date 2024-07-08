@@ -27,44 +27,43 @@ class BaseApproximator(keras.Model):
         self.summary_network = summary_network
         self.configurator = configurator
 
-    def sample(self, num_samples: int = 1, data: dict[str, Tensor] = None) -> dict[str, Tensor]:
+    def sample(self, num_samples: int = 1, data: dict[str, Tensor] = None, numpy: bool = False) -> dict[str, Tensor]:
         if data is None:
             data = {}
         else:
             data = data.copy()
 
-        if self.summary_network is None:
-            inference_conditions = self.configurator.configure_inference_conditions(data)
-            samples = self.inference_network.sample(num_samples, conditions=inference_conditions)
-
-            return self.configurator.deconfigure(samples)
-
-        data["summary_variables"] = self.configurator.configure_summary_variables(data)
-        data["summary_outputs"] = self.summary_network(data["summary_variables"])
+        if self.summary_network is not None:
+            data["summary_variables"] = self.configurator.configure_summary_variables(data)
+            data["summary_outputs"] = self.summary_network(data["summary_variables"])
 
         inference_conditions = self.configurator.configure_inference_conditions(data)
-
         samples = self.inference_network.sample(num_samples, conditions=inference_conditions)
 
-        return self.configurator.deconfigure(samples)
+        samples = self.configurator.deconfigure(samples)
 
-    def log_prob(self, data: dict[str, Tensor]) -> Tensor:
+        if numpy:
+            samples = {key: keras.ops.convert_to_numpy(value) for key, value in samples.items()}
+
+        return samples
+
+    def log_prob(self, data: dict[str, Tensor], numpy: bool = False) -> Tensor:
         data = data.copy()
 
-        if self.summary_network is None:
-            data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
-            data["inference_variables"] = self.configurator.configure_inference_variables(data)
-
-            return self.inference_network.log_prob(data)
-
-        data["summary_variables"] = self.configurator.configure_summary_variables(data)
-        summary_metrics = self.summary_network.compute_metrics(data, stage="inference")
-        data["summary_outputs"] = summary_metrics.get("outputs")
+        if self.summary_network is not None:
+            data["summary_variables"] = self.configurator.configure_summary_variables(data)
+            summary_metrics = self.summary_network.compute_metrics(data, stage="inference")
+            data["summary_outputs"] = summary_metrics.get("outputs")
 
         data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
         data["inference_variables"] = self.configurator.configure_inference_variables(data)
 
-        return self.inference_network.log_prob(data)
+        log_prob = self.inference_network.log_prob(data)
+
+        if numpy:
+            log_prob = keras.ops.convert_to_numpy(log_prob)
+
+        return log_prob
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "BaseApproximator":
