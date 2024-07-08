@@ -1,7 +1,6 @@
 import keras
 from keras.saving import register_keras_serializable
 
-import numpy as np
 
 from bayesflow.types import Tensor
 from bayesflow.utils import filter_concatenate
@@ -21,13 +20,13 @@ class Configurator(BaseConfigurator):
         self.inference_conditions = inference_conditions or []
         self.summary_variables = summary_variables or []
 
-        self._splits = None
+        self._inference_indices = None
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "Configurator":
-        splits = config.pop("splits")
+        inference_indices = config.pop("inference_indices")
         instance = cls(**config)
-        instance._splits = splits
+        instance._inference_indices = inference_indices
 
         return instance
 
@@ -36,14 +35,19 @@ class Configurator(BaseConfigurator):
             "inference_variables": self.inference_variables,
             "inference_conditions": self.inference_conditions,
             "summary_variables": self.summary_variables,
-            "splits": self._splits,
+            "inference_indices": self._inference_indices,
         }
 
     def configure_inference_variables(self, data: dict[str, Tensor]) -> Tensor | None:
-        if self._splits is None:
-            inference_variables = [value for key, value in data.items() if key in self.inference_variables]
-            splits = [keras.ops.shape(x)[-1] for x in inference_variables]
-            self._splits = np.cumsum(splits).tolist()
+        if self._inference_indices is None:
+            inference_variables = {key: value for key, value in data.items() if key in self.inference_variables}
+
+            self._inference_indices = {}
+            start = 0
+            for key, value in inference_variables.items():
+                stop = start + keras.ops.shape(value)[-1]
+                self._inference_indices[key] = list(range(start, stop))
+                start = stop
 
         return filter_concatenate(data, keys=self.inference_variables)
 
@@ -59,7 +63,4 @@ class Configurator(BaseConfigurator):
         return filter_concatenate(data, keys=self.summary_variables)
 
     def deconfigure(self, data: Tensor) -> dict[str, Tensor]:
-        splits = keras.ops.split(data, self._splits, axis=-1)
-        # drop empty last split
-        splits = splits[:-1]
-        return dict(zip(self.inference_variables, splits))
+        return {key: keras.ops.take(data, index, axis=-1) for key, index in self._inference_indices.items()}
