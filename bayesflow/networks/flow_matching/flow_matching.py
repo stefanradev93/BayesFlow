@@ -16,6 +16,8 @@ class FlowMatching(InferenceNetwork):
         self.subnet = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
         self.output_projector = keras.layers.Dense(units=None, bias_initializer="zeros", kernel_initializer="zeros")
 
+        self.seed_generator = keras.random.SeedGenerator()
+
     def build(self, xz_shape, conditions_shape=None):
         super().build(xz_shape)
 
@@ -135,7 +137,7 @@ class FlowMatching(InferenceNetwork):
         # TODO: should move this to worker-process somehow
         x0, x1 = optimal_transport(x0, x1)
 
-        t = keras.random.uniform((keras.ops.shape(x0)[0], 1))
+        t = keras.random.uniform((keras.ops.shape(x0)[0], 1), seed=self.seed_generator)
 
         x = t * x1 + (1 - t) * x0
 
