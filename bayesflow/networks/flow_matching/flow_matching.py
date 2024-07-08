@@ -43,12 +43,18 @@ class FlowMatching(InferenceNetwork):
         return self._forward(xz, conditions=conditions, **kwargs)
 
     def velocity(self, x: Tensor, t: int | float | Tensor, conditions: Tensor = None) -> Tensor:
-        t = keras.ops.convert_to_tensor(t, dtype=x.dtype)
+        if not keras.ops.is_tensor(t):
+            t = keras.ops.convert_to_tensor(t, dtype=x.dtype)
+
         match keras.ops.ndim(t):
             case 0:
                 t = keras.ops.full((keras.ops.shape(x)[0], 1), t, dtype=x.dtype)
             case 1:
                 t = keras.ops.expand_dims(t, 1)
+            case 2:
+                pass
+            case other:
+                raise ValueError(f"Expected time of ndim 0-2, but got {other}.")
 
         if conditions is None:
             xtc = keras.ops.concatenate([x, t], axis=-1)
@@ -75,6 +81,7 @@ class FlowMatching(InferenceNetwork):
                 v, tr = jacobian_trace(f, z, kwargs.get("trace_steps", 5))
                 z += dt * v
                 trace += dt * tr
+                t += dt
 
             log_prob = self.base_distribution.log_prob(z)
 
@@ -85,6 +92,7 @@ class FlowMatching(InferenceNetwork):
             for _ in range(steps):
                 v = self.velocity(z, t, conditions)
                 z += dt * v
+                t += dt
 
             return z
 
@@ -106,6 +114,7 @@ class FlowMatching(InferenceNetwork):
                 v, tr = jacobian_trace(f, x, kwargs.get("trace_steps", 5))
                 x += dt * v
                 trace += dt * tr
+                t += dt
 
             log_prob = self.base_distribution.log_prob(z)
 
@@ -116,6 +125,7 @@ class FlowMatching(InferenceNetwork):
             for _ in range(steps):
                 v = self.velocity(x, t, conditions)
                 x += dt * v
+                t += dt
 
             return x
 
@@ -144,7 +154,7 @@ class FlowMatching(InferenceNetwork):
         predicted_velocity = self.velocity(x, t, c)
         target_velocity = x1 - x0
 
-        loss = keras.losses.mean_squared_error(predicted_velocity, target_velocity)
+        loss = keras.losses.mean_squared_error(target_velocity, predicted_velocity)
         loss = keras.ops.mean(loss)
 
         return base_metrics | {"loss": loss}
