@@ -1,34 +1,32 @@
-from collections.abc import Callable
-
+from typing import TYPE_CHECKING
 
 Shape = tuple[int, ...]
 
-# this is ugly, but:
-# 1. it is recognized by static type checkers (not possible with if-else branching)
-# 2. it does not leave the Tensor type possibly undefined (not possible without nesting)
-try:
-    import jax
 
-    Tensor: type(jax.Array) = jax.Array
-except ModuleNotFoundError:
-    try:
-        import tensorflow as tf
+if TYPE_CHECKING:
+    import keras
 
-        Tensor: type(tf.Tensor) = tf.Tensor
-    except ModuleNotFoundError:
-        import torch
+    match keras.backend.backend():
+        case "numpy":
+            import numpy as np
 
-        Tensor: type(torch.Tensor) = torch.Tensor
+            Tensor = np.ndarray
+        case "jax":
+            import jax
 
+            Tensor = jax.Array
+        case "tensorflow":
+            import tensorflow as tf
 
-BatchedConditionalSampler = Callable[[Shape, Tensor, ...], dict[str, Tensor]]
-BatchedUnconditionalSampler = Callable[[Shape], dict[str, Tensor]]
-UnbatchedConditionalSampler = Callable[[Tensor, ...], dict[str, Tensor]]
-UnbatchedUnconditionalSampler = Callable[[], dict[str, Tensor]]
+            Tensor = tf.Tensor
+        case "torch":
+            import torch
 
-Sampler = (
-    BatchedConditionalSampler
-    | UnbatchedConditionalSampler
-    | UnbatchedConditionalSampler
-    | UnbatchedUnconditionalSampler
-)
+            Tensor = torch.Tensor
+        case other:
+            raise NotImplementedError
+
+else:
+    import keras
+
+    Tensor = type(keras.ops.zeros(()))
