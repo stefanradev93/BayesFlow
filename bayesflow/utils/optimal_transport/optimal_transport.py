@@ -8,7 +8,7 @@ from .sinkhorn_knopp import sinkhorn_knopp, sinkhorn_log
 
 
 def optimal_transport(
-    x1: Tensor, x2: Tensor, method: str = "sinkhorn_knopp", cost: str | Tensor = "euclidean", **kwargs
+    x1: Tensor, x2: Tensor, method: str = "sinkhorn_knopp", cost: str | Tensor = "euclidean", seed=None, **kwargs
 ) -> (Tensor, Tensor):
     """Matches elements from x2 onto x1, such that the transport cost between them is minimized,
     according to the method and cost matrix used.
@@ -29,6 +29,9 @@ def optimal_transport(
         You may also pass the cost matrix of shape (n, m) directly.
         Default: 'euclidean'
 
+    :param seed: Random seed used in randomized selection methods.
+        Default: None
+
     :param kwargs: Additional keyword arguments passed to the optimization method.
 
     :return: Tensors of shapes (n, ...) and (m, ...)
@@ -40,13 +43,13 @@ def optimal_transport(
         case "sinkhorn" | "sinkhorn_knopp":
             cost_matrix = find_cost(cost, x1, x2)
             transport_plan = sinkhorn_knopp(cost_matrix, **kwargs)
-            indices = keras.random.categorical(transport_plan, num_samples=1)
+            indices = keras.random.categorical(transport_plan, num_samples=1, seed=seed)
             indices = keras.ops.squeeze(indices)
             x1 = keras.ops.take(x1, indices, axis=0)
         case "sinkhorn_log":
             cost_matrix = find_cost(cost, x1, x2)
             transport_plan = sinkhorn_log(cost_matrix, **kwargs)
-            indices = keras.random.categorical(transport_plan, num_samples=1)
+            indices = keras.random.categorical(transport_plan, num_samples=1, seed=seed)
             indices = keras.ops.squeeze(indices)
             x1 = keras.ops.take(x1, indices, axis=0)
         case "random":
