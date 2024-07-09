@@ -14,7 +14,8 @@ class LotkaVolterra(Benchmark):
         obs_noise: float = 0.1,
         rng: np.random.Generator = None,
     ):
-        """Lotka Volterra simulated benchmark
+        """Lotka Volterra simulated benchmark.
+        See: https://arxiv.org/pdf/2101.04653.pdf, Task T.10
 
         Parameters
         ----------
@@ -32,7 +33,7 @@ class LotkaVolterra(Benchmark):
             representation of the simulated data is returned.
         obs_noise: float, optional, default: 0.1
             The standard deviation of the log-normal likelihood.
-        rng: np.random.Generator, optional, default: None
+        rng: np.random.Generator or None, optional, default: None
             An optional random number generator to use.
         """
 
@@ -70,8 +71,6 @@ class LotkaVolterra(Benchmark):
     def observation_model(self, params: np.ndarray):
         """Runs a Lotka-Volterra simulation for T time steps and returns `subsample` evenly spaced
         points from the simulated trajectory, given contact parameters `params`.
-
-        See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.10.
 
         Parameters
         ----------

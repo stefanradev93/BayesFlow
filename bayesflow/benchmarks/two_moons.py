@@ -4,7 +4,8 @@ from .benchmark import Benchmark
 
 class TwoMoons(Benchmark):
     def __init__(self, lower_bound: float = -1.0, upper_bound: float = 1.0, rng: np.random.Generator = None):
-        """Two moons simulated benchmark
+        """Two moons simulated benchmark.
+        See: https://arxiv.org/pdf/2101.04653.pdf, Task T.8
 
         Parameters
         ----------
@@ -12,7 +13,7 @@ class TwoMoons(Benchmark):
             The lower bound of the uniform prior
         upper_bound: float, optional, default:  1.0
             The upper bound of the uniform prior
-        rng: np.random.Generator, optional, default: None
+        rng: np.random.Generator or None, optional, default: None
             An option random number generator to use
         """
 
@@ -36,7 +37,6 @@ class TwoMoons(Benchmark):
 
     def observation_model(self, params: np.ndarray):
         """Implements data generation from the two-moons model with a bimodal posterior.
-        See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.8
 
         Parameters
         ----------
