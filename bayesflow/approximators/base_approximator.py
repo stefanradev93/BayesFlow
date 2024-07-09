@@ -10,7 +10,7 @@ import warnings
 from bayesflow.configurators import BaseConfigurator
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import keras_kwargs
+from bayesflow.utils import keras_kwargs, expand_tile
 
 
 @register_keras_serializable(package="bayesflow.approximators")
@@ -37,9 +37,10 @@ class BaseApproximator(keras.Model):
             data["summary_variables"] = self.configurator.configure_summary_variables(data)
             data["summary_outputs"] = self.summary_network(data["summary_variables"])
 
-        inference_conditions = self.configurator.configure_inference_conditions(data)
-        samples = self.inference_network.sample(num_samples, conditions=inference_conditions)
+        conditions = self.configurator.configure_inference_conditions(data)
+        conditions = expand_tile(conditions, axis=1, n=num_samples)
 
+        samples = self.inference_network.sample(num_samples, conditions=conditions)
         samples = self.configurator.deconfigure(samples)
 
         if numpy:
@@ -48,17 +49,19 @@ class BaseApproximator(keras.Model):
         return samples
 
     def log_prob(self, data: dict[str, Tensor], numpy: bool = False) -> Tensor:
-        data = data.copy()
+        if data is None:
+            data = {}
+        else:
+            data = data.copy()
 
         if self.summary_network is not None:
             data["summary_variables"] = self.configurator.configure_summary_variables(data)
-            summary_metrics = self.summary_network.compute_metrics(data, stage="inference")
-            data["summary_outputs"] = summary_metrics.get("outputs")
+            data["summary_outputs"] = self.summary_network(data["summary_variables"])
 
         data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
         data["inference_variables"] = self.configurator.configure_inference_variables(data)
 
-        log_prob = self.inference_network.log_prob(data)
+        log_prob = self.inference_network.log_prob(data["inference_variables"], conditions=data["inference_conditions"])
 
         if numpy:
             log_prob = keras.ops.convert_to_numpy(log_prob)
