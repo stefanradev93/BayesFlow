@@ -19,7 +19,7 @@ def expand_right(x: Tensor, n: int) -> Tensor:
         raise ValueError(f"Cannot expand {n} times.")
 
     idx = [...] + [None] * n
-    return x[*idx]
+    return x[tuple(idx)]
 
 
 def expand_right_to(x: Tensor, dim: int) -> Tensor:
