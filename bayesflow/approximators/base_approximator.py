@@ -154,14 +154,18 @@ class BaseApproximator(keras.Model):
         if not self.built:
             try:
                 dataset = kwargs.get("x") or args[0]
-                data = next(iter(dataset))
-                self.build_from_data(data)
-            except Exception:
+            except IndexError:
+                raise RuntimeError("Missing fit data.")
+
+            if not isinstance(dataset, keras.utils.PyDataset):
                 raise RuntimeError(
-                    "Could not automatically build the approximator. Please pass a dataset as the "
+                    "Cannot automatically build the approximator. Please pass a dataset as the "
                     "first argument to `approximator.fit()` or manually call `approximator.build()` "
                     "with a dictionary specifying your data shapes."
                 )
+
+            data = next(iter(dataset))
+            self.build_from_data(data)
 
         return super().fit(*args, **kwargs)
 
