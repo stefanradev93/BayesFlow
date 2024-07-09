@@ -4,17 +4,17 @@ from bayesflow.types import Tensor
 
 from ..dispatch import find_cost
 
-from .sinkhorn_knopp import sinkhorn_knopp
+from .sinkhorn_knopp import sinkhorn_knopp, sinkhorn_log
 
 
 def optimal_transport(
     x1: Tensor, x2: Tensor, method: str = "sinkhorn_knopp", cost: str | Tensor = "euclidean", **kwargs
 ) -> (Tensor, Tensor):
-    """
-    Matches elements from x2 onto x1, such that the transport cost between them is minimized,
+    """Matches elements from x2 onto x1, such that the transport cost between them is minimized,
     according to the method and cost matrix used.
 
-    Elements in either tensor may be permuted, dropped, or duplicated such that the assignment is optimal.
+    Depending on the method used, elements in either tensor may be permuted, dropped, or duplicated
+    such that the assignment is optimal.
 
     :param x1: Tensor of shape (n, ...)
         Samples from the first distribution.
@@ -40,6 +40,12 @@ def optimal_transport(
         case "sinkhorn" | "sinkhorn_knopp":
             cost_matrix = find_cost(cost, x1, x2)
             transport_plan = sinkhorn_knopp(cost_matrix, **kwargs)
+            indices = keras.random.categorical(transport_plan, num_samples=1)
+            indices = keras.ops.squeeze(indices)
+            x1 = keras.ops.take(x1, indices, axis=0)
+        case "sinkhorn_log":
+            cost_matrix = find_cost(cost, x1, x2)
+            transport_plan = sinkhorn_log(cost_matrix, **kwargs)
             indices = keras.random.categorical(transport_plan, num_samples=1)
             indices = keras.ops.squeeze(indices)
             x1 = keras.ops.take(x1, indices, axis=0)
