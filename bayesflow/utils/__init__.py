@@ -13,6 +13,8 @@ from .git import (
     repo_url,
 )
 
+from .io import warning
+
 from .jacobian_trace import jacobian_trace
 
 from .dispatch import find_distribution, find_network, find_permutation, find_pooling, find_recurrent_net

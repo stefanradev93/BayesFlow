@@ -140,7 +140,7 @@ class FlowMatching(InferenceNetwork):
         x0 = self.base_distribution.sample((keras.ops.shape(x1)[0],))
 
         # TODO: should move this to worker-process somehow
-        x0, x1 = optimal_transport(x0, x1, max_steps=int(1e4), regularization=0.01)
+        x0, x1 = optimal_transport(x0, x1, max_steps=int(1e4), regularization=0.01, seed=self.seed_generator)
 
         t = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
         t = expand_right_as(t, x0)
