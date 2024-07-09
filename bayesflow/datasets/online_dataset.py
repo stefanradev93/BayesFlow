@@ -1,6 +1,7 @@
 import keras
 
 from bayesflow.simulators.simulator import Simulator
+from bayesflow.types import Tensor
 
 
 class OnlineDataset(keras.utils.PyDataset):
@@ -20,7 +21,7 @@ class OnlineDataset(keras.utils.PyDataset):
         self.simulator = simulator
         self.batch_size = batch_size
 
-    def __getitem__(self, item: int) -> (dict, dict):
+    def __getitem__(self, item: int) -> dict[str, Tensor]:
         return self.simulator.sample((self.batch_size,))
 
     @property

@@ -1,6 +1,7 @@
 import keras
 
 from bayesflow.simulators.simulator import Simulator
+from bayesflow.types import Tensor
 
 
 class RoundsDataset(keras.utils.PyDataset):
@@ -27,7 +28,7 @@ class RoundsDataset(keras.utils.PyDataset):
 
         self.regenerate()
 
-    def __getitem__(self, item: int) -> (dict, dict):
+    def __getitem__(self, item: int) -> dict[str, Tensor]:
         """Get a batch of pre-simulated data"""
         return self.data[item]
 
