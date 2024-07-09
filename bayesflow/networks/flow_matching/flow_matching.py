@@ -4,7 +4,7 @@ from keras.saving import (
 )
 
 from bayesflow.types import Tensor
-from bayesflow.utils import find_network, jacobian_trace, keras_kwargs, optimal_transport
+from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, optimal_transport
 
 from ..inference_network import InferenceNetwork
 
@@ -46,15 +46,10 @@ class FlowMatching(InferenceNetwork):
         if not keras.ops.is_tensor(t):
             t = keras.ops.convert_to_tensor(t, dtype=x.dtype)
 
-        match keras.ops.ndim(t):
-            case 0:
-                t = keras.ops.full((keras.ops.shape(x)[0], 1), t, dtype=x.dtype)
-            case 1:
-                t = keras.ops.expand_dims(t, 1)
-            case 2:
-                pass
-            case other:
-                raise ValueError(f"Expected time of ndim 0-2, but got {other}.")
+        if keras.ops.ndim(t) == 0:
+            t = keras.ops.full((keras.ops.shape(x)[0],), t, dtype=keras.ops.dtype(x))
+
+        t = expand_right_as(t, x)
 
         if conditions is None:
             xtc = keras.ops.concatenate([x, t], axis=-1)
@@ -68,7 +63,7 @@ class FlowMatching(InferenceNetwork):
     ) -> Tensor | tuple[Tensor, Tensor]:
         steps = kwargs.get("steps", 100)
         z = keras.ops.copy(x)
-        t = keras.ops.ones((keras.ops.shape(x)[0], 1), dtype=x.dtype)
+        t = 1.0
         dt = -1.0 / steps
 
         if density:
@@ -101,7 +96,7 @@ class FlowMatching(InferenceNetwork):
     ) -> Tensor | tuple[Tensor, Tensor]:
         steps = kwargs.get("steps", 100)
         x = keras.ops.copy(z)
-        t = keras.ops.zeros((keras.ops.shape(x)[0], 1), dtype=x.dtype)
+        t = 0.0
         dt = 1.0 / steps
 
         if density:
@@ -147,7 +142,8 @@ class FlowMatching(InferenceNetwork):
         # TODO: should move this to worker-process somehow
         x0, x1 = optimal_transport(x0, x1, max_steps=int(1e4), regularization=0.01)
 
-        t = keras.random.uniform((keras.ops.shape(x0)[0], 1), seed=self.seed_generator)
+        t = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
+        t = expand_right_as(t, x0)
 
         x = t * x1 + (1 - t) * x0
 
