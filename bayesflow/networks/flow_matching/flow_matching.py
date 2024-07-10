@@ -11,7 +11,7 @@ from ..inference_network import InferenceNetwork
 
 @register_keras_serializable(package="bayesflow.networks")
 class FlowMatching(InferenceNetwork):
-    def __init__(self, subnet: str = "mlp", base_distribution: str = "normal", **kwargs):
+    def __init__(self, subnet: str = "resnet", base_distribution: str = "normal", **kwargs):
         super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
         self.subnet = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
         self.output_projector = keras.layers.Dense(units=None, bias_initializer="zeros", kernel_initializer="zeros")
@@ -23,13 +23,20 @@ class FlowMatching(InferenceNetwork):
 
         self.output_projector.units = xz_shape[-1]
 
-        xz = keras.ops.zeros(xz_shape)
-        if conditions_shape is None:
-            conditions = None
-        else:
-            conditions = keras.ops.zeros(conditions_shape)
+        input_shape = list(xz_shape)
 
-        self.call(xz, conditions=conditions, steps=1)
+        # time vector
+        input_shape[-1] += 1
+
+        if conditions_shape is not None:
+            input_shape[-1] += conditions_shape[-1]
+
+        input_shape = tuple(input_shape)
+
+        self.subnet.build(input_shape)
+
+        input_shape = self.subnet.compute_output_shape(input_shape)
+        self.output_projector.build(input_shape)
 
     def call(
         self,

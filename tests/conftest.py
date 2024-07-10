@@ -25,7 +25,7 @@ def batch_size(request):
 
 
 @pytest.fixture(scope="function")
-def coupling_flow():
+def coupling_flow(request):
     from bayesflow.networks import CouplingFlow
 
     return CouplingFlow(depth=2, subnet_kwargs=dict(depth=2, width=32))
@@ -40,7 +40,7 @@ def dataset(request):
 def flow_matching():
     from bayesflow.networks import FlowMatching
 
-    return FlowMatching(network_kwargs=dict(depth=2, width=32))
+    return FlowMatching(subnet="resnet", network_kwargs=dict(depth=2, width=32))
 
 
 @pytest.fixture(params=["coupling_flow", "flow_matching"], scope="function")

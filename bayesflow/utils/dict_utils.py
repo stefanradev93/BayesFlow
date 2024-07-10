@@ -106,7 +106,7 @@ def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int =
     An optional axis can be specified (default: last axis).
     """
     if not keys:
-        return
+        return None
 
     # ensure every key is present
     tensors = [data[key] for key in keys]

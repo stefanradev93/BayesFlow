@@ -12,7 +12,7 @@ class OnlineDataset(keras.utils.PyDataset):
     def __init__(self, simulator: Simulator, batch_size: int, **kwargs):
         super().__init__(**kwargs)
 
-        if kwargs.get("use_multiprocessing"):
+        if keras.backend.backend() == "torch" and kwargs.get("use_multiprocessing"):
             # keras workaround: https://github.com/keras-team/keras/issues/19346
             import multiprocessing as mp
 

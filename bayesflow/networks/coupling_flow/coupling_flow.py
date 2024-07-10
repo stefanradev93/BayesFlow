@@ -62,14 +62,8 @@ class CouplingFlow(InferenceNetwork):
     def build(self, xz_shape, conditions_shape=None):
         super().build(xz_shape)
 
-        xz = keras.ops.zeros(xz_shape)
-        if conditions_shape is None:
-            conditions = None
-        else:
-            conditions = keras.ops.zeros(conditions_shape)
-
-        # build nested layers with forward pass
-        self.call(xz, conditions=conditions)
+        for layer in self.invertible_layers:
+            layer.build(xz_shape=xz_shape, conditions_shape=conditions_shape)
 
     def call(
         self, xz: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs

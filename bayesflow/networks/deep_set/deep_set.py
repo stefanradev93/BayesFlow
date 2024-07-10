@@ -1,6 +1,6 @@
 import keras
 from keras import layers
-from keras.saving import register_keras_serializable, serialize_keras_object
+from keras.saving import register_keras_serializable, serialize_keras_object as serialize
 
 from bayesflow.types import Tensor
 from bayesflow.utils import keras_kwargs
@@ -71,38 +71,37 @@ class DeepSet(keras.Model):
         self.output_projector = layers.Dense(summary_dim, activation="linear")
         self.summary_dim = summary_dim
 
-    def call(self, input_set: Tensor, **kwargs) -> Tensor:
+    def build(self, input_shape):
+        self.equivariant_modules.build(input_shape)
+        input_shape = self.equivariant_modules.compute_output_shape(input_shape)
+        self.invariant_module.build(input_shape)
+        input_shape = self.invariant_module.compute_output_shape(input_shape)
+        self.output_projector.build(input_shape)
+
+    def call(self, x: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass of a learnable deep invariant transformation consisting of
         a sequence of equivariant transforms followed by an invariant transform.
 
-        Parameters
-        ----------
-        input_set : KerasTensor
-            Input set of shape (batch_size, ..., set_size, obs_dim)
+        :param x: Tensor of shape (batch_size, set_size, n)
+            The input set
 
-        Returns
-        -------
-        out : KerasTensor
-            Output representation of shape (batch_size, ..., set_size, obs_dim)
+        :return: Tensor of shape (batch_size, self.summary_dim)
+            Summary representation of the input set
+
         """
+        x = self.equivariant_modules(x, **kwargs)
+        x = self.invariant_module(x, **kwargs)
 
-        transformed_set = self.equivariant_modules(input_set, **kwargs)
-        set_representation = self.invariant_module(transformed_set, **kwargs)
-        set_representation = self.output_projector(set_representation)
-
-        return set_representation
-
-    def build(self, input_shape):
-        self.call(keras.ops.zeros(input_shape))
+        return self.output_projector(x)
 
     def get_config(self):
-        config = super().get_config()
-        config.update(
-            {
-                "invariant_module": serialize_keras_object(self.equivariant_modules),
-                "equivariant_fc": serialize_keras_object(self.invariant_module),
-                "output_projector": serialize_keras_object(self.output_projector),
-                "summary_dim": serialize_keras_object(self.summary_dim),
-            }
-        )
-        return config
+        base_config = super().get_config()
+
+        config = {
+            "invariant_module": serialize(self.equivariant_modules),
+            "equivariant_fc": serialize(self.invariant_module),
+            "output_projector": serialize(self.output_projector),
+            "summary_dim": serialize(self.summary_dim),
+        }
+
+        return base_config | config

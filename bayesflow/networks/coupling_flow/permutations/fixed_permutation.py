@@ -17,7 +17,7 @@ class FixedPermutation(InvertibleLayer):
             return self._inverse(xz)
         return self._forward(xz)
 
-    def build(self, input_shape: Shape) -> None:
+    def build(self, xz_shape: Shape, **kwargs) -> None:
         raise NotImplementedError
 
     def _forward(self, x: Tensor) -> (Tensor, Tensor):

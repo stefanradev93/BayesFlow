@@ -9,9 +9,11 @@ class InferenceNetwork(keras.Layer):
         super().__init__(**kwargs)
         self.base_distribution = find_distribution(base_distribution)
 
-    def build(self, input_shape):
-        super().build(input_shape)
-        self.base_distribution.build(input_shape)
+    def build(self, xz_shape, **kwargs):
+        self.base_distribution.build(xz_shape)
+
+    def compute_output_shape(self, xz_shape, **kwargs):
+        return xz_shape
 
     def call(self, xz: Tensor, inverse: bool = False, **kwargs) -> Tensor | tuple[Tensor, Tensor]:
         if inverse:
@@ -25,13 +27,7 @@ class InferenceNetwork(keras.Layer):
         raise NotImplementedError
 
     def sample(self, num_samples: int, conditions: Tensor = None, **kwargs) -> Tensor:
-        if conditions is None:
-            # Return shape of samples will be (num_samples, ...)
-            sample_shape = (num_samples,)
-        else:
-            # Return shape of samples will be (num_datasets, num_samples, ...)
-            sample_shape = (keras.ops.shape(conditions)[0], num_samples)
-        samples = self.base_distribution.sample(sample_shape)
+        samples = self.base_distribution.sample((num_samples,))
         samples = self(samples, conditions=conditions, inverse=True, density=False, **kwargs)
         return samples
 

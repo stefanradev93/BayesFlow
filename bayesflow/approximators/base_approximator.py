@@ -91,12 +91,21 @@ class BaseApproximator(keras.Model):
 
     # noinspect PyMethodOverriding
     def build(self, data_shapes: dict[str, Shape]):
-        data = {name: keras.ops.zeros(shape) for name, shape in data_shapes.items()}
-        self.build_from_data(data)
+        data = {key: keras.KerasTensor(value) for key, value in data_shapes.items()}
+
+        if self.summary_network is not None:
+            summary_variables = self.configurator.configure_summary_variables(data)
+            self.summary_network.build(summary_variables.shape)
+
+            data["summary_outputs"] = keras.KerasTensor(self.summary_network.compute_output_shape)
+
+        inference_conditions = self.configurator.configure_inference_conditions(data)
+        inference_variables = self.configurator.configure_inference_variables(data)
+
+        self.inference_network.build(inference_variables.shape, inference_conditions.shape)
 
     def build_from_data(self, data: dict[str, Tensor]):
-        self.compute_metrics(data, stage="training")
-        self.built = True
+        self.build({key: keras.ops.shape(value) for key, value in data.items()})
 
     def train_step(self, data: dict[str, Tensor]) -> dict[str, Tensor]:
         # we cannot provide a backend-agnostic implementation due to reliance on autograd
