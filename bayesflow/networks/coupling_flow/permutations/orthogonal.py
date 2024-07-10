@@ -18,10 +18,8 @@ class OrthogonalPermutation(InvertibleLayer):
         super().__init__(**kwargs)
         self.weight = None
 
-    def build(self, input_shape: Shape) -> None:
-        self.weight = self.add_weight(
-            shape=(input_shape[-1], input_shape[-1]), initializer="orthogonal", trainable=True
-        )
+    def build(self, xz_shape: Shape, **kwargs) -> None:
+        self.weight = self.add_weight(shape=(xz_shape[-1], xz_shape[-1]), initializer="orthogonal", trainable=True)
 
     def call(self, xz: Tensor, inverse: bool = False, **kwargs):
         if inverse:

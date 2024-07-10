@@ -1,7 +1,7 @@
 from keras import ops
 from keras.saving import register_keras_serializable
 
-from bayesflow.types import Tensor
+from bayesflow.types import Shape, Tensor
 from bayesflow.utils import keras_kwargs
 
 from .invertible_layer import InvertibleLayer
@@ -34,9 +34,9 @@ class ActNorm(InvertibleLayer):
         self.scale = None
         self.bias = None
 
-    def build(self, input_shape):
-        self.scale = self.add_weight(shape=(input_shape[-1],), initializer="ones", name="scale")
-        self.bias = self.add_weight(shape=(input_shape[-1],), initializer="zeros", name="bias")
+    def build(self, xz_shape: Shape, **kwargs):
+        self.scale = self.add_weight(shape=(xz_shape[-1],), initializer="ones", name="scale")
+        self.bias = self.add_weight(shape=(xz_shape[-1],), initializer="zeros", name="bias")
 
     def call(self, xz: Tensor, inverse: bool = False, **kwargs):
         if inverse:

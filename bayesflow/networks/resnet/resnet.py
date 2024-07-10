@@ -17,8 +17,20 @@ class ResNet(keras.Layer):
         self.hidden_layers = [keras.layers.Dense(width, activation) for _ in range(depth)]
 
     def build(self, input_shape):
-        # build nested layers with forward pass
-        self.call(keras.ops.zeros(input_shape))
+        self.input_layer.build(input_shape)
+        input_shape = self.input_layer.compute_output_shape(input_shape)
+        for layer in self.hidden_layers:
+            layer.build(input_shape)
+            input_shape = layer.compute_output_shape(input_shape)
+
+        self.output_layer.build(input_shape)
+
+    def compute_output_shape(self, input_shape):
+        input_shape = self.input_layer.compute_output_shape(input_shape)
+        for layer in self.hidden_layers:
+            input_shape = layer.compute_output_shape(input_shape)
+
+        return self.output_layer.compute_output_shape(input_shape)
 
     def call(self, x: Tensor, **kwargs) -> Tensor:
         x = self.input_layer(x)
