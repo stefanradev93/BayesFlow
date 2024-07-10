@@ -42,7 +42,7 @@ class FlowMatching(InferenceNetwork):
             return self._inverse(xz, conditions=conditions, **kwargs)
         return self._forward(xz, conditions=conditions, **kwargs)
 
-    def velocity(self, x: Tensor, t: int | float | Tensor, conditions: Tensor = None) -> Tensor:
+    def velocity(self, x: Tensor, t: int | float | Tensor, conditions: Tensor = None, **kwargs) -> Tensor:
         if not keras.ops.is_tensor(t):
             t = keras.ops.convert_to_tensor(t, dtype=x.dtype)
 
@@ -58,7 +58,7 @@ class FlowMatching(InferenceNetwork):
         else:
             xtc = keras.ops.concatenate([x, t, conditions], axis=-1)
 
-        return self.output_projector(self.subnet(xtc))
+        return self.output_projector(self.subnet(xtc, **kwargs))
 
     def _forward(
         self, x: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
@@ -72,7 +72,7 @@ class FlowMatching(InferenceNetwork):
             trace = keras.ops.zeros(keras.ops.shape(x)[0], dtype=x.dtype)
 
             def f(arg):
-                return self.velocity(arg, t, conditions)
+                return self.velocity(arg, t, conditions, **kwargs)
 
             for _ in range(steps):
                 v, tr = jacobian_trace(f, z, kwargs.get("trace_steps", 5))
@@ -87,7 +87,7 @@ class FlowMatching(InferenceNetwork):
             return z, log_density
         else:
             for _ in range(steps):
-                v = self.velocity(z, t, conditions)
+                v = self.velocity(z, t, conditions, **kwargs)
                 z += dt * v
                 t += dt
 
