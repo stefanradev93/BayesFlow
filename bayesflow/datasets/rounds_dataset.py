@@ -12,7 +12,7 @@ class RoundsDataset(keras.utils.PyDataset):
     def __init__(self, simulator: Simulator, batch_size: int, batches_per_epoch: int, epochs_per_round: int, **kwargs):
         super().__init__(**kwargs)
 
-        if kwargs.get("use_multiprocessing"):
+        if keras.backend.backend() == "torch" and kwargs.get("use_multiprocessing"):
             # keras workaround: https://github.com/keras-team/keras/issues/19346
             import multiprocessing as mp
 
