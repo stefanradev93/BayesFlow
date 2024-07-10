@@ -4,7 +4,7 @@ from keras.saving import (
 )
 
 from bayesflow.types import Tensor
-from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, optimal_transport
+from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, optimal_transport, tile_axis
 
 from ..inference_network import InferenceNetwork
 
@@ -50,6 +50,8 @@ class FlowMatching(InferenceNetwork):
             t = keras.ops.full((keras.ops.shape(x)[0],), t, dtype=keras.ops.dtype(x))
 
         t = expand_right_as(t, x)
+        if keras.ops.ndim(x) == 3:
+            t = tile_axis(t, axis=1, n=keras.ops.shape(x)[1])
 
         if conditions is None:
             xtc = keras.ops.concatenate([x, t], axis=-1)
