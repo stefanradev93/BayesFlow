@@ -5,6 +5,7 @@ from .dict_utils import (
     filter_kwargs,
     keras_kwargs,
     stack_dicts,
+    process_output,
 )
 
 from .git import (

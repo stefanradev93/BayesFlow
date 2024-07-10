@@ -10,7 +10,7 @@ import warnings
 from bayesflow.configurators import BaseConfigurator
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import keras_kwargs, expand_tile
+from bayesflow.utils import keras_kwargs, expand_tile, process_output
 
 
 @register_keras_serializable(package="bayesflow.approximators")
@@ -43,10 +43,10 @@ class BaseApproximator(keras.Model):
         samples = self.inference_network.sample(num_samples, conditions=conditions)
         samples = self.configurator.deconfigure(samples)
 
-        if numpy:
-            samples = {key: keras.ops.convert_to_numpy(value) for key, value in samples.items()}
+        if self.summary_network is not None:
+            samples["summaries"] = data["summary_outputs"]
 
-        return samples
+        return process_output(samples, convert_to_numpy=numpy)
 
     def log_prob(self, data: dict[str, Tensor], numpy: bool = False) -> Tensor:
         if data is None:

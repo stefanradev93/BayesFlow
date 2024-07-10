@@ -1,4 +1,3 @@
-from .benchmark import Benchmark
 from .bernoulli_glm_raw import BernoulliGLMRaw
 from .bernoulli_glm import BernoulliGLM
 from .gaussian_linear_uniform import GaussianLinearUniform

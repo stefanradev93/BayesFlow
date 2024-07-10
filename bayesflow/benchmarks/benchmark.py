@@ -30,4 +30,4 @@ class Benchmark:
     def __call__(self):
         prior_draws = self.prior()
         observables = self.observation_model(prior_draws)
-        return dict(parameters=prior_draws, observables=observables)
+        return dict(parameters=prior_draws.astype(np.float32), observables=observables.astype(np.float32))
