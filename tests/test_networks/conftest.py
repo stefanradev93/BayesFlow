@@ -35,13 +35,6 @@ def random_set(batch_size, set_size, num_features):
     return keras.random.normal((batch_size, set_size, num_features))
 
 
-@pytest.fixture()
-def resnet():
-    from bayesflow.networks import ResNet
-
-    return ResNet()
-
-
 @pytest.fixture(params=[2, 3])
 def set_size(request):
     return request.param
