@@ -11,7 +11,7 @@ from ..inference_network import InferenceNetwork
 
 @register_keras_serializable(package="bayesflow.networks")
 class FlowMatching(InferenceNetwork):
-    def __init__(self, subnet: str = "resnet", base_distribution: str = "normal", **kwargs):
+    def __init__(self, subnet: str = "mlp", base_distribution: str = "normal", **kwargs):
         super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
         self.subnet = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
         self.output_projector = keras.layers.Dense(units=None, bias_initializer="zeros", kernel_initializer="zeros")
