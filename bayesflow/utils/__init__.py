@@ -5,6 +5,7 @@ from .dict_utils import (
     filter_kwargs,
     keras_kwargs,
     stack_dicts,
+    process_output,
 )
 
 from .git import (
@@ -27,4 +28,6 @@ from .tensor_utils import (
     expand_right,
     expand_right_as,
     expand_right_to,
+    tile_axis,
+    expand_tile,
 )

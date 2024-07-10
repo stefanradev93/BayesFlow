@@ -9,7 +9,7 @@ from bayesflow.types import Tensor
 class ConfigurableHiddenBlock(keras.layers.Layer):
     def __init__(
         self,
-        units: int = 256,
+        units: int = 128,
         activation: str = "mish",
         kernel_initializer: str = "he_normal",
         residual: bool = True,

@@ -20,11 +20,11 @@ class SummaryNetwork(keras.Layer):
 
     def call(self, x: Tensor, **kwargs) -> Tensor:
         """
-        :param x: Tensor of shape (batch_size, set_size, input_dim)
+        :param x: Tensor of shape (batch_size, ..., input_dim)
 
         :param kwargs: Additional keyword arguments.
 
-        :return: Tensor of shape (batch_size, output_dim)
+        :return: Tensor of shape (batch_size, ..., output_dim)
         """
         raise NotImplementedError
 

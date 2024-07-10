@@ -1,5 +1,7 @@
+import logging
 import inspect
 import keras
+from keras import ops
 import numpy as np
 
 from collections.abc import Sequence
@@ -99,12 +101,12 @@ def filter_kwargs(kwargs: dict[str, any], f: callable) -> dict[str, any]:
     return kwargs
 
 
-def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int = -1) -> Tensor:
+def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int = -1) -> Tensor | None:
     """Filters and then concatenates all tensors from data using only keys from the given sequence.
     An optional axis can be specified (default: last axis).
     """
     if not keys:
-        return None
+        return
 
     # ensure every key is present
     tensors = [data[key] for key in keys]
@@ -116,7 +118,7 @@ def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int =
         raise ValueError(f"Cannot trivially concatenate tensors {keys} with shapes {shapes}") from e
 
 
-def keras_kwargs(kwargs: dict):
+def keras_kwargs(kwargs: dict) -> dict:
     """Keep dictionary keys that do not end with _kwargs. Used for propagating
     custom keyword arguments in custom models that inherit from keras.Model.
     """
@@ -147,3 +149,26 @@ def stack_dicts(data: list[dict[str, Tensor]], axis: int = 0) -> dict[str, Tenso
         result[key] = keras.ops.stack([d[key] for d in data], axis=axis)
 
     return result
+
+
+def process_output(outputs: dict[str, Tensor], convert_to_numpy: bool = True) -> dict[str, Tensor]:
+    """Utility function to apply common post-processing steps to the outputs of an approximator."""
+
+    # Remove trailing first axis for single data sets
+    outputs = {k: ops.squeeze(v, axis=0) if ops.shape(v)[0] == 1 else v for k, v in outputs.items()}
+
+    # Warn if any NaNs present in output
+    for k, v in outputs.items():
+        nan_mask = ops.isnan(v)
+        if ops.any(nan_mask):
+            logging.warning(f"A total of {ops.sum(nan_mask)} NaN values found for output {k}.")
+
+    # Warn if any inf present in output
+    for k, v in outputs.items():
+        inf_mask = ops.isinf(v)
+        if ops.any(inf_mask):
+            logging.warning(f"A total of {ops.sum(inf_mask)} inf values found for output {k}.")
+
+    if convert_to_numpy:
+        outputs = {k: ops.convert_to_numpy(v) for k, v in outputs.items()}
+    return outputs

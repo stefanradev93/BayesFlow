@@ -6,6 +6,7 @@ from . import (
     distributions,
     networks,
     simulators,
+    benchmarks,
     utils,
 )
 
