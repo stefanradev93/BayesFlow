@@ -81,3 +81,9 @@ class MLP(keras.Layer):
         for layer in self.res_blocks:
             x = layer(x, training=kwargs.get("training", False))
         return x
+
+    def compute_output_shape(self, input_shape):
+        for layer in self.res_blocks:
+            input_shape = layer.compute_output_shape(input_shape)
+
+        return input_shape
