@@ -27,7 +27,11 @@ class InferenceNetwork(keras.Layer):
         raise NotImplementedError
 
     def sample(self, num_samples: int, conditions: Tensor = None, **kwargs) -> Tensor:
-        samples = self.base_distribution.sample((num_samples,))
+        if conditions is None:
+            sample_shape = (num_samples,)
+        else:
+            sample_shape = (keras.ops.shape(conditions)[0], num_samples)
+        samples = self.base_distribution.sample(sample_shape)
         samples = self(samples, conditions=conditions, inverse=True, density=False, **kwargs)
         return samples
 
