@@ -1,6 +1,7 @@
 import keras
 import pytest
-from bayesflow.configurators import Configurator
+
+from bayesflow.configurators import Configurator, TupleConfigurator
 
 
 @pytest.fixture(params=[2, 3])
@@ -51,4 +52,23 @@ def configurator(request, test_params):
         inference_variables=test_params["inference_variables"],
         inference_conditions=test_params["inference_conditions"],
         summary_variables=test_params["summary_variables"],
+    )
+
+
+@pytest.fixture()
+def random_multisource_data(request, batch_size, set_size, num_features):
+    data = {
+        "var1": keras.random.normal((batch_size, set_size, num_features)),
+        "var2": keras.random.normal((batch_size, set_size, num_features)),
+        "var3": keras.random.normal((batch_size, 2 * set_size, num_features + 1)),
+    }
+    return data
+
+
+@pytest.fixture()
+def tuple_configurator(request, test_params):
+    return TupleConfigurator(
+        inference_variables=["var1"],
+        inference_conditions=["var2"],
+        summary_variables=["var2", "var3"],
     )

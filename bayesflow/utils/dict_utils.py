@@ -1,10 +1,10 @@
-import logging
 import inspect
-import keras
-from keras import ops
-import numpy as np
-
+import logging
 from collections.abc import Sequence
+
+import keras
+import numpy as np
+from keras import ops
 
 from bayesflow.types import Shape, Tensor
 
@@ -116,6 +116,14 @@ def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int =
     except ValueError as e:
         shapes = [t.shape for t in tensors]
         raise ValueError(f"Cannot trivially concatenate tensors {keys} with shapes {shapes}") from e
+
+
+def filter_tuple(data: dict[str, Tensor], keys: Sequence[str]) -> tuple[Tensor, ...]:
+    """Filters all tensors from data using only keys from the given sequence and returns them as a tuple."""
+    if not keys:
+        return ()
+
+    return tuple(data[key] for key in keys)
 
 
 def keras_kwargs(kwargs: dict) -> dict:

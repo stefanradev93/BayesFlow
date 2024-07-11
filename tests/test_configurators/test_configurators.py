@@ -38,3 +38,10 @@ def test_summary_variables_shape(random_data, configurator):
         filtered_data = configurator.configure_summary_variables(random_data)
         expected = keras.ops.concatenate([random_data[v] for v in configurator.summary_variables], axis=-1)
         assert filtered_data.shape == expected.shape
+
+
+def test_tuple_summary_variables_shape(random_multisource_data, tuple_configurator):
+    # Tests for correct output shape when querying summary variables as tuples (e.g., for fusion summary nets)
+    filtered_data = tuple_configurator.configure_summary_variables(random_multisource_data)
+    expected_len = len(tuple_configurator.summary_variables)
+    assert isinstance(filtered_data, tuple) and len(filtered_data) == expected_len

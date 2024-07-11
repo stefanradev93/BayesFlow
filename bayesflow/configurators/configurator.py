@@ -1,7 +1,6 @@
 import keras
 from keras.saving import register_keras_serializable
 
-
 from bayesflow.types import Tensor
 from bayesflow.utils import filter_concatenate
 
