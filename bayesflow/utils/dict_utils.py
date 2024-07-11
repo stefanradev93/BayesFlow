@@ -96,6 +96,11 @@ def batched_call(f: callable, batch_shape: Shape, *args: Tensor, **kwargs: Tenso
 def filter_kwargs(kwargs: dict[str, any], f: callable) -> dict[str, any]:
     """Filter keyword arguments for f"""
     signature = inspect.signature(f)
+
+    if inspect.Parameter.VAR_KEYWORD in signature.parameters:
+        # the signature has **kwargs
+        return kwargs
+
     kwargs = {key: value for key, value in kwargs.items() if key in signature.parameters}
 
     return kwargs
