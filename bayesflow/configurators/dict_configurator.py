@@ -12,6 +12,3 @@ class DictConfigurator(Configurator):
 
     def configure_summary_variables(self, data: dict[str, Tensor]) -> dict[str, Tensor] | None:
         return {k: v for k, v in data.items() if k in self.summary_variables}
-
-    def deconfigure(self, data: Tensor) -> dict[str, Tensor]:
-        pass
