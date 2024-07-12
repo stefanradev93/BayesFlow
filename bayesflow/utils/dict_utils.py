@@ -118,14 +118,6 @@ def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int =
         raise ValueError(f"Cannot trivially concatenate tensors {keys} with shapes {shapes}") from e
 
 
-def filter_tuple(data: dict[str, Tensor], keys: Sequence[str]) -> tuple[Tensor, ...]:
-    """Filters all tensors from data using only keys from the given sequence and returns them as a tuple."""
-    if not keys:
-        return ()
-
-    return tuple(data[key] for key in keys)
-
-
 def keras_kwargs(kwargs: dict) -> dict:
     """Keep dictionary keys that do not end with _kwargs. Used for propagating
     custom keyword arguments in custom models that inherit from keras.Model.

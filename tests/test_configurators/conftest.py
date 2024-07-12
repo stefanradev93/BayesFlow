@@ -1,7 +1,7 @@
 import keras
 import pytest
 
-from bayesflow.configurators import Configurator, TupleConfigurator
+from bayesflow.configurators import Configurator, DictConfigurator
 
 
 @pytest.fixture(params=[2, 3])
@@ -66,8 +66,8 @@ def random_multisource_data(request, batch_size, set_size, num_features):
 
 
 @pytest.fixture()
-def tuple_configurator(request, test_params):
-    return TupleConfigurator(
+def dict_configurator(request, test_params):
+    return DictConfigurator(
         inference_variables=["var1"],
         inference_conditions=["var2"],
         summary_variables=["var2", "var3"],

@@ -3,7 +3,6 @@ from .dict_utils import (
     concatenate_dicts,
     filter_concatenate,
     filter_kwargs,
-    filter_tuple,
     keras_kwargs,
     process_output,
     stack_dicts,

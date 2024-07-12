@@ -40,8 +40,10 @@ def test_summary_variables_shape(random_data, configurator):
         assert filtered_data.shape == expected.shape
 
 
-def test_tuple_summary_variables_shape(random_multisource_data, tuple_configurator):
-    # Tests for correct output shape when querying summary variables as tuples (e.g., for fusion summary nets)
-    filtered_data = tuple_configurator.configure_summary_variables(random_multisource_data)
-    expected_len = len(tuple_configurator.summary_variables)
-    assert isinstance(filtered_data, tuple) and len(filtered_data) == expected_len
+def test_dict_summary_variables_shape(random_multisource_data, dict_configurator):
+    # Tests for correct output shape when querying summary variables as dictionaries (e.g., for fusion summary nets)
+    filtered_data = dict_configurator.configure_summary_variables(random_multisource_data)
+    expected_len = len(dict_configurator.summary_variables)
+
+    # Multiple simple sanity checks
+    assert isinstance(filtered_data, dict) and len(filtered_data) == expected_len

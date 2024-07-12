@@ -47,3 +47,10 @@ class SummaryNetwork(keras.Layer):
         metrics["outputs"] = outputs
 
         return metrics
+
+
+class FusionSummaryNetwork(keras.Layer):
+    def __init__(self, summary_networks: list[SummaryNetwork], **kwargs):
+        super().__init__(**keras_kwargs(kwargs))
+
+        self.summary_networks = summary_networks
