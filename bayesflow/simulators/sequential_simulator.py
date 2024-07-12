@@ -5,12 +5,12 @@ from bayesflow.types import Shape, Tensor
 
 from .simulator import Simulator
 from .composite_simulator import CompositeSimulator
-from .functional_simulator import FunctionalSimulator
+from .lambda_simulator import LambdaSimulator
 
 
 class SequentialSimulator(Simulator):
     def __init__(self, sample_fns: Sequence[callable], **kwargs):
-        self.inner = CompositeSimulator([FunctionalSimulator(fn, **kwargs) for fn in sample_fns])
+        self.inner = CompositeSimulator([LambdaSimulator(fn, **kwargs) for fn in sample_fns])
 
     def sample(self, batch_shape: Shape, **kwargs) -> dict[str, Tensor]:
         data = self.inner.sample(batch_shape, **kwargs)

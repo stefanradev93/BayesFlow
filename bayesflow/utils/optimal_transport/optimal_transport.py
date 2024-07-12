@@ -50,7 +50,7 @@ def optimal_transport(
             cost_matrix = find_cost(cost, x1, x2)
             transport_plan = sinkhorn_log(cost_matrix, **kwargs)
             indices = keras.random.categorical(transport_plan, num_samples=1, seed=seed)
-            indices = keras.ops.squeeze(indices)
+            indices = keras.ops.squeeze(indices, axis=1)
             x1 = keras.ops.take(x1, indices, axis=0)
         case "random":
             m = keras.ops.shape(x2)[0]

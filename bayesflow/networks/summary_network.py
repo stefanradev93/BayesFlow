@@ -11,10 +11,12 @@ class SummaryNetwork(keras.Layer):
 
         self.base_distribution = find_distribution(base_distribution)
 
-    def build(self, input_shape, **kwargs):
+    def build(self, input_shape):
+        super().build(input_shape)
+
         if self.base_distribution is not None:
-            input_shape = self.compute_output_shape(input_shape)
-            self.base_distribution.build(input_shape)
+            output_shape = keras.ops.shape(self.call(keras.ops.zeros(input_shape)))
+            self.base_distribution.build(output_shape)
 
     def call(self, x: Tensor, **kwargs) -> Tensor:
         """

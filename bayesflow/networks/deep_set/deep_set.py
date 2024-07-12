@@ -72,11 +72,7 @@ class DeepSet(keras.Model):
         self.summary_dim = summary_dim
 
     def build(self, input_shape):
-        self.equivariant_modules.build(input_shape)
-        input_shape = self.equivariant_modules.compute_output_shape(input_shape)
-        self.invariant_module.build(input_shape)
-        input_shape = self.invariant_module.compute_output_shape(input_shape)
-        self.output_projector.build(input_shape)
+        self.call(keras.ops.zeros(input_shape))
 
     def call(self, x: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass of a learnable deep invariant transformation consisting of
