@@ -45,5 +45,4 @@ def test_dict_summary_variables_shape(random_multisource_data, dict_configurator
     filtered_data = dict_configurator.configure_summary_variables(random_multisource_data)
     expected_len = len(dict_configurator.summary_variables)
 
-    # Multiple simple sanity checks
     assert isinstance(filtered_data, dict) and len(filtered_data) == expected_len
