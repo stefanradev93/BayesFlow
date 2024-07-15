@@ -1,6 +1,8 @@
 from .dict_utils import (
     batched_call,
     concatenate_dicts,
+    convert_args,
+    convert_kwargs,
     filter_concatenate,
     filter_kwargs,
     keras_kwargs,
