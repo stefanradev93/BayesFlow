@@ -1,4 +1,3 @@
-from functools import wraps
 import keras
 import numpy as np
 
@@ -22,40 +21,77 @@ class LambdaSimulator(Simulator):
         # try to use only valid keyword arguments
         kwargs = filter_kwargs(kwargs, self.sample_fn)
 
-        sample_fn = self.sample_fn
-        if self.is_numpy:
-            sample_fn = self._convert_numpy(sample_fn)
+        match self.is_batched, self.is_numpy:
+            case (True, False):
+                # output is already batched and uses tensors: we don't have to do anything
+                data = self.sample_fn(batch_shape, **kwargs)
+            case (False, False):
+                # output uses tensors, but is not batched: convert output to batched
+                # note: we have to use a for loop instead of the vmap api to preserve randomness
+                tensor_kwargs = {key: value for key, value in kwargs.items() if keras.ops.is_tensor(value)}
+                other_kwargs = {key: value for key, value in kwargs.items() if key not in tensor_kwargs}
 
-        if not self.is_batched:
-            sample_fn = self._convert_batched(sample_fn)
+                # get a flat list of index tuples
+                indices = np.indices(batch_shape)
+                indices = np.reshape(indices, (len(batch_shape), -1)).T
+                indices = indices.tolist()
+                indices = [tuple(index) for index in indices]
 
-        return sample_fn(batch_shape, **kwargs)
+                data = []
 
-    def _convert_batched(self, sample_fn: callable) -> callable:
-        # use for loop, not vmap, because vmap does not preserve randomness for numpy
-        @wraps(sample_fn)
-        def wrapper(batch_shape, *args, **kwargs):
-            batch_size = np.prod(batch_shape)
-            data = []
-            for i in range(batch_size):
-                args_i = [arg[i] for arg in args]
-                kwargs_i = {key: value[i] for key, value in kwargs.items()}
-                data_i = sample_fn(*args_i, **kwargs_i)
-                data.append(data_i)
-            data = stack_dicts(data)
+                for index in indices:
+                    kwargs = {key: value[index] for key, value in tensor_kwargs.items()} | other_kwargs
+                    data.append(self.sample_fn(**kwargs))
 
-            return data
+                data = stack_dicts(data)
 
-        return wrapper
+                # restore batch shape
+                data = {
+                    key: keras.ops.reshape(value, batch_shape + keras.ops.shape(value)[1:])
+                    for key, value in data.items()
+                }
+            case (True, True):
+                # output is batched, but does not use tensors: convert input/output
+                kwargs = {key: keras.ops.convert_to_numpy(value) for key, value in kwargs.items()}
+                data = self.sample_fn(batch_shape, **kwargs)
+                data = {key: keras.ops.convert_to_tensor(value, dtype="float32") for key, value in data.items()}
+            case (False, True):
+                # output is neither batched nor using tensors: do everything
+                # note: This is very similar to the other batched=False case.
+                # We do not apply DRY here since we only repeat ourselves once.
+                # Split this into functions if it comes up more often.
+                tensor_kwargs = {
+                    key: keras.ops.convert_to_numpy(value)
+                    for key, value in kwargs.items()
+                    if keras.ops.is_tensor(value)
+                }
+                other_kwargs = {key: value for key, value in kwargs.items() if key not in tensor_kwargs}
 
-    def _convert_numpy(self, sample_fn: callable) -> callable:
-        @wraps(sample_fn)
-        def wrapper(*args, **kwargs):
-            # convert to numpy because numpy functions expect numpy arguments
-            args = [keras.ops.convert_to_numpy(arg) for arg in args]
-            kwargs = {key: keras.ops.convert_to_numpy(value) for key, value in kwargs.items()}
-            data = sample_fn(*args, **kwargs)
-            # convert to float32 to avoid 64-bit tensors on x64 systems (numpy default)
-            return {key: keras.ops.convert_to_tensor(value, dtype="float32") for key, value in data.items()}
+                # get a flat list of index tuples
+                indices = np.indices(batch_shape)
+                indices = np.reshape(indices, (len(batch_shape), -1)).T
+                indices = indices.tolist()
+                indices = [tuple(index) for index in indices]
 
-        return wrapper
+                data = []
+                for index in indices:
+                    kwargs = {key: value[index] for key, value in tensor_kwargs.items()} | other_kwargs
+                    data.append(self.sample_fn(**kwargs))
+
+                data = stack_dicts(data)
+
+                # convert to tensors
+                data = {key: keras.ops.convert_to_tensor(value, dtype="float32") for key, value in data.items()}
+
+                # restore batch shape
+                data = {
+                    key: keras.ops.reshape(value, batch_shape + keras.ops.shape(value)[1:])
+                    for key, value in data.items()
+                }
+            case _:
+                # not reachable
+                raise RuntimeError(
+                    f"Unexpected value for is_batched ({self.is_batched}) or is_numpy ({self.is_numpy})."
+                )
+
+        return data
