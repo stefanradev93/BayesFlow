@@ -31,7 +31,7 @@ class Simulator:
         while not result or keras.ops.shape(next(iter(result.values())))[axis] < batch_shape[axis]:
             samples = self.sample(sample_shape, **kwargs)
             accept_mask = condition(samples)
-            accept_mask = keras.ops.convert_to_tensor(accept_mask, dtype="bool")
+            accept_mask = keras.ops.cast(accept_mask, "bool")
 
             if not keras.ops.any(accept_mask):
                 continue

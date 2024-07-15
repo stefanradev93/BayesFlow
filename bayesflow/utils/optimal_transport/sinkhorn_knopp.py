@@ -57,7 +57,7 @@ def sinkhorn_log(
         marginals = keras.ops.sum(keras.ops.exp(log_plan, axis=0))
         deviations = keras.ops.abs(marginals - 1.0)
         badness = 100.0 * keras.ops.max(deviations)
-        badness = keras.ops.convert_to_tensor(badness, dtype="int32")
+        badness = keras.ops.cast(badness, dtype="int32")
 
         logging.warning(f"Sinkhorn-Knopp did not converge after {max_steps} steps (badness: {badness}%).")
 
