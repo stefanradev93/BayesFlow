@@ -1,6 +1,7 @@
 from .coupling_flow import CouplingFlow
 from .deep_set import DeepSet
 from .flow_matching import FlowMatching
+from .fusion import LateFusionSummaryNetwork
 from .inference_network import InferenceNetwork
 from .mlp import MLP
 from .lstnet import LSTNet
