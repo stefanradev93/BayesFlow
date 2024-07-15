@@ -6,7 +6,7 @@ from bayesflow.utils import find_distribution, keras_kwargs
 
 
 class SummaryNetwork(keras.Layer):
-    def __init_(self, base_distribution: str = "normal", **kwargs):
+    def __init__(self, base_distribution: str = "normal", **kwargs):
         super().__init__(**keras_kwargs(kwargs))
 
         self.base_distribution = find_distribution(base_distribution)

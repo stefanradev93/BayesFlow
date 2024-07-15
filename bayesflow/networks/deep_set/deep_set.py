@@ -4,7 +4,6 @@ from keras.saving import register_keras_serializable, serialize_keras_object as 
 
 
 from bayesflow.types import Tensor
-from bayesflow.utils import keras_kwargs
 from .invariant_module import InvariantModule
 from .equivariant_module import EquivariantModule
 
@@ -46,7 +45,7 @@ class DeepSet(SummaryNetwork):
         #TODO
         """
 
-        super().__init__(**keras_kwargs(kwargs))
+        super().__init__(**kwargs)
 
         # Stack of equivariant modules for a many-to-many learnable transformation
         self.equivariant_modules = keras.Sequential()

@@ -3,7 +3,6 @@ from keras import layers, Sequential
 from keras.saving import register_keras_serializable
 
 from bayesflow.types import Tensor
-from bayesflow.utils import keras_kwargs
 
 from .skip_recurrent import SkipRecurrentNet
 from ..mlp import MLP
@@ -39,7 +38,7 @@ class LSTNet(SummaryNetwork):
         skip_steps: int = 4,
         **kwargs,
     ):
-        super().__init__(**keras_kwargs(kwargs))
+        super().__init__(**kwargs)
 
         # Convolutional backbone -> can be extended with inception-like structure
         if not isinstance(filters, (list, tuple)):
