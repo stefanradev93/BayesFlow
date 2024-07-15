@@ -86,6 +86,7 @@ class DeepSet(SummaryNetwork):
         self.summary_dim = summary_dim
 
     def build(self, input_shape):
+        super().build(input_shape)
         self.call(keras.ops.zeros(input_shape))
 
     def call(self, x: Tensor, **kwargs) -> Tensor:
