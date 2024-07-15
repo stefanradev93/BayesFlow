@@ -11,6 +11,14 @@ from ..inference_network import InferenceNetwork
 
 @register_keras_serializable(package="bayesflow.networks")
 class FlowMatching(InferenceNetwork):
+    """Implements Optimal Transport Flow Matching, originally introduced as Rectified Flow,
+    with ideas incorporated from [1-3].
+
+    [1] Rectified Flow: arXiv:2209.03003
+    [2] Flow Matching: arXiv:2210.02747
+    [3] Optimal Transport Flow Matching: arXiv:2302.00482
+    """
+
     def __init__(self, subnet: str = "mlp", base_distribution: str = "normal", **kwargs):
         super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
         self.subnet = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
