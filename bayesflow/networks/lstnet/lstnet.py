@@ -6,7 +6,7 @@ from bayesflow.types import Tensor
 from bayesflow.utils import keras_kwargs
 
 from .skip_recurrent import SkipRecurrentNet
-from ...networks import MLP
+from ..mlp import MLP
 
 
 @register_keras_serializable(package="bayesflow.networks.lstnet")
