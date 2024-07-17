@@ -27,7 +27,9 @@ class BaseApproximator(keras.Model):
         self.summary_network = summary_network
         self.configurator = configurator
 
-    def sample(self, num_samples: int = 1, data: dict[str, Tensor] = None, numpy: bool = False) -> dict[str, Tensor]:
+    def sample(self, batch_shape: Shape, data: dict[str, Tensor] = None, numpy: bool = False) -> dict[str, Tensor]:
+        num_datasets, num_samples = batch_shape
+
         if data is None:
             data = {}
         else:
@@ -37,10 +39,14 @@ class BaseApproximator(keras.Model):
             data["summary_variables"] = self.configurator.configure_summary_variables(data)
             data["summary_outputs"] = self.summary_network(data["summary_variables"])
 
-        conditions = self.configurator.configure_inference_conditions(data)
-        conditions = expand_tile(conditions, axis=1, n=num_samples)
+        inference_conditions = self.configurator.configure_inference_conditions(data)
 
-        samples = self.inference_network.sample(num_samples, conditions=conditions)
+        # TODO: do not assume this is a tensor
+        # TODO: do not rely on ndim == 2 vs ndim == 3 (i.e., allow multiple feature dimensions for conditions)
+        if inference_conditions is not None and keras.ops.ndim(inference_conditions) == 2:
+            inference_conditions = expand_tile(inference_conditions, axis=1, n=num_samples)
+
+        samples = self.inference_network.sample(batch_shape, conditions=inference_conditions)
         samples = self.configurator.deconfigure(samples)
 
         if self.summary_network is not None:
