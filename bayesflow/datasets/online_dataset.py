@@ -9,7 +9,7 @@ class OnlineDataset(keras.utils.PyDataset):
     A dataset that is generated on-the-fly.
     """
 
-    def __init__(self, simulator: Simulator, batch_size: int, **kwargs):
+    def __init__(self, simulator: Simulator, batch_size: int, collate_fn: callable = None, **kwargs):
         super().__init__(**kwargs)
 
         if keras.backend.backend() == "torch" and kwargs.get("use_multiprocessing"):
@@ -18,11 +18,13 @@ class OnlineDataset(keras.utils.PyDataset):
 
             mp.set_start_method("spawn", force=True)
 
-        self.simulator = simulator
         self.batch_size = batch_size
+        self.collate_fn = collate_fn or (lambda x: x)
+        self.simulator = simulator
 
     def __getitem__(self, item: int) -> dict[str, Tensor]:
-        return self.simulator.sample((self.batch_size,))
+        samples = self.simulator.sample((self.batch_size,))
+        return self.collate_fn(samples)
 
     @property
     def num_batches(self):

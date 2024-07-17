@@ -16,7 +16,10 @@ from .git import (
     repo_url,
 )
 
-from .io import warning
+from .io import (
+    find_maximum_batch_size,
+    warning,
+)
 
 from .jacobian_trace import jacobian_trace
 
