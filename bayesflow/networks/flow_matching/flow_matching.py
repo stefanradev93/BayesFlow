@@ -141,30 +141,20 @@ class FlowMatching(InferenceNetwork):
 
             return x
 
-    def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
-        base_metrics = super().compute_metrics(data, stage=stage)
+    def compute_metrics(self, x1: Tensor, conditions: Tensor = None, stage: str = "training") -> dict[str, Tensor]:
+        base_metrics = super().compute_metrics(x1, conditions=conditions, stage=stage)
 
-        x1 = data["inference_variables"]
-        c = data.get("inference_conditions")
+        batch_size = keras.ops.shape(x1)[0]
+        x0 = self.base_distribution.sample((batch_size,))
 
-        if not self.built:
-            # TODO: the base distribution is not yet built, but we need to sample from it (see below)
-            #  ideally, we want to build automatically before this method is called
-            xz_shape = keras.ops.shape(x1)
-            conditions_shape = None if c is None else keras.ops.shape(c)
-            self.build(xz_shape, conditions_shape)
-
-        x0 = self.base_distribution.sample((keras.ops.shape(x1)[0],))
-
-        # TODO: should move this to worker-process somehow
         x0, x1 = optimal_transport(x0, x1, max_steps=int(1e4), regularization=0.01, seed=self.seed_generator)
 
-        t = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
+        t = keras.random.uniform((batch_size, 1), seed=self.seed_generator)
         t = expand_right_as(t, x0)
 
         x = t * x1 + (1 - t) * x0
 
-        predicted_velocity = self.velocity(x, t, c)
+        predicted_velocity = self.velocity(x, t, conditions)
         target_velocity = x1 - x0
 
         loss = keras.losses.mean_squared_error(target_velocity, predicted_velocity)
