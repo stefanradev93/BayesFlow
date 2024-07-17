@@ -9,44 +9,6 @@ from collections.abc import Sequence
 from bayesflow.types import Shape, Tensor
 
 
-def convert_kwargs(f, *args, **kwargs) -> dict[str, any]:
-    """Convert positional and keyword arguments to just keyword arguments for f"""
-    if not args:
-        return kwargs
-
-    signature = inspect.signature(f)
-
-    parameters = dict(zip(signature.parameters, args))
-
-    for name, value in kwargs.items():
-        if name in parameters:
-            raise TypeError(f"{f.__name__}() got multiple arguments for argument '{name}'")
-
-        parameters[name] = value
-
-    return parameters
-
-
-def convert_args(f, *args, **kwargs) -> tuple[any, ...]:
-    """Convert positional and keyword arguments to just positional arguments for f"""
-    if not kwargs:
-        return args
-
-    signature = inspect.signature(f)
-
-    # convert to just kwargs first
-    kwargs = convert_kwargs(f, *args, **kwargs)
-
-    parameters = []
-    for name, param in signature.parameters.items():
-        if param.kind in [param.VAR_POSITIONAL, param.VAR_KEYWORD]:
-            continue
-
-        parameters.append(kwargs.get(name, param.default))
-
-    return tuple(parameters)
-
-
 def batched_call(f: callable, batch_shape: Shape, *args: Tensor, **kwargs: Tensor):
     """Call f, automatically vectorizing to batch_shape if required.
 
@@ -93,17 +55,55 @@ def batched_call(f: callable, batch_shape: Shape, *args: Tensor, **kwargs: Tenso
     return data
 
 
-def filter_kwargs(kwargs: dict[str, any], f: callable) -> dict[str, any]:
-    """Filter keyword arguments for f"""
+def concatenate_dicts(data: list[dict[str, Tensor]], axis: int = -1) -> dict[str, Tensor]:
+    """Concatenates tensors in multiple dictionaries into a single dictionary."""
+    if not all([d.keys() == data[0].keys() for d in data]):
+        raise ValueError("Dictionaries must have the same keys.")
+
+    result = {}
+
+    for key in data[0].keys():
+        result[key] = keras.ops.concatenate([d[key] for d in data], axis=axis)
+
+    return result
+
+
+def convert_args(f, *args, **kwargs) -> tuple[any, ...]:
+    """Convert positional and keyword arguments to just positional arguments for f"""
+    if not kwargs:
+        return args
+
     signature = inspect.signature(f)
 
-    if inspect.Parameter.VAR_KEYWORD in signature.parameters:
-        # the signature has **kwargs
+    # convert to just kwargs first
+    kwargs = convert_kwargs(f, *args, **kwargs)
+
+    parameters = []
+    for name, param in signature.parameters.items():
+        if param.kind in [param.VAR_POSITIONAL, param.VAR_KEYWORD]:
+            continue
+
+        parameters.append(kwargs.get(name, param.default))
+
+    return tuple(parameters)
+
+
+def convert_kwargs(f, *args, **kwargs) -> dict[str, any]:
+    """Convert positional and keyword arguments to just keyword arguments for f"""
+    if not args:
         return kwargs
 
-    kwargs = {key: value for key, value in kwargs.items() if key in signature.parameters}
+    signature = inspect.signature(f)
 
-    return kwargs
+    parameters = dict(zip(signature.parameters, args))
+
+    for name, value in kwargs.items():
+        if name in parameters:
+            raise TypeError(f"{f.__name__}() got multiple arguments for argument '{name}'")
+
+        parameters[name] = value
+
+    return parameters
 
 
 def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int = -1) -> Tensor | None:
@@ -123,37 +123,24 @@ def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int =
         raise ValueError(f"Cannot trivially concatenate tensors {keys} with shapes {shapes}") from e
 
 
+def filter_kwargs(kwargs: dict[str, any], f: callable) -> dict[str, any]:
+    """Filter keyword arguments for f"""
+    signature = inspect.signature(f)
+
+    if inspect.Parameter.VAR_KEYWORD in signature.parameters:
+        # the signature has **kwargs
+        return kwargs
+
+    kwargs = {key: value for key, value in kwargs.items() if key in signature.parameters}
+
+    return kwargs
+
+
 def keras_kwargs(kwargs: dict) -> dict:
     """Keep dictionary keys that do not end with _kwargs. Used for propagating
     custom keyword arguments in custom models that inherit from keras.Model.
     """
     return {key: value for key, value in kwargs.items() if not key.endswith("_kwargs")}
-
-
-def concatenate_dicts(data: list[dict[str, Tensor]], axis: int = -1) -> dict[str, Tensor]:
-    """Concatenates tensors in multiple dictionaries into a single dictionary."""
-    if not all([d.keys() == data[0].keys() for d in data]):
-        raise ValueError("Dictionaries must have the same keys.")
-
-    result = {}
-
-    for key in data[0].keys():
-        result[key] = keras.ops.concatenate([d[key] for d in data], axis=axis)
-
-    return result
-
-
-def stack_dicts(data: list[dict[str, Tensor]], axis: int = 0) -> dict[str, Tensor]:
-    """Stacks tensors in multiple dictionaries into a single dictionary."""
-    if not all([d.keys() == data[0].keys() for d in data]):
-        raise ValueError("Dictionaries must have the same keys.")
-
-    result = {}
-
-    for key in data[0].keys():
-        result[key] = keras.ops.stack([d[key] for d in data], axis=axis)
-
-    return result
 
 
 def process_output(outputs: dict[str, Tensor], convert_to_numpy: bool = True) -> dict[str, Tensor]:
@@ -177,3 +164,16 @@ def process_output(outputs: dict[str, Tensor], convert_to_numpy: bool = True) ->
     if convert_to_numpy:
         outputs = {k: ops.convert_to_numpy(v) for k, v in outputs.items()}
     return outputs
+
+
+def stack_dicts(data: list[dict[str, Tensor]], axis: int = 0) -> dict[str, Tensor]:
+    """Stacks tensors in multiple dictionaries into a single dictionary."""
+    if not all([d.keys() == data[0].keys() for d in data]):
+        raise ValueError("Dictionaries must have the same keys.")
+
+    result = {}
+
+    for key in data[0].keys():
+        result[key] = keras.ops.stack([d[key] for d in data], axis=axis)
+
+    return result
