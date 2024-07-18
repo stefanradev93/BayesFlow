@@ -33,6 +33,7 @@ from .tensor_utils import (
     expand_right,
     expand_right_as,
     expand_right_to,
-    tile_axis,
     expand_tile,
+    size_of,
+    tile_axis,
 )

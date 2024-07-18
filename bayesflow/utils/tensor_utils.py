@@ -1,4 +1,6 @@
+from collections.abc import Mapping, Sequence
 import keras
+import numpy as np
 
 from bayesflow.types import Shape, Tensor
 
@@ -36,6 +38,19 @@ def expand_tile(x: Tensor, axis: int, n: int) -> Tensor:
     """Expand and tile x along the given axis n times"""
     x = keras.ops.expand_dims(x, axis=axis)
     return tile_axis(x, axis, n)
+
+
+def size_of(x: Tensor | Sequence[Tensor] | Mapping[str, Tensor]) -> int:
+    """
+    :param x: A tensor, a sequence of tensors or a mapping of tensors.
+    :return: The total memory footprint of x, ignoring view semantics.
+    """
+    if keras.ops.is_tensor(x):
+        return int(keras.ops.size(x)) * np.dtype(keras.ops.dtype(x)).itemsize
+    if isinstance(x, Mapping):
+        return size_of(list(x.values()))
+
+    return sum(size_of(item) for item in set(x))
 
 
 def tile_axis(x: Tensor, axis: int, n: int) -> Tensor:

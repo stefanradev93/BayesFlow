@@ -11,7 +11,9 @@ from .backend_workflows import BackendWorkflow
 class Workflow(BackendWorkflow):
     def fit(
         self,
+        *,
         batch_size: int = "auto",
+        configurator: callable = None,
         collate_fn: callable = None,
         dataset: keras.utils.PyDataset = None,
         epochs: int = 8,
@@ -21,7 +23,7 @@ class Workflow(BackendWorkflow):
         **kwargs,
     ):
         if dataset is None:
-            # user should pass a simulator, so we can build a dataset
+            # no dataset, user should pass a simulator, so we can build a dataset
             if simulator is None:
                 raise ValueError("Received no data to fit on. Either provide a dataset or a simulator.")
 
@@ -47,7 +49,7 @@ class Workflow(BackendWorkflow):
                 use_multiprocessing=use_multiprocessing,
             )
         else:
-            # user passed a dataset
+            # user already passed a dataset, so we just use that
             if simulator is not None:
                 raise ValueError(
                     "Received conflicting arguments. Please provide either a dataset or a simulator, " "but not both."
