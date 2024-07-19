@@ -78,21 +78,23 @@ def sample_observables_batched(shape, r, alpha, theta, **kwargs):
     return dict(x=np.random.normal(size=shape + (2,)))
 
 
-@pytest.fixture(params=["class", "batched_sequential", "unbatched_sequential"])
+@pytest.fixture(params=["class", "batched_composite", "unbatched_composite"])
 def simulator(request):
-    from bayesflow.simulators import SequentialSimulator
+    from bayesflow.simulators import CompositeLambdaSimulator
 
     if request.param == "class":
         simulator = Simulator()
-    elif request.param == "batched_sequential":
-        simulator = SequentialSimulator(
+    elif request.param == "batched_composite":
+        simulator = CompositeLambdaSimulator(
             [sample_contexts_batched, sample_parameters_batched, sample_observables_batched],
             is_batched=True,
             is_numpy=True,
         )
-    elif request.param == "unbatched_sequential":
-        simulator = SequentialSimulator(
-            [sample_contexts_unbatched, sample_parameters_unbatched, sample_observables_unbatched]
+    elif request.param == "unbatched_composite":
+        simulator = CompositeLambdaSimulator(
+            [sample_contexts_unbatched, sample_parameters_unbatched, sample_observables_unbatched],
+            is_batched=False,
+            is_numpy=True,
         )
     else:
         raise NotImplementedError

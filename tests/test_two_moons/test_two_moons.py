@@ -22,7 +22,7 @@ def test_fit(approximator, train_dataset, validation_dataset, batch_size):
     untrained_weights = copy.deepcopy(approximator.weights)
     untrained_metrics = approximator.evaluate(validation_dataset, return_dict=True)
 
-    approximator.fit(train_dataset, epochs=20)
+    approximator.fit(dataset=train_dataset, epochs=20, batch_size=batch_size)
 
     trained_weights = approximator.weights
     trained_metrics = approximator.evaluate(validation_dataset, return_dict=True)

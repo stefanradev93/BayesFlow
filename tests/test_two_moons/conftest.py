@@ -3,9 +3,9 @@ import pytest
 
 @pytest.fixture()
 def approximator(inference_network):
-    from bayesflow import Approximator
+    from bayesflow import ContinuousApproximator
 
-    return Approximator(
+    return ContinuousApproximator(
         inference_network=inference_network,
         inference_variables=["theta"],
         inference_conditions=["x", "r", "alpha"],

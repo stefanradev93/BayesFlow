@@ -20,9 +20,9 @@ def inference_network():
 
 @pytest.fixture()
 def approximator(inference_network, summary_network):
-    from bayesflow import Approximator
+    from bayesflow import ContinuousApproximator
 
-    return Approximator(
+    return ContinuousApproximator(
         inference_network=inference_network,
         summary_network=summary_network,
         inference_variables=["mean", "std"],
