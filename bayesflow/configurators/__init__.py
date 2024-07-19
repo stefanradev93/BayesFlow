@@ -1,2 +1,3 @@
-from .base_configurator import BaseConfigurator
 from .configurator import Configurator
+from .composite_configurator import CompositeConfigurator
+from .concatenate_keys_configurator import ConcatenateKeysConfigurator
