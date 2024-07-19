@@ -1,10 +1,14 @@
+import keras
 import torch
 
-from .base_approximator import BaseApproximator
 
+class TorchApproximator(keras.Model):
+    # noinspection PyMethodOverriding
+    def compute_metrics(self, data: any, stage: str = "training") -> dict[str, torch.Tensor]:
+        # implemented by each respective architecture
+        raise NotImplementedError
 
-class TorchApproximator(BaseApproximator):
-    def train_step(self, data):
+    def train_step(self, data: any) -> dict[str, torch.Tensor]:
         with torch.enable_grad():
             metrics = self.compute_metrics(data, stage="training")
 

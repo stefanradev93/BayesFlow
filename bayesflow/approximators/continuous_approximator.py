@@ -1,33 +1,48 @@
+from collections.abc import Sequence
 import keras
 from keras.saving import (
     deserialize_keras_object as deserialize,
-    register_keras_serializable,
+    register_keras_serializable as serializable,
     serialize_keras_object as serialize,
 )
 
+from bayesflow.configurators import ConcatenateKeysConfigurator, Configurator
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
+from bayesflow.utils import logging
 
-from .workflow import Workflow
+from .approximator import Approximator
 
 
-@register_keras_serializable(package="bayesflow.workflows")
-class ContinuousApproximator(Workflow):
+@serializable(package="bayesflow.approximators")
+class ContinuousApproximator(Approximator):
     """
     Defines a workflow for performing fast posterior or likelihood inference.
     The distribution is approximated with an inference network and an optional summary network.
     """
 
-    def __init__(self, inference_network: InferenceNetwork, summary_network: SummaryNetwork = None, **kwargs):
+    def __init__(
+        self,
+        *,
+        inference_network: InferenceNetwork,
+        summary_network: SummaryNetwork = None,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         self.inference_network = inference_network
         self.summary_network = summary_network
 
     def build(self, data_shapes):
-        data = [keras.ops.zeros(shape) for shape in data_shapes]
+        data = []
+        for shape in data_shapes:
+            if shape is None:
+                data.append(None)
+            else:
+                data.append(keras.ops.zeros(shape))
+
         self.compute_metrics(data)
 
     def compute_metrics(self, data: any, stage: str = "training"):
-        summary_variables, inference_variables, inference_conditions = data
+        inference_variables, summary_variables, inference_conditions = data
 
         if self.summary_network is None:
             return self.inference_network.compute_metrics(
@@ -44,10 +59,23 @@ class ContinuousApproximator(Workflow):
 
         return inference_metrics
 
-    def fit(self, *, collate_fn: callable = None, **kwargs):
-        if collate_fn is None:
-            collate_fn = ...
-        return super().fit(collate_fn=collate_fn, **kwargs)
+    def fit(
+        self,
+        *,
+        configurator: Configurator = "auto",
+        inference_variables: Sequence[str] = None,
+        inference_conditions: Sequence[str] = None,
+        summary_variables: Sequence[str] = None,
+        **kwargs,
+    ):
+        if "dataset" in kwargs:
+            return super().fit(**kwargs)
+
+        if configurator == "auto":
+            logging.info("Building automatic configurator.")
+            configurator = ConcatenateKeysConfigurator([inference_variables, summary_variables, inference_conditions])
+
+        return super().fit(configurator=configurator, **kwargs)
 
     @classmethod
     def from_config(cls, config, custom_objects=None):

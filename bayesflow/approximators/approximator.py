@@ -1,88 +1,65 @@
 import keras
-from keras.saving import register_keras_serializable
+import multiprocessing as mp
 
 from bayesflow.configurators import Configurator
+from bayesflow.datasets import OnlineDataset
+from bayesflow.simulators import Simulator
+from bayesflow.utils import find_maximum_batch_size, logging
 
-match keras.backend.backend():
-    case "jax":
-        from .jax_approximator import JAXApproximator as BaseApproximator
-    case "numpy":
-        from .numpy_approximator import NumpyApproximator as BaseApproximator
-    case "tensorflow":
-        from .tensorflow_approximator import TensorFlowApproximator as BaseApproximator
-    case "torch":
-        from .torch_approximator import TorchApproximator as BaseApproximator
-    case other:
-        raise NotImplementedError(f"BayesFlow does not currently support backend '{other}'.")
+from .backend_approximators import BackendWorkflow
 
 
-@register_keras_serializable(package="bayesflow.amortizers")
-class Approximator(BaseApproximator):
-    def __init__(self, **kwargs):
-        """The main workhorse for learning amortized neural approximators for distributions arising
-        in inverse problems and Bayesian inference (e.g., posterior distributions, likelihoods, marginal
-        likelihoods).
-
-        The complete semantics of this class allow for flexible estimation of the following distribution:
-
-        Q(inference_variables | H(summary_variables; summary_conditions), inference_conditions),
-
-        # TODO - math notation
-
-        where all quantities to the right of the "given" symbol | are optional and H refers to the optional
-        summary /embedding network used to compress high-dimensional data into lower-dimensional summary
-        vectors. Some examples are provided below.
-
-        Parameters
-        ----------
-        inference_variables: list[str]
-            A list of variable names indicating the quantities to be inferred / learned by the approximator,
-            e.g., model parameters when approximating the Bayesian posterior or observables when approximating
-            a likelihood density.
-        inference_conditions: list[str]
-            A list of variable names indicating quantities that will be used to condition (i.e., inform) the
-            distribution over inference variables directly, that is, without passing through the summary network.
-        summary_variables: list[str]
-            A list of variable names indicating quantities that will be used to condition (i.e., inform) the
-            distribution over inference variables after passing through the summary network (i.e., undergoing a
-            learnable transformation / dimensionality reduction). For instance, non-vector quantities (e.g.,
-            sets or time-series) in posterior inference will typically qualify as summary variables. In addition,
-            these quantities may involve learnable distributions on their own.
-        summary_conditions: list[str]
-            A list of variable names indicating quantities that will be used to condition (i.e., inform) the
-            optional summary network, e.g., when the summary network accepts further conditions that do not
-            conform to the semantics of summary variable (i.e., need not be embedded or their distribution
-            needs not be learned).
-
-            # TODO add citations
-
-        Examples
-        -------
-        # TODO
-        """
-        if "configurator" not in kwargs:
-            # try to set up a default configurator
-            if "inference_variables" not in kwargs:
-                raise ValueError("You must specify either a configurator or arguments for the default configurator.")
-
-            inference_variables = kwargs.pop("inference_variables")
-            inference_conditions = kwargs.pop("inference_conditions", None)
-            summary_variables = kwargs.pop("summary_variables", None)
-
-            kwargs["configurator"] = Configurator(
-                inference_variables,
-                inference_conditions,
-                summary_variables,
-            )
-        else:
-            # the user passed a configurator, so we should not configure a default one
-            # check if the user also passed args for the default configurator
-            keys = ["inference_variables", "inference_conditions", "summary_variables"]
-            if any(key in kwargs for key in keys):
+class Approximator(BackendWorkflow):
+    def fit(
+        self,
+        batch_size: int = "auto",
+        configurator: Configurator = None,
+        dataset: keras.utils.PyDataset = None,
+        simulator: Simulator = None,
+        workers: int = "auto",
+        use_multiprocessing: bool = True,
+        **kwargs,
+    ):
+        if dataset is not None:
+            if simulator is not None:
                 raise ValueError(
-                    "Received an ambiguous set of arguments: You are passing a configurator explicitly, "
-                    "but also providing arguments for the default configurator."
+                    "Received conflicting arguments. Please provide either a dataset or a simulator, but not both."
                 )
 
-        kwargs.setdefault("summary_network", None)
-        super().__init__(**kwargs)
+            logging.info("Fitting on provided dataset.")
+
+            return super().fit(x=dataset, y=None, **kwargs)
+
+        # user did not pass a dataset, so we need to build one
+        if simulator is None:
+            raise ValueError("Received no data to fit on. Please provide a dataset or a simulator.")
+
+        logging.info("Building online dataset from simulator.")
+
+        if batch_size == "auto":
+
+            def gen_fn(bs):
+                return simulator.sample((bs,))
+
+            # use a conservative estimate since this does not factor in autograd memory usage
+            batch_size = find_maximum_batch_size(gen_fn, start=2**2, stop=2**16)
+            batch_size //= 4
+
+            logging.info("Using batch_size={bs}", bs=batch_size)
+
+        if workers == "auto":
+            workers = mp.cpu_count()
+            logging.info("Using workers={w}", w=workers)
+        elif workers is None:
+            workers = 1
+            logging.info("Using a single worker.")
+
+        dataset = OnlineDataset(
+            simulator=simulator,
+            batch_size=batch_size,
+            configurator=configurator,
+            workers=workers,
+            use_multiprocessing=use_multiprocessing,
+        )
+
+        return super().fit(x=dataset, y=None, **kwargs)

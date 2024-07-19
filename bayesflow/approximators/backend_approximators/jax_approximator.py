@@ -2,7 +2,7 @@ import jax
 import keras
 
 
-class JAXWorkflow(keras.Model):
+class JAXApproximator(keras.Model):
     # noinspection PyMethodOverriding
     def compute_metrics(self, data: any, stage: str = "training") -> dict[str, jax.Array]:
         # implemented by each respective architecture

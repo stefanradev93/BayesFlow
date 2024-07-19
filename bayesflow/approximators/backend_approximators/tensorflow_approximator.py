@@ -1,12 +1,14 @@
+import keras
 import tensorflow as tf
 
-from bayesflow.types import Tensor
 
-from .base_approximator import BaseApproximator
+class TensorFlowApproximator(keras.Model):
+    # noinspection PyMethodOverriding
+    def compute_metrics(self, data: any, stage: str = "training") -> dict[str, tf.Tensor]:
+        # implemented by each respective architecture
+        raise NotImplementedError
 
-
-class TensorFlowApproximator(BaseApproximator):
-    def train_step(self, data: dict[str, Tensor]) -> dict[str, Tensor]:
+    def train_step(self, data: any) -> dict[str, tf.Tensor]:
         with tf.GradientTape() as tape:
             metrics = self.compute_metrics(data)
 
