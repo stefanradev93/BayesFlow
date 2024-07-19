@@ -1,6 +1,7 @@
 import keras
 import math
 
+from bayesflow.configurators import Configurator
 from bayesflow.types import Tensor
 
 
@@ -9,10 +10,10 @@ class OfflineDataset(keras.utils.PyDataset):
     A dataset that is pre-simulated and stored in memory.
     """
 
-    def __init__(self, data: dict, batch_size: int, **kwargs):
+    def __init__(self, data: dict, batch_size: int, configurator: Configurator, **kwargs):
         super().__init__(**kwargs)
         self.batch_size = batch_size
-
+        self.configurator = configurator
         self.data = data
         self.indices = keras.ops.arange(len(data[next(iter(data.keys()))]), dtype="int64")
 
@@ -26,7 +27,12 @@ class OfflineDataset(keras.utils.PyDataset):
         item = slice(item * self.batch_size, (item + 1) * self.batch_size)
         item = self.indices[item]
 
-        return {key: keras.ops.take(value, item, axis=0) for key, value in self.data.items()}
+        batch = {key: keras.ops.take(value, item, axis=0) for key, value in self.data.items()}
+
+        if self.configurator is not None:
+            batch = self.configurator.configure(batch)
+
+        return batch
 
     @property
     def num_batches(self):
