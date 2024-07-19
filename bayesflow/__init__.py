@@ -1,26 +1,33 @@
 from . import (
     approximators,
+    benchmarks,
     configurators,
     datasets,
     diagnostics,
     distributions,
     networks,
     simulators,
-    benchmarks,
     utils,
 )
 
-from .approximators import Approximator
+from .approximators import ContinuousApproximator
 from .datasets import OfflineDataset, OnlineDataset
 
-import keras
 
-if keras.backend.backend() == "torch":
-    # turn off gradients by default
-    import torch
+def setup():
+    # perform any necessary setup without polluting the namespace
+    import keras
+    import logging
 
-    torch.autograd.set_grad_enabled(False)
+    logging.getLogger().setLevel(logging.INFO)
 
-    # clean up namespace
-    del keras
-    del torch
+    if keras.backend.backend() == "torch":
+        # turn off gradients by default
+        import torch
+
+        torch.autograd.set_grad_enabled(False)
+
+
+# call and clean up namespace
+setup()
+del setup

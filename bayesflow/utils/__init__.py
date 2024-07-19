@@ -1,5 +1,4 @@
 from .dict_utils import (
-    batched_call,
     concatenate_dicts,
     convert_args,
     convert_kwargs,
@@ -10,6 +9,8 @@ from .dict_utils import (
     process_output,
 )
 
+from .functional import batched_call
+
 from .git import (
     issue_url,
     pull_url,
@@ -18,8 +19,9 @@ from .git import (
 
 from .io import (
     find_maximum_batch_size,
-    warning,
 )
+
+from . import logging
 
 from .jacobian_trace import jacobian_trace
 

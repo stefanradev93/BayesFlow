@@ -1,12 +1,12 @@
 import keras
-import logging
 
 from bayesflow.types import Tensor
-from bayesflow.utils import warning
+
+from .. import logging
 
 
 def sinkhorn_log(
-    cost_matrix: Tensor, regularization: float = 1.0, max_steps: int = 1000, tolerance: float = 1e-6
+    cost_matrix: Tensor, regularization: float = 0.1, max_steps: int = 1000, tolerance: float = 1e-6
 ) -> Tensor:
     """
     Computes the Sinkhorn-Knopp optimal transport plan for the given cost matrix.
@@ -14,13 +14,14 @@ def sinkhorn_log(
 
     :param cost_matrix: Tensor of shape (n, m).
         Defines the transport costs between samples.
+
     :param regularization: Regularization parameter.
         Controls the standard deviation of the Gaussian kernel.
-        Default: 1.0
+
     :param max_steps: Maximum number of iterations.
-        Default: 1000
+
     :param tolerance: Absolute tolerance for convergence.
-        Default: 1e-6
+
     :return: Tensor of shape (n, m)
         The logarithmic transport probabilities.
     """
@@ -54,12 +55,13 @@ def sinkhorn_log(
         pass
 
     def warn():
-        marginals = keras.ops.sum(keras.ops.exp(log_plan, axis=0))
+        marginals = keras.ops.sum(keras.ops.exp(log_plan), axis=0)
         deviations = keras.ops.abs(marginals - 1.0)
         badness = 100.0 * keras.ops.max(deviations)
-        badness = keras.ops.cast(badness, dtype="int32")
 
-        logging.warning(f"Sinkhorn-Knopp did not converge after {max_steps} steps (badness: {badness}%).")
+        msg = "Sinkhorn-Knopp did not converge after {:d} steps (badness: {:.1f}%)."
+
+        logging.warning(msg, max_steps, badness)
 
     keras.ops.cond(is_converged(log_plan), do_nothing, warn)
 
@@ -118,7 +120,7 @@ def sinkhorn_knopp(
 
         msg = "Sinkhorn-Knopp did not converge after {:d} steps (badness: {:.1f}%)."
 
-        warning(msg, max_steps, badness)
+        logging.warning(msg, max_steps, badness)
 
     keras.ops.cond(is_converged(plan), do_nothing, warn)
 
