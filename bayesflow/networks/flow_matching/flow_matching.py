@@ -4,7 +4,7 @@ from keras.saving import (
 )
 
 from bayesflow.types import Tensor
-from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, optimal_transport, tile_axis
+from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, tile_axis
 
 from ..inference_network import InferenceNetwork
 
@@ -141,21 +141,26 @@ class FlowMatching(InferenceNetwork):
 
             return x
 
-    def compute_metrics(self, x1: Tensor, conditions: Tensor = None, stage: str = "training") -> dict[str, Tensor]:
-        base_metrics = super().compute_metrics(x1, conditions=conditions, stage=stage)
+    def compute_metrics(
+        self, x: Tensor | tuple[Tensor, ...], conditions: Tensor = None, stage: str = "training"
+    ) -> dict[str, Tensor]:
+        if isinstance(x, tuple):
+            # already pre-configured with FlowMatchingConfigurator
+            x0, x1, t, x, target_velocity = x
+        else:
+            # resample, don't use optimal transport for efficiency
+            x1 = x
+            x0 = keras.random.normal(keras.ops.shape(x1), dtype=keras.ops.dtype(x1), seed=self.seed_generator)
 
-        batch_size = keras.ops.shape(x1)[0]
-        x0 = self.base_distribution.sample((batch_size,))
+            t = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
+            t = expand_right_as(t, x0)
 
-        x0, x1 = optimal_transport(x0, x1, max_steps=int(1e4), regularization=0.01, seed=self.seed_generator)
+            x = t * x1 + (1 - t) * x0
+            target_velocity = x1 - x0
 
-        t = keras.random.uniform((batch_size, 1), seed=self.seed_generator)
-        t = expand_right_as(t, x0)
-
-        x = t * x1 + (1 - t) * x0
+        base_metrics = super().compute_metrics(x1, conditions, stage)
 
         predicted_velocity = self.velocity(x, t, conditions)
-        target_velocity = x1 - x0
 
         loss = keras.losses.mean_squared_error(target_velocity, predicted_velocity)
         loss = keras.ops.mean(loss)
