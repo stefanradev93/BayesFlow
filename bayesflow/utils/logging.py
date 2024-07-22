@@ -7,7 +7,7 @@ def _log(msg, *args, callback_fn: callable = print, **kwargs):
         import jax
 
         def __log(*a, **k):
-            jax.debug.callback(callback_fn, msg.format(*a, **k))
+            callback_fn(msg.format(*a, **k))
 
         jax.debug.callback(__log, *args, **kwargs)
     else:
