@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 import keras
 from keras.saving import (
     deserialize_keras_object as deserialize,
@@ -8,6 +8,7 @@ from keras.saving import (
 
 from bayesflow.configurators import ConcatenateKeysConfigurator, Configurator
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
+from bayesflow.types import Shape, Tensor
 from bayesflow.utils import logging
 
 from .approximator import Approximator
@@ -31,27 +32,21 @@ class ContinuousApproximator(Approximator):
         self.inference_network = inference_network
         self.summary_network = summary_network
 
-    def build(self, data_shapes):
-        data = []
-        for shape in data_shapes:
-            if shape is None:
-                data.append(None)
-            else:
-                data.append(keras.ops.zeros(shape))
-
+    def build(self, data_shapes: Mapping[str, Shape]):
+        data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
         self.compute_metrics(data)
 
-    def compute_metrics(self, data: any, stage: str = "training"):
-        inference_variables, summary_variables, inference_conditions = data
+    def compute_metrics(self, data: Mapping[str, Tensor], stage: str = "training"):
+        inference_variables = data["inference_variables"]
+        inference_conditions = data.get("inference_conditions")
 
-        if self.summary_network is None:
-            return self.inference_network.compute_metrics(
-                inference_variables, conditions=inference_conditions, stage=stage
-            )
+        if self.summary_network is not None:
+            summary_variables = data["summary_variables"]
+            summary_outputs = self.summary_network(summary_variables)
 
-        summary_outputs = self.summary_network(summary_variables)
-
-        inference_conditions = keras.ops.concatenate([inference_conditions, summary_outputs], axis=-1)
+            # TODO: introduce method
+            if inference_conditions is not None:
+                inference_conditions = keras.ops.concatenate([inference_conditions, summary_outputs], axis=-1)
 
         inference_metrics = self.inference_network.compute_metrics(
             inference_variables, conditions=inference_conditions, stage=stage
@@ -73,7 +68,11 @@ class ContinuousApproximator(Approximator):
 
         if configurator == "auto":
             logging.info("Building automatic configurator.")
-            configurator = ConcatenateKeysConfigurator([inference_variables, summary_variables, inference_conditions])
+            configurator = ConcatenateKeysConfigurator(
+                inference_variables=inference_variables,
+                inference_conditions=inference_conditions,
+                summary_variables=summary_variables,
+            )
 
         return super().fit(configurator=configurator, **kwargs)
 

@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 import keras
 from keras.saving import (
     deserialize_keras_object as deserialize,
@@ -33,21 +33,19 @@ class ModelComparisonApproximator(Approximator):
         self.classifier_network = classifier_network
         self.summary_network = summary_network
 
-    def build(self, data_shapes: Sequence[Shape]):
-        data = []
-        for shape in data_shapes:
-            if shape is None:
-                data.append(None)
-            else:
-                data.append(keras.ops.zeros(shape))
-
+    def build(self, data_shapes: Mapping[str, Shape]):
+        data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
         self.compute_metrics(data)
 
-    def compute_metrics(self, data: any, stage: str = "training") -> dict[str, Tensor]:
-        classifier_variables, summary_variables, model_indices = data
+    def compute_metrics(self, data: Mapping[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
+        classifier_variables = data["classifier_variables"]
+        model_indices = data["model_indices"]
 
         if self.summary_network is not None:
+            summary_variables = data["summary_variables"]
             summary_outputs = self.summary_network(summary_variables)
+
+            # TODO: introduce method
             classifier_variables = keras.ops.concatenate([classifier_variables, summary_outputs], axis=-1)
 
         logits = self.classifier_network(classifier_variables)

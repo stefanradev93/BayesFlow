@@ -1,5 +1,4 @@
-from collections.abc import Mapping, Sequence
-from itertools import chain
+from collections.abc import Mapping
 from keras.saving import (
     deserialize_keras_object as deserialize,
     register_keras_serializable as serializable,
@@ -12,39 +11,35 @@ from .configurator import Configurator
 
 
 DataT = Mapping[str, Tensor]
-VarT = Sequence[Tensor | None]
+VarT = Mapping[str, Tensor]
 
 
 @serializable(package="bayesflow.configurators")
 class CompositeConfigurator(Configurator[DataT, VarT]):
-    """Composes multiple configurators into a single configurator, sequentially."""
+    """Composes multiple simple configurators into a single more complex configurator."""
 
-    def __init__(self, configurators: Sequence[Configurator[DataT, VarT]]):
+    def __init__(self, configurators: Mapping[str, Configurator[DataT, Tensor]]):
         self.configurators = configurators
         self.variable_counts = None
 
     def configure(self, data: DataT) -> VarT:
-        variables = [configurator.configure(data) for configurator in self.configurators]
-
-        if self.variable_counts is None:
-            # TODO: this is wrong, since variables is a list of lists
-            self.variable_counts = [len(v) if v is not None else 0 for v in variables]
-
-        return list(chain(*variables))
+        return {key: configurator.configure(data) for key, configurator in self.configurators.items()}
 
     def deconfigure(self, variables: VarT) -> DataT:
         data = {}
-        start = 0
-        for idx, configurator in enumerate(self.configurators):
-            stop = start + self.variable_counts[idx]
-            data |= configurator.deconfigure(variables[start:stop])
-            start = stop
+        for key, configurator in self.configurators.items():
+            data |= configurator.deconfigure(variables[key])
 
         return data
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "CompositeConfigurator":
-        return cls([deserialize(configurator, custom_objects) for configurator in config.pop("configurators")])
+        return cls(
+            {
+                key: deserialize(configurator, custom_objects)
+                for key, configurator in config.pop("configurators").items()
+            }
+        )
 
     def get_config(self) -> dict:
-        return {"configurators": [serialize(configurator) for configurator in self.configurators]}
+        return {"configurators": {key: serialize(configurator) for key, configurator in self.configurators.items()}}

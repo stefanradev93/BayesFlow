@@ -4,12 +4,17 @@ import multiprocessing as mp
 from bayesflow.configurators import Configurator
 from bayesflow.datasets import OnlineDataset
 from bayesflow.simulators import Simulator
-from bayesflow.utils import find_maximum_batch_size, logging
+from bayesflow.utils import find_maximum_batch_size, keras_kwargs, logging
 
-from .backend_approximators import BackendWorkflow
+from .backend_approximators import BackendApproximator
 
 
-class Approximator(BackendWorkflow):
+class Approximator(BackendApproximator):
+    def __init__(self, *, configurator: Configurator = None, **kwargs):
+        super().__init__(**keras_kwargs(kwargs))
+        self.configurator = configurator
+        # TODO: save fit config as attribute and serialize / deserialize with it?
+
     def fit(
         self,
         batch_size: int = "auto",
@@ -26,7 +31,7 @@ class Approximator(BackendWorkflow):
                     "Received conflicting arguments. Please provide either a dataset or a simulator, but not both."
                 )
 
-            logging.info("Fitting on provided dataset.")
+            logging.info("Fitting on dataset instance of {clsname}.", clsname=dataset.__class__.__name__)
 
             return super().fit(x=dataset, y=None, **kwargs)
 
@@ -34,7 +39,7 @@ class Approximator(BackendWorkflow):
         if simulator is None:
             raise ValueError("Received no data to fit on. Please provide a dataset or a simulator.")
 
-        logging.info("Building online dataset from simulator.")
+        logging.info("Building dataset from simulator instance of {clsname}.", clsname=simulator.__class__.__name__)
 
         if batch_size == "auto":
 
@@ -53,6 +58,8 @@ class Approximator(BackendWorkflow):
         elif workers is None:
             workers = 1
             logging.info("Using a single worker.")
+
+        configurator = configurator or self.configurator
 
         dataset = OnlineDataset(
             simulator=simulator,

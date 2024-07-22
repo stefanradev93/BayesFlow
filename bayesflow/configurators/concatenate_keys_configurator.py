@@ -11,7 +11,7 @@ from .composite_configurator import CompositeConfigurator
 from .configurator import Configurator
 
 DataT = Mapping[str, Tensor]
-VarT = Sequence[Tensor | None]
+VarT = Tensor
 
 
 @serializable(package="bayesflow.configurators")
@@ -19,6 +19,9 @@ class _ConcatenateKeysConfigurator(Configurator[DataT, VarT]):
     """Concatenates data from multiple keys into a single tensor."""
 
     def __init__(self, keys: Sequence[str]):
+        if not keys:
+            raise ValueError("At least one key must be provided.")
+
         self.keys = keys
         self.data_shapes = None
         self.is_configured = False
@@ -28,13 +31,12 @@ class _ConcatenateKeysConfigurator(Configurator[DataT, VarT]):
             self.data_shapes = {key: keras.ops.shape(value) for key, value in data.items()}
             self.is_configured = True
 
-        return [filter_concatenate(data, self.keys, axis=-1)]
+        return filter_concatenate(data, self.keys, axis=-1)
 
     def deconfigure(self, variables: VarT) -> DataT:
         if not self.is_configured:
             raise ValueError("You must call `configure` at least once before calling `deconfigure`.")
 
-        [variables] = variables
         data = {}
         start = 0
         for key in self.keys:
@@ -56,5 +58,6 @@ class _ConcatenateKeysConfigurator(Configurator[DataT, VarT]):
 class ConcatenateKeysConfigurator(CompositeConfigurator):
     """Concatenates data from multiple keys into multiple tensors."""
 
-    def __init__(self, keys: Sequence[Sequence[str]]):
-        super().__init__([_ConcatenateKeysConfigurator(k) for k in keys])
+    def __init__(self, **keys: Sequence[str]):
+        configurators = {key: _ConcatenateKeysConfigurator(value) for key, value in keys.items()}
+        super().__init__(configurators)
