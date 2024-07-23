@@ -3,14 +3,14 @@ from keras import layers, Sequential
 from keras.saving import register_keras_serializable
 
 from bayesflow.types import Tensor
-from bayesflow.utils import keras_kwargs
 
 from .skip_recurrent import SkipRecurrentNet
-from ...networks import MLP
+from ..mlp import MLP
+from ..summary_network import SummaryNetwork
 
 
-@register_keras_serializable(package="bayesflow.networks.lstnet")
-class LSTNet(keras.Model):
+@register_keras_serializable(package="bayesflow.networks")
+class LSTNet(SummaryNetwork):
     """
     Implements a LSTNet Architecture as described in [1]
 
@@ -38,7 +38,7 @@ class LSTNet(keras.Model):
         skip_steps: int = 4,
         **kwargs,
     ):
-        super().__init__(**keras_kwargs(kwargs))
+        super().__init__(**kwargs)
 
         # Convolutional backbone -> can be extended with inception-like structure
         if not isinstance(filters, (list, tuple)):
@@ -81,4 +81,5 @@ class LSTNet(keras.Model):
         return summary
 
     def build(self, input_shape):
+        super().build(input_shape)
         self.call(keras.ops.zeros(input_shape))

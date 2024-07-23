@@ -1,6 +1,8 @@
 import keras
 import math
 
+from bayesflow.types import Tensor
+
 
 class OfflineDataset(keras.utils.PyDataset):
     """
@@ -16,7 +18,7 @@ class OfflineDataset(keras.utils.PyDataset):
 
         self.shuffle()
 
-    def __getitem__(self, item: int) -> (dict, dict):
+    def __getitem__(self, item: int) -> dict[str, Tensor]:
         """Get a batch of pre-simulated data"""
         if not 0 <= item < self.num_batches:
             raise IndexError(f"Index {item} is out of bounds for dataset with {self.num_batches} batches.")

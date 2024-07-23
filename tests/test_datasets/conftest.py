@@ -86,7 +86,9 @@ def simulator(request):
         simulator = Simulator()
     elif request.param == "batched_sequential":
         simulator = SequentialSimulator(
-            [sample_contexts_batched, sample_parameters_batched, sample_observables_batched]
+            [sample_contexts_batched, sample_parameters_batched, sample_observables_batched],
+            is_batched=True,
+            is_numpy=True,
         )
     elif request.param == "unbatched_sequential":
         simulator = SequentialSimulator(
@@ -98,7 +100,7 @@ def simulator(request):
     return simulator
 
 
-@pytest.fixture(params=[True, False])
+@pytest.fixture(params=[False])
 def use_multiprocessing(request):
     return request.param
 

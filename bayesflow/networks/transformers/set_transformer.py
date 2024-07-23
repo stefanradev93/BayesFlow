@@ -3,13 +3,15 @@ from keras.saving import register_keras_serializable
 
 from bayesflow.types import Tensor
 
+from ..summary_network import SummaryNetwork
+
 from .sab import SetAttentionBlock
 from .isab import InducedSetAttentionBlock
 from .pma import PoolingByMultiHeadAttention
 
 
 @register_keras_serializable(package="bayesflow.networks")
-class SetTransformer(keras.Layer):
+class SetTransformer(SummaryNetwork):
     """Implements the set transformer architecture from [1] which ultimately represents
     a learnable permutation-invariant function. Designed to naturally model interactions in
     the input set, which may be hard to capture with the simpler ``DeepSet`` architecture.
@@ -80,21 +82,16 @@ class SetTransformer(keras.Layer):
         # Output projector is needed to keep output dimensions be summary_dim in case of num_seeds > 1
         self.output_projector = keras.layers.Dense(summary_dim)
 
-    def call(self, set_x: Tensor, **kwargs) -> Tensor:
+    def call(self, x: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass through the set-transformer.
 
-        Parameters
-        ----------
-        set_x : Tensor
-            The input set of shape (batch_size, set_size, input_dim)
+        :param x: Tensor of shape (batch_size, set_size, input_dim)
 
-        Returns
-        -------
-        set_summary : Tensor
-            Output representation of shape (batch_size, summary_dim)
+        :param kwargs: Additional keyword arguments to each block
+
+        :return: Tensor of shape (batch_size, output_dim)
         """
-
-        set_summary = self.attention_blocks(set_x, **kwargs)
-        set_summary = self.pooling_by_attention(set_summary, **kwargs)
-        set_summary = self.output_projector(set_summary)
-        return set_summary
+        summary = self.attention_blocks(x, **kwargs)
+        summary = self.pooling_by_attention(summary, **kwargs)
+        summary = self.output_projector(summary)
+        return summary

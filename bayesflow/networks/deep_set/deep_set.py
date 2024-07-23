@@ -1,15 +1,28 @@
 import keras
 from keras import layers
-from keras.saving import register_keras_serializable, serialize_keras_object
+from keras.saving import register_keras_serializable, serialize_keras_object as serialize
+
 
 from bayesflow.types import Tensor
-from bayesflow.utils import keras_kwargs
 from .invariant_module import InvariantModule
 from .equivariant_module import EquivariantModule
 
+from ..summary_network import SummaryNetwork
+
 
 @register_keras_serializable(package="bayesflow.networks")
-class DeepSet(keras.Model):
+class DeepSet(SummaryNetwork):
+    r"""Implements a deep set encoder introduced in [1]. This module performs the computation:
+
+    ..math:
+        f(X = \{ x_i \mid i=1, \ldots, n \}) = \rho \left( \sigma(\tau(x_1), \ldots, \tau(x_n)) \right)
+
+    where $\sigma must be a permutation-invariant function, such as the mean.
+    $\rho$ and $\tau$ can be any functions, such as neural networks.
+
+    [1] Deep Set: arXiv:1703.06114
+    """
+
     def __init__(
         self,
         summary_dim: int = 16,
@@ -32,7 +45,7 @@ class DeepSet(keras.Model):
         #TODO
         """
 
-        super().__init__(**keras_kwargs(kwargs))
+        super().__init__(**kwargs)
 
         # Stack of equivariant modules for a many-to-many learnable transformation
         self.equivariant_modules = keras.Sequential()
@@ -71,38 +84,34 @@ class DeepSet(keras.Model):
         self.output_projector = layers.Dense(summary_dim, activation="linear")
         self.summary_dim = summary_dim
 
-    def call(self, input_set: Tensor, **kwargs) -> Tensor:
+    def build(self, input_shape):
+        super().build(input_shape)
+        self.call(keras.ops.zeros(input_shape))
+
+    def call(self, x: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass of a learnable deep invariant transformation consisting of
         a sequence of equivariant transforms followed by an invariant transform.
 
-        Parameters
-        ----------
-        input_set : KerasTensor
-            Input set of shape (batch_size, ..., set_size, obs_dim)
+        :param x: Tensor of shape (batch_size, set_size, n)
+            The input set
 
-        Returns
-        -------
-        out : KerasTensor
-            Output representation of shape (batch_size, ..., set_size, obs_dim)
+        :return: Tensor of shape (batch_size, self.summary_dim)
+            Summary representation of the input set
+
         """
+        x = self.equivariant_modules(x, **kwargs)
+        x = self.invariant_module(x, **kwargs)
 
-        transformed_set = self.equivariant_modules(input_set, **kwargs)
-        set_representation = self.invariant_module(transformed_set, **kwargs)
-        set_representation = self.output_projector(set_representation)
-
-        return set_representation
-
-    def build(self, input_shape):
-        self.call(keras.ops.zeros(input_shape))
+        return self.output_projector(x)
 
     def get_config(self):
-        config = super().get_config()
-        config.update(
-            {
-                "invariant_module": serialize_keras_object(self.equivariant_modules),
-                "equivariant_fc": serialize_keras_object(self.invariant_module),
-                "output_projector": serialize_keras_object(self.output_projector),
-                "summary_dim": serialize_keras_object(self.summary_dim),
-            }
-        )
-        return config
+        base_config = super().get_config()
+
+        config = {
+            "invariant_module": serialize(self.equivariant_modules),
+            "equivariant_fc": serialize(self.invariant_module),
+            "output_projector": serialize(self.output_projector),
+            "summary_dim": serialize(self.summary_dim),
+        }
+
+        return base_config | config

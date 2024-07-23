@@ -16,14 +16,20 @@ class DiagonalNormal(Distribution):
         - ``log_prob`` is used for density computation
     """
 
-    def __init__(self, mean: float | Tensor = 0.0, std: float | Tensor = 1.0, **kwargs):
+    def __init__(
+        self,
+        mean: float | Tensor = 0.0,
+        std: float | Tensor = 1.0,
+        seed_generator: keras.random.SeedGenerator = None,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         self.mean = mean
         self.std = std
         self.var = std**2
         self.dim = None
         self.log_norm_const = None
-        self.seed_generator = keras.random.SeedGenerator()
+        self.seed_generator = seed_generator or keras.random.SeedGenerator()
 
     def sample(self, batch_shape: Shape) -> Tensor:
         return keras.random.normal(

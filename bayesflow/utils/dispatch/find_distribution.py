@@ -13,6 +13,8 @@ def _(name: str, *args, **kwargs):
             from bayesflow.distributions import DiagonalNormal
 
             distribution = DiagonalNormal(*args, **kwargs)
+        case "none":
+            distribution = None
         case other:
             raise ValueError(f"Unsupported distribution name '{other}'.")
 
@@ -20,5 +22,5 @@ def _(name: str, *args, **kwargs):
 
 
 @find_distribution.register
-def _(constructor: type, *args, **kwargs):
-    return constructor(*args, **kwargs)
+def _(none: None, *args, **kwargs):
+    return None

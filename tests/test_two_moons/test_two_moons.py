@@ -15,7 +15,6 @@ def test_compile(approximator, random_samples, jit_compile):
 def test_fit(approximator, train_dataset, validation_dataset, batch_size):
     from bayesflow.metrics import MaximumMeanDiscrepancy
 
-    # TODO: Refactor to use approximator.sample() when implemented (instead of calling the inference network directly)
     approximator.compile(inference_metrics=[keras.metrics.KLDivergence(), MaximumMeanDiscrepancy()])
 
     approximator.build_from_data(train_dataset[0])

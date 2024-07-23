@@ -1,24 +1,33 @@
-import importlib
-from functools import partial
-
+import numpy as np
+from bayesflow.types import Tensor
 from bayesflow.utils import batched_call
 
 
 class Benchmark:
-    def __init__(self, name: str, **kwargs):
-        """#TODO"""
+    def sample(self, batch_size: int) -> dict[str, Tensor]:
+        """Runs simulated benchmark and returns `batch_size` parameter
+        and observation batches
 
-        self.name = name
-        self.module = self.get_module(name)
-        self.simulator = partial(getattr(self.module, "simulator"), **kwargs.pop("prior_kwargs", {}))
+        Parameters
+        ----------
+        batch_size: int
+            Number of parameter-observation batches to simulate
 
-    def sample(self, batch_size: int):
-        return batched_call(self.simulator, (batch_size,))
+        Returns
+        -------
+        dict[str, Tensor]: simulated parameters and observables
+            with shapes (`batch_size`, ...)
+        """
 
-    @staticmethod
-    def get_module(name):
-        try:
-            benchmark_module = importlib.import_module(f"bayesflow.benchmarks.{name}")
-            return benchmark_module
-        except Exception as error:
-            raise ModuleNotFoundError(f"{name} is not a known benchmark") from error
+        return batched_call(self, (batch_size,))
+
+    def prior(self):
+        raise NotImplementedError
+
+    def observation_model(self, params: np.ndarray):
+        raise NotImplementedError
+
+    def __call__(self):
+        prior_draws = self.prior()
+        observables = self.observation_model(prior_draws)
+        return dict(parameters=prior_draws.astype(np.float32), observables=observables.astype(np.float32))

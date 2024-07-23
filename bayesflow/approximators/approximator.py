@@ -68,15 +68,16 @@ class Approximator(BaseApproximator):
             inference_variables = kwargs.pop("inference_variables")
             inference_conditions = kwargs.pop("inference_conditions", None)
             summary_variables = kwargs.pop("summary_variables", None)
-            summary_conditions = kwargs.pop("summary_conditions", None)
 
             kwargs["configurator"] = Configurator(
-                inference_variables, inference_conditions, summary_variables, summary_conditions
+                inference_variables,
+                inference_conditions,
+                summary_variables,
             )
         else:
             # the user passed a configurator, so we should not configure a default one
             # check if the user also passed args for the default configurator
-            keys = ["inference_variables", "inference_conditions", "summary_variables", "summary_conditions"]
+            keys = ["inference_variables", "inference_conditions", "summary_variables"]
             if any(key in kwargs for key in keys):
                 raise ValueError(
                     "Received an ambiguous set of arguments: You are passing a configurator explicitly, "

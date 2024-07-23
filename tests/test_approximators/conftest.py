@@ -1,7 +1,9 @@
-import keras
 import pytest
 
-import bayesflow as bf
+
+@pytest.fixture()
+def batch_size():
+    return 8
 
 
 @pytest.fixture()
@@ -11,40 +13,43 @@ def summary_network():
 
 @pytest.fixture()
 def inference_network():
-    network = keras.Sequential([keras.layers.Dense(10)])
-    network.compile(loss="mse")
-    return network
+    from bayesflow.networks import CouplingFlow
+
+    return CouplingFlow()
 
 
 @pytest.fixture()
 def approximator(inference_network, summary_network):
-    return bf.Approximator(
+    from bayesflow import Approximator
+
+    return Approximator(
         inference_network=inference_network,
         summary_network=summary_network,
-        inference_variables=[],
-        inference_conditions=[],
-        summary_variables=[],
-        summary_conditions=[],
+        inference_variables=["mean", "std"],
+        inference_conditions=["x"],
     )
 
 
 @pytest.fixture()
-def dataset():
-    batch_size = 16
-    batches_per_epoch = 4
-    parameter_sets = batch_size * batches_per_epoch
-    observations_per_parameter_set = 32
+def simulator():
+    from tests.utils.normal_simulator import NormalSimulator
 
-    mean = keras.random.normal(mean=0.0, stddev=0.1, shape=(parameter_sets, 2))
-    std = keras.ops.exp(keras.random.normal(mean=0.0, stddev=0.1, shape=(parameter_sets, 2)))
+    return NormalSimulator()
 
-    mean = keras.ops.repeat(mean[:, None], observations_per_parameter_set, 1)
-    std = keras.ops.repeat(std[:, None], observations_per_parameter_set, 1)
 
-    noise = keras.random.normal(shape=(parameter_sets, observations_per_parameter_set, 2))
+@pytest.fixture()
+def train_dataset(simulator, batch_size):
+    from bayesflow import OfflineDataset
 
-    x = mean + std * noise
+    num_batches = 4
+    data = simulator.sample((num_batches * batch_size,))
+    return OfflineDataset(data, workers=4, max_queue_size=num_batches, batch_size=batch_size)
 
-    data = dict(observables=dict(x=x), parameters=dict(mean=mean, std=std))
 
-    return bf.datasets.OfflineDataset(data, batch_size=batch_size, batches_per_epoch=batches_per_epoch)
+@pytest.fixture()
+def validation_dataset(simulator, batch_size):
+    from bayesflow import OfflineDataset
+
+    num_batches = 2
+    data = simulator.sample((num_batches * batch_size,))
+    return OfflineDataset(data, workers=4, max_queue_size=num_batches, batch_size=batch_size)
