@@ -53,7 +53,7 @@ class CIF(InferenceNetwork):
         # NOTE: conditions should be used...
         
         # Sample u ~ p(u)
-        u = self.base_distribution.sample(keras.ops.shape(z))
+        u = self.base_distribution.sample(keras.ops.shape(z)[:-1])
         log_pu = self.base_distribution.log_prob(keras.ops.zeros_like(z))
         
         # Compute inverse of f(z; u)
