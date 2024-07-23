@@ -72,6 +72,9 @@ class InvariantModule(keras.Layer):
         # Pooling function as keras layer for sum decomposition: inner( pooling( inner(set) ) )
         self.pooling_layer = find_pooling(pooling, **kwargs.get("pooling_kwargs", {}))
 
+    def build(self, input_shape):
+        self.call(keras.ops.zeros(input_shape))
+
     def call(self, input_set: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass of a learnable invariant transform.
 
@@ -90,6 +93,3 @@ class InvariantModule(keras.Layer):
         set_summary = self.pooling_layer(set_summary, training=kwargs.get("training", False))
         set_summary = self.outer_fc(set_summary, training=kwargs.get("training", False))
         return set_summary
-
-    def build(self, input_shape):
-        self.call(keras.ops.zeros(input_shape))

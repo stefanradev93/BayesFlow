@@ -3,7 +3,6 @@ from .deep_set import DeepSet
 from .flow_matching import FlowMatching
 from .inference_network import InferenceNetwork
 from .mlp import MLP
-from .resnet import ResNet
 from .lstnet import LSTNet
 from .summary_network import SummaryNetwork
 from .transformers import SetTransformer

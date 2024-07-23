@@ -56,7 +56,7 @@ class EquivariantModule(keras.Layer):
             **kwargs,
         )
 
-        self.input_projection = layers.Dense(units_equivariant)
+        self.input_projector = layers.Dense(units_equivariant)
         self.equivariant_fc = keras.Sequential(name="EquivariantFC")
         for _ in range(num_dense_equivariant):
             layer = layers.Dense(
@@ -69,6 +69,9 @@ class EquivariantModule(keras.Layer):
             self.equivariant_fc.add(layer)
 
         self.layer_norm = layers.LayerNormalization() if layer_norm else None
+
+    def build(self, input_shape):
+        self.call(keras.ops.zeros(input_shape))
 
     def call(self, input_set: Tensor, **kwargs) -> Tensor:
         """Performs the forward pass of a learnable equivariant transform.
@@ -83,7 +86,7 @@ class EquivariantModule(keras.Layer):
         """
 
         training = kwargs.get("training", False)
-        input_set = self.input_projection(input_set)
+        input_set = self.input_projector(input_set)
 
         # Store shape of input_set, will be (batch_size, ..., set_size, some_dim)
         shape = ops.shape(input_set)
@@ -104,6 +107,3 @@ class EquivariantModule(keras.Layer):
             output_set = self.layer_norm(output_set, training=training)
 
         return output_set
-
-    def build(self, input_shape):
-        self.call(keras.ops.zeros(input_shape))

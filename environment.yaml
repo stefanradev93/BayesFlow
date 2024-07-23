@@ -3,7 +3,7 @@ channels:
 dependencies:
   - jupyter
   - jupyterlab
-  - keras ~= 3.3.0
+  - keras ~= 3.4.0
   - numpy
   - matplotlib
   - pre-commit

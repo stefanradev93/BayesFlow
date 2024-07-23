@@ -24,11 +24,16 @@ def batch_size(request):
     return request.param
 
 
+@pytest.fixture(params=[None, 2, 3], scope="session")
+def conditions_size(request):
+    return request.param
+
+
 @pytest.fixture(scope="function")
 def coupling_flow():
     from bayesflow.networks import CouplingFlow
 
-    return CouplingFlow(depth=2, subnet_kwargs=dict(depth=2, width=32))
+    return CouplingFlow(depth=2, subnet="mlp", subnet_kwargs=dict(depth=2, width=32))
 
 
 @pytest.fixture(params=["two_moons"], scope="session")
@@ -36,11 +41,16 @@ def dataset(request):
     return request.getfixturevalue(request.param)
 
 
+@pytest.fixture(params=[2, 3], scope="session")
+def feature_size(request):
+    return request.param
+
+
 @pytest.fixture(scope="function")
 def flow_matching():
     from bayesflow.networks import FlowMatching
 
-    return FlowMatching(network_kwargs=dict(depth=2, width=32))
+    return FlowMatching(subnet="mlp", subnet_kwargs=dict(depth=2, width=32))
 
 
 @pytest.fixture(params=["coupling_flow", "flow_matching"], scope="function")
@@ -53,11 +63,34 @@ def network(request):
     return request.getfixturevalue(request.param)
 
 
+@pytest.fixture(scope="session")
+def random_conditions(batch_size, conditions_size):
+    if conditions_size is None:
+        return None
+
+    return keras.random.normal((batch_size, conditions_size))
+
+
+@pytest.fixture(scope="session")
+def random_samples(batch_size, feature_size):
+    return keras.random.normal((batch_size, feature_size))
+
+
 @pytest.fixture(scope="function", autouse=True)
 def random_seed():
     seed = 0
     keras.utils.set_random_seed(seed)
     return seed
+
+
+@pytest.fixture(scope="session")
+def random_set(batch_size, set_size, feature_size):
+    return keras.random.normal((batch_size, set_size, feature_size))
+
+
+@pytest.fixture(params=[2, 3], scope="session")
+def set_size(request):
+    return request.param
 
 
 @pytest.fixture(params=["two_moons"], scope="session")

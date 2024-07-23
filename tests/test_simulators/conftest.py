@@ -41,7 +41,7 @@ def sequential_two_moons_numpy():
         x2 = (-theta[0] + theta[1]) / np.sqrt(2.0) + r * np.sin(alpha)
         return dict(x=np.stack([x1, x2]))
 
-    return SequentialSimulator([contexts, parameters, observables])
+    return SequentialSimulator([contexts, parameters, observables], is_batched=False, is_numpy=True)
 
 
 @pytest.fixture()
@@ -62,7 +62,7 @@ def sequential_two_moons_keras():
         x2 = (-theta[:, 0] + theta[:, 1]) / np.sqrt(2.0) + r * keras.ops.sin(alpha)
         return dict(x=keras.ops.stack([x1, x2], axis=1))
 
-    return SequentialSimulator([contexts, parameters, observables])
+    return SequentialSimulator([contexts, parameters, observables], is_batched=True, is_numpy=False)
 
 
 @pytest.fixture(params=["sequential_two_moons_keras", "sequential_two_moons_numpy", "two_moons"])

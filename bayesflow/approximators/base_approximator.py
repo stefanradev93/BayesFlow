@@ -10,7 +10,7 @@ import warnings
 from bayesflow.configurators import BaseConfigurator
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import keras_kwargs
+from bayesflow.utils import keras_kwargs, expand_tile, process_output
 
 
 @register_keras_serializable(package="bayesflow.approximators")
@@ -27,44 +27,49 @@ class BaseApproximator(keras.Model):
         self.summary_network = summary_network
         self.configurator = configurator
 
-    def sample(self, num_samples: int = 1, data: dict[str, Tensor] = None) -> dict[str, Tensor]:
+    def sample(self, batch_shape: Shape, data: dict[str, Tensor] = None, numpy: bool = False) -> dict[str, Tensor]:
+        num_datasets, num_samples = batch_shape
+
         if data is None:
             data = {}
         else:
             data = data.copy()
 
-        if self.summary_network is None:
-            inference_conditions = self.configurator.configure_inference_conditions(data)
-            samples = self.inference_network.sample(num_samples, conditions=inference_conditions)
-
-            return self.configurator.deconfigure(samples)
-
-        data["summary_variables"] = self.configurator.configure_summary_variables(data)
-        data["summary_outputs"] = self.summary_network(data["summary_variables"])
+        if self.summary_network is not None:
+            data["summary_variables"] = self.configurator.configure_summary_variables(data)
+            data["summary_outputs"] = self.summary_network(data["summary_variables"])
 
         inference_conditions = self.configurator.configure_inference_conditions(data)
 
-        samples = self.inference_network.sample(num_samples, conditions=inference_conditions)
+        # TODO: do not assume this is a tensor
+        # TODO: do not rely on ndim == 2 vs ndim == 3 (i.e., allow multiple feature dimensions for conditions)
+        if inference_conditions is not None and keras.ops.ndim(inference_conditions) == 2:
+            inference_conditions = expand_tile(inference_conditions, axis=1, n=num_samples)
 
-        return self.configurator.deconfigure(samples)
+        samples = self.inference_network.sample(batch_shape, conditions=inference_conditions)
+        samples = self.configurator.deconfigure(samples)
 
-    def log_prob(self, data: dict[str, Tensor]) -> Tensor:
+        if self.summary_network is not None:
+            samples["summaries"] = data["summary_outputs"]
+
+        return process_output(samples, convert_to_numpy=numpy)
+
+    def log_prob(self, data: dict[str, Tensor], numpy: bool = False) -> Tensor:
         data = data.copy()
 
-        if self.summary_network is None:
-            data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
-            data["inference_variables"] = self.configurator.configure_inference_variables(data)
-
-            return self.inference_network.log_prob(data)
-
-        data["summary_variables"] = self.configurator.configure_summary_variables(data)
-        summary_metrics = self.summary_network.compute_metrics(data, stage="inference")
-        data["summary_outputs"] = summary_metrics.get("outputs")
+        if self.summary_network is not None:
+            data["summary_variables"] = self.configurator.configure_summary_variables(data)
+            data["summary_outputs"] = self.summary_network(data["summary_variables"])
 
         data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
         data["inference_variables"] = self.configurator.configure_inference_variables(data)
 
-        return self.inference_network.log_prob(data)
+        log_prob = self.inference_network.log_prob(data["inference_variables"], conditions=data["inference_conditions"])
+
+        if numpy:
+            log_prob = keras.ops.convert_to_numpy(log_prob)
+
+        return log_prob
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "BaseApproximator":
@@ -155,14 +160,18 @@ class BaseApproximator(keras.Model):
         if not self.built:
             try:
                 dataset = kwargs.get("x") or args[0]
-                data = next(iter(dataset))
-                self.build_from_data(data)
-            except Exception:
+            except IndexError:
+                raise RuntimeError("Missing fit data.")
+
+            if not isinstance(dataset, keras.utils.PyDataset):
                 raise RuntimeError(
-                    "Could not automatically build the approximator. Please pass a dataset as the "
+                    "Cannot automatically build the approximator. Please pass a dataset as the "
                     "first argument to `approximator.fit()` or manually call `approximator.build()` "
                     "with a dictionary specifying your data shapes."
                 )
+
+            data = next(iter(dataset))
+            self.build_from_data(data)
 
         return super().fit(*args, **kwargs)
 

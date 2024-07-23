@@ -37,8 +37,15 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
         return self.activation_fn(x)
 
     def build(self, input_shape):
-        # build nested layers with forward pass
-        self.call(keras.ops.zeros(input_shape))
+        self.dense.build(input_shape)
+        input_shape = self.dense.compute_output_shape(input_shape)
+        self.dropout.build(input_shape)
+
+    def compute_output_shape(self, input_shape):
+        input_shape = self.dense.compute_output_shape(input_shape)
+        input_shape = self.dropout.compute_output_shape(input_shape)
+
+        return input_shape
 
     def get_config(self):
         config = super().get_config()
