@@ -19,7 +19,12 @@ def setup():
     import keras
     import logging
 
-    logging.getLogger().setLevel(logging.INFO)
+    # set the basic logging level if the user hasn't already
+    logging.basicConfig(level=logging.INFO)
+
+    # use a separate logger for the bayesflow package
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
 
     if keras.backend.backend() == "torch":
         # turn off gradients by default

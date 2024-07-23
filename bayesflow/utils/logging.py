@@ -2,6 +2,9 @@ import keras
 import logging
 
 
+logger = logging.getLogger("bayesflow")
+
+
 def _log(msg, *args, callback_fn: callable = print, **kwargs):
     if keras.backend.backend() == "jax":
         import jax
@@ -15,28 +18,28 @@ def _log(msg, *args, callback_fn: callable = print, **kwargs):
 
 
 def critical(msg, *args, **kwargs):
-    _log(msg, *args, callback_fn=logging.critical, **kwargs)
+    _log(msg, *args, callback_fn=logger.critical, **kwargs)
 
 
 def debug(msg, *args, **kwargs):
-    _log(msg, *args, callback_fn=logging.debug, **kwargs)
+    _log(msg, *args, callback_fn=logger.debug, **kwargs)
 
 
 def error(msg, *args, **kwargs):
-    _log(msg, *args, callback_fn=logging.error, **kwargs)
+    _log(msg, *args, callback_fn=logger.error, **kwargs)
 
 
 def exception(msg, *args, **kwargs):
-    _log(msg, *args, callback_fn=logging.exception, **kwargs)
+    _log(msg, *args, callback_fn=logger.exception, **kwargs)
 
 
 def info(msg, *args, **kwargs):
-    _log(msg, *args, callback_fn=logging.info, **kwargs)
+    _log(msg, *args, callback_fn=logger.info, **kwargs)
 
 
 def log(msg, *args, **kwargs):
-    _log(msg, *args, callback_fn=logging.log, **kwargs)
+    _log(msg, *args, callback_fn=logger.log, **kwargs)
 
 
 def warning(msg, *args, **kwargs):
-    _log(msg, *args, callback_fn=logging.warning, **kwargs)
+    _log(msg, *args, callback_fn=logger.warning, **kwargs)
