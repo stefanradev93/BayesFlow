@@ -3,7 +3,7 @@ from keras.saving import (
     register_keras_serializable,
 )
 
-from bayesflow.types import Tensor
+from bayesflow.types import Shape, Tensor
 from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, tile_axis
 
 from ..inference_network import InferenceNetwork
@@ -26,7 +26,7 @@ class FlowMatching(InferenceNetwork):
 
         self.seed_generator = keras.random.SeedGenerator()
 
-    def build(self, xz_shape, conditions_shape=None):
+    def build(self, xz_shape: Shape, conditions_shape: Shape = None) -> None:
         super().build(xz_shape)
 
         self.output_projector.units = xz_shape[-1]

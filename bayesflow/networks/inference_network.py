@@ -1,6 +1,6 @@
 import keras
 
-from bayesflow.types import Tensor
+from bayesflow.types import Shape, Tensor
 from bayesflow.utils import find_distribution
 
 
@@ -9,7 +9,7 @@ class InferenceNetwork(keras.Layer):
         super().__init__(**kwargs)
         self.base_distribution = find_distribution(base_distribution)
 
-    def build(self, xz_shape, **kwargs):
+    def build(self, xz_shape: Shape, conditions_shape: Shape = None) -> None:
         self.base_distribution.build(xz_shape)
 
     def call(self, xz: Tensor, inverse: bool = False, **kwargs) -> Tensor | tuple[Tensor, Tensor]:
