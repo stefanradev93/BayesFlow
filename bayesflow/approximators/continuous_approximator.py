@@ -32,7 +32,7 @@ class ContinuousApproximator(Approximator):
         self.inference_network = inference_network
         self.summary_network = summary_network
 
-    def build(self, data_shapes: Mapping[str, Shape]):
+    def build(self, data_shapes: Mapping[str, Shape]) -> None:
         data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
         self.compute_metrics(data)
 
@@ -68,11 +68,18 @@ class ContinuousApproximator(Approximator):
 
         if configurator == "auto":
             logging.info("Building automatic configurator.")
-            configurator = ConcatenateKeysConfigurator(
-                inference_variables=inference_variables,
-                inference_conditions=inference_conditions,
-                summary_variables=summary_variables,
-            )
+
+            variables = {}
+            if inference_variables is not None:
+                variables["inference_variables"] = inference_variables
+
+            if inference_conditions is not None:
+                variables["inference_conditions"] = inference_conditions
+
+            if summary_variables is not None:
+                variables["summary_variables"] = summary_variables
+
+            configurator = ConcatenateKeysConfigurator(**variables)
 
         return super().fit(configurator=configurator, **kwargs)
 
