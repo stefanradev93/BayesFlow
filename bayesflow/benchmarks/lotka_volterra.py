@@ -1,55 +1,34 @@
-# Copyright (c) 2022 The BayesFlow Developers
-
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
-# Corresponds to Task T.10 from the paper https://arxiv.org/pdf/2101.04653.pdf
-
 import numpy as np
 from scipy.integrate import odeint
 
-bayesflow_benchmark_info = {
-    "simulator_is_batched": False,
-    "parameter_names": [r"$\alpha$", r"$\beta$", r"$\gamma$", r"$\delta$"],
-    "configurator_info": "posterior",
-}
+
+def simulator():
+    """Non-configurable simulator running with default settings."""
+    prior_draws = prior()
+    observables = observation_model(prior_draws)
+    return dict(parameters=prior_draws, observables=observables)
 
 
-def prior(rng=None):
+def prior(rng: np.random.Generator = None):
     """Generates a random draw from a 4-dimensional (independent) lognormal prior
     which represents the four contact parameters of the Lotka-Volterra model.
 
     Parameters
     ----------
-    rng   : np.random.Generator or None, default: None
+    rng    : np.random.Generator or None, default: None
         An optional random number generator to use.
 
     Returns
     -------
-    theta : np.ndarray of shape (4,)
+    params : np.ndarray of shape (4,)
         A single draw from the 4-dimensional prior.
     """
 
     if rng is None:
         rng = np.random.default_rng()
 
-    theta = rng.lognormal(mean=[-0.125, -3, -0.125, -3], sigma=0.5)
-    return theta
+    params = rng.lognormal(mean=[-0.125, -3, -0.125, -3], sigma=0.5)
+    return params
 
 
 def _deriv(x, t, alpha, beta, gamma, delta):
@@ -61,21 +40,30 @@ def _deriv(x, t, alpha, beta, gamma, delta):
     return dX, dY
 
 
-def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True, obs_noise=0.1, rng=None):
+def observation_model(
+    params: np.ndarray,
+    X0: int = 30,
+    Y0: int = 1,
+    T: int = 20,
+    subsample: int = 10,
+    flatten: bool = True,
+    obs_noise: float = 0.1,
+    rng: np.random.Generator = None,
+):
     """Runs a Lotka-Volterra simulation for T time steps and returns `subsample` evenly spaced
-    points from the simulated trajectory, given contact parameters `theta`.
+    points from the simulated trajectory, given contact parameters `params`.
 
     See https://arxiv.org/pdf/2101.04653.pdf, Benchmark Task T.10.
 
     Parameters
     ----------
-    theta       : np.ndarray of shape (2,)
+    params      : np.ndarray of shape (2,)
         The 2-dimensional vector of disease parameters.
-    X0          : float, optional, default: 30
+    X0          : int, optional, default: 30
         Initial number of prey species.
-    Y0          : float, optional, default: 1
+    Y0          : int, optional, default: 1
         Initial number of predator species.
-    T           : T, optional, default: 20
+    T           : int, optional, default: 20
         The duration (time horizon) of the simulation.
     subsample   : int or None, optional, default: 10
         The number of evenly spaced time points to return. If None,
@@ -103,7 +91,7 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True, obs_noise=0.
     x0 = X0, Y0
 
     # Unpack parameter vector into scalars
-    alpha, beta, gamma, delta = theta
+    alpha, beta, gamma, delta = params
 
     # Prepate time vector between 0 and T of length T
     t_vec = np.linspace(0, T, T)
@@ -123,47 +111,3 @@ def simulator(theta, X0=30, Y0=1, T=20, subsample=10, flatten=True, obs_noise=0.
     if flatten:
         return x.flatten()
     return x
-
-
-def configurator(forward_dict, mode="posterior", scale_data=1000, as_summary_condition=False):
-    """Configures simulator outputs for use in BayesFlow training."""
-
-    # Case only posterior configuration
-    if mode == "posterior":
-        input_dict = _config_posterior(forward_dict, scale_data, as_summary_condition)
-
-    # Case only likelihood configuration
-    elif mode == "likelihood":
-        input_dict = _config_likelihood(forward_dict, scale_data)
-
-    # Case posterior and likelihood configuration
-    elif mode == "joint":
-        input_dict = {}
-        input_dict["posterior_inputs"] = _config_posterior(forward_dict, scale_data, as_summary_condition)
-        input_dict["likelihood_inputs"] = _config_likelihood(forward_dict, scale_data)
-
-    # Throw otherwise
-    else:
-        raise NotImplementedError('For now, only a choice between ["posterior", "likelihood", "joint"] is available!')
-    return input_dict
-
-
-def _config_posterior(forward_dict, scale_data, as_summary_condition):
-    """Helper function for posterior configuration."""
-
-    input_dict = {}
-    input_dict["parameters"] = forward_dict["prior_draws"].astype(np.float32)
-    if as_summary_condition:
-        input_dict["summary_conditions"] = forward_dict["sim_data"].astype(np.float32) / scale_data
-    else:
-        input_dict["direct_conditions"] = forward_dict["sim_data"].astype(np.float32) / scale_data
-    return input_dict
-
-
-def _config_likelihood(forward_dict, scale_data):
-    """Helper function for likelihood configuration."""
-
-    input_dict = {}
-    input_dict["observables"] = forward_dict["sim_data"].astype(np.float32) / scale_data
-    input_dict["conditions"] = forward_dict["prior_draws"].astype(np.float32)
-    return input_dict

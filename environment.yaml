@@ -6,12 +6,14 @@ dependencies:
   - keras ~= 3.3.0
   - numpy
   - matplotlib
+  - pre-commit
   - pytest
   - pytest-cov
   - pytest-xdist
   - python >= 3.10, < 3.12
+  - ruff
   - seaborn
   - scikit-learn
-  - scipy
+  - scipy ~= 1.13
   - tqdm
   - tox ~= 4.15

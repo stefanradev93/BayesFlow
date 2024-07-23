@@ -1,0 +1,47 @@
+import keras
+from keras import ops
+
+from bayesflow.types import Shape, Tensor
+from .distribution import Distribution
+
+
+@keras.saving.register_keras_serializable(package="bayesflow.distributions")
+class MixtureDistribution(Distribution):
+    """Utility class for a backend-agnostic mixture distributions."""
+
+    def __init__(
+        self,
+        distributions: list[Distribution],
+        mixture_logits: list[float] = None,
+        trainable_mixture: bool = False,
+        **kwargs,
+    ):
+        """TODO"""
+
+        super().__init__(**kwargs)
+
+        self.distributions = distributions
+
+        if mixture_logits is None:
+            mixture_logits = keras.ops.ones(shape=len(distributions))
+
+        self.mixture_logits = self.add_weight(
+            shape=(len(distributions),),
+            initializer=keras.initializers.Constant(value=mixture_logits),
+            dtype="float32",
+            trainable=trainable_mixture,
+        )
+
+    def sample(self, batch_shape: Shape) -> Tensor:
+        # TODO - Implement efficiently
+        raise NotImplementedError
+
+    def log_prob(self, tensor: Tensor) -> Tensor:
+        log_prob = [distribution.log_prob(tensor) for distribution in self.distributions]
+        log_prob = ops.stack(log_prob, axis=-1)
+        log_prob = ops.logsumexp(log_prob + ops.log_softmax(self.mixture_logits), axis=-1)
+        return log_prob
+
+    def build(self, input_shape: Shape) -> None:
+        for distribution in self.distributions:
+            distribution.build(input_shape)

@@ -1,4 +1,0 @@
-
-class SetTransformer:
-    #TODO
-    pass

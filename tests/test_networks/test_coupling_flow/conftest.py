@@ -1,17 +1,17 @@
-
-import keras
 import pytest
 
 
 @pytest.fixture()
 def actnorm():
-    from bayesflow.experimental.networks.coupling_flow.actnorm import ActNorm
+    from bayesflow.networks.coupling_flow.actnorm import ActNorm
+
     return ActNorm()
 
 
 @pytest.fixture()
 def dual_coupling():
-    from bayesflow.experimental.networks.coupling_flow.couplings import DualCoupling
+    from bayesflow.networks.coupling_flow.couplings import DualCoupling
+
     return DualCoupling()
 
 
@@ -22,5 +22,6 @@ def invertible_layer(request):
 
 @pytest.fixture()
 def single_coupling():
-    from bayesflow.experimental.networks.coupling_flow.couplings import SingleCoupling
+    from bayesflow.networks.coupling_flow.couplings import SingleCoupling
+
     return SingleCoupling()
