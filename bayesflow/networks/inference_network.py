@@ -33,6 +33,11 @@ class InferenceNetwork(keras.Layer):
         return log_density
 
     def compute_metrics(self, x: Tensor, conditions: Tensor = None, stage: str = "training") -> dict[str, Tensor]:
+        if not self.built:
+            xz_shape = keras.ops.shape(x)
+            conditions_shape = None if conditions is None else keras.ops.shape(conditions)
+            self.build(xz_shape, conditions_shape=conditions_shape)
+
         metrics = {}
 
         if stage != "training" and any(self.metrics):
