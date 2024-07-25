@@ -9,7 +9,7 @@ from keras.saving import (
 from bayesflow.configurators import ConcatenateKeysConfigurator, Configurator
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import logging
+from bayesflow.utils import filter_kwargs, logging
 
 from .approximator import Approximator
 
@@ -36,7 +36,22 @@ class ContinuousApproximator(Approximator):
         data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
         self.compute_metrics(data)
 
-    def compute_metrics(self, data: Mapping[str, Tensor], stage: str = "training"):
+    def build_configurator(
+        self,
+        inference_variables: Sequence[str],
+        inference_conditions: Sequence[str],
+        summary_variables: Sequence[str] = None,
+    ):
+        variables = {
+            "inference_variables": inference_variables,
+            "inference_conditions": inference_conditions,
+            "summary_variables": summary_variables,
+        }
+        variables = {key: value for key, value in variables.items() if value is not None}
+
+        return ConcatenateKeysConfigurator(**variables)
+
+    def compute_metrics(self, data: Mapping[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
         # TODO: add method or property to return required keys, on top of documentation
         inference_variables = data["inference_variables"]
         inference_conditions = data.get("inference_conditions")
@@ -59,28 +74,16 @@ class ContinuousApproximator(Approximator):
         self,
         *,
         configurator: Configurator = "auto",
-        inference_variables: Sequence[str] = None,
-        inference_conditions: Sequence[str] = None,
-        summary_variables: Sequence[str] = None,
+        dataset: keras.utils.PyDataset = None,
         **kwargs,
     ):
-        if "dataset" in kwargs:
-            return super().fit(**kwargs)
+        if dataset is not None:
+            return super().fit(dataset=dataset, **kwargs)
 
         if configurator == "auto":
             logging.info("Building automatic configurator.")
 
-            variables = {}
-            if inference_variables is not None:
-                variables["inference_variables"] = inference_variables
-
-            if inference_conditions is not None:
-                variables["inference_conditions"] = inference_conditions
-
-            if summary_variables is not None:
-                variables["summary_variables"] = summary_variables
-
-            configurator = ConcatenateKeysConfigurator(**variables)
+            configurator = self.build_configurator(**filter_kwargs(kwargs, self.build_configurator))
 
         return super().fit(configurator=configurator, **kwargs)
 

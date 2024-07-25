@@ -10,7 +10,7 @@ from bayesflow.configurators import ConcatenateKeysConfigurator, Configurator
 from bayesflow.networks import SummaryNetwork
 from bayesflow.simulators import ModelComparisonSimulator, Simulator
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import logging
+from bayesflow.utils import filter_kwargs, logging
 
 from .approximator import Approximator
 
@@ -37,6 +37,21 @@ class ModelComparisonApproximator(Approximator):
         data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
         self.compute_metrics(data)
 
+    def build_configurator(
+        self,
+        classifier_variables: Sequence[str],
+        summary_variables: Sequence[str] = None,
+        model_index_name: str = "model_indices",
+    ):
+        variables = {
+            "classifier_variables": classifier_variables,
+            "summary_variables": summary_variables,
+            "model_indices": [model_index_name],
+        }
+        variables = {key: value for key, value in variables.items() if value is not None}
+
+        return ConcatenateKeysConfigurator(**variables)
+
     def compute_metrics(self, data: Mapping[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
         classifier_variables = data["classifier_variables"]
         model_indices = data["model_indices"]
@@ -58,23 +73,27 @@ class ModelComparisonApproximator(Approximator):
         self,
         *,
         configurator: Configurator = "auto",
-        classifier_variables: Sequence[str] = None,
-        model_index_name: str = "model_indices",
+        dataset: keras.utils.PyDataset = None,
+        simulator: ModelComparisonSimulator = None,
         simulators: Sequence[Simulator] = None,
-        summary_variables: Sequence[str] = None,
         **kwargs,
     ):
-        if "dataset" in kwargs:
-            return super().fit(**kwargs)
+        if dataset is not None:
+            if simulator is not None or simulators is not None:
+                raise ValueError(
+                    "Received conflicting arguments. Please provide either a dataset or a simulator, but not both."
+                )
+
+            return super().fit(dataset=dataset, **kwargs)
 
         if configurator == "auto":
             logging.info("Building automatic configurator.")
-            configurator = ConcatenateKeysConfigurator([classifier_variables, summary_variables, [model_index_name]])
+            configurator = self.build_configurator(**filter_kwargs(kwargs, self.build_configurator))
 
-        if "simulator" in kwargs:
-            return super().fit(configurator=configurator, **kwargs)
+        if simulator is not None:
+            return super().fit(simulator=simulator, configurator=configurator, **kwargs)
 
-        logging.info("Building model comparison simulator from {n} simulators.", n=len(simulators))
+        logging.info(f"Building model comparison simulator from {len(simulators)} simulators.")
 
         simulator = ModelComparisonSimulator(simulators=simulators)
 
