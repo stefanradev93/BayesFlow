@@ -49,8 +49,18 @@ def size_of(x: Tensor | Sequence[Tensor] | Mapping[str, Tensor]) -> int:
         return int(keras.ops.size(x)) * np.dtype(keras.ops.dtype(x)).itemsize
     if isinstance(x, Mapping):
         return size_of(list(x.values()))
+    if isinstance(x, Sequence):
+        seen_ids = []
+        total = 0
+        for item in x:
+            if id(item) in seen_ids:
+                continue
+            seen_ids.append(id(item))
+            total += size_of(item)
 
-    return sum(size_of(item) for item in set(x))
+        return total
+
+    raise ValueError(f"Cannot compute the size of container with type {type(x)}.")
 
 
 def tile_axis(x: Tensor, axis: int, n: int) -> Tensor:
