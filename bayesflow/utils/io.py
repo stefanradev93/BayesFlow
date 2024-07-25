@@ -8,7 +8,7 @@ def format_bytes(b: int, precision: int = 2, si: bool = False) -> str:
 
     Examples:
         >>> format_bytes(1024)
-        '1 KiB'
+        '1.00 KiB'
         >>> format_bytes(1024, si=True)
         '1.02 kB'
     """
