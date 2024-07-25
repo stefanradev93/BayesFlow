@@ -4,7 +4,7 @@ from keras.saving import (
 )
 
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, tile_axis
+from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, optimal_transport, tile_axis
 
 from ..inference_network import InferenceNetwork
 
@@ -144,13 +144,15 @@ class FlowMatching(InferenceNetwork):
     def compute_metrics(
         self, x: Tensor | tuple[Tensor, ...], conditions: Tensor = None, stage: str = "training"
     ) -> dict[str, Tensor]:
-        if isinstance(x, tuple):
-            # already pre-configured with FlowMatchingConfigurator
+        try:
             x0, x1, t, x, target_velocity = x
-        else:
-            # resample, don't use optimal transport for efficiency
+        except (TypeError, ValueError):
+            # not pre-configured, resample
             x1 = x
             x0 = keras.random.normal(keras.ops.shape(x1), dtype=keras.ops.dtype(x1), seed=self.seed_generator)
+
+            # use weak regularization and low number of steps for efficiency
+            x0, x1 = optimal_transport(x0, x1, regularization=0.1, max_steps=1000, seed=self.seed_generator)
 
             t = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
             t = expand_right_as(t, x0)
