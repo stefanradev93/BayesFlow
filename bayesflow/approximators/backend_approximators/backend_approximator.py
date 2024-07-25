@@ -1,6 +1,6 @@
 import keras
 
-from bayesflow.utils import logging
+from bayesflow.utils import filter_kwargs
 
 
 match keras.backend.backend():
@@ -13,14 +13,10 @@ match keras.backend.backend():
     case "torch":
         from .torch_approximator import TorchApproximator as BaseBackendApproximator
     case other:
-        raise ValueError(f"Backend '{other}' does not support workflows.")
+        raise ValueError(f"Backend '{other}' is not supported.")
 
 
 class BackendApproximator(BaseBackendApproximator):
+    # noinspection PyMethodOverriding
     def fit(self, *, dataset: keras.utils.PyDataset, **kwargs):
-        if not self.built:
-            logging.info("Automatically building networks based on a test batch.")
-            test_batch = dataset[0]
-            self.build({key: keras.ops.shape(value) for key, value in test_batch.items()})
-
-        return super().fit(x=dataset, y=None, **kwargs)
+        return super().fit(x=dataset, y=None, **filter_kwargs(kwargs, super().fit))
