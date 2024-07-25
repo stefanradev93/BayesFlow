@@ -15,14 +15,14 @@ class Simulator:
         *,
         axis: int = 0,
         numpy: bool = False,
-        extra_sample_size: int = None,
+        sample_size: int = None,
         **kwargs,
     ) -> dict[str, Tensor]:
-        if extra_sample_size is None:
+        if sample_size is None:
             sample_shape = batch_shape
         else:
             sample_shape = list(batch_shape)
-            sample_shape[axis] = extra_sample_size
+            sample_shape[axis] = sample_size
 
             sample_shape = tuple(sample_shape)
 

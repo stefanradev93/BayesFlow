@@ -18,7 +18,8 @@ from .git import (
 )
 
 from .io import (
-    find_maximum_batch_size,
+    format_bytes,
+    parse_bytes,
 )
 
 from . import logging

@@ -37,6 +37,7 @@ class ContinuousApproximator(Approximator):
         self.compute_metrics(data)
 
     def compute_metrics(self, data: Mapping[str, Tensor], stage: str = "training"):
+        # TODO: add method or property to return required keys, on top of documentation
         inference_variables = data["inference_variables"]
         inference_conditions = data.get("inference_conditions")
 

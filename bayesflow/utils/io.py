@@ -1,57 +1,71 @@
-import keras
-
-
-def find_maximum_batch_size(gen_fn: callable, start: int = 1, stop: int = 2**31, error_type: type = "auto") -> int:
+def format_bytes(b: int, precision: int = 2, si: bool = False) -> str:
     """
-    Find the maximum batch size for a given generator function, such that memory is filled completely.
-    Note: this does not factor in autograd memory usage, so treat the estimate as an upper bound.
+    Format a number of bytes as a human-readable string in the format '{value} {prefix}{unit}'.
 
-    :param gen_fn: A generator function that takes a batch size as input and returns a batch of samples.
+    :param b: The number of bytes to format.
+    :param precision: The display precision.
+    :param si: Determines whether to use SI decimal or binary prefixes.
 
-    :param start: The initial batch size to start the search from.
-
-    :param stop: The maximum batch size to search for.
-
-    :param error_type: The type of error to catch if allocation fails.
-        If "auto", will use the default error types for the backend.
-
-    :return: The maximum batch size.
+    Examples:
+        >>> format_bytes(1024)
+        '1 KiB'
+        >>> format_bytes(1024, si=True)
+        '1.02 kB'
     """
-    if error_type == "auto":
-        match keras.backend.backend():
-            case "jax":
-                from jaxlib.xla_extension import XlaRuntimeError
+    if si:
+        div = 1000
+        prefixes = ["", "k", "M", "G", "T", "P", "E", "Z", "Y", "R", "Q"]
+    else:
+        div = 1024
+        prefixes = ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi", "Ri", "Qi"]
 
-                error_type = XlaRuntimeError
-            case "numpy":
-                error_type = MemoryError
-            case "tensorflow":
-                import tensorflow as tf
+    value = float(b)
+    idx = 0
+    while value >= div and idx < len(prefixes) - 1:
+        value /= div
+        idx += 1
 
-                error_type = tf.errors.ResourceExhaustedError
-            case "torch":
-                import torch
+    prefix = prefixes[idx]
 
-                # torch only throws if CUDA OOM, not CPU OOM
-                error_type = torch.cuda.OutOfMemoryError
+    return f"{value:.{precision}f} {prefix}B"
 
-    # ensure maximum memory is available
-    keras.utils.clear_session()
 
-    batch_size = start
-    while batch_size <= stop:
-        try:
-            # allocate memory
-            _samples = gen_fn(batch_size)
-        except error_type:
-            # allocation did not work, return the previous batch size
-            return batch_size // 2
-        else:
-            # allocation worked, double the batch size and try again
-            batch_size *= 2
-        finally:
-            # always clear allocated memory, regardless if allocation worked or not
-            keras.utils.clear_session()
+def parse_bytes(s: str) -> int:
+    """
+    Parse a string in the format '{value} {prefix}{unit}' and return the number of bytes,
+    flooring to the nearest integer.
 
-    # reached stop condition without running out of memory
-    return stop
+    The parsing is case-sensitive. E.g., uppercase 'K' will *not* be recognized as 'kilo',
+    and lowercase 'b' will be recognized as 'bit' rather than 'byte'.
+
+    Examples:
+        >>> parse_bytes("8 GB")  # 8 Gigabyte
+        8000000000
+        >>> parse_bytes("32 kiB")  # 32 Kibibyte
+        32768
+        >>> parse_bytes("1 Tb")  # 1 Terrabit
+        125000000000
+        >>> parse_bytes("2.5 kB")  # 2.5 Kilobyte
+        2500
+        >>> parse_bytes("1e9 B")  # 10^9 Bytes
+        1000000000
+    """
+    value, unit = s.strip().split(" ")
+
+    value = float(value)
+    prefix, suffix = unit[:-1], unit[-1]
+
+    if "i" not in prefix:
+        # SI
+        prefixes = ["", "k", "M", "G", "T", "P", "E", "Z", "Y", "R", "Q"]
+        factor = 1000 ** prefixes.index(prefix)
+    else:
+        prefixes = ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi", "Ri", "Qi"]
+        factor = 1024 ** prefixes.index(prefix)
+
+    result = int(value * factor)
+
+    if suffix == "b":
+        result //= 8
+
+    return result

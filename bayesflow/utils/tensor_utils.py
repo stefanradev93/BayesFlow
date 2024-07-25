@@ -43,7 +43,7 @@ def expand_tile(x: Tensor, axis: int, n: int) -> Tensor:
 def size_of(x: Tensor | Sequence[Tensor] | Mapping[str, Tensor]) -> int:
     """
     :param x: A tensor, a sequence of tensors or a mapping of tensors.
-    :return: The total memory footprint of x, ignoring view semantics.
+    :return: The total memory footprint of x, ignoring view semantics, in bytes.
     """
     if keras.ops.is_tensor(x):
         return int(keras.ops.size(x)) * np.dtype(keras.ops.dtype(x)).itemsize
