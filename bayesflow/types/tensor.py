@@ -5,20 +5,20 @@ match keras.backend.backend():
     case "numpy":
         import numpy as np
 
-        bound = np.ndarray
+        BackendTensor = np.ndarray
     case "jax":
         import jax
 
-        bound = jax.Array
+        BackendTensor = jax.Array
     case "tensorflow":
         import tensorflow as tf
 
-        bound = tf.Tensor
+        BackendTensor = tf.Tensor
     case "torch":
         import torch
 
-        bound = torch.Tensor
+        BackendTensor = torch.Tensor
     case other:
         raise NotImplementedError
 
-Tensor = TypeVar("Tensor", bound=bound)
+Tensor = TypeVar("Tensor", bound=BackendTensor)
