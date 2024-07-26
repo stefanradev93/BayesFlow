@@ -2,6 +2,7 @@ from functools import singledispatch
 import keras
 
 from bayesflow.types import Tensor
+from bayesflow.types.tensor import BackendTensor
 
 
 @singledispatch
@@ -24,6 +25,6 @@ def _(name: str, x1: Tensor, x2: Tensor, **kwargs):
     return cost
 
 
-@find_cost.register(Tensor.__bound__)
+@find_cost.register(BackendTensor)
 def _(cost: Tensor, *args, **kwargs):
     return cost
