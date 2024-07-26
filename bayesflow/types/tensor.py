@@ -1,24 +1,24 @@
 import keras
-
-Shape = tuple[int, ...]
-
+from typing import TypeVar
 
 match keras.backend.backend():
     case "numpy":
         import numpy as np
 
-        Tensor = np.ndarray
+        bound = np.ndarray
     case "jax":
         import jax
 
-        Tensor = jax.Array
+        bound = jax.Array
     case "tensorflow":
         import tensorflow as tf
 
-        Tensor = tf.Tensor
+        bound = tf.Tensor
     case "torch":
         import torch
 
-        Tensor = torch.Tensor
+        bound = torch.Tensor
     case other:
         raise NotImplementedError
+
+Tensor = TypeVar("Tensor", bound=bound)

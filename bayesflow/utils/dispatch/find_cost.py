@@ -24,6 +24,6 @@ def _(name: str, x1: Tensor, x2: Tensor, **kwargs):
     return cost
 
 
-@find_cost.register
+@find_cost.register(Tensor.__bound__)
 def _(cost: Tensor, *args, **kwargs):
     return cost
