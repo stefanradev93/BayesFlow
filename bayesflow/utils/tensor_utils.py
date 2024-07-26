@@ -1,4 +1,3 @@
-from collections.abc import Mapping, Sequence
 import keras
 import numpy as np
 
@@ -40,27 +39,22 @@ def expand_tile(x: Tensor, axis: int, n: int) -> Tensor:
     return tile_axis(x, axis, n)
 
 
-def size_of(x: Tensor | Sequence[Tensor] | Mapping[str, Tensor]) -> int:
+def size_of(x) -> int:
     """
-    :param x: A tensor, a sequence of tensors or a mapping of tensors.
+    :param x: Any nested structure of tensors.
     :return: The total memory footprint of x, ignoring view semantics, in bytes.
     """
     if keras.ops.is_tensor(x):
         return int(keras.ops.size(x)) * np.dtype(keras.ops.dtype(x)).itemsize
-    if isinstance(x, Mapping):
-        return size_of(list(x.values()))
-    if isinstance(x, Sequence):
-        seen_ids = []
-        total = 0
-        for item in x:
-            if id(item) in seen_ids:
-                continue
-            seen_ids.append(id(item))
-            total += size_of(item)
 
-        return total
+    # flatten nested structure
+    x = keras.tree.flatten(x)
 
-    raise ValueError(f"Cannot compute the size of container with type {type(x)}.")
+    # get unique tensors by id
+    x = {id(tensor): tensor for tensor in x}
+
+    # sum up individual sizes
+    return sum(size_of(tensor) for tensor in x.values())
 
 
 def tile_axis(x: Tensor, axis: int, n: int) -> Tensor:
