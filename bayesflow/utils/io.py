@@ -50,7 +50,15 @@ def parse_bytes(s: str) -> int:
         >>> parse_bytes("1e9 B")  # 10^9 Bytes
         1000000000
     """
-    value, unit = s.strip().split(" ")
+    s = s.strip()
+    if s.count(" ") != 1:
+        raise ValueError(
+            "Cannot parse bytes from string without exactly one space separator. "
+            "Expected format: '{value} {prefix}{unit}'."
+            "Example: '8 GiB'."
+        )
+
+    value, unit = s.split(" ")
 
     value = float(value)
     prefix, suffix = unit[:-1], unit[-1]
