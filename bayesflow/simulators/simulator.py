@@ -1,3 +1,4 @@
+from collections.abc import Callable
 import keras
 
 from bayesflow.types import Shape, Tensor
@@ -11,7 +12,7 @@ class Simulator:
     def rejection_sample(
         self,
         batch_shape: Shape,
-        condition: callable,
+        predicate: Callable[[dict[str, Tensor]], Tensor],
         *,
         axis: int = 0,
         numpy: bool = False,
@@ -29,17 +30,35 @@ class Simulator:
         result = {}
 
         while not result or keras.ops.shape(next(iter(result.values())))[axis] < batch_shape[axis]:
+            # get a batch of samples
             samples = self.sample(sample_shape, **kwargs)
-            accept_mask = condition(samples)
-            accept_mask = keras.ops.cast(accept_mask, "bool")
 
-            if not keras.ops.any(accept_mask):
+            # get acceptance mask and turn into indices
+            accept = predicate(samples)
+
+            if not keras.ops.is_tensor(accept):
+                raise RuntimeError("Predicate must return a tensor.")
+
+            if not keras.ops.shape(accept) == (sample_shape[axis],):
+                raise RuntimeError(
+                    f"Predicate return tensor must have shape {(sample_shape[axis],)}. "
+                    f"Received: {keras.ops.shape(accept)}."
+                )
+
+            if not keras.ops.dtype(accept) == "bool":
+                # we could cast, but this tends to hide mistakes in the predicate
+                raise RuntimeError("Predicate must return a tensor of dtype bool.")
+
+            (accept,) = keras.ops.nonzero(accept)
+
+            if not keras.ops.any(accept):
+                # no samples accepted, skip
                 continue
 
-            (accept_indices,) = keras.ops.nonzero(accept_mask)
+            # apply acceptance mask
+            samples = {key: keras.ops.take(value, accept, axis=axis) for key, value in samples.items()}
 
-            samples = {key: keras.ops.take(value, accept_indices, axis=axis) for key, value in samples.items()}
-
+            # concatenate with previous samples
             if not result:
                 result = samples
             else:
