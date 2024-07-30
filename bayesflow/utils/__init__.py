@@ -1,11 +1,8 @@
 from .dict_utils import (
-    concatenate_dicts,
     convert_args,
     convert_kwargs,
-    filter_concatenate,
     filter_kwargs,
     keras_kwargs,
-    stack_dicts,
     process_output,
 )
 
@@ -41,4 +38,6 @@ from .tensor_utils import (
     expand_tile,
     size_of,
     tile_axis,
+    tree_concatenate,
+    tree_stack,
 )

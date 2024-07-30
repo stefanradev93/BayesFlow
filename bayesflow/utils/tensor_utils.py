@@ -1,7 +1,12 @@
+from collections.abc import Sequence
 import keras
 import numpy as np
+from typing import TypeVar
 
 from bayesflow.types import Shape, Tensor
+
+
+T = TypeVar("T")
 
 
 def broadcast_right(x: Tensor, shape: Shape) -> Tensor:
@@ -41,7 +46,7 @@ def expand_tile(x: Tensor, axis: int, n: int) -> Tensor:
 
 def size_of(x) -> int:
     """
-    :param x: Any nested structure of tensors.
+    :param x: A nested structure of tensors.
     :return: The total memory footprint of x, ignoring view semantics, in bytes.
     """
     if keras.ops.is_tensor(x):
@@ -62,3 +67,42 @@ def tile_axis(x: Tensor, axis: int, n: int) -> Tensor:
     repeats = [1] * keras.ops.ndim(x)
     repeats[axis] = n
     return keras.ops.tile(x, repeats=repeats)
+
+
+# we want to annotate this as Sequence[PyTree[Tensor]], but static type checkers do not support PyTree's type expansion
+def tree_concatenate(structures: Sequence[T], axis: int = 0, numpy: bool = False) -> T:
+    """Concatenate all tensors in the given sequence of nested structures.
+    All objects in the given sequence must have the same structure.
+    The output will adhere to this structure.
+
+    :param structures: A sequence of nested structures of tensors.
+        All structures in the sequence must have the same layout.
+        Tensors in the same layout location must have compatible shapes for concatenation.
+    :param axis: The axis along which to concatenate tensors.
+    :param numpy: If true, uses numpy for concatenation, ensuring all tensors remain on the cpu.
+    :return: A structure of concatenated tensors with the same layout as each input structure.
+    """
+    if numpy:
+
+        def fn(*tensors):
+            return np.concatenate(tensors, axis=axis)
+    else:
+
+        def fn(*tensors):
+            return keras.ops.concatenate(tensors, axis=axis)
+
+    return keras.tree.map_structure(fn, *structures)
+
+
+def tree_stack(structures: Sequence[T], axis: int = 0, numpy: bool = False) -> T:
+    """Like :func:`tree_concatenate`, except tensors are stacked instead of concatenated."""
+    if numpy:
+
+        def fn(*tensors):
+            return np.stack(tensors, axis=axis)
+    else:
+
+        def fn(*tensors):
+            return keras.ops.concatenate(tensors, axis=axis)
+
+    return keras.tree.map_structure(fn, *structures)

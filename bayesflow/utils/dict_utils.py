@@ -1,25 +1,11 @@
 import inspect
 import keras
-from keras import ops
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 
 from bayesflow.types import Tensor
 
 from . import logging
-
-
-def concatenate_dicts(data: list[Mapping[str, Tensor]], axis: int = -1) -> Mapping[str, Tensor]:
-    """Concatenates tensors in multiple dictionaries into a single dictionary."""
-    if not all([d.keys() == data[0].keys() for d in data]):
-        raise ValueError("Dictionaries must have the same keys.")
-
-    result = {}
-
-    for key in data[0].keys():
-        result[key] = keras.ops.concatenate([d[key] for d in data], axis=axis)
-
-    return result
 
 
 def convert_args(f, *args, **kwargs) -> tuple[any, ...]:
@@ -60,23 +46,6 @@ def convert_kwargs(f, *args, **kwargs) -> Mapping[str, any]:
     return parameters
 
 
-def filter_concatenate(data: Mapping[str, Tensor], keys: Sequence[str], axis: int = -1) -> Tensor | None:
-    """Filters and then concatenates all tensors from data using only keys from the given sequence.
-    An optional axis can be specified (default: last axis).
-    """
-    if not keys:
-        return None
-
-    # ensure every key is present
-    tensors = [data[key] for key in keys]
-
-    try:
-        return keras.ops.concatenate(tensors, axis=axis)
-    except ValueError as e:
-        shapes = [t.shape for t in tensors]
-        raise ValueError(f"Cannot trivially concatenate tensors {keys} with shapes {shapes}") from e
-
-
 def filter_kwargs(kwargs: Mapping[str, any], f: callable) -> Mapping[str, any]:
     """Filter keyword arguments for f"""
     signature = inspect.signature(f)
@@ -101,33 +70,20 @@ def process_output(outputs: Mapping[str, Tensor], convert_to_numpy: bool = True)
     """Utility function to apply common post-processing steps to the outputs of an approximator."""
 
     # Remove trailing first axis for single data sets
-    outputs = {k: ops.squeeze(v, axis=0) if ops.shape(v)[0] == 1 else v for k, v in outputs.items()}
+    outputs = {k: keras.ops.squeeze(v, axis=0) if keras.ops.shape(v)[0] == 1 else v for k, v in outputs.items()}
 
     # Warn if any NaNs present in output
     for k, v in outputs.items():
-        nan_mask = ops.isnan(v)
-        if ops.any(nan_mask):
-            logging.warning("Found a total of {n:d} nan values for output {k}.", n=int(ops.sum(nan_mask)), k=k)
+        nan_mask = keras.ops.isnan(v)
+        if keras.ops.any(nan_mask):
+            logging.warning("Found a total of {n:d} nan values for output {k}.", n=int(keras.ops.sum(nan_mask)), k=k)
 
     # Warn if any inf present in output
     for k, v in outputs.items():
-        inf_mask = ops.isinf(v)
-        if ops.any(inf_mask):
-            logging.warning("Found a total of {n:d} inf values for output {k}.", n=int(ops.sum(inf_mask)), k=k)
+        inf_mask = keras.ops.isinf(v)
+        if keras.ops.any(inf_mask):
+            logging.warning("Found a total of {n:d} inf values for output {k}.", n=int(keras.ops.sum(inf_mask)), k=k)
 
     if convert_to_numpy:
-        outputs = {k: ops.convert_to_numpy(v) for k, v in outputs.items()}
+        outputs = {k: keras.ops.convert_to_numpy(v) for k, v in outputs.items()}
     return outputs
-
-
-def stack_dicts(data: list[Mapping[str, Tensor]], axis: int = 0) -> Mapping[str, Tensor]:
-    """Stacks tensors in multiple dictionaries into a single dictionary."""
-    if not all([d.keys() == data[0].keys() for d in data]):
-        raise ValueError("Dictionaries must have the same keys.")
-
-    result = {}
-
-    for key in data[0].keys():
-        result[key] = keras.ops.stack([d[key] for d in data], axis=axis)
-
-    return result
