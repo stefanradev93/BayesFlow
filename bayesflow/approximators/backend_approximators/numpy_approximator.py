@@ -8,5 +8,8 @@ class NumpyApproximator(keras.Model):
         # implemented by each respective architecture
         raise NotImplementedError
 
-    def train_step(self, data):
+    def test_step(self, data: any) -> dict[str, np.ndarray]:
+        return self.compute_metrics(data, stage="validation")
+
+    def train_step(self, data: any) -> dict[str, np.ndarray]:
         raise NotImplementedError("Numpy backend does not support training.")

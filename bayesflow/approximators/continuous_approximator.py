@@ -6,7 +6,7 @@ from keras.saving import (
     serialize_keras_object as serialize,
 )
 
-from bayesflow.configurators import ConcatenateKeysConfigurator, Configurator
+from bayesflow.data_adapters import ConcatenateKeysDataAdapter, DataAdapter
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
 from bayesflow.utils import filter_kwargs, logging
@@ -36,12 +36,12 @@ class ContinuousApproximator(Approximator):
         data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
         self.compute_metrics(data)
 
-    def build_configurator(
+    def build_data_adapter(
         self,
         inference_variables: Sequence[str],
         inference_conditions: Sequence[str],
         summary_variables: Sequence[str] = None,
-    ):
+    ) -> DataAdapter:  # TODO: generic types
         variables = {
             "inference_variables": inference_variables,
             "inference_conditions": inference_conditions,
@@ -49,7 +49,7 @@ class ContinuousApproximator(Approximator):
         }
         variables = {key: value for key, value in variables.items() if value is not None}
 
-        return ConcatenateKeysConfigurator(**variables)
+        return ConcatenateKeysDataAdapter(**variables)
 
     def compute_metrics(self, data: Mapping[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
         # TODO: add method or property to return required keys, on top of documentation
@@ -73,19 +73,18 @@ class ContinuousApproximator(Approximator):
     def fit(
         self,
         *,
-        configurator: Configurator = "auto",
+        data_adapter: DataAdapter = "auto",
         dataset: keras.utils.PyDataset = None,
         **kwargs,
     ):
         if dataset is not None:
             return super().fit(dataset=dataset, **kwargs)
 
-        if configurator == "auto":
-            logging.info("Building automatic configurator.")
+        if data_adapter == "auto":
+            logging.info("Building automatic data adapter.")
+            data_adapter = self.build_data_adapter(**filter_kwargs(kwargs, self.build_data_adapter))
 
-            configurator = self.build_configurator(**filter_kwargs(kwargs, self.build_configurator))
-
-        return super().fit(configurator=configurator, **kwargs)
+        return super().fit(data_adapter=data_adapter, **kwargs)
 
     @classmethod
     def from_config(cls, config, custom_objects=None):
@@ -102,3 +101,57 @@ class ContinuousApproximator(Approximator):
         }
 
         return base_config | config
+
+    def sample(self, batch_shape: Shape, conditions: Tensor = None, numpy: bool = False) -> dict[str, Tensor]:
+        ...
+        # num_datasets, num_samples = batch_shape
+        #
+        # if self.summary_network is not None:
+        #     summary_outputs = self.summary_network(data["summary_variables"])
+        #
+        #     inference_conditions = keras.ops.concatenate([inference_conditions, summary_outputs], axis=-1)
+        #
+        # samples = self.inference_network.sample(batch_shape, conditions=conditions)
+        #
+        # if numpy:
+        #     samples = {key: keras.ops.convert_to_numpy(value) for key, value in samples.items()}
+        #
+        # return samples
+        #
+        # if self.summary_network is not None:
+        #     summary_outputs = self.summary_network(data["summary_variables"])
+        #     data["summary_outputs"] = self.summary_network(data["summary_variables"])
+        #
+        # inference_conditions = self.configurator.configure_inference_conditions(data)
+        #
+        # # TODO: do not assume this is a tensor
+        # # TODO: do not rely on ndim == 2 vs ndim == 3 (i.e., allow multiple feature dimensions for conditions)
+        # if inference_conditions is not None and keras.ops.ndim(inference_conditions) == 2:
+        #     inference_conditions = expand_tile(inference_conditions, axis=1, n=num_samples)
+        #
+        # samples = self.inference_network.sample(batch_shape, conditions=inference_conditions)
+        # samples = self.configurator.deconfigure(samples)
+        #
+        # if self.summary_network is not None:
+        #     samples["summaries"] = data["summary_outputs"]
+        #
+        # return process_output(samples, convert_to_numpy=numpy)
+
+    def log_prob(self, data: Mapping[str, Tensor], numpy: bool = False) -> Tensor:
+        ...
+        # data = data.copy()
+        #
+        # if self.summary_network is not None:
+        #     data["summary_variables"] = self.configurator.configure_summary_variables(data)
+        #     data["summary_outputs"] = self.summary_network(data["summary_variables"])
+        #
+        # data["inference_conditions"] = self.configurator.configure_inference_conditions(data)
+        # data["inference_variables"] = self.configurator.configure_inference_variables(data)
+        #
+        # log_prob = self.inference_network.log_prob(data["inference_variables"],
+        # conditions=data["inference_conditions"])
+        #
+        # if numpy:
+        #     log_prob = keras.ops.convert_to_numpy(log_prob)
+        #
+        # return log_prob

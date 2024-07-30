@@ -8,6 +8,9 @@ class TensorFlowApproximator(keras.Model):
         # implemented by each respective architecture
         raise NotImplementedError
 
+    def test_step(self, data: any) -> dict[str, tf.Tensor]:
+        return self.compute_metrics(data, stage="validation")
+
     def train_step(self, data: any) -> dict[str, tf.Tensor]:
         with tf.GradientTape() as tape:
             metrics = self.compute_metrics(data)

@@ -1,7 +1,7 @@
 import keras
 import multiprocessing as mp
 
-from bayesflow.configurators import Configurator
+from bayesflow.data_adapters import DataAdapter
 from bayesflow.datasets import OnlineDataset
 from bayesflow.simulators import Simulator
 from bayesflow.utils import find_batch_size, filter_kwargs, logging
@@ -14,18 +14,19 @@ class Approximator(BackendApproximator):
     def build(self, data_shapes: dict[str, Shape]) -> None:
         raise NotImplementedError
 
-    def build_configurator(self, **kwargs) -> Configurator:
+    def build_data_adapter(self, **kwargs) -> DataAdapter:
+        # implemented by each respective architecture
         raise NotImplementedError
 
     def build_dataset(
         self,
         *,
         batch_size: int = "auto",
-        configurator: Configurator = "auto",
+        data_adapter: DataAdapter = "auto",
         memory_budget: str | int = "auto",
         simulator: Simulator,
         workers: int = "auto",
-        use_multiprocessing: bool = True,
+        use_multiprocessing: bool = False,
         max_queue_size: int = 32,
         **kwargs,
     ) -> OnlineDataset:
@@ -33,8 +34,8 @@ class Approximator(BackendApproximator):
             batch_size = find_batch_size(memory_budget=memory_budget, sample=simulator.sample((1,)))
             logging.info(f"Using a batch size of {batch_size}.")
 
-        if configurator == "auto":
-            configurator = self.build_configurator(**filter_kwargs(kwargs, self.build_configurator))
+        if data_adapter == "auto":
+            data_adapter = self.build_data_adapter(**filter_kwargs(kwargs, self.build_data_adapter))
 
         if workers == "auto":
             workers = mp.cpu_count()
@@ -42,10 +43,17 @@ class Approximator(BackendApproximator):
 
         workers = workers or 1
 
+        if use_multiprocessing:
+            logging.warning(
+                "Due to a bug in keras, multiprocessing may not work correctly. "
+                "We recommend turning this off until the following issue is resolved: "
+                "https://github.com/keras-team/keras/issues/20032"
+            )
+
         return OnlineDataset(
             simulator=simulator,
             batch_size=batch_size,
-            configurator=configurator,
+            data_adapter=data_adapter,
             workers=workers,
             use_multiprocessing=use_multiprocessing,
             max_queue_size=max_queue_size,

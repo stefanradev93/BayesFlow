@@ -1,48 +1,57 @@
-def plot():
-    import os
-
-    os.environ["KERAS_BACKEND"] = "torch"
-
-    import bayesflow as bf
+def flatten_samples(samples):
     import keras
-    import seaborn as sns
+
+    flattened_samples = {}
+    for key, value in samples.items():
+        shape = keras.ops.shape(value)
+        if shape[1] == 1:
+            flattened_samples[key] = keras.ops.squeeze(value, 1)
+        else:
+            for i in range(shape[1]):
+                flattened_samples[f"{key}{i + 1}"] = value[:, i]
+    return flattened_samples
+
+
+def predicate(samples):
+    import keras
+
+    return keras.ops.norm(samples["x"], axis=-1) <= 1e-3
+
+
+def plot(samples):
     import matplotlib.pyplot as plt
+    import seaborn as sns
 
-    sns.set_style("whitegrid")
+    # add dashed minor grid lines
+    sns.set_style(
+        "whitegrid", {"axes.grid": True, "axes.grid.which": "both", "grid.linestyle": "--", "grid.linewidth": 0.5}
+    )
 
-    simulator = bf.simulators.TwoMoonsSimulator()
+    samples = flatten_samples(samples)
 
-    def condition(data):
-        return keras.ops.norm(data["x"], ord=2, axis=-1) < 0.01
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
-    samples = simulator.rejection_sample((2048,), condition=condition, numpy=True)
+    axes[0].scatter(
+        samples["theta1"], samples["theta2"], s=10, lw=0, c=samples["r"], cmap=sns.cubehelix_palette(as_cmap=True)
+    )
+    axes[1].scatter(
+        samples["theta1"], samples["theta2"], s=10, lw=0, c=samples["alpha"], cmap=sns.cubehelix_palette(as_cmap=True)
+    )
 
-    print({key: keras.ops.shape(value) for key, value in samples.items()})
+    axes[0].set_title(r"Hue by $r$")
+    axes[0].set_xlabel(r"$\theta_1$")
+    axes[0].set_ylabel(r"$\theta_2$")
 
-    samples["x2"] = samples["x"][:, 1]
-    samples["x1"] = samples["x"][:, 0]
-    samples["theta1"] = samples["theta"][:, 0]
-    samples["theta2"] = samples["theta"][:, 1]
+    axes[1].set_title(r"Hue by $\alpha$")
+    axes[1].set_xlabel(r"$\theta_1$")
+    axes[1].set_ylabel(r"$\theta_2$")
 
-    del samples["x"]
-    del samples["theta"]
+    fig.suptitle("Two Moons Samples")
 
-    samples = {key: keras.ops.squeeze(value, -1) for key, value in samples.items()}
-
-    g = sns.relplot(samples, x="x1", y="x2", hue="r", lw=0)
-    print(type(g))
-    print(dir(g))
-    g.ax.xaxis.grid(True, "minor", linewidth=0.25)
-    g.ax.yaxis.grid(True, "minor", linewidth=0.25)
-    g.despine(left=True, bottom=True)
     plt.show()
 
 
 def main():
-    import os
-
-    os.environ["KERAS_BACKEND"] = "torch"
-
     import bayesflow as bf
     import keras
 
@@ -68,9 +77,17 @@ def main():
         memory_budget="4 GB",
         # we don't need workers or multiprocessing because our dataset is small
         workers=1,
-        use_multiprocessing=False,
+        use_multiprocessing=True,
     )
+
+    samples = approximator.sample((2048,), numpy=True)
+
+    plot(samples)
 
 
 if __name__ == "__main__":
-    plot()
+    import os
+
+    os.environ["KERAS_BACKEND"] = "torch"
+
+    main()
