@@ -23,8 +23,8 @@ class InferenceNetwork(keras.Layer):
     def _inverse(self, z: Tensor, **kwargs) -> Tensor | tuple[Tensor, Tensor]:
         raise NotImplementedError
 
-    def sample(self, num_samples: int, conditions: Tensor = None, **kwargs) -> Tensor:
-        samples = self.base_distribution.sample((num_samples,))
+    def sample(self, batch_shape: Shape, conditions: Tensor = None, **kwargs) -> Tensor:
+        samples = self.base_distribution.sample(batch_shape)
         samples = self(samples, conditions=conditions, inverse=True, density=False, **kwargs)
         return samples
 

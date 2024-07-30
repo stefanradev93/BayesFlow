@@ -144,9 +144,10 @@ class FlowMatching(InferenceNetwork):
     def compute_metrics(
         self, x: Tensor | tuple[Tensor, ...], conditions: Tensor = None, stage: str = "training"
     ) -> dict[str, Tensor]:
-        try:
+        if isinstance(x, tuple):
+            # already pre-configured
             x0, x1, t, x, target_velocity = x
-        except (TypeError, ValueError):
+        else:
             # not pre-configured, resample
             x1 = x
             x0 = keras.random.normal(keras.ops.shape(x1), dtype=keras.ops.dtype(x1), seed=self.seed_generator)

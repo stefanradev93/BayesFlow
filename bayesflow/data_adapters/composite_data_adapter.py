@@ -7,25 +7,25 @@ from keras.saving import (
 
 from bayesflow.types import Tensor
 
-from .configurator import Configurator
+from .data_adapter import DataAdapter
 
 
-DataT = Mapping[str, Tensor]
-VarT = Mapping[str, Tensor]
+TRaw = Mapping[str, Tensor]
+TReady = Mapping[str, Tensor]
 
 
 @serializable(package="bayesflow.configurators")
-class CompositeConfigurator(Configurator[DataT, VarT]):
-    """Composes multiple simple configurators into a single more complex configurator."""
+class CompositeDataAdapter(DataAdapter[TRaw, TReady]):
+    """Composes multiple simple data adapters into a single more complex adapter."""
 
-    def __init__(self, configurators: Mapping[str, Configurator[DataT, Tensor]]):
+    def __init__(self, configurators: Mapping[str, DataAdapter[TRaw, Tensor]]):
         self.configurators = configurators
         self.variable_counts = None
 
-    def configure(self, data: DataT) -> VarT:
+    def configure(self, data: TRaw) -> TReady:
         return {key: configurator.configure(data) for key, configurator in self.configurators.items()}
 
-    def deconfigure(self, variables: VarT) -> DataT:
+    def deconfigure(self, variables: TReady) -> TRaw:
         data = {}
         for key, configurator in self.configurators.items():
             data |= configurator.deconfigure(variables[key])
@@ -33,7 +33,7 @@ class CompositeConfigurator(Configurator[DataT, VarT]):
         return data
 
     @classmethod
-    def from_config(cls, config: dict, custom_objects=None) -> "CompositeConfigurator":
+    def from_config(cls, config: dict, custom_objects=None) -> "CompositeDataAdapter":
         return cls(
             {
                 key: deserialize(configurator, custom_objects)
