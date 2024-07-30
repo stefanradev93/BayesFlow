@@ -1,6 +1,7 @@
 from collections.abc import Sequence
+import numpy as np
 
-from bayesflow.types import Shape, Tensor
+from bayesflow.types import Shape
 
 from .simulator import Simulator
 from .composite_simulator import CompositeSimulator
@@ -15,5 +16,5 @@ class CompositeLambdaSimulator(Simulator):
             [LambdaSimulator(fn, **kwargs) for fn in sample_fns], expand_outputs=expand_outputs
         )
 
-    def sample(self, batch_shape: Shape, **kwargs) -> dict[str, Tensor]:
+    def sample(self, batch_shape: Shape, **kwargs) -> dict[str, np.ndarray]:
         return self.inner.sample(batch_shape, **kwargs)

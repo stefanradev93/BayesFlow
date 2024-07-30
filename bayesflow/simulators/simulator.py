@@ -1,24 +1,23 @@
 from collections.abc import Callable
-import keras
+import numpy as np
 
-from bayesflow.types import Shape, Tensor
-from bayesflow.utils import concatenate_dicts
+from bayesflow.types import Shape
+from bayesflow.utils import tree_concatenate
 
 
 class Simulator:
-    def sample(self, batch_shape: Shape, *, numpy: bool = False, **kwargs) -> dict[str, Tensor]:
+    def sample(self, batch_shape: Shape, **kwargs) -> dict[str, np.ndarray]:
         raise NotImplementedError
 
     def rejection_sample(
         self,
         batch_shape: Shape,
-        predicate: Callable[[dict[str, Tensor]], Tensor],
+        predicate: Callable[[dict[str, np.ndarray]], np.ndarray],
         *,
         axis: int = 0,
-        numpy: bool = False,
         sample_size: int = None,
         **kwargs,
-    ) -> dict[str, Tensor]:
+    ) -> dict[str, np.ndarray]:
         if sample_size is None:
             sample_shape = batch_shape
         else:
@@ -29,42 +28,38 @@ class Simulator:
 
         result = {}
 
-        while not result or keras.ops.shape(next(iter(result.values())))[axis] < batch_shape[axis]:
+        while not result or next(iter(result.values())).shape[axis] < batch_shape[axis]:
             # get a batch of samples
             samples = self.sample(sample_shape, **kwargs)
 
             # get acceptance mask and turn into indices
             accept = predicate(samples)
 
-            if not keras.ops.is_tensor(accept):
-                raise RuntimeError("Predicate must return a tensor.")
+            if not isinstance(accept, np.ndarray):
+                raise RuntimeError("Predicate must return a numpy array.")
 
-            if not keras.ops.shape(accept) == (sample_shape[axis],):
+            if accept.shape != (sample_shape[axis],):
                 raise RuntimeError(
-                    f"Predicate return tensor must have shape {(sample_shape[axis],)}. "
-                    f"Received: {keras.ops.shape(accept)}."
+                    f"Predicate return array must have shape {(sample_shape[axis],)}. " f"Received: {accept.shape}."
                 )
 
-            if not keras.ops.dtype(accept) == "bool":
+            if not accept.dtype == "bool":
                 # we could cast, but this tends to hide mistakes in the predicate
-                raise RuntimeError("Predicate must return a tensor of dtype bool.")
+                raise RuntimeError("Predicate must return a boolean type array.")
 
-            (accept,) = keras.ops.nonzero(accept)
+            (accept,) = np.nonzero(accept)
 
-            if not keras.ops.any(accept):
+            if not np.any(accept):
                 # no samples accepted, skip
                 continue
 
             # apply acceptance mask
-            samples = {key: keras.ops.take(value, accept, axis=axis) for key, value in samples.items()}
+            samples = {key: np.take(value, accept, axis=axis) for key, value in samples.items()}
 
             # concatenate with previous samples
             if not result:
                 result = samples
             else:
-                result = concatenate_dicts([result, samples], axis=axis)
-
-        if numpy:
-            result = {key: keras.ops.convert_to_numpy(value) for key, value in result.items()}
+                result = tree_concatenate([result, samples], axis=axis, numpy=True)
 
         return result

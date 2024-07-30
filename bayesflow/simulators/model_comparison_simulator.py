@@ -3,7 +3,7 @@ import keras
 import numpy as np
 
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import expand_tile, stack_dicts
+from bayesflow.utils import expand_tile, tree_stack
 
 from .simulator import Simulator
 
@@ -40,7 +40,7 @@ class ModelComparisonSimulator(Simulator):
             model_indices = keras.random.categorical(logits, 1, seed=self.seed_generator)
 
             data = [self.simulators[int(i)].sample(()) for i in model_indices]
-            data = stack_dicts(data, axis=0)
+            data = tree_stack(data, axis=0)
 
             # restore batch shape
             data = {
