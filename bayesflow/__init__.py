@@ -1,7 +1,7 @@
 from . import (
     approximators,
     benchmarks,
-    configurators,
+    data_adapters,
     datasets,
     diagnostics,
     distributions,

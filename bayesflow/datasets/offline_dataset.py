@@ -1,7 +1,7 @@
 import keras
-import math
+import numpy as np
 
-from bayesflow.configurators import Configurator
+from bayesflow.data_adapters import DataAdapter
 from bayesflow.types import Tensor
 
 
@@ -10,12 +10,13 @@ class OfflineDataset(keras.utils.PyDataset):
     A dataset that is pre-simulated and stored in memory.
     """
 
-    def __init__(self, data: dict, batch_size: int, configurator: Configurator, **kwargs):
+    def __init__(self, data: dict[str, Tensor], batch_size: int, data_adapter: DataAdapter, **kwargs):
         super().__init__(**kwargs)
         self.batch_size = batch_size
-        self.configurator = configurator
         self.data = data
-        self.indices = keras.ops.arange(len(data[next(iter(data.keys()))]), dtype="int64")
+        self.data_adapter = data_adapter
+        self.num_samples = next(iter(data.values())).shape[0]
+        self.indices = np.arange(self.num_samples, dtype="int64")
 
         self.shuffle()
 
@@ -29,14 +30,14 @@ class OfflineDataset(keras.utils.PyDataset):
 
         batch = {key: keras.ops.take(value, item, axis=0) for key, value in self.data.items()}
 
-        if self.configurator is not None:
-            batch = self.configurator.configure(batch)
+        if self.data_adapter is not None:
+            batch = self.data_adapter.configure(batch)
 
         return batch
 
     @property
-    def num_batches(self):
-        return math.ceil(len(self.indices) / self.batch_size)
+    def num_batches(self) -> int | None:
+        return np.ceil(self.num_samples / self.batch_size)
 
     def on_epoch_end(self) -> None:
         self.shuffle()

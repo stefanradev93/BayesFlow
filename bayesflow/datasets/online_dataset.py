@@ -1,5 +1,4 @@
 import keras
-from optree import PyTree
 
 from bayesflow.data_adapters import DataAdapter
 from bayesflow.simulators.simulator import Simulator
@@ -11,7 +10,13 @@ class OnlineDataset(keras.utils.PyDataset):
     A dataset that is generated on-the-fly.
     """
 
-    def __init__(self, simulator: Simulator, batch_size: int, adapter: DataAdapter[any, PyTree[Tensor]], **kwargs):
+    def __init__(
+        self,
+        simulator: Simulator,
+        batch_size: int,
+        adapter: DataAdapter[dict[str, Tensor], dict[str, Tensor]],
+        **kwargs,
+    ):
         super().__init__(**kwargs)
 
         if keras.backend.backend() == "torch" and kwargs.get("use_multiprocessing"):
@@ -24,7 +29,7 @@ class OnlineDataset(keras.utils.PyDataset):
         self.adapter = adapter
         self.simulator = simulator
 
-    def __getitem__(self, item: int):
+    def __getitem__(self, item: int) -> dict[str, Tensor]:
         batch = self.simulator.sample((self.batch_size,))
 
         if self.adapter is not None:
@@ -33,6 +38,6 @@ class OnlineDataset(keras.utils.PyDataset):
         return batch
 
     @property
-    def num_batches(self):
+    def num_batches(self) -> int | None:
         # infinite dataset
         return None

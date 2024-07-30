@@ -6,7 +6,7 @@ from keras.saving import (
     serialize_keras_object as serialize,
 )
 
-from bayesflow.configurators import ConcatenateKeysConfigurator, Configurator
+from bayesflow.data_adapters import ConcatenateKeysDataAdapter, DataAdapter
 from bayesflow.networks import SummaryNetwork
 from bayesflow.simulators import ModelComparisonSimulator, Simulator
 from bayesflow.types import Shape, Tensor
@@ -37,7 +37,7 @@ class ModelComparisonApproximator(Approximator):
         data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
         self.compute_metrics(data)
 
-    def build_configurator(
+    def build_data_adapter(
         self,
         classifier_variables: Sequence[str],
         summary_variables: Sequence[str] = None,
@@ -50,7 +50,7 @@ class ModelComparisonApproximator(Approximator):
         }
         variables = {key: value for key, value in variables.items() if value is not None}
 
-        return ConcatenateKeysConfigurator(**variables)
+        return ConcatenateKeysDataAdapter(**variables)
 
     def compute_metrics(self, data: Mapping[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
         classifier_variables = data["classifier_variables"]
@@ -72,7 +72,7 @@ class ModelComparisonApproximator(Approximator):
     def fit(
         self,
         *,
-        configurator: Configurator = "auto",
+        data_adapter: DataAdapter = "auto",
         dataset: keras.utils.PyDataset = None,
         simulator: ModelComparisonSimulator = None,
         simulators: Sequence[Simulator] = None,
@@ -86,18 +86,18 @@ class ModelComparisonApproximator(Approximator):
 
             return super().fit(dataset=dataset, **kwargs)
 
-        if configurator == "auto":
-            logging.info("Building automatic configurator.")
-            configurator = self.build_configurator(**filter_kwargs(kwargs, self.build_configurator))
+        if data_adapter == "auto":
+            logging.info("Building automatic data adapter.")
+            data_adapter = self.build_data_adapter(**filter_kwargs(kwargs, self.build_data_adapter))
 
         if simulator is not None:
-            return super().fit(simulator=simulator, configurator=configurator, **kwargs)
+            return super().fit(simulator=simulator, data_adapter=data_adapter, **kwargs)
 
         logging.info(f"Building model comparison simulator from {len(simulators)} simulators.")
 
         simulator = ModelComparisonSimulator(simulators=simulators)
 
-        return super().fit(simulator=simulator, configurator=configurator, **kwargs)
+        return super().fit(simulator=simulator, data_adapter=data_adapter, **kwargs)
 
     @classmethod
     def from_config(cls, config, custom_objects=None):

@@ -1,8 +1,9 @@
 import keras
 
-from bayesflow.configurators import Configurator
+from bayesflow.data_adapters import DataAdapter
 from bayesflow.simulators.simulator import Simulator
 from bayesflow.types import Tensor
+from bayesflow.utils import logging
 
 
 class RoundsDataset(keras.utils.PyDataset):
@@ -16,7 +17,7 @@ class RoundsDataset(keras.utils.PyDataset):
         batch_size: int,
         batches_per_epoch: int,
         epochs_per_round: int,
-        configurator: Configurator,
+        data_adapter: DataAdapter[dict[str, Tensor], dict[str, Tensor]] | None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -30,9 +31,17 @@ class RoundsDataset(keras.utils.PyDataset):
         self.batches = None
         self.batches_per_epoch = batches_per_epoch
         self.batch_size = batch_size
-        self.configurator = configurator
+        self.data_adapter = data_adapter
         self.epoch = 0
+
+        if epochs_per_round == 1:
+            logging.warning(
+                "Using `RoundsDataset` with `epochs_per_round=1` is equivalent to fully online training. "
+                "Use an `OnlineDataset` instead for best performance."
+            )
+
         self.epochs_per_round = epochs_per_round
+
         self.simulator = simulator
 
         self.regenerate()
@@ -40,14 +49,15 @@ class RoundsDataset(keras.utils.PyDataset):
     def __getitem__(self, item: int) -> dict[str, Tensor]:
         """Get a batch of pre-simulated data"""
         batch = self.batches[item]
-        if self.configurator is not None:
-            batch = self.configurator.configure(batch)
+
+        if self.data_adapter is not None:
+            batch = self.data_adapter.configure(batch)
+
         return batch
 
     @property
-    def num_batches(self):
-        # infinite dataset
-        return None
+    def num_batches(self) -> int | None:
+        return self.batches_per_epoch
 
     def on_epoch_end(self) -> None:
         self.epoch += 1

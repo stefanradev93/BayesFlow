@@ -5,7 +5,6 @@ from keras.saving import (
 )
 
 from bayesflow.types import Tensor
-from bayesflow.utils import filter_concatenate
 
 from .composite_data_adapter import CompositeDataAdapter
 from .data_adapter import DataAdapter
@@ -31,7 +30,9 @@ class _ConcatenateKeysDataAdapter(DataAdapter[TRaw, TProcessed]):
             self.data_shapes = {key: keras.ops.shape(value) for key, value in raw_data.items()}
             self.is_configured = True
 
-        return filter_concatenate(raw_data, self.keys, axis=-1)
+        # filter and concatenate
+        data = {key: value for key, value in raw_data.items() if key in self.keys}
+        return keras.ops.concatenate(list(data.values()), axis=-1)
 
     def deconfigure(self, processed_data: TProcessed) -> TRaw:
         if not self.is_configured:
