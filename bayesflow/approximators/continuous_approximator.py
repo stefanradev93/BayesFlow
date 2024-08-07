@@ -35,7 +35,7 @@ class ContinuousApproximator(Approximator):
 
     def build(self, data_shapes: Mapping[str, Shape]) -> None:
         data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
-        self.compute_metrics(data)
+        self.compute_metrics(**data, stage="training")
 
     @classmethod
     def build_data_adapter(
@@ -53,19 +53,19 @@ class ContinuousApproximator(Approximator):
 
         return ConcatenateKeysDataAdapter(**variables)
 
-    def compute_metrics(self, data: Mapping[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
-        # TODO: add method or property to return required keys, on top of documentation
-        inference_variables = data["inference_variables"]
-        inference_conditions = data.get("inference_conditions")
-
+    def compute_metrics(
+        self,
+        inference_variables: Tensor,
+        inference_conditions: Tensor = None,
+        summary_variables: Tensor = None,
+        stage: str = "training",
+    ) -> dict[str, Tensor]:
         if self.summary_network is not None:
-            summary_variables = data["summary_variables"]
             summary_outputs = self.summary_network(summary_variables)
 
             if inference_conditions is None:
                 inference_conditions = summary_outputs
             else:
-                # TODO: use data adapter
                 inference_conditions = keras.ops.concatenate([inference_conditions, summary_outputs], axis=-1)
 
         inference_metrics = self.inference_network.compute_metrics(

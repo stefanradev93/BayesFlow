@@ -1,19 +1,23 @@
 import keras
 import torch
 
+from bayesflow.utils import filter_kwargs
+
 
 class TorchApproximator(keras.Model):
     # noinspection PyMethodOverriding
-    def compute_metrics(self, data: any, stage: str = "training") -> dict[str, torch.Tensor]:
+    def compute_metrics(self, *args, **kwargs) -> dict[str, torch.Tensor]:
         # implemented by each respective architecture
         raise NotImplementedError
 
-    def test_step(self, data: any) -> dict[str, torch.Tensor]:
-        return self.compute_metrics(data, stage="validation")
+    def test_step(self, data: dict[str, any]) -> dict[str, torch.Tensor]:
+        kwargs = filter_kwargs(data | {"stage": "validation"}, self.compute_metrics)
+        return self.compute_metrics(**kwargs)
 
-    def train_step(self, data: any) -> dict[str, torch.Tensor]:
+    def train_step(self, data: dict[str, any]) -> dict[str, torch.Tensor]:
         with torch.enable_grad():
-            metrics = self.compute_metrics(data, stage="training")
+            kwargs = filter_kwargs(data | {"stage": "training"}, self.compute_metrics)
+            metrics = self.compute_metrics(**kwargs)
 
         loss = metrics["loss"]
 

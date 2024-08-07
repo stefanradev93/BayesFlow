@@ -1,19 +1,23 @@
 import keras
 import tensorflow as tf
 
+from bayesflow.utils import filter_kwargs
+
 
 class TensorFlowApproximator(keras.Model):
     # noinspection PyMethodOverriding
-    def compute_metrics(self, data: any, stage: str = "training") -> dict[str, tf.Tensor]:
+    def compute_metrics(self, *args, **kwargs) -> dict[str, tf.Tensor]:
         # implemented by each respective architecture
         raise NotImplementedError
 
-    def test_step(self, data: any) -> dict[str, tf.Tensor]:
-        return self.compute_metrics(data, stage="validation")
+    def test_step(self, data: dict[str, any]) -> dict[str, tf.Tensor]:
+        kwargs = filter_kwargs(data | {"stage": "validation"}, self.compute_metrics)
+        return self.compute_metrics(**kwargs)
 
-    def train_step(self, data: any) -> dict[str, tf.Tensor]:
+    def train_step(self, data: dict[str, any]) -> dict[str, tf.Tensor]:
         with tf.GradientTape() as tape:
-            metrics = self.compute_metrics(data)
+            kwargs = filter_kwargs(data | {"stage": "training"}, self.compute_metrics)
+            metrics = self.compute_metrics(**kwargs)
 
         loss = metrics["loss"]
 

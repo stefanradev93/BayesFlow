@@ -36,7 +36,7 @@ class ModelComparisonApproximator(Approximator):
 
     def build(self, data_shapes: Mapping[str, Shape]):
         data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
-        self.compute_metrics(data)
+        self.compute_metrics(**data, stage="training")
 
     @classmethod
     def build_data_adapter(
@@ -71,12 +71,14 @@ class ModelComparisonApproximator(Approximator):
 
         return super().build_dataset(dataset=dataset, simulator=simulator, **kwargs)
 
-    def compute_metrics(self, data: Mapping[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
-        classifier_variables = data["classifier_variables"]
-        model_indices = data["model_indices"]
-
+    def compute_metrics(
+        self,
+        classifier_variables: Tensor,
+        model_indices: Tensor,
+        summary_variables: Tensor = None,
+        stage: str = "training",
+    ) -> dict[str, Tensor]:
         if self.summary_network is not None:
-            summary_variables = data["summary_variables"]
             summary_outputs = self.summary_network(summary_variables)
 
             # TODO: introduce method

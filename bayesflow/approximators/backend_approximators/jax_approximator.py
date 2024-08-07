@@ -1,10 +1,12 @@
 import jax
 import keras
 
+from bayesflow.utils import filter_kwargs
+
 
 class JAXApproximator(keras.Model):
     # noinspection PyMethodOverriding
-    def compute_metrics(self, data: any, stage: str = "training") -> dict[str, jax.Array]:
+    def compute_metrics(self, *args, **kwargs) -> dict[str, jax.Array]:
         # implemented by each respective architecture
         raise NotImplementedError
 
@@ -13,7 +15,7 @@ class JAXApproximator(keras.Model):
         trainable_variables: any,
         non_trainable_variables: any,
         metrics_variables: any,
-        data: any,
+        data: dict[str, any],
         stage: str = "training",
     ) -> (jax.Array, tuple):
         """
@@ -36,7 +38,8 @@ class JAXApproximator(keras.Model):
 
         # perform a stateless call to compute_metrics
         with keras.StatelessScope(state_mapping) as scope:
-            metrics = self.compute_metrics(data, stage=stage)
+            kwargs = filter_kwargs(data | {"stage": stage}, self.compute_metrics)
+            metrics = self.compute_metrics(**kwargs)
 
         # update variables
         non_trainable_variables = [scope.get_current_value(v) for v in self.non_trainable_variables]
@@ -44,11 +47,11 @@ class JAXApproximator(keras.Model):
 
         return metrics["loss"], (metrics, non_trainable_variables, metrics_variables)
 
-    def stateless_test_step(self, state: tuple, data: any) -> (dict[str, jax.Array], tuple):
+    def stateless_test_step(self, state: tuple, data: dict[str, any]) -> (dict[str, jax.Array], tuple):
         trainable_variables, non_trainable_variables, metrics_variables = state
 
         loss, aux = self.stateless_compute_metrics(
-            trainable_variables, non_trainable_variables, metrics_variables, data, stage="validation"
+            trainable_variables, non_trainable_variables, metrics_variables, **data, stage="validation"
         )
         metrics, non_trainable_variables, metrics_variables = aux
 
@@ -57,13 +60,13 @@ class JAXApproximator(keras.Model):
         state = trainable_variables, non_trainable_variables, metrics_variables
         return metrics, state
 
-    def stateless_train_step(self, state: tuple, data: any) -> (dict[str, jax.Array], tuple):
+    def stateless_train_step(self, state: tuple, data: dict[str, any]) -> (dict[str, jax.Array], tuple):
         trainable_variables, non_trainable_variables, optimizer_variables, metrics_variables = state
 
         grad_fn = jax.value_and_grad(self.stateless_compute_metrics, has_aux=True)
 
         (loss, aux), grads = grad_fn(
-            trainable_variables, non_trainable_variables, metrics_variables, data, stage="training"
+            trainable_variables, non_trainable_variables, metrics_variables, **data, stage="training"
         )
         metrics, non_trainable_variables, metrics_variables = aux
 
