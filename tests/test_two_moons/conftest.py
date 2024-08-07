@@ -8,7 +8,7 @@ def approximator(inference_network):
     return ContinuousApproximator(
         inference_network=inference_network,
         inference_variables=["theta"],
-        inference_conditions=["x", "r", "alpha"],
+        inference_conditions=["x"],
     )
 
 

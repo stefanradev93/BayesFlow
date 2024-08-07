@@ -10,7 +10,7 @@ class OfflineDataset(keras.utils.PyDataset):
     A dataset that is pre-simulated and stored in memory.
     """
 
-    def __init__(self, data: dict[str, Tensor], batch_size: int, data_adapter: DataAdapter, **kwargs):
+    def __init__(self, data: dict[str, Tensor], batch_size: int, data_adapter: DataAdapter | None, **kwargs):
         super().__init__(**kwargs)
         self.batch_size = batch_size
         self.data = data
@@ -28,7 +28,7 @@ class OfflineDataset(keras.utils.PyDataset):
         item = slice(item * self.batch_size, (item + 1) * self.batch_size)
         item = self.indices[item]
 
-        batch = {key: keras.ops.take(value, item, axis=0) for key, value in self.data.items()}
+        batch = {key: np.take(value, item, axis=0) for key, value in self.data.items()}
 
         if self.data_adapter is not None:
             batch = self.data_adapter.configure(batch)
@@ -37,7 +37,7 @@ class OfflineDataset(keras.utils.PyDataset):
 
     @property
     def num_batches(self) -> int | None:
-        return np.ceil(self.num_samples / self.batch_size)
+        return int(np.ceil(self.num_samples / self.batch_size))
 
     def on_epoch_end(self) -> None:
         self.shuffle()

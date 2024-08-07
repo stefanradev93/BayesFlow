@@ -4,31 +4,30 @@ from keras.saving import (
     register_keras_serializable as serializable,
     serialize_keras_object as serialize,
 )
-
-from bayesflow.types import Tensor
+import numpy as np
 
 from .data_adapter import DataAdapter
 
 
-TRaw = Mapping[str, Tensor]
-TReady = Mapping[str, Tensor]
+TRaw = Mapping[str, np.ndarray]
+TProcessed = Mapping[str, np.ndarray]
 
 
-@serializable(package="bayesflow.configurators")
-class CompositeDataAdapter(DataAdapter[TRaw, TReady]):
+@serializable(package="bayesflow.data_adapters")
+class CompositeDataAdapter(DataAdapter[TRaw, TProcessed]):
     """Composes multiple simple data adapters into a single more complex adapter."""
 
-    def __init__(self, configurators: Mapping[str, DataAdapter[TRaw, Tensor]]):
-        self.configurators = configurators
+    def __init__(self, data_adapters: Mapping[str, DataAdapter[TRaw, np.ndarray]]):
+        self.data_adapters = data_adapters
         self.variable_counts = None
 
-    def configure(self, data: TRaw) -> TReady:
-        return {key: configurator.configure(data) for key, configurator in self.configurators.items()}
+    def configure(self, data: TRaw) -> TProcessed:
+        return {key: data_adapter.configure(data) for key, data_adapter in self.data_adapters.items()}
 
-    def deconfigure(self, variables: TReady) -> TRaw:
+    def deconfigure(self, variables: TProcessed) -> TRaw:
         data = {}
-        for key, configurator in self.configurators.items():
-            data |= configurator.deconfigure(variables[key])
+        for key, data_adapter in self.data_adapters.items():
+            data |= data_adapter.deconfigure(variables[key])
 
         return data
 
@@ -36,10 +35,10 @@ class CompositeDataAdapter(DataAdapter[TRaw, TReady]):
     def from_config(cls, config: dict, custom_objects=None) -> "CompositeDataAdapter":
         return cls(
             {
-                key: deserialize(configurator, custom_objects)
-                for key, configurator in config.pop("configurators").items()
+                key: deserialize(data_adapter, custom_objects)
+                for key, data_adapter in config.pop("data_adapters").items()
             }
         )
 
     def get_config(self) -> dict:
-        return {"configurators": {key: serialize(configurator) for key, configurator in self.configurators.items()}}
+        return {"data_adapters": {key: serialize(configurator) for key, configurator in self.data_adapters.items()}}

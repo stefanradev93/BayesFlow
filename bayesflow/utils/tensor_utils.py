@@ -103,6 +103,6 @@ def tree_stack(structures: Sequence[T], axis: int = 0, numpy: bool = False) -> T
     else:
 
         def fn(*tensors):
-            return keras.ops.concatenate(tensors, axis=axis)
+            return keras.ops.stack(tensors, axis=axis)
 
     return keras.tree.map_structure(fn, *structures)

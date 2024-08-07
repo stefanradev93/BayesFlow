@@ -1,40 +1,40 @@
-import keras
+from keras.saving import register_keras_serializable as serializable
+import numpy as np
+from typing import TypeVar
 
-from bayesflow.types import Tensor
 from bayesflow.utils import optimal_transport
 
 from .data_adapter import DataAdapter
 
 
-TRaw = any
-TProcessedInner = dict[str, Tensor]
-TProcessed = dict[str, Tensor | tuple[Tensor, ...]]
+TRaw = TypeVar("TRaw")
+TProcessed = dict[str, np.ndarray | tuple[np.ndarray, ...]]
 
 
+@serializable(package="bayesflow.data_adapters")
 class FlowMatchingDataAdapter(DataAdapter[TRaw, TProcessed]):
     """Wraps a data adapter, applying all further processing required for Optimal Transport Flow Matching.
     Useful to move these operations into a worker process, so as not to slow down training.
     """
 
-    def __init__(self, inner: DataAdapter[TRaw, TProcessedInner], key: str = "inference_variables", **kwargs):
+    def __init__(self, inner: DataAdapter[TRaw, dict[str, np.ndarray]], key: str = "inference_variables", **kwargs):
         self.inner = inner
         self.key = key
         self.kwargs = kwargs
 
-        self.seed_generator = keras.random.SeedGenerator()
-
     def configure(self, raw_data: TRaw) -> TProcessed:
         processed_data = self.inner.configure(raw_data)
 
-        x1: Tensor = processed_data[self.key]
-        x0: Tensor = keras.random.normal(keras.ops.shape(x1), dtype=keras.ops.dtype(x1), seed=self.seed_generator)
-        t: Tensor = keras.random.uniform(keras.ops.shape(x1)[0], dtype=keras.ops.dtype(x1), seed=self.seed_generator)
+        x1 = processed_data[self.key]
+        x0 = np.random.standard_normal(size=x1.shape).astype(x1.dtype)
+        t = np.random.uniform(size=x1.shape[0]).astype(x1.dtype)
 
+        # TODO: use numpy and compute this on the cpu
         x0, x1 = optimal_transport(x0, x1, **self.kwargs)
 
-        x: Tensor = t * x1 + (1 - t) * x0
+        x = t * x1 + (1 - t) * x0
 
-        target_velocity: Tensor = x1 - x0
+        target_velocity = x1 - x0
 
         return processed_data | {self.key: (x0, x1, t, x, target_velocity)}
 

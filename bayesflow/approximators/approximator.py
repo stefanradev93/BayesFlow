@@ -14,14 +14,17 @@ class Approximator(BackendApproximator):
     def build(self, data_shapes: dict[str, Shape]) -> None:
         raise NotImplementedError
 
-    def build_data_adapter(self, **kwargs) -> DataAdapter:
+    @classmethod
+    def build_data_adapter(cls, **kwargs) -> DataAdapter:
         # implemented by each respective architecture
         raise NotImplementedError
 
+    @classmethod
     def build_dataset(
-        self,
+        cls,
         *,
         batch_size: int = "auto",
+        batches_per_epoch: int,
         data_adapter: DataAdapter = "auto",
         memory_budget: str | int = "auto",
         simulator: Simulator,
@@ -35,7 +38,7 @@ class Approximator(BackendApproximator):
             logging.info(f"Using a batch size of {batch_size}.")
 
         if data_adapter == "auto":
-            data_adapter = self.build_data_adapter(**filter_kwargs(kwargs, self.build_data_adapter))
+            data_adapter = cls.build_data_adapter(**filter_kwargs(kwargs, cls.build_data_adapter))
 
         if workers == "auto":
             workers = mp.cpu_count()
@@ -43,16 +46,10 @@ class Approximator(BackendApproximator):
 
         workers = workers or 1
 
-        if use_multiprocessing:
-            logging.warning(
-                "Due to a bug in keras, multiprocessing may not work correctly. "
-                "We recommend turning this off until the following issue is resolved: "
-                "https://github.com/keras-team/keras/issues/20032"
-            )
-
         return OnlineDataset(
             simulator=simulator,
             batch_size=batch_size,
+            batches_per_epoch=batches_per_epoch,
             data_adapter=data_adapter,
             workers=workers,
             use_multiprocessing=use_multiprocessing,

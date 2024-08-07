@@ -12,8 +12,12 @@ class ModelComparisonSimulator(Simulator):
     """Wraps a sequence of simulators for use with a model comparison approximator."""
 
     def __init__(
-        self, simulators: Sequence[Simulator], logits: Sequence[float] = None, use_mixed_batches: bool = False
+        self,
+        simulators: Sequence[Simulator],
+        logits: Sequence[float] = None,
+        use_mixed_batches: bool = False,
     ):
+        # TODO: use simulator_probabilities instead of logits
         self.simulators = simulators
         self.logits = logits or [0.0] * len(simulators)
         if len(logits) != len(simulators):

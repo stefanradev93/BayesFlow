@@ -1,6 +1,7 @@
 import keras
 import pytest
-from bayesflow.configurators import Configurator
+from bayesflow.data_adapters import ConcatenateKeysDataAdapter
+# from bayesflow.configurators import Configurator
 
 
 @pytest.fixture(params=[2, 3])
@@ -46,8 +47,8 @@ def test_params(request):
 @pytest.fixture(params=[False, True])
 def configurator(request, test_params):
     if request.param:
-        return Configurator(inference_variables=test_params["inference_variables"])
-    return Configurator(
+        return ConcatenateKeysDataAdapter(inference_variables=test_params["inference_variables"])
+    return ConcatenateKeysDataAdapter(
         inference_variables=test_params["inference_variables"],
         inference_conditions=test_params["inference_conditions"],
         summary_variables=test_params["summary_variables"],

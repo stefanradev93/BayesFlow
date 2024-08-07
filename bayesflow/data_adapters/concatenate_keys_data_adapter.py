@@ -3,17 +3,16 @@ import keras
 from keras.saving import (
     register_keras_serializable as serializable,
 )
-
-from bayesflow.types import Tensor
+import numpy as np
 
 from .composite_data_adapter import CompositeDataAdapter
 from .data_adapter import DataAdapter
 
-TRaw = Mapping[str, Tensor]
-TProcessed = Tensor
+TRaw = Mapping[str, np.ndarray]
+TProcessed = np.ndarray
 
 
-@serializable(package="bayesflow.configurators")
+@serializable(package="bayesflow.data_adapters")
 class _ConcatenateKeysDataAdapter(DataAdapter[TRaw, TProcessed]):
     """Concatenates data from multiple keys into a single tensor."""
 
@@ -49,13 +48,16 @@ class _ConcatenateKeysDataAdapter(DataAdapter[TRaw, TProcessed]):
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "_ConcatenateKeysDataAdapter":
-        return cls(config.pop("keys"))
+        instance = cls(config["keys"])
+        instance.data_shapes = config.get("data_shapes")
+        instance.is_configured = config.get("is_configured", False)
+        return instance
 
     def get_config(self) -> dict:
-        return {"keys": self.keys}
+        return {"keys": self.keys, "data_shapes": self.data_shapes, "is_configured": self.is_configured}
 
 
-@serializable(package="bayesflow.configurators")
+@serializable(package="bayesflow.data_adapters")
 class ConcatenateKeysDataAdapter(CompositeDataAdapter):
     """Concatenates data from multiple keys into multiple tensors."""
 

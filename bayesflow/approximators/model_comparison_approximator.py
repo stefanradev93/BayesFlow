@@ -6,6 +6,7 @@ from keras.saving import (
     serialize_keras_object as serialize,
 )
 
+from bayesflow.datasets import OnlineDataset
 from bayesflow.data_adapters import ConcatenateKeysDataAdapter, DataAdapter
 from bayesflow.networks import SummaryNetwork
 from bayesflow.simulators import ModelComparisonSimulator, Simulator
@@ -37,8 +38,9 @@ class ModelComparisonApproximator(Approximator):
         data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
         self.compute_metrics(data)
 
+    @classmethod
     def build_data_adapter(
-        self,
+        cls,
         classifier_variables: Sequence[str],
         summary_variables: Sequence[str] = None,
         model_index_name: str = "model_indices",
@@ -51,6 +53,23 @@ class ModelComparisonApproximator(Approximator):
         variables = {key: value for key, value in variables.items() if value is not None}
 
         return ConcatenateKeysDataAdapter(**variables)
+
+    @classmethod
+    def build_dataset(
+        cls,
+        *,
+        dataset: keras.utils.PyDataset = None,
+        simulator: ModelComparisonSimulator = None,
+        simulators: Sequence[Simulator] = None,
+        **kwargs,
+    ) -> OnlineDataset:
+        if sum(arg is not None for arg in (dataset, simulator, simulators)) != 1:
+            raise ValueError("Exactly one of dataset, simulator, or simulators must be provided.")
+
+        if simulators is not None:
+            simulator = ModelComparisonSimulator(simulators)
+
+        return super().build_dataset(dataset=dataset, simulator=simulator, **kwargs)
 
     def compute_metrics(self, data: Mapping[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
         classifier_variables = data["classifier_variables"]

@@ -17,7 +17,7 @@ class RoundsDataset(keras.utils.PyDataset):
         batch_size: int,
         batches_per_epoch: int,
         epochs_per_round: int,
-        data_adapter: DataAdapter[dict[str, Tensor], dict[str, Tensor]] | None,
+        data_adapter: DataAdapter | None,
         **kwargs,
     ):
         super().__init__(**kwargs)
