@@ -1,7 +1,7 @@
 from collections.abc import Mapping
 import numpy as np
 
-from bayesflow.utils import batched_call, filter_kwargs, tree_stack
+from bayesflow.utils import filter_kwargs, tree_stack
 
 from .simulator import Simulator
 from ..types import Shape
@@ -35,7 +35,15 @@ class LambdaSimulator(Simulator):
         if self.is_batched:
             data = self.sample_fn(batch_shape, **kwargs)
         else:
-            data = batched_call(self.sample_fn, batch_shape, args=(), kwargs=kwargs, flatten=True)
+            data = np.empty(batch_shape, dtype="object")
+
+            for index in np.ndindex(batch_shape):
+                index_kwargs = {
+                    key: value[index] if isinstance(value, np.ndarray) else value for key, value in kwargs.items()
+                }
+                data[index] = self.sample_fn(**index_kwargs)
+
+            data = data.flatten().tolist()
 
             # convert 0D float outputs to 0D numpy arrays
             for i in range(len(data)):

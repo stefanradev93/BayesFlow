@@ -65,31 +65,31 @@ def online_dataset(simulator, batch_size, batches_per_epoch, workers, use_multip
 
 class Simulator:
     def sample(self, batch_shape):
-        return dict(x=np.random.normal(batch_shape + (2,)).astype("float32"))
+        return dict(x=np.random.standard_normal(size=batch_shape + (2,)).astype("float32"))
 
 
 def sample_contexts_unbatched(**kwargs):
-    return dict(r=np.random.normal(), alpha=np.random.normal())
+    return dict(r=np.random.standard_normal(), alpha=np.random.standard_normal())
 
 
 def sample_parameters_unbatched(**kwargs):
-    return dict(theta=np.random.normal(size=2))
+    return dict(theta=np.random.standard_normal(size=2))
 
 
 def sample_observables_unbatched(r, alpha, theta, **kwargs):
-    return dict(x=np.random.normal(size=2))
+    return dict(x=np.random.standard_normal(size=2))
 
 
 def sample_contexts_batched(shape, **kwargs):
-    return dict(r=np.random.normal(size=shape), alpha=np.random.normal(size=shape))
+    return dict(r=np.random.standard_normal(size=shape), alpha=np.random.standard_normal(size=shape))
 
 
 def sample_parameters_batched(shape, **kwargs):
-    return dict(theta=np.random.normal(size=shape + (2,)))
+    return dict(theta=np.random.standard_normal(size=shape + (2,)))
 
 
 def sample_observables_batched(shape, r, alpha, theta, **kwargs):
-    return dict(x=np.random.normal(size=shape + (2,)))
+    return dict(x=np.random.standard_normal(size=shape + (2,)))
 
 
 @pytest.fixture(params=["class", "batched_composite", "unbatched_composite"])

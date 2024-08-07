@@ -17,4 +17,9 @@ class TwoMoonsSimulator(Simulator):
 
         x = np.concatenate([x1, x2], axis=-1)
 
+        r = r.astype("float32")
+        alpha = alpha.astype("float32")
+        theta = theta.astype("float32")
+        x = x.astype("float32")
+
         return dict(r=r, alpha=alpha, theta=theta, x=x)

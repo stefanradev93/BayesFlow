@@ -6,8 +6,6 @@ from .dict_utils import (
     process_output,
 )
 
-from .functional import batched_call
-
 from .git import (
     issue_url,
     pull_url,
@@ -26,6 +24,8 @@ from . import logging
 from .jacobian_trace import jacobian_trace
 
 from .dispatch import find_distribution, find_network, find_permutation, find_pooling, find_recurrent_net
+
+from . import numpy_utils
 
 from .optimal_transport import optimal_transport
 
