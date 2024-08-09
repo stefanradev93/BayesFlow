@@ -6,6 +6,8 @@ from .dict_utils import (
     process_output,
 )
 
+from .functional import batched_call
+
 from .git import (
     issue_url,
     pull_url,
