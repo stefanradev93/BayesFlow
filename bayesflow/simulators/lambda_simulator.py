@@ -1,7 +1,8 @@
 from collections.abc import Mapping
 import numpy as np
 
-from bayesflow.utils import filter_kwargs, tree_stack
+
+from bayesflow.utils import batched_call, filter_kwargs, tree_stack
 
 from .simulator import Simulator
 from ..types import Shape
@@ -35,24 +36,22 @@ class LambdaSimulator(Simulator):
         if self.is_batched:
             data = self.sample_fn(batch_shape, **kwargs)
         else:
-            data = np.empty(batch_shape, dtype="object")
+            data = self._sample_batch(batch_shape, **kwargs)
 
-            for index in np.ndindex(batch_shape):
-                index_kwargs = {
-                    key: value[index] if isinstance(value, np.ndarray) else value for key, value in kwargs.items()
-                }
-                data[index] = self.sample_fn(**index_kwargs)
+        data = self._cast_dtypes(data)
 
-            data = data.flatten().tolist()
+        return data
 
-            # convert 0D float outputs to 0D numpy arrays
-            for i in range(len(data)):
-                data[i] = {key: np.array(value) for key, value in data[i].items()}
+    def _sample_batch(self, batch_shape: Shape, **kwargs) -> dict[str, np.ndarray]:
+        """Samples a batch of data from an otherwise unbatched sampling function."""
+        data = batched_call(self.sample_fn, batch_shape, kwargs=kwargs, flatten=True)
 
-            data = tree_stack(data, axis=0, numpy=True)
+        data = tree_stack(data, axis=0, numpy=True)
 
-            # restore batch shape
-            data = {key: np.reshape(value, batch_shape + np.shape(value)[1:]) for key, value in data.items()}
+        return data
+
+    def _cast_dtypes(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+        data = data.copy()
 
         for key, value in data.items():
             dtype = str(value.dtype)
