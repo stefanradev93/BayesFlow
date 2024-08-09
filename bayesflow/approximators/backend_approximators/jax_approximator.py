@@ -51,7 +51,7 @@ class JAXApproximator(keras.Model):
         trainable_variables, non_trainable_variables, metrics_variables = state
 
         loss, aux = self.stateless_compute_metrics(
-            trainable_variables, non_trainable_variables, metrics_variables, **data, stage="validation"
+            trainable_variables, non_trainable_variables, metrics_variables, data=data, stage="validation"
         )
         metrics, non_trainable_variables, metrics_variables = aux
 
@@ -66,7 +66,7 @@ class JAXApproximator(keras.Model):
         grad_fn = jax.value_and_grad(self.stateless_compute_metrics, has_aux=True)
 
         (loss, aux), grads = grad_fn(
-            trainable_variables, non_trainable_variables, metrics_variables, **data, stage="training"
+            trainable_variables, non_trainable_variables, metrics_variables, data=data, stage="training"
         )
         metrics, non_trainable_variables, metrics_variables = aux
 

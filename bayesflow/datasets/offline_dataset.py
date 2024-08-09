@@ -2,7 +2,6 @@ import keras
 import numpy as np
 
 from bayesflow.data_adapters import DataAdapter
-from bayesflow.types import Tensor
 
 
 class OfflineDataset(keras.utils.PyDataset):
@@ -10,7 +9,7 @@ class OfflineDataset(keras.utils.PyDataset):
     A dataset that is pre-simulated and stored in memory.
     """
 
-    def __init__(self, data: dict[str, Tensor], batch_size: int, data_adapter: DataAdapter | None, **kwargs):
+    def __init__(self, data: dict[str, np.ndarray], batch_size: int, data_adapter: DataAdapter | None, **kwargs):
         super().__init__(**kwargs)
         self.batch_size = batch_size
         self.data = data
@@ -20,7 +19,7 @@ class OfflineDataset(keras.utils.PyDataset):
 
         self.shuffle()
 
-    def __getitem__(self, item: int) -> dict[str, Tensor]:
+    def __getitem__(self, item: int) -> dict[str, np.ndarray]:
         """Get a batch of pre-simulated data"""
         if not 0 <= item < self.num_batches:
             raise IndexError(f"Index {item} is out of bounds for dataset with {self.num_batches} batches.")
