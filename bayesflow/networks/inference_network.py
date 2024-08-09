@@ -42,7 +42,7 @@ class InferenceNetwork(keras.Layer):
 
         if stage != "training" and any(self.metrics):
             # compute sample-based metrics
-            samples = self.sample(keras.ops.shape(x)[0], conditions=conditions)
+            samples = self.sample((keras.ops.shape(x)[0],), conditions=conditions)
 
             for metric in self.metrics:
                 metrics[metric.name] = metric(samples, x)
