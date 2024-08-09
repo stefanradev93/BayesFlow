@@ -62,5 +62,13 @@ class ConcatenateKeysDataAdapter(CompositeDataAdapter):
     """Concatenates data from multiple keys into multiple tensors."""
 
     def __init__(self, **keys: Sequence[str]):
+        self.keys = keys
         configurators = {key: _ConcatenateKeysDataAdapter(value) for key, value in keys.items()}
         super().__init__(configurators)
+
+    @classmethod
+    def from_config(cls, config: Mapping[str, any], custom_objects=None) -> "ConcatenateKeysDataAdapter":
+        return cls(**config["keys"])
+
+    def get_config(self) -> dict[str, any]:
+        return {"keys": self.keys}
