@@ -9,6 +9,7 @@ from keras.saving import (
 from bayesflow.data_adapters import ConcatenateKeysDataAdapter, DataAdapter
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
+from bayesflow.utils import logging
 
 from .approximator import Approximator
 
@@ -53,6 +54,24 @@ class ContinuousApproximator(Approximator):
 
         return ConcatenateKeysDataAdapter(**variables)
 
+    def compile(
+        self,
+        *args,
+        inference_metrics: Sequence[keras.Metric] = None,
+        summary_metrics: Sequence[keras.Metric] = None,
+        **kwargs,
+    ):
+        if inference_metrics:
+            self.inference_network._metrics = inference_metrics
+
+        if summary_metrics:
+            if self.summary_network is None:
+                logging.warning("Ignoring summary metrics because there is no summary network.")
+            else:
+                self.summary_network._metrics = summary_metrics
+
+        return super().compile(*args, **kwargs)
+
     def compute_metrics(
         self,
         inference_variables: Tensor,
@@ -60,9 +79,13 @@ class ContinuousApproximator(Approximator):
         summary_variables: Tensor = None,
         stage: str = "training",
     ) -> dict[str, Tensor]:
-        if self.summary_network is not None:
-            summary_outputs = self.summary_network(summary_variables)
+        if self.summary_network is None:
+            summary_metrics = {}
+        else:
+            summary_metrics = self.summary_network.compute_metrics(summary_variables, stage=stage)
+            summary_outputs = summary_metrics.pop("outputs")
 
+            # append summary outputs to inference conditions
             if inference_conditions is None:
                 inference_conditions = summary_outputs
             else:
@@ -72,18 +95,27 @@ class ContinuousApproximator(Approximator):
             inference_variables, conditions=inference_conditions, stage=stage
         )
 
-        return inference_metrics
+        loss = inference_metrics.get("loss", keras.ops.zeros(())) + summary_metrics.get("loss", keras.ops.zeros(()))
+
+        inference_metrics = {f"inference/{key}": value for key, value in inference_metrics.items()}
+        summary_metrics = {f"summary/{key}": value for key, value in summary_metrics.items()}
+
+        metrics = {"loss": loss} | inference_metrics | summary_metrics
+
+        return metrics
 
     @classmethod
     def from_config(cls, config, custom_objects=None):
-        inference_network = deserialize(config.pop("inference_network"), custom_objects=custom_objects)
-        summary_network = deserialize(config.pop("summary_network"), custom_objects=custom_objects)
+        config["data_adapter"] = deserialize(config["data_adapter"], custom_objects=custom_objects)
+        config["inference_network"] = deserialize(config["inference_network"], custom_objects=custom_objects)
+        config["summary_network"] = deserialize(config["summary_network"], custom_objects=custom_objects)
 
-        return cls(inference_network=inference_network, summary_network=summary_network, **config)
+        return super().from_config(config, custom_objects=custom_objects)
 
     def get_config(self):
         base_config = super().get_config()
         config = {
+            "data_adapter": serialize(self.data_adapter),
             "inference_network": serialize(self.inference_network),
             "summary_network": serialize(self.summary_network),
         }

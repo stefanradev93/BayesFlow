@@ -27,11 +27,13 @@ class ModelComparisonApproximator(Approximator):
         self,
         *,
         classifier_network: keras.Layer,
+        data_adapter: DataAdapter,
         summary_network: SummaryNetwork = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.classifier_network = classifier_network
+        self.data_adapter = data_adapter
         self.summary_network = summary_network
 
     def build(self, data_shapes: Mapping[str, Shape]):
@@ -71,6 +73,24 @@ class ModelComparisonApproximator(Approximator):
 
         return super().build_dataset(dataset=dataset, simulator=simulator, **kwargs)
 
+    def compile(
+        self,
+        *args,
+        classifier_metrics: Sequence[keras.Metric] = None,
+        summary_metrics: Sequence[keras.Metric] = None,
+        **kwargs,
+    ):
+        if classifier_metrics:
+            self.classifier_network._metrics = classifier_metrics
+
+        if summary_metrics:
+            if self.summary_network is None:
+                logging.warning("Ignoring summary metrics because there is no summary network.")
+            else:
+                self.summary_network._metrics = summary_metrics
+
+        return super().compile(*args, **kwargs)
+
     def compute_metrics(
         self,
         classifier_variables: Tensor,
@@ -78,17 +98,33 @@ class ModelComparisonApproximator(Approximator):
         summary_variables: Tensor = None,
         stage: str = "training",
     ) -> dict[str, Tensor]:
-        if self.summary_network is not None:
-            summary_outputs = self.summary_network(summary_variables)
+        if self.summary_network is None:
+            summary_metrics = {}
+        else:
+            summary_metrics = self.summary_network.compute_metrics(summary_variables, stage=stage)
+            summary_outputs = summary_metrics.pop("outputs")
 
-            # TODO: introduce method
             classifier_variables = keras.ops.concatenate([classifier_variables, summary_outputs], axis=-1)
 
+        # we could move this into its own class
         logits = self.classifier_network(classifier_variables)
+        classifier_metrics = {"loss": keras.losses.categorical_crossentropy(model_indices, logits, from_logits=True)}
 
-        loss = keras.losses.categorical_crossentropy(model_indices, logits)
+        if stage != "training" and any(self.classifier_network.metrics):
+            # compute sample-based metrics
+            predictions = keras.ops.argmax(logits, axis=-1)
+            classifier_metrics |= {
+                metric.name: metric(model_indices, predictions) for metric in self.classifier_network.metrics
+            }
 
-        return {"loss": loss}
+        loss = classifier_metrics.get("loss", keras.ops.zeros(())) + summary_metrics.get("loss", keras.ops.zeros(()))
+
+        classifier_metrics = {f"classifier/{key}": value for key, value in classifier_metrics.items()}
+        summary_metrics = {f"summary/{key}": value for key, value in summary_metrics.items()}
+
+        metrics = {"loss": loss} | classifier_metrics | summary_metrics
+
+        return metrics
 
     def fit(
         self,
@@ -122,14 +158,18 @@ class ModelComparisonApproximator(Approximator):
 
     @classmethod
     def from_config(cls, config, custom_objects=None):
+        data_adapter = deserialize(config.pop("data_adapter"), custom_objects=custom_objects)
         classifier_network = deserialize(config.pop("classifier_network"), custom_objects=custom_objects)
         summary_network = deserialize(config.pop("summary_network"), custom_objects=custom_objects)
-        return cls(classifier_network=classifier_network, summary_network=summary_network, **config)
+        return cls(
+            data_adapter=data_adapter, classifier_network=classifier_network, summary_network=summary_network, **config
+        )
 
     def get_config(self):
         base_config = super().get_config()
 
         config = {
+            "data_adapter": serialize(self.data_adapter),
             "classifier_network": serialize(self.classifier_network),
             "summary_network": serialize(self.summary_network),
         }
