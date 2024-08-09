@@ -9,6 +9,7 @@ dependencies:
   - pre-commit
   - pytest
   - pytest-cov
+  - pytest-rerunfailures
   - pytest-xdist
   - python >= 3.10, < 3.12
   - ruff

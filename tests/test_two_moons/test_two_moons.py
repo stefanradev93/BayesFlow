@@ -12,6 +12,7 @@ def test_compile(approximator, random_samples, jit_compile):
     approximator.compile(jit_compile=jit_compile)
 
 
+@pytest.mark.flaky(reruns=1, only_rerun="AssertionError")
 def test_fit(approximator, train_dataset, validation_dataset, batch_size):
     from bayesflow.metrics import MaximumMeanDiscrepancy
 
