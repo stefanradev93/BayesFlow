@@ -14,7 +14,7 @@ class OnlineDataset(keras.utils.PyDataset):
         self,
         simulator: Simulator,
         batch_size: int,
-        batches_per_epoch: int,
+        num_batches: int,
         data_adapter: DataAdapter | None,
         **kwargs,
     ):
@@ -27,7 +27,7 @@ class OnlineDataset(keras.utils.PyDataset):
             mp.set_start_method("spawn", force=True)
 
         self.batch_size = batch_size
-        self.batches_per_epoch = batches_per_epoch
+        self._num_batches = num_batches
         self.data_adapter = data_adapter
         self.simulator = simulator
 
@@ -41,4 +41,4 @@ class OnlineDataset(keras.utils.PyDataset):
 
     @property
     def num_batches(self) -> int:
-        return self.batches_per_epoch
+        return self._num_batches

@@ -15,7 +15,7 @@ class RoundsDataset(keras.utils.PyDataset):
         self,
         simulator: Simulator,
         batch_size: int,
-        batches_per_epoch: int,
+        num_batches: int,
         epochs_per_round: int,
         data_adapter: DataAdapter | None,
         **kwargs,
@@ -29,7 +29,7 @@ class RoundsDataset(keras.utils.PyDataset):
             mp.set_start_method("spawn", force=True)
 
         self.batches = None
-        self.batches_per_epoch = batches_per_epoch
+        self._num_batches = num_batches
         self.batch_size = batch_size
         self.data_adapter = data_adapter
         self.epoch = 0
@@ -56,8 +56,8 @@ class RoundsDataset(keras.utils.PyDataset):
         return batch
 
     @property
-    def num_batches(self) -> int | None:
-        return self.batches_per_epoch
+    def num_batches(self) -> int:
+        return self._num_batches
 
     def on_epoch_end(self) -> None:
         self.epoch += 1
