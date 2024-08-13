@@ -4,6 +4,7 @@ from .dict_utils import (
     filter_kwargs,
     keras_kwargs,
     process_output,
+    split_tensors,
 )
 
 from .functional import batched_call

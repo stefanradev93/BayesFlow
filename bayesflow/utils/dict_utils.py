@@ -87,3 +87,21 @@ def process_output(outputs: Mapping[str, Tensor], convert_to_numpy: bool = True)
     if convert_to_numpy:
         outputs = {k: keras.ops.convert_to_numpy(v) for k, v in outputs.items()}
     return outputs
+
+
+def split_tensors(data: Mapping[any, Tensor], axis: int = -1) -> Mapping[any, Tensor]:
+    """Split tensors in the dictionary along the given axis."""
+    result = {}
+
+    for key, value in data.items():
+        if keras.ops.shape(value)[axis] == 1:
+            result[key] = keras.ops.squeeze(value, axis=axis)
+            continue
+
+        splits = keras.ops.split(value, keras.ops.shape(value)[axis], axis=axis)
+        splits = [keras.ops.squeeze(split, axis=axis) for split in splits]
+
+        for i, split in enumerate(splits):
+            result[f"{key}_{i + 1}"] = split
+
+    return result
