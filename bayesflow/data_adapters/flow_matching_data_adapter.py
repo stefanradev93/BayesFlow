@@ -29,8 +29,7 @@ class FlowMatchingDataAdapter(DataAdapter[TRaw, TProcessed]):
         x0 = np.random.standard_normal(size=x1.shape).astype(x1.dtype)
         t = np.random.uniform(size=x1.shape[0]).astype(x1.dtype)
 
-        # TODO: use numpy and compute this on the cpu
-        x0, x1 = optimal_transport(x0, x1, **self.kwargs)
+        x0, x1 = optimal_transport(x0, x1, **self.kwargs, numpy=True)
 
         x = t * x1 + (1 - t) * x0
 

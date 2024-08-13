@@ -163,7 +163,9 @@ def sinkhorn_plan_keras(cost: Tensor, regularization: float, max_steps: int, tol
         marginals = keras.ops.sum(plan, axis=0), keras.ops.sum(plan, axis=1)
         deviations = keras.ops.abs(marginals[0] - 1.0), keras.ops.abs(marginals[1] - 1.0)
 
-        return keras.ops.all(deviations[0] <= tolerance) and keras.ops.all(deviations[1] <= tolerance)
+        return keras.ops.logical_and(
+            keras.ops.all(deviations[0] <= tolerance), keras.ops.all(deviations[1] <= tolerance)
+        )
 
     def update_plan(plan):
         # Sinkhorn-Knopp: repeatedly normalize the transport plan along each dimension
