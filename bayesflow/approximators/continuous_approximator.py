@@ -104,6 +104,9 @@ class ContinuousApproximator(Approximator):
 
         return metrics
 
+    def fit(self, *args, **kwargs):
+        return super().fit(*args, **kwargs, data_adapter=self.data_adapter)
+
     @classmethod
     def from_config(cls, config, custom_objects=None):
         config["data_adapter"] = deserialize(config["data_adapter"], custom_objects=custom_objects)
