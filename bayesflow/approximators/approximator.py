@@ -24,7 +24,7 @@ class Approximator(BackendApproximator):
         cls,
         *,
         batch_size: int = "auto",
-        batches_per_epoch: int,
+        num_batches: int,
         data_adapter: DataAdapter = "auto",
         memory_budget: str | int = "auto",
         simulator: Simulator,
@@ -49,7 +49,7 @@ class Approximator(BackendApproximator):
         return OnlineDataset(
             simulator=simulator,
             batch_size=batch_size,
-            batches_per_epoch=batches_per_epoch,
+            num_batches=num_batches,
             data_adapter=data_adapter,
             workers=workers,
             use_multiprocessing=use_multiprocessing,
