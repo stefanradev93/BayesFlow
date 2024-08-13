@@ -1,5 +1,4 @@
 from collections.abc import Mapping, Sequence
-import keras
 from keras.saving import (
     register_keras_serializable as serializable,
 )
@@ -9,7 +8,7 @@ from .composite_data_adapter import CompositeDataAdapter
 from .data_adapter import DataAdapter
 
 TRaw = Mapping[str, np.ndarray]
-TProcessed = np.ndarray
+TProcessed = np.ndarray | None
 
 
 @serializable(package="bayesflow.data_adapters")
@@ -26,12 +25,16 @@ class _ConcatenateKeysDataAdapter(DataAdapter[TRaw, TProcessed]):
 
     def configure(self, raw_data: TRaw) -> TProcessed:
         if not self.is_configured:
-            self.data_shapes = {key: keras.ops.shape(value) for key, value in raw_data.items()}
+            self.data_shapes = {key: value.shape for key, value in raw_data.items()}
             self.is_configured = True
 
         # filter and concatenate
         data = {key: value for key, value in raw_data.items() if key in self.keys}
-        return keras.ops.concatenate(list(data.values()), axis=-1)
+
+        if not data:
+            return None
+
+        return np.concatenate(list(data.values()), axis=-1)
 
     def deconfigure(self, processed_data: TProcessed) -> TRaw:
         if not self.is_configured:
@@ -41,7 +44,7 @@ class _ConcatenateKeysDataAdapter(DataAdapter[TRaw, TProcessed]):
         start = 0
         for key in self.keys:
             stop = start + self.data_shapes[key][-1]
-            data[key] = keras.ops.take(processed_data, list(range(start, stop)), axis=-1)
+            data[key] = np.take(processed_data, list(range(start, stop)), axis=-1)
             start = stop
 
         return data

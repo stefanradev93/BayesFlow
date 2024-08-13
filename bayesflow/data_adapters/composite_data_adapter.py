@@ -17,19 +17,27 @@ TProcessed = Mapping[str, np.ndarray]
 class CompositeDataAdapter(DataAdapter[TRaw, TProcessed]):
     """Composes multiple simple data adapters into a single more complex adapter."""
 
-    def __init__(self, data_adapters: Mapping[str, DataAdapter[TRaw, np.ndarray]]):
+    def __init__(self, data_adapters: Mapping[str, DataAdapter[TRaw, np.ndarray | None]]):
         self.data_adapters = data_adapters
         self.variable_counts = None
 
-    def configure(self, data: TRaw) -> TProcessed:
-        return {key: data_adapter.configure(data) for key, data_adapter in self.data_adapters.items()}
-
-    def deconfigure(self, variables: TProcessed) -> TRaw:
-        data = {}
+    def configure(self, raw_data: TRaw) -> TProcessed:
+        processed_data = {}
         for key, data_adapter in self.data_adapters.items():
-            data |= data_adapter.deconfigure(variables[key])
+            data = data_adapter.configure(raw_data)
+            if data is not None:
+                processed_data[key] = data
 
-        return data
+        return processed_data
+
+    def deconfigure(self, processed_data: TProcessed) -> TRaw:
+        raw_data = {}
+        for key, data_adapter in self.data_adapters.items():
+            data = processed_data.get(key)
+            if data is not None:
+                raw_data |= data_adapter.deconfigure(data)
+
+        return raw_data
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "CompositeDataAdapter":
