@@ -49,7 +49,7 @@ def size_of(x) -> int:
     :param x: A nested structure of tensors.
     :return: The total memory footprint of x, ignoring view semantics, in bytes.
     """
-    if keras.ops.is_tensor(x):
+    if keras.ops.is_tensor(x) or isinstance(x, np.ndarray):
         return int(keras.ops.size(x)) * np.dtype(keras.ops.dtype(x)).itemsize
 
     # flatten nested structure
