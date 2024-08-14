@@ -28,12 +28,16 @@ class _ConcatenateKeysDataAdapter(DataAdapter[TRaw, TProcessed]):
             self.data_shapes = {key: value.shape for key, value in raw_data.items()}
             self.is_configured = True
 
-        # filter and concatenate
-        data = {key: value for key, value in raw_data.items() if key in self.keys}
+        # filter and reorder data
+        data = {}
+        for key in self.keys:
+            if key not in raw_data:
+                # if a key is missing, we cannot configure, so we return None
+                return None
 
-        if not data:
-            return None
+            data[key] = raw_data[key]
 
+        # concatenate all tensors
         return np.concatenate(list(data.values()), axis=-1)
 
     def deconfigure(self, processed_data: TProcessed) -> TRaw:
