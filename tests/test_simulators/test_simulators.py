@@ -1,4 +1,5 @@
 import keras
+import numpy as np
 
 
 def test_two_moons(simulator, batch_size):
@@ -6,11 +7,12 @@ def test_two_moons(simulator, batch_size):
 
     assert isinstance(samples, dict)
     assert list(samples.keys()) == ["r", "alpha", "theta", "x"]
+    assert all(isinstance(value, np.ndarray) for value in samples.values())
 
-    assert keras.ops.shape(samples["r"]) == (batch_size, 1)
-    assert keras.ops.shape(samples["alpha"]) == (batch_size, 1)
-    assert keras.ops.shape(samples["theta"]) == (batch_size, 2)
-    assert keras.ops.shape(samples["x"]) == (batch_size, 2)
+    assert samples["r"].shape == (batch_size, 1)
+    assert samples["alpha"].shape == (batch_size, 1)
+    assert samples["theta"].shape == (batch_size, 2)
+    assert samples["x"].shape == (batch_size, 2)
 
 
 def test_sample(simulator, batch_size):
@@ -23,12 +25,12 @@ def test_sample(simulator, batch_size):
         print(f"{key}.shape = {keras.ops.shape(value)}")
 
         # test type
-        assert keras.ops.is_tensor(value)
-        assert keras.utils.standardize_dtype(value.dtype) == "float32"
+        assert isinstance(value, np.ndarray)
+        assert str(value.dtype) == "float32"
 
         # test shape
-        assert keras.ops.shape(value)[0] == batch_size
-        assert keras.ops.ndim(value) > 1
+        assert value.shape[0] == batch_size
+        assert value.ndim > 1
 
         # test batch randomness
-        assert keras.ops.any(~keras.ops.isclose(value, value[0]))
+        assert np.any(~np.isclose(value, value[0]))

@@ -9,11 +9,8 @@ class InferenceNetwork(keras.Layer):
         super().__init__(**kwargs)
         self.base_distribution = find_distribution(base_distribution)
 
-    def build(self, xz_shape, **kwargs):
+    def build(self, xz_shape: Shape, conditions_shape: Shape = None) -> None:
         self.base_distribution.build(xz_shape)
-
-    def compute_output_shape(self, xz_shape, **kwargs):
-        return xz_shape
 
     def call(self, xz: Tensor, inverse: bool = False, **kwargs) -> Tensor | tuple[Tensor, Tensor]:
         if inverse:
@@ -35,16 +32,19 @@ class InferenceNetwork(keras.Layer):
         _, log_density = self(samples, conditions=conditions, inverse=False, density=True, **kwargs)
         return log_density
 
-    def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
+    def compute_metrics(self, x: Tensor, conditions: Tensor = None, stage: str = "training") -> dict[str, Tensor]:
+        if not self.built:
+            xz_shape = keras.ops.shape(x)
+            conditions_shape = None if conditions is None else keras.ops.shape(conditions)
+            self.build(xz_shape, conditions_shape=conditions_shape)
+
         metrics = {}
 
         if stage != "training" and any(self.metrics):
             # compute sample-based metrics
-            targets = data["inference_variables"]
-            conditions = data.get("inference_conditions")
-            samples = self.sample(keras.ops.shape(targets)[0], conditions=conditions)
+            samples = self.sample((keras.ops.shape(x)[0],), conditions=conditions)
 
             for metric in self.metrics:
-                metrics[metric.name] = metric(samples, targets)
+                metrics[metric.name] = metric(samples, x)
 
         return metrics

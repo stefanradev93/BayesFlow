@@ -25,8 +25,7 @@ class SummaryNetwork(keras.Layer):
         """
         raise NotImplementedError
 
-    def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
-        x = data["summary_variables"]
+    def compute_metrics(self, x: Tensor, stage: str = "training") -> dict[str, Tensor]:
         outputs = self(x, training=stage == "training")
 
         metrics = {}

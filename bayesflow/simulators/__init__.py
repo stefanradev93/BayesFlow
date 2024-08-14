@@ -1,3 +1,6 @@
-from .sequential_simulator import SequentialSimulator
+from .composite_lambda_simulator import CompositeLambdaSimulator
+from .composite_simulator import CompositeSimulator
+from .lambda_simulator import LambdaSimulator
+from .model_comparison_simulator import ModelComparisonSimulator
 from .simulator import Simulator
 from .two_moons_simulator import TwoMoonsSimulator
