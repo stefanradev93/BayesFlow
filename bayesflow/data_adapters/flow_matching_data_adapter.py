@@ -29,6 +29,9 @@ class FlowMatchingDataAdapter(DataAdapter[TRaw, TProcessed]):
         x0 = np.random.standard_normal(size=x1.shape).astype(x1.dtype)
         t = np.random.uniform(size=x1.shape[0]).astype(x1.dtype)
 
+        expand_index = [slice(None)] + [None] * (x1.ndim - 1)
+        t = t[tuple(expand_index)]
+
         x0, x1 = optimal_transport(x0, x1, **self.kwargs, numpy=True)
 
         x = t * x1 + (1 - t) * x0
