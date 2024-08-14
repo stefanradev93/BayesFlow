@@ -70,7 +70,7 @@ class SetTransformer(SummaryNetwork):
             if num_inducing_points is not None:
                 block = InducedSetAttentionBlock(**attention_block_settings)
             else:
-                block = SetAttentionBlock(**{k: v for k, v in attention_block_settings if k != "num_inducing_points"})
+                block = SetAttentionBlock(**{k: v for k, v in attention_block_settings.items() if k != "num_inducing_points"})
             self.attention_blocks.add(block)
 
         # Pooling will be applied as a final step to the abstract representations obtained from set attention
