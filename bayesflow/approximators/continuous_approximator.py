@@ -128,7 +128,7 @@ class ContinuousApproximator(Approximator):
         data = self.data_adapter.deconfigure(data)
 
         if numpy:
-            data = {key: keras.ops.convert_to_numpy(value) for key, value in data.items()}
+            data = keras.tree.map_structure(keras.ops.convert_to_numpy, data)
 
         return data
 

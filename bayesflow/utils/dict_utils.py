@@ -1,11 +1,14 @@
 import inspect
 import keras
+from typing import TypeVar
 
 from collections.abc import Mapping
 
 from bayesflow.types import Tensor
 
 from . import logging
+
+T = TypeVar("T")
 
 
 def convert_args(f, *args, **kwargs) -> tuple[any, ...]:
@@ -66,12 +69,8 @@ def keras_kwargs(kwargs: Mapping) -> Mapping:
     return {key: value for key, value in kwargs.items() if not key.endswith("_kwargs")}
 
 
-def process_output(outputs: Mapping[str, Tensor], convert_to_numpy: bool = True) -> Mapping[str, Tensor]:
-    """Utility function to apply common post-processing steps to the outputs of an approximator."""
-
-    # Remove trailing first axis for single data sets
-    outputs = {k: keras.ops.squeeze(v, axis=0) if keras.ops.shape(v)[0] == 1 else v for k, v in outputs.items()}
-
+# TODO: rename and streamline and make protected
+def check_output(outputs: T) -> None:
     # Warn if any NaNs present in output
     for k, v in outputs.items():
         nan_mask = keras.ops.isnan(v)
@@ -83,10 +82,6 @@ def process_output(outputs: Mapping[str, Tensor], convert_to_numpy: bool = True)
         inf_mask = keras.ops.isinf(v)
         if keras.ops.any(inf_mask):
             logging.warning("Found a total of {n:d} inf values for output {k}.", n=int(keras.ops.sum(inf_mask)), k=k)
-
-    if convert_to_numpy:
-        outputs = {k: keras.ops.convert_to_numpy(v) for k, v in outputs.items()}
-    return outputs
 
 
 def split_tensors(data: Mapping[any, Tensor], axis: int = -1) -> Mapping[any, Tensor]:
