@@ -34,10 +34,6 @@ class ContinuousApproximator(Approximator):
         self.inference_network = inference_network
         self.summary_network = summary_network
 
-    def build(self, data_shapes: Mapping[str, Shape]) -> None:
-        data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
-        self.compute_metrics(**data, stage="training")
-
     @classmethod
     def build_data_adapter(
         cls,

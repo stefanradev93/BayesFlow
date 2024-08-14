@@ -5,19 +5,23 @@ from bayesflow.data_adapters import DataAdapter
 from bayesflow.datasets import OnlineDataset
 from bayesflow.simulators import Simulator
 from bayesflow.utils import find_batch_size, filter_kwargs, logging
-from bayesflow.types import Shape
 
 from .backend_approximators import BackendApproximator
 
 
 class Approximator(BackendApproximator):
-    def build(self, data_shapes: dict[str, Shape]) -> None:
-        raise NotImplementedError
+    def build(self, data_shapes: any) -> None:
+        mock_data = keras.tree.map_structure(keras.ops.zeros, data_shapes)
+        self.build_from_data(mock_data)
 
     @classmethod
     def build_data_adapter(cls, **kwargs) -> DataAdapter:
         # implemented by each respective architecture
         raise NotImplementedError
+
+    def build_from_data(self, data: dict[str, any]) -> None:
+        self.compute_metrics(**data, stage="training")
+        self.built = True
 
     @classmethod
     def build_dataset(
@@ -73,7 +77,8 @@ class Approximator(BackendApproximator):
 
         if not self.built:
             logging.info("Building on a test batch.")
-            test_batch = dataset[0]
-            self.build({key: keras.ops.shape(value) for key, value in test_batch.items()})
+            mock_data = dataset[0]
+            mock_data = keras.tree.map_structure(keras.ops.convert_to_tensor, mock_data)
+            self.build_from_data(mock_data)
 
         return super().fit(dataset=dataset, **kwargs)
