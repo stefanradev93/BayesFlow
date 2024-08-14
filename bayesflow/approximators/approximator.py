@@ -46,7 +46,7 @@ class Approximator(BackendApproximator):
 
         if workers == "auto":
             workers = mp.cpu_count()
-            logging.info(f"Using {workers} data loading workers to fully leverage your CPU.")
+            logging.info(f"Using {workers} data loading workers.")
 
         workers = workers or 1
 
