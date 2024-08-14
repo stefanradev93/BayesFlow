@@ -58,7 +58,9 @@ class MLP(keras.Layer):
         if spectral_normalization:
             projector = layers.SpectralNormalization(projector)
         self.res_blocks.append(projector)
-        self.res_blocks.append(layers.Dropout(dropout))
+
+        if dropout is not None and dropout > 0.0:
+            self.res_blocks.append(layers.Dropout(dropout))
 
         for _ in range(depth):
             self.res_blocks.append(
