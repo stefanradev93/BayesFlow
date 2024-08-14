@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 import keras
 from keras.saving import (
     register_keras_serializable,
@@ -19,11 +20,20 @@ class FlowMatching(InferenceNetwork):
     [3] Optimal Transport Flow Matching: arXiv:2302.00482
     """
 
-    def __init__(self, subnet: str = "mlp", base_distribution: str = "normal", **kwargs):
+    def __init__(
+        self,
+        subnet: str = "mlp",
+        base_distribution: str = "normal",
+        use_optimal_transport: bool = False,
+        optimal_transport_kwargs: dict[str, any] = None,
+        **kwargs,
+    ):
         super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
         self.subnet = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
         self.output_projector = keras.layers.Dense(units=None, bias_initializer="zeros", kernel_initializer="zeros")
 
+        self.use_optimal_transport = use_optimal_transport
+        self.optimal_transport_kwargs = optimal_transport_kwargs or {}
         self.seed_generator = keras.random.SeedGenerator()
 
     def build(self, xz_shape: Shape, conditions_shape: Shape = None) -> None:
@@ -142,9 +152,9 @@ class FlowMatching(InferenceNetwork):
             return x
 
     def compute_metrics(
-        self, x: Tensor | tuple[Tensor, ...], conditions: Tensor = None, stage: str = "training"
+        self, x: Tensor | Sequence[Tensor, ...], conditions: Tensor = None, stage: str = "training"
     ) -> dict[str, Tensor]:
-        if isinstance(x, tuple):
+        if isinstance(x, Sequence):
             # already pre-configured
             x0, x1, t, x, target_velocity = x
         else:
@@ -153,7 +163,8 @@ class FlowMatching(InferenceNetwork):
             x0 = keras.random.normal(keras.ops.shape(x1), dtype=keras.ops.dtype(x1), seed=self.seed_generator)
 
             # use weak regularization and low number of steps for efficiency
-            x0, x1 = optimal_transport(x0, x1, regularization=0.1, max_steps=1000, seed=self.seed_generator)
+            if self.use_optimal_transport:
+                x0, x1 = optimal_transport(x0, x1, seed=self.seed_generator, **self.optimal_transport_kwargs)
 
             t = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
             t = expand_right_as(t, x0)
