@@ -1,5 +1,5 @@
 import keras
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 from bayesflow.utils import find_permutation, keras_kwargs
@@ -9,7 +9,7 @@ from .couplings import DualCoupling
 from ..inference_network import InferenceNetwork
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class CouplingFlow(InferenceNetwork):
     """Implements a coupling flow as a sequence of dual couplings with permutations and activation
     normalization. Incorporates ideas from [1-5].

@@ -1,5 +1,5 @@
 import keras
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 
@@ -10,7 +10,7 @@ from .isab import InducedSetAttentionBlock
 from .pma import PoolingByMultiHeadAttention
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class SetTransformer(SummaryNetwork):
     """Implements the set transformer architecture from [1] which ultimately represents
     a learnable permutation-invariant function. Designed to naturally model interactions in

@@ -1,8 +1,6 @@
 from collections.abc import Sequence
 import keras
-from keras.saving import (
-    register_keras_serializable,
-)
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Shape, Tensor
 from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, optimal_transport, tile_axis
@@ -10,7 +8,7 @@ from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras
 from ..inference_network import InferenceNetwork
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class FlowMatching(InferenceNetwork):
     """Implements Optimal Transport Flow Matching, originally introduced as Rectified Flow,
     with ideas incorporated from [1-3].

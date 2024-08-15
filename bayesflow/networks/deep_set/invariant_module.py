@@ -1,13 +1,13 @@
 import keras
 from keras import layers
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 from bayesflow.utils import keras_kwargs
 from bayesflow.utils import find_pooling
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class InvariantModule(keras.Layer):
     """Implements an invariant module performing a permutation-invariant transform.
 

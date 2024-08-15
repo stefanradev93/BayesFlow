@@ -3,7 +3,6 @@ from .dict_utils import (
     convert_kwargs,
     filter_kwargs,
     keras_kwargs,
-    process_output,
     split_tensors,
 )
 

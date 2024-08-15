@@ -1,5 +1,5 @@
 import keras
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.utils import keras_kwargs
 from bayesflow.types import Tensor
@@ -7,7 +7,7 @@ from .single_coupling import SingleCoupling
 from ..invertible_layer import InvertibleLayer
 
 
-@register_keras_serializable(package="bayesflow.networks.coupling_flow")
+@serializable(package="bayesflow.networks.coupling_flow")
 class DualCoupling(InvertibleLayer):
     def __init__(self, subnet: str = "mlp", transform: str = "affine", **kwargs):
         super().__init__(**keras_kwargs(kwargs))

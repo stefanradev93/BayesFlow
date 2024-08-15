@@ -1,13 +1,14 @@
 import math
 
 import keras
+from keras.saving import register_keras_serializable as serializable
 from keras import ops
 
 from bayesflow.types import Shape, Tensor
 from .distribution import Distribution
 
 
-@keras.saving.register_keras_serializable(package="bayesflow.distributions")
+@serializable(package="bayesflow.distributions")
 class DiagonalNormal(Distribution):
     """Utility class for a backend-agnostic spherical Gaussian distribution.
 

@@ -1,6 +1,6 @@
 import keras
 from keras import layers
-from keras.saving import register_keras_serializable, serialize_keras_object as serialize
+from keras.saving import register_keras_serializable as serializable, serialize_keras_object as serialize
 
 
 from bayesflow.types import Tensor
@@ -10,7 +10,7 @@ from .equivariant_module import EquivariantModule
 from ..summary_network import SummaryNetwork
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class DeepSet(SummaryNetwork):
     r"""Implements a deep set encoder introduced in [1]. This module performs the computation:
 

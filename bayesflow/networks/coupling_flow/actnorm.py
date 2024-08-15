@@ -1,5 +1,6 @@
 from keras import ops
-from keras.saving import register_keras_serializable
+
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Shape, Tensor
 from bayesflow.utils import keras_kwargs
@@ -7,7 +8,7 @@ from bayesflow.utils import keras_kwargs
 from .invertible_layer import InvertibleLayer
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class ActNorm(InvertibleLayer):
     """Implements an Activation Normalization (ActNorm) Layer.
     Activation Normalization is learned invertible normalization, using
