@@ -53,9 +53,10 @@ def filter_kwargs(kwargs: Mapping[str, any], f: callable) -> Mapping[str, any]:
     """Filter keyword arguments for f"""
     signature = inspect.signature(f)
 
-    if inspect.Parameter.VAR_KEYWORD in signature.parameters:
-        # the signature has **kwargs
-        return kwargs
+    for parameter in signature.parameters.values():
+        if parameter.kind == inspect.Parameter.VAR_KEYWORD:
+            # there is a **kwargs parameter, so anything is valid
+            return kwargs
 
     kwargs = {key: value for key, value in kwargs.items() if key in signature.parameters}
 

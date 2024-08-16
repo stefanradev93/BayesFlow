@@ -26,6 +26,7 @@ class ModelComparisonApproximator(Approximator):
     def __init__(
         self,
         *,
+        num_models: int,
         classifier_network: keras.Layer,
         data_adapter: DataAdapter,
         summary_network: SummaryNetwork = None,
@@ -36,6 +37,8 @@ class ModelComparisonApproximator(Approximator):
         self.data_adapter = data_adapter
         self.summary_network = summary_network
 
+        self.logits_projector = keras.layers.Dense(num_models)
+
     def build(self, data_shapes: Mapping[str, Shape]):
         data = {key: keras.ops.zeros(value) for key, value in data_shapes.items()}
         self.compute_metrics(**data, stage="training")
@@ -43,12 +46,15 @@ class ModelComparisonApproximator(Approximator):
     @classmethod
     def build_data_adapter(
         cls,
-        classifier_variables: Sequence[str],
+        classifier_conditions: Sequence[str] = None,
         summary_variables: Sequence[str] = None,
         model_index_name: str = "model_indices",
     ):
+        if classifier_conditions is None and summary_variables is None:
+            raise ValueError("At least one of `classifier_variables` or `summary_variables` must be provided.")
+
         variables = {
-            "classifier_variables": classifier_variables,
+            "classifier_conditions": classifier_conditions,
             "summary_variables": summary_variables,
             "model_indices": [model_index_name],
         }
@@ -93,7 +99,8 @@ class ModelComparisonApproximator(Approximator):
 
     def compute_metrics(
         self,
-        classifier_variables: Tensor,
+        *,
+        classifier_conditions: Tensor = None,
         model_indices: Tensor,
         summary_variables: Tensor = None,
         stage: str = "training",
@@ -104,11 +111,19 @@ class ModelComparisonApproximator(Approximator):
             summary_metrics = self.summary_network.compute_metrics(summary_variables, stage=stage)
             summary_outputs = summary_metrics.pop("outputs")
 
-            classifier_variables = keras.ops.concatenate([classifier_variables, summary_outputs], axis=-1)
+            if classifier_conditions is None:
+                classifier_conditions = summary_outputs
+            else:
+                classifier_conditions = keras.ops.concatenate([classifier_conditions, summary_outputs], axis=-1)
 
         # we could move this into its own class
-        logits = self.classifier_network(classifier_variables)
-        classifier_metrics = {"loss": keras.losses.categorical_crossentropy(model_indices, logits, from_logits=True)}
+        logits = self.classifier_network(classifier_conditions)
+        logits = self.logits_projector(logits)
+
+        cross_entropy = keras.losses.categorical_crossentropy(model_indices, logits, from_logits=True)
+        cross_entropy = keras.ops.mean(cross_entropy)
+
+        classifier_metrics = {"loss": cross_entropy}
 
         if stage != "training" and any(self.classifier_network.metrics):
             # compute sample-based metrics
