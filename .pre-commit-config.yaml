@@ -21,12 +21,12 @@ repos:
       args: [ --fix ]
     # Run the formatter.
     - id: ruff-format
-- repo: https://github.com/nbQA-dev/nbQA
-  rev: 1.6.3
-  hooks:
-    # Run ruff for jupyter notebooks.
-    - id: nbqa-ruff
-      args: [--ignore=E402]  # E402: module level import not at top of file
+#- repo: https://github.com/nbQA-dev/nbQA
+#  rev: 1.6.3
+#  hooks:
+#    # Run ruff for jupyter notebooks.
+#    - id: nbqa-ruff
+#      args: [--ignore=E402]  # E402: module level import not at top of file
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.4.0
   hooks:

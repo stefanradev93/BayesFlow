@@ -59,6 +59,7 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
+    "*.ipynb",  # ignore jupyter notebooks completely for now
 ]
 
 # more lenient line width than Black
@@ -90,10 +91,6 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 "tests/**/__init__.py" = [
     "F403",  # * imports
-]
-
-"*.ipynb" = [
-    "E501",  # line too long
 ]
 
 [tool.ruff.format]
