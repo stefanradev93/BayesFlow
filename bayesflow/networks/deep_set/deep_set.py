@@ -37,7 +37,7 @@ class DeepSet(SummaryNetwork):
         units_invariant_outer: int = 128,
         activation: str = "gelu",
         kernel_initializer: str = "he_normal",
-        dropout: float = 0.05,
+        dropout: int | float | None = 0.05,
         spectral_normalization: bool = False,
         **kwargs,
     ):

@@ -25,7 +25,7 @@ class InvariantModule(keras.Layer):
         units_outer: int = 128,
         activation: str = "gelu",
         kernel_initializer: str = "he_normal",
-        dropout: float = 0.05,
+        dropout: int | float | None = 0.05,
         pooling: str | keras.Layer = "mean",
         spectral_normalization: bool = False,
         **kwargs,
@@ -58,7 +58,8 @@ class InvariantModule(keras.Layer):
         # Outer fully connected net for sum decomposition: inner( pooling( inner(set) ) )
         self.outer_fc = keras.Sequential(name="InvariantOuterFC")
         for _ in range(num_dense_outer):
-            self.outer_fc.add(layers.Dropout(dropout))
+            if dropout is not None:
+                self.outer_fc.add(layers.Dropout(float(dropout)))
 
             layer = layers.Dense(
                 units=units_outer,
