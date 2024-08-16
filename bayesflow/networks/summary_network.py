@@ -39,8 +39,6 @@ class SummaryNetwork(keras.Layer):
                 # compute sample-based validation metrics
                 for metric in self.metrics:
                     metrics[metric.name] = metric(outputs, samples)
-        else:
-            metrics["loss"] = keras.ops.zeros(())
 
         metrics["outputs"] = outputs
 
