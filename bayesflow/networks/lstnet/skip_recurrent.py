@@ -1,11 +1,11 @@
 import keras
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 from bayesflow.utils import keras_kwargs, find_recurrent_net
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class SkipRecurrentNet(keras.Model):
     """
     Implements a Skip recurrent layer as described in [1], but allowing a more flexible

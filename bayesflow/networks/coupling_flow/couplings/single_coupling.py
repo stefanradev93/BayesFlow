@@ -1,5 +1,6 @@
 import keras
-from keras.saving import register_keras_serializable
+
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 from bayesflow.utils import find_network, keras_kwargs
@@ -7,7 +8,7 @@ from ..invertible_layer import InvertibleLayer
 from ..transforms import find_transform
 
 
-@register_keras_serializable(package="bayesflow.networks.coupling_flow")
+@serializable(package="bayesflow.networks.coupling_flow")
 class SingleCoupling(InvertibleLayer):
     """
     Implements a single coupling layer as a composition of a subnet and a transform.

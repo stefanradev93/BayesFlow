@@ -1,6 +1,7 @@
+import re
+
 import pytest
 import io
-import numpy as np
 from contextlib import redirect_stdout
 
 
@@ -22,22 +23,25 @@ def test_loss_progress(approximator, train_dataset, validation_dataset):
     num_epochs = 3
 
     # Capture ostream and train model
-    ostream = io.StringIO()
-    with redirect_stdout(ostream):
-        history = approximator.fit(train_dataset, validation_data=validation_dataset, epochs=num_epochs).history
-    output = ostream.getvalue()
-    ostream.close()
+    with io.StringIO() as stream:
+        with redirect_stdout(stream):
+            approximator.fit(dataset=train_dataset, validation_data=validation_dataset, epochs=num_epochs)
 
-    loss_output = [line.replace("\x08", "") for line in output.splitlines() if "loss" in line]
+        output = stream.getvalue()
 
-    # Test losses are not NaN and that epoch summaries match loss histories
-    epoch = 0
-    for loss_stats in loss_output:
-        content = loss_stats.split()
-        if "val_loss" in loss_stats:
-            assert float(content[-4]) == round(history["loss"][epoch], 4)
-            assert float(content[-1]) == round(history["val_loss"][epoch], 4)
-            epoch += 1
-            continue
+    print(output)
 
-        assert not np.isnan(float(content[-1]))
+    # check that there is a progress bar
+    assert "━" in output, "no progress bar"
+
+    # check that the loss is shown
+    assert "loss" in output
+    assert re.search(r"\bloss: \d+\.\d+", output) is not None, "training loss not correctly shown"
+
+    # check that validation loss is shown
+    assert "val_loss" in output
+    assert re.search(r"\bval_loss: \d+\.\d+", output) is not None, "validation loss not correctly shown"
+
+    # check that the shown loss is not nan or zero
+    assert re.search(r"\bnan\b", output) is None, "found nan in output"
+    assert re.search(r"\bloss: 0\.0000e\+00\b", output) is None, "found zero loss in output"

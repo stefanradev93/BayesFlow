@@ -1,15 +1,28 @@
 import keras
 from keras import layers
-from keras.saving import register_keras_serializable, serialize_keras_object as serialize
+from keras.saving import register_keras_serializable as serializable, serialize_keras_object as serialize
+
 
 from bayesflow.types import Tensor
-from bayesflow.utils import keras_kwargs
 from .invariant_module import InvariantModule
 from .equivariant_module import EquivariantModule
 
+from ..summary_network import SummaryNetwork
 
-@register_keras_serializable(package="bayesflow.networks")
-class DeepSet(keras.Model):
+
+@serializable(package="bayesflow.networks")
+class DeepSet(SummaryNetwork):
+    r"""Implements a deep set encoder introduced in [1]. This module performs the computation:
+
+    ..math:
+        f(X = \{ x_i \mid i=1, \ldots, n \}) = \rho \left( \sigma(\tau(x_1), \ldots, \tau(x_n)) \right)
+
+    where $\sigma must be a permutation-invariant function, such as the mean.
+    $\rho$ and $\tau$ can be any functions, such as neural networks.
+
+    [1] Deep Set: arXiv:1703.06114
+    """
+
     def __init__(
         self,
         summary_dim: int = 16,
@@ -32,7 +45,7 @@ class DeepSet(keras.Model):
         #TODO
         """
 
-        super().__init__(**keras_kwargs(kwargs))
+        super().__init__(**kwargs)
 
         # Stack of equivariant modules for a many-to-many learnable transformation
         self.equivariant_modules = keras.Sequential()
@@ -72,6 +85,7 @@ class DeepSet(keras.Model):
         self.summary_dim = summary_dim
 
     def build(self, input_shape):
+        super().build(input_shape)
         self.call(keras.ops.zeros(input_shape))
 
     def call(self, x: Tensor, **kwargs) -> Tensor:

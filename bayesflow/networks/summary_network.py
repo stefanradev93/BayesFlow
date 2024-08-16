@@ -6,14 +6,11 @@ from bayesflow.utils import find_distribution, keras_kwargs
 
 
 class SummaryNetwork(keras.Layer):
-    def __init_(self, base_distribution: str = "normal", **kwargs):
+    def __init__(self, base_distribution: str = None, **kwargs):
         super().__init__(**keras_kwargs(kwargs))
-
         self.base_distribution = find_distribution(base_distribution)
 
     def build(self, input_shape):
-        super().build(input_shape)
-
         if self.base_distribution is not None:
             output_shape = keras.ops.shape(self.call(keras.ops.zeros(input_shape)))
             self.base_distribution.build(output_shape)
@@ -28,8 +25,7 @@ class SummaryNetwork(keras.Layer):
         """
         raise NotImplementedError
 
-    def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
-        x = data["summary_variables"]
+    def compute_metrics(self, x: Tensor, stage: str = "training") -> dict[str, Tensor]:
         outputs = self(x, training=stage == "training")
 
         metrics = {}

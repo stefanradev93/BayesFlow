@@ -1,88 +1,84 @@
 import keras
-from keras.saving import register_keras_serializable
+import multiprocessing as mp
 
-from bayesflow.configurators import Configurator
+from bayesflow.data_adapters import DataAdapter
+from bayesflow.datasets import OnlineDataset
+from bayesflow.simulators import Simulator
+from bayesflow.utils import find_batch_size, filter_kwargs, logging
 
-match keras.backend.backend():
-    case "jax":
-        from .jax_approximator import JAXApproximator as BaseApproximator
-    case "numpy":
-        from .numpy_approximator import NumpyApproximator as BaseApproximator
-    case "tensorflow":
-        from .tensorflow_approximator import TensorFlowApproximator as BaseApproximator
-    case "torch":
-        from .torch_approximator import TorchApproximator as BaseApproximator
-    case other:
-        raise NotImplementedError(f"BayesFlow does not currently support backend '{other}'.")
+from .backend_approximators import BackendApproximator
 
 
-@register_keras_serializable(package="bayesflow.amortizers")
-class Approximator(BaseApproximator):
-    def __init__(self, **kwargs):
-        """The main workhorse for learning amortized neural approximators for distributions arising
-        in inverse problems and Bayesian inference (e.g., posterior distributions, likelihoods, marginal
-        likelihoods).
+class Approximator(BackendApproximator):
+    def build(self, data_shapes: any) -> None:
+        mock_data = keras.tree.map_structure(keras.ops.zeros, data_shapes)
+        self.build_from_data(mock_data)
 
-        The complete semantics of this class allow for flexible estimation of the following distribution:
+    @classmethod
+    def build_data_adapter(cls, **kwargs) -> DataAdapter:
+        # implemented by each respective architecture
+        raise NotImplementedError
 
-        Q(inference_variables | H(summary_variables; summary_conditions), inference_conditions),
+    def build_from_data(self, data: dict[str, any]) -> None:
+        self.compute_metrics(**data, stage="training")
+        self.built = True
 
-        # TODO - math notation
+    @classmethod
+    def build_dataset(
+        cls,
+        *,
+        batch_size: int = "auto",
+        num_batches: int,
+        data_adapter: DataAdapter = "auto",
+        memory_budget: str | int = "auto",
+        simulator: Simulator,
+        workers: int = "auto",
+        use_multiprocessing: bool = False,
+        max_queue_size: int = 32,
+        **kwargs,
+    ) -> OnlineDataset:
+        if batch_size == "auto":
+            batch_size = find_batch_size(memory_budget=memory_budget, sample=simulator.sample((1,)))
+            logging.info(f"Using a batch size of {batch_size}.")
 
-        where all quantities to the right of the "given" symbol | are optional and H refers to the optional
-        summary /embedding network used to compress high-dimensional data into lower-dimensional summary
-        vectors. Some examples are provided below.
+        if data_adapter == "auto":
+            data_adapter = cls.build_data_adapter(**filter_kwargs(kwargs, cls.build_data_adapter))
 
-        Parameters
-        ----------
-        inference_variables: list[str]
-            A list of variable names indicating the quantities to be inferred / learned by the approximator,
-            e.g., model parameters when approximating the Bayesian posterior or observables when approximating
-            a likelihood density.
-        inference_conditions: list[str]
-            A list of variable names indicating quantities that will be used to condition (i.e., inform) the
-            distribution over inference variables directly, that is, without passing through the summary network.
-        summary_variables: list[str]
-            A list of variable names indicating quantities that will be used to condition (i.e., inform) the
-            distribution over inference variables after passing through the summary network (i.e., undergoing a
-            learnable transformation / dimensionality reduction). For instance, non-vector quantities (e.g.,
-            sets or time-series) in posterior inference will typically qualify as summary variables. In addition,
-            these quantities may involve learnable distributions on their own.
-        summary_conditions: list[str]
-            A list of variable names indicating quantities that will be used to condition (i.e., inform) the
-            optional summary network, e.g., when the summary network accepts further conditions that do not
-            conform to the semantics of summary variable (i.e., need not be embedded or their distribution
-            needs not be learned).
+        if workers == "auto":
+            workers = mp.cpu_count()
+            logging.info(f"Using {workers} data loading workers.")
 
-            # TODO add citations
+        workers = workers or 1
 
-        Examples
-        -------
-        # TODO
-        """
-        if "configurator" not in kwargs:
-            # try to set up a default configurator
-            if "inference_variables" not in kwargs:
-                raise ValueError("You must specify either a configurator or arguments for the default configurator.")
+        return OnlineDataset(
+            simulator=simulator,
+            batch_size=batch_size,
+            num_batches=num_batches,
+            data_adapter=data_adapter,
+            workers=workers,
+            use_multiprocessing=use_multiprocessing,
+            max_queue_size=max_queue_size,
+        )
 
-            inference_variables = kwargs.pop("inference_variables")
-            inference_conditions = kwargs.pop("inference_conditions", None)
-            summary_variables = kwargs.pop("summary_variables", None)
+    def fit(self, *, dataset: keras.utils.PyDataset = None, simulator: Simulator = None, **kwargs):
+        if dataset is None:
+            if simulator is None:
+                raise ValueError("Received no data to fit on. Please provide either a dataset or a simulator.")
 
-            kwargs["configurator"] = Configurator(
-                inference_variables,
-                inference_conditions,
-                summary_variables,
-            )
+            logging.info(f"Building dataset from simulator instance of {simulator.__class__.__name__}.")
+            dataset = self.build_dataset(simulator=simulator, **filter_kwargs(kwargs, self.build_dataset))
         else:
-            # the user passed a configurator, so we should not configure a default one
-            # check if the user also passed args for the default configurator
-            keys = ["inference_variables", "inference_conditions", "summary_variables"]
-            if any(key in kwargs for key in keys):
+            if simulator is not None:
                 raise ValueError(
-                    "Received an ambiguous set of arguments: You are passing a configurator explicitly, "
-                    "but also providing arguments for the default configurator."
+                    "Received conflicting arguments. Please provide either a dataset or a simulator, but not both."
                 )
 
-        kwargs.setdefault("summary_network", None)
-        super().__init__(**kwargs)
+            logging.info(f"Fitting on dataset instance of {dataset.__class__.__name__}.")
+
+        if not self.built:
+            logging.info("Building on a test batch.")
+            mock_data = dataset[0]
+            mock_data = keras.tree.map_structure(keras.ops.convert_to_tensor, mock_data)
+            self.build_from_data(mock_data)
+
+        return super().fit(dataset=dataset, **kwargs)

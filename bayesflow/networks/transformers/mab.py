@@ -1,11 +1,11 @@
 import keras
 from keras import layers
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class MultiHeadAttentionBlock(keras.Layer):
     """Implements the MAB block from [1] which represents learnable cross-attention.
 
