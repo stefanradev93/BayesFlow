@@ -2,12 +2,12 @@ import keras
 from keras.saving import (
     register_keras_serializable,
 )
-
 from bayesflow.types import Tensor
 from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, optimal_transport, tile_axis
-
 from ..inference_network import InferenceNetwork
-from ...integrators import EulerIntegrator
+from .integrators import EulerIntegrator
+from .integrators import RK2Integrator
+from .integrators import RK4Integrator
 
 
 @register_keras_serializable(package="bayesflow.networks")
@@ -23,11 +23,11 @@ class FlowMatching(InferenceNetwork):
     def __init__(self, subnet: str = "mlp", base_distribution: str = "normal", **kwargs):
         super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
         self.seed_generator = keras.random.SeedGenerator()
-        self.integrator = EulerIntegrator(subnet)
+        self.integrator = EulerIntegrator(subnet, **kwargs)
 
 
     def build(self, xz_shape, conditions_shape=None):
-        super().build(xz_shape)        
+        super().build(xz_shape)
         self.integrator.build(xz_shape, conditions_shape)
 
 
@@ -96,8 +96,7 @@ class FlowMatching(InferenceNetwork):
 
         x = t * x1 + (1 - t) * x0
 
-        # predicted_velocity = self.velocity(x, t, c)
-        predicted_velocity = self.integrator._velocity(x, t, c)
+        predicted_velocity = self.integrator.velocity(x, t, c)
         target_velocity = x1 - x0
 
         loss = keras.losses.mean_squared_error(target_velocity, predicted_velocity)

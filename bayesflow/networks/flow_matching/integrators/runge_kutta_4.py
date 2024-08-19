@@ -1,20 +1,19 @@
 import keras
-import numpy as np
 from bayesflow.types import Tensor, Shape
 from bayesflow.utils import find_network, jacobian_trace, keras_kwargs, expand_right_as, tile_axis
 from .integrator import Integrator
 
 
-class EulerIntegrator(Integrator):
+class RK4Integrator(Integrator):
     """
     TODO: docstring
     """
     def __init__(self, subnet: str = "mlp", **kwargs):
         super().__init__(**keras_kwargs(kwargs))
-        self.subnet = find_network(subnet)
+        self.subnet = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
         self.output_projector = keras.layers.Dense(units=None, bias_initializer="zeros")
-    
-    
+
+
     def build(self, xz_shape: Shape, conditions_shape: Shape = None):
         self.output_projector.units = xz_shape[-1]
         input_shape = list(xz_shape)
@@ -29,8 +28,8 @@ class EulerIntegrator(Integrator):
         self.subnet.build(input_shape)
         out_shape = self.subnet.compute_output_shape(input_shape)
         self.output_projector.build(out_shape)
-        
-    
+
+
     def velocity(self, x: Tensor, t: int | float | Tensor, conditions: Tensor = None, **kwargs):
         if not keras.ops.is_tensor(t):
             t = keras.ops.convert_to_tensor(t, dtype=x.dtype)
@@ -47,29 +46,35 @@ class EulerIntegrator(Integrator):
             xtc = keras.ops.concatenate([x, t, conditions], axis=-1)
         
         return self.output_projector(self.subnet(xtc, **kwargs))
-            
-    
+
+
     def call(self, x: Tensor, conditions: Tensor = None, steps: int = 100, traced: bool = False, inverse: bool = False, **kwargs):
         z = keras.ops.copy(x)
         t = 1.0 if not inverse else 0.0
         dt = -1.0 / steps if not inverse else 1.0 / steps
         
         def f(arg):
-            return self.velocity(arg, t, conditions, **kwargs)
+            k1 = self.velocity(arg, t, conditions, **kwargs)
+            k2 = self.velocity(arg + (dt / 2.0 * k1), t + (dt / 2.0), conditions, **kwargs)
+            k3 = self.velocity(arg + (dt / 2.0 * k2), t + (dt / 2.0), conditions, **kwargs)
+            k4 = self.velocity(arg + (dt * k3), t + dt, conditions, **kwargs)
+            return (k1 + (2 * k2) + (2 * k3) + k4) / 6.0
         
         if traced:
             trace = keras.ops.zeros(keras.ops.shape(x)[0], dtype=x.dtype)
             for _ in range(steps):
-                v, tr = jacobian_trace(f, z, kwargs.get("trace_steps", 5))
-                z += dt * v
+                v4, tr = jacobian_trace(f, z, kwargs.get("trace_steps", 5))
+                z += dt * v4
                 trace += dt * tr
                 t += dt
             return z, trace
         
         for _ in range(steps):
-            v = self.velocity(z, t, conditions, **kwargs)
-            z += dt * v
+            k1 = self.velocity(z, t, conditions, **kwargs)
+            k2 = self.velocity(z + (dt / 2.0 * k1), t + (dt / 2.0), conditions, **kwargs)
+            k3 = self.velocity(z + (dt / 2.0 * k2), t + (dt / 2.0), conditions, **kwargs)
+            k4 = self.velocity(z + (dt * k3), t + dt, conditions, **kwargs)
+            z += (dt / 6.0) * (k1 + (2 * k2) + (2 * k3) + k4)
             t += dt
         
         return z
-    
