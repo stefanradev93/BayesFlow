@@ -7,7 +7,7 @@ from bayesflow.utils import issue_url
 def gaussian_kernel(x1: Tensor, x2: Tensor, scales: Tensor = keras.ops.logspace(-6, 6, 11)) -> Tensor:
     residuals = x1[:, None] - x2[None, :]
     residuals = keras.ops.reshape(residuals, keras.ops.shape(residuals)[:2] + (-1,))
-    norms = keras.ops.norm(residuals, axis=2)
+    norms = keras.ops.norm(residuals, ord=2, axis=2)
     exponent = norms[:, :, None] / (2.0 * scales[None, None, :])
     return keras.ops.mean(keras.ops.exp(-exponent), axis=2)
 
@@ -17,15 +17,15 @@ def maximum_mean_discrepancy(x1: Tensor, x2: Tensor, kernel: str = "gaussian", *
 
     :param x1: Tensor of shape (n, ...)
 
-    :param x2: Tensor of shape (m, ...)
+    :param x2: Tensor of shape (n, ...)
 
     :param kernel: Name of the kernel to use.
         Default: 'gaussian'
 
     :param kwargs: Additional keyword arguments to pass to the kernel function.
 
-    :return: Tensor of shape (n, m)
-        Pairwise maximum mean discrepancy between samples in x1 and x2.
+    :return: Tensor of shape (n,)
+        The (x1)-sample-wise maximum mean discrepancy between samples in x1 and x2.
     """
     if kernel != "gaussian":
         raise ValueError(
@@ -39,6 +39,11 @@ def maximum_mean_discrepancy(x1: Tensor, x2: Tensor, kernel: str = "gaussian", *
         raise ValueError(
             f"Expected x1 and x2 to live in the same feature space, "
             f"but got {keras.ops.shape(x1)[1:]} != {keras.ops.shape(x2)[1:]}."
+        )
+
+    if keras.ops.shape(x1)[0] != keras.ops.shape(x2)[0]:
+        raise ValueError(
+            "This version of the maximum mean discrepancy does not support different batch sizes in x1 and x2."
         )
 
     # use flattened versions
