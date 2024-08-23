@@ -41,11 +41,6 @@ def maximum_mean_discrepancy(x1: Tensor, x2: Tensor, kernel: str = "gaussian", *
             f"but got {keras.ops.shape(x1)[1:]} != {keras.ops.shape(x2)[1:]}."
         )
 
-    if keras.ops.shape(x1)[0] != keras.ops.shape(x2)[0]:
-        raise ValueError(
-            "This version of the maximum mean discrepancy does not support different batch sizes in x1 and x2."
-        )
-
     # use flattened versions
     x1 = keras.ops.reshape(x1, (keras.ops.shape(x1)[0], -1))
     x2 = keras.ops.reshape(x2, (keras.ops.shape(x2)[0], -1))
