@@ -9,7 +9,7 @@ from keras.saving import (
 from bayesflow.data_adapters import ConcatenateKeysDataAdapter, DataAdapter
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import logging
+from bayesflow.utils import logging, expand_tile
 
 from .approximator import Approximator
 
@@ -121,10 +121,10 @@ class ContinuousApproximator(Approximator):
 
         return base_config | config
 
-    def sample(self, batch_shape: Shape, data: Mapping[str, Tensor], numpy: bool = False) -> dict[str, Tensor]:
+    def sample(self, data: Mapping[str, Tensor], num_samples: int = 1, numpy: bool = True) -> dict[str, Tensor]:
         data = self.data_adapter.configure(data)
         data = keras.tree.map_structure(keras.ops.convert_to_tensor, data)
-        data = {"inference_variables": self._sample(batch_shape, **data)}
+        data = {"inference_variables": self._sample(num_samples, **data)}
         data = self.data_adapter.deconfigure(data)
 
         if numpy:
@@ -133,7 +133,7 @@ class ContinuousApproximator(Approximator):
         return data
 
     def _sample(
-        self, batch_shape: Shape, inference_conditions: Tensor = None, summary_variables: Tensor = None
+        self, num_samples: Shape, inference_conditions: Tensor = None, summary_variables: Tensor = None
     ) -> Tensor:
         if self.summary_network is not None:
             summary_outputs = self.summary_network(summary_variables)
@@ -142,6 +142,9 @@ class ContinuousApproximator(Approximator):
                 inference_conditions = summary_outputs
             else:
                 inference_conditions = keras.ops.concatenate([inference_conditions, summary_outputs], axis=-1)
+
+        inference_conditions = expand_tile(inference_conditions, axis=1, n=num_samples)
+        batch_shape = (keras.ops.shape(inference_conditions)[0], num_samples)
 
         return self.inference_network.sample(batch_shape, conditions=inference_conditions)
 
