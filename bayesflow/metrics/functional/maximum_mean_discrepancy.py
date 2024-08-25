@@ -6,7 +6,8 @@ from bayesflow.utils import issue_url
 
 def gaussian_kernel(x1: Tensor, x2: Tensor, scales: Tensor = keras.ops.logspace(-6, 6, 11)) -> Tensor:
     residuals = x1[:, None] - x2[None, :]
-    norms = keras.ops.norm(residuals, axis=tuple(range(2, keras.ops.ndim(residuals))))
+    residuals = keras.ops.reshape(residuals, keras.ops.shape(residuals)[:2] + (-1,))
+    norms = keras.ops.norm(residuals, ord=2, axis=2)
     exponent = norms[:, :, None] / (2.0 * scales[None, None, :])
     return keras.ops.mean(keras.ops.exp(-exponent), axis=2)
 
@@ -16,15 +17,15 @@ def maximum_mean_discrepancy(x1: Tensor, x2: Tensor, kernel: str = "gaussian", *
 
     :param x1: Tensor of shape (n, ...)
 
-    :param x2: Tensor of shape (m, ...)
+    :param x2: Tensor of shape (n, ...)
 
     :param kernel: Name of the kernel to use.
         Default: 'gaussian'
 
     :param kwargs: Additional keyword arguments to pass to the kernel function.
 
-    :return: Tensor of shape (n, m)
-        Pairwise maximum mean discrepancy between samples in x1 and x2.
+    :return: Tensor of shape (n,)
+        The (x1)-sample-wise maximum mean discrepancy between samples in x1 and x2.
     """
     if kernel != "gaussian":
         raise ValueError(
@@ -44,8 +45,8 @@ def maximum_mean_discrepancy(x1: Tensor, x2: Tensor, kernel: str = "gaussian", *
     x1 = keras.ops.reshape(x1, (keras.ops.shape(x1)[0], -1))
     x2 = keras.ops.reshape(x2, (keras.ops.shape(x2)[0], -1))
 
-    k1 = kernel_fn(x1, x1, **kwargs)
-    k2 = kernel_fn(x2, x2, **kwargs)
-    k3 = kernel_fn(x1, x2, **kwargs)
+    k1 = keras.ops.mean(kernel_fn(x1, x1, **kwargs), axis=1)
+    k2 = keras.ops.mean(kernel_fn(x2, x2, **kwargs), axis=1)
+    k3 = keras.ops.mean(kernel_fn(x1, x2, **kwargs), axis=1)
 
     return k1 + k2 - 2.0 * k3

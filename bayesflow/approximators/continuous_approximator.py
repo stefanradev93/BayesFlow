@@ -38,7 +38,7 @@ class ContinuousApproximator(Approximator):
     def build_data_adapter(
         cls,
         inference_variables: Sequence[str],
-        inference_conditions: Sequence[str],
+        inference_conditions: Sequence[str] = None,
         summary_variables: Sequence[str] = None,
     ) -> DataAdapter:
         variables = {
@@ -93,8 +93,8 @@ class ContinuousApproximator(Approximator):
 
         loss = inference_metrics.get("loss", keras.ops.zeros(())) + summary_metrics.get("loss", keras.ops.zeros(()))
 
-        inference_metrics = {f"inference/{key}": value for key, value in inference_metrics.items()}
-        summary_metrics = {f"summary/{key}": value for key, value in summary_metrics.items()}
+        inference_metrics = {f"{key}/inference_{key}": value for key, value in inference_metrics.items()}
+        summary_metrics = {f"{key}/summary_{key}": value for key, value in summary_metrics.items()}
 
         metrics = {"loss": loss} | inference_metrics | summary_metrics
 

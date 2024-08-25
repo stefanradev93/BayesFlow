@@ -1,6 +1,7 @@
 from . import (
     approximators,
     benchmarks,
+    callbacks,
     data_adapters,
     datasets,
     diagnostics,

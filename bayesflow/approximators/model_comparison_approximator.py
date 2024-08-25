@@ -134,8 +134,8 @@ class ModelComparisonApproximator(Approximator):
 
         loss = classifier_metrics.get("loss", keras.ops.zeros(())) + summary_metrics.get("loss", keras.ops.zeros(()))
 
-        classifier_metrics = {f"classifier/{key}": value for key, value in classifier_metrics.items()}
-        summary_metrics = {f"summary/{key}": value for key, value in summary_metrics.items()}
+        classifier_metrics = {f"{key}/classifier_{key}": value for key, value in classifier_metrics.items()}
+        summary_metrics = {f"{key}/summary_{key}": value for key, value in summary_metrics.items()}
 
         metrics = {"loss": loss} | classifier_metrics | summary_metrics
 
