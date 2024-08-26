@@ -122,21 +122,33 @@ class ContinuousApproximator(Approximator):
         return base_config | config
 
     def sample(
-        self, data: Mapping[str, Tensor], num_samples: int = 1, numpy: bool = True, batch_shape: Shape = None
+        self,
+        *,
+        conditions: Mapping[str, Tensor],
+        num_samples: int = None,
+        numpy: bool = True,
+        batch_shape: Shape = None,
     ) -> dict[str, Tensor]:
-        data = self.data_adapter.configure(data)
-        data = keras.tree.map_structure(keras.ops.convert_to_tensor, data)
-        data = {"inference_variables": self._sample(num_samples, batch_shape=batch_shape, **data)}
-        data = self.data_adapter.deconfigure(data)
+        if num_samples is None and batch_shape is None:
+            num_samples = 1
+        elif batch_shape is not None and num_samples is not None:
+            raise ValueError("Please specify either `num_samples` or `batch_shape`, not both.")
+
+        conditions = self.data_adapter.configure(conditions)
+        conditions = keras.tree.map_structure(keras.ops.convert_to_tensor, conditions)
+        conditions = {
+            "inference_variables": self._sample(num_samples=num_samples, batch_shape=batch_shape, **conditions)
+        }
+        conditions = self.data_adapter.deconfigure(conditions)
 
         if numpy:
-            data = keras.tree.map_structure(keras.ops.convert_to_numpy, data)
+            conditions = keras.tree.map_structure(keras.ops.convert_to_numpy, conditions)
 
-        return data
+        return conditions
 
     def _sample(
         self,
-        num_samples: int,
+        num_samples: int = None,
         batch_shape: Shape = None,
         inference_conditions: Tensor = None,
         summary_variables: Tensor = None,
@@ -151,14 +163,14 @@ class ContinuousApproximator(Approximator):
 
         if batch_shape is None:
             if inference_conditions is not None:
-                inference_conditions = expand_tile(inference_conditions, axis=1, n=num_samples)
                 batch_shape = (keras.ops.shape(inference_conditions)[0], num_samples)
+                inference_conditions = expand_tile(inference_conditions, axis=1, n=num_samples)
             else:
                 batch_shape = (num_samples,)
 
         return self.inference_network.sample(batch_shape, conditions=inference_conditions)
 
-    def log_prob(self, data: Mapping[str, Tensor], numpy: bool = False) -> Tensor:
+    def log_prob(self, data: Mapping[str, Tensor], numpy: bool = True) -> Tensor:
         data = self.data_adapter.configure(data)
         log_prob = self._log_prob(**data)
 
