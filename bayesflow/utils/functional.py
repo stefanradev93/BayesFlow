@@ -39,9 +39,9 @@ def batched_call(
 
         def map_predicate(arg):
             if isinstance(arg, np.ndarray):
-                return arg.ndim > len(batch_shape)
+                return arg.ndim >= len(batch_shape)
             if keras.ops.is_tensor(arg):
-                return keras.ops.ndim(arg) > len(batch_shape)
+                return keras.ops.ndim(arg) >= len(batch_shape)
 
             return False
 
