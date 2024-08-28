@@ -15,9 +15,9 @@ class LambdaSimulator(Simulator):
         :param sample_fn: The sampling function.
             If in batched format, must accept a batch_shape argument as the first positional argument.
             If in unbatched format (the default), may accept any keyword arguments.
-            Must return a dictionary of string keys and numpy array values.
+            Must return a dictionary of string keys and numpy array (or scalar) values.
         :param is_batched: Whether the sampling function is in batched format.
-        :param cast_dtypes: Output data types to cast to.
+        :param cast_dtypes: Output data types to cast arrays to.
             By default, we convert float64 (the default for numpy on x64 systems)
             to float32 (the default for deep learning on any system).
         """
@@ -29,7 +29,7 @@ class LambdaSimulator(Simulator):
 
         self.cast_dtypes = cast_dtypes
 
-    def sample(self, batch_shape: Shape, **kwargs) -> dict[str, np.ndarray]:
+    def sample(self, batch_shape: Shape, **kwargs) -> dict[str, any]:
         # try to use only valid keyword arguments
         kwargs = filter_kwargs(kwargs, self.sample_fn)
 
@@ -42,7 +42,7 @@ class LambdaSimulator(Simulator):
 
         return data
 
-    def _sample_batch(self, batch_shape: Shape, **kwargs) -> dict[str, np.ndarray]:
+    def _sample_batch(self, batch_shape: Shape, **kwargs) -> dict[str, any]:
         """Samples a batch of data from an otherwise unbatched sampling function."""
         data = batched_call(self.sample_fn, batch_shape, kwargs=kwargs, flatten=True)
 
@@ -50,10 +50,13 @@ class LambdaSimulator(Simulator):
 
         return data
 
-    def _cast_dtypes(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+    def _cast_dtypes(self, data: dict[str, any]) -> dict[str, any]:
         data = data.copy()
 
         for key, value in data.items():
+            if not isinstance(value, np.ndarray):
+                continue
+
             dtype = str(value.dtype)
             if dtype in self.cast_dtypes:
                 data[key] = value.astype(self.cast_dtypes[dtype])
