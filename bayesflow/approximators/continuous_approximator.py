@@ -164,7 +164,7 @@ class ContinuousApproximator(Approximator):
         if batch_shape is None:
             if inference_conditions is not None:
                 batch_shape = (keras.ops.shape(inference_conditions)[0], num_samples)
-                inference_conditions = expand_tile(inference_conditions, axis=1, n=num_samples)
+                inference_conditions = expand_tile(inference_conditions, num_samples, axis=1)
             else:
                 batch_shape = (num_samples,)
 

@@ -32,8 +32,6 @@ from . import numpy_utils
 from .optimal_transport import optimal_transport
 
 from .tensor_utils import (
-    broadcast_right,
-    broadcast_right_as,
     expand_right,
     expand_right_as,
     expand_right_to,
