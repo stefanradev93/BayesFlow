@@ -29,7 +29,7 @@ class LambdaSimulator(Simulator):
 
         self.cast_dtypes = cast_dtypes
 
-    def sample(self, batch_shape: Shape, **kwargs) -> dict[str, any]:
+    def sample(self, batch_shape: Shape, **kwargs) -> dict[str, np.ndarray]:
         # try to use only valid keyword arguments
         kwargs = filter_kwargs(kwargs, self.sample_fn)
 
@@ -42,7 +42,7 @@ class LambdaSimulator(Simulator):
 
         return data
 
-    def _sample_batch(self, batch_shape: Shape, **kwargs) -> dict[str, any]:
+    def _sample_batch(self, batch_shape: Shape, **kwargs) -> dict[str, np.ndarray]:
         """Samples a batch of data from an otherwise unbatched sampling function."""
         data = batched_call(self.sample_fn, batch_shape, kwargs=kwargs, flatten=True)
 
@@ -50,13 +50,10 @@ class LambdaSimulator(Simulator):
 
         return data
 
-    def _cast_dtypes(self, data: dict[str, any]) -> dict[str, any]:
+    def _cast_dtypes(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         data = data.copy()
 
         for key, value in data.items():
-            if not isinstance(value, np.ndarray):
-                continue
-
             dtype = str(value.dtype)
             if dtype in self.cast_dtypes:
                 data[key] = value.astype(self.cast_dtypes[dtype])

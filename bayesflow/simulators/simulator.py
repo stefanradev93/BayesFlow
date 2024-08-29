@@ -45,7 +45,7 @@ class Simulator:
 
             if not accept.dtype == "bool":
                 # we could cast, but this tends to hide mistakes in the predicate
-                raise RuntimeError("Predicate must return a boolean type array.")
+                raise RuntimeError(f"Predicate must return a boolean type array. Got dtype={accept.dtype}")
 
             (accept,) = np.nonzero(accept)
 

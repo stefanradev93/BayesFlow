@@ -1,5 +1,6 @@
 from .composite_lambda_simulator import CompositeLambdaSimulator
 from .composite_simulator import CompositeSimulator
+from .hierarchical_simulator import HierarchicalSimulator
 from .lambda_simulator import LambdaSimulator
 from .model_comparison_simulator import ModelComparisonSimulator
 from .simulator import Simulator
