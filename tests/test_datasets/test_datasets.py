@@ -19,6 +19,7 @@ def test_dataset_is_picklable(dataset):
 
 
 def test_dataset_works_in_fit(model, dataset):
+    print(next(iter(dataset[0].values())).dtype)
     model.fit(dataset, epochs=1, steps_per_epoch=1)
 
 

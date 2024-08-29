@@ -1,5 +1,5 @@
 import keras
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 from bayesflow.utils import find_permutation, keras_kwargs
@@ -9,7 +9,7 @@ from .couplings import DualCoupling
 from ..inference_network import InferenceNetwork
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class CouplingFlow(InferenceNetwork):
     """Implements a coupling flow as a sequence of dual couplings with permutations and activation
     normalization. Incorporates ideas from [1-5].
@@ -104,13 +104,10 @@ class CouplingFlow(InferenceNetwork):
 
         return x
 
-    def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
-        base_metrics = super().compute_metrics(data, stage=stage)
+    def compute_metrics(self, x: Tensor, conditions: Tensor = None, stage: str = "training") -> dict[str, Tensor]:
+        base_metrics = super().compute_metrics(x, conditions=conditions, stage=stage)
 
-        inference_variables = data["inference_variables"]
-        inference_conditions = data.get("inference_conditions")
-
-        z, log_density = self(inference_variables, conditions=inference_conditions, inverse=False, density=True)
+        z, log_density = self(x, conditions=conditions, inverse=False, density=True)
         loss = -keras.ops.mean(log_density)
 
         return base_metrics | {"loss": loss}

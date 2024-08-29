@@ -1,34 +1,31 @@
+import keras
 import keras.ops as ops
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
+import numpy as np
 
 from bayesflow.types import Tensor
 from .transform import Transform
 
 
-@register_keras_serializable(package="bayesflow.networks.coupling_flow")
+@serializable(package="bayesflow.networks.coupling_flow")
 class AffineTransform(Transform):
-    def __init__(self, clamp_factor: float | None = 5.0, **kwargs):
+    def __init__(self, clamp: bool | int | float | None = 3.0, **kwargs):
         super().__init__(**kwargs)
-        self.clamp_factor = clamp_factor
+        match clamp:
+            case True:
+                self.clamp_factor = 3.0
+            case False:
+                self.clamp_factor = None
+            case int() | float():
+                self.clamp_factor = float(clamp)
+            case None:
+                self.clamp_factor = None
+            case _:
+                raise ValueError(f"Invalid value for 'clamp': {clamp}")
 
     @property
     def params_per_dim(self):
         return 2
-
-    @classmethod
-    def from_config(cls, config):
-        clamp_factor = config.pop("clamp_factor")
-
-        return cls(clamp_factor, **config)
-
-    def get_config(self):
-        base_config = super().get_config()
-
-        config = {
-            "clamp_factor": self.clamp_factor,
-        }
-
-        return base_config | config
 
     def split_parameters(self, parameters: Tensor) -> dict[str, Tensor]:
         scale, shift = ops.split(parameters, 2, axis=-1)
@@ -36,10 +33,19 @@ class AffineTransform(Transform):
         return {"scale": scale, "shift": shift}
 
     def constrain_parameters(self, parameters: dict[str, Tensor]) -> dict[str, Tensor]:
-        if self.clamp_factor is not None:
-            s = parameters["scale"]
-            parameters["scale"] = 1 / (1 + ops.exp(-s)) * ops.sqrt(1 + ops.abs(s + self.clamp_factor))
+        scale = parameters["scale"]
 
+        # shift such that constrain(0) = 1
+        scale = scale + np.log(np.e - 1)
+
+        # constrain to positive values
+        scale = keras.ops.softplus(scale)
+
+        # soft clamp
+        if self.clamp_factor is not None:
+            scale = self.clamp_factor * keras.ops.tanh(scale)
+
+        parameters["scale"] = scale
         return parameters
 
     def _forward(self, x: Tensor, parameters: dict[str, Tensor] = None) -> (Tensor, Tensor):

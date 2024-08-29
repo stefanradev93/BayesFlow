@@ -1,25 +1,23 @@
 import jax
 import keras
 
-from .base_approximator import BaseApproximator
-from ..types import Tensor
+from bayesflow.utils import filter_kwargs
 
 
-class JAXApproximator(BaseApproximator):
-    def train_step(self, *args, **kwargs):
-        return self.stateless_train_step(*args, **kwargs)
-
-    def test_step(self, *args, **kwargs):
-        return self.stateless_test_step(*args, **kwargs)
+class JAXApproximator(keras.Model):
+    # noinspection PyMethodOverriding
+    def compute_metrics(self, *args, **kwargs) -> dict[str, jax.Array]:
+        # implemented by each respective architecture
+        raise NotImplementedError
 
     def stateless_compute_metrics(
         self,
         trainable_variables: any,
         non_trainable_variables: any,
         metrics_variables: any,
-        data: dict[str, Tensor],
+        data: dict[str, any],
         stage: str = "training",
-    ) -> (Tensor, tuple):
+    ) -> (jax.Array, tuple):
         """
         Things we do for jax:
         1. Accept trainable variables as the first argument
@@ -40,7 +38,8 @@ class JAXApproximator(BaseApproximator):
 
         # perform a stateless call to compute_metrics
         with keras.StatelessScope(state_mapping) as scope:
-            metrics = self.compute_metrics(data, stage)
+            kwargs = filter_kwargs(data | {"stage": stage}, self.compute_metrics)
+            metrics = self.compute_metrics(**kwargs)
 
         # update variables
         non_trainable_variables = [scope.get_current_value(v) for v in self.non_trainable_variables]
@@ -48,13 +47,26 @@ class JAXApproximator(BaseApproximator):
 
         return metrics["loss"], (metrics, non_trainable_variables, metrics_variables)
 
-    def stateless_train_step(self, state: tuple, data: dict[str, Tensor]) -> (dict[str, Tensor], tuple):
+    def stateless_test_step(self, state: tuple, data: dict[str, any]) -> (dict[str, jax.Array], tuple):
+        trainable_variables, non_trainable_variables, metrics_variables = state
+
+        loss, aux = self.stateless_compute_metrics(
+            trainable_variables, non_trainable_variables, metrics_variables, data=data, stage="validation"
+        )
+        metrics, non_trainable_variables, metrics_variables = aux
+
+        metrics_variables = self._update_loss(loss, metrics_variables)
+
+        state = trainable_variables, non_trainable_variables, metrics_variables
+        return metrics, state
+
+    def stateless_train_step(self, state: tuple, data: dict[str, any]) -> (dict[str, jax.Array], tuple):
         trainable_variables, non_trainable_variables, optimizer_variables, metrics_variables = state
 
         grad_fn = jax.value_and_grad(self.stateless_compute_metrics, has_aux=True)
 
         (loss, aux), grads = grad_fn(
-            trainable_variables, non_trainable_variables, metrics_variables, data, stage="training"
+            trainable_variables, non_trainable_variables, metrics_variables, data=data, stage="training"
         )
         metrics, non_trainable_variables, metrics_variables = aux
 
@@ -67,20 +79,13 @@ class JAXApproximator(BaseApproximator):
         state = trainable_variables, non_trainable_variables, optimizer_variables, metrics_variables
         return metrics, state
 
-    def stateless_test_step(self, state: tuple, data: dict[str, Tensor]) -> (dict[str, Tensor], tuple):
-        trainable_variables, non_trainable_variables, metrics_variables = state
+    def test_step(self, *args, **kwargs):
+        return self.stateless_test_step(*args, **kwargs)
 
-        loss, aux = self.stateless_compute_metrics(
-            trainable_variables, non_trainable_variables, metrics_variables, data, stage="validation"
-        )
-        metrics, non_trainable_variables, metrics_variables = aux
+    def train_step(self, *args, **kwargs):
+        return self.stateless_train_step(*args, **kwargs)
 
-        metrics_variables = self._update_loss(loss, metrics_variables)
-
-        state = trainable_variables, non_trainable_variables, metrics_variables
-        return metrics, state
-
-    def _update_loss(self, loss, metrics_variables):
+    def _update_loss(self, loss: jax.Array, metrics_variables: any) -> any:
         # update the loss progress bar, and possibly metrics variables along with it
         state_mapping = list(zip(self.metrics_variables, metrics_variables))
         with keras.StatelessScope(state_mapping) as scope:

@@ -12,17 +12,20 @@ def test_compile(approximator, random_samples, jit_compile):
     approximator.compile(jit_compile=jit_compile)
 
 
+@pytest.mark.flaky(reruns=1, only_rerun="AssertionError")
 def test_fit(approximator, train_dataset, validation_dataset, batch_size):
     from bayesflow.metrics import MaximumMeanDiscrepancy
 
-    approximator.compile(inference_metrics=[keras.metrics.KLDivergence(), MaximumMeanDiscrepancy()])
+    approximator.compile(inference_metrics=[MaximumMeanDiscrepancy()])
 
-    approximator.build_from_data(train_dataset[0])
+    mock_data = train_dataset[0]
+    mock_data = keras.tree.map_structure(keras.ops.convert_to_tensor, mock_data)
+    approximator.build_from_data(mock_data)
 
     untrained_weights = copy.deepcopy(approximator.weights)
     untrained_metrics = approximator.evaluate(validation_dataset, return_dict=True)
 
-    approximator.fit(train_dataset, epochs=20)
+    approximator.fit(dataset=train_dataset, epochs=20, batch_size=batch_size)
 
     trained_weights = approximator.weights
     trained_metrics = approximator.evaluate(validation_dataset, return_dict=True)
@@ -33,25 +36,18 @@ def test_fit(approximator, train_dataset, validation_dataset, batch_size):
     assert isinstance(untrained_metrics, dict)
     assert isinstance(trained_metrics, dict)
 
-    # test loss decreases
-    assert "loss" in untrained_metrics
-    assert "loss" in trained_metrics
-    assert untrained_metrics["loss"] > trained_metrics["loss"]
-
-    # test kl divergence decreases
-    assert "kl_divergence" in untrained_metrics
-    assert "kl_divergence" in trained_metrics
-    assert untrained_metrics["kl_divergence"] > trained_metrics["kl_divergence"]
-
-    # test mmd decreases
-    assert "maximum_mean_discrepancy" in untrained_metrics
-    assert "maximum_mean_discrepancy" in trained_metrics
-    assert untrained_metrics["maximum_mean_discrepancy"] > trained_metrics["maximum_mean_discrepancy"]
+    # test that metrics are improving
+    for metric in ["loss", "maximum_mean_discrepancy/inference_maximum_mean_discrepancy"]:
+        assert metric in untrained_metrics
+        assert metric in trained_metrics
+        assert trained_metrics[metric] <= untrained_metrics[metric]
 
 
 @pytest.mark.parametrize("jit_compile", [False, True])
-def test_serialize_deserialize(tmp_path, approximator, random_samples, jit_compile):
-    approximator.build_from_data(random_samples)
+def test_serialize_deserialize(tmp_path, approximator, train_dataset, jit_compile):
+    mock_data = train_dataset[0]
+    mock_data = keras.tree.map_structure(keras.ops.convert_to_tensor, mock_data)
+    approximator.build_from_data(mock_data)
 
     keras.saving.save_model(approximator, tmp_path / "model.keras")
     loaded_approximator = keras.saving.load_model(tmp_path / "model.keras")

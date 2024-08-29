@@ -1,6 +1,6 @@
 import keras
 from keras import layers, Sequential
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 
@@ -9,7 +9,7 @@ from ..mlp import MLP
 from ..summary_network import SummaryNetwork
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class LSTNet(SummaryNetwork):
     """
     Implements a LSTNet Architecture as described in [1]

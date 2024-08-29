@@ -25,8 +25,7 @@ class SummaryNetwork(keras.Layer):
         """
         raise NotImplementedError
 
-    def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
-        x = data["summary_variables"]
+    def compute_metrics(self, x: Tensor, stage: str = "training") -> dict[str, Tensor]:
         outputs = self(x, training=stage == "training")
 
         metrics = {}
@@ -40,8 +39,6 @@ class SummaryNetwork(keras.Layer):
                 # compute sample-based validation metrics
                 for metric in self.metrics:
                     metrics[metric.name] = metric(outputs, samples)
-        else:
-            metrics["loss"] = keras.ops.zeros(())
 
         metrics["outputs"] = outputs
 
