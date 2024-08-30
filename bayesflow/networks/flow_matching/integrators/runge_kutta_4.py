@@ -12,7 +12,7 @@ class RK4Integrator(Integrator):
     def __init__(self, subnet: str = "mlp", **kwargs):
         super().__init__(**keras_kwargs(kwargs))
         self.subnet = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
-        self.output_projector = keras.layers.Dense(units=None, bias_initializer="zeros")
+        self.output_projector = keras.layers.Dense(units=None, bias_initializer="zeros", kernel_initializer="zeros")
 
     def build(self, xz_shape: Shape, conditions_shape: Shape = None):
         self.output_projector.units = xz_shape[-1]
@@ -33,7 +33,7 @@ class RK4Integrator(Integrator):
         if not keras.ops.is_tensor(t):
             t = keras.ops.convert_to_tensor(t, dtype=x.dtype)
         if keras.ops.ndim(t) == 0:
-            t = keras.ops.full((keras.ops.shape(x)[0],), t, dtype=x.dtype)
+            t = keras.ops.full((keras.ops.shape(x)[0],), t, dtype=keras.ops.dtype(x))
 
         t = expand_right_as(t, x)
         if keras.ops.ndim(x) == 3:
@@ -51,7 +51,7 @@ class RK4Integrator(Integrator):
         x: Tensor,
         conditions: Tensor = None,
         steps: int = 100,
-        traced: bool = False,
+        density: bool = False,
         inverse: bool = False,
         **kwargs,
     ):
@@ -66,7 +66,7 @@ class RK4Integrator(Integrator):
             k4 = self.velocity(arg + (dt * k3), t + dt, conditions, **kwargs)
             return (k1 + (2 * k2) + (2 * k3) + k4) / 6.0
 
-        if traced:
+        if density:
             trace = keras.ops.zeros(keras.ops.shape(x)[0], dtype=x.dtype)
             for _ in range(steps):
                 v4, tr = jacobian_trace(f, z, kwargs.get("trace_steps", 5))

@@ -24,7 +24,7 @@ class FlowMatching(InferenceNetwork):
         self,
         subnet: str = "mlp",
         base_distribution: str = "normal",
-        integrator: str = "rk2",
+        integrator: str = "euler",
         use_optimal_transport: bool = False,
         optimal_transport_kwargs: dict[str, any] = None,
         **kwargs,
@@ -63,15 +63,15 @@ class FlowMatching(InferenceNetwork):
     def _forward(
         self, x: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
-        steps = kwargs.get("steps", 200)
+        steps = kwargs.get("steps", 100)
 
         if density:
-            z, trace = self.integrator(x, conditions=conditions, steps=steps, traced=True)
+            z, trace = self.integrator(x, conditions=conditions, steps=steps, density=True)
             log_prob = self.base_distribution.log_prob(z)
             log_density = log_prob + trace
             return z, log_density
 
-        z = self.integrator(x, conditions=conditions, steps=steps, traced=False)
+        z = self.integrator(x, conditions=conditions, steps=steps, density=False)
         return z
 
     def _inverse(
@@ -80,12 +80,12 @@ class FlowMatching(InferenceNetwork):
         steps = kwargs.get("steps", 100)
 
         if density:
-            x, trace = self.integrator(z, conditions=conditions, steps=steps, traced=True, inverse=True)
+            x, trace = self.integrator(z, conditions=conditions, steps=steps, density=True, inverse=True)
             log_prob = self.base_distribution.log_prob(z)
             log_density = log_prob - trace
             return x, log_density
 
-        x = self.integrator(z, conditions=conditions, steps=steps, traced=False, inverse=True)
+        x = self.integrator(z, conditions=conditions, steps=steps, density=False, inverse=True)
         return x
 
     def compute_metrics(
