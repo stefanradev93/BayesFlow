@@ -24,6 +24,7 @@ class FlowMatching(InferenceNetwork):
         self,
         subnet: str = "mlp",
         base_distribution: str = "normal",
+        integrator: str = "rk2",
         use_optimal_transport: bool = False,
         optimal_transport_kwargs: dict[str, any] = None,
         **kwargs,
@@ -33,8 +34,17 @@ class FlowMatching(InferenceNetwork):
         self.use_optimal_transport = use_optimal_transport
         self.optimal_transport_kwargs = optimal_transport_kwargs or {}
         self.seed_generator = keras.random.SeedGenerator()
-        self.integrator = EulerIntegrator(subnet, **kwargs)
-
+        
+        match integrator:
+            case "euler":
+                self.integrator = EulerIntegrator(subnet, **kwargs)
+            case "rk2":
+                self.integrator = RK2Integrator(subnet, **kwargs)
+            case "rk4":
+                self.integrator = RK4Integrator(subnet, **kwargs)
+            case _:
+                raise NotImplementedError(f"No support for {integrator} integration")
+            
 
     def build(self, xz_shape: Shape, conditions_shape: Shape = None) -> None:
         super().build(xz_shape)
