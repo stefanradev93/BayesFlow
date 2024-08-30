@@ -3,7 +3,7 @@ import keras
 from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, optimal_transport, tile_axis
+from bayesflow.utils import expand_right_as, keras_kwargs, optimal_transport
 from ..inference_network import InferenceNetwork
 from .integrators import EulerIntegrator
 from .integrators import RK2Integrator
@@ -34,7 +34,7 @@ class FlowMatching(InferenceNetwork):
         self.use_optimal_transport = use_optimal_transport
         self.optimal_transport_kwargs = optimal_transport_kwargs or {}
         self.seed_generator = keras.random.SeedGenerator()
-        
+
         match integrator:
             case "euler":
                 self.integrator = EulerIntegrator(subnet, **kwargs)
@@ -44,12 +44,10 @@ class FlowMatching(InferenceNetwork):
                 self.integrator = RK4Integrator(subnet, **kwargs)
             case _:
                 raise NotImplementedError(f"No support for {integrator} integration")
-            
 
     def build(self, xz_shape: Shape, conditions_shape: Shape = None) -> None:
         super().build(xz_shape)
         self.integrator.build(xz_shape, conditions_shape)
-
 
     def call(
         self,
@@ -62,7 +60,6 @@ class FlowMatching(InferenceNetwork):
             return self._inverse(xz, conditions=conditions, **kwargs)
         return self._forward(xz, conditions=conditions, **kwargs)
 
-
     def _forward(
         self, x: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
@@ -73,25 +70,23 @@ class FlowMatching(InferenceNetwork):
             log_prob = self.base_distribution.log_prob(z)
             log_density = log_prob + trace
             return z, log_density
-        
+
         z = self.integrator(x, conditions=conditions, steps=steps, traced=False)
         return z
-
 
     def _inverse(
         self, z: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         steps = kwargs.get("steps", 100)
-        
+
         if density:
             x, trace = self.integrator(z, conditions=conditions, steps=steps, traced=True, inverse=True)
             log_prob = self.base_distribution.log_prob(z)
             log_density = log_prob - trace
             return x, log_density
-        
+
         x = self.integrator(z, conditions=conditions, steps=steps, traced=False, inverse=True)
         return x
-
 
     def compute_metrics(
         self, x: Tensor | Sequence[Tensor, ...], conditions: Tensor = None, stage: str = "training"
