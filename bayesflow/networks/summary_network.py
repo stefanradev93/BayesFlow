@@ -28,7 +28,7 @@ class SummaryNetwork(keras.Layer):
     def compute_metrics(self, x: Tensor, stage: str = "training") -> dict[str, Tensor]:
         outputs = self(x, training=stage == "training")
 
-        metrics = {}
+        metrics = {"outputs": outputs}
 
         if self.base_distribution is not None:
             samples = self.base_distribution.sample((keras.ops.shape(x)[0],))
@@ -39,7 +39,5 @@ class SummaryNetwork(keras.Layer):
                 # compute sample-based validation metrics
                 for metric in self.metrics:
                     metrics[metric.name] = metric(outputs, samples)
-
-        metrics["outputs"] = outputs
 
         return metrics

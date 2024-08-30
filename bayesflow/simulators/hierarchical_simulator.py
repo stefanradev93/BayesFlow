@@ -6,8 +6,6 @@ from bayesflow.types import Shape
 
 from .simulator import Simulator
 
-ShapeLike = Sequence[int | Sequence[int], ...]
-
 
 class HierarchicalSimulator(Simulator):
     def __init__(self, hierarchy: Sequence[Simulator]):
