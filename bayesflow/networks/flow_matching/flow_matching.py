@@ -29,8 +29,6 @@ class FlowMatching(InferenceNetwork):
         **kwargs,
     ):
         super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
-        self.subnet = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
-        self.output_projector = keras.layers.Dense(units=None, bias_initializer="zeros", kernel_initializer="zeros")
 
         self.use_optimal_transport = use_optimal_transport
         self.optimal_transport_kwargs = optimal_transport_kwargs or {}
@@ -53,25 +51,6 @@ class FlowMatching(InferenceNetwork):
         if inverse:
             return self._inverse(xz, conditions=conditions, **kwargs)
         return self._forward(xz, conditions=conditions, **kwargs)
-
-      
-    def velocity(self, x: Tensor, t: int | float | Tensor, conditions: Tensor = None, **kwargs) -> Tensor:
-        if not keras.ops.is_tensor(t):
-            t = keras.ops.convert_to_tensor(t, dtype=x.dtype)
-
-        if keras.ops.ndim(t) == 0:
-            t = keras.ops.full((keras.ops.shape(x)[0],), t, dtype=keras.ops.dtype(x))
-
-        t = expand_right_as(t, x)
-        if keras.ops.ndim(x) == 3:
-            t = tile_axis(t, keras.ops.shape(x)[1], axis=1)
-
-        if conditions is None:
-            xtc = keras.ops.concatenate([x, t], axis=-1)
-        else:
-            xtc = keras.ops.concatenate([x, t, conditions], axis=-1)
-
-        return self.output_projector(self.subnet(xtc, **kwargs))
 
 
     def _forward(
@@ -127,7 +106,7 @@ class FlowMatching(InferenceNetwork):
 
         base_metrics = super().compute_metrics(x1, conditions, stage)
 
-        predicted_velocity = self.velocity(x, t, conditions)
+        predicted_velocity = self.integrator.velocity(x, t, conditions)
 
         loss = keras.losses.mean_squared_error(target_velocity, predicted_velocity)
         loss = keras.ops.mean(loss)

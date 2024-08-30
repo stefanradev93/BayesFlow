@@ -38,7 +38,7 @@ class RK4Integrator(Integrator):
         
         t = expand_right_as(t, x)
         if keras.ops.ndim(x) == 3:
-            t = tile_axis(t, axis=1, n=keras.ops.shape(x)[1])
+            t = tile_axis(t, n=keras.ops.shape(x)[1], axis=1)
         
         if conditions is None:
             xtc = keras.ops.concatenate([x, t], axis=-1)
