@@ -8,6 +8,11 @@ def batch_size():
     return 16
 
 
+@pytest.fixture()
+def num_batches():
+    return 4
+
+
 @pytest.fixture(params=["online_dataset", "offline_dataset"])
 def dataset(request, online_dataset, offline_dataset):
     return request.getfixturevalue(request.param)
@@ -29,21 +34,30 @@ def model():
 
 
 @pytest.fixture()
-def offline_dataset(simulator, batch_size, workers, use_multiprocessing):
+def offline_dataset(simulator, batch_size, num_batches, workers, use_multiprocessing):
     from bayesflow import OfflineDataset
 
     # TODO: there is a bug in keras where if len(dataset) == 1 batch
     #  fit will error because no logs are generated
     #  the single batch is then skipped entirely
-    data = simulator.sample((batch_size * 2,))
-    return OfflineDataset(data, batch_size=batch_size, workers=workers, use_multiprocessing=use_multiprocessing)
+    data = simulator.sample((batch_size * num_batches,))
+    return OfflineDataset(
+        data, batch_size=batch_size, workers=workers, use_multiprocessing=use_multiprocessing, data_adapter=None
+    )
 
 
 @pytest.fixture()
-def online_dataset(simulator, batch_size, workers, use_multiprocessing):
+def online_dataset(simulator, batch_size, num_batches, workers, use_multiprocessing):
     from bayesflow import OnlineDataset
 
-    return OnlineDataset(simulator, batch_size=batch_size, workers=workers, use_multiprocessing=use_multiprocessing)
+    return OnlineDataset(
+        simulator,
+        batch_size=batch_size,
+        num_batches=num_batches,
+        workers=workers,
+        use_multiprocessing=use_multiprocessing,
+        data_adapter=None,
+    )
 
 
 # these need to be global for pickle
@@ -51,48 +65,48 @@ def online_dataset(simulator, batch_size, workers, use_multiprocessing):
 
 class Simulator:
     def sample(self, batch_shape):
-        return dict(x=keras.random.normal(batch_shape + (2,)))
+        return dict(x=np.random.standard_normal(size=batch_shape + (2,)).astype("float32"))
 
 
 def sample_contexts_unbatched(**kwargs):
-    return dict(r=np.random.normal(), alpha=np.random.normal())
+    return dict(r=np.random.standard_normal(), alpha=np.random.standard_normal())
 
 
 def sample_parameters_unbatched(**kwargs):
-    return dict(theta=np.random.normal(size=2))
+    return dict(theta=np.random.standard_normal(size=2))
 
 
 def sample_observables_unbatched(r, alpha, theta, **kwargs):
-    return dict(x=np.random.normal(size=2))
+    return dict(x=np.random.standard_normal(size=2))
 
 
 def sample_contexts_batched(shape, **kwargs):
-    return dict(r=np.random.normal(size=shape), alpha=np.random.normal(size=shape))
+    return dict(r=np.random.standard_normal(size=shape), alpha=np.random.standard_normal(size=shape))
 
 
 def sample_parameters_batched(shape, **kwargs):
-    return dict(theta=np.random.normal(size=shape + (2,)))
+    return dict(theta=np.random.standard_normal(size=shape + (2,)))
 
 
 def sample_observables_batched(shape, r, alpha, theta, **kwargs):
-    return dict(x=np.random.normal(size=shape + (2,)))
+    return dict(x=np.random.standard_normal(size=shape + (2,)))
 
 
-@pytest.fixture(params=["class", "batched_sequential", "unbatched_sequential"])
+@pytest.fixture(params=["class", "batched_composite", "unbatched_composite"])
 def simulator(request):
-    from bayesflow.simulators import SequentialSimulator
+    from bayesflow.simulators import CompositeLambdaSimulator
 
     if request.param == "class":
         simulator = Simulator()
-    elif request.param == "batched_sequential":
-        simulator = SequentialSimulator(
+    elif request.param == "batched_composite":
+        simulator = CompositeLambdaSimulator(
             [sample_contexts_batched, sample_parameters_batched, sample_observables_batched],
             is_batched=True,
-            is_numpy=True,
         )
-    elif request.param == "unbatched_sequential":
-        simulator = SequentialSimulator(
-            [sample_contexts_unbatched, sample_parameters_unbatched, sample_observables_unbatched]
+    elif request.param == "unbatched_composite":
+        simulator = CompositeLambdaSimulator(
+            [sample_contexts_unbatched, sample_parameters_unbatched, sample_observables_unbatched],
+            is_batched=False,
         )
     else:
         raise NotImplementedError

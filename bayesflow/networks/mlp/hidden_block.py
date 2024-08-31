@@ -1,11 +1,11 @@
 import keras
 from keras import layers
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class ConfigurableHiddenBlock(keras.layers.Layer):
     def __init__(
         self,
@@ -27,23 +27,35 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
         )
         if spectral_normalization:
             self.dense = layers.SpectralNormalization(self.dense)
-        self.dropout = keras.layers.Dropout(dropout)
+
+        if dropout is not None and dropout > 0.0:
+            self.dropout = layers.Dropout(dropout)
+        else:
+            self.dropout = None
 
     def call(self, inputs: Tensor, training=False) -> Tensor:
         x = self.dense(inputs, training=training)
-        x = self.dropout(x, training=training)
+
+        if self.dropout is not None:
+            x = self.dropout(x, training=training)
+
         if self.residual:
             x = x + inputs
+
         return self.activation_fn(x)
 
     def build(self, input_shape):
         self.dense.build(input_shape)
         input_shape = self.dense.compute_output_shape(input_shape)
-        self.dropout.build(input_shape)
+
+        if self.dropout is not None:
+            self.dropout.build(input_shape)
 
     def compute_output_shape(self, input_shape):
         input_shape = self.dense.compute_output_shape(input_shape)
-        input_shape = self.dropout.compute_output_shape(input_shape)
+
+        if self.dropout is not None:
+            input_shape = self.dropout.compute_output_shape(input_shape)
 
         return input_shape
 

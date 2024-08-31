@@ -1,1 +1,3 @@
 from .approximator import Approximator
+from .continuous_approximator import ContinuousApproximator
+from .model_comparison_approximator import ModelComparisonApproximator

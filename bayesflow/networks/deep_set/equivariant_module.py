@@ -1,13 +1,13 @@
 import keras
 from keras import ops, layers
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 from bayesflow.utils import keras_kwargs
 from .invariant_module import InvariantModule
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class EquivariantModule(keras.Layer):
     """Implements an equivariant module performing an equivariant transform.
 
@@ -28,7 +28,7 @@ class EquivariantModule(keras.Layer):
         pooling: str | keras.Layer = "mean",
         activation: str = "gelu",
         kernel_initializer: str = "he_normal",
-        dropout: float = 0.05,
+        dropout: int | float | None = 0.05,
         layer_norm: bool = True,
         spectral_normalization: bool = False,
         **kwargs,

@@ -1,30 +1,14 @@
-import logging
 import inspect
 import keras
-from keras import ops
-import numpy as np
+from typing import TypeVar
 
-from collections.abc import Sequence
+from collections.abc import Mapping
 
-from bayesflow.types import Shape, Tensor
+from bayesflow.types import Tensor
 
+from . import logging
 
-def convert_kwargs(f, *args, **kwargs) -> dict[str, any]:
-    """Convert positional and keyword arguments to just keyword arguments for f"""
-    if not args:
-        return kwargs
-
-    signature = inspect.signature(f)
-
-    parameters = dict(zip(signature.parameters, args))
-
-    for name, value in kwargs.items():
-        if name in parameters:
-            raise TypeError(f"{f.__name__}() got multiple arguments for argument '{name}'")
-
-        parameters[name] = value
-
-    return parameters
+T = TypeVar("T")
 
 
 def convert_args(f, *args, **kwargs) -> tuple[any, ...]:
@@ -47,133 +31,73 @@ def convert_args(f, *args, **kwargs) -> tuple[any, ...]:
     return tuple(parameters)
 
 
-def batched_call(f: callable, batch_shape: Shape, *args: Tensor, **kwargs: Tensor):
-    """Call f, automatically vectorizing to batch_shape if required.
+def convert_kwargs(f, *args, **kwargs) -> Mapping[str, any]:
+    """Convert positional and keyword arguments to just keyword arguments for f"""
+    if not args:
+        return kwargs
 
-    :param f: The function to call.
-        May accept any number of tensor or numpy array arguments.
-        Must return a dictionary of tensors or numpy arrays.
+    signature = inspect.signature(f)
 
-    :param batch_shape: The shape of the batch. If f is not already batched, it will be called
-        prod(batch_shape) times.
+    parameters = dict(zip(signature.parameters, args))
 
-    :param args: Positional arguments to f
+    for name, value in kwargs.items():
+        if name in parameters:
+            raise TypeError(f"{f.__name__}() got multiple arguments for argument '{name}'")
 
-    :param kwargs: Keyword arguments to f
+        parameters[name] = value
 
-    :return: A dictionary of batched tensors or numpy arrays.
-    """
-    try:
-        # already batched
-        data = f(batch_shape, *args, **kwargs)
-
-        # convert numpy to keras
-        data = {key: keras.ops.convert_to_tensor(value) for key, value in data.items()}
-    except TypeError:
-        # for loop fallback
-        batch_size = np.prod(batch_shape)
-        data = []
-        for b in range(batch_size):
-            # get args and kwargs for this index
-            args_i = [args[i][b] for i in range(len(args))]
-            kwargs_i = {k: v[b] for k, v in kwargs.items()}
-
-            data_i = f(*args_i, **kwargs_i)
-
-            # convert numpy to keras
-            data_i = {key: keras.ops.convert_to_tensor(value) for key, value in data_i.items()}
-
-            data.append(data_i)
-
-        data = stack_dicts(data, axis=0)
-
-        # reshape to batch_shape
-        data = {key: keras.ops.reshape(value, batch_shape + keras.ops.shape(value)[1:]) for key, value in data.items()}
-
-    return data
+    return parameters
 
 
-def filter_kwargs(kwargs: dict[str, any], f: callable) -> dict[str, any]:
+def filter_kwargs(kwargs: Mapping[str, any], f: callable) -> Mapping[str, any]:
     """Filter keyword arguments for f"""
     signature = inspect.signature(f)
 
-    if inspect.Parameter.VAR_KEYWORD in signature.parameters:
-        # the signature has **kwargs
-        return kwargs
+    for parameter in signature.parameters.values():
+        if parameter.kind == inspect.Parameter.VAR_KEYWORD:
+            # there is a **kwargs parameter, so anything is valid
+            return kwargs
 
     kwargs = {key: value for key, value in kwargs.items() if key in signature.parameters}
 
     return kwargs
 
 
-def filter_concatenate(data: dict[str, Tensor], keys: Sequence[str], axis: int = -1) -> Tensor | None:
-    """Filters and then concatenates all tensors from data using only keys from the given sequence.
-    An optional axis can be specified (default: last axis).
-    """
-    if not keys:
-        return None
-
-    # ensure every key is present
-    tensors = [data[key] for key in keys]
-
-    try:
-        return keras.ops.concatenate(tensors, axis=axis)
-    except ValueError as e:
-        shapes = [t.shape for t in tensors]
-        raise ValueError(f"Cannot trivially concatenate tensors {keys} with shapes {shapes}") from e
-
-
-def keras_kwargs(kwargs: dict) -> dict:
+def keras_kwargs(kwargs: Mapping) -> Mapping:
     """Keep dictionary keys that do not end with _kwargs. Used for propagating
     custom keyword arguments in custom models that inherit from keras.Model.
     """
     return {key: value for key, value in kwargs.items() if not key.endswith("_kwargs")}
 
 
-def concatenate_dicts(data: list[dict[str, Tensor]], axis: int = -1) -> dict[str, Tensor]:
-    """Concatenates tensors in multiple dictionaries into a single dictionary."""
-    if not all([d.keys() == data[0].keys() for d in data]):
-        raise ValueError("Dictionaries must have the same keys.")
-
-    result = {}
-
-    for key in data[0].keys():
-        result[key] = keras.ops.concatenate([d[key] for d in data], axis=axis)
-
-    return result
-
-
-def stack_dicts(data: list[dict[str, Tensor]], axis: int = 0) -> dict[str, Tensor]:
-    """Stacks tensors in multiple dictionaries into a single dictionary."""
-    if not all([d.keys() == data[0].keys() for d in data]):
-        raise ValueError("Dictionaries must have the same keys.")
-
-    result = {}
-
-    for key in data[0].keys():
-        result[key] = keras.ops.stack([d[key] for d in data], axis=axis)
-
-    return result
-
-
-def process_output(outputs: dict[str, Tensor], convert_to_numpy: bool = True) -> dict[str, Tensor]:
-    """Utility function to apply common post-processing steps to the outputs of an approximator."""
-
-    # Remove trailing first axis for single data sets
-    outputs = {k: ops.squeeze(v, axis=0) if ops.shape(v)[0] == 1 else v for k, v in outputs.items()}
-
+# TODO: rename and streamline and make protected
+def check_output(outputs: T) -> None:
     # Warn if any NaNs present in output
     for k, v in outputs.items():
-        nan_mask = ops.isnan(v)
-        if ops.any(nan_mask):
-            logging.warning(f"A total of {ops.sum(nan_mask)} NaN values found for output {k}.")
+        nan_mask = keras.ops.isnan(v)
+        if keras.ops.any(nan_mask):
+            logging.warning("Found a total of {n:d} nan values for output {k}.", n=int(keras.ops.sum(nan_mask)), k=k)
 
     # Warn if any inf present in output
     for k, v in outputs.items():
-        inf_mask = ops.isinf(v)
-        if ops.any(inf_mask):
-            logging.warning(f"A total of {ops.sum(inf_mask)} inf values found for output {k}.")
+        inf_mask = keras.ops.isinf(v)
+        if keras.ops.any(inf_mask):
+            logging.warning("Found a total of {n:d} inf values for output {k}.", n=int(keras.ops.sum(inf_mask)), k=k)
 
-    if convert_to_numpy:
-        outputs = {k: ops.convert_to_numpy(v) for k, v in outputs.items()}
-    return outputs
+
+def split_tensors(data: Mapping[any, Tensor], axis: int = -1) -> Mapping[any, Tensor]:
+    """Split tensors in the dictionary along the given axis."""
+    result = {}
+
+    for key, value in data.items():
+        if keras.ops.shape(value)[axis] == 1:
+            result[key] = keras.ops.squeeze(value, axis=axis)
+            continue
+
+        splits = keras.ops.split(value, keras.ops.shape(value)[axis], axis=axis)
+        splits = [keras.ops.squeeze(split, axis=axis) for split in splits]
+
+        for i, split in enumerate(splits):
+            result[f"{key}_{i + 1}"] = split
+
+    return result

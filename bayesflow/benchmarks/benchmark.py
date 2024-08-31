@@ -1,6 +1,5 @@
 import numpy as np
 from bayesflow.types import Tensor
-from bayesflow.utils import batched_call
 
 
 class Benchmark:
@@ -18,8 +17,8 @@ class Benchmark:
         dict[str, Tensor]: simulated parameters and observables
             with shapes (`batch_size`, ...)
         """
-
-        return batched_call(self, (batch_size,))
+        return ...  # TODO
+        # return batched_call(self, (batch_size,))
 
     def prior(self):
         raise NotImplementedError

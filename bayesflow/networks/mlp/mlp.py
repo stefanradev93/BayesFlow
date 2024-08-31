@@ -1,6 +1,6 @@
 import keras
 from keras import layers
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 from bayesflow.utils import keras_kwargs
@@ -8,7 +8,7 @@ from bayesflow.utils import keras_kwargs
 from .hidden_block import ConfigurableHiddenBlock
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class MLP(keras.Layer):
     """
     Implements a simple configurable MLP with optional residual connections and dropout.
@@ -58,7 +58,9 @@ class MLP(keras.Layer):
         if spectral_normalization:
             projector = layers.SpectralNormalization(projector)
         self.res_blocks.append(projector)
-        self.res_blocks.append(layers.Dropout(dropout))
+
+        if dropout is not None and dropout > 0.0:
+            self.res_blocks.append(layers.Dropout(dropout))
 
         for _ in range(depth):
             self.res_blocks.append(

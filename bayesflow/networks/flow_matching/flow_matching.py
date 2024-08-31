@@ -1,15 +1,14 @@
+from collections.abc import Sequence
 import keras
-from keras.saving import (
-    register_keras_serializable,
-)
+from keras.saving import register_keras_serializable as serializable
 
-from bayesflow.types import Tensor
+from bayesflow.types import Shape, Tensor
 from bayesflow.utils import expand_right_as, find_network, jacobian_trace, keras_kwargs, optimal_transport, tile_axis
 
 from ..inference_network import InferenceNetwork
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class FlowMatching(InferenceNetwork):
     """Implements Optimal Transport Flow Matching, originally introduced as Rectified Flow,
     with ideas incorporated from [1-3].
@@ -19,14 +18,23 @@ class FlowMatching(InferenceNetwork):
     [3] Optimal Transport Flow Matching: arXiv:2302.00482
     """
 
-    def __init__(self, subnet: str = "mlp", base_distribution: str = "normal", **kwargs):
+    def __init__(
+        self,
+        subnet: str = "mlp",
+        base_distribution: str = "normal",
+        use_optimal_transport: bool = False,
+        optimal_transport_kwargs: dict[str, any] = None,
+        **kwargs,
+    ):
         super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
         self.subnet = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
         self.output_projector = keras.layers.Dense(units=None, bias_initializer="zeros", kernel_initializer="zeros")
 
+        self.use_optimal_transport = use_optimal_transport
+        self.optimal_transport_kwargs = optimal_transport_kwargs or {}
         self.seed_generator = keras.random.SeedGenerator()
 
-    def build(self, xz_shape, conditions_shape=None):
+    def build(self, xz_shape: Shape, conditions_shape: Shape = None) -> None:
         super().build(xz_shape)
 
         self.output_projector.units = xz_shape[-1]
@@ -66,7 +74,7 @@ class FlowMatching(InferenceNetwork):
 
         t = expand_right_as(t, x)
         if keras.ops.ndim(x) == 3:
-            t = tile_axis(t, axis=1, n=keras.ops.shape(x)[1])
+            t = tile_axis(t, keras.ops.shape(x)[1], axis=1)
 
         if conditions is None:
             xtc = keras.ops.concatenate([x, t], axis=-1)
@@ -141,31 +149,30 @@ class FlowMatching(InferenceNetwork):
 
             return x
 
-    def compute_metrics(self, data: dict[str, Tensor], stage: str = "training") -> dict[str, Tensor]:
-        base_metrics = super().compute_metrics(data, stage=stage)
+    def compute_metrics(
+        self, x: Tensor | Sequence[Tensor, ...], conditions: Tensor = None, stage: str = "training"
+    ) -> dict[str, Tensor]:
+        if isinstance(x, Sequence):
+            # already pre-configured
+            x0, x1, t, x, target_velocity = x
+        else:
+            # not pre-configured, resample
+            x1 = x
+            x0 = keras.random.normal(keras.ops.shape(x1), dtype=keras.ops.dtype(x1), seed=self.seed_generator)
 
-        x1 = data["inference_variables"]
-        c = data.get("inference_conditions")
+            # use weak regularization and low number of steps for efficiency
+            if self.use_optimal_transport:
+                x0, x1 = optimal_transport(x0, x1, seed=self.seed_generator, **self.optimal_transport_kwargs)
 
-        if not self.built:
-            # TODO: the base distribution is not yet built, but we need to sample from it (see below)
-            #  ideally, we want to build automatically before this method is called
-            xz_shape = keras.ops.shape(x1)
-            conditions_shape = None if c is None else keras.ops.shape(c)
-            self.build(xz_shape, conditions_shape)
+            t = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
+            t = expand_right_as(t, x0)
 
-        x0 = self.base_distribution.sample((keras.ops.shape(x1)[0],))
+            x = t * x1 + (1 - t) * x0
+            target_velocity = x1 - x0
 
-        # TODO: should move this to worker-process somehow
-        x0, x1 = optimal_transport(x0, x1, max_steps=int(1e4), regularization=0.01, seed=self.seed_generator)
+        base_metrics = super().compute_metrics(x1, conditions, stage)
 
-        t = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
-        t = expand_right_as(t, x0)
-
-        x = t * x1 + (1 - t) * x0
-
-        predicted_velocity = self.velocity(x, t, c)
-        target_velocity = x1 - x0
+        predicted_velocity = self.velocity(x, t, conditions)
 
         loss = keras.losses.mean_squared_error(target_velocity, predicted_velocity)
         loss = keras.ops.mean(loss)
