@@ -13,7 +13,7 @@ def compute_jacobian_trace(f: Callable[[Tensor], Tensor], x: Tensor) -> (Tensor,
 
     :param f: The function to be differentiated.
 
-    :param x: Tensor of shape (n, d)
+    :param x: Tensor of shape (n, ..., d)
         The input tensor to f.
 
     :return: 2-tuple of tensors:
@@ -21,18 +21,18 @@ def compute_jacobian_trace(f: Callable[[Tensor], Tensor], x: Tensor) -> (Tensor,
         2. Tensor of shape (n,)
             The exact trace of the Jacobian matrix of f.
     """
-    batch_size, dims = keras.ops.shape(x)
-    trace = keras.ops.zeros((batch_size,))
+    shape = keras.ops.shape(x)
+    trace = keras.ops.zeros(shape[:-1])
 
     fx, vjp_fn = _make_vjp_fn(f, x)
 
-    for dim in range(dims):
-        projector = np.zeros((batch_size, dims), dtype="float32")
-        projector[:, dim] = 1.0
+    for dim in range(shape[-1]):
+        projector = np.zeros(shape, dtype="float32")
+        projector[..., dim] = 1.0
         projector = keras.ops.convert_to_tensor(projector)
 
         vjp = vjp_fn(projector)
 
-        trace += vjp[:, dim]
+        trace += vjp[..., dim]
 
     return fx, trace

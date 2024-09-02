@@ -10,7 +10,7 @@ def estimate_jacobian_trace(f: callable, x: Tensor, steps: int = 1) -> (Tensor, 
 
     :param f: The function to be differentiated.
 
-    :param x: Tensor of shape (n, d)
+    :param x: Tensor of shape (n,..., d)
         The input tensor to f.
 
     :param steps: The number of steps to use for the estimate.
@@ -22,16 +22,16 @@ def estimate_jacobian_trace(f: callable, x: Tensor, steps: int = 1) -> (Tensor, 
         2. Tensor of shape (n,)
             An unbiased estimate of the trace of the Jacobian matrix of f.
     """
-    batch_size, dims = keras.ops.shape(x)
-    trace = keras.ops.zeros((batch_size,))
+    shape = keras.ops.shape(x)
+    trace = keras.ops.zeros(shape[:-1])
 
     fx, vjp_fn = _make_vjp_fn(f, x)
 
-    for step in range(steps):
-        projector = keras.random.normal((batch_size, dims))
+    for _ in range(steps):
+        projector = keras.random.normal(shape)
 
         vjp = vjp_fn(projector)
 
-        trace += keras.ops.sum(vjp * projector, axis=1)
+        trace += keras.ops.sum(vjp * projector, axis=-1)
 
     return fx, trace

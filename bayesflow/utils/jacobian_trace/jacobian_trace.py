@@ -12,7 +12,7 @@ def jacobian_trace(f: Callable[[Tensor], Tensor], x: Tensor, max_steps: int = 1)
 
     :param f: The function to be differentiated.
 
-    :param x: Tensor of shape (n, d)
+    :param x: Tensor of shape (n, ..., d)
         The input tensor to f.
 
     :param max_steps: The maximum number of steps to use for the estimate.
@@ -26,7 +26,7 @@ def jacobian_trace(f: Callable[[Tensor], Tensor], x: Tensor, max_steps: int = 1)
         2. Tensor of shape (n,)
             An unbiased estimate or the exact trace of the Jacobian of f.
     """
-    batch_size, dims = keras.ops.shape(x)
+    dims = keras.ops.shape(x)[-1]
 
     if max_steps is None or dims <= max_steps:
         # use the exact version
