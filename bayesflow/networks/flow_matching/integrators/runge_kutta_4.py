@@ -67,7 +67,7 @@ class RK4Integrator(Integrator):
             return (k1 + (2 * k2) + (2 * k3) + k4) / 6.0
 
         if density:
-            trace = keras.ops.zeros(keras.ops.shape(x)[0], dtype=x.dtype)
+            trace = keras.ops.zeros(keras.ops.shape(x)[:-1], dtype=x.dtype)
             for _ in range(steps):
                 v4, tr = jacobian_trace(f, z, kwargs.get("trace_steps", 5))
                 z += dt * v4
