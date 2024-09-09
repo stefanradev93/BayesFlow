@@ -101,7 +101,7 @@ class FlowMatching(InferenceNetwork):
 
             # use weak regularization and low number of steps for efficiency
             if self.use_optimal_transport:
-                x0, x1 = optimal_transport(x0, x1, seed=self.seed_generator, **self.optimal_transport_kwargs)
+                x1, x0 = optimal_transport(x1, x0, seed=self.seed_generator, **self.optimal_transport_kwargs)
 
             t = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
             t = expand_right_as(t, x0)
