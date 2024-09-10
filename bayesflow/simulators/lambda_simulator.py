@@ -21,6 +21,7 @@ class LambdaSimulator(Simulator):
             By default, we convert float64 (the default for numpy on x64 systems)
             to float32 (the default for deep learning on any system).
         """
+
         self.sample_fn = sample_fn
         self.is_batched = is_batched
 
