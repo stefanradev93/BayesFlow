@@ -11,12 +11,13 @@ from ..numpy_utils import softmax
 def sinkhorn(
     x1: Tensor,
     x2: Tensor,
+    *aux: Tensor,
     cost: str | Tensor = "euclidean",
     seed: int = None,
-    numpy: bool = False,
     regularization: float = 1.0,
     max_steps: int = 10000,
     tolerance: float = 1e-6,
+    numpy: bool = False,
 ) -> (Tensor, Tensor):
     """
     Matches elements from x2 onto x1 using the Sinkhorn-Knopp algorithm.
@@ -30,6 +31,10 @@ def sinkhorn(
 
     :param x2: Tensor of shape (m, ...)
         Samples from the second distribution.
+
+    :param aux: Tensors of shape (n, ...)
+        Auxiliary tensors to be permuted along with x1.
+        Note that x2 is never permuted by this method.
 
     :param cost: Method used to compute the transport cost. You may also pass the cost matrix directly.
         Default: 'euclidean'
@@ -54,18 +59,7 @@ def sinkhorn(
     :return: Tensors of shapes (n, ...) and (m, ...)
         x1 and x2 in optimal transport permutation order.
     """
-    if numpy:
-        return sinkhorn_numpy(
-            x1=x1,
-            x2=x2,
-            cost=cost,
-            seed=seed,
-            regularization=regularization,
-            max_steps=max_steps,
-            tolerance=tolerance,
-        )
-
-    return sinkhorn_keras(
+    indices = sinkhorn_indices(
         x1=x1,
         x2=x2,
         cost=cost,
@@ -73,62 +67,96 @@ def sinkhorn(
         regularization=regularization,
         max_steps=max_steps,
         tolerance=tolerance,
+        numpy=numpy,
     )
 
+    if numpy:
+        x1 = np.take(x1, indices, axis=0)
+        aux = [np.take(x, indices, axis=0) for x in aux]
+    else:
+        x1 = keras.ops.take(x1, indices, axis=0)
+        aux = [keras.ops.take(x, indices, axis=0) for x in aux]
 
-def sinkhorn_keras(
-    x1: Tensor, x2: Tensor, cost: str | Tensor, seed: int, regularization: float, max_steps: int, tolerance: float
-) -> (Tensor, Tensor):
-    cost = find_cost(cost, x1, x2, numpy=False)
-    plan = sinkhorn_plan(
-        cost=cost,
-        regularization=regularization,
-        max_steps=max_steps,
-        tolerance=tolerance,
-        numpy=False,
-    )
-
-    indices = keras.random.categorical(plan, num_samples=1, seed=seed)
-    indices = keras.ops.squeeze(indices, axis=1)
-    x2 = keras.ops.take(x2, indices, axis=0)
-
-    return x1, x2
+    return x1, x2, *aux
 
 
-def sinkhorn_numpy(
-    x1: np.ndarray,
-    x2: np.ndarray,
-    cost: str | Tensor,
-    seed: int,
-    regularization: float,
-    max_steps: int,
-    tolerance: float,
-) -> (np.ndarray, np.ndarray):
-    cost = find_cost(cost, x1, x2, numpy=True)
-    plan = sinkhorn_plan(
-        cost=cost,
-        regularization=regularization,
-        max_steps=max_steps,
-        tolerance=tolerance,
-        numpy=True,
-    )
-
-    if seed is not None:
-        np.random.seed(seed)
-
-    indices = []
-    for row in range(len(x1)):
-        index = np.random.choice(len(x2), p=plan[row])
-        indices.append(index)
-
-    x2 = np.take(x2, indices, axis=0)
-
-    return x1, x2
-
-
-def sinkhorn_plan(cost: Tensor, regularization: float, max_steps: int, tolerance: float, numpy: bool = False) -> Tensor:
+def sinkhorn_indices(
+    x1: Tensor,
+    x2: Tensor,
+    *,
+    cost: str | Tensor = "euclidean",
+    seed: int = None,
+    regularization: float = 1.0,
+    max_steps: int = 1000,
+    tolerance: float = 1e-6,
+    numpy: bool = False,
+) -> Tensor | np.ndarray:
     """
-    Computes the Sinkhorn-Knopp optimal transport plan for the given cost matrix.
+    Samples a set of optimal transport permutation indices using the Sinkhorn-Knopp algorithm.
+
+    :param x1: Tensor of shape (n, ...)
+        Samples from the first distribution.
+
+    :param x2: Tensor of shape (m, ...)
+        Samples from the second distribution.
+
+    :param cost: Tensor of shape (n, m).
+        Defines the transport costs between samples.
+
+    :param seed: Random seed used for the assignment.
+
+    :param regularization: Regularization parameter.
+        Controls the standard deviation of the Gaussian kernel.
+        Default: 1.0
+
+    :param max_steps: Maximum number of iterations.
+        Default: 1000
+
+    :param tolerance: Absolute tolerance for convergence.
+        Default: 1e-6
+
+    :param numpy: Whether to use numpy or keras backend.
+
+    :return: Tensor of shape (n,)
+        Randomly sampled optimal permutation indices for the first distribution.
+    """
+    plan = sinkhorn_plan(
+        x1=x1,
+        x2=x2,
+        cost=cost,
+        regularization=regularization,
+        max_steps=max_steps,
+        tolerance=tolerance,
+        numpy=numpy,
+    )
+
+    if numpy:
+        rng = np.random.default_rng(seed)
+
+        indices = []
+        for row in range(cost.shape[0]):
+            index = rng.choice(cost.shape[1], p=plan[row])
+            indices.append(index)
+
+        indices = np.array(indices)
+    else:
+        indices = keras.random.categorical(plan, num_samples=1, seed=seed)
+        indices = keras.ops.squeeze(indices, axis=1)
+
+    return indices
+
+
+def sinkhorn_plan(
+    x1: Tensor, x2: Tensor, cost: Tensor, regularization: float, max_steps: int, tolerance: float, numpy: bool = False
+) -> Tensor:
+    """
+    Computes the Sinkhorn-Knopp optimal transport plan.
+
+    :param x1: Tensor of shape (n, ...)
+        Samples from the first distribution.
+
+    :param x2: Tensor of shape (m, ...)
+        Samples from the second distribution.
 
     :param cost: Tensor of shape (n, m).
         Defines the transport costs between samples.
@@ -143,9 +171,13 @@ def sinkhorn_plan(cost: Tensor, regularization: float, max_steps: int, tolerance
     :param tolerance: Absolute tolerance for convergence.
         Default: 1e-6
 
+    :param numpy: Whether to use numpy or keras backend.
+
     :return: Tensor of shape (n, m)
         The transport probabilities.
     """
+    cost = find_cost(cost, x1, x2, numpy=numpy)
+
     if numpy:
         return sinkhorn_plan_numpy(cost=cost, regularization=regularization, max_steps=max_steps, tolerance=tolerance)
     return sinkhorn_plan_keras(cost=cost, regularization=regularization, max_steps=max_steps, tolerance=tolerance)

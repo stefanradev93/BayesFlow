@@ -4,19 +4,27 @@ import numpy as np
 from bayesflow.types import Tensor
 
 
-def random(x1: Tensor, x2: Tensor, replace: bool = False, numpy: bool = False, seed: int = None) -> (Tensor, Tensor):
+def random(
+    x1: Tensor, x2: Tensor, *aux, replace: bool = False, numpy: bool = False, seed: int = None
+) -> (Tensor, Tensor):
     if numpy:
-        if seed is not None:
-            np.random.seed(seed)
+        n = x1.shape[0]
+        rng = np.random.default_rng(seed)
+        indices = rng.choice(n, size=n, replace=replace)
 
-        indices = np.random.choice(len(x2), size=len(x2), replace=replace)
+        x1 = np.take(x1, indices, axis=0)
+        aux = [np.take(x, indices, axis=0) for x in aux]
 
-        return x1, x2[indices]
+        return x1, x2, *aux
+
+    n = keras.ops.shape(x1)[0]
 
     if replace:
-        indices = keras.random.randint((len(x2),), 0, len(x2), seed=seed)
-        x2 = keras.ops.take(x2, indices, axis=0)
+        indices = keras.random.randint((n,), 0, n, seed=seed)
     else:
-        x2 = keras.random.shuffle(x2, axis=0, seed=seed)
+        indices = keras.random.shuffle(keras.ops.arange(n), seed=seed)
 
-    return x1, x2
+    x1 = keras.ops.take(x1, indices, axis=0)
+    aux = [keras.ops.take(x, indices, axis=0) for x in aux]
+
+    return x1, x2, *aux

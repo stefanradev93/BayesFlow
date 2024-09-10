@@ -32,7 +32,14 @@ class FlowMatching(InferenceNetwork):
         super().__init__(base_distribution=base_distribution, **keras_kwargs(kwargs))
 
         self.use_optimal_transport = use_optimal_transport
-        self.optimal_transport_kwargs = optimal_transport_kwargs or {}
+        self.optimal_transport_kwargs = optimal_transport_kwargs or {
+            "method": "sinkhorn",
+            "cost": "euclidean",
+            "regularization": 0.1,
+            "max_steps": 1000,
+            "tolerance": 1e-4,
+        }
+
         self.seed_generator = keras.random.SeedGenerator()
 
         match integrator:
@@ -99,9 +106,10 @@ class FlowMatching(InferenceNetwork):
             x1 = x
             x0 = keras.random.normal(keras.ops.shape(x1), dtype=keras.ops.dtype(x1), seed=self.seed_generator)
 
-            # use weak regularization and low number of steps for efficiency
             if self.use_optimal_transport:
-                x1, x0 = optimal_transport(x1, x0, seed=self.seed_generator, **self.optimal_transport_kwargs)
+                x1, x0, conditions = optimal_transport(
+                    x1, x0, conditions, seed=self.seed_generator, **self.optimal_transport_kwargs
+                )
 
             t = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
             t = expand_right_as(t, x0)
