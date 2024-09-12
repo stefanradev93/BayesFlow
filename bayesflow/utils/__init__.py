@@ -1,3 +1,9 @@
+from . import (
+    keras_utils,
+    logging,
+    numpy_utils,
+)
+
 from .dict_utils import (
     convert_args,
     convert_kwargs,
@@ -21,13 +27,9 @@ from .io import (
     parse_bytes,
 )
 
-from . import logging
-
 from .jacobian_trace import jacobian_trace
 
 from .dispatch import find_distribution, find_network, find_permutation, find_pooling, find_recurrent_net
-
-from . import numpy_utils
 
 from .optimal_transport import optimal_transport
 
