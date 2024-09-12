@@ -1,3 +1,5 @@
+from . import transforms
+
 from .composite_data_adapter import CompositeDataAdapter
 from .concatenate_keys_data_adapter import ConcatenateKeysDataAdapter
 from .data_adapter import DataAdapter
