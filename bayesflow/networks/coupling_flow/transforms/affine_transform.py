@@ -1,9 +1,9 @@
 import keras
 import keras.ops as ops
 from keras.saving import register_keras_serializable as serializable
-import numpy as np
 
 from bayesflow.types import Tensor
+from bayesflow.utils.keras_utils import shifted_softplus
 from .transform import Transform
 
 
@@ -35,11 +35,8 @@ class AffineTransform(Transform):
     def constrain_parameters(self, parameters: dict[str, Tensor]) -> dict[str, Tensor]:
         scale = parameters["scale"]
 
-        # shift such that constrain(0) = 1
-        scale = scale + np.log(np.e - 1)
-
         # constrain to positive values
-        scale = keras.ops.softplus(scale)
+        scale = shifted_softplus(scale)
 
         # soft clamp
         if self.clamp_factor is not None:
