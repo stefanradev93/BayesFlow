@@ -43,4 +43,4 @@ class OfflineDataset(keras.utils.PyDataset):
 
     def shuffle(self) -> None:
         """Shuffle the dataset in-place."""
-        self.indices = keras.random.shuffle(self.indices)
+        np.random.shuffle(self.indices)
