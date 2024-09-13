@@ -14,9 +14,9 @@ def test_cycle_consistency(data_adapter, random_data):
         assert keras.ops.all(keras.ops.isclose(value, deprocessed[key]))
 
 
-def test_serialize_deserialize(data_adapter):
+def test_serialize_deserialize(data_adapter, custom_objects):
     serialized = serialize(data_adapter)
-    deserialized = deserialize(serialized)
+    deserialized = deserialize(serialized, custom_objects)
     reserialized = serialize(deserialized)
 
     assert reserialized == serialized
