@@ -5,7 +5,6 @@ from keras.saving import register_keras_serializable as serializable
 from bayesflow.types import Tensor
 
 from .skip_recurrent import SkipRecurrentNet
-from ..mlp import MLP
 from ..summary_network import SummaryNetwork
 
 
@@ -28,7 +27,7 @@ class LSTNet(SummaryNetwork):
         filters: int | list | tuple = 32,
         kernel_sizes: int | list | tuple = 3,
         strides: int | list | tuple = 1,
-        activation: str = "relu",
+        activation: str = "mish",
         kernel_initializer: str = "glorot_uniform",
         groups: int = 8,
         recurrent_type: str | keras.Layer = "gru",
@@ -69,14 +68,11 @@ class LSTNet(SummaryNetwork):
             skip_steps=skip_steps,
             dropout=dropout,
         )
-        self.feedforward = MLP(**kwargs.get("mlp_kwargs", {}))
-
         self.output_projector = layers.Dense(summary_dim)
 
     def call(self, time_series: Tensor, **kwargs) -> Tensor:
         summary = self.conv(time_series, **kwargs)
         summary = self.recurrent(summary, **kwargs)
-        summary = self.feedforward(summary, **kwargs)
         summary = self.output_projector(summary)
         return summary
 
