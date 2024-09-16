@@ -1,4 +1,9 @@
-from keras.saving import register_keras_serializable as serializable
+from collections.abc import Sequence
+from keras.saving import (
+    deserialize_keras_object as deserialize,
+    register_keras_serializable as serializable,
+    serialize_keras_object as serialize,
+)
 import numpy as np
 
 from bayesflow.utils.numpy_utils import (
@@ -15,8 +20,16 @@ from .transform import Transform
 class ConstrainBounded(Transform):
     """Constrains a parameter with a lower and/or upper bound."""
 
-    def __init__(self, parameter_name: str, *, lower: np.ndarray = None, upper: np.ndarray = None, method: str):
-        super().__init__(parameter_name)
+    def __init__(
+        self,
+        parameters: str | Sequence[str] | None = None,
+        /,
+        *,
+        lower: np.ndarray = None,
+        upper: np.ndarray = None,
+        method: str,
+    ):
+        super().__init__(parameters)
 
         self.lower = lower
         self.upper = upper
@@ -32,11 +45,11 @@ class ConstrainBounded(Transform):
             # double bounded case
             match method:
                 case "clip":
-                    self.forward = lambda x: np.clip(x, lower, upper)
-                    self.inverse = lambda x: x
+                    self.forward = lambda x: x
+                    self.inverse = lambda x: np.clip(x, lower, upper)
                 case "sigmoid":
-                    self.forward = lambda x: (upper - lower) * sigmoid(x) + lower
-                    self.inverse = lambda x: inverse_sigmoid((x - lower) / (upper - lower))
+                    self.forward = lambda x: inverse_sigmoid((x - lower) / (upper - lower))
+                    self.inverse = lambda x: (upper - lower) * sigmoid(x) + lower
                 case str() as name:
                     raise ValueError(f"Unsupported method name for double bounded constraint: '{name}'.")
                 case other:
@@ -46,14 +59,14 @@ class ConstrainBounded(Transform):
             if lower is not None:
                 match method:
                     case "clip":
-                        self.forward = lambda x: np.clip(x, lower, np.inf)
-                        self.inverse = lambda x: x
+                        self.forward = lambda x: x
+                        self.inverse = lambda x: np.clip(x, lower, np.inf)
                     case "softplus":
-                        self.forward = lambda x: softplus(x) + lower
-                        self.inverse = lambda x: inverse_softplus(x - lower)
+                        self.forward = lambda x: inverse_softplus(x - lower)
+                        self.inverse = lambda x: softplus(x) + lower
                     case "exp":
-                        self.forward = np.exp
-                        self.inverse = np.log
+                        self.forward = np.log
+                        self.inverse = np.exp
                     case str() as name:
                         raise ValueError(f"Unsupported method name for single bounded constraint: '{name}'.")
                     case other:
@@ -61,14 +74,14 @@ class ConstrainBounded(Transform):
             else:
                 match method:
                     case "clip":
-                        self.forward = lambda x: np.clip(x, -np.inf, upper)
-                        self.inverse = lambda x: x
+                        self.forward = lambda x: x
+                        self.inverse = lambda x: np.clip(x, -np.inf, upper)
                     case "softplus":
-                        self.forward = lambda x: -softplus(-x) + upper
-                        self.inverse = lambda x: -inverse_softplus(-(x - upper))
+                        self.forward = lambda x: -inverse_softplus(-(x - upper))
+                        self.inverse = lambda x: -softplus(-x) + upper
                     case "exp":
-                        self.forward = lambda x: -np.exp(-x) + upper
-                        self.inverse = lambda x: -np.log(-x + upper)
+                        self.forward = lambda x: -np.log(-x + upper)
+                        self.inverse = lambda x: -np.exp(-x) + upper
                     case str() as name:
                         raise ValueError(f"Unsupported method name for single bounded constraint: '{name}'.")
                     case other:
@@ -76,12 +89,17 @@ class ConstrainBounded(Transform):
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "ConstrainBounded":
-        return cls(config["parameter_name"], lower=config["lower"], upper=config["upper"], method=config["method"])
+        return cls(
+            deserialize(config["parameters"], custom_objects),
+            lower=deserialize(config["lower"], custom_objects),
+            upper=deserialize(config["upper"], custom_objects),
+            method=deserialize(config["method"], custom_objects),
+        )
 
     def get_config(self) -> dict:
         return {
-            "parameter_name": self.parameter_name,
-            "lower": self.lower,
-            "upper": self.upper,
-            "method": self.method,
+            "parameters": serialize(self.parameters),
+            "lower": serialize(self.lower),
+            "upper": serialize(self.upper),
+            "method": serialize(self.method),
         }

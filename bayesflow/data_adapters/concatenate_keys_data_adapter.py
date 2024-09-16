@@ -81,7 +81,7 @@ class ConcatenateKeysDataAdapter(CompositeDataAdapter):
         data = raw_data
 
         for transform in self.transforms:
-            data = transform(data, inverse=True)
+            data = transform(data, inverse=False)
 
         data = super().configure(data)
 
@@ -93,7 +93,7 @@ class ConcatenateKeysDataAdapter(CompositeDataAdapter):
         data = super().deconfigure(data)
 
         for transform in reversed(self.transforms):
-            data = transform(data, inverse=False)
+            data = transform(data, inverse=True)
 
         return data
 

@@ -7,7 +7,7 @@ from keras.saving import (
 )
 
 from bayesflow.data_adapters import ConcatenateKeysDataAdapter, DataAdapter
-from bayesflow.data_adapters.transforms import Transform
+from bayesflow.data_adapters.transforms import Normalize, Transform
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
 from bayesflow.utils import logging, expand_tile
@@ -41,7 +41,7 @@ class ContinuousApproximator(Approximator):
         inference_variables: Sequence[str],
         inference_conditions: Sequence[str] = None,
         summary_variables: Sequence[str] = None,
-        transforms: Sequence[Transform] = None,
+        transforms: Sequence[Transform] | None = "default",
     ) -> DataAdapter:
         variables = {
             "inference_variables": inference_variables,
@@ -49,6 +49,9 @@ class ContinuousApproximator(Approximator):
             "summary_variables": summary_variables,
         }
         variables = {key: value for key, value in variables.items() if value is not None}
+
+        if transforms == "default":
+            transforms = [Normalize()]
 
         return ConcatenateKeysDataAdapter(**variables, transforms=transforms)
 

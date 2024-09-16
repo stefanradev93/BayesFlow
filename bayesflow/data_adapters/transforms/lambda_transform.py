@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from keras.saving import (
     deserialize_keras_object as deserialize,
     register_keras_serializable as serializable,
@@ -16,8 +17,8 @@ class LambdaTransform(Transform):
     to the `custom_objects` argument of the `deserialize` function when deserializing this class.
     """
 
-    def __init__(self, parameter_name: str, forward: callable, inverse: callable):
-        super().__init__(parameter_name)
+    def __init__(self, parameters: str | Sequence[str] | None = None, /, *, forward: callable, inverse: callable):
+        super().__init__(parameters)
 
         self.forward = forward
         self.inverse = inverse
@@ -25,14 +26,14 @@ class LambdaTransform(Transform):
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "LambdaTransform":
         return cls(
-            deserialize(config["parameter_name"], custom_objects),
-            deserialize(config["forward"], custom_objects),
-            deserialize(config["inverse"], custom_objects),
+            deserialize(config["parameters"], custom_objects),
+            forward=deserialize(config["forward"], custom_objects),
+            inverse=deserialize(config["inverse"], custom_objects),
         )
 
     def get_config(self) -> dict:
         return {
-            "parameter_name": serialize(self.parameter_name),
+            "parameters": serialize(self.parameters),
             "forward": serialize(self.forward),
             "inverse": serialize(self.inverse),
         }

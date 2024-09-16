@@ -1,5 +1,8 @@
+from collections.abc import Sequence
 from keras.saving import (
+    deserialize_keras_object as deserialize,
     register_keras_serializable as serializable,
+    serialize_keras_object as serialize,
 )
 import numpy as np
 
@@ -8,34 +11,42 @@ from .transform import Transform
 
 @serializable(package="bayesflow.data_adapters")
 class Normalize(Transform):
-    """Normalizes a parameter to have zero mean and unit standard deviation"""
+    """Normalizes a parameter to have zero mean and unit standard deviation.
+    By default, this is lazily initialized; the mean and standard deviation are computed from the first batch of data.
+    For eager initialization, pass the mean and standard deviation to the constructor.
+    """
 
-    def __init__(self, parameter_name: str, mean: np.ndarray, std: np.ndarray):
-        super().__init__(parameter_name)
-        self.mean = np.asarray(mean)
-        self.std = np.asarray(std)
-
-    @classmethod
-    def from_batch(cls, batch: dict[str, np.ndarray], parameter_name: str) -> "Normalize":
-        parameter = batch[parameter_name]
-        mean = np.mean(parameter, axis=0)
-        std = np.std(parameter, axis=0)
-
-        return cls(parameter_name, mean, std)
+    def __init__(
+        self, parameters: str | Sequence[str] | None = None, /, *, mean: np.ndarray = None, std: np.ndarray = None
+    ):
+        super().__init__(parameters)
+        self.mean = mean
+        self.std = std
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "Normalize":
-        return cls(config["parameter_name"], np.array(config["mean"]), np.array(config["std"]))
+        return cls(
+            deserialize(config["parameters"], custom_objects),
+            mean=deserialize(config["mean"], custom_objects),
+            std=deserialize(config["std"], custom_objects),
+        )
 
     def forward(self, parameter: np.ndarray) -> np.ndarray:
+        if self.mean is None or self.std is None:
+            self.mean = np.mean(parameter, axis=0)
+            self.std = np.std(parameter, axis=0)
+
         return (parameter - self.mean) / self.std
 
     def get_config(self) -> dict:
         return {
-            "parameter_name": self.parameter_name,
-            "mean": self.mean.tolist(),
-            "std": self.std.tolist(),
+            "parameters": serialize(self.parameters),
+            "mean": serialize(self.mean),
+            "std": serialize(self.std),
         }
 
     def inverse(self, parameter: np.ndarray) -> np.ndarray:
+        if self.mean is None or self.std is None:
+            raise ValueError("Cannot call `inverse` before calling `forward` at least once.")
+
         return parameter * self.std + self.mean
