@@ -38,9 +38,9 @@ class Standardize(ElementwiseTransform):
 
     def forward(self, parameter_name: str, parameter_value: np.ndarray) -> np.ndarray:
         if parameter_name not in self.means:
-            self.means[parameter_name] = np.mean(parameter_value, axis=0)
+            self.means[parameter_name] = np.mean(parameter_value, axis=list(range(parameter_value.ndim)), keepdims=True)
         if parameter_name not in self.stds:
-            self.stds[parameter_name] = np.std(parameter_value, axis=0)
+            self.stds[parameter_name] = np.std(parameter_value, axis=list(range(parameter_value.ndim)), keepdims=True)
 
         return (parameter_value - self.means[parameter_name]) / self.stds[parameter_name]
 
