@@ -1,30 +1,38 @@
-# Copyright (c) 2022 The BayesFlow Developers
+from . import (
+    approximators,
+    benchmarks,
+    data_adapters,
+    datasets,
+    diagnostics,
+    distributions,
+    networks,
+    simulators,
+    utils,
+)
 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
+from .approximators import ContinuousApproximator
+from .datasets import OfflineDataset, OnlineDataset
 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+def setup():
+    # perform any necessary setup without polluting the namespace
+    import keras
+    import logging
 
-import logging
+    # set the basic logging level if the user hasn't already
+    logging.basicConfig(level=logging.INFO)
 
-# Add easy access imports
-try:
-    from bayesflow import amortizers, default_settings, diagnostics, losses, networks, trainers, sensitivity
-except ImportError as err:
-    logger = logging.getLogger()
-    logger.setLevel(logging.WARNING)
-    logger.warn("Some dependencies failed to load. BayesFlow modules may not work properly!")
-    logger.warn(str(err))
+    # use a separate logger for the bayesflow package
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
+    if keras.backend.backend() == "torch":
+        # turn off gradients by default
+        import torch
+
+        torch.autograd.set_grad_enabled(False)
+
+
+# call and clean up namespace
+setup()
+del setup

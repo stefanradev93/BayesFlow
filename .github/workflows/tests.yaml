@@ -1,0 +1,106 @@
+
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - dev
+      - streamlined-backend
+
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: environment.yaml
+          python-version: "3.10"
+
+      - name: Show Environment Info
+        run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
+          printenv | sort
+
+      - name: Run Linter
+        run: |
+          ruff check --config pyproject.toml
+
+      - name: Run Formatter
+        run: |
+          ruff format --check --config pyproject.toml
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.11"]
+        backend: ["jax", "tensorflow", "torch"]
+    defaults:
+      run:
+        shell: bash -el {0}
+    env:
+      KERAS_BACKEND: ${{ matrix.backend }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: environment.yaml
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install JAX
+        if: ${{ matrix.backend == 'jax' }}
+        run: |
+          pip install -U "jax[cpu]"
+      - name: Install NumPy
+        if: ${{ matrix.backend == 'numpy' }}
+        run: |
+          conda install numpy
+      - name: Install Tensorflow
+        if: ${{ matrix.backend == 'tensorflow' }}
+        run: |
+          pip install -U tensorflow
+      - name: Install PyTorch
+        if: ${{ matrix.backend == 'torch' }}
+        run: |
+          conda install pytorch torchvision torchaudio cpuonly -c pytorch
+
+      - name: Show Environment Info
+        run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
+          printenv | sort
+
+      - name: Run Tests
+        run: |
+          pytest
+
+      - name: Create Coverage Report
+        run: |
+          coverage xml
+
+      - name: Upload Coverage Reports to CodeCov
+        uses: codecov/codecov-action@v4
+        with:
+          # do not use the files attribute here, otherwise the reports are not merged correctly
+          token: ${{ secrets.CODECOV_TOKEN }}

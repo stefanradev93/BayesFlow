@@ -1,14 +1,76 @@
-# BayesFlow <img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/bayesflow_hex.png?raw=true" align="right" width=20% height=20% />
+# BayesFlow <img src="img/bayesflow_hex.png" style="float: right; width: 20%; height: 20%;" alt="BayesFlow Logo" />
 
-[![Actions Status](https://github.com/stefanradev93/bayesflow/workflows/Tests/badge.svg)](https://github.com/stefanradev93/bayesflow/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://joss.theoj.org/papers/10.21105/joss.05702/status.svg)](https://doi.org/10.21105/joss.05702)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwyl/esta/issues)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/stefanradev93/bayesflow/tests.yaml?style=for-the-badge&label=Tests)
+![Codecov](https://img.shields.io/codecov/c/github/stefanradev93/bayesflow/streamlined-backend?style=for-the-badge)
+[![DOI](https://img.shields.io/badge/DOI-10.21105%2Fjoss.05702-blue?style=for-the-badge)](https://doi.org/10.21105/joss.05702)
+![PyPI - License](https://img.shields.io/pypi/l/bayesflow?style=for-the-badge)
+
+BayesFlow is a Python library for simulation-based **Amortized Bayesian Inference** with neural networks.
+It provides users with:
+
+- A user-friendly API for rapid Bayesian workflows
+- A rich collection of neural network architectures
+- Multi-Backend Support: [PyTorch](https://github.com/pytorch/pytorch), [TensorFlow](https://github.com/tensorflow/tensorflow), [JAX](https://github.com/google/jax), and [NumPy](https://github.com/numpy/numpy)
+
+BayesFlow is designed to be a flexible and efficient tool, enabling rapid statistical inference after a
+potentially longer simulation-based training phase.
 
 
-Welcome to our BayesFlow library for efficient simulation-based Bayesian workflows! Our library enables users to create specialized neural networks for *amortized Bayesian inference*, which repay users with rapid statistical inference after a potentially longer simulation-based training phase.
+## Install
 
-For starters, check out some of our walk-through notebooks:
+### Backend
+
+First, install your machine learning backend of choice. Note that BayesFlow **will not run** without a backend.
+
+Once installed, set the appropriate backend environment variable. For example, to use PyTorch:
+
+```bash
+export KERAS_BACKEND=torch
+```
+
+If you use conda, you can instead set this individually for each environment:
+
+```bash
+conda env config vars set KERAS_BACKEND=torch
+```
+
+### Using Conda
+
+We recommend installing with conda (or mamba).
+
+```bash
+conda install -c conda-forge bayesflow
+```
+
+### Using pip
+
+```bash
+pip install bayesflow
+```
+
+### From Source
+
+Stable version:
+
+```bash
+git clone https://github.com/stefanradev93/bayesflow
+cd bayesflow
+conda env create --file environment.yaml --name bayesflow
+```
+
+Development version:
+
+```bash
+git clone https://github.com/stefanradev93/bayesflow
+cd bayesflow
+git checkout dev
+conda env create --file environment.yaml --name bayesflow
+```
+
+
+## Getting Started
+
+Check out some of our walk-through notebooks:
 
 1. [Quickstart amortized posterior estimation](examples/Intro_Amortized_Posterior_Estimation.ipynb)
 2. [Tackling strange bimodal distributions](examples/TwoMoons_Bimodal_Posterior.ipynb)
@@ -19,13 +81,11 @@ For starters, check out some of our walk-through notebooks:
 7. [Model comparison for cognitive models](examples/Model_Comparison_MPT.ipynb)
 8. [Hierarchical model comparison for cognitive models](examples/Hierarchical_Model_Comparison_MPT.ipynb)
 
+
 ## Documentation \& Help
 
-The project documentation is available at <https://bayesflow.org>. Please use the [BayesFlow Forums](https://discuss.bayesflow.org/) for any BayesFlow-related questions and discussions, and [GitHub Issues](https://github.com/stefanradev93/BayesFlow/issues) for bug reports and feature requests.
+Documentation is available at https://bayesflow.org. Please use the [BayesFlow Forums](https://discuss.bayesflow.org/) for any BayesFlow-related questions and discussions, and [GitHub Issues](https://github.com/stefanradev93/BayesFlow/issues) for bug reports and feature requests.
 
-## Installation
-
-See [INSTALL.rst](INSTALL.rst) for installation instructions.
 
 ## Conceptual Overview
 
@@ -37,222 +97,6 @@ overview of neurally bootstrapped Bayesian inference.
 
 <img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/high_level_framework.png?raw=true" width=80% height=80%>
 
-## Getting Started: Parameter Estimation
-
-The core functionality of BayesFlow is amortized Bayesian posterior estimation, as described in our paper:
-
-Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020).
-BayesFlow: Learning complex stochastic models with invertible neural networks.
-<em>IEEE Transactions on Neural Networks and Learning Systems</em>, available
-for free at: https://arxiv.org/abs/2003.06281.
-
-However, since then, we have substantially extended the BayesFlow library such that
-it is now much more general and cleaner than what we describe in the above paper.
-
-### Minimal Example
-
-```python
-import numpy as np
-import bayesflow as bf
-```
-
-To introduce you to the basic workflow of the library, let's consider
-a simple 2D Gaussian model, from which we want to obtain
-posterior inference.  We assume a Gaussian simulator (likelihood)
-and a Gaussian prior for the means of the two components,
-which are our only model parameters in this example:
-
-```python
-def simulator(theta, n_obs=50, scale=1.0):
-    return np.random.default_rng().normal(loc=theta, scale=scale, size=(n_obs, theta.shape[0]))
-
-def prior(D=2, mu=0., sigma=1.0):
-    return np.random.default_rng().normal(loc=mu, scale=sigma, size=D)
-```
-
-Then, we connect the `prior` with the `simulator` using a `GenerativeModel` wrapper:
-
-```python
-generative_model = bf.simulation.GenerativeModel(prior, simulator, simulator_is_batched=False)
-```
-
-Next, we create our BayesFlow setup consisting of a summary and an inference network:
-
-```python
-summary_net = bf.networks.SetTransformer(input_dim=2)
-inference_net = bf.networks.InvertibleNetwork(num_params=2)
-amortized_posterior = bf.amortizers.AmortizedPosterior(inference_net, summary_net)
-```
-
-Finally, we connect the networks with the generative model via a `Trainer` instance:
-
-```python
-trainer = bf.trainers.Trainer(amortizer=amortized_posterior, generative_model=generative_model)
-```
-
-We are now ready to train an amortized posterior approximator. For instance,
-to run online training, we simply call:
-
-```python
-losses = trainer.train_online(epochs=10, iterations_per_epoch=1000, batch_size=32)
-```
-
-Prior to inference, we can use simulation-based calibration (SBC,
-https://arxiv.org/abs/1804.06788) to check the computational faithfulness of
-the model-amortizer combination on unseen simulations:
-
-```python
-# Generate 500 new simulated data sets
-new_sims = trainer.configurator(generative_model(500))
-
-# Obtain 100 posterior draws per data set instantly
-posterior_draws = amortized_posterior.sample(new_sims, n_samples=100)
-
-# Diagnose calibration
-fig = bf.diagnostics.plot_sbc_histograms(posterior_draws, new_sims['parameters'])
-```
-
-<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_sbc.png?raw=true" width=65% height=65%>
-
-The histograms are roughly uniform and lie within the expected range for
-well-calibrated inference algorithms as indicated by the shaded gray areas.
-Accordingly, our neural approximator seems to have converged to the intended target.
-
-As you can see, amortized inference on new (real or simulated) data is easy and fast.
-We can obtain further 5000 posterior draws per simulated data set and quickly inspect
-how well the model can recover its parameters across the entire *prior predictive distribution*.
-
-
-```python
-posterior_draws = amortized_posterior.sample(new_sims, n_samples=5000)
-fig = bf.diagnostics.plot_recovery(posterior_draws, new_sims['parameters'])
-```
-
-<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_recovery.png?raw=true" width=65% height=65%>
-
-For any individual data set, we can also compare the parameters' posteriors with
-their corresponding priors:
-
-```python
-fig = bf.diagnostics.plot_posterior_2d(posterior_draws[0], prior=generative_model.prior)
-```
-
-<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_posterior.png?raw=true" width=45% height=45%>
-
-We see clearly how the posterior shrinks relative to the prior for both
-model parameters as a result of conditioning on the data.
-
-### References and Further Reading
-
-- Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2020).
-BayesFlow: Learning complex stochastic models with invertible neural networks.
-<em>IEEE Transactions on Neural Networks and Learning Systems, 33(4)</em>, 1452-1466.
-
-- Radev, S. T., Graw, F., Chen, S., Mutters, N. T., Eichel, V. M., Bärnighausen, T., & Köthe, U. (2021).
-OutbreakFlow: Model-based Bayesian inference of disease outbreak dynamics with invertible neural networks and its application to the COVID-19 pandemics in Germany. <em>PLoS Computational Biology, 17(10)</em>, e1009472.
-
-- Bieringer, S., Butter, A., Heimel, T., Höche, S., Köthe, U., Plehn, T., & Radev, S. T. (2021).
-Measuring QCD splittings with invertible networks. <em>SciPost Physics, 10(6)</em>, 126.
-
-- von Krause, M., Radev, S. T., & Voss, A. (2022).
-Mental speed is high until age 60 as revealed by analysis of over a million participants.
-<em>Nature Human Behaviour, 6(5)</em>, 700-708.
-
-## Model Misspecification
-
-What if we are dealing with misspecified models? That is, how faithful is our
-amortized inference if the generative model is a poor representation of reality?
-A modified loss function optimizes the learned summary statistics towards a unit
-Gaussian and reliably detects model misspecification during inference time.
-
-
-<img src="https://github.com/stefanradev93/BayesFlow/blob/master/examples/img/model_misspecification_amortized_sbi.png?raw=true" width=100% height=100%>
-
-In order to use this method, you should only provide the `summary_loss_fun` argument
-to the `AmortizedPosterior` instance:
-
-```python
-amortized_posterior = bf.amortizers.AmortizedPosterior(inference_net, summary_net, summary_loss_fun='MMD')
-```
-
-The amortizer knows how to combine its losses and you can inspect the summary space for outliers during inference.
-
-### References and Further Reading
-
-- Schmitt, M., Bürkner P. C., Köthe U., & Radev S. T. (2022). Detecting Model
-Misspecification in Amortized Bayesian Inference with Neural Networks. <em>ArXiv
-preprint</em>, available for free at: https://arxiv.org/abs/2112.08866
-
-## Model Comparison
-
-BayesFlow can not only be used for parameter estimation, but also to perform approximate Bayesian model comparison via posterior model probabilities or Bayes factors.
-Let's extend the minimal example from before with a second model $M_2$ that we want to compare with our original model $M_1$:
-
-```python
-def simulator(theta, n_obs=50, scale=1.0):
-    return np.random.default_rng().normal(loc=theta, scale=scale, size=(n_obs, theta.shape[0]))
-
-def prior_m1(D=2, mu=0., sigma=1.0):
-    return np.random.default_rng().normal(loc=mu, scale=sigma, size=D)
-
-def prior_m2(D=2, mu=2., sigma=1.0):
-    return np.random.default_rng().normal(loc=mu, scale=sigma, size=D)
-```
-
-For the purpose of this illustration, the two toy models only differ with respect to their prior specification ($M_1: \mu = 0, M_2: \mu = 2$). We create both models as before and use a `MultiGenerativeModel` wrapper to combine them in a `meta_model`:
-
-```python
-model_m1 = bf.simulation.GenerativeModel(prior_m1, simulator, simulator_is_batched=False)
-model_m2 = bf.simulation.GenerativeModel(prior_m2, simulator, simulator_is_batched=False)
-meta_model = bf.simulation.MultiGenerativeModel([model_m1, model_m2])
-```
-
-Next, we construct our neural network with a `PMPNetwork` for approximating posterior model probabilities:
-
-```python
-summary_net = bf.networks.SetTransformer(input_dim=2)
-probability_net = bf.networks.PMPNetwork(num_models=2)
-amortized_bmc = bf.amortizers.AmortizedModelComparison(probability_net, summary_net)
-```
-
-We combine all previous steps with a `Trainer` instance and train the neural approximator:
-
-```python
-trainer = bf.trainers.Trainer(amortizer=amortized_bmc, generative_model=meta_model)
-losses = trainer.train_online(epochs=3, iterations_per_epoch=100, batch_size=32)
-```
-
-Let's simulate data sets from our models to check our networks' performance:
-
-```python
-sims = trainer.configurator(meta_model(5000))
-```
-
-When feeding the data to our trained network, we almost immediately obtain posterior model probabilities for each of the 5000 data sets:
-
-```python
-model_probs = amortized_bmc.posterior_probs(sims)
-```
-
-How good are these predicted probabilities in the closed world? We can have a look at the calibration:
-
-```python
-cal_curves = bf.diagnostics.plot_calibration_curves(sims["model_indices"], model_probs)
-```
-
-<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_calibration_curves.png?raw=true" width=65% height=65%>
-
-Our approximator shows excellent calibration, with the calibration curve being closely aligned to the diagonal, an expected calibration error (ECE) near 0 and most predicted probabilities being certain of the model underlying a data set. We can further assess patterns of misclassification with a confusion matrix:
-
-```python
-conf_matrix = bf.diagnostics.plot_confusion_matrix(sims["model_indices"], model_probs)
-```
-
-<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/showcase_confusion_matrix.png?raw=true" width=44% height=44%>
-
-For the vast majority of simulated data sets, the "true" data-generating model is correctly identified. With these diagnostic results backing us up, we can proceed and apply our trained network to empirical data.
-
-BayesFlow is also able to conduct model comparison for hierarchical models. See this [tutorial notebook](examples/Hierarchical_Model_Comparison_MPT.ipynb) for an introduction to the associated workflow.
 
 ### References and Further Reading
 
@@ -269,26 +113,7 @@ and Statistics</em>, 11-29, PMLR, available for free at: https://arxiv.org/abs/2
 Learning Method for Comparing Bayesian Hierarchical Models. <em>ArXiv preprint</em>,
 available for free at: https://arxiv.org/abs/2301.11873
 
-## Likelihood Emulation
-
-In order to learn the exchangeable (i.e., permutation invariant) likelihood from the minimal example instead of the posterior, you may use the `AmortizedLikelihood` wrapper:
-
-```python
-likelihood_net = bf.networks.InvertibleNetwork(num_params=2)
-amortized_likelihood = bf.amortizers.AmortizedLikelihood(likelihood_net)
-```
-
-This wrapper can interact with a `Trainer` instance in the same way as the `AmortizedPosterior`. Finally, you can also learn the likelihood and the posterior *simultaneously* by using the `AmortizedPosteriorLikelihood` wrapper and choosing your preferred training scheme:
-
-```python
-joint_amortizer = bf.amortizers.AmortizedPosteriorLikelihood(amortized_posterior, amortized_likelihood)
-```
-
-Learning both densities enables us to approximate marginal likelihoods or perform approximate leave-one-out cross-validation (LOO-CV) for prior or posterior predictive model comparison, respectively.
-
-### References and Further Reading
-
-Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P.-C. (2023).
+- Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P.-C. (2023).
 JANA: Jointly amortized neural approximation of complex Bayesian models.
 *Proceedings of the Thirty-Ninth Conference on Uncertainty in Artificial Intelligence, 216*, 1695-1706.
 ([arXiv](https://arxiv.org/abs/2302.09125))([PMLR](https://proceedings.mlr.press/v216/radev23a.html))
