@@ -13,11 +13,11 @@ from bayesflow.utils.numpy_utils import (
     softplus,
 )
 
-from .transform import Transform
+from .lambda_transform import LambdaTransform
 
 
 @serializable(package="bayesflow.data_adapters")
-class ConstrainBounded(Transform):
+class ConstrainBounded(LambdaTransform):
     """Constrains a parameter with a lower and/or upper bound."""
 
     def __init__(
@@ -29,8 +29,6 @@ class ConstrainBounded(Transform):
         upper: np.ndarray = None,
         method: str,
     ):
-        super().__init__(parameters)
-
         self.lower = lower
         self.upper = upper
         self.method = method
@@ -45,11 +43,20 @@ class ConstrainBounded(Transform):
             # double bounded case
             match method:
                 case "clip":
-                    self.forward = lambda x: x
-                    self.inverse = lambda x: np.clip(x, lower, upper)
+
+                    def constrain(x):
+                        return np.clip(x, lower, upper)
+
+                    def unconstrain(x):
+                        # not bijective
+                        return x
                 case "sigmoid":
-                    self.forward = lambda x: inverse_sigmoid((x - lower) / (upper - lower))
-                    self.inverse = lambda x: (upper - lower) * sigmoid(x) + lower
+
+                    def constrain(x):
+                        return (upper - lower) * sigmoid(x) + lower
+
+                    def unconstrain(x):
+                        return inverse_sigmoid((x - lower) / (upper - lower))
                 case str() as name:
                     raise ValueError(f"Unsupported method name for double bounded constraint: '{name}'.")
                 case other:
@@ -59,14 +66,27 @@ class ConstrainBounded(Transform):
             if lower is not None:
                 match method:
                     case "clip":
-                        self.forward = lambda x: x
-                        self.inverse = lambda x: np.clip(x, lower, np.inf)
+
+                        def constrain(x):
+                            return np.clip(x, lower, np.inf)
+
+                        def unconstrain(x):
+                            # not bijective
+                            return x
                     case "softplus":
-                        self.forward = lambda x: inverse_softplus(x - lower)
-                        self.inverse = lambda x: softplus(x) + lower
+
+                        def constrain(x):
+                            return softplus(x) + lower
+
+                        def unconstrain(x):
+                            return inverse_softplus(x - lower)
                     case "exp":
-                        self.forward = np.log
-                        self.inverse = np.exp
+
+                        def constrain(x):
+                            return np.exp(x) + lower
+
+                        def unconstrain(x):
+                            return np.log(x - lower)
                     case str() as name:
                         raise ValueError(f"Unsupported method name for single bounded constraint: '{name}'.")
                     case other:
@@ -74,18 +94,33 @@ class ConstrainBounded(Transform):
             else:
                 match method:
                     case "clip":
-                        self.forward = lambda x: x
-                        self.inverse = lambda x: np.clip(x, -np.inf, upper)
+
+                        def constrain(x):
+                            return np.clip(x, -np.inf, upper)
+
+                        def unconstrain(x):
+                            # not bijective
+                            return x
                     case "softplus":
-                        self.forward = lambda x: -inverse_softplus(-(x - upper))
-                        self.inverse = lambda x: -softplus(-x) + upper
+
+                        def constrain(x):
+                            return -softplus(-x) + upper
+
+                        def unconstrain(x):
+                            return -inverse_softplus(-(x - upper))
                     case "exp":
-                        self.forward = lambda x: -np.log(-x + upper)
-                        self.inverse = lambda x: -np.exp(-x) + upper
+
+                        def constrain(x):
+                            return -np.exp(-x) + upper
+
+                        def unconstrain(x):
+                            return -np.log(-x + upper)
                     case str() as name:
                         raise ValueError(f"Unsupported method name for single bounded constraint: '{name}'.")
                     case other:
                         raise TypeError(f"Expected a method name, got {other!r}.")
+
+        super().__init__(parameters, forward=unconstrain, inverse=constrain)
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "ConstrainBounded":

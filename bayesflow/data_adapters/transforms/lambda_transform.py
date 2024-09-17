@@ -1,14 +1,16 @@
 from collections.abc import Sequence
+
+import numpy as np
 from keras.saving import (
     deserialize_keras_object as deserialize,
     register_keras_serializable as serializable,
     serialize_keras_object as serialize,
 )
-from .transform import Transform
+from .transform import ElementwiseTransform
 
 
 @serializable(package="bayesflow.data_adapters")
-class LambdaTransform(Transform):
+class LambdaTransform(ElementwiseTransform):
     """
     Transforms a parameter using a pair of forward and inverse functions.
 
@@ -20,8 +22,8 @@ class LambdaTransform(Transform):
     def __init__(self, parameters: str | Sequence[str] | None = None, /, *, forward: callable, inverse: callable):
         super().__init__(parameters)
 
-        self.forward = forward
-        self.inverse = inverse
+        self._forward = forward
+        self._inverse = inverse
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "LambdaTransform":
@@ -31,9 +33,15 @@ class LambdaTransform(Transform):
             inverse=deserialize(config["inverse"], custom_objects),
         )
 
+    def forward(self, parameter_name: str, parameter_value: np.ndarray) -> np.ndarray:
+        return self._forward(parameter_value)
+
     def get_config(self) -> dict:
         return {
             "parameters": serialize(self.parameters),
-            "forward": serialize(self.forward),
-            "inverse": serialize(self.inverse),
+            "forward": serialize(self._forward),
+            "inverse": serialize(self._inverse),
         }
+
+    def inverse(self, parameter_name: str, parameter_value: np.ndarray) -> np.ndarray:
+        return self._inverse(parameter_value)
