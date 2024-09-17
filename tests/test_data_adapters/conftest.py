@@ -24,9 +24,10 @@ def data_adapter():
         x=["x1", "x2"],
         y=["y1", "y2"],
         transforms=[
-            Normalize("x1", mean=np.array([0.0]), std=np.array([1.0])),
+            # normalize all parameters
+            Normalize(),
             # use a lambda transform with global functions
-            LambdaTransform("x2", forward_transform, inverse_transform),
+            LambdaTransform("x2", forward=forward_transform, inverse=inverse_transform),
         ],
     )
 
