@@ -18,14 +18,14 @@ def custom_objects():
 @pytest.fixture()
 def data_adapter():
     from bayesflow.data_adapters import ConcatenateKeysDataAdapter
-    from bayesflow.data_adapters.transforms import LambdaTransform, Normalize
+    from bayesflow.data_adapters.transforms import LambdaTransform, Standardize
 
     return ConcatenateKeysDataAdapter(
         x=["x1", "x2"],
         y=["y1", "y2"],
         transforms=[
             # normalize all parameters
-            Normalize(),
+            Standardize(),
             # use a lambda transform with global functions
             LambdaTransform("x2", forward=forward_transform, inverse=inverse_transform),
         ],

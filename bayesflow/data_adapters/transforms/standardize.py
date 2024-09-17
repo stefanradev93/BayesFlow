@@ -10,7 +10,7 @@ from .transform import ElementwiseTransform
 
 
 @serializable(package="bayesflow.data_adapters")
-class Normalize(ElementwiseTransform):
+class Standardize(ElementwiseTransform):
     """Normalizes a parameter to have zero mean and unit standard deviation.
     By default, this is lazily initialized; the mean and standard deviation are computed from the first batch of data.
     For eager initialization, pass the mean and standard deviation to the constructor.
@@ -29,7 +29,7 @@ class Normalize(ElementwiseTransform):
         self.stds = stds or {}
 
     @classmethod
-    def from_config(cls, config: dict, custom_objects=None) -> "Normalize":
+    def from_config(cls, config: dict, custom_objects=None) -> "Standardize":
         return cls(
             deserialize(config["parameters"], custom_objects),
             means=deserialize(config["means"], custom_objects),
