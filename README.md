@@ -1,5 +1,4 @@
-# BayesFlow <img src="img/bayesflow_hex.png" style="float: right; width: 20%; height: 20%;" alt="BayesFlow Logo" />
-
+# BayesFlow <img src="img/bayesflow_hex.png" style="float: right; width: 20%; height: 20%;" align="right" alt="BayesFlow Logo" />
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/stefanradev93/bayesflow/tests.yaml?style=for-the-badge&label=Tests)
 ![Codecov](https://img.shields.io/codecov/c/github/stefanradev93/bayesflow/streamlined-backend?style=for-the-badge)
 [![DOI](https://img.shields.io/badge/DOI-10.21105%2Fjoss.05702-blue?style=for-the-badge)](https://doi.org/10.21105/joss.05702)
