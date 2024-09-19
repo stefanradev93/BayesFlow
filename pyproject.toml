@@ -120,5 +120,5 @@ docstring-code-format = true
 # enabled.
 docstring-code-line-length = "dynamic"
 
-[tool.setuptools]
-py-modules = []
+[tool.setuptools.packages]
+find = {}
