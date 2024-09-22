@@ -11,9 +11,8 @@ It provides users with:
 - A rich collection of neural network architectures
 - Multi-Backend Support: [PyTorch](https://github.com/pytorch/pytorch), [TensorFlow](https://github.com/tensorflow/tensorflow), [JAX](https://github.com/google/jax), and [NumPy](https://github.com/numpy/numpy)
 
-BayesFlow is designed to be a flexible and efficient tool, enabling rapid statistical inference after a
-potentially longer simulation-based training phase.
-
+BayesFlow is designed to be a flexible and efficient tool that enables rapid statistical inference
+fueled by continuous progress in generative AI and Bayesian inference.
 
 ## Install
 
@@ -66,25 +65,16 @@ git checkout dev
 conda env create --file environment.yaml --name bayesflow
 ```
 
-
 ## Getting Started
 
 Check out some of our walk-through notebooks:
 
-1. [Quickstart amortized posterior estimation](examples/Intro_Amortized_Posterior_Estimation.ipynb)
-2. [Tackling strange bimodal distributions](examples/TwoMoons_Bimodal_Posterior.ipynb)
-3. [Detecting model misspecification in posterior inference](examples/Model_Misspecification.ipynb)
-4. [Principled Bayesian workflow for cognitive models](examples/LCA_Model_Posterior_Estimation.ipynb)
-5. [Posterior estimation for ODEs](examples/Linear_ODE_system.ipynb)
-6. [Posterior estimation for SIR-like models](examples/Covid19_Initial_Posterior_Estimation.ipynb)
-7. [Model comparison for cognitive models](examples/Model_Comparison_MPT.ipynb)
-8. [Hierarchical model comparison for cognitive models](examples/Hierarchical_Model_Comparison_MPT.ipynb)
-
+1. [Two moons toy example with flow matching](examples/TwoMoons_FlowMatching.ipynb)
+2. ...Under construction
 
 ## Documentation \& Help
 
 Documentation is available at https://bayesflow.org. Please use the [BayesFlow Forums](https://discuss.bayesflow.org/) for any BayesFlow-related questions and discussions, and [GitHub Issues](https://github.com/stefanradev93/BayesFlow/issues) for bug reports and feature requests.
-
 
 ## Conceptual Overview
 
@@ -95,7 +85,6 @@ complex to be described analytically. The figure below presents a higher-level
 overview of neurally bootstrapped Bayesian inference.
 
 <img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/high_level_framework.png?raw=true" width=80% height=80%>
-
 
 ### References and Further Reading
 
