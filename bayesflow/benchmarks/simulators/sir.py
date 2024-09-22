@@ -1,9 +1,10 @@
 import numpy as np
 from scipy.integrate import odeint
-from .benchmark import Benchmark
+
+from .benchmark_simulator import BenchmarkSimulator
 
 
-class SIR(Benchmark):
+class SIR(BenchmarkSimulator):
     def __init__(
         self,
         N: float = 1e6,

@@ -1,8 +1,9 @@
 import numpy as np
-from .benchmark import Benchmark
+
+from .benchmark_simulator import BenchmarkSimulator
 
 
-class TwoMoons(Benchmark):
+class TwoMoons(BenchmarkSimulator):
     def __init__(self, lower_bound: float = -1.0, upper_bound: float = 1.0, rng: np.random.Generator = None):
         """Two moons simulated benchmark.
         See: https://arxiv.org/pdf/2101.04653.pdf, Task T.8

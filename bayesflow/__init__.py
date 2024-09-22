@@ -12,6 +12,7 @@ from . import (
 
 from .approximators import ContinuousApproximator
 from .datasets import OfflineDataset, OnlineDataset, DiskDataset
+from .benchmarks import TwoMoons
 
 
 def setup():

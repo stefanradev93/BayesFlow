@@ -1,9 +1,10 @@
 import numpy as np
 from scipy.special import expit
-from .benchmark import Benchmark
+
+from .benchmark_simulator import BenchmarkSimulator
 
 
-class BernoulliGLM(Benchmark):
+class BernoulliGLM(BenchmarkSimulator):
     def __init__(self, T: int = 100, scale_by_T: bool = True, rng: np.random.Generator = None):
         """Bernoulli GLM simulated benchmark
         See: https://arxiv.org/pdf/2101.04653.pdf, Task T.5

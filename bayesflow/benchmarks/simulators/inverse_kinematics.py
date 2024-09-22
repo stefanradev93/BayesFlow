@@ -1,8 +1,9 @@
 import numpy as np
-from .benchmark import Benchmark
+
+from .benchmark_simulator import BenchmarkSimulator
 
 
-class InverseKinematics(Benchmark):
+class InverseKinematics(BenchmarkSimulator):
     def __init__(
         self,
         scales: np.ndarray = None,

@@ -1,8 +1,9 @@
 import numpy as np
-from .benchmark import Benchmark
+
+from .benchmark_simulator import BenchmarkSimulator
 
 
-class SLCP(Benchmark):
+class SLCP(BenchmarkSimulator):
     def __init__(
         self,
         lower_bound: float = -3.0,

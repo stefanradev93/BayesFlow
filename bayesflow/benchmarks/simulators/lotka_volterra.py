@@ -1,9 +1,10 @@
 import numpy as np
 from scipy.integrate import odeint
-from .benchmark import Benchmark
+
+from .benchmark_simulator import BenchmarkSimulator
 
 
-class LotkaVolterra(Benchmark):
+class LotkaVolterra(BenchmarkSimulator):
     def __init__(
         self,
         X0: int = 30,

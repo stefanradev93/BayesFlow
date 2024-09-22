@@ -1,9 +1,10 @@
 import numpy as np
 from scipy.special import expit
-from .benchmark import Benchmark
+
+from .benchmark_simulator import BenchmarkSimulator
 
 
-class BernoulliGLMRaw(Benchmark):
+class BernoulliGLMRaw(BenchmarkSimulator):
     def __init__(self, T: int = 100, rng: np.random.Generator = None):
         """Bernoulli GLM raw simulated benchmark.
         See: https://arxiv.org/pdf/2101.04653.pdf, Task T.6

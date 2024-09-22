@@ -65,7 +65,7 @@ def filter_kwargs(kwargs: Mapping[str, any], f: callable) -> Mapping[str, any]:
 
 def keras_kwargs(kwargs: Mapping) -> Mapping:
     """Keep dictionary keys that do not end with _kwargs. Used for propagating
-    custom keyword arguments in custom models that inherit from keras.Model.
+    custom keyword arguments in custom simulators that inherit from keras.Model.
     """
     return {key: value for key, value in kwargs.items() if not key.endswith("_kwargs")}
 

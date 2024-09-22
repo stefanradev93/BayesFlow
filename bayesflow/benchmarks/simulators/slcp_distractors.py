@@ -1,9 +1,10 @@
 import numpy as np
 from scipy.stats import multivariate_t
-from .benchmark import Benchmark
+
+from .benchmark_simulator import BenchmarkSimulator
 
 
-class SLCPDistractors(Benchmark):
+class SLCPDistractors(BenchmarkSimulator):
     def __init__(
         self,
         lower_bound: float = -3.0,

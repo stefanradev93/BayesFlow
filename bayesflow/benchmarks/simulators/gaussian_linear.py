@@ -1,8 +1,9 @@
 import numpy as np
-from .benchmark import Benchmark
+
+from .benchmark_simulator import BenchmarkSimulator
 
 
-class GaussianLinear(Benchmark):
+class GaussianLinear(BenchmarkSimulator):
     def __init__(
         self,
         D: int = 10,
