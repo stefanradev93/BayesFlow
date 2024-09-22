@@ -11,7 +11,7 @@ from . import (
 )
 
 from .approximators import ContinuousApproximator
-from .datasets import OfflineDataset, OnlineDataset
+from .datasets import OfflineDataset, OnlineDataset, DiskDataset
 
 
 def setup():

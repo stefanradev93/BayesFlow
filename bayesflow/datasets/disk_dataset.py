@@ -2,25 +2,25 @@ import keras
 import numpy as np
 import os
 import pathlib as pl
-import pickle
 
 from bayesflow.data_adapters import DataAdapter
-from bayesflow.utils import tree_stack
+from bayesflow.utils import tree_stack, pickle_load
 
 
-class PickleDataset(keras.utils.PyDataset):
+class DiskDataset(keras.utils.PyDataset):
     """
-    A dataset used to load pickle files from disk.
+    A dataset used to load pre-simulated files from disk.
     The training strategy will be offline.
 
     By default, the expected file structure is as follows:
     root
     ├── ...
-    ├── sample_1.pkl
+    ├── sample_1.[ext]
     ├── ...
-    └── sample_n.pkl
+    └── sample_n.[ext]
 
-    where each pickle file contains a complete sample (e.g., a dictionary of numpy arrays).
+    where each file contains a complete sample (e.g., a dictionary of numpy arrays) or
+    is converted into a complete sample using a custom loader provided to ``load_fun``.
     """
 
     def __init__(
@@ -29,12 +29,14 @@ class PickleDataset(keras.utils.PyDataset):
         *,
         pattern: str = "*.pkl",
         batch_size: int,
+        load_fun: callable = None,
         data_adapter: DataAdapter | None,
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.batch_size = batch_size
         self.root = pl.Path(root)
+        self.loader = load_fun or pickle_load
         self.data_adapter = data_adapter
         self.files = list(map(str, self.root.glob(pattern)))
 
@@ -48,8 +50,7 @@ class PickleDataset(keras.utils.PyDataset):
 
         batch = []
         for file in files:
-            with open(file, "rb") as f:
-                batch.append(pickle.load(f))
+            batch.append(self.loader(file))
 
         batch = tree_stack(batch)
 

@@ -1,3 +1,14 @@
+from typing import Any
+import pickle
+
+
+def pickle_load(filepath: str) -> Any:
+    """Small utility to safely load a pickle object."""
+
+    with open(filepath, "rb+") as f:
+        return pickle.load(f)
+
+
 def format_bytes(b: int, precision: int = 2, si: bool = False) -> str:
     """
     Format a number of bytes as a human-readable string in the format '{value} {prefix}{unit}'.

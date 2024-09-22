@@ -23,6 +23,7 @@ from .git import (
 from .hparam_utils import find_batch_size, find_memory_budget
 
 from .io import (
+    pickle_load,
     format_bytes,
     parse_bytes,
 )
