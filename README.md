@@ -9,7 +9,7 @@ It provides users with:
 
 - A user-friendly API for rapid Bayesian workflows
 - A rich collection of neural network architectures
-- Multi-Backend Support via [Keras3](https://keras.io/keras_3/): You can use [PyTorch](https://github.com/pytorch/pytorch), [TensorFlow](https://github.com/tensorflow/tensorflow), [JAX](https://github.com/google/jax), or [NumPy](https://github.com/numpy/numpy)
+- Multi-Backend Support via [Keras3](https://keras.io/keras_3/): You can use [PyTorch](https://github.com/pytorch/pytorch), [TensorFlow](https://github.com/tensorflow/tensorflow), or [JAX](https://github.com/google/jax)
 
 BayesFlow is designed to be a flexible and efficient tool that enables rapid statistical inference
 fueled by continuous progress in generative AI and Bayesian inference.
@@ -27,28 +27,23 @@ overview of neurally bootstrapped Bayesian inference.
 
 ## Disclaimer
 
-This is the current dev version of BayesFlow, which constitutes a complete refactor of the library built on Keras3. This way, you can now use any of the major deep learning libraries as backend for BayesFlow. The refactor is still work in progress with some of the advanced features not yet implemented. We are actively working on them and promise to catch up soon. 
+This is the current dev version of BayesFlow, which constitutes a complete refactor of the library built on Keras 3. This way, you can now use any of the major deep learning libraries as backend for BayesFlow. The refactor is still work in progress with some of the advanced features not yet implemented. We are actively working on them and promise to catch up soon.
 
-If you encounter any issues, please don't hesitate to open an issue here on [Github](https://github.com/stefanradev93/BayesFlow/issues) or ask questions on our [Discourse Forums](https://discuss.bayesflow.org/). 
+If you encounter any issues, please don't hesitate to open an issue here on [Github](https://github.com/stefanradev93/BayesFlow/issues) or ask questions on our [Discourse Forums](https://discuss.bayesflow.org/).
 
 ## Install
 
 ### Backend
 
-First, install your machine learning backend of choice. Note that BayesFlow **will not run** without a backend. If you don't know which one to use, we recommend [PyTorch](https://github.com/pytorch/pytorch) to get started.
+First, install one machine learning backend of choice. Note that BayesFlow **will not run** without a backend.
 
-Once installed, set the appropriate backend environment variable. For example, to use PyTorch, type into your terminal before starting Python:
+[Install JAX](https://jax.readthedocs.io/en/latest/installation.html)
+[Install PyTorch](https://pytorch.org/get-started/locally/)
+[Install TensorFlow](https://www.tensorflow.org/install)
 
-```bash
-export KERAS_BACKEND=torch
-```
+If you are new to machine learning and don't know which one to use, we recommend PyTorch to get started.
 
-You can also set the environment variable directly in the Python script:
-
-```python
-import os
-os.environ["KERAS_BACKEND"] = "torch"
-```
+Once installed, [set the backend environment variable as required by keras.](https://keras.io/getting_started/#configuring-your-backend)
 
 If you use conda, you can alternatively set this individually for each environment in your terminal:
 
@@ -66,18 +61,17 @@ You can install the dev version with pip:
 pip install git+https://github.com/stefanradev93/bayesflow@dev
 ```
 
-### Using Conda
+### Using Conda (coming soon)
 
 The dev version is not conda-installable yet.
 
 ### From Source
 
-To install the dev version from source, use:
+If you want to contribute to BayesFlow, we recommend installing the dev branch from source:
 
 ```bash
-git clone https://github.com/stefanradev93/bayesflow
+git clone -b dev git@github.com:stefanradev93/bayesflow.git
 cd <local-path-to-bayesflow-repository>
-git checkout dev
 conda env create --file environment.yaml --name bayesflow
 ```
 
