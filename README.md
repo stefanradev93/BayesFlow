@@ -27,7 +27,7 @@ overview of neurally bootstrapped Bayesian inference.
 
 ## Disclaimer
 
-This is the current dev version of BayesFlow, which constitutes a complete refactor of the library build on Keras3. This way, you can now use any of the major deep learning libraries as backend for BayesFlow. The refactor is still work in progress with some of the advanced features not yet implemented. We promise to catch up on them soon. 
+This is the current dev version of BayesFlow, which constitutes a complete refactor of the library built on Keras3. This way, you can now use any of the major deep learning libraries as backend for BayesFlow. The refactor is still work in progress with some of the advanced features not yet implemented. We are actively working on them and promise to catch up soon. 
 
 If you encounter any issues, please don't hesitate to open an issue here on [Github](https://github.com/stefanradev93/BayesFlow/issues) or ask questions on our [Discourse Forums](https://discuss.bayesflow.org/). 
 
@@ -43,7 +43,12 @@ Once installed, set the appropriate backend environment variable. For example, t
 export KERAS_BACKEND=torch
 ```
 
-TODO: can we set this within python too?
+You can also set the environment variable directly in the Python script:
+
+```python
+import os
+os.environ["KERAS_BACKEND"] = "torch"
+```
 
 If you use conda, you can instead set this individually for each environment:
 
@@ -66,20 +71,14 @@ conda env create --file environment.yaml --name bayesflow
 
 ### Using Conda
 
-TODO: does conda or pip work with the current dev yet? If not, I suggest to remove it for now.
-
-We recommend installing BayesFlow with conda (or mamba).
-
-```bash
-conda install -c conda-forge bayesflow
-```
+The dev version is not conda-installable yet.
 
 ### Using pip
 
 You can of course use pip as well:
 
 ```bash
-pip install bayesflow
+pip install git+https://github.com/stefanradev93/bayesflow@dev
 ```
 
 ## Getting Started
