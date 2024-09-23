@@ -43,9 +43,15 @@ First, install one machine learning backend of choice. Note that BayesFlow **wil
 
 If you are new to machine learning and don't know which one to use, we recommend PyTorch to get started.
 
-Once installed, [set the backend environment variable as required by keras.](https://keras.io/getting_started/#configuring-your-backend)
+Once installed, [set the backend environment variable as required by keras](https://keras.io/getting_started/#configuring-your-backend). For example, inside your Python script write:
 
-If you use conda, you can alternatively set this individually for each environment in your terminal:
+```python
+import os
+os.environ["KERAS_BACKEND"] = "torch"
+import keras
+```
+
+If you use conda, you can alternatively set this individually for each environment in your terminal. For example:
 
 ```bash
 conda env config vars set KERAS_BACKEND=torch
