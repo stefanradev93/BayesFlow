@@ -2,10 +2,10 @@ from functools import partial
 import keras
 
 
-from .functional import maximum_mean_discrepancy
+from .functional import root_mean_squared_error
 
 
-class MaximumMeanDiscrepancy(keras.metrics.MeanMetricWrapper):
-    def __init__(self, name="maximum_mean_discrepancy", dtype=None, **kwargs):
-        fn = partial(maximum_mean_discrepancy, **kwargs)
+class RootMeanSquaredError(keras.metrics.MeanMetricWrapper):
+    def __init__(self, name="root_mean_squared_error", dtype=None, **kwargs):
+        fn = partial(root_mean_squared_error, **kwargs)
         super().__init__(fn, name=name, dtype=dtype)
