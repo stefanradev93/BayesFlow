@@ -19,12 +19,13 @@ class DiagonalStudentT(Distribution):
         - ``log_prob`` is used for density computation
     """
 
-    def __init__(self, 
-        df: float = 50, 
-        loc: float | Tensor = 0.0, 
-        scale: float | Tensor = 1.0, 
+    def __init__(
+        self,
+        df: float = 50,
+        loc: float | Tensor = 0.0,
+        scale: float | Tensor = 1.0,
         seed_generator: keras.random.SeedGenerator = None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.loc = loc
@@ -45,10 +46,15 @@ class DiagonalStudentT(Distribution):
     def build(self, input_shape: Shape) -> None:
         self.dim = int(input_shape[-1])
         self.log_norm_const = self.dim * (
-            math.lgamma(self.df / 2.0) - math.lgamma((self.df + 1.0) / 2.0) + 
-            0.5 * math.log(self.df * math.pi) + math.log(self.scale)
+            math.lgamma(self.df / 2.0)
+            - math.lgamma((self.df + 1.0) / 2.0)
+            + 0.5 * math.log(self.df * math.pi)
+            + math.log(self.scale)
         )
 
     def _log_unnormalized_prob(self, tensor: Tensor) -> Tensor:
-       return - (self.df + 1.0) / 2.0 * ops.sum(ops.log(1.0 + 1.0 / self.df * 
-              ops.square((tensor - self.loc) / self.scale)), axis=-1)
+        return (
+            -(self.df + 1.0)
+            / 2.0
+            * ops.sum(ops.log(1.0 + 1.0 / self.df * ops.square((tensor - self.loc) / self.scale)), axis=-1)
+        )
