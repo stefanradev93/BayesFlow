@@ -50,7 +50,7 @@ import os
 os.environ["KERAS_BACKEND"] = "torch"
 ```
 
-If you use conda, you can instead set this individually for each environment:
+If you use conda, you can alternatively set this individually for each environment in your terminal:
 
 ```bash
 conda env config vars set KERAS_BACKEND=torch
@@ -58,27 +58,27 @@ conda env config vars set KERAS_BACKEND=torch
 
 This way, you also don't have to manually set the backend every time you are starting Python to use BayesFlow.
 
-### From Source
+### Using pip
 
-To install the development version of BayesFlow from source, use:
+You can install the dev version with pip:
 
 ```bash
-git clone https://github.com/stefanradev93/bayesflow
-cd <local-path-to-bayesflow-repository>
-git checkout dev
-conda env create --file environment.yaml --name bayesflow
+pip install git+https://github.com/stefanradev93/bayesflow@dev
 ```
 
 ### Using Conda
 
 The dev version is not conda-installable yet.
 
-### Using pip
+### From Source
 
-You can of course use pip as well:
+To install the dev version from source, use:
 
 ```bash
-pip install git+https://github.com/stefanradev93/bayesflow@dev
+git clone https://github.com/stefanradev93/bayesflow
+cd <local-path-to-bayesflow-repository>
+git checkout dev
+conda env create --file environment.yaml --name bayesflow
 ```
 
 ## Getting Started
@@ -90,28 +90,6 @@ Check out some of our walk-through notebooks below. We are actively working on p
 ## Documentation \& Help
 
 Documentation is available at https://bayesflow.org. Please use the [BayesFlow Forums](https://discuss.bayesflow.org/) for any BayesFlow-related questions and discussions, and [GitHub Issues](https://github.com/stefanradev93/BayesFlow/issues) for bug reports and feature requests.
-
-### Further Reading
-
-TODO: which papers to we want to reference here exactly and according to which criteria?
-
-- Radev S. T., D’Alessandro M., Mertens U. K., Voss A., Köthe U., & Bürkner P.
-C. (2021). Amortized Bayesian Model Comparison with Evidental Deep Learning.
-<em>IEEE Transactions on Neural Networks and Learning Systems</em>.
-doi:10.1109/TNNLS.2021.3124052 available for free at: https://arxiv.org/abs/2004.10629
-
-- Schmitt, M., Radev, S. T., & Bürkner, P. C. (2022). Meta-Uncertainty in
-Bayesian Model Comparison. In <em>International Conference on Artificial Intelligence
-and Statistics</em>, 11-29, PMLR, available for free at: https://arxiv.org/abs/2210.07278
-
-- Elsemüller, L., Schnuerch, M., Bürkner, P. C., & Radev, S. T. (2023). A Deep
-Learning Method for Comparing Bayesian Hierarchical Models. <em>ArXiv preprint</em>,
-available for free at: https://arxiv.org/abs/2301.11873
-
-- Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P.-C. (2023).
-JANA: Jointly amortized neural approximation of complex Bayesian models.
-*Proceedings of the Thirty-Ninth Conference on Uncertainty in Artificial Intelligence, 216*, 1695-1706.
-([arXiv](https://arxiv.org/abs/2302.09125))([PMLR](https://proceedings.mlr.press/v216/radev23a.html))
 
 ## Citing BayesFlow
 
