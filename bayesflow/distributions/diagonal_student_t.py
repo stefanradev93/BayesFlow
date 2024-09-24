@@ -55,7 +55,7 @@ class DiagonalStudentT(Distribution):
 
     def sample(self, batch_shape: Shape) -> Tensor:
         dist = scipy_student_t(df=self.df, loc=self.loc, scale=self.scale_diag)
-        return dist.rvs(size=batch_shape)
+        return dist.rvs(size=batch_shape + (self.dim,))
 
     def log_prob(self, tensor: Tensor) -> Tensor:
         log_unnorm_pdf = self._log_unnormalized_prob(tensor)
@@ -115,7 +115,7 @@ class DiagonalStudentT(Distribution):
             1
             + (1 / self.df)
             * ops.sum(
-                (tensor - expand_left_as(self.loc, tensor)) ** 2 / expand_left_as(self.scale_diag, tensor) ** 2, axis=-1
+                (tensor - expand_left_as(self.loc, tensor)) ** 2 / expand_left_as(self.scale_diag, tensor), axis=-1
             )
         )
         return log_unnormalized_pdf
