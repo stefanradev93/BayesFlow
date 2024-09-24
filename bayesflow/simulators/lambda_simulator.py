@@ -8,7 +8,14 @@ from ..types import Shape
 
 
 class LambdaSimulator(Simulator):
-    def __init__(self, sample_fn: callable, *, is_batched: bool = False, cast_dtypes: Mapping[str, str] = "default"):
+    def __init__(
+        self,
+        sample_fn: callable,
+        *,
+        is_batched: bool = False,
+        cast_dtypes: Mapping[str, str] = "default",
+        reserved_arguments: Mapping[str, any] = "default",
+    ):
         """Implements a simulator based on a (batched or unbatched) sampling function.
         Outputs will always be in batched format.
         :param sample_fn: The sampling function.
@@ -19,6 +26,8 @@ class LambdaSimulator(Simulator):
         :param cast_dtypes: Output data types to cast arrays to.
             By default, we convert float64 (the default for numpy on x64 systems)
             to float32 (the default for deep learning on any system).
+        :param reserved_arguments: Reserved keyword arguments to pass to the sampling function.
+            By default, functions requesting an argument 'rng' will be passed the default numpy random generator.
         """
         self.sample_fn = sample_fn
         self.is_batched = is_batched
@@ -28,7 +37,15 @@ class LambdaSimulator(Simulator):
 
         self.cast_dtypes = cast_dtypes
 
+        if reserved_arguments == "default":
+            reserved_arguments = {"rng": np.random.default_rng()}
+
+        self.reserved_arguments = reserved_arguments
+
     def sample(self, batch_shape: Shape, **kwargs) -> dict[str, np.ndarray]:
+        # add reserved arguments
+        kwargs = self.reserved_arguments | kwargs
+
         # try to use only valid keyword arguments
         kwargs = filter_kwargs(kwargs, self.sample_fn)
 
