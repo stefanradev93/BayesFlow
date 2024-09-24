@@ -19,10 +19,11 @@ def root_mean_squared_error(x1: Tensor, x2: Tensor, normalize: bool = False, **k
         The RMSE between x1 and x2 over all remaining dimensions.
     """
 
-    if keras.ops.shape(x1) != keras.ops.shape(x2):
+    # cannot check first (batch) dimension since it will be unknown at compile time
+    if keras.ops.shape(x1)[1:] != keras.ops.shape(x2)[1:]:
         raise ValueError(
             f"Expected x1 and x2 to have the same dimensions, "
-            f"but got {keras.ops.shape(x1)} != {keras.ops.shape(x2)}."
+            f"but got {keras.ops.shape(x1)[1:]} != {keras.ops.shape(x2)[1:]}."
         )
 
     # use flattened versions
