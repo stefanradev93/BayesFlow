@@ -9,6 +9,25 @@ from bayesflow.types import Tensor
 T = TypeVar("T")
 
 
+def expand_left(x, n):
+    """Expand x to the left n times"""
+    if n < 0:
+        raise ValueError(f"Cannot expand {n} times.")
+
+    idx = [None] * n + [...]
+    return x[tuple(idx)]
+
+
+def expand_left_to(x: Tensor, dim: int) -> Tensor:
+    """Expand x to the left, matching dim"""
+    return expand_left(x, dim - keras.ops.ndim(x))
+
+
+def expand_left_as(x: Tensor, y: Tensor) -> Tensor:
+    """Expand x to the right, matching the dimension of y"""
+    return expand_left_to(x, keras.ops.ndim(y))
+
+
 def expand_right(x: Tensor, n: int) -> Tensor:
     """Expand x to the right n times"""
     if n < 0:
