@@ -115,7 +115,7 @@ class DiagonalStudentT(Distribution):
             1
             + (1 / self.df)
             * ops.sum(
-                (tensor - expand_left_as(self.loc, tensor)) ** 2 / expand_left_as(self.scale_diag, tensor), axis=-1
+                (tensor - expand_left_as(self.loc, tensor)) ** 2 / expand_left_as(self.scale_diag**2, tensor), axis=-1
             )
         )
         return log_unnormalized_pdf
