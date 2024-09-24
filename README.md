@@ -37,9 +37,9 @@ If you encounter any issues, please don't hesitate to open an issue here on [Git
 
 First, install one machine learning backend of choice. Note that BayesFlow **will not run** without a backend.
 
-[Install JAX](https://jax.readthedocs.io/en/latest/installation.html)
-[Install PyTorch](https://pytorch.org/get-started/locally/)
-[Install TensorFlow](https://www.tensorflow.org/install)
+- [Install JAX](https://jax.readthedocs.io/en/latest/installation.html)
+- [Install PyTorch](https://pytorch.org/get-started/locally/)
+- [Install TensorFlow](https://www.tensorflow.org/install)
 
 If you are new to machine learning and don't know which one to use, we recommend PyTorch to get started.
 
