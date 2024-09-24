@@ -59,7 +59,7 @@ class DiagonalStudentT(Distribution):
 
     def log_prob(self, tensor: Tensor) -> Tensor:
         log_unnorm_pdf = self._log_unnormalized_prob(tensor)
-        return log_unnorm_pdf - self.log_norm_const
+        return self.log_norm_const + log_unnorm_pdf
 
     def build(self, input_shape: Shape) -> None:
         dim = int(input_shape[-1])
