@@ -1,16 +1,20 @@
 import keras
-from keras.saving import register_keras_serializable
+from keras.saving import register_keras_serializable as serializable
+
+from bayesflow.types import Shape, Tensor
+
 from ..inference_network import InferenceNetwork
 from ..coupling_flow import CouplingFlow
+
 from .conditional_gaussian import ConditionalGaussian
 
 
-@register_keras_serializable(package="bayesflow.networks")
+@serializable(package="bayesflow.networks")
 class CIF(InferenceNetwork):
     """Implements a continuously indexed flow (CIF) with a `CouplingFlow`
     bijection and `ConditionalGaussian` distributions p and q. Improves on
     eliminating leaky sampling found topologically in normalizing flows.
-    Bulit in reference to [1].
+    Built in reference to [1].
 
     [1] R. Cornish, A. Caterini, G. Deligiannidis, & A. Doucet (2021).
     Relaxing Bijectivity Constraints with Continuously Indexed Normalising
@@ -18,7 +22,7 @@ class CIF(InferenceNetwork):
     arXiv:1909.13833.
     """
 
-    def __init__(self, pq_depth=4, pq_width=128, pq_activation="tanh", **kwargs):
+    def __init__(self, pq_depth: int = 4, pq_width: int = 128, pq_activation: str = "swish", **kwargs):
         """Creates an instance of a `CIF` with configurable
         `ConditionalGaussian` distributions p and q, each containing MLP
         networks
@@ -38,22 +42,26 @@ class CIF(InferenceNetwork):
         self.p_dist = ConditionalGaussian(depth=pq_depth, width=pq_width, activation=pq_activation)
         self.q_dist = ConditionalGaussian(depth=pq_depth, width=pq_width, activation=pq_activation)
 
-    def build(self, xz_shape, conditions_shape=None):
+    def build(self, xz_shape: Shape, conditions_shape: Shape = None) -> None:
         super().build(xz_shape)
         self.bijection.build(xz_shape, conditions_shape=conditions_shape)
         self.p_dist.build(xz_shape)
         self.q_dist.build(xz_shape)
 
-    def call(self, xz, conditions=None, inverse=False, **kwargs):
+    def call(
+        self, xz: Tensor, conditions: Tensor = None, inverse: bool = False, **kwargs
+    ) -> Tensor | tuple[Tensor, Tensor]:
         if inverse:
             return self._inverse(xz, conditions=conditions, **kwargs)
         return self._forward(xz, conditions=conditions, **kwargs)
 
-    def _forward(self, x, conditions=None, density=False, **kwargs):
+    def _forward(
+        self, x: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
+    ) -> Tensor | tuple[Tensor, Tensor]:
         # Sample u ~ q_u
         u, log_qu = self.q_dist.sample(x, log_prob=True)
 
-        # Bijection and log jacobian x -> z
+        # Bijection and log Jacobian x -> z
         z, log_jac = self.bijection(x, conditions=conditions, density=True)
         if log_jac.ndim > 1:
             log_jac = keras.ops.sum(log_jac, axis=1)
@@ -66,26 +74,32 @@ class CIF(InferenceNetwork):
         if log_prior.ndim > 1:
             log_prior = keras.ops.sum(log_prior, axis=1)
 
-        # ELBO loss
+        # we cannot compute an exact analytical density
         elbo = log_jac + log_pu + log_prior - log_qu
 
         if density:
             return z, elbo
+
         return z
 
-    def _inverse(self, z, conditions=None, density=False, **kwargs):
-        # Inverse bijection z -> x
+    def _inverse(
+        self, z: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
+    ) -> Tensor | tuple[Tensor, Tensor]:
+        if not density:
+            return self.bijection(z, conditions=conditions, inverse=True, density=False)
+
         u = self.p_dist.sample(z)
         x = self.bijection(z, conditions=conditions, inverse=True)
-        if density:
-            log_pu = self.p_dist.log_prob(u, x)
-            return x, log_pu
-        return x
 
-    def compute_metrics(self, data, stage="training"):
-        base_metrics = super().compute_metrics(data, stage=stage)
-        inference_variables = data["inference_variables"]
-        inference_conditions = data.get("inference_conditions")
-        _, elbo = self(inference_variables, conditions=inference_conditions, inverse=False, density=True)
+        log_pu = self.p_dist.log_prob(u, x)
+
+        return x, log_pu
+
+    def compute_metrics(self, x: Tensor, conditions: Tensor = None, stage: str = "training") -> dict[str, Tensor]:
+        base_metrics = super().compute_metrics(x, conditions=conditions, stage=stage)
+
+        elbo = self.log_prob(x, conditions=conditions)
+
         loss = -keras.ops.mean(elbo)
+
         return base_metrics | {"loss": loss}
