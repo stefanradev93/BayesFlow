@@ -17,4 +17,7 @@ class NormalSimulator(Simulator):
         noise = np.random.standard_normal(batch_shape + (num_observations, 2))
 
         x = mean + std * noise
+        mean = mean.astype("float32")
+        std = std.astype("float32")
+        x = x.astype("float32")
         return dict(mean=mean, std=std, x=x)
