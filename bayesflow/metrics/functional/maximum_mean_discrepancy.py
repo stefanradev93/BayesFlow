@@ -3,8 +3,26 @@ import keras
 from bayesflow.types import Tensor
 from bayesflow.utils import issue_url
 
+# hard coded from keras.ops.logspace(-6, 6, 11)
+# to avoid pytorch errors/warnings if you want to use MPS
+default_scales = keras.ops.convert_to_tensor(
+    [
+        1.0000e-06,
+        1.5849e-05,
+        2.5119e-04,
+        3.9811e-03,
+        6.3096e-02,
+        1.0000e00,
+        1.5849e01,
+        2.5119e02,
+        3.9811e03,
+        6.3096e04,
+        1.0000e06,
+    ]
+)
 
-def gaussian_kernel(x1: Tensor, x2: Tensor, scales: Tensor = keras.ops.logspace(-6, 6, 11)) -> Tensor:
+
+def gaussian_kernel(x1: Tensor, x2: Tensor, scales: Tensor = default_scales) -> Tensor:
     residuals = x1[:, None] - x2[None, :]
     residuals = keras.ops.reshape(residuals, keras.ops.shape(residuals)[:2] + (-1,))
     norms = keras.ops.norm(residuals, ord=2, axis=2)
@@ -35,6 +53,7 @@ def maximum_mean_discrepancy(x1: Tensor, x2: Tensor, kernel: str = "gaussian", *
     else:
         kernel_fn = gaussian_kernel
 
+    # cannot check first (batch) dimension since it will be unknown at compile time
     if keras.ops.shape(x1)[1:] != keras.ops.shape(x2)[1:]:
         raise ValueError(
             f"Expected x1 and x2 to live in the same feature space, "
