@@ -7,7 +7,7 @@ from bayesflow.utils.keras_utils import shifted_softplus
 from .transform import Transform
 
 
-@serializable(package="bayesflow.networks.coupling_flow")
+@serializable(package="bayesflow.networks")
 class AffineTransform(Transform):
     def __init__(self, clamp: bool | int | float | None = 3.0, **kwargs):
         super().__init__(**kwargs)
