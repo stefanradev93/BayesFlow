@@ -20,7 +20,7 @@ class DiskDataset(keras.utils.PyDataset):
     └── sample_n.[ext]
 
     where each file contains a complete sample (e.g., a dictionary of numpy arrays) or
-    is converted into a complete sample using a custom loader provided to ``load_fun``.
+    is converted into a complete sample using a custom loader function.
     """
 
     def __init__(
@@ -29,14 +29,14 @@ class DiskDataset(keras.utils.PyDataset):
         *,
         pattern: str = "*.pkl",
         batch_size: int,
-        load_fun: callable = None,
+        load_fn: callable = None,
         data_adapter: DataAdapter | None,
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.batch_size = batch_size
         self.root = pl.Path(root)
-        self.loader = load_fun or pickle_load
+        self.load_fn = load_fn or pickle_load
         self.data_adapter = data_adapter
         self.files = list(map(str, self.root.glob(pattern)))
 
@@ -50,7 +50,7 @@ class DiskDataset(keras.utils.PyDataset):
 
         batch = []
         for file in files:
-            batch.append(self.loader(file))
+            batch.append(self.load_fn(file))
 
         batch = tree_stack(batch)
 
