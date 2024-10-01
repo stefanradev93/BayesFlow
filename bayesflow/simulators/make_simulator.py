@@ -16,16 +16,16 @@ def _(simulator: Simulator):
     return simulator
 
 
-@make_simulator.register
-def _(fn: FunctionType, **kwargs):
+@make_simulator.register(FunctionType)
+def _(fn: Callable, **kwargs):
     from bayesflow.simulators import LambdaSimulator
 
     return LambdaSimulator(fn, **kwargs)
 
 
-@make_simulator.register
+@make_simulator.register(Sequence)
 def _(
-    objs: Sequence,
+    objs: Sequence[FunctionType],
     obj_kwargs: Mapping[str, dict[str, any]] = None,
     meta_fn: Callable[[], dict[str, np.ndarray]] = None,
     **kwargs,
@@ -34,6 +34,25 @@ def _(
 
     if obj_kwargs is None:
         obj_kwargs = {}
+
+    # sanity check
+    detected_names = {obj.__name__ for obj in objs if hasattr(obj, "__name__")}
+    given_names = set(obj_kwargs.keys())
+
+    if not given_names.issubset(detected_names):
+        unmatched_names = given_names - detected_names
+        msg = (
+            f"Found at least one key in obj_kwargs that does not have a match in the object sequence:\n"
+            f"{list(unmatched_names)!r}"
+        )
+
+        if not all(hasattr(obj, "__name__") for obj in objs):
+            msg += (
+                "\nThis can happen if the matching objects in the sequence do not have a __name__ attribute. "
+                "Pass a dictionary instead to specify names explicitly."
+            )
+
+        raise ValueError(msg)
 
     simulators = []
 
@@ -52,9 +71,9 @@ def _(
     return SequentialSimulator(simulators, **kwargs)
 
 
-@make_simulator.register
+@make_simulator.register(Mapping)
 def _(
-    objs: Mapping,
+    objs: Mapping[str, FunctionType],
     obj_kwargs: Mapping[str, dict[str, any]] = None,
     meta_fn: Callable[[], dict[str, np.ndarray]] = None,
     **kwargs,
@@ -63,6 +82,17 @@ def _(
 
     if obj_kwargs is None:
         obj_kwargs = {}
+
+    # sanity check
+    detected_names = set(objs.keys())
+    given_names = set(obj_kwargs.keys())
+
+    if not given_names.issubset(detected_names):
+        unmatched_names = given_names - detected_names
+        raise ValueError(
+            f"Found at least one key in obj_kwargs that does not have a match in the object mapping:\n"
+            f"{list(unmatched_names)!r}"
+        )
 
     simulators = []
 
