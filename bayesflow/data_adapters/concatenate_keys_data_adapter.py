@@ -28,7 +28,7 @@ class _ConcatenateKeysDataAdapter(DataAdapter[TRaw, TProcessed]):
 
     def configure(self, raw_data: TRaw) -> TProcessed:
         if not self.is_configured:
-            self.data_shapes = {key: value.shape for key, value in raw_data.items()}
+            self.data_shapes = {key: value.shape for key, value in raw_data.items() if key in self.keys}
             self.is_configured = True
 
         # filter and reorder data
