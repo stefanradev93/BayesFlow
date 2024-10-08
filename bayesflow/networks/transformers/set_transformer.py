@@ -48,6 +48,7 @@ class SetTransformer(SummaryNetwork):
         """
 
         super().__init__(**kwargs)
+        self.summary_dim = summary_dim
 
         # Construct a series of set-attention blocks
         self.attention_blocks = keras.Sequential()
