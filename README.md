@@ -48,7 +48,7 @@ Once installed, [set the backend environment variable as required by keras](http
 ```python
 import os
 os.environ["KERAS_BACKEND"] = "torch"
-import keras
+import bayesflow
 ```
 
 If you use conda, you can alternatively set this individually for each environment in your terminal. For example:
@@ -58,6 +58,8 @@ conda env config vars set KERAS_BACKEND=torch
 ```
 
 This way, you also don't have to manually set the backend every time you are starting Python to use BayesFlow.
+
+**Caution:** Some people report that the IDE (e.g., VSCode or PyCharm) can silently overwrite environment variables. If you have set your backend as an environment variable and you still get keras-related import errors when loading BayesFlow, these IDE shenanigans might be the culprit. Try setting the keras backend in your Python script via `import os; os.environ["KERAS_BACKEND"] = "<YOUR-BACKEND>"`.
 
 ### Using pip
 
