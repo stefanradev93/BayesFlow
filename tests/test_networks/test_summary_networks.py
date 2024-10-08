@@ -62,3 +62,27 @@ def test_serialize_deserialize(tmp_path, summary_network, random_set):
     loaded = keras.saving.load_model(tmp_path / "model.keras")
 
     assert_layers_equal(summary_network, loaded)
+
+
+@pytest.mark.parametrize("stage", ["training", "validation"])
+def test_compute_metrics(stage, summary_network, random_set):
+    if summary_network is None:
+        pytest.skip()
+
+    summary_network.build(keras.ops.shape(random_set))
+
+    metrics = summary_network.compute_metrics(random_set, stage=stage)
+
+    assert "outputs" in metrics
+
+    # check that the batch dimension is preserved
+    assert metrics["outputs"].shape[0] == keras.ops.shape(random_set)[0]
+
+    if summary_network.base_distribution is not None:
+        assert "loss" in metrics
+        assert metrics["loss"].shape == ()
+
+        if stage != "training":
+            for metric in summary_network.metrics:
+                assert metric.name in metrics
+                assert metrics[metric.name].shape == ()

@@ -1,7 +1,6 @@
 import keras
 import pytest
 
-
 BACKENDS = ["jax", "numpy", "tensorflow", "torch"]
 
 
@@ -98,7 +97,28 @@ def simulator(request):
     return request.getfixturevalue(request.param)
 
 
-@pytest.fixture(params=[None], scope="function")
+@pytest.fixture(scope="function")
+def lst_net():
+    from bayesflow.networks import LSTNet
+
+    return LSTNet()
+
+
+@pytest.fixture(scope="function")
+def set_transformer():
+    from bayesflow.networks import SetTransformer
+
+    return SetTransformer()
+
+
+@pytest.fixture(scope="function")
+def deep_set():
+    from bayesflow.networks import DeepSet
+
+    return DeepSet()
+
+
+@pytest.fixture(params=[None, "lst_net", "set_transformer", "deep_set"], scope="function")
 def summary_network(request):
     if request.param is None:
         return None
