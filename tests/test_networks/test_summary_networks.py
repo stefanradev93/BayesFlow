@@ -76,20 +76,18 @@ def test_compute_metrics(stage, summary_network, random_set):
     assert "outputs" in metrics
 
     # check that the batch dimension is preserved
-    assert metrics["outputs"].shape[0] == keras.ops.shape(random_set)[0]
+    assert keras.ops.shape(metrics["outputs"])[0] == keras.ops.shape(random_set)[0]
 
     # check summary dimension
     summary_dim = summary_network.summary_dim
-    assert metrics["outputs"].shape[-1] == summary_dim
-
-    print(metrics["outputs"].shape)
+    assert keras.ops.shape(metrics["outputs"])[-1] == summary_dim
 
     if summary_network.base_distribution is not None:
         assert "loss" in metrics
-        assert metrics["loss"].shape == ()
+        assert keras.ops.shape(metrics["loss"]) == ()
 
         if stage != "training":
             for metric in summary_network.metrics:
                 assert metric.name in metrics
-                assert metrics[metric.name].shape == ()
+                assert keras.ops.shape(metrics[metric.name]) == ()
 
