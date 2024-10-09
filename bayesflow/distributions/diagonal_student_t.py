@@ -12,11 +12,11 @@ from .distribution import Distribution
 
 @serializable(package="bayesflow.distributions")
 class DiagonalStudentT(Distribution):
-    """Implements a backend-agnostic spherical Student-t distribution."""
+    """Implements a backend-agnostic diagonal Student-t distribution."""
 
     def __init__(
         self,
-        df: int | float = 50,
+        df: int | float,
         loc: int | float | np.ndarray | Tensor = 0.0,
         scale: int | float | np.ndarray | Tensor = 1.0,
         use_learnable_parameters: bool = False,
@@ -48,7 +48,7 @@ class DiagonalStudentT(Distribution):
             - 0.5 * self.dim * math.log(math.pi)
             - math.lgamma(0.5 * self.df)
             + math.lgamma(0.5 * (self.df + self.dim))
-            - 0.5 * keras.ops.sum(keras.ops.log(self.scale))
+            - keras.ops.sum(keras.ops.log(self.scale))
         )
 
         if self.use_learnable_parameters:

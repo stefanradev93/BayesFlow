@@ -10,7 +10,7 @@ from .distribution import Distribution
 
 @serializable(package="bayesflow.distributions")
 class DiagonalNormal(Distribution):
-    """Implements a backend-agnostic spherical Gaussian distribution."""
+    """Implements a backend-agnostic diagonal Gaussian distribution."""
 
     def __init__(
         self,
@@ -23,7 +23,6 @@ class DiagonalNormal(Distribution):
         super().__init__(**kwargs)
         self.mean = mean
         self.std = std
-        self.var = std**2
 
         self.dim = None
         self.log_normalization_constant = None
@@ -45,11 +44,8 @@ class DiagonalNormal(Distribution):
         self.std = keras.ops.broadcast_to(self.std, (self.dim,))
         self.std = keras.ops.cast(self.std, "float32")
 
-        # we have to do this again because the type of self.std may have changed
-        self.var = self.std**2
-
-        self.log_normalization_constant = (
-            -0.5 * self.dim * (math.log(2.0 * math.pi) - keras.ops.sum(keras.ops.log(self.var)))
+        self.log_normalization_constant = -0.5 * self.dim * math.log(2.0 * math.pi) - keras.ops.sum(
+            keras.ops.log(self.std)
         )
 
         if self.use_learnable_parameters:
@@ -59,6 +55,7 @@ class DiagonalNormal(Distribution):
                 initializer="zeros",
                 dtype="float32",
             )
+            self.mean.assign(mean)
 
             std = self.std
             self.std = self.add_weight(
@@ -69,7 +66,7 @@ class DiagonalNormal(Distribution):
             self.std.assign(std)
 
     def log_prob(self, samples: Tensor, *, normalize: bool = True) -> Tensor:
-        result = -0.5 * keras.ops.sum((samples - self.mean) ** 2 / self.var, axis=-1)
+        result = -0.5 * keras.ops.sum((samples - self.mean) ** 2 / self.std**2, axis=-1)
 
         if normalize:
             result += self.log_normalization_constant
