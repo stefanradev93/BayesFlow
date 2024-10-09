@@ -91,3 +91,19 @@ def test_compute_metrics(stage, summary_network, random_set):
                 assert metric.name in metrics
                 assert keras.ops.shape(metrics[metric.name]) == ()
 
+
+def test_set_transformer_with_key_dim(set_transformer_key_dim_variation, random_set):
+
+    set_transformer_key_dim_variation.build(keras.ops.shape(random_set))
+    _ = set_transformer_key_dim_variation(random_set)
+
+    att_layers = set_transformer_key_dim_variation.attention_blocks.layers
+
+    # check that the number of attention blocks is as per the specified key_dim
+    assert len(att_layers) == set_transformer_key_dim_variation.num_attention_blocks
+
+    # check that the key_dim is set correctly per attention block
+    for i, layer in enumerate(att_layers):
+        assert keras.ops.shape(layer.output)[-1] == set_transformer_key_dim_variation.key_dim
+        if i != 0:
+            assert keras.ops.shape(layer.input)[-1] == set_transformer_key_dim_variation.key_dim

@@ -6,6 +6,11 @@ def summary_dim(request):
     return request.param
 
 
+@pytest.fixture(params=[1, 2, 16], scope="session")
+def key_dim(request):
+    return request.param
+
+
 @pytest.fixture(scope="function")
 def lst_net(summary_dim):
     from bayesflow.networks import LSTNet
@@ -18,6 +23,13 @@ def set_transformer(summary_dim):
     from bayesflow.networks import SetTransformer
 
     return SetTransformer(summary_dim=summary_dim)
+
+
+@pytest.fixture(scope="function")
+def set_transformer_key_dim_variation(summary_dim, key_dim):
+    from bayesflow.networks import SetTransformer
+
+    return SetTransformer(summary_dim=summary_dim, key_dim=key_dim)
 
 
 @pytest.fixture(scope="function")
