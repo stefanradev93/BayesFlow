@@ -1,4 +1,3 @@
-from .numpy_dataset import NumpyDataset
 from .offline_dataset import OfflineDataset
 from .online_dataset import OnlineDataset
 from .disk_dataset import DiskDataset

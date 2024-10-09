@@ -131,7 +131,6 @@ class ContinuousApproximator(Approximator):
         *,
         conditions: Mapping[str, Tensor],
         num_samples: int = None,
-        numpy: bool = True,
         batch_shape: Shape = None,
     ) -> dict[str, Tensor]:
         if num_samples is None and batch_shape is None:
@@ -144,10 +143,8 @@ class ContinuousApproximator(Approximator):
         conditions = {
             "inference_variables": self._sample(num_samples=num_samples, batch_shape=batch_shape, **conditions)
         }
+        conditions = keras.tree.map_structure(keras.ops.convert_to_numpy, conditions)
         conditions = self.data_adapter.deconfigure(conditions)
-
-        if numpy:
-            conditions = keras.tree.map_structure(keras.ops.convert_to_numpy, conditions)
 
         return conditions
 

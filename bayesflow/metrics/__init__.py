@@ -1,1 +1,2 @@
 from .maximum_mean_discrepancy import MaximumMeanDiscrepancy
+from .root_mean_squard_error import RootMeanSquaredError

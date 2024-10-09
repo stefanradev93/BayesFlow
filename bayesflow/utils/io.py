@@ -1,8 +1,8 @@
-from typing import Any
+import os
 import pickle
 
 
-def pickle_load(filepath: str) -> Any:
+def pickle_load(filepath: os.PathLike) -> any:
     """Small utility to safely load a pickle object."""
 
     with open(filepath, "rb+") as f:

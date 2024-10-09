@@ -9,72 +9,10 @@ It provides users with:
 
 - A user-friendly API for rapid Bayesian workflows
 - A rich collection of neural network architectures
-- Multi-Backend Support: [PyTorch](https://github.com/pytorch/pytorch), [TensorFlow](https://github.com/tensorflow/tensorflow), [JAX](https://github.com/google/jax), and [NumPy](https://github.com/numpy/numpy)
+- Multi-Backend Support via [Keras3](https://keras.io/keras_3/): You can use [PyTorch](https://github.com/pytorch/pytorch), [TensorFlow](https://github.com/tensorflow/tensorflow), or [JAX](https://github.com/google/jax)
 
 BayesFlow is designed to be a flexible and efficient tool that enables rapid statistical inference
 fueled by continuous progress in generative AI and Bayesian inference.
-
-## Install
-
-### Backend
-
-First, install your machine learning backend of choice. Note that BayesFlow **will not run** without a backend.
-
-Once installed, set the appropriate backend environment variable. For example, to use PyTorch:
-
-```bash
-export KERAS_BACKEND=torch
-```
-
-If you use conda, you can instead set this individually for each environment:
-
-```bash
-conda env config vars set KERAS_BACKEND=torch
-```
-
-### Using Conda
-
-We recommend installing with conda (or mamba).
-
-```bash
-conda install -c conda-forge bayesflow
-```
-
-### Using pip
-
-```bash
-pip install bayesflow
-```
-
-### From Source
-
-Stable version:
-
-```bash
-git clone https://github.com/stefanradev93/bayesflow
-cd bayesflow
-conda env create --file environment.yaml --name bayesflow
-```
-
-Development version:
-
-```bash
-git clone https://github.com/stefanradev93/bayesflow
-cd bayesflow
-git checkout dev
-conda env create --file environment.yaml --name bayesflow
-```
-
-## Getting Started
-
-Check out some of our walk-through notebooks:
-
-1. [Two moons toy example with flow matching](examples/TwoMoons_FlowMatching.ipynb)
-2. ...Under construction
-
-## Documentation \& Help
-
-Documentation is available at https://bayesflow.org. Please use the [BayesFlow Forums](https://discuss.bayesflow.org/) for any BayesFlow-related questions and discussions, and [GitHub Issues](https://github.com/stefanradev93/BayesFlow/issues) for bug reports and feature requests.
 
 ## Conceptual Overview
 
@@ -86,29 +24,74 @@ overview of neurally bootstrapped Bayesian inference.
 
 <img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/high_level_framework.png?raw=true" width=80% height=80%>
 
-### References and Further Reading
 
-- Radev S. T., D’Alessandro M., Mertens U. K., Voss A., Köthe U., & Bürkner P.
-C. (2021). Amortized Bayesian Model Comparison with Evidental Deep Learning.
-<em>IEEE Transactions on Neural Networks and Learning Systems</em>.
-doi:10.1109/TNNLS.2021.3124052 available for free at: https://arxiv.org/abs/2004.10629
+## Disclaimer
 
-- Schmitt, M., Radev, S. T., & Bürkner, P. C. (2022). Meta-Uncertainty in
-Bayesian Model Comparison. In <em>International Conference on Artificial Intelligence
-and Statistics</em>, 11-29, PMLR, available for free at: https://arxiv.org/abs/2210.07278
+This is the current dev version of BayesFlow, which constitutes a complete refactor of the library built on Keras 3. This way, you can now use any of the major deep learning libraries as backend for BayesFlow. The refactor is still work in progress with some of the advanced features not yet implemented. We are actively working on them and promise to catch up soon.
 
-- Elsemüller, L., Schnuerch, M., Bürkner, P. C., & Radev, S. T. (2023). A Deep
-Learning Method for Comparing Bayesian Hierarchical Models. <em>ArXiv preprint</em>,
-available for free at: https://arxiv.org/abs/2301.11873
+If you encounter any issues, please don't hesitate to open an issue here on [Github](https://github.com/stefanradev93/BayesFlow/issues) or ask questions on our [Discourse Forums](https://discuss.bayesflow.org/).
 
-- Radev, S. T., Schmitt, M., Pratz, V., Picchini, U., Köthe, U., & Bürkner, P.-C. (2023).
-JANA: Jointly amortized neural approximation of complex Bayesian models.
-*Proceedings of the Thirty-Ninth Conference on Uncertainty in Artificial Intelligence, 216*, 1695-1706.
-([arXiv](https://arxiv.org/abs/2302.09125))([PMLR](https://proceedings.mlr.press/v216/radev23a.html))
+## Install
 
-## Support
+### Backend
 
-This project is currently managed by researchers from Rensselaer Polytechnic Institute, TU Dortmund University, and Heidelberg University. It is partially funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation, Project 528702768). The project is further supported by Germany's Excellence Strategy -- EXC-2075 - 390740016 (Stuttgart Cluster of Excellence SimTech) and EXC-2181 - 390900948 (Heidelberg Cluster of Excellence STRUCTURES), as well as the Informatics for Life initiative funded by the Klaus Tschira Foundation.
+First, install one machine learning backend of choice. Note that BayesFlow **will not run** without a backend.
+
+- [Install JAX](https://jax.readthedocs.io/en/latest/installation.html)
+- [Install PyTorch](https://pytorch.org/get-started/locally/)
+- [Install TensorFlow](https://www.tensorflow.org/install)
+
+If you are new to machine learning and don't know which one to use, we recommend PyTorch to get started.
+
+Once installed, [set the backend environment variable as required by keras](https://keras.io/getting_started/#configuring-your-backend). For example, inside your Python script write:
+
+```python
+import os
+os.environ["KERAS_BACKEND"] = "torch"
+import bayesflow
+```
+
+If you use conda, you can alternatively set this individually for each environment in your terminal. For example:
+
+```bash
+conda env config vars set KERAS_BACKEND=torch
+```
+
+This way, you also don't have to manually set the backend every time you are starting Python to use BayesFlow.
+
+**Caution:** Some people report that the IDE (e.g., VSCode or PyCharm) can silently overwrite environment variables. If you have set your backend as an environment variable and you still get keras-related import errors when loading BayesFlow, these IDE shenanigans might be the culprit. Try setting the keras backend in your Python script via `import os; os.environ["KERAS_BACKEND"] = "<YOUR-BACKEND>"`.
+
+### Using pip
+
+You can install the dev version with pip:
+
+```bash
+pip install git+https://github.com/stefanradev93/bayesflow@dev
+```
+
+### Using Conda (coming soon)
+
+The dev version is not conda-installable yet.
+
+### From Source
+
+If you want to contribute to BayesFlow, we recommend installing the dev branch from source:
+
+```bash
+git clone -b dev git@github.com:stefanradev93/bayesflow.git
+cd <local-path-to-bayesflow-repository>
+conda env create --file environment.yaml --name bayesflow
+```
+
+## Getting Started
+
+Check out some of our walk-through notebooks below. We are actively working on porting all notebooks to the new interface so more will be available soon!
+
+1. [Two moons toy example with flow matching](examples/TwoMoons_FlowMatching.ipynb)
+
+## Documentation \& Help
+
+Documentation is available at https://bayesflow.org. Please use the [BayesFlow Forums](https://discuss.bayesflow.org/) for any BayesFlow-related questions and discussions, and [GitHub Issues](https://github.com/stefanradev93/BayesFlow/issues) for bug reports and feature requests.
 
 ## Citing BayesFlow
 
@@ -156,3 +139,7 @@ You can cite BayesFlow along the lines of:
   publisher = {PMLR}
 }
 ```
+
+## Acknowledgments
+
+This project is currently managed by researchers from Rensselaer Polytechnic Institute, TU Dortmund University, and Heidelberg University. It is partially funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation, Project 528702768). The project is further supported by Germany's Excellence Strategy -- EXC-2075 - 390740016 (Stuttgart Cluster of Excellence SimTech) and EXC-2181 - 390900948 (Heidelberg Cluster of Excellence STRUCTURES), as well as the Informatics for Life initiative funded by the Klaus Tschira Foundation.
