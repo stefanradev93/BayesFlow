@@ -126,8 +126,8 @@ sample_data <- simulator$sample(r_to_py(c(4L))) # notice here we need to specify
 
 ```{r error=TRUE}
 data_adapter <- bf$ContinuousApproximator$build_data_adapter(
-  inference_variables = "theta",
-  inference_conditions = "x"
+  inference_variables = list("theta"),
+  inference_conditions = list("x"),
 )
 ```
 
@@ -164,7 +164,6 @@ print(print(iterate(training_dataset)))
 
 
 
-
 ```{r}
 # manually configure the data --> inference_variables missing as well
 training_dataset$data_adapter$configure(training_dataset$data)
@@ -181,6 +180,9 @@ print(data_adapter$data_adapters$inference_conditions$configure(training_dataset
 print(data_adapter$data_adapters$inference_variables$configure(training_dataset$data))
 ```
 
+```{r}
+print(data_adapter$data_adapters$inference_variables$keys)
+```
 
 ## 5 Training a neural network to approximate all posteriors 
 
