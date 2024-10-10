@@ -90,8 +90,8 @@ class DiagonalStudentT(Distribution):
         # chi-square(df) = Gamma(shape = 0.5 * df, scale = 2) = Gamma(shape = 0.5 * df, scale = 1) * 2
         chi2_samples = keras.random.gamma(batch_shape, alpha=0.5 * self.df, seed=self.seed_generator) * 2.0
 
-        # the chi-quare samples needs to be repeated across self.dim
-        # since for each element of batch_shape only one sample is created
+        # The chi-quare samples need to be repeated across self.dim
+        # since for each element of batch_shape only one sample is created.
         chi2_samples = expand_tile(chi2_samples, n=self.dim, axis=-1)
 
         normal_samples = keras.random.normal(batch_shape + (self.dim,), seed=self.seed_generator)
