@@ -2,8 +2,6 @@ import pytest
 
 import keras
 
-from bayesflow.distributions import DiagonalNormal
-
 
 @pytest.fixture(params=[2, 3])
 def batch_size(request):
@@ -22,6 +20,8 @@ def random_samples(batch_size, num_features):
 
 @pytest.fixture()
 def diagonal_normal():
+    from bayesflow.distributions import DiagonalNormal
+    
     return DiagonalNormal()
 
 
@@ -29,7 +29,7 @@ def diagonal_normal():
 def diagonal_student_t():
     from bayesflow.distributions import DiagonalStudentT
 
-    return DiagonalStudentT()
+    return DiagonalStudentT(df = 10)
 
 
 @pytest.fixture(params=["diagonal_normal", "diagonal_student_t"])
