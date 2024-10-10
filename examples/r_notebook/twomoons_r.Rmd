@@ -1,0 +1,199 @@
+---
+title: "2TwoMoons"
+author: "Leona Odole"
+date: "2024-09-24"
+output: html_document
+---
+
+## 1.1 Reticulate Library
+
+Using Python packages in R is relatively simple. The [reticulate](https://rstudio.github.io/reticulate/) package allows users to use Python packages directly from R, with more detailed instructions on how its used found on their github link above. Before starting, bayesflow needs to be installed following the installation instructions and there should be a virtual environment within which bayesflow is installed. 
+
+As with any other package it can be installed directly from CRAN using the following:
+
+```{r eval=FALSE}
+install.packages("reticulate")
+```
+
+Once `reticulate` is installed the next step is setting up the bayesflow to be callable from R. First call the library to the R session. 
+
+```{r}
+library(reticulate)
+```
+
+Next point reticulate to the correct virtual environment where bayesflow is stored. 
+
+```{r echo=FALSE}
+use_condaenv("/Users/eodole/miniforge3/envs/bfv2")
+```
+
+```{r echo = FALSE}
+use_condaenv("/Users/eodole/miniforge3/envs/bfv2")
+```
+
+```{r eval = FALSE}
+use_condaenv("/path_to_environment/environment_name")
+```
+
+
+Then call the bayesflow module into the R session and give it an alias
+
+```{r}
+bf <- import("bayesflow")
+keras <- import("keras")
+```
+
+
+Then we can set a local seed for reproducibility, although the results will not necessarily be the same as in Python. 
+
+```{r}
+set.seed(2023)
+```
+
+One of the many quirks of using bayesflow with R is type matching. Many errors arise from variable types being passed from R to Python in an unexpected format. To try and avoid these errors it's important to familiarlize yourself with the Python equivalents of R variable types. 
+Below is a handy conversion guide from Posit
+
+![Link to posit](/Users/eodole/Desktop/HiWi Stelle/Software/R/rcheatsheet.png)
+
+[Posit Quick Guide](https://raw.githubusercontent.com/rstudio/cheatsheets/main/reticulate.pdf)
+
+## 1.2  Libraries 
+For your convenience all additional  R libraries are loaded here, and then mentioned again specifically where they are used during the tutorial.
+
+```{r}
+# library(MASS)
+# library(ggplot2)
+# library(zoo)
+# library(GGally)
+# library(tidyr)
+# library(ggpubr)
+# library(dplyr)
+```
+
+
+*need to somehow set the backend to tensorflow*
+
+
+## 2.1 Simulator 
+
+As in the python example, this example will demonstrate amortized estimation of a Bayesian model, whose posterior evaluated at the origin $x = (0,0)$ of the "data" will resemble two crescent moons. The forward process is a noisy non-linear transformation on a 2D plane:
+
+$$ x_1 = -|\theta_1 + \theta_2| / \sqrt{2} + r \cos(\alpha) + 0.25 $$
+
+$$ x_2 = (-\theta_1 + \theta_2) / \sqrt{2} + r \sin(\alpha) $$
+with $x=(x_1, x_2)$ playing the role of "observables" (data to be learned from),$\alpha \sim Uniform(-\pi/2, \pi/2)$ , and $r \sim N(0.1, 0.01)$ being latent variables creating noise in the data, and being the parameters that we will later seek to infer from new $x$.
+
+*insert more text* 
+
+
+```{r}
+alpha_prior <- function(...) {
+  alpha <- runif(1, -pi / 2, pi / 2)
+  return(alpha)
+}
+
+r_prior <- function(...) {
+  r <- rnorm(1, 0.1, 0.01) # could potentially change these to be batch functions
+  return(r)
+}
+
+theta_prior <- function(...) {
+  theta <- runif(2, -1, 1)
+  return(theta)
+}
+
+forward_model <- function(...) {
+  theta <- theta_prior()
+  alpha <- alpha_prior()
+  r <- r_prior()
+  x_1 <- abs(theta[1] + theta[2]) / sqrt(2) + r * cos(alpha) + 0.25
+  x_2 <- (-theta[1] + theta[2]) / sqrt(2) + r * sin(alpha)
+  # return(list(x1 = x_1 ,x2 = x_2)) # working
+  return(list(x = np_array(c(x_1, x_2)), theta = np_array(c(theta[1], theta[2])), a = alpha, r = r)) # in order for a variable to have more than one direction we need to return it as a numpy array
+}
+```
+
+Notice here that the sampling function is eventually defined as a single `forward_model`, which allows all the functions related to R to stay in R without causing problems with type conversions to python. Additionally all the functions use the `...` argument which allow additional arguments to be passed to these functions. This was done in order to avoid unused argument errors, as the unused arguments passed by python are then simply ignored. 
+
+
+```{r}
+simulator <- bf$simulators$LambdaSimulator(sample_fn = r_to_py(forward_model))
+sample_data <- simulator$sample(r_to_py(c(128L))) # notice here we need to specify 128 as an integer
+```
+
+#3.1 Data Adapter 
+
+
+```{r error=TRUE}
+data_adapter <- bf$ContinuousApproximator$build_data_adapter(
+  inference_variables = "theta",
+  inference_conditions = "x"
+)
+
+# data_adapter$data_adapters[["inference_variables"]] <- "theta"
+# data_adapter$data_adapters[["inference_conditions"]] <- "x"
+```
+
+
+
+## 4 Data Set 
+
+```{r}
+# works
+num_training_batches <- 512L
+num_validation_batches <- 128L
+batch_size <- 64L
+```
+
+```{r}
+# works
+training_samples <- simulator$sample(r_to_py(num_training_batches * batch_size))
+validation_samples <- simulator$sample(r_to_py(num_validation_batches * batch_size))
+```
+
+
+```{r}
+training_dataset <- bf$datasets$OfflineDataset(training_samples, batch_size = batch_size, data_adapter = data_adapter)
+validation_dataset <- bf$datasets$OfflineDataset(validation_samples, batch_size = batch_size, data_adapter = data_adapter)
+```
+
+
+## 5 Training a neural network to approximate all posteriors 
+
+```{r}
+inference_network <- bf$networks$FlowMatching(
+  subnet = "mlp",
+  subnet_kwargs = list(depth = 6L, width = 256L),
+)
+```
+
+
+```{r}
+approximator <- bf$ContinuousApproximator(
+  inference_network = inference_network,
+  data_adapter = data_adapter,
+)
+```
+
+### 5.1 Optimizer and Learning Rate 
+
+```{r}
+learning_rate <- 1e-4
+optimizer <- keras$optimizers$Adam(learning_rate = learning_rate)
+```
+
+```{r}
+approximator$compile(optimizer = optimizer)
+```
+
+
+# 5.2 Training 
+
+```{r}
+history <- approximator$fit(
+  epochs = 3L,
+  dataset = training_dataset,
+  validation_data = validation_dataset
+)
+```
+
