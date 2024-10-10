@@ -4,7 +4,6 @@ from keras.saving import register_keras_serializable as serializable
 import math
 import numpy as np
 
-from scipy.stats import t as scipy_student_t
 
 from bayesflow.types import Shape, Tensor
 from .distribution import Distribution
@@ -20,6 +19,7 @@ class DiagonalStudentT(Distribution):
         loc: int | float | np.ndarray | Tensor = 0.0,
         scale: int | float | np.ndarray | Tensor = 1.0,
         use_learnable_parameters: bool = False,
+        seed_generator: keras.random.SeedGenerator = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -32,6 +32,11 @@ class DiagonalStudentT(Distribution):
         self.log_normalization_constant = None
 
         self.use_learnable_parameters = use_learnable_parameters
+
+        if seed_generator is None:
+            seed_generator = keras.random.SeedGenerator()
+
+        self.seed_generator = seed_generator
 
     def build(self, input_shape: Shape) -> None:
         self.dim = int(input_shape[-1])
@@ -78,9 +83,15 @@ class DiagonalStudentT(Distribution):
         return result
 
     def sample(self, batch_shape: Shape) -> Tensor:
-        # TODO: use reparameterization trick instead of scipy
-        # TODO: use the seed generator state
-        dist = scipy_student_t(df=self.df, loc=self.loc, scale=self.scale)
-        samples = dist.rvs(size=batch_shape + (self.dim,))
+        # As of writing this code, keras does not support the chi-square distribution
+        # nor does it support a scale or rate parameter in Gamma. Hence we use the relation:
+        # chi-square(df) = Gamma(shape = 0.5 * df, scale = 2) = Gamma(shape = 0.5 * df, scale = 1) * 2
+        samples_chisq = keras.random.gamma(batch_shape, alpha=0.5 * self.df) * 2.0
+        # the chi-quare samples needss to be repeated across self.dim
+        # since for each element of batch_shape only one sample is created
+        samples_chisq = keras.ops.repeat(samples_chisq, self.dim, axis=-1)
+        samples_chisq = keras.ops.reshape(samples_chisq, batch_shape + (self.dim,))
 
-        return keras.ops.convert_to_tensor(samples)
+        return self.loc + self.scale * keras.random.normal(
+            shape=batch_shape + (self.dim,), seed=self.seed_generator
+        ) * keras.ops.sqrt(self.df / samples_chisq)
