@@ -178,7 +178,7 @@ class ConsistencyModel(InferenceNetwork):
         """
         steps = kwargs.get("steps", 10)
         x = keras.ops.copy(z)
-        discretized_time = keras.ops.flip(self._discretize_time(steps), axis=[-1])
+        discretized_time = keras.ops.flip(self._discretize_time(steps), axis=-1)
         t = keras.ops.full((*keras.ops.shape(x)[:2], 1), discretized_time[0], dtype=x.dtype)
         x = self.consistency_function(x, t, conditions=conditions)
         for n in range(1, steps):
@@ -237,7 +237,7 @@ class ConsistencyModel(InferenceNetwork):
             ops.erf((ops.log(discretized_time[1:]) - p_mean) / (ops.sqrt(2.0) * p_std))
             - ops.erf((ops.log(discretized_time[:-1]) - p_mean) / (ops.sqrt(2.0) * p_std))
         )
-        times = keras.random.categorical([log_p], ops.shape(x)[0])[0]
+        times = keras.random.categorical(ops.expand_dims(log_p, 0), ops.shape(x)[0], seed=self.seed_generator)[0]
         t1 = ops.take(discretized_time, times)[..., None]
         t2 = ops.take(discretized_time, times + 1)[..., None]
 
