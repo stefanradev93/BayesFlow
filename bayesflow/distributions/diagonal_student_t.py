@@ -6,6 +6,8 @@ import numpy as np
 
 
 from bayesflow.types import Shape, Tensor
+from bayesflow.utils import expand_tile
+
 from .distribution import Distribution
 
 
@@ -84,14 +86,14 @@ class DiagonalStudentT(Distribution):
 
     def sample(self, batch_shape: Shape) -> Tensor:
         # As of writing this code, keras does not support the chi-square distribution
-        # nor does it support a scale or rate parameter in Gamma. Hence we use the relation:
+        # nor does it support a scale or rate parameter in Gamma. Hence, we use the relation:
         # chi-square(df) = Gamma(shape = 0.5 * df, scale = 2) = Gamma(shape = 0.5 * df, scale = 1) * 2
-        samples_chisq = keras.random.gamma(batch_shape, alpha=0.5 * self.df) * 2.0
-        # the chi-quare samples needss to be repeated across self.dim
-        # since for each element of batch_shape only one sample is created
-        samples_chisq = keras.ops.repeat(samples_chisq, self.dim, axis=-1)
-        samples_chisq = keras.ops.reshape(samples_chisq, batch_shape + (self.dim,))
+        chi2_samples = keras.random.gamma(batch_shape, alpha=0.5 * self.df, seed=self.seed_generator) * 2.0
 
-        return self.loc + self.scale * keras.random.normal(
-            shape=batch_shape + (self.dim,), seed=self.seed_generator
-        ) * keras.ops.sqrt(self.df / samples_chisq)
+        # the chi-quare samples needs to be repeated across self.dim
+        # since for each element of batch_shape only one sample is created
+        chi2_samples = expand_tile(chi2_samples, n=self.dim, axis=-1)
+
+        normal_samples = keras.random.normal(batch_shape + (self.dim,), seed=self.seed_generator)
+
+        return self.loc + self.scale * normal_samples * keras.ops.sqrt(self.df / chi2_samples)
