@@ -21,7 +21,7 @@ def random_samples(batch_size, num_features):
 @pytest.fixture()
 def diagonal_normal():
     from bayesflow.distributions import DiagonalNormal
-    
+
     return DiagonalNormal()
 
 
@@ -29,7 +29,7 @@ def diagonal_normal():
 def diagonal_student_t():
     from bayesflow.distributions import DiagonalStudentT
 
-    return DiagonalStudentT(df = 10)
+    return DiagonalStudentT(df=10)
 
 
 @pytest.fixture(params=["diagonal_normal", "diagonal_student_t"])
