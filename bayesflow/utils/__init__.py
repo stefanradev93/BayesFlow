@@ -37,6 +37,9 @@ from .dispatch import find_distribution, find_network, find_permutation, find_po
 from .optimal_transport import optimal_transport
 
 from .tensor_utils import (
+    expand_left,
+    expand_left_as,
+    expand_left_to,
     expand_right,
     expand_right_as,
     expand_right_to,
