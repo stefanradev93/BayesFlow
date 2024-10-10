@@ -24,16 +24,16 @@ library(reticulate)
 Next point reticulate to the correct virtual environment where bayesflow is stored. 
 
 ```{r echo=FALSE}
-use_condaenv("/Users/eodole/miniforge3/envs/bfv2")
+# explicit conda env path during dev
+# use_condaenv("/path_to_environment/environment_name")
+use_condaenv("/Users/marvin/miniforge3/envs/bayesflow_r")
+
+if (FALSE) {
+  use_condaenv("/Users/eodole/miniforge3/envs/bfv2")
+}
 ```
 
-```{r echo = FALSE}
-use_condaenv("/Users/eodole/miniforge3/envs/bfv2")
-```
 
-```{r eval = FALSE}
-use_condaenv("/path_to_environment/environment_name")
-```
 
 
 Then call the bayesflow module into the R session and give it an alias
@@ -53,7 +53,7 @@ set.seed(2023)
 One of the many quirks of using bayesflow with R is type matching. Many errors arise from variable types being passed from R to Python in an unexpected format. To try and avoid these errors it's important to familiarlize yourself with the Python equivalents of R variable types. 
 Below is a handy conversion guide from Posit
 
-![Link to posit](/Users/eodole/Desktop/HiWi Stelle/Software/R/rcheatsheet.png)
+<!-- ![Link to posit](/Users/eodole/Desktop/HiWi Stelle/Software/R/rcheatsheet.png) -->
 
 [Posit Quick Guide](https://raw.githubusercontent.com/rstudio/cheatsheets/main/reticulate.pdf)
 
@@ -118,7 +118,7 @@ Notice here that the sampling function is eventually defined as a single `forwar
 
 ```{r}
 simulator <- bf$simulators$LambdaSimulator(sample_fn = r_to_py(forward_model))
-sample_data <- simulator$sample(r_to_py(c(128L))) # notice here we need to specify 128 as an integer
+sample_data <- simulator$sample(r_to_py(c(4L))) # notice here we need to specify the batch size as an integer
 ```
 
 #3.1 Data Adapter 
@@ -129,9 +129,6 @@ data_adapter <- bf$ContinuousApproximator$build_data_adapter(
   inference_variables = "theta",
   inference_conditions = "x"
 )
-
-# data_adapter$data_adapters[["inference_variables"]] <- "theta"
-# data_adapter$data_adapters[["inference_conditions"]] <- "x"
 ```
 
 
@@ -140,9 +137,9 @@ data_adapter <- bf$ContinuousApproximator$build_data_adapter(
 
 ```{r}
 # works
-num_training_batches <- 512L
-num_validation_batches <- 128L
-batch_size <- 64L
+num_training_batches <- 2L
+num_validation_batches <- 2L
+batch_size <- 4L
 ```
 
 ```{r}
@@ -151,10 +148,37 @@ training_samples <- simulator$sample(r_to_py(num_training_batches * batch_size))
 validation_samples <- simulator$sample(r_to_py(num_validation_batches * batch_size))
 ```
 
+```{r}
+print(training_samples)
+```
 
 ```{r}
 training_dataset <- bf$datasets$OfflineDataset(training_samples, batch_size = batch_size, data_adapter = data_adapter)
 validation_dataset <- bf$datasets$OfflineDataset(validation_samples, batch_size = batch_size, data_adapter = data_adapter)
+```
+
+```{r}
+# generate a batch --> inference_variables missing
+print(print(iterate(training_dataset)))
+```
+
+
+
+
+```{r}
+# manually configure the data --> inference_variables missing as well
+training_dataset$data_adapter$configure(training_dataset$data)
+```
+
+```{r}
+# manually call sub-adapter for inference conditions: works
+print(data_adapter$data_adapters$inference_conditions$configure(training_dataset$data))
+```
+
+
+```{r}
+# manually call sub-adapter for inference variables: fails
+print(data_adapter$data_adapters$inference_variables$configure(training_dataset$data))
 ```
 
 
@@ -189,7 +213,7 @@ approximator$compile(optimizer = optimizer)
 
 # 5.2 Training 
 
-```{r}
+```{r eval=FALSE}
 history <- approximator$fit(
   epochs = 3L,
   dataset = training_dataset,
