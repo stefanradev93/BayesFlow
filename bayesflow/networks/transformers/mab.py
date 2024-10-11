@@ -4,6 +4,7 @@ from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
 from bayesflow.networks import MLP
+from .mha import MultiHeadAttention
 
 
 @serializable(package="bayesflow.networks")
@@ -17,11 +18,10 @@ class MultiHeadAttentionBlock(keras.Layer):
 
     def __init__(
         self,
-        key_dim: int = 32,
+        embed_dim: int = 64,
         num_heads: int = 4,
         dropout: float = 0.05,
         num_dense_feedforward: int = 2,
-        output_dim: int = None,
         dense_units: int = 128,
         dense_activation: str = "gelu",
         kernel_initializer: str = "he_normal",
@@ -39,14 +39,11 @@ class MultiHeadAttentionBlock(keras.Layer):
 
         super().__init__(**kwargs)
 
-        if output_dim is None:
-            output_dim = key_dim
-        self.input_projector = layers.Dense(output_dim)
-        self.attention = layers.MultiHeadAttention(
+        self.input_projector = layers.Dense(embed_dim)
+        self.attention = MultiHeadAttention(
+            embed_dim=embed_dim,
             num_heads=num_heads,
-            key_dim=key_dim,
-            dropout=dropout if dropout else 0.0,
-            output_shape=output_dim,
+            dropout=dropout,
             use_bias=use_bias,
         )
         self.ln_pre = layers.LayerNormalization() if layer_norm else None
@@ -57,15 +54,15 @@ class MultiHeadAttentionBlock(keras.Layer):
             kernel_initializer=kernel_initializer,
             dropout=dropout,
         )
-        self.output_projector = layers.Dense(output_dim)
+        self.output_projector = layers.Dense(embed_dim)
         self.ln_post = layers.LayerNormalization() if layer_norm else None
 
-    def call(self, set_x: Tensor, set_y: Tensor, training=False, **kwargs) -> Tensor:
+    def call(self, set_x: Tensor, set_y: Tensor, training: bool = False, **kwargs) -> Tensor:
         """Performs the forward pass through the attention layer.
 
         Parameters
         ----------
-        set_x    : Tensor
+        set_x    : Tensor (e.g., np.ndarray, tf.Tensor, ...)
             Input of shape (batch_size, set_size_x, input_dim), which will
             play the role of a query (Q).
         set_y    : Tensor
@@ -81,7 +78,7 @@ class MultiHeadAttentionBlock(keras.Layer):
         Returns
         -------
         out : Tensor
-            Output of shape (batch_size, set_size_x, input_dim)
+            Output of shape (batch_size, set_size_x, output_dim)
         """
 
         h = self.input_projector(set_x) + self.attention(
@@ -89,9 +86,11 @@ class MultiHeadAttentionBlock(keras.Layer):
         )
         if self.ln_pre is not None:
             h = self.ln_pre(h, training=training)
+
         out = h + self.output_projector(self.mlp(h, training=training))
         if self.ln_post is not None:
             out = self.ln_post(out, training=training)
+
         return out
 
     def build(self, input_shape):
