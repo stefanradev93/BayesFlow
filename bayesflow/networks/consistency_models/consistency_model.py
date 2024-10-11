@@ -164,7 +164,7 @@ class ConsistencyModel(InferenceNetwork):
         Parameters
         ----------
         z           : Tensor
-            Samples from the latent distribution
+            Samples from a standard normal distribution
         conditions  : Tensor, optional, default: None
             Conditions for a approximate conditional distribution
         **kwargs    : dict, optional, default: {}
@@ -177,9 +177,9 @@ class ConsistencyModel(InferenceNetwork):
             The approximate samples
         """
         steps = kwargs.get("steps", 10)
-        x = keras.ops.copy(z)
+        x = keras.ops.copy(z) * self.max_time
         discretized_time = keras.ops.flip(self._discretize_time(steps), axis=-1)
-        t = keras.ops.full((*keras.ops.shape(x)[:2], 1), discretized_time[0], dtype=x.dtype)
+        t = keras.ops.full((*keras.ops.shape(x)[:-1], 1), discretized_time[0], dtype=x.dtype)
         x = self.consistency_function(x, t, conditions=conditions)
         for n in range(1, steps):
             noise = keras.random.normal(keras.ops.shape(x), dtype=keras.ops.dtype(x), seed=self.seed_generator)
