@@ -3,6 +3,7 @@ from keras import layers
 from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Tensor
+from bayesflow.networks import MLP
 
 
 @serializable(package="bayesflow.networks")
@@ -49,21 +50,15 @@ class MultiHeadAttentionBlock(keras.Layer):
             use_bias=use_bias,
         )
         self.ln_pre = layers.LayerNormalization() if layer_norm else None
-        self.feedforward = keras.Sequential()
-        for _ in range(num_dense_feedforward):
-            self.feedforward.add(
-                layers.Dense(
-                    units=dense_units,
-                    activation=dense_activation,
-                    kernel_initializer=kernel_initializer,
-                    use_bias=use_bias,
-                )
-            )
+        self.feedforward = MLP(
+            depth=num_dense_feedforward,
+            width=dense_units,
+            activation=dense_activation,
+            kernel_initializer=kernel_initializer,
+            dropout=dropout,
+        )
 
-            if dropout is not None and dropout > 0:
-                self.feedforward.add(layers.Dropout(float(dropout)))
-
-        self.feedforward.add(layers.Dense(output_dim))
+        self.output_projector = layers.Dense(output_dim)
         self.ln_post = layers.LayerNormalization() if layer_norm else None
 
     def call(self, set_x: Tensor, set_y: Tensor, **kwargs) -> Tensor:
@@ -88,7 +83,7 @@ class MultiHeadAttentionBlock(keras.Layer):
         h = self.projector(set_x) + self.att(set_x, set_y, set_y, **kwargs)
         if self.ln_pre is not None:
             h = self.ln_pre(h, training=training)
-        out = h + self.feedforward(h, training=training)
+        out = h + self.output_projector(self.feedforward(h, training=training))
         if self.ln_post is not None:
             out = self.ln_post(out, training=training)
         return out
