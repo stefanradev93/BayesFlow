@@ -60,7 +60,7 @@ class MLP(keras.Layer):
         self.res_blocks.append(projector)
 
         if dropout is not None and dropout > 0.0:
-            self.res_blocks.append(layers.Dropout(dropout))
+            self.res_blocks.append(layers.Dropout(float(dropout)))
 
         for _ in range(depth):
             self.res_blocks.append(

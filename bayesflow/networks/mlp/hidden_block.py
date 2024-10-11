@@ -29,7 +29,7 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
             self.dense = layers.SpectralNormalization(self.dense)
 
         if dropout is not None and dropout > 0.0:
-            self.dropout = layers.Dropout(dropout)
+            self.dropout = layers.Dropout(float(dropout))
         else:
             self.dropout = None
 

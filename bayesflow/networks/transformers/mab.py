@@ -59,7 +59,10 @@ class MultiHeadAttentionBlock(keras.Layer):
                     use_bias=use_bias,
                 )
             )
-            self.feedforward.add(layers.Dropout(dropout))
+
+            if dropout is not None and dropout > 0:
+                self.feedforward.add(layers.Dropout(float(dropout)))
+
         self.feedforward.add(layers.Dense(output_dim))
         self.ln_post = layers.LayerNormalization() if layer_norm else None
 
