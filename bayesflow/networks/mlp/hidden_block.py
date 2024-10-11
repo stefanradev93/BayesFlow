@@ -33,7 +33,7 @@ class ConfigurableHiddenBlock(keras.layers.Layer):
         else:
             self.dropout = None
 
-    def call(self, inputs: Tensor, training=False) -> Tensor:
+    def call(self, inputs: Tensor, training: bool = False, **kwargs) -> Tensor:
         x = self.dense(inputs, training=training)
 
         if self.dropout is not None:
