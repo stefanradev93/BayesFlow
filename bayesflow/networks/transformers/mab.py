@@ -41,37 +41,42 @@ class MultiHeadAttentionBlock(keras.Layer):
 
         if output_dim is None:
             output_dim = key_dim
-        self.projector = layers.Dense(output_dim)
-        self.att = layers.MultiHeadAttention(
+        self.input_projector = layers.Dense(output_dim)
+        self.attention = layers.MultiHeadAttention(
             num_heads=num_heads,
             key_dim=key_dim,
-            dropout=dropout if dropout is not None else 0.0,
+            dropout=dropout if dropout else 0.0,
             output_shape=output_dim,
             use_bias=use_bias,
         )
         self.ln_pre = layers.LayerNormalization() if layer_norm else None
-        self.feedforward = MLP(
+        self.mlp = MLP(
             depth=num_dense_feedforward,
             width=dense_units,
             activation=dense_activation,
             kernel_initializer=kernel_initializer,
             dropout=dropout,
         )
-
         self.output_projector = layers.Dense(output_dim)
         self.ln_post = layers.LayerNormalization() if layer_norm else None
 
-    def call(self, set_x: Tensor, set_y: Tensor, **kwargs) -> Tensor:
+    def call(self, set_x: Tensor, set_y: Tensor, training=False, **kwargs) -> Tensor:
         """Performs the forward pass through the attention layer.
 
         Parameters
         ----------
-        set_x : Tensor
+        set_x    : Tensor
             Input of shape (batch_size, set_size_x, input_dim), which will
             play the role of a query (Q).
-        set_y : Tensor
+        set_y    : Tensor
             Input of shape (batch_size, set_size_y, input_dim), which will
             play the role of key (K) and value (V).
+        training : boolean, optional (default - True)
+            Passed to the optional internal dropout and spectral normalization
+            layers to distinguish between train and test time behavior.
+        **kwargs : dict, optional (default - {})
+            Additional keyword arguments passed to the internal attention layer,
+            such as ``attention_mask`` or ``return_attention_scores``
 
         Returns
         -------
@@ -79,11 +84,12 @@ class MultiHeadAttentionBlock(keras.Layer):
             Output of shape (batch_size, set_size_x, input_dim)
         """
 
-        training = kwargs.get("training", False)
-        h = self.projector(set_x) + self.att(set_x, set_y, set_y, **kwargs)
+        h = self.input_projector(set_x) + self.attention(
+            query=set_x, key=set_y, value=set_y, training=training, **kwargs
+        )
         if self.ln_pre is not None:
             h = self.ln_pre(h, training=training)
-        out = h + self.output_projector(self.feedforward(h, training=training))
+        out = h + self.output_projector(self.mlp(h, training=training))
         if self.ln_post is not None:
             out = self.ln_post(out, training=training)
         return out
