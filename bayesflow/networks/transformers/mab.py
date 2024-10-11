@@ -45,7 +45,7 @@ class MultiHeadAttentionBlock(keras.Layer):
         self.att = layers.MultiHeadAttention(
             num_heads=num_heads,
             key_dim=key_dim,
-            dropout=dropout,
+            dropout=dropout if dropout is not None else 0.0,
             output_shape=output_dim,
             use_bias=use_bias,
         )
