@@ -3,7 +3,7 @@ import keras
 from keras.saving import register_keras_serializable as serializable
 
 from bayesflow.types import Shape, Tensor
-from bayesflow.utils import expand_right_as, keras_kwargs, optimal_transport
+from bayesflow.utils import expand_right_as, keras_kwargs, optimal_transport, find_network
 from ..inference_network import InferenceNetwork
 from .integrators import EulerIntegrator
 from .integrators import RK2Integrator
@@ -24,7 +24,7 @@ class FlowMatching(InferenceNetwork):
         self,
         subnet: str = "mlp",
         base_distribution: str = "normal",
-        integrator: str = "euler",
+        # integrator: str = "euler", -> this needs to be configurable at forward and inverse steps
         use_optimal_transport: bool = False,
         optimal_transport_kwargs: dict[str, any] = None,
         **kwargs,
@@ -41,20 +41,37 @@ class FlowMatching(InferenceNetwork):
         }
 
         self.seed_generator = keras.random.SeedGenerator()
+        
+        self.subnet = find_network(subnet, **kwargs.get("subnet_kwargs", {}))
+        self.output_projector = keras.layers.Dense(units=None, bias_initializer="zeros")
 
-        match integrator:
-            case "euler":
-                self.integrator = EulerIntegrator(subnet, **kwargs)
-            case "rk2":
-                self.integrator = RK2Integrator(subnet, **kwargs)
-            case "rk4":
-                self.integrator = RK4Integrator(subnet, **kwargs)
-            case _:
-                raise NotImplementedError(f"No support for {integrator} integration")
+        # match integrator:
+        #     case "euler":
+        #         self.integrator = EulerIntegrator(subnet, **kwargs)
+        #     case "rk2":
+        #         self.integrator = RK2Integrator(subnet, **kwargs)
+        #     case "rk4":
+        #         self.integrator = RK4Integrator(subnet, **kwargs)
+        #     case _:
+        #         raise NotImplementedError(f"No support for {integrator} integration")
 
     def build(self, xz_shape: Shape, conditions_shape: Shape = None) -> None:
         super().build(xz_shape)
-        self.integrator.build(xz_shape, conditions_shape)
+        # self.integrator.build(xz_shape, conditions_shape)
+        self.output_projector.units = xz_shape[-1]
+        input_shape = list(xz_shape)
+        
+        # construct time vector
+        input_shape[-1] += 1
+        if conditions_shape is not None:
+            input_shape[-1] += conditions_shape[-1]
+        
+        input_shape = tuple(input_shape)
+        
+        self.subnet.build(input_shape)
+        out_shape = self.subnet.compute_output_shape(input_shape)
+        self.output_projector.build(out_shape)
+        
 
     def call(
         self,
@@ -71,28 +88,35 @@ class FlowMatching(InferenceNetwork):
         self, x: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         steps = kwargs.get("steps", 100)
-
+        
+        # decide which integrator to use (defaults to Euler for now, add case matching later)
+        integrator = RK2Integrator()
+        
+        # Run integrator
         if density:
-            z, trace = self.integrator(x, conditions=conditions, steps=steps, density=True)
+            z, trace = integrator(self.subnet, self.output_projector, x, conditions=conditions, steps=steps, density=True)
             log_prob = self.base_distribution.log_prob(z)
             log_density = log_prob + trace
             return z, log_density
 
-        z = self.integrator(x, conditions=conditions, steps=steps, density=False)
+        z = integrator(self.subnet, self.output_projector, x, conditions=conditions, steps=steps, density=False)
         return z
 
     def _inverse(
         self, z: Tensor, conditions: Tensor = None, density: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         steps = kwargs.get("steps", 100)
+        
+        # decide which integrator to use (defaults to Euler for now, add case matching later)
+        integrator = RK2Integrator()
 
         if density:
-            x, trace = self.integrator(z, conditions=conditions, steps=steps, density=True, inverse=True)
+            x, trace = integrator(self.subnet, self.output_projector, z, conditions=conditions, steps=steps, density=True, inverse=True)
             log_prob = self.base_distribution.log_prob(z)
             log_density = log_prob - trace
             return x, log_density
 
-        x = self.integrator(z, conditions=conditions, steps=steps, density=False, inverse=True)
+        x = integrator(self.subnet, self.output_projector, z, conditions=conditions, steps=steps, density=False, inverse=True)
         return x
 
     def compute_metrics(
@@ -119,7 +143,8 @@ class FlowMatching(InferenceNetwork):
 
         base_metrics = super().compute_metrics(x1, conditions, stage)
 
-        predicted_velocity = self.integrator.velocity(x, t, conditions)
+        integrator = RK2Integrator()
+        predicted_velocity = integrator.velocity(self.subnet, self.output_projector, x, t, conditions)
 
         loss = keras.losses.mean_squared_error(target_velocity, predicted_velocity)
         loss = keras.ops.mean(loss)
