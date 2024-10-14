@@ -6,8 +6,7 @@ from keras.saving import (
     serialize_keras_object as serialize,
 )
 
-from bayesflow.data_adapters import ConcatenateKeysDataAdapter, DataAdapter
-from bayesflow.data_adapters.transforms import Standardize, Transform
+from bayesflow.data_adapters import DataAdapter
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
 from bayesflow.utils import logging, expand_tile
@@ -41,19 +40,17 @@ class ContinuousApproximator(Approximator):
         inference_variables: Sequence[str],
         inference_conditions: Sequence[str] = None,
         summary_variables: Sequence[str] = None,
-        transforms: Sequence[Transform] | None = "default",
     ) -> DataAdapter:
-        variables = {
-            "inference_variables": inference_variables,
-            "inference_conditions": inference_conditions,
-            "summary_variables": summary_variables,
-        }
-        variables = {key: value for key, value in variables.items() if value is not None}
+        # TODO: test this
+        data_adapter = DataAdapter.default().concatenate(inference_variables, into="inference_variables")
 
-        if transforms == "default":
-            transforms = [Standardize()]
+        if inference_conditions is not None:
+            data_adapter = data_adapter.concatenate(inference_conditions, into="inference_conditions")
 
-        return ConcatenateKeysDataAdapter(**variables, transforms=transforms)
+        if summary_variables is not None:
+            data_adapter = data_adapter.concatenate(summary_variables, into="summary_variables")
+
+        return data_adapter
 
     def compile(
         self,
