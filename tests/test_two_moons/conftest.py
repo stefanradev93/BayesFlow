@@ -33,7 +33,7 @@ def random_samples(batch_size, simulator):
 
 @pytest.fixture()
 def simulator():
-    from bayesflow.benchmarks import TwoMoons
+    from bayesflow.simulators import TwoMoons
 
     return TwoMoons()
 
