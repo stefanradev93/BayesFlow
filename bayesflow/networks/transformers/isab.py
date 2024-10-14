@@ -26,7 +26,7 @@ class InducedSetAttentionBlock(keras.Layer):
         dense_units: int = 128,
         dense_activation: str = "gelu",
         kernel_initializer: str = "he_normal",
-        use_bias=True,
+        use_bias: bool = True,
         layer_norm: bool = True,
         **kwargs,
     ):
