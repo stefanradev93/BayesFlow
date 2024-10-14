@@ -47,26 +47,34 @@ class FilterTransform(Transform):
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "Transform":
+        def transform_constructor(*args, **kwargs):
+            raise RuntimeError(
+                "Instantiating new elementwise transforms on a deserialized FilterTransform is not yet supported (and"
+                "may never be). As a work-around, you can manually register the elementwise transform constructor after"
+                "deserialization:\n"
+                "obj = deserialize(config)\n"
+                "obj.transform_constructor = MyElementwiseTransform"
+            )
+
         instance = cls(
-            transform_constructor=deserialize(config.pop("transform_constructor"), custom_objects),
+            transform_constructor=transform_constructor,
             predicate=deserialize(config.pop("predicate"), custom_objects),
             include=deserialize(config.pop("include"), custom_objects),
             exclude=deserialize(config.pop("exclude"), custom_objects),
             **config.pop("kwargs"),
         )
 
-        instance.transform_map = {key: deserialize(value, custom_objects) for key, value in config.pop("transform_map")}
+        instance.transform_map = deserialize(config.pop("transform_map"))
 
         return instance
 
     def get_config(self) -> dict:
         return {
-            "transform_constructor": serialize(self.transform_constructor),
             "predicate": serialize(self.predicate),
             "include": serialize(self.include),
             "exclude": serialize(self.exclude),
             "kwargs": serialize(self.kwargs),
-            "transform_map": {key: serialize(value) for key, value in self.transform_map.items()},
+            "transform_map": serialize(self.transform_map),
         }
 
     def forward(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:

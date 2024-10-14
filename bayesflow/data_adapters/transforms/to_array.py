@@ -1,14 +1,28 @@
+from keras.saving import (
+    deserialize_keras_object as deserialize,
+    register_keras_serializable as serializable,
+    serialize_keras_object as serialize,
+)
 from numbers import Number
-
 import numpy as np
 
 from .elementwise_transform import ElementwiseTransform
 
 
+@serializable(package="bayesflow.data_adapters")
 class ToArray(ElementwiseTransform):
     def __init__(self):
         super().__init__()
         self.original_type = None
+
+    @classmethod
+    def from_config(cls, config: dict, custom_objects=None) -> "ToArray":
+        instance = cls()
+        instance.original_type = deserialize(config["original_type"], custom_objects)
+        return instance
+
+    def get_config(self) -> dict:
+        return {"original_type": serialize(self.original_type)}
 
     def forward(self, data: any) -> np.ndarray:
         if self.original_type is None:

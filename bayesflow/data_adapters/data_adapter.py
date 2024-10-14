@@ -76,7 +76,7 @@ class DataAdapter:
         *,
         forward: callable,
         inverse: callable,
-        predicate: callable,
+        predicate: callable = None,
         include: str | Sequence[str] = None,
         exclude: str | Sequence[str] = None,
         **kwargs,
@@ -88,6 +88,7 @@ class DataAdapter:
             exclude=exclude,
             forward=forward,
             inverse=inverse,
+            **kwargs,
         )
         self.transforms.append(transform)
         return self
