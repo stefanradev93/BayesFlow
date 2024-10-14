@@ -1,5 +1,4 @@
-
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from keras.saving import (
     deserialize_keras_object as deserialize,
     register_keras_serializable as serializable,
@@ -9,6 +8,15 @@ import numpy as np
 
 from .transforms import (
     Concatenate,
+    Constrain,
+    ConvertDType,
+    Drop,
+    FilterTransform,
+    LambdaTransform,
+    MapTransform,
+    Rename,
+    Standardize,
+    ToArray,
     Transform,
 )
 
@@ -16,18 +24,28 @@ from .transforms import (
 @serializable(package="bayesflow.data_adapters")
 class DataAdapter:
     def __init__(self, transforms: Sequence[Transform] | None = None):
-        self.transforms = transforms or []
+        if transforms is None:
+            transforms = []
+
+        self.transforms = transforms
 
     @classmethod
     def default(cls):
         instance = cls()
-        instance.expand_scalars()
-        instance.convert_dtypes(from_dtype="float64", to_dtype="float32")
+        instance.to_array()
+        instance.convert_dtype(from_dtype="float64", to_dtype="float32")
         instance.standardize()
 
         return instance
 
-    def forward(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+    @classmethod
+    def from_config(cls, config: dict, custom_objects=None) -> "DataAdapter":
+        return cls(transforms=deserialize(config.pop("transforms"), custom_objects))
+
+    def get_config(self) -> dict:
+        return {"transforms": serialize(self.transforms)}
+
+    def forward(self, data: dict[str, any]) -> dict[str, np.ndarray]:
         data = data.copy()
 
         for transform in self.transforms:
@@ -35,7 +53,7 @@ class DataAdapter:
 
         return data
 
-    def inverse(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+    def inverse(self, data: dict[str, np.ndarray]) -> dict[str, any]:
         data = data.copy()
 
         for transform in reversed(self.transforms):
@@ -43,7 +61,7 @@ class DataAdapter:
 
         return data
 
-    def __call__(self, data: dict[str, np.ndarray], inverse: bool = False) -> dict[str, np.ndarray]:
+    def __call__(self, data: dict[str, any], inverse: bool = False) -> dict[str, np.ndarray]:
         if inverse:
             return self.inverse(data)
 
@@ -53,95 +71,111 @@ class DataAdapter:
         self.transforms.append(transform)
         return self
 
-    def apply(self, forward: Callable, inverse: Callable):
-        self.transforms.append(LambdaTransform(forward, inverse))
+    def apply(
+        self,
+        *,
+        forward: callable,
+        inverse: callable,
+        predicate: callable,
+        include: str | Sequence[str] = None,
+        exclude: str | Sequence[str] = None,
+        **kwargs,
+    ):
+        transform = FilterTransform(
+            transform_constructor=LambdaTransform,
+            predicate=predicate,
+            include=include,
+            exclude=exclude,
+            forward=forward,
+            inverse=inverse,
+        )
+        self.transforms.append(transform)
         return self
 
     def clear(self):
         self.transforms = []
         return self
 
-    def concatenate(self, keys: Sequence[str], into: str, axis: int = -1):
-        self.transforms.append(Concatenate(keys, into, axis))
+    def concatenate(self, keys: Sequence[str], *, into: str, axis: int = -1):
+        transform = Concatenate(keys, into=into, axis=axis)
+        self.transforms.append(transform)
         return self
 
-    def convert_dtypes(self, keys: str | Sequence[str] = None, exclude: str | Sequence[str] = None, *, from_dtype: str, to_dtype: str):
-        ...
+    def convert_dtype(
+        self,
+        *,
+        predicate: callable = None,
+        include: str | Sequence[str] = None,
+        exclude: str | Sequence[str] = None,
+        from_dtype: str,
+        to_dtype: str,
+    ):
+        transform = FilterTransform(
+            transform_constructor=ConvertDType,
+            predicate=predicate,
+            include=include,
+            exclude=exclude,
+            from_dtype=from_dtype,
+            to_dtype=to_dtype,
+        )
+        self.transforms.append(transform)
         return self
 
-    def constrain(self, keys: Sequence[str], *, lower: float | np.ndarray = None, upper: float | np.ndarray = None, method: str):
-        ...
+    def constrain(
+        self,
+        keys: Sequence[str],
+        *,
+        lower: int | float | np.ndarray = None,
+        upper: int | float | np.ndarray = None,
+        method: str,
+    ):
+        transform = MapTransform(
+            transform_map={key: Constrain(lower=lower, upper=upper, method=method) for key in keys}
+        )
+        self.transforms.append(transform)
         return self
 
-    def expand_scalars(self, keys: str | Sequence[str] = None, exclude: str | Sequence[str] = None):
-        self.transforms.append(...)  # convert to numpy arrays
-        self.transforms.append(Reshape(...))  # reshape (batch_size,) to (batch_size, 1)
+    def drop(self, keys: str | Sequence[str]):
+        transform = Drop(keys)
+        self.transforms.append(transform)
         return self
 
     def rename(self, from_key: str, to_key: str):
-        self.transforms.append(Concatenate([from_key], into=to_key))
+        self.transforms.append(Rename(from_key, to_key))
         return self
 
-    def standardize(self, keys: str | Sequence[str] = None, exclude: str | Sequence[str] = None, means: Mapping[str, np.ndarray] = None, stds: Mapping[str, np.ndarray] = None):
-        self.transforms.append(Standardize(keys, exclude, ))
+    def standardize(
+        self,
+        *,
+        predicate: callable = None,
+        include: str | Sequence[str] = None,
+        exclude: str | Sequence[str] = None,
+        **kwargs,
+    ):
+        transform = FilterTransform(
+            transform_constructor=Standardize,
+            predicate=predicate,
+            include=include,
+            exclude=exclude,
+            **kwargs,
+        )
+        self.transforms.append(transform)
         return self
 
-
-
-# data_adapter = bf.ContinuousApproximator.build_data_adapter(
-#     inference_variables=["theta", "alpha"],
-# )
-
-approximator = bf.ContinuousApproximator()
-approximator.build_data_adapter(
-    transforms=[bf.data_adapters.transforms.Standardize(["theta", "x"])],
-)
-
-
-
-# example usage
-data_adapter = DataAdapter()
-data_adapter.expand_scalars()  # (batch_size,) -> (batch_size, 1)
-data_adapter.convert_dtypes(from_dtype="float64", to_dtype="float32")
-data_adapter.standardize(exclude="num_obs")
-data_adapter.concatenate(["theta", "r", "alpha"], into="inference_variables")
-data_adapter.rename("x", "inference_conditions")
-
-
-# or use the builder pattern
-data_adapter = DataAdapter.default() \
-    .concatenate(["theta", "r", "alpha"], into="inference_variables") \
-    .rename("x", "inference_conditions")
-
-
-
-
-from typing import Generic, TypeVar
-
-
-TRaw = TypeVar("TRaw")
-TProcessed = TypeVar("TProcessed")
-
-
-class DataAdapter(Generic[TRaw, TProcessed]):
-    """Construct and deconstruct deep-learning ready data from and into raw data."""
-
-    def configure(self, raw_data: TRaw) -> TProcessed:
-        """Construct deep-learning ready data from raw data."""
-        raise NotImplementedError
-
-    def deconfigure(self, processed_data: TProcessed) -> TRaw:
-        """Reconstruct raw data from deep-learning ready processed data.
-        Note that configuration is not required to be bijective, so this method is only meant to be a 'best effort'
-        attempt, and may return incomplete or different raw data.
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def from_config(cls, config: dict, custom_objects=None) -> "DataAdapter":
-        """Construct a data adapter from a configuration dictionary."""
-        raise NotImplementedError
-
-    def get_config(self) -> dict:
-        """Return a configuration dictionary."""
-        raise NotImplementedError
+    def to_array(
+        self,
+        *,
+        predicate: callable = None,
+        include: str | Sequence[str] = None,
+        exclude: str | Sequence[str] = None,
+        **kwargs,
+    ):
+        transform = FilterTransform(
+            transform_constructor=ToArray,
+            predicate=predicate,
+            include=include,
+            exclude=exclude,
+            **kwargs,
+        )
+        self.transforms.append(transform)
+        return self
