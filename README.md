@@ -1,6 +1,6 @@
 # BayesFlow <img src="img/bayesflow_hex.png" style="float: right; width: 20%; height: 20%;" align="right" alt="BayesFlow Logo" />
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/stefanradev93/bayesflow/tests.yaml?style=for-the-badge&label=Tests)
-![Codecov](https://img.shields.io/codecov/c/github/stefanradev93/bayesflow/streamlined-backend?style=for-the-badge)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/bayesflow-org/bayesflow/tests.yaml?style=for-the-badge&label=Tests)
+![Codecov](https://img.shields.io/codecov/c/github/bayesflow-org/bayesflow/dev?style=for-the-badge)
 [![DOI](https://img.shields.io/badge/DOI-10.21105%2Fjoss.05702-blue?style=for-the-badge)](https://doi.org/10.21105/joss.05702)
 ![PyPI - License](https://img.shields.io/pypi/l/bayesflow?style=for-the-badge)
 
@@ -22,14 +22,14 @@ when working with intractable simulators whose behavior as a whole is too
 complex to be described analytically. The figure below presents a higher-level
 overview of neurally bootstrapped Bayesian inference.
 
-<img src="https://github.com/stefanradev93/BayesFlow/blob/master/img/high_level_framework.png?raw=true" width=80% height=80%>
+<img src="https://github.com/bayesflow-org/bayesflow/blob/master/img/high_level_framework.png?raw=true" width=80% height=80%>
 
 
 ## Disclaimer
 
 This is the current dev version of BayesFlow, which constitutes a complete refactor of the library built on Keras 3. This way, you can now use any of the major deep learning libraries as backend for BayesFlow. The refactor is still work in progress with some of the advanced features not yet implemented. We are actively working on them and promise to catch up soon.
 
-If you encounter any issues, please don't hesitate to open an issue here on [Github](https://github.com/stefanradev93/BayesFlow/issues) or ask questions on our [Discourse Forums](https://discuss.bayesflow.org/).
+If you encounter any issues, please don't hesitate to open an issue here on [Github](https://github.com/bayesflow-org/bayesflow/issues) or ask questions on our [Discourse Forums](https://discuss.bayesflow.org/).
 
 ## Install
 
@@ -66,7 +66,7 @@ This way, you also don't have to manually set the backend every time you are sta
 You can install the dev version with pip:
 
 ```bash
-pip install git+https://github.com/stefanradev93/bayesflow@dev
+pip install git+https://github.com/bayesflow-org/bayesflow@dev
 ```
 
 ### Using Conda (coming soon)
@@ -78,7 +78,7 @@ The dev version is not conda-installable yet.
 If you want to contribute to BayesFlow, we recommend installing the dev branch from source:
 
 ```bash
-git clone -b dev git@github.com:stefanradev93/bayesflow.git
+git clone -b dev git@github.com:bayesflow-org/bayesflow.git
 cd <local-path-to-bayesflow-repository>
 conda env create --file environment.yaml --name bayesflow
 ```
@@ -91,7 +91,7 @@ Check out some of our walk-through notebooks below. We are actively working on p
 
 ## Documentation \& Help
 
-Documentation is available at https://bayesflow.org. Please use the [BayesFlow Forums](https://discuss.bayesflow.org/) for any BayesFlow-related questions and discussions, and [GitHub Issues](https://github.com/stefanradev93/BayesFlow/issues) for bug reports and feature requests.
+Documentation is available at https://bayesflow.org. Please use the [BayesFlow Forums](https://discuss.bayesflow.org/) for any BayesFlow-related questions and discussions, and [GitHub Issues](https://github.com/bayesflow-org/bayesflow/issues) for bug reports and feature requests.
 
 ## Citing BayesFlow
 
