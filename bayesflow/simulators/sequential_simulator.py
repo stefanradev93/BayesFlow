@@ -9,7 +9,7 @@ from .simulator import Simulator
 class SequentialSimulator(Simulator):
     """Combines multiple simulators into one, sequentially."""
 
-    def __init__(self, simulators: Sequence[Simulator], expand_outputs: bool = False):
+    def __init__(self, simulators: Sequence[Simulator], expand_outputs: bool = True):
         self.simulators = simulators
         self.expand_outputs = expand_outputs
 

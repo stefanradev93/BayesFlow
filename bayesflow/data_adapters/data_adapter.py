@@ -108,6 +108,7 @@ class DataAdapter:
 
     def concatenate(self, keys: Sequence[str], *, into: str, axis: int = -1):
         if isinstance(keys, str):
+            # this is a common mistake, and also passes the type checker since str is a sequence of characters
             raise ValueError("Keys must be a sequence of strings. To rename a single key, use the `rename` method.")
 
         transform = Concatenate(keys, into=into, axis=axis)
