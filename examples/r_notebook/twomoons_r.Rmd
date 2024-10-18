@@ -26,11 +26,9 @@ Next point reticulate to the correct virtual environment where bayesflow is stor
 ```{r echo=FALSE}
 # explicit conda env path during dev
 # use_condaenv("/path_to_environment/environment_name")
-use_condaenv("/Users/marvin/miniforge3/envs/bayesflow_r")
 
-if (FALSE) {
-  use_condaenv("/Users/eodole/miniforge3/envs/bfv2")
-}
+#use_condaenv("/Users/marvin/miniforge3/envs/bayesflow_r")
+use_condaenv("/Users/eodole/miniforge3/envs/bfv2")
 ```
 
 
@@ -131,6 +129,7 @@ data_adapter <- bf$ContinuousApproximator$build_data_adapter(
 )
 ```
 
+This step can cause problems, essentially if you get an error saying that inference variables is not found, then the 
 
 
 ## 4 Data Set 
@@ -157,32 +156,7 @@ training_dataset <- bf$datasets$OfflineDataset(training_samples, batch_size = ba
 validation_dataset <- bf$datasets$OfflineDataset(validation_samples, batch_size = batch_size, data_adapter = data_adapter)
 ```
 
-```{r}
-# generate a batch --> inference_variables missing
-print(print(iterate(training_dataset)))
-```
 
-
-
-```{r}
-# manually configure the data --> inference_variables missing as well
-training_dataset$data_adapter$configure(training_dataset$data)
-```
-
-```{r}
-# manually call sub-adapter for inference conditions: works
-print(data_adapter$data_adapters$inference_conditions$configure(training_dataset$data))
-```
-
-
-```{r}
-# manually call sub-adapter for inference variables: fails
-print(data_adapter$data_adapters$inference_variables$configure(training_dataset$data))
-```
-
-```{r}
-print(data_adapter$data_adapters$inference_variables$keys)
-```
 
 ## 5 Training a neural network to approximate all posteriors 
 
