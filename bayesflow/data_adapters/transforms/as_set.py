@@ -8,4 +8,7 @@ class AsSet(ElementwiseTransform):
         return np.atleast_3d(data)
 
     def inverse(self, data: np.ndarray, **kwargs) -> np.ndarray:
-        return np.squeeze(data, axis=2)
+        if data.shape[2] == 1:
+            return np.squeeze(data, axis=2)
+
+        return data
