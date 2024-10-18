@@ -7,6 +7,7 @@ from keras.saving import (
 import numpy as np
 
 from .transforms import (
+    AsSet,
     Broadcast,
     Concatenate,
     Constrain,
@@ -91,6 +92,14 @@ class DataAdapter:
             inverse=inverse,
             **kwargs,
         )
+        self.transforms.append(transform)
+        return self
+
+    def as_set(self, keys: str | Sequence[str]):
+        if isinstance(keys, str):
+            keys = [keys]
+
+        transform = MapTransform({key: AsSet() for key in keys})
         self.transforms.append(transform)
         return self
 
