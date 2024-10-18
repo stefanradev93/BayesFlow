@@ -1,8 +1,6 @@
 import numpy as np
 import pytest
 
-from bayesflow.simulators import CompositeLambdaSimulator
-
 
 @pytest.fixture()
 def batch_size():
@@ -50,6 +48,6 @@ def simulator(request):
 
 @pytest.fixture()
 def two_moons():
-    from bayesflow.simulators import TwoMoonsSimulator
+    from bayesflow.benchmarks import TwoMoons
 
-    return TwoMoonsSimulator()
+    return TwoMoons()

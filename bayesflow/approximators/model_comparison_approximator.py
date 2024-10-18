@@ -7,8 +7,7 @@ from keras.saving import (
 )
 
 from bayesflow.datasets import OnlineDataset
-from bayesflow.data_adapters import ConcatenateKeysDataAdapter, DataAdapter
-from bayesflow.data_adapters.transforms import Transform
+from bayesflow.data_adapters import DataAdapter
 from bayesflow.networks import SummaryNetwork
 from bayesflow.simulators import ModelComparisonSimulator, Simulator
 from bayesflow.types import Shape, Tensor
@@ -50,19 +49,22 @@ class ModelComparisonApproximator(Approximator):
         classifier_conditions: Sequence[str] = None,
         summary_variables: Sequence[str] = None,
         model_index_name: str = "model_indices",
-        transforms: Sequence[Transform] = None,
     ):
+        # TODO: test this
         if classifier_conditions is None and summary_variables is None:
             raise ValueError("At least one of `classifier_variables` or `summary_variables` must be provided.")
 
-        variables = {
-            "classifier_conditions": classifier_conditions,
-            "summary_variables": summary_variables,
-            "model_indices": [model_index_name],
-        }
-        variables = {key: value for key, value in variables.items() if value is not None}
+        data_adapter = DataAdapter.default()
 
-        return ConcatenateKeysDataAdapter(**variables, transforms=transforms)
+        if classifier_conditions is not None:
+            data_adapter = data_adapter.concatenate(classifier_conditions, into="classifier_conditions")
+
+        if summary_variables is not None:
+            data_adapter = data_adapter.concatenate(summary_variables, into="summary_variables")
+
+        data_adapter = data_adapter.concatenate([model_index_name], into="model_indices")
+
+        return data_adapter
 
     @classmethod
     def build_dataset(
