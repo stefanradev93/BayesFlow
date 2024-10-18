@@ -100,14 +100,49 @@ theta_prior <- function(...) {
   return(theta)
 }
 
+```
+
+```{r eval=FALSE}
+# Original
 forward_model <- function(...) {
   theta <- theta_prior()
   alpha <- alpha_prior()
   r <- r_prior()
   x_1 <- abs(theta[1] + theta[2]) / sqrt(2) + r * cos(alpha) + 0.25
-  x_2 <- (-theta[1] + theta[2]) / sqrt(2) + r * sin(alpha)
+  x_2 <- ( theta[2] - theta[1] ) / sqrt(2) + r * sin(alpha)
   # return(list(x1 = x_1 ,x2 = x_2)) # working
   return(list(x = np_array(c(x_1, x_2)), theta = np_array(c(theta[1], theta[2])), a = alpha, r = r)) # in order for a variable to have more than one direction we need to return it as a numpy array
+}
+```
+
+```{r eval=FALSE}
+# Test 1 
+forward_model <- function(...) {
+  # Need to explicitly make all output into floats 
+  theta <- as.float(theta_prior())
+  alpha <- as.float(alpha_prior())
+  r <- as.float(r_prior())
+  x_1 <- as.float(abs(theta[1] + theta[2]) / sqrt(2) + r * cos(alpha) + 0.25)
+  x_2 <- as.float((theta[2] - theta[1] ) / sqrt(2) + r * sin(alpha))
+  # return(list(x1 = x_1 ,x2 = x_2)) # working
+  return(list(x = np_array(c(x_1, x_2)), theta = np_array(c(theta[1], theta[2])), a = alpha, r = r)) # in order for a variable to have more than one direction we need to return it as a numpy array
+}
+```
+
+```{r }
+# Test 2 
+forward_model <- function(...) {
+  theta <- theta_prior()
+  alpha <- alpha_prior()
+  r <- r_prior()
+  x_1 <- abs(theta[1] + theta[2]) / sqrt(2) + r * cos(alpha) + 0.25
+  x_2 <- ( theta[2] - theta[1] ) / sqrt(2) + r * sin(alpha)
+  # in order for a variable to have more than one direction we need to return it as a numpy array
+  # we also need to explicitly define each output as having type "float32" since R used "float64 as default and tensorflow want float 32 
+  return(list(x = np_array(c(x_1, x_2), dtype="float32"),
+              theta = np_array(c(theta[1], theta[2]),dtype="float32"),
+              a = np_array(alpha, dtype="float32"),
+              r = np_array(r, dtype="float32"))) 
 }
 ```
 
@@ -155,6 +190,7 @@ print(training_samples)
 training_dataset <- bf$datasets$OfflineDataset(training_samples, batch_size = batch_size, data_adapter = data_adapter)
 validation_dataset <- bf$datasets$OfflineDataset(validation_samples, batch_size = batch_size, data_adapter = data_adapter)
 ```
+
 
 
 
