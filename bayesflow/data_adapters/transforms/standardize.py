@@ -10,7 +10,7 @@ from .elementwise_transform import ElementwiseTransform
 
 @serializable(package="bayesflow.data_adapters")
 class Standardize(ElementwiseTransform):
-    def __init__(self, mean: int | float | np.ndarray = None, std: int | float | np.ndarray = None, axis: int = 0):
+    def __init__(self, mean: int | float | np.ndarray = None, std: int | float | np.ndarray = None, axis: int = None):
         super().__init__()
 
         self.mean = mean
@@ -33,6 +33,9 @@ class Standardize(ElementwiseTransform):
         }
 
     def forward(self, data: np.ndarray, **kwargs) -> np.ndarray:
+        if self.axis is None:
+            self.axis = tuple(range(data.ndim - 1))
+
         if self.mean is None:
             self.mean = np.mean(data, axis=self.axis, keepdims=True)
 
