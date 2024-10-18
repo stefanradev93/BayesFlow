@@ -35,7 +35,10 @@ class ToArray(ElementwiseTransform):
             raise RuntimeError("Cannot call `inverse` before calling `forward` at least once.")
 
         if issubclass(self.original_type, Number):
-            return self.original_type(data.item())
+            try:
+                return self.original_type(data.item())
+            except ValueError:
+                pass
 
         # cannot invert
         return data
