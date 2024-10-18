@@ -10,10 +10,7 @@ from .transform import Transform
 
 @serializable(package="bayesflow.data_adapters")
 class Drop(Transform):
-    def __init__(self, keys: str | Sequence[str]):
-        if isinstance(keys, str):
-            keys = [keys]
-
+    def __init__(self, keys: Sequence[str]):
         self.keys = keys
 
     @classmethod

@@ -94,7 +94,10 @@ class DataAdapter:
         self.transforms.append(transform)
         return self
 
-    def broadcast(self, keys: Sequence[str], *, expand_scalars: bool = True):
+    def broadcast(self, keys: str | Sequence[str], *, expand_scalars: bool = True):
+        if isinstance(keys, str):
+            keys = [keys]
+
         transform = MapTransform({key: Broadcast(expand_scalars=expand_scalars) for key in keys})
         self.transforms.append(transform)
         return self
@@ -104,6 +107,9 @@ class DataAdapter:
         return self
 
     def concatenate(self, keys: Sequence[str], *, into: str, axis: int = -1):
+        if isinstance(keys, str):
+            raise ValueError("Keys must be a sequence of strings. To rename a single key, use the `rename` method.")
+
         transform = Concatenate(keys, into=into, axis=axis)
         self.transforms.append(transform)
         return self
@@ -130,12 +136,15 @@ class DataAdapter:
 
     def constrain(
         self,
-        keys: Sequence[str],
+        keys: str | Sequence[str],
         *,
         lower: int | float | np.ndarray = None,
         upper: int | float | np.ndarray = None,
         method: str,
     ):
+        if isinstance(keys, str):
+            keys = [keys]
+
         transform = MapTransform(
             transform_map={key: Constrain(lower=lower, upper=upper, method=method) for key in keys}
         )
@@ -143,6 +152,9 @@ class DataAdapter:
         return self
 
     def drop(self, keys: str | Sequence[str]):
+        if isinstance(keys, str):
+            keys = [keys]
+
         transform = Drop(keys)
         self.transforms.append(transform)
         return self
