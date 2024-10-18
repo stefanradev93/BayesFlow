@@ -79,8 +79,14 @@ class ContinuousApproximator(Approximator):
         stage: str = "training",
     ) -> dict[str, Tensor]:
         if self.summary_network is None:
+            if summary_variables is not None:
+                raise ValueError("Cannot compute summary metrics without a summary network.")
+
             summary_metrics = {}
         else:
+            if summary_variables is None:
+                raise ValueError("Summary variables are required when a summary network is present.")
+
             summary_metrics = self.summary_network.compute_metrics(summary_variables, stage=stage)
             summary_outputs = summary_metrics.pop("outputs")
 
@@ -153,7 +159,13 @@ class ContinuousApproximator(Approximator):
         inference_conditions: Tensor = None,
         summary_variables: Tensor = None,
     ) -> Tensor:
-        if self.summary_network is not None:
+        if self.summary_network is None:
+            if summary_variables is not None:
+                raise ValueError("Cannot use summary variables without a summary network.")
+        else:
+            if summary_variables is None:
+                raise ValueError("Summary variables are required when a summary network is present.")
+
             summary_outputs = self.summary_network(summary_variables)
 
             if inference_conditions is None:
@@ -181,7 +193,13 @@ class ContinuousApproximator(Approximator):
     def _log_prob(
         self, inference_variables: Tensor, inference_conditions: Tensor = None, summary_variables: Tensor = None
     ) -> Tensor:
-        if self.summary_network is not None:
+        if self.summary_network is None:
+            if summary_variables is not None:
+                raise ValueError("Cannot use summary variables without a summary network.")
+        else:
+            if summary_variables is None:
+                raise ValueError("Summary variables are required when a summary network is present.")
+
             summary_outputs = self.summary_network(summary_variables)
 
             if inference_conditions is None:
