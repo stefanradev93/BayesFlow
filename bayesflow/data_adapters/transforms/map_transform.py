@@ -26,8 +26,18 @@ class MapTransform(Transform):
     def get_config(self) -> dict:
         return {"transform_map": serialize(self.transform_map)}
 
-    def forward(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        return {key: transform.forward(data[key]) for key, transform in self.transform_map.items() if key in data}
+    def forward(self, data: dict[str, np.ndarray], **kwargs) -> dict[str, np.ndarray]:
+        result = data.copy()
+        for key, transform in self.transform_map.items():
+            if key in data:
+                result[key] = transform.forward(data[key], **kwargs)
 
-    def inverse(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        return {key: transform.inverse(data[key]) for key, transform in self.transform_map.items() if key in data}
+        return result
+
+    def inverse(self, data: dict[str, np.ndarray], **kwargs) -> dict[str, np.ndarray]:
+        result = data.copy()
+        for key, transform in self.transform_map.items():
+            if key in data:
+                result[key] = transform.inverse(data[key], **kwargs)
+
+        return result
