@@ -36,8 +36,8 @@ class LambdaTransform(ElementwiseTransform):
             "inverse": serialize(self._inverse),
         }
 
-    def forward(self, data: np.ndarray) -> np.ndarray:
-        return self._forward(data)
+    def forward(self, data: np.ndarray, **kwargs) -> np.ndarray:
+        return self._forward(data, **kwargs)
 
-    def inverse(self, data: np.ndarray) -> np.ndarray:
-        return self._inverse(data)
+    def inverse(self, data: np.ndarray, **kwargs) -> np.ndarray:
+        return self._inverse(data, **kwargs)

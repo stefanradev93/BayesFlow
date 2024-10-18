@@ -35,7 +35,7 @@ class Concatenate(Transform):
             "axis": serialize(self.axis),
         }
 
-    def forward(self, data: dict[str, any]) -> dict[str, any]:
+    def forward(self, data: dict[str, any], **kwargs) -> dict[str, any]:
         required_keys = set(self.keys)
         available_keys = set(data.keys())
         missing_keys = required_keys - available_keys
@@ -60,7 +60,7 @@ class Concatenate(Transform):
 
         return data
 
-    def inverse(self, data: dict[str, any]) -> dict[str, any]:
+    def inverse(self, data: dict[str, any], **kwargs) -> dict[str, any]:
         required_keys = {self.into}
         available_keys = set(data.keys())
         missing_keys = required_keys - available_keys

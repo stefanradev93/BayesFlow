@@ -29,8 +29,8 @@ class ConvertDType(ElementwiseTransform):
             "to_dtype": serialize(self.to_dtype),
         }
 
-    def forward(self, data: np.ndarray) -> np.ndarray:
+    def forward(self, data: np.ndarray, **kwargs) -> np.ndarray:
         return data.astype(self.to_dtype)
 
-    def inverse(self, data: np.ndarray) -> np.ndarray:
+    def inverse(self, data: np.ndarray, **kwargs) -> np.ndarray:
         return data.astype(self.from_dtype)

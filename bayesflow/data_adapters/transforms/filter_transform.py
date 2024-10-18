@@ -77,16 +77,16 @@ class FilterTransform(Transform):
             "transform_map": serialize(self.transform_map),
         }
 
-    def forward(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+    def forward(self, data: dict[str, np.ndarray], **kwargs) -> dict[str, np.ndarray]:
         data = data.copy()
 
         for key, value in data.items():
             if self._should_transform(key, value, inverse=False):
-                data[key] = self._apply_transform(key, value, inverse=False)
+                data[key] = self._apply_transform(key, value, inverse=False, **kwargs)
 
         return data
 
-    def inverse(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+    def inverse(self, data: dict[str, np.ndarray], **kwargs) -> dict[str, np.ndarray]:
         data = data.copy()
 
         for key, value in data.items():
@@ -129,10 +129,10 @@ class FilterTransform(Transform):
                     return True
                 return predicate(key, value, inverse=inverse)
 
-    def _apply_transform(self, key: str, value: np.ndarray, inverse: bool = False) -> np.ndarray:
+    def _apply_transform(self, key: str, value: np.ndarray, inverse: bool = False, **kwargs) -> np.ndarray:
         if key not in self.transform_map:
             self.transform_map[key] = self.transform_constructor(**self.kwargs)
 
         transform = self.transform_map[key]
 
-        return transform(value, inverse=inverse)
+        return transform(value, inverse=inverse, **kwargs)

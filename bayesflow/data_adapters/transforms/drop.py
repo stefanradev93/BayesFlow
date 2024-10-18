@@ -23,9 +23,9 @@ class Drop(Transform):
     def get_config(self) -> dict:
         return {"keys": serialize(self.keys)}
 
-    def forward(self, data: dict[str, any]) -> dict[str, any]:
+    def forward(self, data: dict[str, any], **kwargs) -> dict[str, any]:
         return {key: value for key, value in data.items() if key not in self.keys}
 
-    def inverse(self, data: dict[str, any]) -> dict[str, any]:
+    def inverse(self, data: dict[str, any], **kwargs) -> dict[str, any]:
         # non-invertible transform
         return data

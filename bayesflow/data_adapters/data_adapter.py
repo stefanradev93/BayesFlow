@@ -7,6 +7,7 @@ from keras.saving import (
 import numpy as np
 
 from .transforms import (
+    Broadcast,
     Concatenate,
     Constrain,
     ConvertDType,
@@ -45,27 +46,27 @@ class DataAdapter:
     def get_config(self) -> dict:
         return {"transforms": serialize(self.transforms)}
 
-    def forward(self, data: dict[str, any]) -> dict[str, np.ndarray]:
+    def forward(self, data: dict[str, any], **kwargs) -> dict[str, np.ndarray]:
         data = data.copy()
 
         for transform in self.transforms:
-            data = transform(data)
+            data = transform(data, **kwargs)
 
         return data
 
-    def inverse(self, data: dict[str, np.ndarray]) -> dict[str, any]:
+    def inverse(self, data: dict[str, np.ndarray], **kwargs) -> dict[str, any]:
         data = data.copy()
 
         for transform in reversed(self.transforms):
-            data = transform(data, inverse=True)
+            data = transform(data, inverse=True, **kwargs)
 
         return data
 
-    def __call__(self, data: dict[str, any], inverse: bool = False) -> dict[str, np.ndarray]:
+    def __call__(self, data: dict[str, any], *, inverse: bool = False, **kwargs) -> dict[str, np.ndarray]:
         if inverse:
-            return self.inverse(data)
+            return self.inverse(data, **kwargs)
 
-        return self.forward(data)
+        return self.forward(data, **kwargs)
 
     def add_transform(self, transform: Transform):
         self.transforms.append(transform)
@@ -90,6 +91,11 @@ class DataAdapter:
             inverse=inverse,
             **kwargs,
         )
+        self.transforms.append(transform)
+        return self
+
+    def broadcast(self, keys: Sequence[str], *, expand_scalars: bool = True):
+        transform = MapTransform({key: Broadcast(expand_scalars=expand_scalars) for key in keys})
         self.transforms.append(transform)
         return self
 

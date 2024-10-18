@@ -24,12 +24,12 @@ class Rename(Transform):
     def get_config(self) -> dict:
         return {"from_key": serialize(self.from_key), "to_key": serialize(self.to_key)}
 
-    def forward(self, data: dict[str, any]) -> dict[str, any]:
+    def forward(self, data: dict[str, any], **kwargs) -> dict[str, any]:
         data = data.copy()
         data[self.to_key] = data.pop(self.from_key)
         return data
 
-    def inverse(self, data: dict[str, any]) -> dict[str, any]:
+    def inverse(self, data: dict[str, any], **kwargs) -> dict[str, any]:
         data = data.copy()
         data[self.from_key] = data.pop(self.to_key)
         return data

@@ -100,10 +100,10 @@ class Constrain(ElementwiseTransform):
             "method": self.method,
         }
 
-    def forward(self, data: np.ndarray) -> np.ndarray:
+    def forward(self, data: np.ndarray, **kwargs) -> np.ndarray:
         # forward means data space -> network space, so unconstrain the data
         return self.unconstrain(data)
 
-    def inverse(self, data: np.ndarray) -> np.ndarray:
+    def inverse(self, data: np.ndarray, **kwargs) -> np.ndarray:
         # inverse means network space -> data space, so constrain the data
         return self.constrain(data)

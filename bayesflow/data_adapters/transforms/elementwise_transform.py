@@ -4,11 +4,11 @@ import numpy as np
 
 @serializable(package="bayesflow.data_adapters")
 class ElementwiseTransform:
-    def __call__(self, data: np.ndarray, inverse: bool = False):
+    def __call__(self, data: np.ndarray, inverse: bool = False, **kwargs) -> np.ndarray:
         if inverse:
-            return self.inverse(data)
+            return self.inverse(data, **kwargs)
 
-        return self.forward(data)
+        return self.forward(data, **kwargs)
 
     @classmethod
     def from_config(cls, config: dict, custom_objects=None) -> "ElementwiseTransform":
@@ -17,8 +17,8 @@ class ElementwiseTransform:
     def get_config(self) -> dict:
         raise NotImplementedError
 
-    def forward(self, data: np.ndarray) -> np.ndarray:
+    def forward(self, data: np.ndarray, **kwargs) -> np.ndarray:
         raise NotImplementedError
 
-    def inverse(self, data: np.ndarray) -> np.ndarray:
+    def inverse(self, data: np.ndarray, **kwargs) -> np.ndarray:
         raise NotImplementedError

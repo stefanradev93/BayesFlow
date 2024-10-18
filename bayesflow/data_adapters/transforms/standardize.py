@@ -32,7 +32,7 @@ class Standardize(ElementwiseTransform):
             "axis": serialize(self.axis),
         }
 
-    def forward(self, data: np.ndarray) -> np.ndarray:
+    def forward(self, data: np.ndarray, **kwargs) -> np.ndarray:
         if self.mean is None:
             self.mean = np.mean(data, axis=self.axis, keepdims=True)
 
@@ -44,7 +44,7 @@ class Standardize(ElementwiseTransform):
 
         return (data - mean) / std
 
-    def inverse(self, data: np.ndarray) -> np.ndarray:
+    def inverse(self, data: np.ndarray, **kwargs) -> np.ndarray:
         if self.mean is None or self.std is None:
             raise RuntimeError("Cannot call `inverse` before calling `forward` at least once.")
 
