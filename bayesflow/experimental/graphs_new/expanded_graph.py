@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, NamedTuple, TypeAlias
 import networkx as nx
 
 from .inverted_graph import InvertedGraph
+from .factorizations import enumerate_factorizations, select_factorization
 
 if TYPE_CHECKING:
     from .simulation_graph import SimulationGraph
@@ -23,7 +24,12 @@ class ExpandedGraph(nx.DiGraph):
         super().__init__(incoming_graph_data, **kwargs)
         self.simulation_graph = deepcopy(simulation_graph)
 
-    def invert(self, ordering: list[SimulationNode]):
+    def invert(self, ordering: list[SimulationNode] = None):
+        if not ordering:
+            factorizations = enumerate_factorizations(self)
+
+            return select_factorization(factorizations)
+
         inverted = nx.DiGraph()
         inverted.add_nodes_from(node for node in self if self.out_degree(node) == 0)
 
