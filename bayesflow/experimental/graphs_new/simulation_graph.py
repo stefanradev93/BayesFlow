@@ -1,13 +1,16 @@
 from typing import Callable, TypeAlias
-from .expanded_graph import ExpandedGraph, ExpandedNode
+
 import networkx as nx
+
+from .expanded_graph import ExpandedGraph, ExpandedNode
 
 SimulationNode: TypeAlias = str
 
 
 class SimulationGraph(nx.DiGraph):
-    def __init__(self, meta_fn: Callable = None, **kwargs):
+    def __init__(self, meta_fn: Callable | None = None, **kwargs):
         super().__init__(**kwargs)
+        self.meta_fn = meta_fn
 
     def expand(self) -> ExpandedGraph:
         expanded = nx.relabel_nodes(nx.DiGraph(self), ExpandedNode)

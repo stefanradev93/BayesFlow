@@ -24,11 +24,9 @@ class ExpandedGraph(nx.DiGraph):
         super().__init__(incoming_graph_data, **kwargs)
         self.simulation_graph = deepcopy(simulation_graph)
 
-    def invert(self, ordering: list[SimulationNode] = None):
-        if not ordering:
-            factorizations = enumerate_factorizations(self)
-
-            return select_factorization(factorizations)
+    def invert(self, ordering: list[SimulationNode] | None = None):
+        if ordering is None:
+            return select_factorization(enumerate_factorizations(self))
 
         inverted = nx.DiGraph()
         inverted.add_nodes_from(node for node in self if self.out_degree(node) == 0)
