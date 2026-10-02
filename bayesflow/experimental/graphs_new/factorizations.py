@@ -1,11 +1,14 @@
 import itertools
 import numpy as np
+from typing import TYPE_CHECKING
 
-from .expanded_graph import ExpandedGraph
+if TYPE_CHECKING:
+    from .expanded_graph import ExpandedGraph
+
 from .inverted_graph import InvertedGraph
 
 
-def enumerate_factorizations(expanded_graph: ExpandedGraph) -> list[InvertedGraph]:
+def enumerate_factorizations(expanded_graph: "ExpandedGraph") -> list[InvertedGraph]:
     simulation_graph = expanded_graph.simulation_graph
     latent = sorted(v for v in simulation_graph if simulation_graph.out_degree(v) > 0)
 
@@ -16,7 +19,7 @@ def enumerate_factorizations(expanded_graph: ExpandedGraph) -> list[InvertedGrap
     return factorizations
 
 
-def select_factorizations(factorizations: list[InvertedGraph]) -> InvertedGraph:
+def select_factorization(factorizations: list[InvertedGraph]) -> InvertedGraph:
     simulation_graph = factorizations[0].expanded_graph.simulation_graph
     mean_reps = mean_repetitions(simulation_graph)
 
@@ -28,7 +31,7 @@ def select_factorizations(factorizations: list[InvertedGraph]) -> InvertedGraph:
             if not factorization.is_amortizable(variable):
                 sequential_instances += mean_reps[variable]
 
-            costs.append(sequential_instances)
+        costs.append(sequential_instances)
 
     return factorizations[np.argmin(costs)]
 
