@@ -37,7 +37,7 @@ class ExpandedGraph(nx.DiGraph):
                 inverted.add_node(node)
                 inverted.add_edges_from((parent, node) for parent in parents)
 
-        return InvertedGraph(inverted, expanded_graph=self)
+        return InvertedGraph(inverted, expanded_graph=self, ordering=ordering)
 
 
 def minimal_conditions(graph: nx.DiGraph, node: ExpandedNode, known: set[ExpandedNode]) -> set[ExpandedNode]:
