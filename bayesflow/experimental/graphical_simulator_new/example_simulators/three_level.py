@@ -3,29 +3,29 @@ import numpy as np
 from ..graphical_simulator import GraphicalSimulator
 
 
-def sample_schools(num_samples):
-    school_mu = np.random.normal(size=num_samples)
-    school_sigma = np.abs(np.random.normal(size=num_samples))
+def sample_schools(batch_size):
+    school_mu = np.random.normal(size=batch_size)
+    school_sigma = np.abs(np.random.normal(size=batch_size))
 
     return {"school_mu": school_mu, "school_sigma": school_sigma}
 
 
-def sample_classrooms(school_mu, school_sigma, num_samples):
+def sample_classrooms(school_mu, school_sigma, batch_size):
     classroom_mu = np.random.normal(school_mu[:, 0], school_sigma[:, 0])
-    classroom_sigma = np.abs(np.random.normal(size=num_samples))
+    classroom_sigma = np.abs(np.random.normal(size=batch_size))
 
     return {"classroom_mu": classroom_mu, "classroom_sigma": classroom_sigma}
 
 
-def sample_students(classroom_mu, classroom_sigma, num_samples):
+def sample_students(classroom_mu, classroom_sigma, batch_size):
     student_mu = np.random.normal(classroom_mu[:, 0], classroom_sigma[:, 0])
-    student_sigma = np.abs(np.random.normal(size=num_samples))
+    student_sigma = np.abs(np.random.normal(size=batch_size))
 
     return {"student_mu": student_mu, "student_sigma": student_sigma}
 
 
-def sample_shared(num_samples):
-    shared_sigma = np.abs(np.random.normal(size=num_samples))
+def sample_shared(batch_size):
+    shared_sigma = np.abs(np.random.normal(size=batch_size))
 
     return {"shared_sigma": shared_sigma}
 

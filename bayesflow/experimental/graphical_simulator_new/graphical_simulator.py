@@ -68,7 +68,7 @@ def draw_values(sample_fn, parents, indices, meta, is_batched) -> dict[str, np.n
             parent_values[variable] = values[parent_sample]
 
     if is_batched:
-        outputs = call_sample_fn(sample_fn, parent_values | meta | {"num_samples": num_samples})
+        outputs = call_sample_fn(sample_fn, parent_values | meta | {"batch_size": num_samples})
     else:
         outputs = draw_one_by_one(sample_fn, parent_values, meta, num_samples)
 

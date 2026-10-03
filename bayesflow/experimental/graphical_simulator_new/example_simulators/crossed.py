@@ -5,13 +5,13 @@ from ..graphical_simulator import GraphicalSimulator
 
 
 # schools have different exam difficulties
-def sample_school(num_samples):
-    mu_question_mean = np.random.normal(loc=1.1, scale=0.2, size=num_samples)
-    sigma_question_mean = abs(np.random.normal(loc=0, scale=1, size=num_samples))
+def sample_school(batch_size):
+    mu_question_mean = np.random.normal(loc=1.1, scale=0.2, size=batch_size)
+    sigma_question_mean = abs(np.random.normal(loc=0, scale=1, size=batch_size))
 
     # hierarchical mu/sigma for the question difficulty standard deviation (logscale)
-    mu_question_std = np.random.normal(loc=0.5, scale=0.3, size=num_samples)
-    sigma_question_std = abs(np.random.normal(loc=0, scale=0.5, size=num_samples))
+    mu_question_std = np.random.normal(loc=0.5, scale=0.3, size=batch_size)
+    sigma_question_std = abs(np.random.normal(loc=0, scale=0.5, size=batch_size))
 
     return dict(
         mu_question_mean=mu_question_mean,
@@ -36,8 +36,8 @@ def sample_questions(mu_question_mean, sigma_question_mean, mu_question_std, sig
 
 
 # realizations of individual student abilities
-def sample_student(num_samples):
-    student_ability = np.random.normal(loc=0, scale=1, size=num_samples)
+def sample_student(batch_size):
+    student_ability = np.random.normal(loc=0, scale=1, size=batch_size)
 
     return dict(student_ability=student_ability)
 
