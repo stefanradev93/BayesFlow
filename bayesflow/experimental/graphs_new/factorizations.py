@@ -48,6 +48,12 @@ def mean_repetitions(simulation_graph, num_samples: int = 1000) -> dict[str, flo
     mean_reps = {}
     for variable in simulation_graph:
         reps = simulation_graph.nodes[variable].get("reps", 1)
-        mean_reps[variable] = mean_meta[reps] if isinstance(reps, str) else reps
+
+        if callable(reps):
+            mean_reps[variable] = np.mean(reps(size=num_samples))
+        elif isinstance(reps, str):
+            mean_reps[variable] = mean_meta[reps]
+        else:
+            mean_reps[variable] = reps
 
     return mean_reps

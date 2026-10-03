@@ -51,4 +51,4 @@ def is_interior(graph: SimulationGraph, node: SimulationNode):
 def is_exchangeable(graph: SimulationGraph, node: SimulationNode):
     reps = graph.nodes[node].get("reps", 1)
 
-    return isinstance(reps, str) or reps > 1
+    return callable(reps) or isinstance(reps, str) or reps > 1
