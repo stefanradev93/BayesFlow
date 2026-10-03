@@ -9,9 +9,17 @@ SimulationNode: TypeAlias = str
 
 
 class InvertedGraph(nx.DiGraph):
-    def __init__(self, incoming_graph_data=None, *, expanded_graph: "ExpandedGraph | None" = None, **kwargs):
+    def __init__(
+        self,
+        incoming_graph_data=None,
+        *,
+        expanded_graph: "ExpandedGraph | None" = None,
+        ordering: list[SimulationNode] | None = None,
+        **kwargs,
+    ):
         super().__init__(incoming_graph_data, **kwargs)
         self.expanded_graph = expanded_graph
+        self.ordering = ordering
 
     def is_amortizable(self, variable: SimulationNode) -> bool:
         nodes = instances(self, variable)
