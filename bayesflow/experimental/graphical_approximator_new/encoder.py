@@ -20,6 +20,12 @@ def segment_mean(values, ids, num_segments):
     return totals / keras.ops.maximum(counts, 1.0)
 
 
+def sum_per_dataset(values, datasets, num_datasets):
+    values = keras.ops.reshape(values, (keras.ops.shape(values)[0], -1))
+
+    return keras.ops.segment_sum(keras.ops.sum(values, axis=-1), datasets, num_segments=num_datasets)
+
+
 @serializable("bayesflow.experimental")
 class ExchangeableEncoder(keras.Layer):
     def __init__(self, width: int = 64, depth: int = 2, activation: str = "mish", **kwargs):

@@ -8,12 +8,12 @@ from bayesflow.approximators import Approximator
 from bayesflow.networks import InferenceNetwork
 from bayesflow.utils.serialization import serializable, serialize
 
-from ..graphical_simulator_new.samples import NodeSamples, Simulation, placeholder_simulation, repeat
+from ..graphical_simulator_new.samples import NodeSamples, Simulation, num_datasets, placeholder_simulation, repeat
 from ..graphs_new import InvertedGraph
 from ..graphs_new.simulation_graph import data_nodes
 from .batches import SimulationDataset, groupings, to_batch
 from .conditions import network_conditions, network_variables, split_values
-from .encoder import ExchangeableEncoder
+from .encoder import ExchangeableEncoder, sum_per_dataset
 
 
 @serializable("bayesflow.experimental")
@@ -94,6 +94,28 @@ class GraphicalApproximator(Approximator):
         result = self.adapter(result, inverse=True, strict=False)
 
         return keras.tree.map_structure(keras.ops.convert_to_numpy, result)
+
+    def log_prob(self, data: Simulation) -> np.ndarray:
+        batch = to_batch(data, self.adapter, self.groupings)
+        datasets = num_datasets(data)
+
+        log_prob = keras.ops.zeros(datasets)
+
+        for i, network in enumerate(self.networks):
+            variables = network_variables(batch, network)
+            conditions = network_conditions(batch, network, self.conditions[i], self.data_nodes, self.encoders[i])
+
+            network_log_prob = self.inference_networks[i].log_prob(variables, conditions=conditions)
+            log_prob += sum_per_dataset(network_log_prob, batch[network[0]]["indices"]["dataset"], datasets)
+
+            for node in network:
+                _, log_det_jac = self.adapter(data[node].values, strict=False, log_det_jac=True)
+
+                for value in log_det_jac.values():
+                    value = keras.ops.cast(value, keras.config.floatx())
+                    log_prob += sum_per_dataset(value, batch[node]["indices"]["dataset"], datasets)
+
+        return keras.ops.convert_to_numpy(log_prob)
 
     def build_dataset(self, *, simulator, batch_size, num_batches):
         batch_fn = partial(to_batch, adapter=self.adapter, groupings=self.groupings)
