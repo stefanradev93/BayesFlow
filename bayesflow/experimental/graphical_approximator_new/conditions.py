@@ -45,6 +45,15 @@ def network_conditions(
     return keras.ops.concatenate(result, axis=-1)
 
 
+def network_variables(batch: dict, network: list[str]):
+    values = []
+
+    for node in network:
+        values.append(node_values(batch, node))
+
+    return keras.ops.concatenate(values, axis=-1)
+
+
 def node_values(batch: dict, node: str):
     values = []
 
