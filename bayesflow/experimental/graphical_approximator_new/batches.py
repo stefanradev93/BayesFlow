@@ -53,20 +53,21 @@ class SimulationDataset(keras.utils.PyDataset):
             self.order = np.random.permutation(len(self.source))
 
 
-def to_batch(simulation: Simulation, adapter: Adapter, data_node: str, groupings: list[tuple[str, ...]]) -> dict:
+def to_batch(simulation: Simulation, adapter: Adapter, groupings: dict[str, list[tuple[str, ...]]]) -> dict:
     batch = {}
 
     for node, samples in simulation.items():
         indices = {column: ids.to_numpy() for column, ids in samples.indices.items()}
         batch[node] = {"indices": indices, "values": adapter(samples.values, strict=False)}
 
-    groups = {}
+    for data_node, node_groupings in groupings.items():
+        groups = {}
 
-    for factors in groupings:
-        ids = simulation[data_node].indices.groupby(["dataset", *factors], sort=False).ngroup().to_numpy()
-        groups["+".join(factors) or "dataset"] = {"ids": ids, "counts": np.bincount(ids)}
+        for factors in node_groupings:
+            ids = simulation[data_node].indices.groupby(["dataset", *factors], sort=False).ngroup().to_numpy()
+            groups["+".join(factors) or "dataset"] = {"ids": ids, "counts": np.bincount(ids)}
 
-    batch[data_node]["groups"] = groups
+        batch[data_node]["groups"] = groups
 
     return batch
 

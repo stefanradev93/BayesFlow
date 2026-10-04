@@ -52,3 +52,13 @@ def is_exchangeable(graph: SimulationGraph, node: SimulationNode):
     reps = graph.nodes[node].get("reps", 1)
 
     return callable(reps) or isinstance(reps, str) or reps > 1
+
+
+def data_nodes(graph: SimulationGraph) -> list[SimulationNode]:
+    nodes = []
+
+    for node in nx.lexicographical_topological_sort(graph):
+        if graph.out_degree(node) == 0:
+            nodes.append(node)
+
+    return nodes

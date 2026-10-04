@@ -1,6 +1,10 @@
+import importlib
+import sys
 from typing import TYPE_CHECKING, TypeAlias
 
 import networkx as nx
+
+from bayesflow.utils.serialization import serializable
 
 if TYPE_CHECKING:
     from .expanded_graph import ExpandedGraph, ExpandedNode
@@ -8,6 +12,7 @@ if TYPE_CHECKING:
 SimulationNode: TypeAlias = str
 
 
+@serializable("bayesflow.experimental")
 class InvertedGraph(nx.DiGraph):
     def __init__(
         self,
@@ -57,6 +62,53 @@ class InvertedGraph(nx.DiGraph):
     def is_amortizable(self, variable: SimulationNode) -> bool:
         nodes = instances(self, variable)
         return not any(self.has_edge(u, w) for u in nodes for w in nodes)
+
+    def get_config(self):
+        simulation_graph = self.expanded_graph.simulation_graph
+
+        reps = {}
+
+        for node in simulation_graph:
+            node_reps = simulation_graph.nodes[node]["reps"]
+
+            if callable(node_reps):
+                node_reps = {"function": function_reference(node_reps)}
+
+            reps[node] = node_reps
+
+        return {"reps": reps, "edges": list(simulation_graph.edges), "ordering": self.ordering}
+
+    @classmethod
+    def from_config(cls, config):
+        from .simulation_graph import SimulationGraph
+
+        simulation_graph = SimulationGraph()
+
+        for node, node_reps in config["reps"].items():
+            if isinstance(node_reps, dict):
+                node_reps = import_function(node_reps["function"])
+
+            simulation_graph.add_node(node, reps=node_reps)
+
+        for parent, child in config["edges"]:
+            simulation_graph.add_edge(parent, child)
+
+        return simulation_graph.expand().invert(config["ordering"])
+
+
+def function_reference(fn) -> str:
+    module = sys.modules[fn.__module__]
+
+    if getattr(module, fn.__name__, None) is not fn:
+        raise ValueError(f"Cannot serialize {fn}: callable reps must be top-level functions.")
+
+    return f"{fn.__module__}:{fn.__name__}"
+
+
+def import_function(reference: str):
+    module, name = reference.split(":")
+
+    return getattr(importlib.import_module(module), name)
 
 
 def instances(graph, variable: SimulationNode) -> list["ExpandedNode"]:

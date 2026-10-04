@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import TypeAlias
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 
@@ -47,6 +48,27 @@ def concatenate(simulations: list[Simulation]) -> Simulation:
         concatenated[node] = NodeSamples(pd.concat(indices, ignore_index=True), values)
 
     return concatenated
+
+
+def repeat(simulation, num_copies: int) -> Simulation:
+    return concatenate([simulation] * num_copies)
+
+
+def placeholder_simulation(graph, variable_dims: dict[str, dict[str, int]]) -> Simulation:
+    simulation = {}
+
+    for node in graph:
+        columns = ["dataset", *nx.ancestors(graph, node), node]
+        indices = pd.DataFrame(0, index=[0], columns=columns)
+
+        values = {}
+
+        for variable, dim in variable_dims[node].items():
+            values[variable] = np.zeros((1, dim))
+
+        simulation[node] = NodeSamples(indices, values)
+
+    return simulation
 
 
 def num_datasets(simulation: Simulation) -> int:
