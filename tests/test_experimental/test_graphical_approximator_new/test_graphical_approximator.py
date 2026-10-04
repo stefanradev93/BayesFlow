@@ -51,6 +51,41 @@ def test_fit_sample(simulator, approximator, request):
 
     assert set(samples) == latent_variables
 
+    log_prob = approximator.log_prob(observed)
+    assert log_prob.shape == (3,)
+    assert np.all(np.isfinite(log_prob))
+
+
+def test_log_prob_sums_rows_per_dataset(two_level_simulator, two_level_approximator):
+    from bayesflow.experimental.graphical_simulator_new.samples import repeat
+
+    simulation = two_level_simulator.sample(5)
+    two_level_approximator.build_from_data(batch_of(two_level_approximator, simulation))
+
+    log_prob = two_level_approximator.log_prob(simulation)
+
+    np.testing.assert_allclose(two_level_approximator.log_prob(repeat(simulation, 2)), np.tile(log_prob, 2), atol=1e-4)
+
+
+def test_log_prob_with_adapter(two_level_simulator):
+    from bayesflow.adapters import Adapter
+    from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
+    from bayesflow.networks import CouplingFlow
+
+    adapter = Adapter().standardize(include="hyper_mean", mean=0.0, std=2.0)
+    approximator = GraphicalApproximator(
+        two_level_simulator.graph.expand().invert(),
+        adapter=adapter,
+        inference_networks=[CouplingFlow(), CouplingFlow()],
+    )
+
+    simulation = two_level_simulator.sample(2)
+    approximator.build_from_data(batch_of(approximator, simulation))
+
+    log_prob = approximator.log_prob(simulation)
+    assert log_prob.shape == (2,)
+    assert np.all(np.isfinite(log_prob))
+
 
 @pytest.mark.parametrize(("simulator", "approximator"), EXAMPLES)
 def test_serialization(simulator, approximator, request):
@@ -76,9 +111,8 @@ def test_save_and_load(tmp_path, two_data_nodes_simulator, two_data_nodes_approx
     assert loaded.conditions == approximator.conditions
     assert loaded.variable_dims == approximator.variable_dims
 
-    expected = approximator.compute_metrics(**batch, stage="validation")["loss"]
-    actual = loaded.compute_metrics(**batch, stage="validation")["loss"]
-    np.testing.assert_allclose(actual, expected, rtol=1e-5)
+    simulation = two_data_nodes_simulator.sample(2)
+    np.testing.assert_allclose(loaded.log_prob(simulation), approximator.log_prob(simulation), rtol=1e-5)
 
 
 def test_defaults(two_data_nodes_approximator):
