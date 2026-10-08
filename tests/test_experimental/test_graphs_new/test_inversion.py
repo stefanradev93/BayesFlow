@@ -60,5 +60,9 @@ def test_mean_repetitions():
     graph.add_node("from_meta", reps="num_groups")
     graph.add_node("from_callable", reps=lambda size: np.full(size, 7))
     graph.add_node("default")
+    graph.add_node("data", reps=lambda combinations: np.ones(len(combinations)))
+    for node in ["fixed", "from_meta", "from_callable", "default"]:
+        graph.add_edge(node, "data")
 
+    # data nodes are never inferred, so their reps are skipped and may need the combinations
     assert mean_repetitions(graph) == {"fixed": 3, "from_meta": 4, "from_callable": 7, "default": 1}

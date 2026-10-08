@@ -10,6 +10,7 @@ EXAMPLES = [
     ("three_level_simulator", "three_level_approximator"),
     ("two_data_nodes_simulator", "two_data_nodes_approximator"),
     ("crossed_design_irt_simulator", "crossed_design_irt_approximator"),
+    ("survey_simulator", "survey_approximator"),
 ]
 
 

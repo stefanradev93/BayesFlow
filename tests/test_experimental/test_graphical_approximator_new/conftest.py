@@ -24,6 +24,43 @@ def sample_w(local_mean):
     return {"w": np.random.normal(local_mean, 0.5, size=2)}
 
 
+# a survey, where every square is surveyed in one window of years, so obs has no row for most (square, year) pairs
+def squares_reps(size):
+    return np.random.randint(1, 5, size=size)
+
+
+def surveyed(combinations, num_years):
+    squares, square = np.unique(combinations["squares"], return_inverse=True)
+    year = combinations["years"] % num_years
+
+    first = np.random.randint(0, num_years, size=len(squares))
+    last = first + np.random.randint(0, num_years - first)
+
+    return ((year >= first[square]) & (year <= last[square])).astype(int).to_numpy()
+
+
+@pytest.fixture()
+def survey_simulator():
+    from bayesflow.experimental.graphical_simulator_new import GraphicalSimulator
+
+    simulator = GraphicalSimulator(meta_fn=lambda: {"num_years": 5})
+    simulator.add_node("globals", sample_fn=lambda: {"mu": np.random.normal()})
+    simulator.add_node("squares", sample_fn=lambda mu: {"alpha": np.random.normal(mu)}, reps=squares_reps)
+    simulator.add_node("years", sample_fn=lambda: {"beta": np.random.normal()}, reps="num_years")
+    simulator.add_node("obs", sample_fn=lambda alpha, beta: {"count": np.random.normal(alpha + beta)}, reps=surveyed)
+    simulator.add_edge("globals", "squares")
+    simulator.add_edge("globals", "years")
+    simulator.add_edge("squares", "obs")
+    simulator.add_edge("years", "obs")
+
+    return simulator
+
+
+@pytest.fixture()
+def survey_approximator(survey_simulator):
+    return approximator_for(survey_simulator)
+
+
 @pytest.fixture()
 def single_level_simulator():
     from bayesflow.experimental.graphical_simulator_new.example_simulators import single_level_simulator

@@ -47,6 +47,9 @@ def mean_repetitions(simulation_graph, num_samples: int = 1000) -> dict[str, flo
 
     mean_reps = {}
     for variable in simulation_graph:
+        if simulation_graph.out_degree(variable) == 0:
+            continue
+
         reps = simulation_graph.nodes[variable].get("reps", 1)
 
         if callable(reps):

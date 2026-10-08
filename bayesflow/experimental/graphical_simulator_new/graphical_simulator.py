@@ -50,7 +50,7 @@ def assign_indices(node, parents, reps, meta, num_datasets) -> pd.DataFrame:
     for samples in parents.values():
         combinations = combinations.merge(samples.indices)
 
-    num_samples = draw_num_samples(reps, meta, num_combinations=len(combinations))
+    num_samples = draw_num_samples(reps, meta, combinations=combinations)
     indices = combinations.apply(np.repeat, repeats=num_samples).reset_index(drop=True)
     indices[node] = np.arange(len(indices))
 
@@ -103,9 +103,9 @@ def call_sample_fn(sample_fn, arguments):
     return sample_fn(**required_arguments)
 
 
-def draw_num_samples(reps, meta, num_combinations):
+def draw_num_samples(reps, meta, combinations):
     if callable(reps):
-        return reps(size=num_combinations)
+        return call_sample_fn(reps, meta | {"size": len(combinations), "combinations": combinations})
     if isinstance(reps, str):
         return meta[reps]
 

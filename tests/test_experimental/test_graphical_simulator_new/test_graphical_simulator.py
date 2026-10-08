@@ -67,6 +67,30 @@ def test_callable_reps():
     assert list(simulation["obs"].indices.groupby("group").size()) == [1, 2, 3, 4]
 
 
+def first_items(combinations, num_items):
+    # the reps see every combination of group and item, and meta
+    assert len(combinations) == combinations["group"].nunique() * num_items
+
+    # the k-th group of a dataset observes its first k + 1 items
+    return (combinations["item"] % num_items <= combinations["group"] % 3).astype(int).to_numpy()
+
+
+def test_reps_receive_combinations_and_meta():
+    simulator = GraphicalSimulator(meta_fn=lambda: {"num_items": 4})
+    simulator.add_node("group", sample_fn=lambda: {"mu": np.random.normal()}, reps=3)
+    simulator.add_node("item", sample_fn=lambda: {"b": np.random.normal()}, reps="num_items")
+    simulator.add_node("obs", sample_fn=lambda mu, b: {"y": mu + b}, reps=first_items)
+    simulator.add_edge("group", "obs")
+    simulator.add_edge("item", "obs")
+
+    simulation = simulator.sample(2)
+    obs = simulation["obs"].indices
+
+    # combinations with zero reps have no rows
+    assert list(obs.groupby("group").size()) == [1, 2, 3, 1, 2, 3]
+    np.testing.assert_array_equal(obs["obs"], np.arange(len(obs)))
+
+
 def test_crossed_samples_join_within_school(crossed_design_irt_simulator):
     simulation = crossed_design_irt_simulator.sample(5)
     observations = simulation["observations"].indices
