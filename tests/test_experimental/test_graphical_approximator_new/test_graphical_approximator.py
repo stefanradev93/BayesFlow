@@ -49,6 +49,23 @@ def test_fit_sample(simulator, approximator, request):
     assert np.all(np.isfinite(log_prob))
 
 
+@pytest.mark.parametrize(("simulator", "approximator"), EXAMPLES)
+def test_padding_preserves_loss(simulator, approximator, request):
+    from bayesflow.experimental.graphical_approximator_new.batches import pad
+
+    simulator = request.getfixturevalue(simulator)
+    approximator = request.getfixturevalue(approximator)
+
+    batch = batch_of(approximator, simulator.sample(5))
+    approximator.build_from_data(batch)
+
+    plain = approximator.compute_metrics(**batch, stage="validation")
+    padded = approximator.compute_metrics(**pad(batch), stage="validation")
+
+    for name, value in plain.items():
+        np.testing.assert_allclose(padded[name], value, rtol=1e-4, atol=1e-4)
+
+
 def test_log_prob_sums_rows_per_dataset(two_level_simulator, two_level_approximator):
     from bayesflow.experimental.graphical_simulator_new.samples import repeat
 

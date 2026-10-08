@@ -154,8 +154,11 @@ class GraphicalApproximator(Approximator):
         for i, network in enumerate(self.networks):
             variables = network_variables(batch, network)
             conditions = self.inference_conditions(batch, i, training=stage == "training")
+            weights = batch[network[0]].get("weights")
 
-            network_metrics = self.inference_networks[i].compute_metrics(variables, conditions=conditions, stage=stage)
+            network_metrics = self.inference_networks[i].compute_metrics(
+                variables, conditions=conditions, sample_weight=weights, stage=stage
+            )
             total_loss += network_metrics["loss"]
 
             for name, value in network_metrics.items():

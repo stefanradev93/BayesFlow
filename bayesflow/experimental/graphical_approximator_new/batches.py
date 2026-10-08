@@ -40,14 +40,14 @@ class SimulationDataset(keras.utils.PyDataset):
 
     def __getitem__(self, i: int) -> dict:
         if isinstance(self.source, GraphicalSimulator):
-            return self.to_batch(self.source.sample(self.batch_size))
+            return pad(self.to_batch(self.source.sample(self.batch_size)))
 
         simulations = []
 
         for j in self.order[i * self.batch_size : (i + 1) * self.batch_size]:
             simulations.append(self.source[j])
 
-        return self.to_batch(concatenate(simulations))
+        return pad(self.to_batch(concatenate(simulations)))
 
     def on_epoch_end(self) -> None:
         if not isinstance(self.source, GraphicalSimulator):
@@ -93,6 +93,78 @@ def to_batch(
         }
 
     return batch
+
+
+def pad(batch: dict) -> dict:
+    sizes = {}
+
+    for node, entries in batch.items():
+        sizes[node] = bucket(len(entries["indices"][node]))
+
+    datasets = 0
+    for entries in batch.values():
+        datasets = max(datasets, int(np.max(entries["indices"]["dataset"])) + 1)
+
+    sizes["dataset"] = bucket(datasets)
+
+    padded = {}
+
+    for node, entries in batch.items():
+        rows = len(entries["indices"][node])
+        size = sizes[node]
+
+        indices = {}
+        for column, ids in entries["indices"].items():
+            indices[column] = pad_with(ids, size, sizes[column] - 1)
+
+        values = {}
+        for variable, value in entries["values"].items():
+            values[variable] = repeat_rows(value, size)
+
+        weights = pad_with(np.full(rows, size / rows, dtype=keras.config.floatx()), size, 0.0)
+
+        padded[node] = {"indices": indices, "values": values, "weights": weights}
+
+        if "groups" in entries:
+            groups = {}
+
+            for name, group in entries["groups"].items():
+                num_groups = bucket(len(group["counts"]))
+                groups[name] = {
+                    "ids": pad_with(group["ids"], size, num_groups - 1),
+                    "counts": pad_with(group["counts"], num_groups, 0),
+                }
+
+            padded[node]["groups"] = groups
+
+        if "steps" in entries:
+            steps = entries["steps"]
+            num_groups = bucket(len(steps["counts"]))
+            num_pairs = bucket(len(steps["earlier"]))
+
+            padded[node]["steps"] = {
+                "ids": pad_with(steps["ids"], size, num_groups - 1),
+                "counts": pad_with(steps["counts"], num_groups, 0),
+                "positions": pad_with(steps["positions"], size, 0),
+                "earlier": pad_with(steps["earlier"], num_pairs, size - 1),
+                "later": pad_with(steps["later"], num_pairs, size - 1),
+            }
+
+    return padded
+
+
+def bucket(n: int) -> int:
+    return int(np.ceil(2 ** (np.ceil(4 * np.log2(n + 1)) / 4)))
+
+
+def pad_with(array, size: int, value):
+    padding = np.full((size - len(array), *np.shape(array)[1:]), value, dtype=np.asarray(array).dtype)
+
+    return np.concatenate([array, padding])
+
+
+def repeat_rows(values, size: int):
+    return np.asarray(values)[np.arange(size) % len(values)]
 
 
 def groupings(graph: SimulationGraph, data_node: str) -> list[tuple[str, ...]]:
