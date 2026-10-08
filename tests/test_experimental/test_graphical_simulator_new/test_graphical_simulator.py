@@ -91,6 +91,21 @@ def test_reps_receive_combinations_and_meta():
     np.testing.assert_array_equal(obs["obs"], np.arange(len(obs)))
 
 
+def sample_positions(indices):
+    return {"position": indices.groupby("dataset").cumcount().to_numpy()}
+
+
+def test_batched_sample_fn_receives_indices():
+    simulator = GraphicalSimulator()
+    simulator.add_node("group", sample_fn=lambda: {"mu": np.random.normal()})
+    simulator.add_node("obs", sample_fn=sample_positions, reps=4, is_batched=True)
+    simulator.add_edge("group", "obs")
+
+    simulation = simulator.sample(3)
+
+    np.testing.assert_array_equal(simulation["obs"].values["position"].ravel(), np.tile(np.arange(4), 3))
+
+
 def test_crossed_samples_join_within_school(crossed_design_irt_simulator):
     simulation = crossed_design_irt_simulator.sample(5)
     observations = simulation["observations"].indices
