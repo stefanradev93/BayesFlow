@@ -2,8 +2,6 @@ import numpy as np
 import pytest
 from keras.src.callbacks.history import History
 
-from bayesflow.experimental.graphical_approximator_new.batches import SimulationDataset
-
 from .conftest import approximator_for
 
 EXAMPLES = [
@@ -30,14 +28,7 @@ def test_fit_sample(simulator, approximator, request):
 
     assert isinstance(approximator.fit(simulator=simulator, batch_size=2, num_batches=1, epochs=1), History)
 
-    simulations = []
-    for i in range(4):
-        simulations.append(simulator.sample(1))
-
-    dataset = SimulationDataset(
-        simulations, batch_size=2, to_batch=lambda simulation: batch_of(approximator, simulation)
-    )
-    assert isinstance(approximator.fit(dataset=dataset, epochs=1), History)
+    assert isinstance(approximator.fit(dataset=simulator.sample(4), batch_size=2, epochs=1), History)
 
     observed = simulator.sample(3)
     samples = approximator.sample(num_samples=5, conditions=observed)
@@ -188,14 +179,7 @@ def test_batch_size_from_data(two_level_simulator, two_level_approximator):
 def test_fit_with_dataset_tensorflow(single_level_simulator, single_level_approximator):
     single_level_approximator.compile()
 
-    simulations = []
-    for i in range(8):
-        simulations.append(single_level_simulator.sample(1))
-
-    dataset = SimulationDataset(
-        simulations, batch_size=4, to_batch=lambda simulation: batch_of(single_level_approximator, simulation)
-    )
-    fit = single_level_approximator.fit(dataset=dataset, epochs=1)
+    fit = single_level_approximator.fit(dataset=single_level_simulator.sample(8), batch_size=4, epochs=1)
     assert isinstance(fit, History)
 
 

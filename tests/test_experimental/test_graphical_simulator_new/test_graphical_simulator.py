@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from bayesflow.experimental.graphical_simulator_new import GraphicalSimulator
+from bayesflow.experimental.graphical_simulator_new.samples import concatenate, split
 
 SIMULATORS = ["single_level_simulator", "two_level_simulator", "three_level_simulator", "crossed_design_irt_simulator"]
 
@@ -125,3 +126,24 @@ def test_vector_valued_variables(is_batched):
         simulator.add_node("prior", sample_fn=lambda: {"beta": np.zeros(3)})
 
     assert simulator.sample(4)["prior"].values["beta"].shape == (4, 3)
+
+
+@pytest.mark.parametrize("simulator", SIMULATORS)
+def test_split(request, simulator):
+    simulation = request.getfixturevalue(simulator).sample(4)
+    parts = split(simulation)
+
+    assert len(parts) == 4
+
+    # every part is a simulation of a single dataset
+    for part in parts:
+        for node, samples in part.items():
+            assert (samples.indices["dataset"] == 0).all()
+            np.testing.assert_array_equal(samples.indices[node], np.arange(len(samples.indices)))
+
+    # concatenating the parts restores the simulation
+    restored = concatenate(parts)
+    for node, samples in simulation.items():
+        np.testing.assert_array_equal(restored[node].indices.to_numpy(), samples.indices.to_numpy())
+        for variable, values in samples.values.items():
+            np.testing.assert_array_equal(restored[node].values[variable], values)

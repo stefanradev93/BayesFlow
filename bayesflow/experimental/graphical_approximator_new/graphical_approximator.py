@@ -136,6 +136,12 @@ class GraphicalApproximator(Approximator):
     def build_dataset(self, *, simulator, batch_size, num_batches):
         return SimulationDataset(simulator, batch_size, self.to_batch, num_batches)
 
+    def fit(self, *, dataset: Simulation | keras.utils.PyDataset | None = None, **kwargs):
+        if isinstance(dataset, dict):
+            dataset = SimulationDataset(dataset, kwargs.pop("batch_size"), self.to_batch)
+
+        return super().fit(dataset=dataset, **kwargs)
+
     def compute_metrics(self, stage: str = "training", **batch):
         total_loss = 0
         metrics = {}

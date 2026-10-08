@@ -50,6 +50,36 @@ def concatenate(simulations: list[Simulation]) -> Simulation:
     return concatenated
 
 
+def split(simulation: Simulation) -> list[Simulation]:
+    positions = {}
+
+    for node, samples in simulation.items():
+        positions[node] = samples.indices.groupby("dataset").cumcount().to_numpy()
+
+    datasets = []
+
+    for dataset in range(num_datasets(simulation)):
+        datasets.append({})
+
+    for node, samples in simulation.items():
+        indices = samples.indices.copy()
+
+        for column in indices.columns.drop("dataset"):
+            indices[column] = positions[column][indices[column]]
+
+        indices["dataset"] = 0
+
+        for dataset, rows in samples.indices.groupby("dataset").indices.items():
+            values = {}
+
+            for variable, value in samples.values.items():
+                values[variable] = value[rows]
+
+            datasets[dataset][node] = NodeSamples(indices.iloc[rows].reset_index(drop=True), values)
+
+    return datasets
+
+
 def repeat(simulation, num_copies: int) -> Simulation:
     return concatenate([simulation] * num_copies)
 

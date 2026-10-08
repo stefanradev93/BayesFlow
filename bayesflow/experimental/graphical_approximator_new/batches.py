@@ -9,7 +9,7 @@ import numpy as np
 from bayesflow.adapters import Adapter
 
 from ..graphical_simulator_new import GraphicalSimulator
-from ..graphical_simulator_new.samples import Simulation, concatenate
+from ..graphical_simulator_new.samples import Simulation, concatenate, split
 from ..graphs_new import SimulationGraph
 from ..graphs_new.simulation_graph import is_exchangeable, is_interior
 
@@ -17,7 +17,7 @@ from ..graphs_new.simulation_graph import is_exchangeable, is_interior
 class SimulationDataset(keras.utils.PyDataset):
     def __init__(
         self,
-        source: GraphicalSimulator | list[Simulation],
+        source: GraphicalSimulator | Simulation,
         batch_size: int,
         to_batch: Callable[[Simulation], dict],
         num_batches: int | None = None,
@@ -31,8 +31,9 @@ class SimulationDataset(keras.utils.PyDataset):
         if isinstance(source, GraphicalSimulator):
             self.length = num_batches
         else:
-            self.length = math.ceil(len(source) / batch_size)
-            self.order = np.random.permutation(len(source))
+            self.source = split(source)
+            self.length = math.ceil(len(self.source) / batch_size)
+            self.order = np.random.permutation(len(self.source))
 
     def __len__(self) -> int:
         return self.length
