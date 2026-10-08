@@ -53,7 +53,9 @@ class SimulationDataset(keras.utils.PyDataset):
             self.order = np.random.permutation(len(self.source))
 
 
-def to_batch(simulation: Simulation, adapter: Adapter, groupings: dict[str, list[tuple[str, ...]]]) -> dict:
+def to_batch(
+    simulation: Simulation, adapter: Adapter, groupings: dict[str, list[tuple[str, ...]]], sequential: list[str] = ()
+) -> dict:
     batch = {}
 
     for node, samples in simulation.items():
@@ -68,6 +70,26 @@ def to_batch(simulation: Simulation, adapter: Adapter, groupings: dict[str, list
             groups["+".join(factors) or "dataset"] = {"ids": ids, "counts": np.bincount(ids)}
 
         batch[data_node]["groups"] = groups
+
+    for node in sequential:
+        indices = simulation[node].indices
+        group = indices.groupby(list(indices.columns.drop(node)), sort=False)
+
+        earlier = []
+        later = []
+
+        for rows in group.indices.values():
+            first, second = np.triu_indices(len(rows), k=1)
+            earlier.append(rows[first])
+            later.append(rows[second])
+
+        batch[node]["steps"] = {
+            "ids": group.ngroup().to_numpy(),
+            "counts": group.size().to_numpy(),
+            "positions": group.cumcount().to_numpy(),
+            "earlier": np.concatenate(earlier),
+            "later": np.concatenate(later),
+        }
 
     return batch
 

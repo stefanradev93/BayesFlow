@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from keras.src.callbacks.history import History
 
-from bayesflow.experimental.graphical_approximator_new.batches import SimulationDataset, to_batch
+from bayesflow.experimental.graphical_approximator_new.batches import SimulationDataset
 
 from .conftest import approximator_for
 
@@ -11,11 +11,12 @@ EXAMPLES = [
     ("two_level_simulator", "two_level_approximator"),
     ("three_level_simulator", "three_level_approximator"),
     ("two_data_nodes_simulator", "two_data_nodes_approximator"),
+    ("crossed_design_irt_simulator", "crossed_design_irt_approximator"),
 ]
 
 
 def batch_of(approximator, simulation):
-    return to_batch(simulation, approximator.adapter, approximator.groupings)
+    return approximator.to_batch(simulation)
 
 
 @pytest.mark.parametrize(("simulator", "approximator"), EXAMPLES)
@@ -87,6 +88,39 @@ def test_log_prob_with_adapter(two_level_simulator):
     assert np.all(np.isfinite(log_prob))
 
 
+@pytest.mark.parametrize(
+    ("standardize", "expected"),
+    [
+        ("inference_variables", ["hyper_mean", "hyper_std", "local_mean", "shared_std"]),
+        ("all", ["hyper_mean", "hyper_std", "local_mean", "shared_std", "y"]),
+        (["local_mean"], ["local_mean"]),
+        (None, []),
+    ],
+)
+def test_standardize(two_level_simulator, standardize, expected):
+    from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
+    from bayesflow.networks import CouplingFlow
+
+    approximator = GraphicalApproximator(
+        two_level_simulator.graph.expand().invert(),
+        inference_networks=[CouplingFlow(), CouplingFlow()],
+        standardize=standardize,
+    )
+    batch = batch_of(approximator, two_level_simulator.sample(2))
+    approximator.build_from_data(batch)
+
+    assert sorted(approximator.standardize_layers) == expected
+
+    # building runs a forward pass on placeholder zeros, which must not enter the running moments
+    for layer in approximator.standardize_layers.values():
+        assert float(layer.count[0]) == 0.0
+
+    # training updates them
+    approximator.compute_metrics(**batch, stage="training")
+    for layer in approximator.standardize_layers.values():
+        assert float(layer.count[0]) > 0.0
+
+
 @pytest.mark.parametrize(("simulator", "approximator"), EXAMPLES)
 def test_serialization(simulator, approximator, request):
     from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
@@ -131,9 +165,17 @@ def test_defaults(two_data_nodes_approximator):
             assert isinstance(encoder, ExchangeableEncoder)
 
 
-def test_rejects_non_amortizable_networks(crossed_design_irt_simulator):
-    with pytest.raises(NotImplementedError, match="not amortizable"):
-        approximator_for(crossed_design_irt_simulator)
+def test_non_amortizable_networks_are_sequential(crossed_design_irt_approximator):
+    assert crossed_design_irt_approximator.sequential == ["questions"]
+
+
+def test_rejects_networks_whose_nodes_do_not_share_rows(two_level_repeated_roots_simulator):
+    # hypers are repeated within every dataset, shared is not, but both are inferred by network 0
+    simulation = two_level_repeated_roots_simulator.sample(2)
+
+    with pytest.raises(ValueError, match="rows"):
+        approximator = approximator_for(two_level_repeated_roots_simulator)
+        approximator.compute_metrics(**batch_of(approximator, simulation))
 
 
 def test_batch_size_from_data(two_level_simulator, two_level_approximator):

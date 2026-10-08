@@ -49,6 +49,13 @@ def two_level_approximator(two_level_simulator):
 
 
 @pytest.fixture()
+def two_level_repeated_roots_simulator():
+    from bayesflow.experimental.graphical_simulator_new.example_simulators import two_level_simulator
+
+    return two_level_simulator(repeated_roots=True)
+
+
+@pytest.fixture()
 def two_data_nodes_simulator():
     from bayesflow.experimental.graphical_simulator_new.example_simulators import two_level_simulator
 
@@ -81,3 +88,8 @@ def crossed_design_irt_simulator():
     from bayesflow.experimental.graphical_simulator_new.example_simulators import crossed_design_irt_simulator
 
     return crossed_design_irt_simulator()
+
+
+@pytest.fixture()
+def crossed_design_irt_approximator(crossed_design_irt_simulator):
+    return approximator_for(crossed_design_irt_simulator)

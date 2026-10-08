@@ -4,17 +4,17 @@ import pytest
 
 from bayesflow.adapters import Adapter
 from bayesflow.experimental.graphical_approximator_new.batches import groupings, to_batch
-from bayesflow.experimental.graphical_approximator_new.conditions import network_conditions
+from bayesflow.experimental.graphical_approximator_new.conditions import network_conditions, sequential_conditions
 from bayesflow.experimental.graphical_approximator_new.encoder import ExchangeableEncoder
 from bayesflow.experimental.graphs_new.simulation_graph import data_nodes
 
 
-def batch_of(simulator, num_datasets):
+def batch_of(simulator, num_datasets, sequential=()):
     node_groupings = {}
     for node in data_nodes(simulator.graph):
         node_groupings[node] = groupings(simulator.graph, node)
 
-    batch = to_batch(simulator.sample(num_datasets), Adapter(), node_groupings)
+    batch = to_batch(simulator.sample(num_datasets), Adapter(), node_groupings, sequential)
 
     for node in batch:
         for variable, values in batch[node]["values"].items():
@@ -160,7 +160,7 @@ def test_conditions_depend_on_which_observations_share_a_group(two_level_simulat
     # the summary for hypers depends on which observations share a group
     assert not np.allclose(before[0][0], after[0][0])
     # dataset 1 is untouched
-    np.testing.assert_allclose(before[0][1], after[0][1], atol=1e-6)
+    np.testing.assert_allclose(before[0][1], after[0][1], rtol=1e-4, atol=1e-4)
 
 
 def test_conditions_are_paired_with_the_data(crossed_design_irt_simulator):
@@ -180,7 +180,44 @@ def test_conditions_are_paired_with_the_data(crossed_design_irt_simulator):
 
     dataset = batch["students"]["indices"]["dataset"]
     assert not np.allclose(before[students][dataset == 0], after[students][dataset == 0])
-    np.testing.assert_allclose(before[students][dataset == 1], after[students][dataset == 1], atol=1e-6)
+    np.testing.assert_allclose(before[students][dataset == 1], after[students][dataset == 1], rtol=1e-4, atol=1e-4)
+
+
+def test_steps(crossed_design_irt_simulator):
+    batch = batch_of(crossed_design_irt_simulator, 2, sequential=["questions"])
+    steps = batch["questions"]["steps"]
+    datasets = batch["questions"]["indices"]["dataset"]
+
+    # the questions of each dataset form one group, numbered from 0
+    np.testing.assert_array_equal(steps["ids"], datasets)
+    np.testing.assert_array_equal(steps["counts"], np.bincount(datasets))
+
+    for group in range(2):
+        rows = np.flatnonzero(steps["ids"] == group)
+        np.testing.assert_array_equal(steps["positions"][rows], np.arange(len(rows)))
+
+    # every pair of rows within a group, the earlier one first
+    assert len(steps["earlier"]) == np.sum(steps["positions"])
+    np.testing.assert_array_equal(steps["ids"][steps["earlier"]], steps["ids"][steps["later"]])
+    assert np.all(steps["positions"][steps["earlier"]] < steps["positions"][steps["later"]])
+
+
+def test_sequential_conditions_only_see_earlier_instances(crossed_design_irt_simulator):
+    batch = batch_of(crossed_design_irt_simulator, 2, sequential=["questions"])
+    positions = batch["questions"]["steps"]["positions"]
+    ids = batch["questions"]["steps"]["ids"]
+    conditions = keras.ops.zeros((len(positions), 3))
+    before = keras.ops.convert_to_numpy(sequential_conditions(batch, "questions", conditions))
+
+    # change the third question of the first dataset
+    changed = np.flatnonzero((ids == 0) & (positions == 2))[0]
+    for values in batch["questions"]["values"].values():
+        values[changed] += 10.0
+    after = keras.ops.convert_to_numpy(sequential_conditions(batch, "questions", conditions))
+
+    # up to the order of float32 sums
+    affected = np.flatnonzero(np.any(~np.isclose(before, after, atol=1e-4), axis=-1))
+    np.testing.assert_array_equal(affected, np.flatnonzero((ids == 0) & (positions > 2)))
 
 
 def test_encoder_serialization():

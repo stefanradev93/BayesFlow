@@ -55,6 +55,23 @@ def network_conditions(
     return keras.ops.concatenate(result, axis=-1)
 
 
+def sequential_conditions(batch: dict, node: str, conditions):
+    steps = batch[node]["steps"]
+    num_groups = keras.ops.shape(steps["counts"])[0]
+
+    group_conditions = gather(segment_mean(conditions, steps["ids"], num_groups), steps["ids"])
+
+    values = node_values(batch, node)
+    earlier = keras.ops.segment_sum(
+        gather(values, steps["earlier"]), steps["later"], num_segments=keras.ops.shape(values)[0]
+    )
+
+    num_earlier = keras.ops.cast(steps["positions"], values.dtype)[:, None]
+    earlier_mean = earlier / keras.ops.maximum(num_earlier, 1.0)
+
+    return keras.ops.concatenate([conditions, group_conditions, earlier_mean, keras.ops.log1p(num_earlier)], axis=-1)
+
+
 def split_values(samples, network: list[str], variable_dims: dict[str, dict[str, int]]) -> dict[str, dict]:
     values_by_node = {}
     start = 0

@@ -1,18 +1,17 @@
-from functools import partial
-
 import keras
 import numpy as np
 
 from bayesflow.adapters import Adapter
 from bayesflow.approximators import Approximator
 from bayesflow.networks import InferenceNetwork
+from bayesflow.networks.helpers.standardization.standardization import Standardization
 from bayesflow.utils.serialization import serializable, serialize
 
 from ..graphical_simulator_new.samples import NodeSamples, Simulation, num_datasets, placeholder_simulation, repeat
 from ..graphs_new import InvertedGraph
 from ..graphs_new.simulation_graph import data_nodes
 from .batches import SimulationDataset, groupings, to_batch
-from .conditions import network_conditions, network_variables, split_values
+from .conditions import network_conditions, network_variables, sequential_conditions, split_values
 from .encoder import ExchangeableEncoder, sum_per_dataset
 
 
@@ -25,12 +24,14 @@ class GraphicalApproximator(Approximator):
         inference_networks: list[InferenceNetwork],
         encoders: list[dict[str, keras.Layer]] | None = None,
         adapter: Adapter | None = None,
+        standardize: str | list[str] | None = "inference_variables",
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.graph = graph
         self.inference_networks = inference_networks
         self.adapter = adapter or Adapter()
+        self.standardize = standardize
 
         simulation_graph = graph.expanded_graph.simulation_graph
         self.data_nodes = data_nodes(simulation_graph)
@@ -42,10 +43,14 @@ class GraphicalApproximator(Approximator):
             self.groupings[node] = groupings(simulation_graph, node)
 
         self.conditions = []
+        self.sequential = []
 
         for network in self.networks:
             if not graph.is_amortizable(network[0]):
-                raise NotImplementedError(f"Network for {network} is not amortizable.")
+                if len(network) > 1:
+                    raise NotImplementedError(f"Network for {network} infers several non-amortizable nodes.")
+
+                self.sequential.append(network[0])
 
             self.conditions.append(graph.conditions(network))
 
@@ -72,11 +77,16 @@ class GraphicalApproximator(Approximator):
             else:
                 observed[node] = NodeSamples(samples.indices, {})
 
-        batch = to_batch(repeat(observed, num_samples), self.adapter, self.groupings)
+        batch = self.to_batch(repeat(observed, num_samples))
+        batch = self.standardized(batch, stage="inference")
 
         for i, network in enumerate(self.networks):
-            network_conds = network_conditions(batch, network, self.conditions[i], self.data_nodes, self.encoders[i])
-            samples = self.inference_networks[i].sample((keras.ops.shape(network_conds)[0],), conditions=network_conds)
+            if network[0] in self.sequential:
+                self.sample_sequentially(batch, i)
+                continue
+
+            conditions = self.inference_conditions(batch, i)
+            samples = self.inference_networks[i].sample((keras.ops.shape(conditions)[0],), conditions=conditions)
 
             for node, values in split_values(samples, network, self.variable_dims).items():
                 batch[node]["values"] = values
@@ -86,6 +96,7 @@ class GraphicalApproximator(Approximator):
         for network in self.networks:
             for node in network:
                 for variable, value in batch[node]["values"].items():
+                    value = self.standardizer.maybe_standardize(value, variable, forward=False)
                     value = keras.ops.convert_to_numpy(value)
                     value = value.reshape(num_samples, -1, value.shape[-1])
 
@@ -96,19 +107,24 @@ class GraphicalApproximator(Approximator):
         return keras.tree.map_structure(keras.ops.convert_to_numpy, result)
 
     def log_prob(self, data: Simulation) -> np.ndarray:
-        batch = to_batch(data, self.adapter, self.groupings)
+        batch = self.standardized(self.to_batch(data), stage="inference")
         datasets = num_datasets(data)
 
         log_prob = keras.ops.zeros(datasets)
 
         for i, network in enumerate(self.networks):
             variables = network_variables(batch, network)
-            conditions = network_conditions(batch, network, self.conditions[i], self.data_nodes, self.encoders[i])
+            conditions = self.inference_conditions(batch, i)
 
             network_log_prob = self.inference_networks[i].log_prob(variables, conditions=conditions)
             log_prob += sum_per_dataset(network_log_prob, batch[network[0]]["indices"]["dataset"], datasets)
 
             for node in network:
+                for variable, value in batch[node]["values"].items():
+                    if variable in self.standardizer.standardize:
+                        _, log_det_jac = self.standardizer.maybe_standardize(value, variable, log_det_jac=True)
+                        log_prob += sum_per_dataset(log_det_jac, batch[node]["indices"]["dataset"], datasets)
+
                 _, log_det_jac = self.adapter(data[node].values, strict=False, log_det_jac=True)
 
                 for value in log_det_jac.values():
@@ -118,19 +134,20 @@ class GraphicalApproximator(Approximator):
         return keras.ops.convert_to_numpy(log_prob)
 
     def build_dataset(self, *, simulator, batch_size, num_batches):
-        batch_fn = partial(to_batch, adapter=self.adapter, groupings=self.groupings)
-
-        return SimulationDataset(simulator, batch_size, batch_fn, num_batches)
+        return SimulationDataset(simulator, batch_size, self.to_batch, num_batches)
 
     def compute_metrics(self, stage: str = "training", **batch):
         total_loss = 0
         metrics = {}
 
+        if not self.built:
+            self.build_from_data(batch)
+
+        batch = self.standardized(batch, stage)
+
         for i, network in enumerate(self.networks):
             variables = network_variables(batch, network)
-            conditions = network_conditions(
-                batch, network, self.conditions[i], self.data_nodes, self.encoders[i], training=stage == "training"
-            )
+            conditions = self.inference_conditions(batch, i, training=stage == "training")
 
             network_metrics = self.inference_networks[i].compute_metrics(variables, conditions=conditions, stage=stage)
             total_loss += network_metrics["loss"]
@@ -148,6 +165,7 @@ class GraphicalApproximator(Approximator):
             "inference_networks": self.inference_networks,
             "encoders": self.encoders,
             "adapter": self.adapter,
+            "standardize": self.standardize,
         }
 
         return super().get_config() | serialize(config)
@@ -158,11 +176,88 @@ class GraphicalApproximator(Approximator):
     def build_from_config(self, config):
         self.variable_dims = config["variable_dims"]
 
+        variable_shapes = {}
+        standardized_variables = []
+
+        for node, dims in self.variable_dims.items():
+            for variable, dim in dims.items():
+                variable_shapes[variable] = (None, dim)
+
+                if self.standardize == "all":
+                    standardized_variables.append(variable)
+                elif self.standardize == "inference_variables":
+                    if node not in self.data_nodes:
+                        standardized_variables.append(variable)
+                elif variable in (self.standardize or []):
+                    standardized_variables.append(variable)
+
+        self.standardizer = Standardization(standardized_variables)
+        self.standardizer.build(variable_shapes)
+
         simulation_graph = self.graph.expanded_graph.simulation_graph
         simulation = placeholder_simulation(simulation_graph, self.variable_dims)
 
-        self.compute_metrics(**to_batch(simulation, Adapter(), self.groupings), stage="training")
         self.built = True
+
+        self.compute_metrics(**self.to_batch(simulation, adapter=Adapter()), stage="validation")
+
+    def to_batch(self, simulation: Simulation, adapter: Adapter | None = None) -> dict:
+        datasets = num_datasets(simulation)
+
+        # the nodes of a network are concatenated row by row, so each must have one row per dataset
+        for network in self.networks:
+            if len(network) > 1:
+                for node in network:
+                    if len(simulation[node].indices) != datasets:
+                        raise ValueError(
+                            f"Network {network} infers {node}, which has more than one row per dataset. "
+                            "The nodes of a network must share their rows."
+                        )
+
+        return to_batch(simulation, adapter or self.adapter, self.groupings, self.sequential)
+
+    def inference_conditions(self, batch: dict, i: int, training: bool = False):
+        network = self.networks[i]
+        conditions = network_conditions(
+            batch, network, self.conditions[i], self.data_nodes, self.encoders[i], training=training
+        )
+
+        if network[0] in self.sequential:
+            conditions = sequential_conditions(batch, network[0], conditions)
+
+        return conditions
+
+    def sample_sequentially(self, batch: dict, i: int):
+        node = self.networks[i][0]
+        positions = batch[node]["steps"]["positions"]
+
+        values = {}
+
+        for variable, dim in self.variable_dims[node].items():
+            values[variable] = keras.ops.zeros((len(positions), dim))
+
+        batch[node]["values"] = values
+
+        for step in range(int(np.max(positions)) + 1):
+            conditions = self.inference_conditions(batch, i)
+            samples = self.inference_networks[i].sample((len(positions),), conditions=conditions)
+            is_step = (positions == step)[:, None]
+
+            for variable, value in split_values(samples, [node], self.variable_dims)[node].items():
+                values[variable] = keras.ops.where(is_step, value, values[variable])
+
+    def standardized(self, batch: dict, stage: str) -> dict:
+        result = {}
+
+        for node, entries in batch.items():
+            values = {}
+
+            for variable, value in entries["values"].items():
+                values[variable] = self.standardizer.maybe_standardize(value, variable, stage=stage)
+
+            result[node] = entries | {"values": values}
+
+        return result
 
     def build_from_data(self, batch):
         variable_dims = {}
