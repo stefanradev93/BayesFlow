@@ -210,7 +210,7 @@ class GraphicalApproximator(Approximator):
 
         self.compute_metrics(**self.to_batch(simulation, adapter=Adapter()), stage="validation")
 
-    def to_batch(self, simulation: Simulation, adapter: Adapter | None = None) -> dict:
+    def to_batch(self, simulation: Simulation, adapter: Adapter | None = None, padded: bool = False) -> dict:
         datasets = num_datasets(simulation)
 
         # the nodes of a network are concatenated row by row, so each must have one row per dataset
@@ -223,7 +223,7 @@ class GraphicalApproximator(Approximator):
                             "The nodes of a network must share their rows."
                         )
 
-        return to_batch(simulation, adapter or self.adapter, self.groupings, self.sequential)
+        return to_batch(simulation, adapter or self.adapter, self.groupings, self.sequential, padded)
 
     def inference_conditions(self, batch: dict, i: int, training: bool = False):
         network = self.networks[i]

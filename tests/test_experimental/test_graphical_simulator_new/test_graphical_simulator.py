@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from bayesflow.experimental.graphical_simulator_new import GraphicalSimulator
-from bayesflow.experimental.graphical_simulator_new.samples import concatenate, split
+from bayesflow.experimental.graphical_simulator_new.samples import concatenate, select, split
 
 SIMULATORS = ["single_level_simulator", "two_level_simulator", "three_level_simulator", "crossed_design_irt_simulator"]
 
@@ -186,3 +186,18 @@ def test_split(request, simulator):
         np.testing.assert_array_equal(restored[node].indices.to_numpy(), samples.indices.to_numpy())
         for variable, values in samples.values.items():
             np.testing.assert_array_equal(restored[node].values[variable], values)
+
+
+@pytest.mark.parametrize("simulator", SIMULATORS)
+def test_select(request, simulator):
+    simulation = request.getfixturevalue(simulator).sample(6)
+    datasets = np.array([4, 1, 3])
+
+    selected = select(simulation, datasets)
+    expected = concatenate([split(simulation)[j] for j in sorted(datasets)])
+
+    for node, samples in expected.items():
+        np.testing.assert_array_equal(selected[node].indices.to_numpy(), samples.indices.to_numpy())
+        assert list(selected[node].indices.columns) == list(samples.indices.columns)
+        for variable, values in samples.values.items():
+            np.testing.assert_array_equal(selected[node].values[variable], values)

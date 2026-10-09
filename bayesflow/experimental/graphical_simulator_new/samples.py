@@ -80,6 +80,43 @@ def split(simulation: Simulation) -> list[Simulation]:
     return datasets
 
 
+def dataset_rows(simulation: Simulation) -> dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]]:
+    rows = {}
+
+    for node, samples in simulation.items():
+        dataset = samples.indices["dataset"].to_numpy()
+        counts = np.bincount(dataset, minlength=num_datasets(simulation))
+        rows[node] = (np.argsort(dataset, kind="stable"), np.cumsum(counts) - counts, counts)
+
+    return rows
+
+
+def select(simulation: Simulation, datasets: np.ndarray, rows: dict | None = None) -> Simulation:
+    datasets = np.sort(datasets)
+    rows = rows or dataset_rows(simulation)
+
+    kept = {"dataset": datasets}
+    for node, (order, starts, counts) in rows.items():
+        first = np.repeat(starts[datasets] - (np.cumsum(counts[datasets]) - counts[datasets]), counts[datasets])
+        kept[node] = np.sort(order[first + np.arange(len(first))])
+
+    selected = {}
+    for node, samples in simulation.items():
+        node_rows = kept[node]
+
+        indices = {}
+        for column in samples.indices.columns:
+            indices[column] = np.searchsorted(kept[column], samples.indices[column].to_numpy()[node_rows])
+
+        values = {}
+        for variable, value in samples.values.items():
+            values[variable] = value[node_rows]
+
+        selected[node] = NodeSamples(pd.DataFrame(indices), values)
+
+    return selected
+
+
 def repeat(simulation, num_copies: int) -> Simulation:
     return concatenate([simulation] * num_copies)
 

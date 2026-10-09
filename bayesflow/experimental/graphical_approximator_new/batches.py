@@ -9,7 +9,7 @@ import numpy as np
 from bayesflow.adapters import Adapter
 
 from ..graphical_simulator_new import GraphicalSimulator
-from ..graphical_simulator_new.samples import Simulation, concatenate, split
+from ..graphical_simulator_new.samples import Simulation, dataset_rows, num_datasets, select
 from ..graphs_new import SimulationGraph
 from ..graphs_new.simulation_graph import is_exchangeable, is_interior
 
@@ -31,37 +31,38 @@ class SimulationDataset(keras.utils.PyDataset):
         if isinstance(source, GraphicalSimulator):
             self.length = num_batches
         else:
-            self.source = split(source)
-            self.length = math.ceil(len(self.source) / batch_size)
-            self.order = np.random.permutation(len(self.source))
+            self.length = math.ceil(num_datasets(source) / batch_size)
+            self.order = np.random.permutation(num_datasets(source))
+            self.rows = dataset_rows(source)
 
     def __len__(self) -> int:
         return self.length
 
     def __getitem__(self, i: int) -> dict:
         if isinstance(self.source, GraphicalSimulator):
-            return pad(self.to_batch(self.source.sample(self.batch_size)))
+            return self.to_batch(self.source.sample(self.batch_size), padded=True)
 
-        simulations = []
+        datasets = self.order[i * self.batch_size : (i + 1) * self.batch_size]
 
-        for j in self.order[i * self.batch_size : (i + 1) * self.batch_size]:
-            simulations.append(self.source[j])
-
-        return pad(self.to_batch(concatenate(simulations)))
+        return self.to_batch(select(self.source, datasets, self.rows), padded=True)
 
     def on_epoch_end(self) -> None:
         if not isinstance(self.source, GraphicalSimulator):
-            self.order = np.random.permutation(len(self.source))
+            self.order = np.random.permutation(num_datasets(self.source))
 
 
 def to_batch(
-    simulation: Simulation, adapter: Adapter, groupings: dict[str, list[tuple[str, ...]]], sequential: list[str] = ()
+    simulation: Simulation,
+    adapter: Adapter,
+    groupings: dict[str, list[tuple[str, ...]]],
+    sequential: list[str] = (),
+    padded: bool = False,
 ) -> dict:
     batch = {}
 
     for node, samples in simulation.items():
         indices = {column: ids.to_numpy() for column, ids in samples.indices.items()}
-        batch[node] = {"indices": indices, "values": adapter(samples.values, strict=False)}
+        batch[node] = {"indices": indices, "values": samples.values}
 
     for data_node, node_groupings in groupings.items():
         groups = {}
@@ -91,6 +92,12 @@ def to_batch(
             "earlier": np.concatenate(earlier),
             "later": np.concatenate(later),
         }
+
+    if padded:
+        batch = pad(batch)
+
+    for entries in batch.values():
+        entries["values"] = adapter(entries["values"], strict=False)
 
     return batch
 
