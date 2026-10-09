@@ -60,8 +60,15 @@ class InvertedGraph(nx.DiGraph):
         return result
 
     def is_amortizable(self, variable: SimulationNode) -> bool:
+        # a variable is amortizable if none of its instances is conditioned on another one
         nodes = instances(self, variable)
-        return not any(self.has_edge(u, w) for u in nodes for w in nodes)
+
+        for node in nodes:
+            for other in nodes:
+                if self.has_edge(node, other):
+                    return False
+
+        return True
 
     def get_config(self):
         simulation_graph = self.expanded_graph.simulation_graph

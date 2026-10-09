@@ -2,7 +2,7 @@ from typing import Callable, TypeAlias
 
 import networkx as nx
 
-from .expanded_graph import ExpandedGraph, ExpandedNode
+from .expanded_graph import ExpandedGraph, ExpandedNode, instances
 
 SimulationNode: TypeAlias = str
 
@@ -17,31 +17,36 @@ class SimulationGraph(nx.DiGraph):
 
         for variable in nx.lexicographical_topological_sort(self):
             if is_interior(self, variable) and is_exchangeable(self, variable):
-                instances = [node for node in expanded if node.original == variable]
-
-                for node in instances:
+                for node in instances(expanded, variable):
                     split(expanded, node)
 
         return ExpandedGraph(expanded, simulation_graph=self)
 
 
 def split(graph: nx.DiGraph, node: ExpandedNode):
+    # replaces the node and all its descendants by two copies, which share the incoming edges
     subtree = {node} | nx.descendants(graph, node)
     inner_edges = list(graph.subgraph(subtree).edges)
-    incoming_edges = [(u, w) for u, w in graph.in_edges(subtree) if u not in subtree]
+
+    incoming_edges = []
+    for parent, child in graph.in_edges(subtree):
+        if parent not in subtree:
+            incoming_edges.append((parent, child))
 
     graph.remove_nodes_from(subtree)
 
     for k in (1, 2):
+        copies = {}
+        for member in subtree:
+            copies[member] = ExpandedNode(member.original, (*member.index, (node.original, k)))
 
-        def copy(w: ExpandedNode) -> ExpandedNode:
-            return ExpandedNode(w.original, (*w.index, (node.original, k)))
+        graph.add_nodes_from(copies.values())
 
-        graph.add_nodes_from(copy(w) for w in subtree)
-        graph.add_edges_from((copy(u), copy(w)) for u, w in inner_edges)
-        graph.add_edges_from((u, copy(w)) for u, w in incoming_edges)
+        for parent, child in inner_edges:
+            graph.add_edge(copies[parent], copies[child])
 
-    return graph
+        for parent, child in incoming_edges:
+            graph.add_edge(parent, copies[child])
 
 
 def is_interior(graph: SimulationGraph, node: SimulationNode):

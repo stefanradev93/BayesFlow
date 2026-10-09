@@ -1,16 +1,21 @@
 import itertools
-import numpy as np
 from typing import TYPE_CHECKING
+
+import numpy as np
+
+from .inverted_graph import InvertedGraph
 
 if TYPE_CHECKING:
     from .expanded_graph import ExpandedGraph
 
-from .inverted_graph import InvertedGraph
-
 
 def enumerate_factorizations(expanded_graph: "ExpandedGraph") -> list[InvertedGraph]:
     simulation_graph = expanded_graph.simulation_graph
-    latent = sorted(v for v in simulation_graph if simulation_graph.out_degree(v) > 0)
+
+    latent = []
+    for variable in sorted(simulation_graph):
+        if simulation_graph.out_degree(variable) > 0:
+            latent.append(variable)
 
     factorizations = []
     for ordering in itertools.permutations(latent):
@@ -23,25 +28,27 @@ def select_factorization(factorizations: list[InvertedGraph]) -> InvertedGraph:
     simulation_graph = factorizations[0].expanded_graph.simulation_graph
     mean_reps = mean_repetitions(simulation_graph)
 
+    # the cost is the expected number of instances that are inferred sequentially
     costs = []
     for factorization in factorizations:
-        sequential_instances = 0
+        cost = 0
 
         for variable in simulation_graph:
             if not factorization.is_amortizable(variable):
-                sequential_instances += mean_reps[variable]
+                cost += mean_reps[variable]
 
-        costs.append(sequential_instances)
+        costs.append(cost)
 
     return factorizations[np.argmin(costs)]
 
 
 def mean_repetitions(simulation_graph, num_samples: int = 1000) -> dict[str, float]:
-    meta_fn = simulation_graph.meta_fn
-    meta_samples = [meta_fn() for _ in range(num_samples)] if meta_fn else []
-
     mean_meta = {}
-    if meta_samples:
+    if simulation_graph.meta_fn:
+        meta_samples = []
+        for _ in range(num_samples):
+            meta_samples.append(simulation_graph.meta_fn())
+
         for key in meta_samples[0]:
             mean_meta[key] = np.mean([sample[key] for sample in meta_samples])
 

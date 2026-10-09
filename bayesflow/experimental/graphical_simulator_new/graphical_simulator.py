@@ -93,7 +93,7 @@ class GraphicalSimulator:
             ``NodeSample`` contains two fields: ``indices`` contains a dictionary
             mapping each sample to its dataset, every ancestor and the node index
             itself. ``values`` maps every variable to an array of shape
-            ``(num_samples, dim)``. The output can be used as input to the
+            ``(num_samples, dim)``. The output can be used as input to
             ``GraphicalApproximator.fit``.
         """
         meta_fn = self.graph.meta_fn

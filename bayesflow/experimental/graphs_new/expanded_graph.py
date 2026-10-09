@@ -12,8 +12,6 @@ if TYPE_CHECKING:
 SimulationNode: TypeAlias = str
 
 
-# expanded nodes have their own class, storing the original node name and an index
-# storing which groups it belongs to
 class ExpandedNode(NamedTuple):
     original: str
     index: tuple[tuple[str, int], ...] = ()
@@ -29,27 +27,31 @@ class ExpandedGraph(nx.DiGraph):
             return select_factorization(enumerate_factorizations(self))
 
         inverted = nx.DiGraph()
-        inverted.add_nodes_from(node for node in self if self.out_degree(node) == 0)
+        for node in self:
+            if self.out_degree(node) == 0:
+                inverted.add_node(node)
 
         for variable in ordering:
             for node in instances(self, variable):
-                parents = minimal_conditions(self, node, known=set(inverted))
+                conditions = minimal_conditions(self, node, known=set(inverted))
+
                 inverted.add_node(node)
-                inverted.add_edges_from((parent, node) for parent in parents)
+                for condition in conditions:
+                    inverted.add_edge(condition, node)
 
         return InvertedGraph(inverted, expanded_graph=self, ordering=ordering)
 
 
 def minimal_conditions(graph: nx.DiGraph, node: ExpandedNode, known: set[ExpandedNode]) -> set[ExpandedNode]:
-    kept = set(known)
+    # drops known nodes one by one, as long as the node stays independent of all dropped nodes
+    conditions = set(known)
 
     for candidate in sorted(known):
-        without = kept - {candidate}
-        dropped = known - without
-        if nx.is_d_separator(graph, {node}, dropped, without):
-            kept = without
+        fewer = conditions - {candidate}
+        if nx.is_d_separator(graph, {node}, known - fewer, fewer):
+            conditions = fewer
 
-    return kept
+    return conditions
 
 
 def instances(graph, variable: SimulationNode) -> list[ExpandedNode]:
