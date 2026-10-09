@@ -9,7 +9,8 @@ import numpy as np
 from bayesflow.adapters import Adapter
 
 from ..graphical_simulator_new import GraphicalSimulator
-from ..graphical_simulator_new.samples import Simulation, dataset_rows, num_datasets, select
+from ..graphical_simulator_new.indexing_helpers import concatenated_ranges, group_ids
+from ..graphical_simulator_new.samples import Simulation, num_datasets, select
 from ..graphs_new import SimulationGraph
 from ..graphs_new.simulation_graph import is_exchangeable, is_interior
 
@@ -33,7 +34,6 @@ class SimulationDataset(keras.utils.PyDataset):
         else:
             self.length = math.ceil(num_datasets(source) / batch_size)
             self.order = np.random.permutation(num_datasets(source))
-            self.rows = dataset_rows(source)
 
     def __len__(self) -> int:
         return self.length
@@ -44,7 +44,7 @@ class SimulationDataset(keras.utils.PyDataset):
 
         datasets = self.order[i * self.batch_size : (i + 1) * self.batch_size]
 
-        return self.to_batch(select(self.source, datasets, self.rows), padded=True)
+        return self.to_batch(select(self.source, datasets), padded=True)
 
     def on_epoch_end(self) -> None:
         if not isinstance(self.source, GraphicalSimulator):
@@ -61,36 +61,44 @@ def to_batch(
     batch = {}
 
     for node, samples in simulation.items():
-        indices = {column: ids.to_numpy() for column, ids in samples.indices.items()}
-        batch[node] = {"indices": indices, "values": samples.values}
+        batch[node] = {"indices": samples.indices, "values": samples.values}
 
     for data_node, node_groupings in groupings.items():
         groups = {}
 
         for factors in node_groupings:
-            ids = simulation[data_node].indices.groupby(["dataset", *factors], sort=False).ngroup().to_numpy()
+            columns = []
+            for factor in ["dataset", *factors]:
+                columns.append(simulation[data_node].indices[factor])
+
+            ids = group_ids(columns)
             groups["+".join(factors) or "dataset"] = {"ids": ids, "counts": np.bincount(ids)}
 
         batch[data_node]["groups"] = groups
 
     for node in sequential:
-        indices = simulation[node].indices
-        group = indices.groupby(list(indices.columns.drop(node)), sort=False)
+        columns = []
+        for column, ids in simulation[node].indices.items():
+            if column != node:
+                columns.append(ids)
 
-        earlier = []
-        later = []
+        ids = group_ids(columns)
+        counts = np.bincount(ids)
+        starts = np.cumsum(counts) - counts
+        order = np.argsort(ids, kind="stable")
 
-        for rows in group.indices.values():
-            first, second = np.triu_indices(len(rows), k=1)
-            earlier.append(rows[first])
-            later.append(rows[second])
+        positions = np.empty(len(ids), dtype=np.int64)
+        positions[order] = np.arange(len(ids)) - np.repeat(starts, counts)
+
+        later = np.repeat(np.arange(len(ids)), positions)
+        earlier = order[concatenated_ranges(starts[ids], positions)]
 
         batch[node]["steps"] = {
-            "ids": group.ngroup().to_numpy(),
-            "counts": group.size().to_numpy(),
-            "positions": group.cumcount().to_numpy(),
-            "earlier": np.concatenate(earlier),
-            "later": np.concatenate(later),
+            "ids": ids,
+            "counts": counts,
+            "positions": positions,
+            "earlier": earlier,
+            "later": later,
         }
 
     if padded:

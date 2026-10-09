@@ -60,7 +60,7 @@ def test_mean_repetitions():
     graph.add_node("from_meta", reps="num_groups")
     graph.add_node("from_callable", reps=lambda size: np.full(size, 7))
     graph.add_node("default")
-    graph.add_node("data", reps=lambda combinations: np.ones(len(combinations)))
+    graph.add_node("data", reps=lambda combinations: np.ones(len(combinations["dataset"])))
     for node in ["fixed", "from_meta", "from_callable", "default"]:
         graph.add_edge(node, "data")
 

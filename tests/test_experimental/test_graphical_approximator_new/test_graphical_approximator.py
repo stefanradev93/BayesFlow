@@ -67,14 +67,16 @@ def test_padding_preserves_loss(simulator, approximator, request):
 
 
 def test_log_prob_sums_rows_per_dataset(two_level_simulator, two_level_approximator):
-    from bayesflow.experimental.graphical_simulator_new.samples import repeat
+    from bayesflow.experimental.graphical_simulator_new.samples import concatenate
 
     simulation = two_level_simulator.sample(5)
     two_level_approximator.build_from_data(batch_of(two_level_approximator, simulation))
 
     log_prob = two_level_approximator.log_prob(simulation)
 
-    np.testing.assert_allclose(two_level_approximator.log_prob(repeat(simulation, 2)), np.tile(log_prob, 2), atol=1e-4)
+    np.testing.assert_allclose(
+        two_level_approximator.log_prob(concatenate([simulation] * 2)), np.tile(log_prob, 2), atol=1e-4
+    )
 
 
 def test_log_prob_with_adapter(two_level_simulator):

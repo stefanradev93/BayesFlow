@@ -3,10 +3,10 @@ from typing import Any, Callable
 
 import networkx as nx
 import numpy as np
-import pandas as pd
 
 from ..graphs_new import SimulationGraph
-from .samples import NodeSamples, Simulation
+from .indexing_helpers import join
+from .samples import NodeSamples, Simulation, num_rows
 
 
 class GraphicalSimulator:
@@ -45,24 +45,28 @@ class GraphicalSimulator:
         return simulation
 
 
-def assign_indices(node, parents, reps, meta, num_datasets) -> pd.DataFrame:
-    combinations = pd.DataFrame({"dataset": np.arange(num_datasets)})
+def assign_indices(node, parents, reps, meta, num_datasets) -> dict[str, np.ndarray]:
+    combinations = {"dataset": np.arange(num_datasets)}
     for samples in parents.values():
-        combinations = combinations.merge(samples.indices)
+        combinations = join(combinations, samples.indices)
 
     num_samples = draw_num_samples(reps, meta, combinations=combinations)
-    indices = combinations.apply(np.repeat, repeats=num_samples).reset_index(drop=True)
-    indices[node] = np.arange(len(indices))
+
+    indices = {}
+    for column, ids in combinations.items():
+        indices[column] = np.repeat(ids, num_samples)
+
+    indices[node] = np.arange(num_rows(indices))
 
     return indices
 
 
 def draw_values(sample_fn, parents, indices, meta, is_batched) -> dict[str, np.ndarray]:
-    num_samples = len(indices)
+    num_samples = num_rows(indices)
     parent_values = {}
 
     for parent, samples in parents.items():
-        parent_sample = indices[parent].to_numpy()
+        parent_sample = indices[parent]
 
         for variable, values in samples.values.items():
             parent_values[variable] = values[parent_sample]
@@ -105,7 +109,7 @@ def call_sample_fn(sample_fn, arguments):
 
 def draw_num_samples(reps, meta, combinations):
     if callable(reps):
-        return call_sample_fn(reps, meta | {"size": len(combinations), "combinations": combinations})
+        return call_sample_fn(reps, meta | {"size": num_rows(combinations), "combinations": combinations})
     if isinstance(reps, str):
         return meta[reps]
 

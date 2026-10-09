@@ -1,4 +1,5 @@
 import keras
+import networkx as nx
 import numpy as np
 
 from bayesflow.adapters import Adapter
@@ -7,7 +8,13 @@ from bayesflow.networks import InferenceNetwork
 from bayesflow.networks.helpers.standardization.standardization import Standardization
 from bayesflow.utils.serialization import serializable, serialize
 
-from ..graphical_simulator_new.samples import NodeSamples, Simulation, num_datasets, placeholder_simulation, repeat
+from ..graphical_simulator_new.samples import (
+    NodeSamples,
+    Simulation,
+    concatenate,
+    num_datasets,
+    num_rows,
+)
 from ..graphs_new import InvertedGraph
 from ..graphs_new.simulation_graph import data_nodes
 from .batches import SimulationDataset, groupings, to_batch
@@ -77,7 +84,7 @@ class GraphicalApproximator(Approximator):
             else:
                 observed[node] = NodeSamples(samples.indices, {})
 
-        batch = self.to_batch(repeat(observed, num_samples))
+        batch = self.to_batch(concatenate([observed] * num_samples))
         batch = self.standardized(batch, stage="inference")
 
         for i, network in enumerate(self.networks):
@@ -217,7 +224,7 @@ class GraphicalApproximator(Approximator):
         for network in self.networks:
             if len(network) > 1:
                 for node in network:
-                    if len(simulation[node].indices) != datasets:
+                    if num_rows(simulation[node].indices) != datasets:
                         raise ValueError(
                             f"Network {network} infers {node}, which has more than one row per dataset. "
                             "The nodes of a network must share their rows."
@@ -283,3 +290,21 @@ class GraphicalApproximator(Approximator):
         root = self.networks[0][0]
 
         return keras.ops.shape(data[root]["indices"][root])[0]
+
+
+def placeholder_simulation(graph, variable_dims: dict[str, dict[str, int]]) -> Simulation:
+    simulation = {}
+
+    for node in graph:
+        indices = {}
+        for column in ["dataset", *nx.ancestors(graph, node), node]:
+            indices[column] = np.zeros(1, dtype=np.int64)
+
+        values = {}
+
+        for variable, dim in variable_dims[node].items():
+            values[variable] = np.zeros((1, dim))
+
+        simulation[node] = NodeSamples(indices, values)
+
+    return simulation

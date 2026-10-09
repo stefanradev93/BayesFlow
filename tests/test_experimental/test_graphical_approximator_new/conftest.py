@@ -36,7 +36,7 @@ def surveyed(combinations, num_years):
     first = np.random.randint(0, num_years, size=len(squares))
     last = first + np.random.randint(0, num_years - first)
 
-    return ((year >= first[square]) & (year <= last[square])).astype(int).to_numpy()
+    return ((year >= first[square]) & (year <= last[square])).astype(int)
 
 
 @pytest.fixture()
