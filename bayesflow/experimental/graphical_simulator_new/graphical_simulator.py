@@ -10,6 +10,22 @@ from .samples import NodeSamples, Simulation, num_rows
 
 
 class GraphicalSimulator:
+    """
+    A graph-based simulator for multilevel models.
+
+    The model is a directed acyclic graph whose nodes hold sampling functions.
+    Every node creates samples once for each combination of its parent's samples.
+    The data are stored in long format: one row per sample, with integer indices
+    of the dataset, all ancestors, and the node itself.
+
+    Parameters
+    ----------
+    meta_fn: Callable([], dict[str, Any]], optional
+        Function returning a dict of meta data, called once per call to ``sample``.
+        Meta data can set the number of repetitions of a node via ``reps``,
+        and sampling functions can accept all keys of the return meta data.
+    """
+
     def __init__(self, meta_fn: Callable[[], dict[str, Any]] | None = None):
         self.graph = SimulationGraph(meta_fn=meta_fn)
 
@@ -20,25 +36,79 @@ class GraphicalSimulator:
         reps: int | str | Callable = 1,
         is_batched: bool = False,
     ):
+        """
+        Adds a node with its sampling function and number of repetitions.
+
+        Parameters
+        ----------
+        node : str
+            Name of the node.
+        sample_fn: Callable[..., dict[str, Any]]
+            Function returning a dict that maps variable names to sampled values.
+            Each ``sample_fn`` of a node can accept arguments that are named
+            by either the variable names of the node's parents or the meta data.
+        reps : int, str or Callable, optional
+            Number of repetitions of the node per combination of its parents'
+            values. Used to vary the number of groups for each simulated dataset.
+            Either a fixed integer, a key of the meta data, or a function
+            returning a single integer. Default is 1.
+        is_batched : bool, optional
+            If False, ``sample_fn`` is called once per sample with the values
+            of its parents. For much faster batched sampling, set it to `True`.
+            In this case, ``sample_fn`` must take an addition argument called
+            ``batch_size`` and return a dictionary of sampled values with shape
+            (batch_size, dim).
+        """
         self.graph.add_node(node, sample_fn=sample_fn, reps=reps, is_batched=is_batched)
 
     def add_edge(self, from_node: str, to_node: str):
+        """
+        Adds a directed edge indicating a dependency between two nodes.
+
+        Parameters
+        ----------
+        from_node : str
+            Parent node, whose variables are passed to the sampling function of
+            the child.
+        to_node : str
+            Child node, which is repeated for every sample of the parent.
+        """
         self.graph.add_edge(from_node, to_node)
 
     def sample(self, num_datasets: int, meta: dict[str, Any] | None = None) -> Simulation:
+        """
+        Samples datasets by traversing the graph in topological order.
+
+        Parameters
+        ----------
+        num_datasets : int
+            The number of datasets to sample.
+        meta : dict[str, Any], optional
+            Meta data that overrides the output of ``meta_fn``.
+
+        Returns
+        -------
+        simulation : dict[str, NodeSamples]
+            The samples of every node of type ``NodeSamples``.
+            ``NodeSample`` contains two fields: ``indices`` contains a dictionary
+            mapping each sample to its dataset, every ancestor and the node index
+            itself. ``values`` maps every variable to an array of shape
+            ``(num_samples, dim)``. The output can be used as input to the
+            ``GraphicalApproximator.fit``.
+        """
         meta_fn = self.graph.meta_fn
         meta = (meta_fn() if meta_fn else {}) | (meta or {})
 
         simulation = {}
 
         for node in nx.lexicographical_topological_sort(self.graph):
-            parents = {parent: simulation[parent] for parent in self.graph.predecessors(node)}
-            sample_fn = self.graph.nodes[node]["sample_fn"]
-            reps = self.graph.nodes[node]["reps"]
-            is_batched = self.graph.nodes[node]["is_batched"]
+            parents = {}
+            for parent in self.graph.predecessors(node):
+                parents[parent] = simulation[parent]
 
-            indices = assign_indices(node, parents, reps, meta, num_datasets)
-            values = draw_values(sample_fn, parents, indices, meta, is_batched)
+            settings = self.graph.nodes[node]
+            indices = assign_indices(node, parents, settings["reps"], meta, num_datasets)
+            values = draw_values(settings["sample_fn"], parents, indices, meta, settings["is_batched"])
 
             simulation[node] = NodeSamples(indices, values)
 
@@ -47,14 +117,20 @@ class GraphicalSimulator:
 
 def assign_indices(node, parents, reps, meta, num_datasets) -> dict[str, np.ndarray]:
     combinations = {"dataset": np.arange(num_datasets)}
+
     for samples in parents.values():
         combinations = join(combinations, samples.indices)
 
-    num_samples = draw_num_samples(reps, meta, combinations=combinations)
+    if callable(reps):
+        repetitions = call(reps, meta | {"size": num_rows(combinations), "combinations": combinations})
+    elif isinstance(reps, str):
+        repetitions = meta[reps]
+    else:
+        repetitions = reps
 
     indices = {}
     for column, ids in combinations.items():
-        indices[column] = np.repeat(ids, num_samples)
+        indices[column] = np.repeat(ids, repetitions)
 
     indices[node] = np.arange(num_rows(indices))
 
@@ -62,55 +138,47 @@ def assign_indices(node, parents, reps, meta, num_datasets) -> dict[str, np.ndar
 
 
 def draw_values(sample_fn, parents, indices, meta, is_batched) -> dict[str, np.ndarray]:
-    num_samples = num_rows(indices)
+    rows = num_rows(indices)
+
     parent_values = {}
-
     for parent, samples in parents.items():
-        parent_sample = indices[parent]
-
         for variable, values in samples.values.items():
-            parent_values[variable] = values[parent_sample]
+            parent_values[variable] = values[indices[parent]]
 
     if is_batched:
-        outputs = call_sample_fn(sample_fn, parent_values | meta | {"batch_size": num_samples, "indices": indices})
+        outputs = call(sample_fn, parent_values | meta | {"batch_size": rows, "indices": indices})
     else:
-        outputs = draw_one_by_one(sample_fn, parent_values, meta, num_samples)
+        outputs = draw_row_by_row(sample_fn, parent_values, meta, rows)
 
     values = {}
     for variable, value in outputs.items():
-        values[variable] = np.reshape(value, (num_samples, -1))
+        values[variable] = np.reshape(value, (rows, -1))
 
     return values
 
 
-def draw_one_by_one(sample_fn, parent_values, meta, num_samples) -> dict[str, np.ndarray]:
-    outputs_per_sample = []
+def draw_row_by_row(sample_fn, parent_values, meta, rows) -> dict[str, np.ndarray]:
+    draws = []
 
-    for i in range(num_samples):
-        parent_values_per_sample = {}
+    for row in range(rows):
+        arguments = {}
         for variable, values in parent_values.items():
-            parent_values_per_sample[variable] = np.squeeze(values[i])
+            arguments[variable] = np.squeeze(values[row])
 
-        outputs_per_sample.append(call_sample_fn(sample_fn, parent_values_per_sample | meta))
+        draws.append(call(sample_fn, arguments | meta))
 
     outputs = {}
-    for variable in outputs_per_sample[0]:
-        outputs[variable] = np.stack([sample[variable] for sample in outputs_per_sample])
+    for variable in draws[0]:
+        outputs[variable] = np.stack([draw[variable] for draw in draws])
 
     return outputs
 
 
-def call_sample_fn(sample_fn, arguments):
-    parameters = inspect.signature(sample_fn).parameters
-    required_arguments = {name: arguments[name] for name in parameters if name in arguments}
+def call(function, arguments):
+    # calls the function with the arguments that appear in its signature
+    accepted = {}
+    for name in inspect.signature(function).parameters:
+        if name in arguments:
+            accepted[name] = arguments[name]
 
-    return sample_fn(**required_arguments)
-
-
-def draw_num_samples(reps, meta, combinations):
-    if callable(reps):
-        return call_sample_fn(reps, meta | {"size": num_rows(combinations), "combinations": combinations})
-    if isinstance(reps, str):
-        return meta[reps]
-
-    return reps
+    return function(**accepted)
