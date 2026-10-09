@@ -11,7 +11,7 @@ Examples
 """
 
 # Base classes
-from .inference import InferenceNetwork
+from .inference import InferenceMasks, InferenceNetwork, MaskHandler, MaskName
 from .summary import SummaryNetwork
 
 # Decoders
