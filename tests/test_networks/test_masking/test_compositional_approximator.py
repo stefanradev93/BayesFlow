@@ -42,7 +42,7 @@ def test_discovered_compositional_masks_keep_their_semantic_shapes():
             MaskName.FIXED_TARGET_VALUE: fixed_target_value,
         }
     )
-    inference_kwargs = approximator._prepare_inference_kwargs(adapted, {})
+    inference_kwargs = approximator._prepare_inference_kwargs({}, adapted=adapted)
 
     assert tuple(resolved_conditions.shape) == (2, 3, 2)
     np.testing.assert_array_equal(_numpy(resolved_conditions), inference_conditions)

@@ -70,7 +70,7 @@ class AutoregressiveApproximator(ContinuousApproximator):
         self.condition_builder = AutoregressiveConditionBuilder()
         self.sampler = AutoregressiveSampler()
 
-    def _prepare_step_inference_kwargs(self, adapted: Mapping | None, kwargs: Mapping) -> dict:
+    def _prepare_step_inference_kwargs(self, kwargs: Mapping, adapted: Mapping | None = None) -> dict:
         """Prepare kwargs for the inference network behind the AR decoder.
 
         The adapted ``inference_mask`` and ``inference_attention_mask`` describe
@@ -148,7 +148,7 @@ class AutoregressiveApproximator(ContinuousApproximator):
             inference_mask=inference_mask,
         )
 
-        inference_kwargs = self._prepare_step_inference_kwargs(None, kwargs)
+        inference_kwargs = self._prepare_step_inference_kwargs(MaskHandler.collect_mask_kwargs(kwargs))
         inference_metrics = self.inference_network.compute_metrics(
             inference_variables,
             conditions=conditions,
@@ -195,7 +195,7 @@ class AutoregressiveApproximator(ContinuousApproximator):
 
         kwargs = self._maybe_inject_guidance_unstandardize(kwargs)
         sequence_kwargs = MaskHandler.collect_inference_masks(adapted, kwargs)
-        kwargs = self._prepare_step_inference_kwargs(adapted, kwargs)
+        kwargs = self._prepare_step_inference_kwargs(kwargs, adapted=adapted)
 
         samples = self.sampler.sample(
             inference_network=self.inference_network,
@@ -277,7 +277,7 @@ class AutoregressiveApproximator(ContinuousApproximator):
             inference_mask=sequence_kwargs.get(MaskName.MASK),
         )
 
-        inference_kwargs = self._prepare_step_inference_kwargs(adapted, kwargs)
+        inference_kwargs = self._prepare_step_inference_kwargs(kwargs, adapted=adapted)
         inference_kwargs.pop("batch_size", None)
         step_log_prob = self.inference_network.log_prob(
             inference_variables,

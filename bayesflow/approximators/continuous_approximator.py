@@ -132,8 +132,7 @@ class ContinuousApproximator(Approximator):
             inference_mask=inference_mask,
         )
         summary_kwargs = MaskHandler.collect_summary_masks(masks)
-        inference_kwargs = MaskHandler.collect_inference_masks(masks)
-        inference_kwargs |= self._prepare_inference_kwargs(None, kwargs)
+        inference_kwargs = self._prepare_inference_kwargs(MaskHandler.collect_inference_masks(masks), adapted=kwargs)
 
         resolved_conditions, summary_metrics = self._standardize_and_resolve(
             inference_conditions, summary_variables, stage=stage, purpose="metrics", **summary_kwargs
@@ -211,11 +210,10 @@ class ContinuousApproximator(Approximator):
         """
         return getattr(self.inference_network, "mask_handler", None)
 
-    def _prepare_inference_kwargs(self, adapted: Mapping | None, kwargs: Mapping) -> dict:
-        """Route inference kwargs and put fixed values into network coordinates."""
-        handler = self.mask_handler
+    def _prepare_inference_kwargs(self, kwargs: Mapping, adapted: Mapping | None = None) -> dict:
+        """Route explicit kwargs over adapted masks and standardize fixed values."""
         inference_kwargs = MaskHandler.with_inference_masks(kwargs, adapted)
-        if handler is None:
+        if self.mask_handler is None:
             return MaskHandler.without_semantic_kwargs(inference_kwargs)
 
         return self._standardize_fixed_target_value(inference_kwargs)
@@ -291,7 +289,7 @@ class ContinuousApproximator(Approximator):
         resolved_conditions, adapted, summary_outputs = self._prepare_conditions(conditions, batch_size=batch_size)
 
         kwargs = self._maybe_inject_guidance_unstandardize(kwargs)
-        inference_kwargs = self._prepare_inference_kwargs(adapted, kwargs)
+        inference_kwargs = self._prepare_inference_kwargs(kwargs, adapted=adapted)
 
         data_batch_size = None
         if resolved_conditions is None:
@@ -360,7 +358,7 @@ class ContinuousApproximator(Approximator):
         # log_det_jac from the adapter call (log_det_jac=True), which
         # _prepare_conditions does not support.
         adapted, log_det_jac = self.adapter(data, strict=False, log_det_jac=True, stage="inference")
-        inference_kwargs = self._prepare_inference_kwargs(adapted, kwargs)
+        inference_kwargs = self._prepare_inference_kwargs(kwargs, adapted=adapted)
 
         summary_kwargs = MaskHandler.collect_summary_masks(adapted)
 
@@ -471,7 +469,7 @@ class ContinuousApproximator(Approximator):
         )
 
         kwargs = self._maybe_inject_guidance_unstandardize(kwargs)
-        inference_kwargs = self._prepare_inference_kwargs(adapted, kwargs)
+        inference_kwargs = self._prepare_inference_kwargs(kwargs, adapted=adapted)
 
         samples = self.sampler.sample(
             inference_network=self.inference_network,

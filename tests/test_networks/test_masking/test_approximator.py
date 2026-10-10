@@ -156,14 +156,14 @@ def test_handlerless_inference_kwargs_keep_routed_and_ordinary_kwargs():
 
     prepared = approximator._prepare_inference_kwargs(
         {
-            MaskName.INFERENCE: adapted_mask,
-            MaskName.INFERENCE_ATTENTION: adapted_attention,
-            MaskName.FIXED_TARGET: _values((2, 3)),
-        },
-        {
             MaskName.INFERENCE: explicit_mask,
             MaskName.FIXED_TARGET_VALUE: _values((2, 3)),
             "steps": 4,
+        },
+        adapted={
+            MaskName.INFERENCE: adapted_mask,
+            MaskName.INFERENCE_ATTENTION: adapted_attention,
+            MaskName.FIXED_TARGET: _values((2, 3)),
         },
     )
 

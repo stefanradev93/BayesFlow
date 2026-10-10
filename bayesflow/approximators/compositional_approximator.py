@@ -130,7 +130,7 @@ class CompositionalApproximator(ContinuousApproximator):
             )
 
         kwargs = self._maybe_inject_guidance_unstandardize(kwargs)
-        inference_kwargs = self._prepare_inference_kwargs(adapted, kwargs)
+        inference_kwargs = self._prepare_inference_kwargs(kwargs, adapted=adapted)
         inference_kwargs["compute_prior_score"] = compute_prior_score_pre
 
         # NOTE: infer option of sample cannot handle the compositional dimensions
