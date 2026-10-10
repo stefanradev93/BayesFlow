@@ -4,7 +4,7 @@ import numpy as np
 from bayesflow.adapters import Adapter
 from bayesflow.approximators import CompositionalApproximator
 from bayesflow.networks import DiffusionModel
-from bayesflow.networks.inference.masking import MaskName
+from bayesflow.masking import MaskName
 
 
 def _numpy(value):

@@ -8,7 +8,7 @@ import keras
 
 from bayesflow.adapters import Adapter
 from bayesflow.datasets import OnlineDataset
-from bayesflow.networks.inference.masking import MaskHandler, MaskName
+from bayesflow.masking import MaskHandler, MaskName
 from bayesflow.simulators import Simulator
 from bayesflow.types import Tensor
 from bayesflow.utils import find_batch_size, filter_kwargs, concatenate_valid_shapes, logging
@@ -161,7 +161,7 @@ class Approximator(BackendApproximator):
         """
         if data is not None:
             adapted = self.adapter(data, strict=False, **kwargs)
-            summary_kwargs = MaskHandler.collect_summary(adapted)
+            summary_kwargs = MaskHandler.collect_summary_masks(adapted)
         elif summary_outputs is not None:
             adapted = {}
             summary_kwargs = {}
@@ -204,7 +204,7 @@ class Approximator(BackendApproximator):
             adapted_child = self.adapter(flattened_conditions, strict=False, **kwargs)
             adapted_child = keras.tree.map_structure(keras.ops.convert_to_tensor, adapted_child)
 
-            summary_kwargs = MaskHandler.collect_summary(adapted_child)
+            summary_kwargs = MaskHandler.collect_summary_masks(adapted_child)
             child_summary_variables = self.standardizer.maybe_standardize(
                 adapted_child.get("summary_variables"), key="summary_variables", stage="inference"
             )
@@ -301,7 +301,7 @@ class Approximator(BackendApproximator):
             inference_conditions, key="inference_conditions", stage=stage
         )
         summary_variables = self.standardizer.maybe_standardize(
-            summary_variables, key="summary_variables", stage=stage, mask=summary_kwargs.get("mask")
+            summary_variables, key="summary_variables", stage=stage, mask=summary_kwargs.get(MaskName.MASK)
         )
         resolved_conditions, summary_outputs = self.condition_builder.resolve(
             summary_network=self.summary_network,
@@ -376,14 +376,14 @@ class Approximator(BackendApproximator):
             "inference_conditions",
             "summary_variables",
             "sample_weight",
-            *sorted(MaskName.semantic()),
+            *MaskName.semantic(),
         ]
 
         for canonical_name, user_name in {
-            "summary_attention_mask": summary_attention_mask,
-            "summary_mask": summary_mask,
-            "inference_attention_mask": inference_attention_mask,
-            "inference_mask": inference_mask,
+            MaskName.SUMMARY_ATTENTION: summary_attention_mask,
+            MaskName.SUMMARY: summary_mask,
+            MaskName.INFERENCE_ATTENTION: inference_attention_mask,
+            MaskName.INFERENCE: inference_mask,
         }.items():
             if user_name is not None:
                 adapter.rename(user_name, canonical_name)

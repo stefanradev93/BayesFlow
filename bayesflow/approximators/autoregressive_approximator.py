@@ -7,7 +7,7 @@ import numpy as np
 from bayesflow.adapters import Adapter
 from bayesflow.networks import InferenceNetwork, TimeSeriesTransformer
 from bayesflow.networks.decoders import TransformerDecoder
-from bayesflow.networks.inference.masking import MaskHandler, MaskName
+from bayesflow.masking import MaskHandler, MaskName
 from bayesflow.types import Tensor
 from bayesflow.utils import split_arrays
 from bayesflow.utils.keras_utils import resolve_seed
@@ -81,15 +81,16 @@ class AutoregressiveApproximator(ContinuousApproximator):
         """
         adapted = adapted or {}
         kwargs = dict(kwargs)
-        semantic = self._prepare_semantic_mask_kwargs(adapted, kwargs)
+        semantic = self.mask_handler.collect_semantic_masks(adapted, kwargs)
+        semantic = self._standardize_fixed_target_value(semantic)
         if semantic.get(MaskName.INFER_TARGET) is not None or self.mask_handler.missing_target_prob > 0.0:
             raise NotImplementedError(
                 "AutoregressiveApproximator requires a feature-mask-aware decoder to marginalize targets. "
                 "Fixed-target conditioning is supported."
             )
         passthrough = self.mask_handler.without_semantic_kwargs(kwargs)
-        passthrough.pop("inference_attention_mask", None)
-        passthrough.pop("inference_mask", None)
+        passthrough.pop(MaskName.INFERENCE_ATTENTION, None)
+        passthrough.pop(MaskName.INFERENCE, None)
         return passthrough | semantic
 
     def build(self, data_shapes: Mapping[str, tuple]):
@@ -188,12 +189,12 @@ class AutoregressiveApproximator(ContinuousApproximator):
             inference_conditions=adapted.get("inference_conditions"),
             summary_variables=adapted.get("summary_variables"),
             stage="inference",
-            summary_attention_mask=adapted.get("summary_attention_mask"),
-            summary_mask=adapted.get("summary_mask"),
+            summary_attention_mask=adapted.get(MaskName.SUMMARY_ATTENTION),
+            summary_mask=adapted.get(MaskName.SUMMARY),
         )
 
         kwargs = self._maybe_inject_guidance_unstandardize(kwargs)
-        sequence_kwargs = MaskHandler.collect_inference(adapted, kwargs)
+        sequence_kwargs = MaskHandler.collect_inference_masks(adapted, kwargs)
         kwargs = self._prepare_step_inference_kwargs(adapted, kwargs)
 
         samples = self.sampler.sample(
@@ -205,9 +206,9 @@ class AutoregressiveApproximator(ContinuousApproximator):
             sample_shape=sample_shape,
             seed=resolve_seed(seed, self.seed_generator),
             time=decoder_time,
-            encoder_mask=adapted.get("summary_mask"),
-            target_mask=sequence_kwargs.get("mask"),
-            target_attention_mask=sequence_kwargs.get("attention_mask"),
+            encoder_mask=adapted.get(MaskName.SUMMARY),
+            target_mask=sequence_kwargs.get(MaskName.MASK),
+            target_attention_mask=sequence_kwargs.get(MaskName.ATTENTION_MASK),
             **kwargs,
         )
 
@@ -249,15 +250,16 @@ class AutoregressiveApproximator(ContinuousApproximator):
             log_det_jac=True,
             stage="inference",
         )
-        sequence_kwargs = MaskHandler.collect_inference(adapted, kwargs)
-        mask_kwargs = self.mask_handler.collect_semantic(adapted, kwargs)
-        self._validate_masked_adapter_density(mask_kwargs, adapter_log_det)
+
+        sequence_kwargs = MaskHandler.collect_inference_masks(adapted, kwargs)
+        mask_kwargs = self.mask_handler.collect_semantic_masks(adapted, kwargs)
+
         inference_variables, standardizer_log_det = self.standardizer.maybe_standardize(
             adapted.get("inference_variables"),
             key="inference_variables",
             stage="inference",
             log_det_jac=True,
-            mask=sequence_kwargs.get("mask"),
+            mask=sequence_kwargs.get(MaskName.MASK),
             log_det_jac_mask=mask_kwargs.get(MaskName.FIXED_TARGET),
         )
 
@@ -269,10 +271,10 @@ class AutoregressiveApproximator(ContinuousApproximator):
             inference_conditions=adapted.get("inference_conditions"),
             summary_variables=adapted.get("summary_variables"),
             stage="inference",
-            summary_attention_mask=adapted.get("summary_attention_mask"),
-            summary_mask=adapted.get("summary_mask"),
-            inference_attention_mask=sequence_kwargs.get("attention_mask"),
-            inference_mask=sequence_kwargs.get("mask"),
+            summary_attention_mask=adapted.get(MaskName.SUMMARY_ATTENTION),
+            summary_mask=adapted.get(MaskName.SUMMARY),
+            inference_attention_mask=sequence_kwargs.get(MaskName.ATTENTION_MASK),
+            inference_mask=sequence_kwargs.get(MaskName.MASK),
         )
 
         inference_kwargs = self._prepare_step_inference_kwargs(adapted, kwargs)
@@ -283,9 +285,9 @@ class AutoregressiveApproximator(ContinuousApproximator):
             **inference_kwargs,
         )
         step_log_prob = step_log_prob + standardizer_log_det
-        if sequence_kwargs.get("mask") is not None:
+        if sequence_kwargs.get(MaskName.MASK) is not None:
             step_log_prob = step_log_prob * keras.ops.cast(
-                sequence_kwargs["mask"],
+                sequence_kwargs[MaskName.MASK],
                 step_log_prob.dtype,
             )
         log_prob = keras.ops.sum(step_log_prob, axis=-1)

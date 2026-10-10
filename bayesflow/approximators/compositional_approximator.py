@@ -6,7 +6,7 @@ import numpy as np
 
 from bayesflow.adapters import Adapter
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
-from bayesflow.networks.inference.masking import MaskName
+from bayesflow.masking import MaskName
 from bayesflow.types import Tensor
 from bayesflow.utils import split_arrays
 from bayesflow.utils.serialization import serializable

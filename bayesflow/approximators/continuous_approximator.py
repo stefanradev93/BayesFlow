@@ -7,7 +7,7 @@ import keras
 
 from bayesflow.adapters import Adapter
 from bayesflow.networks import InferenceNetwork, SummaryNetwork
-from bayesflow.networks.inference.masking import MaskHandler, MaskName
+from bayesflow.masking import MaskHandler, MaskName
 from bayesflow.types import Tensor
 from bayesflow.utils import split_arrays
 from bayesflow.utils.keras_utils import resolve_seed
@@ -131,9 +131,9 @@ class ContinuousApproximator(Approximator):
             inference_attention_mask=inference_attention_mask,
             inference_mask=inference_mask,
         )
-        summary_kwargs = MaskHandler.collect_summary(masks)
-        inference_kwargs = MaskHandler.collect_inference(masks)
-        inference_kwargs |= self._prepare_semantic_mask_kwargs(kwargs)
+        summary_kwargs = MaskHandler.collect_summary_masks(masks)
+        inference_kwargs = MaskHandler.collect_inference_masks(masks)
+        inference_kwargs |= self._prepare_inference_kwargs(None, kwargs)
 
         resolved_conditions, summary_metrics = self._standardize_and_resolve(
             inference_conditions, summary_variables, stage=stage, purpose="metrics", **summary_kwargs
@@ -211,52 +211,25 @@ class ContinuousApproximator(Approximator):
         """
         return getattr(self.inference_network, "mask_handler", None)
 
-    def _prepare_semantic_mask_kwargs(self, *sources: Mapping) -> dict:
-        """Collect semantic masks and put fixed values into network coordinates."""
+    def _prepare_inference_kwargs(self, adapted: Mapping | None, kwargs: Mapping) -> dict:
+        """Route inference kwargs and put fixed values into network coordinates."""
         handler = self.mask_handler
+        inference_kwargs = MaskHandler.with_inference_masks(kwargs, adapted)
         if handler is None:
-            return {}
+            return MaskHandler.without_semantic_kwargs(inference_kwargs)
 
-        semantic = handler.collect_semantic(*sources)
-        fixed_target_value = semantic.get(MaskName.FIXED_TARGET_VALUE)
+        return self._standardize_fixed_target_value(inference_kwargs)
+
+    def _standardize_fixed_target_value(self, kwargs: dict) -> dict:
+        fixed_target_value = kwargs.get(MaskName.FIXED_TARGET_VALUE)
         if fixed_target_value is not None:
-            semantic[MaskName.FIXED_TARGET_VALUE] = self.standardizer.maybe_standardize(
+            kwargs[MaskName.FIXED_TARGET_VALUE] = self.standardizer.maybe_standardize(
                 fixed_target_value,
                 key="inference_variables",
                 stage="inference",
                 forward=True,
             )
-        return semantic
-
-    def _prepare_inference_kwargs(self, adapted: Mapping | None, kwargs: Mapping) -> dict:
-        """Prepare passthrough, subnet, and semantic kwargs for an inference call.
-
-        Values supplied directly to the approximator take precedence over values
-        discovered in adapted data.
-        """
-        adapted = adapted or {}
-        kwargs = dict(kwargs)
-
-        routed = MaskHandler.collect_inference(adapted, kwargs)
-        semantic = self._prepare_semantic_mask_kwargs(adapted, kwargs)
-
-        passthrough = MaskHandler.without_semantic_kwargs(kwargs)
-        passthrough.pop("inference_attention_mask", None)
-        passthrough.pop("inference_mask", None)
-        return routed | passthrough | semantic
-
-    @staticmethod
-    def _validate_masked_adapter_density(mask_kwargs: Mapping, adapter_log_det: Mapping) -> None:
-        """Reject aggregate adapter Jacobians that cannot be feature-masked safely."""
-        if (
-            mask_kwargs.get(MaskName.FIXED_TARGET) is not None
-            and adapter_log_det.get("inference_variables") is not None
-        ):
-            raise NotImplementedError(
-                "Masked log_prob is not supported when the adapter contributes an aggregate "
-                "inference-variable log-Jacobian. Move elementwise standardization to the "
-                "approximator standardizer or evaluate density in adapted coordinates."
-            )
+        return kwargs
 
     def sample(
         self,
@@ -320,14 +293,21 @@ class ContinuousApproximator(Approximator):
         kwargs = self._maybe_inject_guidance_unstandardize(kwargs)
         inference_kwargs = self._prepare_inference_kwargs(adapted, kwargs)
 
+        data_batch_size = None
+        if resolved_conditions is None:
+            structural_rank = (
+                0 if sample_shape == "infer" else 1 if isinstance(sample_shape, int) else len(sample_shape)
+            )
+            data_batch_size = MaskHandler.infer_batch_size(inference_kwargs, structural_rank)
+            if data_batch_size is None:
+                data_batch_size = MaskHandler.infer_batch_size(adapted, structural_rank)
+
         samples = self.sampler.sample(
             inference_network=self.inference_network,
             num_samples=num_samples,
             conditions=resolved_conditions,
             batch_size=batch_size,
-            data_batch_size=(
-                self.sampler.infer_data_batch_size(adapted, sample_shape) if resolved_conditions is None else None
-            ),
+            data_batch_size=data_batch_size,
             sample_shape=sample_shape,
             seed=seed,
             **inference_kwargs,
@@ -380,10 +360,9 @@ class ContinuousApproximator(Approximator):
         # log_det_jac from the adapter call (log_det_jac=True), which
         # _prepare_conditions does not support.
         adapted, log_det_jac = self.adapter(data, strict=False, log_det_jac=True, stage="inference")
-        mask_kwargs = MaskHandler.collect_semantic(adapted, kwargs) if self.mask_handler is not None else {}
-        self._validate_masked_adapter_density(mask_kwargs, log_det_jac)
+        inference_kwargs = self._prepare_inference_kwargs(adapted, kwargs)
 
-        summary_kwargs = MaskHandler.collect_summary(adapted)
+        summary_kwargs = MaskHandler.collect_summary_masks(adapted)
 
         resolved_conditions, _ = self._standardize_and_resolve(
             adapted.get("inference_conditions"),
@@ -398,13 +377,11 @@ class ContinuousApproximator(Approximator):
             key="inference_variables",
             stage="inference",
             log_det_jac=True,
-            log_det_jac_mask=mask_kwargs.get(MaskName.FIXED_TARGET),
+            log_det_jac_mask=inference_kwargs.get(MaskName.FIXED_TARGET),
         )
 
         log_det_jac = log_det_jac.get("inference_variables", 0.0)
         log_det_jac += log_det_jac_std
-
-        inference_kwargs = self._prepare_inference_kwargs(adapted, kwargs)
 
         log_prob = self.inference_network.log_prob(
             inference_variables,

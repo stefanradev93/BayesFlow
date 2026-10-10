@@ -13,7 +13,7 @@ from bayesflow.utils import (
     weighted_mean,
 )
 from bayesflow.utils.serialization import serializable, serialize
-from bayesflow.networks.inference.masking import InferenceMasks
+from bayesflow.masking import InferenceMasks
 
 from ...inference import InferenceNetwork
 from ...defaults import CONSISTENCY_MODEL_DEFAULTS, DIFFUSION_TRANSFORMER_DEFAULTS
@@ -283,7 +283,6 @@ class ConsistencyModel(InferenceNetwork):
             kwargs,
             targets=z,
             conditions=conditions,
-            generate=False,
             subnet=self.subnet,
         )
         subnet_kwargs = masks.subnet_kwargs
@@ -354,16 +353,18 @@ class ConsistencyModel(InferenceNetwork):
             kwargs,
             targets=x,
             conditions=conditions,
-            generate=False,
             subnet=self.subnet,
         )
-        return self._consistency_function(
+        replacement = masks.fixed_target_value if masks.fixed_target_value is not None else x
+        x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, replacement)
+        out = self._consistency_function(
             x,
             t,
             conditions=conditions,
             training=training,
             subnet_kwargs=masks.subnet_kwargs,
         )
+        return self.mask_handler.maybe_apply(out, masks.fixed_target_mask, replacement)
 
     def _consistency_function(
         self,
@@ -423,7 +424,7 @@ class ConsistencyModel(InferenceNetwork):
             kwargs,
             targets=x,
             conditions=conditions,
-            generate=training,
+            stage=stage,
             subnet=self.subnet,
         )
         subnet_kwargs = masks.subnet_kwargs

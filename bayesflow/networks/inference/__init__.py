@@ -2,8 +2,9 @@ r"""
 Generative neural networks for approximating conditional distributions.
 """
 
+from bayesflow.masking import InferenceMasks, MaskHandler, MaskName
+
 from .inference_network import InferenceNetwork
-from .masking import InferenceMasks, MaskHandler, MaskName
 from .consistency import ConsistencyModel, StableConsistencyModel
 from .coupling import CouplingFlow
 from .diffusion import DiffusionModel

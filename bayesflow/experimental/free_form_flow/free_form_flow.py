@@ -2,7 +2,8 @@ import keras
 from keras import ops
 
 from bayesflow.distributions import Distribution
-from bayesflow.networks import InferenceMasks, InferenceNetwork
+from bayesflow.masking import InferenceMasks, MaskName
+from bayesflow.networks import InferenceNetwork
 from bayesflow.types import Tensor
 from bayesflow.utils import (
     concatenate_valid,
@@ -145,8 +146,9 @@ class FreeFormFlow(InferenceNetwork):
             kwargs,
             targets=x,
             conditions=conditions,
-            generate=False,
         )
+        replacement = masks.fixed_target_value if masks.fixed_target_value is not None else x
+        x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, replacement)
         subnet_kwargs = self._subnet_kwargs(self.encoder_subnet, masks, kwargs)
 
         if density:
@@ -183,7 +185,6 @@ class FreeFormFlow(InferenceNetwork):
             kwargs,
             targets=z,
             conditions=conditions,
-            generate=False,
         )
         subnet_kwargs = self._subnet_kwargs(self.decoder_subnet, masks, kwargs)
         z = self.mask_handler.maybe_apply(z, masks.fixed_target_mask, masks.fixed_target_value)
@@ -220,8 +221,9 @@ class FreeFormFlow(InferenceNetwork):
             kwargs,
             targets=x,
             conditions=conditions,
-            generate=False,
         )
+        replacement = masks.fixed_target_value if masks.fixed_target_value is not None else x
+        x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, replacement)
         return self._encode(
             x,
             conditions=conditions,
@@ -251,7 +253,6 @@ class FreeFormFlow(InferenceNetwork):
             kwargs,
             targets=z,
             conditions=conditions,
-            generate=False,
         )
         z = self.mask_handler.maybe_apply(z, masks.fixed_target_mask, masks.fixed_target_value)
         return self._decode(
@@ -284,11 +285,11 @@ class FreeFormFlow(InferenceNetwork):
         source: dict,
     ) -> dict:
         """Route ordinary and semantic masks only to subnets declaring them."""
-        mask_kwargs = self.mask_handler.collect_subnet_kwargs(subnet, source, masks.as_kwargs())
+        mask_kwargs = self.mask_handler.collect_subnet_masks(subnet, source, masks.semantic_kwargs())
         passthrough = {
             key: value
             for key, value in self.mask_handler.without_semantic_kwargs(source).items()
-            if key not in ("attention_mask", "mask")
+            if key not in (MaskName.ATTENTION_MASK, MaskName.MASK)
         }
         return passthrough | mask_kwargs
 
@@ -322,8 +323,11 @@ class FreeFormFlow(InferenceNetwork):
             kwargs,
             targets=x,
             conditions=conditions,
-            generate=training,
+            stage=stage,
+            subnet=(self.encoder_subnet, self.decoder_subnet),
         )
+        replacement = masks.fixed_target_value if masks.fixed_target_value is not None else x
+        x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, replacement)
         encoder_kwargs = self._subnet_kwargs(self.encoder_subnet, masks, kwargs)
         decoder_kwargs = self._subnet_kwargs(self.decoder_subnet, masks, kwargs)
 

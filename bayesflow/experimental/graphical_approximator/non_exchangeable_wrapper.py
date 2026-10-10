@@ -1,7 +1,8 @@
 import warnings
 
 import keras
-from bayesflow.networks import InferenceMasks, InferenceNetwork, MaskName, SummaryNetwork
+from bayesflow.masking import InferenceMasks, MaskName
+from bayesflow.networks import InferenceNetwork, SummaryNetwork
 from bayesflow.types import Shape, Tensor
 from bayesflow.utils import weighted_mean
 from bayesflow.utils.decorators import allow_batch_size
@@ -30,9 +31,9 @@ class NonExchangeableWrapper(InferenceNetwork):
         conditions: Tensor | None,
         kwargs: dict,
         *,
-        generate: bool,
+        stage: str = "inference",
     ) -> InferenceMasks:
-        provided = self.mask_handler.collect_semantic(kwargs)
+        provided = self.mask_handler.collect_semantic_masks(kwargs)
         if self.missing_target_prob > 0.0 or provided.get(MaskName.INFER_TARGET) is not None:
             raise NotImplementedError(
                 "NonExchangeableWrapper cannot marginalize target features without an explicit "
@@ -42,7 +43,7 @@ class NonExchangeableWrapper(InferenceNetwork):
             kwargs,
             targets=targets,
             conditions=conditions,
-            generate=generate,
+            stage=stage,
         )
 
     def get_config(self):
@@ -88,12 +89,7 @@ class NonExchangeableWrapper(InferenceNetwork):
     ):
         if seed is not None:
             kwargs["seed"] = seed
-        masks = self._resolve_masks(
-            xz,
-            conditions,
-            kwargs,
-            generate=False,
-        )
+        masks = self._resolve_masks(xz, conditions, kwargs)
         kwargs = self.mask_handler.without_semantic_kwargs(kwargs)
         return self._call_resolved(
             xz,
@@ -208,7 +204,7 @@ class NonExchangeableWrapper(InferenceNetwork):
             x,
             conditions,
             kwargs,
-            generate=stage == "training",
+            stage=stage,
         )
         z, log_density = self._call_resolved(
             x,
@@ -226,7 +222,7 @@ class NonExchangeableWrapper(InferenceNetwork):
 
     def _target_mask_kwargs(self, masks: InferenceMasks, index: int | None = None) -> dict:
         result = {}
-        for name, value in masks.as_kwargs().items():
+        for name, value in masks.semantic_kwargs().items():
             if name == MaskName.OBSERVED_CONDITION:
                 continue
             if index is None:

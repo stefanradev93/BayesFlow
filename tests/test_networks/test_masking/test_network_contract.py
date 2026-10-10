@@ -143,6 +143,75 @@ def test_probability_generated_masking_has_finite_training_loss(
     assert np.all(np.isfinite(loss))
 
 
+def test_validation_never_samples_semantic_masks(
+    monkeypatch,
+    network_factory,
+    targets,
+    conditions,
+):
+    network = _build(
+        network_factory(
+            fixed_target_prob=1.0,
+            missing_target_prob=1.0,
+            missing_conditions_prob=1.0,
+        ),
+        targets,
+        conditions,
+    )
+
+    def fail(*args, **kwargs):
+        raise AssertionError("validation must not generate semantic masks")
+
+    monkeypatch.setattr(network.mask_handler, "random_mask", fail)
+
+    metrics = network.compute_metrics(targets, conditions=conditions, stage="validation")
+
+    assert np.all(np.isfinite(_numpy(metrics["loss"])))
+
+
+@pytest.mark.parametrize(
+    ("probabilities", "expected_masks"),
+    [
+        ((0.0, 0.0, 0.0), None),
+        ((1.0, 1.0, 1.0), "generated"),
+    ],
+    ids=["none", "all"],
+)
+def test_generated_masks_follow_probability_extremes_and_reach_subnet(
+    network_factory,
+    targets,
+    conditions,
+    probabilities,
+    expected_masks,
+):
+    subnet = RecordingSubnet()
+    network = _build(
+        network_factory(
+            subnet=subnet,
+            fixed_target_prob=probabilities[0],
+            missing_target_prob=probabilities[1],
+            missing_conditions_prob=probabilities[2],
+        ),
+        targets,
+        conditions,
+    )
+
+    network.compute_metrics(targets, conditions=conditions, stage="training")
+
+    if expected_masks is None:
+        assert subnet.received["fixed_target_mask"] is None
+        assert subnet.received["infer_target_mask"] is None
+        assert subnet.received["observed_condition_mask"] is None
+        return
+
+    fixed = _numpy(subnet.received["fixed_target_mask"])
+    inferred = _numpy(subnet.received["infer_target_mask"])
+    observed = _numpy(subnet.received["observed_condition_mask"])
+    np.testing.assert_array_equal(fixed.sum(axis=-1), np.ones((2,), dtype=np.float32))
+    np.testing.assert_array_equal(inferred, fixed)
+    np.testing.assert_array_equal(observed, np.zeros((2, 2), dtype=np.float32))
+
+
 def test_explicit_masks_override_sampling_and_reach_explicit_subnet_parameters(
     network_factory,
     targets,
@@ -180,6 +249,43 @@ def test_explicit_masks_override_sampling_and_reach_explicit_subnet_parameters(
     np.testing.assert_array_equal(_numpy(subnet.received["attention_mask"]), _numpy(attention_mask))
     np.testing.assert_array_equal(_numpy(subnet.received["mask"]), _numpy(padding_mask))
     np.testing.assert_array_equal(_numpy(subnet.received["fixed_target_mask"]), _numpy(fixed_target_mask))
+    np.testing.assert_array_equal(_numpy(subnet.received["infer_target_mask"]), _numpy(infer_target_mask))
+    np.testing.assert_array_equal(
+        _numpy(subnet.received["observed_condition_mask"]),
+        _numpy(observed_condition_mask),
+    )
+
+
+def test_sampling_routes_explicit_semantic_masks_once_to_subnet(
+    monkeypatch,
+    network_factory,
+    targets,
+    conditions,
+    infer_target_mask,
+    observed_condition_mask,
+):
+    subnet = RecordingSubnet()
+    network = _build(network_factory(subnet=subnet), targets, conditions)
+    original_resolve = network.mask_handler.resolve
+    calls = 0
+
+    def counting_resolve(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return original_resolve(*args, **kwargs)
+
+    monkeypatch.setattr(network.mask_handler, "resolve", counting_resolve)
+
+    samples = network.sample(
+        (2,),
+        conditions=conditions,
+        seed=keras.random.SeedGenerator(317),
+        infer_target_mask=infer_target_mask,
+        observed_condition_mask=observed_condition_mask,
+    )
+
+    assert tuple(samples.shape) == tuple(targets.shape)
+    assert calls == 1
     np.testing.assert_array_equal(_numpy(subnet.received["infer_target_mask"]), _numpy(infer_target_mask))
     np.testing.assert_array_equal(
         _numpy(subnet.received["observed_condition_mask"]),
@@ -259,7 +365,7 @@ def test_flow_matching_forward_uses_explicit_fixed_target_value(
         )
     )
 
-    network(
+    encoded = network(
         targets,
         conditions=conditions,
         fixed_target_mask=fixed_target_mask,
@@ -267,7 +373,7 @@ def test_flow_matching_forward_uses_explicit_fixed_target_value(
     )
 
     np.testing.assert_allclose(
-        _numpy(subnet.received["state"])[:, 1],
+        _numpy(encoded)[:, 1],
         _numpy(fixed_target_value)[:, 1],
         rtol=0.0,
         atol=1e-6,

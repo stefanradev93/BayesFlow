@@ -2,13 +2,12 @@ from collections.abc import Callable
 
 import keras
 
+from bayesflow.masking import MaskHandler
 from bayesflow.types import Shape, Tensor
 from bayesflow.utils import layer_kwargs, find_distribution
 from bayesflow.utils.decorators import allow_batch_size
 from bayesflow.utils.keras_utils import resolve_seed
 from bayesflow.utils.serialization import deserialize
-
-from .masking import MaskHandler
 
 
 class InferenceNetwork(keras.Layer):

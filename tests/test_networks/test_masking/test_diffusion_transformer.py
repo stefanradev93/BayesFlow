@@ -92,6 +92,33 @@ def test_explicit_attention_mask_is_used_unchanged_without_semantic_masks():
     assert block.update_mask is None
 
 
+def test_conditioning_attention_mask_three_state_dependency_truth_table():
+    fixed = _tensor([[1.0, 0.0, 0.0]])
+    inferred = _tensor([[1.0, 1.0, 0.0]])
+    observed_conditions = _tensor([[1.0, 0.0]])
+
+    actual = DiffusionTransformer.conditioning_attention_mask(
+        fixed_target_mask=fixed,
+        observed_condition_mask=observed_conditions,
+        infer_target_mask=inferred,
+        num_targets=3,
+        num_conditions=2,
+        batch_size=1,
+    )
+
+    # Rows are latent, observed, and absent target queries. Columns are the
+    # three target keys followed by an observed and an absent condition key.
+    expected = np.asarray(
+        [
+            [True, True, False, True, False],
+            [False, True, False, True, False],
+            [False, False, True, False, False],
+        ],
+        dtype=np.bool_,
+    )[None]
+    np.testing.assert_array_equal(_numpy(actual), expected)
+
+
 def test_missing_semantic_inputs_do_not_leak_placeholder_values():
     transformer = DiffusionTransformer(widths=(8, 8), num_heads=2, dropout=0.0)
     time = _tensor([[0.5]])

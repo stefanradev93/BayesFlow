@@ -1,3 +1,4 @@
+from typing import Any
 from collections.abc import Sequence
 
 import keras
@@ -16,7 +17,7 @@ from bayesflow.utils import (
     weighted_mean,
 )
 from bayesflow.utils.serialization import serialize, serializable
-from bayesflow.networks.inference.masking import InferenceMasks
+from bayesflow.masking import InferenceMasks
 
 from ...inference import InferenceNetwork
 from ...defaults import (
@@ -55,11 +56,11 @@ class FlowMatching(InferenceNetwork):
         approximately 2.5×, but may lead to faster inference.
     loss_fn : str or keras.Loss
         The loss function used for training.  Default is ``"mse"``.
-    integrate_kwargs : dict[str, any], optional
+    integrate_kwargs : dict[str, Any], optional
         Additional keyword arguments for the ODE integrator used at inference time.
-    optimal_transport_kwargs : dict[str, any], optional
+    optimal_transport_kwargs : dict[str, Any], optional
         Additional keyword arguments for configuring optimal transport.
-    subnet_kwargs : dict[str, any], optional
+    subnet_kwargs : dict[str, Any], optional
         Keyword arguments passed to the subnet constructor or used to update the
         default MLP settings.
     time_power_law_alpha : float
@@ -106,9 +107,9 @@ class FlowMatching(InferenceNetwork):
         base_distribution: str | Distribution = "normal",
         use_optimal_transport: bool = False,
         loss_fn: str | keras.Loss = "mse",
-        integrate_kwargs: dict[str, any] = None,
-        optimal_transport_kwargs: dict[str, any] = None,
-        subnet_kwargs: dict[str, any] = None,
+        integrate_kwargs: dict[str, Any] = None,
+        optimal_transport_kwargs: dict[str, Any] = None,
+        subnet_kwargs: dict[str, Any] = None,
         time_power_law_alpha: float = 0.5,
         fixed_target_prob: float = 0.0,
         missing_target_prob: float = 0.0,
@@ -158,7 +159,7 @@ class FlowMatching(InferenceNetwork):
             x0 = self.base_distribution.sample(keras.ops.shape(x1)[:-1], seed=self.seed_generator)
 
             if self.use_optimal_transport:
-                provided_masks = sorted(self.mask_handler.collect_masks(kwargs))
+                provided_masks = self.mask_handler.collect_mask_kwargs(kwargs)
                 if provided_masks:
                     names = ", ".join(provided_masks)
                     raise ValueError(
@@ -190,7 +191,7 @@ class FlowMatching(InferenceNetwork):
             kwargs,
             targets=x,
             conditions=conditions,
-            generate=stage == "training",
+            stage=stage,
             subnet=self.subnet,
         )
         x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, x1)
@@ -255,7 +256,6 @@ class FlowMatching(InferenceNetwork):
             kwargs,
             targets=xz,
             conditions=conditions,
-            generate=False,
             subnet=self.subnet,
         )
         return self._velocity(
@@ -316,7 +316,6 @@ class FlowMatching(InferenceNetwork):
             kwargs,
             targets=x,
             conditions=conditions,
-            generate=False,
             subnet=self.subnet,
         )
         # Build integrate kwargs: instance config -> call-time overrides
@@ -398,7 +397,6 @@ class FlowMatching(InferenceNetwork):
             kwargs,
             targets=z,
             conditions=conditions,
-            generate=False,
             subnet=self.subnet,
         )
         # Build integrate kwargs: instance config -> call-time overrides

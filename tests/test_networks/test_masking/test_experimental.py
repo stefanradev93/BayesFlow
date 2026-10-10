@@ -5,6 +5,7 @@ import pytest
 from bayesflow.experimental import FreeFormFlow, LatentInferenceNetwork
 from bayesflow.experimental.graphical_approximator.non_exchangeable_wrapper import NonExchangeableWrapper
 from bayesflow.networks import DeepSet, InferenceNetwork
+from bayesflow.utils.serialization import deserialize, serialize
 
 
 class RecordingSubnet(keras.Layer):
@@ -15,6 +16,8 @@ class RecordingSubnet(keras.Layer):
         self.fixed_target_mask = None
         self.infer_target_mask = None
         self.observed_condition_mask = None
+        self.attention_mask = None
+        self.mask = None
 
     def call(
         self,
@@ -23,10 +26,14 @@ class RecordingSubnet(keras.Layer):
         fixed_target_mask=None,
         infer_target_mask=None,
         observed_condition_mask=None,
+        attention_mask=None,
+        mask=None,
     ):
         self.fixed_target_mask = fixed_target_mask
         self.infer_target_mask = infer_target_mask
         self.observed_condition_mask = observed_condition_mask
+        self.attention_mask = attention_mask
+        self.mask = mask
         return inputs
 
     def compute_output_shape(self, input_shape):
@@ -145,6 +152,34 @@ def test_generated_masks_are_resolved_once_and_routed(targets, conditions):
     )
 
 
+def test_free_form_generates_missingness_only_when_both_subnets_support_it(targets, conditions):
+    class UnmaskedSubnet(keras.Layer):
+        def call(self, inputs, training=None):
+            del training
+            return inputs
+
+        def compute_output_shape(self, input_shape):
+            return input_shape
+
+    encoder = RecordingSubnet()
+    network = FreeFormFlow(
+        encoder_subnet=encoder,
+        decoder_subnet=UnmaskedSubnet(),
+        hutchinson_sampling="sphere",
+        fixed_target_prob=1.0,
+        missing_target_prob=1.0,
+        missing_conditions_prob=1.0,
+    )
+    network.build(targets.shape, conditions.shape)
+
+    metrics = network.compute_metrics(targets, conditions=conditions, stage="training")
+
+    assert keras.ops.isfinite(metrics["loss"])
+    assert encoder.fixed_target_mask is not None
+    assert encoder.infer_target_mask is None
+    assert encoder.observed_condition_mask is None
+
+
 def test_explicit_masks_override_generation(targets, conditions):
     encoder = RecordingSubnet()
     decoder = RecordingSubnet()
@@ -185,6 +220,37 @@ def test_explicit_masks_override_generation(targets, conditions):
         )
 
 
+def test_ordinary_masks_are_routed_to_both_free_form_subnets(targets, conditions):
+    encoder = RecordingSubnet()
+    decoder = RecordingSubnet()
+    network = FreeFormFlow(
+        encoder_subnet=encoder,
+        decoder_subnet=decoder,
+        hutchinson_sampling="sphere",
+    )
+    network.build(targets.shape, conditions.shape)
+    attention = keras.ops.ones((2, 3, 5), dtype="float32")
+    padding = keras.ops.convert_to_tensor(
+        np.asarray(
+            [[1.0, 1.0, 0.0], [1.0, 0.0, 0.0]],
+            dtype=np.float32,
+        )
+    )
+
+    metrics = network.compute_metrics(
+        targets,
+        conditions=conditions,
+        stage="validation",
+        attention_mask=attention,
+        mask=padding,
+    )
+
+    assert keras.ops.isfinite(metrics["loss"])
+    for subnet in (encoder, decoder):
+        np.testing.assert_array_equal(keras.ops.convert_to_numpy(subnet.attention_mask), attention)
+        np.testing.assert_array_equal(keras.ops.convert_to_numpy(subnet.mask), padding)
+
+
 def test_sample_clamps_fixed_targets_to_explicit_values():
     network = _small_free_form_flow()
     network.build((2, 3))
@@ -201,6 +267,46 @@ def test_sample_clamps_fixed_targets_to_explicit_values():
     np.testing.assert_array_equal(
         keras.ops.convert_to_numpy(samples[..., 1]),
         np.full((2,), 7.0, dtype=np.float32),
+    )
+
+
+@pytest.mark.skip_on_mps
+def test_encode_and_density_use_explicit_fixed_target_values():
+    network = _small_free_form_flow()
+    network.build((2, 3))
+    targets = keras.ops.convert_to_tensor(np.asarray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32))
+    fixed_target_mask = np.asarray([1.0, 0.0, 1.0], dtype=np.float32)
+    fixed_target_value = np.asarray([0.0, 7.0, 0.0], dtype=np.float32)
+
+    encoded = network.encode(
+        targets,
+        fixed_target_mask=fixed_target_mask,
+        fixed_target_value=fixed_target_value,
+    )
+    _, log_density = network(
+        targets,
+        density=True,
+        fixed_target_mask=fixed_target_mask,
+        fixed_target_value=fixed_target_value,
+    )
+    changed_targets = keras.ops.convert_to_tensor(np.asarray([[1.0, 200.0, 3.0], [4.0, -500.0, 6.0]], dtype=np.float32))
+    _, changed_log_density = network(
+        changed_targets,
+        density=True,
+        fixed_target_mask=fixed_target_mask,
+        fixed_target_value=fixed_target_value,
+    )
+
+    np.testing.assert_array_equal(
+        keras.ops.convert_to_numpy(encoded[..., 1]),
+        np.full((2,), 7.0, dtype=np.float32),
+    )
+    assert np.all(np.isfinite(keras.ops.convert_to_numpy(log_density)))
+    np.testing.assert_allclose(
+        keras.ops.convert_to_numpy(log_density),
+        keras.ops.convert_to_numpy(changed_log_density),
+        rtol=1e-6,
+        atol=1e-6,
     )
 
 
@@ -241,22 +347,26 @@ def test_all_fixed_targets_have_zero_training_loss(targets):
     )
 
 
-def test_mask_probabilities_round_trip_through_config():
+def test_mask_configuration_round_trips_through_serialization():
     network = _small_free_form_flow(
         fixed_target_prob=0.2,
         missing_target_prob=0.3,
         missing_conditions_prob=0.4,
+        seed=91,
     )
 
     config = network.get_config()
-    restored = FreeFormFlow.from_config(config)
+    restored = deserialize(serialize(network))
 
     assert config["fixed_target_prob"] == pytest.approx(0.2)
     assert config["missing_target_prob"] == pytest.approx(0.3)
     assert config["missing_conditions_prob"] == pytest.approx(0.4)
+    assert config["seed"] == 91
     assert restored.fixed_target_prob == pytest.approx(0.2)
     assert restored.missing_target_prob == pytest.approx(0.3)
     assert restored.missing_conditions_prob == pytest.approx(0.4)
+    assert restored.seed == 91
+    assert restored.mask_handler.seed_generator is restored.seed_generator
 
 
 @pytest.mark.parametrize("probability", ["fixed_target_prob", "missing_target_prob"])

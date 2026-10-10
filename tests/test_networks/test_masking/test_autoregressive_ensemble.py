@@ -185,6 +185,131 @@ def test_autoregressive_sampler_batches_repeats_and_slices_semantic_masks():
         )
 
 
+def test_autoregressive_sampler_slices_shared_and_batched_singleton_time_semantic_masks():
+    network = _RecordingSamplerNetwork(target_dim=2)
+    batch_size, num_steps, num_samples = 3, 2, 2
+    shared_fixed_mask = np.asarray([[1.0, 0.0]], dtype=np.float32)
+    shared_fixed_value = np.asarray([[4.0, 7.0]], dtype=np.float32)
+    batched_infer_mask = np.asarray(
+        [
+            [[1.0, 1.0]],
+            [[1.0, 0.0]],
+            [[0.0, 1.0]],
+        ],
+        dtype=np.float32,
+    )
+    batched_observed_mask = np.flip(batched_infer_mask, axis=-1).copy()
+
+    AutoregressiveSampler().sample(
+        inference_network=network,
+        decoder_network=_CacheDecoder(),
+        num_samples=num_samples,
+        conditions=_encoder_outputs(batch_size=batch_size, num_steps=num_steps),
+        batch_size=2,
+        seed=keras.random.SeedGenerator(105),
+        fixed_target_mask=shared_fixed_mask,
+        fixed_target_value=shared_fixed_value,
+        infer_target_mask=batched_infer_mask,
+        observed_condition_mask=batched_observed_mask,
+    )
+
+    for batch_index, (start, stop) in enumerate(((0, 2), (2, 3))):
+        expected_infer = np.repeat(batched_infer_mask[start:stop, 0], num_samples, axis=0)
+        expected_observed = np.repeat(batched_observed_mask[start:stop, 0], num_samples, axis=0)
+        for step in range(num_steps):
+            call = network.calls[batch_index * num_steps + step]
+            np.testing.assert_array_equal(call["fixed_target_mask"], shared_fixed_mask[0])
+            np.testing.assert_array_equal(call["fixed_target_value"], shared_fixed_value[0])
+            np.testing.assert_array_equal(call["infer_target_mask"], expected_infer)
+            np.testing.assert_array_equal(call["observed_condition_mask"], expected_observed)
+
+
+@pytest.mark.parametrize("time_size", [1, 2])
+def test_autoregressive_sampler_slices_shared_time_indexed_ordinary_masks(time_size):
+    network = _RecordingSamplerNetwork(target_dim=2)
+    batch_size, num_steps = 3, 2
+    mask = np.asarray(
+        [[1.0, 0.0, 1.0], [0.0, 1.0, 0.0]][:time_size],
+        dtype=np.float32,
+    )
+    attention_mask = np.asarray(
+        [
+            [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            [[0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        ][:time_size],
+        dtype=np.float32,
+    )
+
+    AutoregressiveSampler().sample(
+        inference_network=network,
+        decoder_network=_CacheDecoder(),
+        num_samples=2,
+        conditions=_encoder_outputs(batch_size=batch_size, num_steps=num_steps),
+        batch_size=2,
+        seed=keras.random.SeedGenerator(106),
+        mask=mask,
+        attention_mask=attention_mask,
+    )
+
+    for batch_index in range(2):
+        for step in range(num_steps):
+            call = network.calls[batch_index * num_steps + step]
+            time_index = 0 if time_size == 1 else step
+            np.testing.assert_array_equal(call["mask"], mask[time_index])
+            np.testing.assert_array_equal(call["attention_mask"], attention_mask[time_index])
+
+
+@pytest.mark.parametrize("time_size", [1, 2])
+def test_autoregressive_sampler_batches_repeats_and_slices_time_indexed_ordinary_masks(time_size):
+    network = _RecordingSamplerNetwork(target_dim=2)
+    batch_size, num_steps, num_samples = 3, 2, 2
+    mask = np.asarray(
+        [
+            [[1.0, 0.0, 1.0], [0.0, 1.0, 1.0]],
+            [[0.0, 1.0, 0.0], [1.0, 0.0, 1.0]],
+            [[1.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        ],
+        dtype=np.float32,
+    )[:, :time_size]
+    attention_mask = np.asarray(
+        [
+            [
+                [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+                [[0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+            ],
+            [
+                [[0.0, 0.0, 1.0], [1.0, 0.0, 0.0]],
+                [[1.0, 1.0, 0.0], [0.0, 1.0, 1.0]],
+            ],
+            [
+                [[1.0, 0.0, 1.0], [0.0, 1.0, 0.0]],
+                [[0.0, 1.0, 1.0], [1.0, 0.0, 0.0]],
+            ],
+        ],
+        dtype=np.float32,
+    )[:, :time_size]
+
+    AutoregressiveSampler().sample(
+        inference_network=network,
+        decoder_network=_CacheDecoder(),
+        num_samples=num_samples,
+        conditions=_encoder_outputs(batch_size=batch_size, num_steps=num_steps),
+        batch_size=2,
+        seed=keras.random.SeedGenerator(107),
+        mask=mask,
+        attention_mask=attention_mask,
+    )
+
+    for batch_index, (start, stop) in enumerate(((0, 2), (2, 3))):
+        for step in range(num_steps):
+            call = network.calls[batch_index * num_steps + step]
+            time_index = 0 if time_size == 1 else step
+            expected_mask = np.repeat(mask[start:stop, time_index], num_samples, axis=0)
+            expected_attention = np.repeat(attention_mask[start:stop, time_index], num_samples, axis=0)
+            np.testing.assert_array_equal(call["mask"], expected_mask)
+            np.testing.assert_array_equal(call["attention_mask"], expected_attention)
+
+
 class _IdentityEncoder(keras.Layer):
     def call(self, inputs, attention_mask=None, mask=None, training=None):
         return inputs
@@ -374,6 +499,57 @@ def test_autoregressive_sampling_gives_explicit_sequence_masks_precedence():
         np.testing.assert_array_equal(_numpy(call["fixed_target_value"]), explicit_fixed_value[:, step])
         assert "inference_mask" not in call
         assert "inference_attention_mask" not in call
+
+
+def test_autoregressive_log_prob_combines_sequence_and_fixed_coordinate_masks():
+    approximator = AutoregressiveApproximator(
+        inference_network=_RecordingInferenceNetwork(),
+        encoder_network=_IdentityEncoder(),
+        decoder_network=_RecordingDecoder(),
+        adapter=Adapter(),
+        standardize="inference_variables",
+    )
+    targets = keras.ops.convert_to_tensor(
+        np.asarray(
+            [
+                [[1.0, 2.0], [3.0, 6.0], [5.0, 10.0]],
+                [[2.0, 4.0], [4.0, 8.0], [6.0, 12.0]],
+            ],
+            dtype=np.float32,
+        )
+    )
+    sequence_mask = keras.ops.convert_to_tensor(np.asarray([[1.0, 1.0, 0.0], [1.0, 0.0, 0.0]], dtype=np.float32))
+    fixed_target_mask = keras.ops.convert_to_tensor(
+        np.asarray(
+            [
+                [[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
+                [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0]],
+            ],
+            dtype=np.float32,
+        )
+    )
+    approximator.standardizer.build({"inference_variables": tuple(targets.shape)})
+    approximator.standardizer.maybe_standardize(
+        targets,
+        key="inference_variables",
+        stage="training",
+        mask=sequence_mask,
+    )
+
+    actual = approximator.log_prob(
+        {
+            "inference_variables": _numpy(targets),
+            "summary_variables": _numpy(targets),
+        },
+        to_numpy=False,
+        inference_mask=sequence_mask,
+        fixed_target_mask=fixed_target_mask,
+    )
+
+    std = approximator.standardizer.standardize_layers["inference_variables"].moving_std(0)
+    step_log_det = -keras.ops.sum(keras.ops.log(std) * fixed_target_mask, axis=-1)
+    expected = keras.ops.sum(step_log_det * sequence_mask, axis=-1)
+    np.testing.assert_allclose(_numpy(actual), _numpy(expected), rtol=1e-6, atol=1e-6)
 
 
 class _RecordingApproximator(Approximator):

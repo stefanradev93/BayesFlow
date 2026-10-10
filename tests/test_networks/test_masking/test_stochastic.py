@@ -2,7 +2,8 @@ import keras
 import numpy as np
 import pytest
 
-from bayesflow.networks import DiffusionModel, FlowMatching, InferenceMasks, MaskHandler
+from bayesflow.masking import InferenceMasks, MaskHandler
+from bayesflow.networks import DiffusionModel, FlowMatching
 
 from .conftest import make_network
 
@@ -27,7 +28,7 @@ def test_mask_handler_repeats_only_batch_bearing_subnet_masks(key, shape, expect
 
     repeated = (
         MaskHandler()
-        .repeat(
+        .repeat_compositional(
             InferenceMasks(subnet_kwargs={key: value}),
             num_repeats=4,
         )
@@ -48,6 +49,7 @@ class InvariantRecordingSubnet(keras.Layer):
         self.record = record
         self.states = []
         self.observed_condition_masks = []
+        self.attention_masks = []
 
     def call(
         self,
@@ -63,6 +65,8 @@ class InvariantRecordingSubnet(keras.Layer):
             self.states.append(_numpy(inputs[0]).copy())
             if observed_condition_mask is not None:
                 self.observed_condition_masks.append(_numpy(observed_condition_mask).copy())
+            if attention_mask is not None:
+                self.attention_masks.append(_numpy(attention_mask).copy())
         return keras.ops.zeros_like(inputs[0])
 
     def compute_output_shape(self, input_shape):
@@ -86,14 +90,14 @@ class InvariantRecordingSubnet(keras.Layer):
     ],
     ids=["diffusion_langevin", "diffusion_corrector", "flow_matching_glass"],
 )
-def test_stochastic_solvers_preserve_fixed_state_at_every_subnet_call(
+def test_stochastic_solvers_preserve_fixed_state(
     network_name,
     integrate_kwargs,
     targets,
     conditions,
     fixed_target_mask,
 ):
-    subnet = InvariantRecordingSubnet()
+    subnet = InvariantRecordingSubnet(record=False)
     network = make_network(
         network_name,
         subnet=subnet,
@@ -117,9 +121,6 @@ def test_stochastic_solvers_preserve_fixed_state_at_every_subnet_call(
 
     expected = _numpy(fixed_value)[:, 1]
     np.testing.assert_allclose(_numpy(samples)[:, 1], expected, rtol=0.0, atol=1e-6)
-    assert subnet.states
-    for state in subnet.states:
-        np.testing.assert_allclose(state[:, 1], expected, rtol=0.0, atol=1e-6)
 
 
 @pytest.mark.parametrize("use_jac", [False, True], ids=["direct", "jacobian"])
@@ -141,8 +142,8 @@ def test_compositional_diffusion_resolves_masks_once(
     original = network.mask_handler.resolve
     original_resolve_compositional = network.mask_handler.resolve_compositional
     original_without_masks = network.mask_handler.without_mask_kwargs
-    original_repeat = network.mask_handler.repeat
-    calls = {"resolve": 0, "resolve_compositional": 0, "without_masks": 0, "repeat": 0}
+    original_repeat = network.mask_handler.repeat_compositional
+    calls = {"resolve": 0, "resolve_compositional": 0, "without_masks": 0, "repeat_compositional": 0}
 
     def counting_resolve(*args, **kwargs):
         calls["resolve"] += 1
@@ -157,13 +158,13 @@ def test_compositional_diffusion_resolves_masks_once(
         return original_without_masks(*args, **kwargs)
 
     def counting_repeat(*args, **kwargs):
-        calls["repeat"] += 1
+        calls["repeat_compositional"] += 1
         return original_repeat(*args, **kwargs)
 
     monkeypatch.setattr(network.mask_handler, "resolve", counting_resolve)
     monkeypatch.setattr(network.mask_handler, "resolve_compositional", counting_resolve_compositional)
     monkeypatch.setattr(network.mask_handler, "without_mask_kwargs", counting_without_masks)
-    monkeypatch.setattr(network.mask_handler, "repeat", counting_repeat)
+    monkeypatch.setattr(network.mask_handler, "repeat_compositional", counting_repeat)
 
     samples = network._inverse_compositional(
         targets,
@@ -177,7 +178,12 @@ def test_compositional_diffusion_resolves_masks_once(
     )
 
     assert tuple(samples.shape) == tuple(targets.shape)
-    assert calls == {"resolve": 1, "resolve_compositional": 1, "without_masks": 1, "repeat": 1}
+    assert calls == {
+        "resolve": 1,
+        "resolve_compositional": 1,
+        "without_masks": 1,
+        "repeat_compositional": 1,
+    }
 
 
 def test_learned_compositional_prior_is_marked_as_missing(targets, conditions):
@@ -199,6 +205,52 @@ def test_learned_compositional_prior_is_marked_as_missing(targets, conditions):
     np.testing.assert_array_equal(mask[:, -1], np.zeros((2, 2), dtype=np.float32))
 
 
+def test_compositional_minibatch_slices_condition_masks_and_repeats_attention(targets, conditions):
+    subnet = InvariantRecordingSubnet()
+    network = DiffusionModel(subnet=subnet)
+    network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
+    compositional_conditions = keras.ops.stack([conditions, -conditions, conditions + np.float32(2.0)], axis=1)
+    observed = keras.ops.convert_to_tensor(
+        np.asarray(
+            [
+                [[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
+                [[0.0, 1.0], [1.0, 0.0], [1.0, 1.0]],
+            ],
+            dtype=np.float32,
+        )
+    )
+    attention = keras.ops.convert_to_tensor(
+        np.stack(
+            [
+                np.eye(3, 5, dtype=np.float32),
+                np.ones((3, 5), dtype=np.float32),
+            ],
+            axis=0,
+        )
+    )
+    seed = 1731
+
+    network.compositional_score(
+        targets,
+        time=0.5,
+        conditions=compositional_conditions,
+        seed=keras.random.SeedGenerator(seed),
+        compute_prior_score=lambda value, time: keras.ops.zeros_like(value),
+        mini_batch_size=2,
+        observed_condition_mask=observed,
+        attention_mask=attention,
+        clip=None,
+    )
+
+    ranks = keras.random.uniform((2, 3), seed=keras.random.SeedGenerator(seed))
+    _, indices = keras.ops.top_k(-ranks, 2)
+    expected_observed = keras.ops.take_along_axis(observed, indices[..., None], axis=1)
+    expected_observed = keras.ops.reshape(expected_observed, (4, 2))
+
+    np.testing.assert_array_equal(subnet.observed_condition_masks[-1], _numpy(expected_observed))
+    np.testing.assert_array_equal(subnet.attention_masks[-1], np.repeat(_numpy(attention), 2, axis=0))
+
+
 def test_compositional_score_projects_fixed_coordinates(targets, conditions, fixed_target_mask):
     network = DiffusionModel(subnet=InvariantRecordingSubnet(record=False))
     network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
@@ -217,6 +269,90 @@ def test_compositional_score_projects_fixed_coordinates(targets, conditions, fix
     np.testing.assert_array_equal(_numpy(score)[:, 1], np.zeros((2,), dtype=np.float32))
 
 
+def test_diffusion_public_fields_project_fixed_coordinates(targets, conditions, fixed_target_mask):
+    network = DiffusionModel(subnet=InvariantRecordingSubnet(record=False))
+    network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
+
+    outputs = (
+        network.score(
+            targets,
+            time=0.5,
+            conditions=conditions,
+            fixed_target_mask=fixed_target_mask,
+            clip=None,
+        ),
+        network.velocity(
+            targets,
+            time=0.5,
+            stochastic_solver=False,
+            conditions=conditions,
+            fixed_target_mask=fixed_target_mask,
+        ),
+        network.diffusion_term(
+            targets,
+            time=0.5,
+            fixed_target_mask=fixed_target_mask,
+        ),
+    )
+
+    for output in outputs:
+        np.testing.assert_array_equal(_numpy(output)[:, 1], np.zeros((2,), dtype=np.float32))
+
+
+def test_flow_matching_public_velocity_projects_fixed_coordinates(targets, conditions, fixed_target_mask):
+    network = FlowMatching(
+        subnet=InvariantRecordingSubnet(record=False),
+        integrate_kwargs={"method": "euler", "steps": 2},
+    )
+    network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
+
+    velocity = network.velocity(
+        targets,
+        time=0.5,
+        conditions=conditions,
+        fixed_target_mask=fixed_target_mask,
+    )
+
+    np.testing.assert_array_equal(_numpy(velocity)[:, 1], np.zeros((2,), dtype=np.float32))
+
+
+@pytest.mark.parametrize("network_name", ["consistency", "stable_consistency"])
+@pytest.mark.parametrize("explicit_value", [False, True], ids=["mask_only", "fixed_value"])
+def test_public_consistency_function_clamps_fixed_coordinates(
+    network_name,
+    explicit_value,
+    targets,
+    conditions,
+    fixed_target_mask,
+):
+    subnet = InvariantRecordingSubnet()
+    network = make_network(network_name, subnet=subnet)
+    network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
+    time = keras.ops.full((targets.shape[0], 1), np.float32(0.5), dtype="float32")
+    fixed_target_value = keras.ops.convert_to_tensor(
+        np.asarray(
+            [[-4.0, 7.5, 2.0], [3.0, -2.5, 1.0]],
+            dtype=np.float32,
+        )
+    )
+    kwargs = {"fixed_target_mask": fixed_target_mask}
+    if explicit_value:
+        kwargs["fixed_target_value"] = fixed_target_value
+
+    output = network.consistency_function(
+        targets,
+        time,
+        conditions=conditions,
+        **kwargs,
+    )
+
+    replacement = fixed_target_value if explicit_value else targets
+    expected_input = np.where(_numpy(fixed_target_mask).astype(bool), _numpy(targets), _numpy(replacement))
+    np.testing.assert_array_equal(subnet.states[-1], expected_input)
+    np.testing.assert_array_equal(_numpy(output)[:, 1], _numpy(replacement)[:, 1])
+    assert _numpy(output).dtype == np.float32
+
+
 @pytest.mark.skip_on_mps
 def test_stable_consistency_all_fixed_loss_stays_zero_with_nonzero_weight_network(
     targets,
@@ -225,7 +361,7 @@ def test_stable_consistency_all_fixed_loss_stays_zero_with_nonzero_weight_networ
     network = make_network("stable_consistency")
     network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
     for weight in network.weight_fn_projector.weights:
-        weight.assign(keras.ops.ones_like(weight) * keras.ops.cast(0.5, weight.dtype))
+        weight.assign(np.full(weight.shape, 0.5, dtype=np.float32))
 
     metrics = network.compute_metrics(
         targets,

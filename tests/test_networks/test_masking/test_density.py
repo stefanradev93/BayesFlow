@@ -5,6 +5,7 @@ import pytest
 from bayesflow.adapters import Adapter
 from bayesflow.approximators import ContinuousApproximator
 from bayesflow.distributions import DiagonalNormal, DiagonalStudentT, Mixture
+from bayesflow.networks.helpers.standardization.standardize import Standardize
 
 from .conftest import make_network
 
@@ -27,6 +28,17 @@ class ZeroSubnet(keras.Layer):
 
     def compute_output_shape(self, input_shape):
         return input_shape[0]
+
+
+class HandlerlessDensityNetwork(keras.Layer):
+    def build(self, input_shape, conditions_shape=None):
+        super().build(input_shape)
+
+    def call(self, inputs):
+        return inputs
+
+    def log_prob(self, samples, conditions=None, **kwargs):
+        return -keras.ops.sum(keras.ops.square(samples), axis=-1)
 
 
 def test_diagonal_normal_mask_is_a_normalized_marginal(targets, fixed_target_mask):
@@ -79,7 +91,7 @@ def test_diagonal_student_t_mask_is_exact_lower_dimensional_marginal(targets, fi
     marginal.build((targets.shape[0], 2))
 
     actual = distribution.log_prob(targets, mask=fixed_target_mask)
-    expected = marginal.log_prob(targets[..., [0, 2]])
+    expected = marginal.log_prob(keras.ops.take(targets, [0, 2], axis=-1))
 
     np.testing.assert_allclose(_numpy(actual), _numpy(expected), rtol=1e-6, atol=1e-6)
 
@@ -94,7 +106,7 @@ def test_diagonal_student_t_mask_isolates_nan_coordinates(targets, fixed_target_
     marginal.build((values.shape[0], 2))
 
     actual = distribution.log_prob(values, mask=fixed_target_mask)
-    expected = marginal.log_prob(values[..., [0, 2]])
+    expected = marginal.log_prob(keras.ops.take(values, [0, 2], axis=-1))
 
     assert np.all(np.isfinite(_numpy(actual)))
     np.testing.assert_allclose(_numpy(actual), _numpy(expected), rtol=1e-6, atol=1e-6)
@@ -221,25 +233,90 @@ def test_approximator_masks_dynamic_standardizer_jacobian(targets, conditions, f
     np.testing.assert_allclose(_numpy(actual), _numpy(expected), rtol=1e-5, atol=1e-5)
 
 
-def test_approximator_rejects_unmaskable_adapter_jacobian(targets, conditions, fixed_target_mask):
-    network = make_network("flow_matching")
-    adapter = Adapter().scale("inference_variables", by=np.float32(2.0))
+def test_handlerless_density_ignores_semantic_masks(targets, fixed_target_mask):
     approximator = ContinuousApproximator(
-        inference_network=network,
-        adapter=adapter,
-        standardize=None,
+        inference_network=HandlerlessDensityNetwork(),
+        adapter=Adapter(),
+        standardize="inference_variables",
     )
-    approximator.build(
-        {
-            "inference_variables": tuple(targets.shape),
-            "inference_conditions": tuple(conditions.shape),
-        }
+    approximator.build({"inference_variables": tuple(targets.shape)})
+    approximator.standardizer.maybe_standardize(targets, key="inference_variables", stage="training")
+
+    data = {"inference_variables": _numpy(targets).astype(np.float32)}
+    unmasked = approximator.log_prob(data, to_numpy=False)
+    masked = approximator.log_prob(
+        data | {"fixed_target_mask": _numpy(fixed_target_mask).astype(np.float32)},
+        to_numpy=False,
     )
-    data = {
-        "inference_variables": _numpy(targets).astype(np.float32),
-        "inference_conditions": _numpy(conditions).astype(np.float32),
-        "fixed_target_mask": _numpy(fixed_target_mask).astype(np.float32),
+
+    np.testing.assert_allclose(_numpy(masked), _numpy(unmasked), rtol=0.0, atol=1e-6)
+
+
+def test_standardize_density_mask_broadcasts_and_selects_jacobian_coordinates():
+    layer = Standardize()
+    layer.build((2, 3))
+    std = np.asarray([2.0, 4.0, 0.5], dtype=np.float32)
+    layer.moving_m2[0].assign(std ** np.float32(2.0))
+    layer.count[0].assign(np.float32(1.0))
+    values = keras.ops.convert_to_tensor(np.asarray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32))
+
+    masks = {
+        "partial": np.asarray([1.0, 0.0, 1.0], dtype=np.float32),
+        "all": np.ones((3,), dtype=np.float32),
+        "none": np.zeros((3,), dtype=np.float32),
+    }
+    for mask in masks.values():
+        _, forward = layer(
+            values,
+            stage="inference",
+            forward=True,
+            log_det_jac=True,
+            log_det_jac_mask=keras.ops.convert_to_tensor(mask),
+        )
+        _, inverse = layer(
+            values,
+            stage="inference",
+            forward=False,
+            log_det_jac=True,
+            log_det_jac_mask=keras.ops.convert_to_tensor(mask),
+        )
+        expected = np.full(
+            (2,),
+            -np.sum(np.log(std) * mask, dtype=np.float32),
+            dtype=np.float32,
+        )
+
+        np.testing.assert_allclose(_numpy(forward), expected, rtol=0.0, atol=1e-6)
+        np.testing.assert_allclose(_numpy(inverse), -expected, rtol=0.0, atol=1e-6)
+
+
+def test_standardize_nested_density_masks_follow_each_leaf():
+    layer = Standardize()
+    layer.build({"a": (2, 2), "b": (2, 3)})
+    std_a = np.asarray([2.0, 4.0], dtype=np.float32)
+    std_b = np.asarray([0.5, 2.0, 8.0], dtype=np.float32)
+    for index, std in enumerate((std_a, std_b)):
+        layer.moving_m2[index].assign(std ** np.float32(2.0))
+        layer.count[index].assign(np.float32(1.0))
+
+    values = {
+        "a": keras.ops.ones((2, 2), dtype="float32"),
+        "b": keras.ops.ones((2, 3), dtype="float32"),
+    }
+    masks = {
+        "a": keras.ops.convert_to_tensor(np.asarray([1.0, 0.0], dtype=np.float32)),
+        "b": keras.ops.convert_to_tensor(np.asarray([0.0, 1.0, 1.0], dtype=np.float32)),
     }
 
-    with pytest.raises(NotImplementedError, match="aggregate"):
-        approximator.log_prob(data)
+    _, actual = layer(
+        values,
+        stage="inference",
+        forward=True,
+        log_det_jac=True,
+        log_det_jac_mask=masks,
+    )
+
+    expected_a = np.full((2,), -np.log(std_a[0]), dtype=np.float32)
+    expected_b = np.full((2,), -np.sum(np.log(std_b[1:]), dtype=np.float32), dtype=np.float32)
+    np.testing.assert_allclose(_numpy(actual["a"]), expected_a, rtol=0.0, atol=1e-6)
+    np.testing.assert_allclose(_numpy(actual["b"]), expected_b, rtol=0.0, atol=1e-6)

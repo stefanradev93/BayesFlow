@@ -3,7 +3,8 @@ from functools import lru_cache
 import keras
 
 from bayesflow._backend import jacrev
-from bayesflow.networks.inference import InferenceMasks, InferenceNetwork, MaskName
+from bayesflow.masking import InferenceMasks, MaskName
+from bayesflow.networks.inference import InferenceNetwork
 from bayesflow.types import Tensor
 from bayesflow.utils import filter_kwargs, issue_url, log_abs_det
 from bayesflow.utils.serialization import serializable, serialize
@@ -63,10 +64,10 @@ class LatentInferenceNetwork(InferenceNetwork):
         conditions: Tensor | None,
         kwargs: dict,
         *,
-        generate: bool,
+        stage: str = "inference",
     ) -> tuple[InferenceMasks, dict]:
         """Resolve only condition masks, whose feature space is unchanged."""
-        provided = self.mask_handler.collect_semantic(kwargs)
+        provided = self.mask_handler.collect_semantic_masks(kwargs)
         target_mask = (
             self.fixed_target_prob > 0.0
             or self.missing_target_prob > 0.0
@@ -82,14 +83,14 @@ class LatentInferenceNetwork(InferenceNetwork):
             kwargs,
             targets=targets,
             conditions=conditions,
-            generate=generate,
+            stage=stage,
         )
         clean_kwargs = self.mask_handler.without_semantic_kwargs(kwargs)
         return masks, clean_kwargs
 
     @staticmethod
     def _inner_kwargs(masks: InferenceMasks, kwargs: dict) -> dict:
-        return kwargs | masks.as_kwargs()
+        return kwargs | masks.semantic_kwargs()
 
     def build(self, xz_shape, conditions_shape=None):
         if self.built:
@@ -115,12 +116,7 @@ class LatentInferenceNetwork(InferenceNetwork):
     def _forward(
         self, x: Tensor, conditions: Tensor | None = None, density: bool = False, training: bool = False, **kwargs
     ):
-        masks, kwargs = self._resolve_condition_masks(
-            x,
-            conditions,
-            kwargs,
-            generate=False,
-        )
+        masks, kwargs = self._resolve_condition_masks(x, conditions, kwargs)
         inner_kwargs = self._inner_kwargs(masks, kwargs)
 
         if not density:
@@ -170,12 +166,7 @@ class LatentInferenceNetwork(InferenceNetwork):
                 f"If you need this feature, please open an issue at {issue_url}."
             )
 
-        masks, kwargs = self._resolve_condition_masks(
-            z,
-            conditions,
-            kwargs,
-            generate=False,
-        )
+        masks, kwargs = self._resolve_condition_masks(z, conditions, kwargs)
         inner_kwargs = self._inner_kwargs(masks, kwargs)
 
         y = self.inference_network(
@@ -195,7 +186,7 @@ class LatentInferenceNetwork(InferenceNetwork):
             x,
             conditions,
             kwargs,
-            generate=stage == "training",
+            stage=stage,
         )
         autoencoder_metrics = self.autoencoder.compute_metrics(x, sample_weight=sample_weight, stage=stage, **kwargs)
 
