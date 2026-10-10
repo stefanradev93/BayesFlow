@@ -9,12 +9,8 @@ from bayesflow.experimental.graphical_approximator_new.encoder import Exchangeab
 from bayesflow.experimental.graphs_new.simulation_graph import data_nodes
 
 
-def batch_of(simulator, num_datasets, sequential=()):
-    node_groupings = {}
-    for node in data_nodes(simulator.graph):
-        node_groupings[node] = groupings(simulator.graph, node)
-
-    batch = to_batch(simulator.sample(num_datasets), Adapter(), node_groupings, sequential)
+def batch_of(simulator, num_datasets):
+    batch = to_batch(simulator.sample(num_datasets), simulator.graph.expand().invert(), Adapter())
 
     for node in batch:
         for variable, values in batch[node]["values"].items():
@@ -184,7 +180,7 @@ def test_conditions_are_paired_with_the_data(crossed_design_irt_simulator):
 
 
 def test_steps(crossed_design_irt_simulator):
-    batch = batch_of(crossed_design_irt_simulator, 2, sequential=["questions"])
+    batch = batch_of(crossed_design_irt_simulator, 2)
     steps = batch["questions"]["steps"]
     datasets = batch["questions"]["indices"]["dataset"]
 
@@ -203,7 +199,7 @@ def test_steps(crossed_design_irt_simulator):
 
 
 def test_sequential_conditions_only_see_earlier_instances(crossed_design_irt_simulator):
-    batch = batch_of(crossed_design_irt_simulator, 2, sequential=["questions"])
+    batch = batch_of(crossed_design_irt_simulator, 2)
     positions = batch["questions"]["steps"]["positions"]
     ids = batch["questions"]["steps"]["ids"]
     conditions = keras.ops.zeros((len(positions), 3))

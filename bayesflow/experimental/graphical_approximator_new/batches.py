@@ -11,7 +11,7 @@ from bayesflow.adapters import Adapter
 from ..graphical_simulator_new import GraphicalSimulator
 from ..graphical_simulator_new.indexing_helpers import concatenated_ranges, group_ids
 from ..graphical_simulator_new.samples import Simulation, num_datasets, select
-from ..graphs_new import SimulationGraph
+from ..graphs_new import InvertedGraph, SimulationGraph
 from ..graphs_new.simulation_graph import is_exchangeable, is_interior
 
 
@@ -51,55 +51,19 @@ class SimulationDataset(keras.utils.PyDataset):
             self.order = np.random.permutation(num_datasets(self.source))
 
 
-def to_batch(
-    simulation: Simulation,
-    adapter: Adapter,
-    groupings: dict[str, list[tuple[str, ...]]],
-    sequential: list[str] = (),
-    padded: bool = False,
-) -> dict:
-    batch = {}
+def to_batch(simulation: Simulation, graph: InvertedGraph, adapter: Adapter, padded: bool = False) -> dict:
+    # Adds groups and steps to the samples and runs the adapter.
+    # This is the input that inference networks use
+    simulation_graph = graph.expanded_graph.simulation_graph
 
+    batch = {}
     for node, samples in simulation.items():
         batch[node] = {"indices": samples.indices, "values": samples.values}
 
-    for data_node, node_groupings in groupings.items():
-        groups = {}
-
-        for factors in node_groupings:
-            columns = []
-            for factor in ["dataset", *factors]:
-                columns.append(simulation[data_node].indices[factor])
-
-            ids = group_ids(columns)
-            groups["+".join(factors) or "dataset"] = {"ids": ids, "counts": np.bincount(ids)}
-
-        batch[data_node]["groups"] = groups
-
-    for node in sequential:
-        columns = []
-        for column, ids in simulation[node].indices.items():
-            if column != node:
-                columns.append(ids)
-
-        ids = group_ids(columns)
-        counts = np.bincount(ids)
-        starts = np.cumsum(counts) - counts
-        order = np.argsort(ids, kind="stable")
-
-        positions = np.empty(len(ids), dtype=np.int64)
-        positions[order] = np.arange(len(ids)) - np.repeat(starts, counts)
-
-        later = np.repeat(np.arange(len(ids)), positions)
-        earlier = order[concatenated_ranges(starts[ids], positions)]
-
-        batch[node]["steps"] = {
-            "ids": ids,
-            "counts": counts,
-            "positions": positions,
-            "earlier": earlier,
-            "later": later,
-        }
+        if simulation_graph.out_degree(node) == 0:
+            batch[node]["groups"] = groups(simulation_graph, node, samples.indices)
+        elif not graph.is_amortizable(node):
+            batch[node]["steps"] = steps(node, samples.indices)
 
     if padded:
         batch = pad(batch)
@@ -110,19 +74,83 @@ def to_batch(
     return batch
 
 
+def groups(graph: SimulationGraph, data_node: str, indices: dict[str, np.ndarray]) -> dict[str, dict]:
+    # Helper function for to_batch.
+    # For each grouping of exchangeable factors, compute to which group the row belongs to.
+    result = {}
+
+    for factors in groupings(graph, data_node):
+        columns = []
+        for factor in ["dataset", *factors]:
+            columns.append(indices[factor])
+
+        ids = group_ids(columns)
+        name = "+".join(factors) or "dataset"
+        result[name] = {"ids": ids, "counts": np.bincount(ids)}
+
+    return result
+
+
+def groupings(graph: SimulationGraph, data_node: str) -> list[tuple[str, ...]]:
+    # Lists the different ways that rows of the data node can be grouped by.
+    # This is necessary for summarizing the data.
+    ancestors = nx.ancestors(graph, data_node)
+
+    grouping_factors = []
+    for node in nx.lexicographical_topological_sort(graph):
+        if node in ancestors and is_interior(graph, node) and is_exchangeable(graph, node):
+            grouping_factors.append(node)
+
+    valid = []
+    for size in range(len(grouping_factors) + 1):
+        for factors in itertools.combinations(grouping_factors, size):
+            outer_factors = set()
+            for factor in factors:
+                outer_factors |= nx.ancestors(graph, factor) & set(grouping_factors)
+
+            if outer_factors <= set(factors):
+                valid.append(factors)
+
+    if not is_exchangeable(graph, data_node):
+        valid.remove(tuple(grouping_factors))
+
+    return valid
+
+
+def steps(node: str, indices: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+    # Helper function for to_batch.
+    # Computes for each row its sequence and position, as well as all (earlier, later)
+    # row pairs within a sequence. Used for sequentially inferred nodes.
+    columns = []
+    for column, ids in indices.items():
+        if column != node:
+            columns.append(ids)
+
+    ids = group_ids(columns)
+    counts = np.bincount(ids)
+    starts = np.cumsum(counts) - counts
+    order = np.argsort(ids, kind="stable")
+
+    positions = np.empty(len(ids), dtype=np.int64)
+    positions[order] = np.arange(len(ids)) - np.repeat(starts, counts)
+
+    later = np.repeat(np.arange(len(ids)), positions)
+    earlier = order[concatenated_ranges(starts[ids], positions)]
+
+    return {"ids": ids, "counts": counts, "positions": positions, "earlier": earlier, "later": later}
+
+
 def pad(batch: dict) -> dict:
+    # Pad output of to_batch, so that inference networks do not see so many
+    # dataset sizes, which would trigger a long compilation run
     sizes = {}
+    datasets = 0
 
     for node, entries in batch.items():
         sizes[node] = bucket(len(entries["indices"][node]))
-
-    datasets = 0
-    for entries in batch.values():
         datasets = max(datasets, int(np.max(entries["indices"]["dataset"])) + 1)
 
     sizes["dataset"] = bucket(datasets)
-
-    padded = {}
 
     for node, entries in batch.items():
         rows = len(entries["indices"][node])
@@ -136,39 +164,33 @@ def pad(batch: dict) -> dict:
         for variable, value in entries["values"].items():
             values[variable] = repeat_rows(value, size)
 
-        weights = pad_with(np.full(rows, size / rows, dtype=keras.config.floatx()), size, 0.0)
+        weights = np.full(rows, size / rows, dtype=keras.config.floatx())
 
-        padded[node] = {"indices": indices, "values": values, "weights": weights}
+        entries["indices"] = indices
+        entries["values"] = values
+        entries["weights"] = pad_with(weights, size, 0.0)
 
-        if "groups" in entries:
-            groups = {}
+        groupings = list(entries.get("groups", {}).values())
+        if "steps" in entries:
+            groupings.append(entries["steps"])
 
-            for name, group in entries["groups"].items():
-                num_groups = bucket(len(group["counts"]))
-                groups[name] = {
-                    "ids": pad_with(group["ids"], size, num_groups - 1),
-                    "counts": pad_with(group["counts"], num_groups, 0),
-                }
-
-            padded[node]["groups"] = groups
+        for group in groupings:
+            num_groups = bucket(len(group["counts"]))
+            group["ids"] = pad_with(group["ids"], size, num_groups - 1)
+            group["counts"] = pad_with(group["counts"], num_groups, 0)
 
         if "steps" in entries:
             steps = entries["steps"]
-            num_groups = bucket(len(steps["counts"]))
             num_pairs = bucket(len(steps["earlier"]))
+            steps["positions"] = pad_with(steps["positions"], size, 0)
+            steps["earlier"] = pad_with(steps["earlier"], num_pairs, size - 1)
+            steps["later"] = pad_with(steps["later"], num_pairs, size - 1)
 
-            padded[node]["steps"] = {
-                "ids": pad_with(steps["ids"], size, num_groups - 1),
-                "counts": pad_with(steps["counts"], num_groups, 0),
-                "positions": pad_with(steps["positions"], size, 0),
-                "earlier": pad_with(steps["earlier"], num_pairs, size - 1),
-                "later": pad_with(steps["later"], num_pairs, size - 1),
-            }
-
-    return padded
+    return batch
 
 
 def bucket(n: int) -> int:
+    # the next of four sizes per doubling that is larger than n
     return int(np.ceil(2 ** (np.ceil(4 * np.log2(n + 1)) / 4)))
 
 
@@ -180,31 +202,3 @@ def pad_with(array, size: int, value):
 
 def repeat_rows(values, size: int):
     return np.asarray(values)[np.arange(size) % len(values)]
-
-
-def groupings(graph: SimulationGraph, data_node: str) -> list[tuple[str, ...]]:
-    grouping_factors = []
-
-    for node in nx.lexicographical_topological_sort(graph):
-        interior = is_interior(graph, node)
-        exchangeable = is_exchangeable(graph, node)
-
-        if node in nx.ancestors(graph, data_node) and interior and exchangeable:
-            grouping_factors.append(node)
-
-    result = []
-
-    for size in range(len(grouping_factors) + 1):
-        for factors in itertools.combinations(grouping_factors, size):
-            outer_factors = set()
-
-            for factor in factors:
-                outer_factors |= nx.ancestors(graph, factor) & set(grouping_factors)
-
-            if outer_factors <= set(factors):
-                result.append(factors)
-
-    if not is_exchangeable(graph, data_node):
-        result.remove(tuple(grouping_factors))
-
-    return result

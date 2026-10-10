@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 
 from bayesflow.experimental.graphical_approximator_new.batches import bucket, pad
@@ -15,7 +17,7 @@ def test_bucket():
 
 def test_pad(two_level_simulator, two_level_approximator):
     batch = two_level_approximator.to_batch(two_level_simulator.sample(3))
-    padded = pad(batch)
+    padded = pad(copy.deepcopy(batch))
 
     for node, entries in batch.items():
         rows = len(entries["indices"][node])

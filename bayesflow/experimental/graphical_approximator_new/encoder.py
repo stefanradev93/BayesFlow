@@ -57,19 +57,20 @@ class ExchangeableEncoder(keras.Layer):
             log_size = keras.ops.log1p(keras.ops.cast(group["counts"], observations.dtype))
             features.append(gather(log_size, group["ids"])[:, None])
 
-        h = keras.ops.concatenate(features, axis=-1)
+        hidden = keras.ops.concatenate(features, axis=-1)
 
+        # every layer adds a transformation of the group means of each grouping to every row
         for kernel, group_kernel, bias in zip(self.kernels, self.group_kernels, self.biases):
             pooled = bias
 
             for i, group in enumerate(groups):
                 num_groups = keras.ops.shape(group["counts"])[0]
-                mean = segment_mean(h, group["ids"], num_groups)
+                mean = segment_mean(hidden, group["ids"], num_groups)
                 pooled = pooled + gather(keras.ops.matmul(mean, group_kernel[i]), group["ids"])
 
-            h = activation(keras.ops.matmul(h, kernel) + pooled)
+            hidden = activation(keras.ops.matmul(hidden, kernel) + pooled)
 
-        return h
+        return hidden
 
     def get_config(self):
         return super().get_config() | {"width": self.width, "depth": self.depth, "activation": self.activation}

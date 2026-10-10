@@ -17,7 +17,7 @@ from ..graphical_simulator_new.samples import (
 )
 from ..graphs_new import InvertedGraph
 from ..graphs_new.simulation_graph import data_nodes
-from .batches import SimulationDataset, groupings, to_batch
+from .batches import SimulationDataset, to_batch
 from .conditions import network_conditions, network_variables, sequential_conditions, split_values
 from .encoder import ExchangeableEncoder, sum_per_dataset
 
@@ -43,11 +43,6 @@ class GraphicalApproximator(Approximator):
         simulation_graph = graph.expanded_graph.simulation_graph
         self.data_nodes = data_nodes(simulation_graph)
         self.networks = graph.networks()
-
-        self.groupings = {}
-
-        for node in self.data_nodes:
-            self.groupings[node] = groupings(simulation_graph, node)
 
         self.conditions = []
         self.sequential = []
@@ -105,8 +100,9 @@ class GraphicalApproximator(Approximator):
                 for variable, value in batch[node]["values"].items():
                     value = self.standardizer.maybe_standardize(value, variable, forward=False)
                     value = keras.ops.convert_to_numpy(value)
-                    value = value.reshape(num_samples, -1, value.shape[-1])
 
+                    # the copies of the observed data are stacked, so rows are ordered by copy first
+                    value = value.reshape(num_samples, -1, value.shape[-1])
                     result[variable] = np.moveaxis(value, 0, 1)
 
         result = self.adapter(result, inverse=True, strict=False)
@@ -119,6 +115,8 @@ class GraphicalApproximator(Approximator):
 
         log_prob = keras.ops.zeros(datasets)
 
+        # sums the log density of every network, and the log determinants of the standardization
+        # and the adapter, over the rows of each dataset
         for i, network in enumerate(self.networks):
             variables = network_variables(batch, network)
             conditions = self.inference_conditions(batch, i)
@@ -127,16 +125,18 @@ class GraphicalApproximator(Approximator):
             log_prob += sum_per_dataset(network_log_prob, batch[network[0]]["indices"]["dataset"], datasets)
 
             for node in network:
+                dataset_ids = batch[node]["indices"]["dataset"]
+
                 for variable, value in batch[node]["values"].items():
                     if variable in self.standardizer.standardize:
                         _, log_det_jac = self.standardizer.maybe_standardize(value, variable, log_det_jac=True)
-                        log_prob += sum_per_dataset(log_det_jac, batch[node]["indices"]["dataset"], datasets)
+                        log_prob += sum_per_dataset(log_det_jac, dataset_ids, datasets)
 
                 _, log_det_jac = self.adapter(data[node].values, strict=False, log_det_jac=True)
 
                 for value in log_det_jac.values():
                     value = keras.ops.cast(value, keras.config.floatx())
-                    log_prob += sum_per_dataset(value, batch[node]["indices"]["dataset"], datasets)
+                    log_prob += sum_per_dataset(value, dataset_ids, datasets)
 
         return keras.ops.convert_to_numpy(log_prob)
 
@@ -230,7 +230,7 @@ class GraphicalApproximator(Approximator):
                             "The nodes of a network must share their rows."
                         )
 
-        return to_batch(simulation, adapter or self.adapter, self.groupings, self.sequential, padded)
+        return to_batch(simulation, self.graph, adapter or self.adapter, padded)
 
     def inference_conditions(self, batch: dict, i: int, training: bool = False):
         network = self.networks[i]
@@ -278,10 +278,10 @@ class GraphicalApproximator(Approximator):
     def build_from_data(self, batch):
         variable_dims = {}
 
-        for node, samples in batch.items():
+        for node, entries in batch.items():
             variable_dims[node] = {}
 
-            for variable, value in batch[node]["values"].items():
+            for variable, value in entries["values"].items():
                 variable_dims[node][variable] = int(keras.ops.shape(value)[-1])
 
         self.build_from_config({"variable_dims": variable_dims})

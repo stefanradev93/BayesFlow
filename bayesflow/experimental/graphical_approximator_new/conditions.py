@@ -46,7 +46,8 @@ def network_conditions(
         pooled = segment_mean(encoded, observations[target], num_instances)
         log_counts = keras.ops.log1p(segment_count(observations[target], num_instances, pooled.dtype))
 
-        result += [pooled, log_counts]
+        result.append(pooled)
+        result.append(log_counts)
 
     for node in latent:
         if node in target_indices:
@@ -56,20 +57,21 @@ def network_conditions(
 
 
 def sequential_conditions(batch: dict, node: str, conditions):
+    # adds the mean conditions of the sequence, and the mean and number of the earlier values
     steps = batch[node]["steps"]
-    num_groups = keras.ops.shape(steps["counts"])[0]
-
-    group_conditions = gather(segment_mean(conditions, steps["ids"], num_groups), steps["ids"])
-
     values = node_values(batch, node)
-    earlier = keras.ops.segment_sum(
-        gather(values, steps["earlier"]), steps["later"], num_segments=keras.ops.shape(values)[0]
-    )
+
+    num_sequences = keras.ops.shape(steps["counts"])[0]
+    sequence_mean = segment_mean(conditions, steps["ids"], num_sequences)
+    sequence_conditions = gather(sequence_mean, steps["ids"])
+
+    num_rows = keras.ops.shape(values)[0]
+    earlier_sum = keras.ops.segment_sum(gather(values, steps["earlier"]), steps["later"], num_segments=num_rows)
 
     num_earlier = keras.ops.cast(steps["positions"], values.dtype)[:, None]
-    earlier_mean = earlier / keras.ops.maximum(num_earlier, 1.0)
+    earlier_mean = earlier_sum / keras.ops.maximum(num_earlier, 1.0)
 
-    return keras.ops.concatenate([conditions, group_conditions, earlier_mean, keras.ops.log1p(num_earlier)], axis=-1)
+    return keras.ops.concatenate([conditions, sequence_conditions, earlier_mean, keras.ops.log1p(num_earlier)], axis=-1)
 
 
 def split_values(samples, network: list[str], variable_dims: dict[str, dict[str, int]]) -> dict[str, dict]:
