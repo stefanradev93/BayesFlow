@@ -42,9 +42,9 @@ class InferenceNetwork(keras.Layer):
     an omitted ``seed`` against ``self.seed_generator``, so that they never fall back to Keras'
     global generator (which cannot be traced under ``jax.jit``).
 
-    Every inference network also owns a :class:`MaskHandler`. Implementations resolve masks once
+    Every inference network also owns a :class:`~bayesflow.masking.MaskHandler`. Implementations resolve masks once
     at the boundary of each top-level operation and reuse the returned immutable
-    :class:`InferenceMasks` throughout solver steps or derivative
+    :class:`~bayesflow.masking.InferenceMasks` throughout solver steps or derivative
     closures. Ordinary padding and attention masks are routed separately to subnets which declare
     them explicitly. Custom implementations should follow the same boundary so mask sampling is
     neither repeated nor inserted into the backpropagation loop.

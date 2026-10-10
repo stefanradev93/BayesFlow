@@ -137,19 +137,12 @@ def test_generated_masks_are_resolved_once_and_routed(targets, conditions):
 
     assert keras.ops.isfinite(metrics["loss"])
     for subnet in (encoder, decoder):
-        fixed = keras.ops.convert_to_numpy(subnet.fixed_target_mask)
-        inferred = keras.ops.convert_to_numpy(subnet.infer_target_mask)
-        observed = keras.ops.convert_to_numpy(subnet.observed_condition_mask)
+        assert keras.backend.standardize_dtype(subnet.fixed_target_mask.dtype) == "float32"
+        assert keras.ops.all(keras.ops.sum(subnet.fixed_target_mask, axis=-1) == 1)
+        assert keras.ops.all(subnet.infer_target_mask == subnet.fixed_target_mask)
+        assert keras.ops.all(subnet.observed_condition_mask == 0)
 
-        assert fixed.dtype == np.float32
-        np.testing.assert_array_equal(keras.ops.sum(fixed, axis=-1), np.ones((2,), dtype=np.float32))
-        np.testing.assert_array_equal(inferred, fixed)
-        np.testing.assert_array_equal(observed, np.zeros((2, 2), dtype=np.float32))
-
-    np.testing.assert_array_equal(
-        keras.ops.convert_to_numpy(encoder.fixed_target_mask),
-        keras.ops.convert_to_numpy(decoder.fixed_target_mask),
-    )
+    assert keras.ops.all(encoder.fixed_target_mask == decoder.fixed_target_mask)
 
 
 def test_free_form_generates_missingness_only_when_both_subnets_support_it(targets, conditions):
@@ -247,8 +240,8 @@ def test_ordinary_masks_are_routed_to_both_free_form_subnets(targets, conditions
 
     assert keras.ops.isfinite(metrics["loss"])
     for subnet in (encoder, decoder):
-        np.testing.assert_array_equal(keras.ops.convert_to_numpy(subnet.attention_mask), attention)
-        np.testing.assert_array_equal(keras.ops.convert_to_numpy(subnet.mask), padding)
+        assert keras.ops.all(subnet.attention_mask == attention)
+        assert keras.ops.all(subnet.mask == padding)
 
 
 def test_sample_clamps_fixed_targets_to_explicit_values():
@@ -452,17 +445,11 @@ def test_non_exchangeable_wrapper_flattens_and_routes_generated_masks():
 
     assert wrapper.built
     assert keras.ops.isfinite(metrics["loss"])
-    fixed = keras.ops.convert_to_numpy(inner.fixed_target_mask)
-    inferred = inner.infer_target_mask
-    observed = keras.ops.convert_to_numpy(inner.observed_condition_mask)
-    assert fixed.shape == (6, 1, 2)
-    np.testing.assert_array_equal(
-        keras.ops.convert_to_numpy(keras.ops.sum(fixed, axis=-1)),
-        np.ones((6, 1), dtype=np.float32),
-    )
-    assert inferred is None
-    np.testing.assert_array_equal(observed[..., :2], np.ones((6, 1, 2), dtype=np.float32))
-    np.testing.assert_array_equal(observed[..., 2:], np.zeros((6, 1, 1), dtype=np.float32))
+    assert inner.fixed_target_mask.shape == (6, 1, 2)
+    assert keras.ops.all(keras.ops.sum(inner.fixed_target_mask, axis=-1) == 1)
+    assert inner.infer_target_mask is None
+    assert keras.ops.all(inner.observed_condition_mask[..., :2] == 1)
+    assert keras.ops.all(inner.observed_condition_mask[..., 2:] == 0)
 
 
 def test_non_exchangeable_wrapper_slices_fixed_values_during_sampling():

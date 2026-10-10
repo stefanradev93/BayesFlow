@@ -655,7 +655,7 @@ def test_with_flattened_condition_mask_flattens_and_routes_mask():
     masks = InferenceMasks(subnet_kwargs={MaskName.OBSERVED_CONDITION: observed})
 
     updated = MaskHandler.with_flattened_condition_mask(masks, observed)
-    expected = np.asarray(observed).reshape(6, 2)
+    expected = _numpy(observed).reshape(6, 2)
 
     np.testing.assert_array_equal(_numpy(updated.observed_condition_mask), expected)
     np.testing.assert_array_equal(_numpy(updated.subnet_kwargs[MaskName.OBSERVED_CONDITION]), expected)

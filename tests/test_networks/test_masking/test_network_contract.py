@@ -139,7 +139,7 @@ def test_probability_generated_masking_has_finite_training_loss(
     metrics = network.compute_metrics(targets, conditions=conditions, stage="training")
 
     loss = _numpy(metrics["loss"])
-    assert np.asarray(loss).dtype == np.float32
+    assert loss.dtype == np.float32
     assert np.all(np.isfinite(loss))
 
 

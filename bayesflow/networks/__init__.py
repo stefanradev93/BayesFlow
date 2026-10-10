@@ -10,8 +10,6 @@ Examples
 ... )
 """
 
-from bayesflow.masking import InferenceMasks, MaskHandler, MaskName
-
 # Base classes
 from .inference import InferenceNetwork
 from .summary import SummaryNetwork

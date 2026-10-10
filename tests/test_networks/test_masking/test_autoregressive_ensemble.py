@@ -678,8 +678,8 @@ def test_ensemble_routes_member_specific_semantic_masks_during_inference():
 
     for name, member in (("left", left), ("right", right)):
         for key, values in semantic.items():
-            sampled = np.asarray(member.sample_received[key])
-            evaluated = np.asarray(member.log_prob_received[key])
+            sampled = _numpy(member.sample_received[key])
+            evaluated = _numpy(member.log_prob_received[key])
             assert sampled.dtype == np.float32
             assert evaluated.dtype == np.float32
             np.testing.assert_array_equal(sampled, values[name])
