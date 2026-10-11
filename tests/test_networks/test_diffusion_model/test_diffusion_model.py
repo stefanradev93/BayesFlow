@@ -112,7 +112,7 @@ def test_adaptive_solver_sample_and_density():
     test_inference_networks.py::test_density_numerically."""
     from bayesflow.networks import DiffusionModel
 
-    model = DiffusionModel(subnet_kwargs=dict(widths=(8, 8)))
+    model = DiffusionModel(subnet_kwargs=dict(widths=(8, 8), fourier_scale=1.0))
     conditions = keras.random.normal((2, 3))
     model.build((2, 3), conditions_shape=(2, 3))
 
