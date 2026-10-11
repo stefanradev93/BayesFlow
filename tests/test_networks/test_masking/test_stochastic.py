@@ -123,7 +123,11 @@ def test_stochastic_solvers_preserve_fixed_state(
     np.testing.assert_allclose(_numpy(samples)[:, 1], expected, rtol=0.0, atol=1e-6)
 
 
-@pytest.mark.parametrize("use_jac", [False, True], ids=["direct", "jacobian"])
+@pytest.mark.parametrize(
+    "use_jac",
+    [False, pytest.param(True, marks=pytest.mark.skip_on_mps)],
+    ids=["direct", "jacobian"],
+)
 def test_compositional_diffusion_resolves_masks_once(
     monkeypatch,
     targets,
