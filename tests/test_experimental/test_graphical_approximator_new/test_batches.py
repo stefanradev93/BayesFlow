@@ -1,5 +1,3 @@
-import copy
-
 import keras
 import numpy as np
 
@@ -9,7 +7,6 @@ from bayesflow.experimental.graphical_approximator_new.batches import (
     add_sequence_summaries,
     bucket,
     groupings,
-    pad,
     steps,
     to_batch,
 )
@@ -86,9 +83,10 @@ def test_bucket():
 
 
 def test_pad(two_level_simulator):
+    simulation = two_level_simulator.sample(3)
     graph = two_level_simulator.graph.expand().invert()
-    batch = to_batch(two_level_simulator.sample(3), graph, Adapter())
-    padded = pad(copy.deepcopy(batch))
+    batch = to_batch(simulation, graph, Adapter())
+    padded = to_batch(simulation, graph, Adapter(), padded=True)
 
     for node, entries in batch.items():
         rows = len(entries["indices"][node])
@@ -99,8 +97,9 @@ def test_pad(two_level_simulator):
             np.testing.assert_array_equal(padded[node]["indices"][column][:rows], ids)
 
         for variable, values in entries["values"].items():
-            assert len(padded[node]["values"][variable]) == size
-            np.testing.assert_array_equal(padded[node]["values"][variable][:rows], values)
+            padded_values = keras.ops.convert_to_numpy(padded[node]["values"][variable])
+            assert len(padded_values) == size
+            np.testing.assert_array_equal(padded_values[:rows], keras.ops.convert_to_numpy(values))
 
         weights = padded[node]["weights"]
         assert np.all(weights[rows:] == 0)

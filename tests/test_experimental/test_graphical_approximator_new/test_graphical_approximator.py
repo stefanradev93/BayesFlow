@@ -4,7 +4,6 @@ import pytest
 
 from bayesflow.adapters import Adapter
 from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
-from bayesflow.experimental.graphical_approximator_new.batches import pad
 from bayesflow.experimental.graphical_approximator_new.encoder import ExchangeableEncoder
 from bayesflow.experimental.graphical_simulator_new.samples import concatenate
 from bayesflow.networks import CouplingFlow
@@ -55,14 +54,20 @@ def test_padding_preserves_loss(simulator, approximator, request):
     simulator = request.getfixturevalue(simulator)
     approximator = request.getfixturevalue(approximator)
 
-    batch = approximator.to_batch(simulator.sample(5))
+    simulation = simulator.sample(5)
+    batch = approximator.to_batch(simulation)
     approximator.build_from_data(batch)
 
+    # fit converts the batches to tensors, so the padding weights are on the same device as the loss
+    padded_batch = keras.tree.map_structure(keras.ops.convert_to_tensor, approximator.to_batch(simulation, padded=True))
+
     plain = approximator.compute_metrics(**batch, stage="validation")
-    padded = approximator.compute_metrics(**pad(batch), stage="validation")
+    padded = approximator.compute_metrics(**padded_batch, stage="validation")
 
     for name, value in plain.items():
-        np.testing.assert_allclose(padded[name], value, rtol=1e-4, atol=1e-4)
+        np.testing.assert_allclose(
+            keras.ops.convert_to_numpy(padded[name]), keras.ops.convert_to_numpy(value), rtol=1e-4, atol=1e-4
+        )
 
 
 def test_fit_with_validation_data(two_level_simulator, two_level_approximator):
