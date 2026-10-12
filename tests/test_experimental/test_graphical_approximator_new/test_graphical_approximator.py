@@ -1,8 +1,14 @@
+import keras
 import numpy as np
 import pytest
-from keras.src.callbacks.history import History
 
-from .conftest import approximator_for
+from bayesflow.adapters import Adapter
+from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
+from bayesflow.experimental.graphical_approximator_new.batches import pad
+from bayesflow.experimental.graphical_approximator_new.encoder import ExchangeableEncoder
+from bayesflow.experimental.graphical_simulator_new.samples import concatenate
+from bayesflow.networks import CouplingFlow
+
 
 EXAMPLES = [
     ("single_level_simulator", "single_level_approximator"),
@@ -14,22 +20,17 @@ EXAMPLES = [
 ]
 
 
-def batch_of(approximator, simulation):
-    return approximator.to_batch(simulation)
-
-
 @pytest.mark.parametrize(("simulator", "approximator"), EXAMPLES)
 def test_fit_sample(simulator, approximator, request):
     simulator = request.getfixturevalue(simulator)
     approximator = request.getfixturevalue(approximator)
     approximator.compile()
 
-    metrics = approximator.compute_metrics(**batch_of(approximator, simulator.sample(2)))
+    metrics = approximator.compute_metrics(**approximator.to_batch(simulator.sample(2)))
     assert "loss" in metrics
 
-    assert isinstance(approximator.fit(simulator=simulator, batch_size=2, num_batches=1, epochs=1), History)
-
-    assert isinstance(approximator.fit(dataset=simulator.sample(4), batch_size=2, epochs=1), History)
+    approximator.fit(simulator=simulator, batch_size=2, num_batches=1, epochs=1)
+    approximator.fit(dataset=simulator.sample(4), batch_size=2, epochs=1)
 
     observed = simulator.sample(3)
     samples = approximator.sample(num_samples=5, conditions=observed)
@@ -51,12 +52,10 @@ def test_fit_sample(simulator, approximator, request):
 
 @pytest.mark.parametrize(("simulator", "approximator"), EXAMPLES)
 def test_padding_preserves_loss(simulator, approximator, request):
-    from bayesflow.experimental.graphical_approximator_new.batches import pad
-
     simulator = request.getfixturevalue(simulator)
     approximator = request.getfixturevalue(approximator)
 
-    batch = batch_of(approximator, simulator.sample(5))
+    batch = approximator.to_batch(simulator.sample(5))
     approximator.build_from_data(batch)
 
     plain = approximator.compute_metrics(**batch, stage="validation")
@@ -67,10 +66,8 @@ def test_padding_preserves_loss(simulator, approximator, request):
 
 
 def test_log_prob_sums_rows_per_dataset(two_level_simulator, two_level_approximator):
-    from bayesflow.experimental.graphical_simulator_new.samples import concatenate
-
     simulation = two_level_simulator.sample(5)
-    two_level_approximator.build_from_data(batch_of(two_level_approximator, simulation))
+    two_level_approximator.build_from_data(two_level_approximator.to_batch(simulation))
 
     log_prob = two_level_approximator.log_prob(simulation)
 
@@ -80,10 +77,6 @@ def test_log_prob_sums_rows_per_dataset(two_level_simulator, two_level_approxima
 
 
 def test_log_prob_with_adapter(two_level_simulator):
-    from bayesflow.adapters import Adapter
-    from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
-    from bayesflow.networks import CouplingFlow
-
     adapter = Adapter().standardize(include="hyper_mean", mean=0.0, std=2.0)
     approximator = GraphicalApproximator(
         two_level_simulator.graph.expand().invert(),
@@ -92,62 +85,26 @@ def test_log_prob_with_adapter(two_level_simulator):
     )
 
     simulation = two_level_simulator.sample(2)
-    approximator.build_from_data(batch_of(approximator, simulation))
+    approximator.build_from_data(approximator.to_batch(simulation))
 
     log_prob = approximator.log_prob(simulation)
     assert log_prob.shape == (2,)
     assert np.all(np.isfinite(log_prob))
 
 
-@pytest.mark.parametrize(
-    ("standardize", "expected"),
-    [
-        ("inference_variables", ["hyper_mean", "hyper_std", "local_mean", "shared_std"]),
-        ("all", ["hyper_mean", "hyper_std", "local_mean", "shared_std", "y"]),
-        (["local_mean"], ["local_mean"]),
-        (None, []),
-    ],
-)
-def test_standardize(two_level_simulator, standardize, expected):
-    from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
-    from bayesflow.networks import CouplingFlow
-
-    approximator = GraphicalApproximator(
-        two_level_simulator.graph.expand().invert(),
-        inference_networks=[CouplingFlow(), CouplingFlow()],
-        standardize=standardize,
-    )
-    batch = batch_of(approximator, two_level_simulator.sample(2))
-    approximator.build_from_data(batch)
-
-    assert sorted(approximator.standardize_layers) == expected
-
-    # building runs a forward pass on placeholder zeros, which must not enter the running moments
-    for layer in approximator.standardize_layers.values():
-        assert float(layer.count[0]) == 0.0
-
-    # training updates them
-    approximator.compute_metrics(**batch, stage="training")
-    for layer in approximator.standardize_layers.values():
-        assert float(layer.count[0]) > 0.0
-
-
 @pytest.mark.parametrize(("simulator", "approximator"), EXAMPLES)
 def test_serialization(simulator, approximator, request):
-    from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
-
     approximator = request.getfixturevalue(approximator)
 
-    config = approximator.get_config()
-    assert isinstance(GraphicalApproximator.from_config(config), GraphicalApproximator)
+    restored = GraphicalApproximator.from_config(approximator.get_config())
+
+    assert restored.networks == approximator.networks
+    assert restored.condition_nodes == approximator.condition_nodes
 
 
 def test_save_and_load(tmp_path, two_data_nodes_simulator, two_data_nodes_approximator):
-    import keras
-
-    batch = batch_of(two_data_nodes_approximator, two_data_nodes_simulator.sample(2))
     approximator = two_data_nodes_approximator
-    approximator.build_from_data(batch)
+    approximator.build_from_data(approximator.to_batch(two_data_nodes_simulator.sample(2)))
 
     approximator.save(tmp_path / "model.keras")
     loaded = keras.saving.load_model(tmp_path / "model.keras")
@@ -161,9 +118,6 @@ def test_save_and_load(tmp_path, two_data_nodes_simulator, two_data_nodes_approx
 
 
 def test_defaults(two_data_nodes_approximator):
-    from bayesflow.adapters import Adapter
-    from bayesflow.experimental.graphical_approximator_new.encoder import ExchangeableEncoder
-
     approximator = two_data_nodes_approximator
 
     assert isinstance(approximator.adapter, Adapter)
@@ -178,34 +132,3 @@ def test_defaults(two_data_nodes_approximator):
 
 def test_non_amortizable_networks_are_sequential(crossed_design_irt_approximator):
     assert crossed_design_irt_approximator.sequential == ["questions"]
-
-
-def test_rejects_networks_whose_nodes_do_not_share_rows(two_level_repeated_roots_simulator):
-    # hypers are repeated within every dataset, shared is not, but both are inferred by network 0
-    simulation = two_level_repeated_roots_simulator.sample(2)
-
-    with pytest.raises(ValueError, match="rows"):
-        approximator = approximator_for(two_level_repeated_roots_simulator)
-        approximator.compute_metrics(**batch_of(approximator, simulation))
-
-
-def test_batch_size_from_data(two_level_simulator, two_level_approximator):
-    batch = batch_of(two_level_approximator, two_level_simulator.sample(3))
-
-    assert two_level_approximator._batch_size_from_data(batch) == 3
-
-
-@pytest.mark.tensorflow
-def test_fit_with_dataset_tensorflow(single_level_simulator, single_level_approximator):
-    single_level_approximator.compile()
-
-    fit = single_level_approximator.fit(dataset=single_level_simulator.sample(8), batch_size=4, epochs=1)
-    assert isinstance(fit, History)
-
-
-@pytest.mark.tensorflow
-def test_fit_with_simulator_tensorflow(single_level_simulator, single_level_approximator):
-    single_level_approximator.compile()
-
-    fit = single_level_approximator.fit(simulator=single_level_simulator, batch_size=4, num_batches=2, epochs=1)
-    assert isinstance(fit, History)

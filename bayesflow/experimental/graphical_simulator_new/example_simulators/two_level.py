@@ -28,7 +28,7 @@ def sample_y(local_mean, shared_std):
     return {"y": y}
 
 
-def two_level_simulator(repeated_roots=False):
+def two_level_simulator():
     r"""
     Simple hierarchical model with two levels of parameters: hyperparameters
     and local parameters, along with a shared parameter:
@@ -41,24 +41,11 @@ def two_level_simulator(repeated_roots=False):
           y
 
     The sample functions draw one sample per call.
-
-    Parameters
-    ----------
-    repeated_roots : bool, default false.
     """
     simulator = GraphicalSimulator()
 
-    if not repeated_roots:
-        simulator.add_node("hypers", sample_fn=sample_hypers)
-    else:
-        simulator.add_node("hypers", sample_fn=sample_hypers, reps=5)
-
-    simulator.add_node(
-        "locals",
-        sample_fn=sample_locals,
-        reps=6,
-    )
-
+    simulator.add_node("hypers", sample_fn=sample_hypers)
+    simulator.add_node("locals", sample_fn=sample_locals, reps=6)
     simulator.add_node("shared", sample_fn=sample_shared)
     simulator.add_node("y", sample_fn=sample_y, reps=10)
 

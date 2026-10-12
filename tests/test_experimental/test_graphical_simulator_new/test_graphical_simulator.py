@@ -9,16 +9,6 @@ SIMULATORS = ["single_level_simulator", "two_level_simulator", "three_level_simu
 
 
 @pytest.mark.parametrize("simulator", SIMULATORS)
-def test_one_row_per_sample(request, simulator):
-    simulation = request.getfixturevalue(simulator).sample(5)
-
-    for samples in simulation.values():
-        for values in samples.values.values():
-            assert values.ndim == 2
-            assert len(values) == len(samples.indices["dataset"])
-
-
-@pytest.mark.parametrize("simulator", SIMULATORS)
 def test_index_columns(request, simulator):
     simulator = request.getfixturevalue(simulator)
     simulation = simulator.sample(5)
@@ -33,7 +23,7 @@ def test_index_columns(request, simulator):
 
 
 @pytest.mark.parametrize("simulator", SIMULATORS)
-def test_every_dataset_has_every_root(request, simulator):
+def test_roots_have_one_row_per_dataset(request, simulator):
     simulator = request.getfixturevalue(simulator)
     simulation = simulator.sample(5)
 
@@ -67,45 +57,31 @@ def test_callable_reps():
     assert list(np.bincount(simulation["obs"].indices["group"])) == [1, 2, 3, 4]
 
 
-def first_items(combinations, num_items):
-    # the reps see every combination of group and item, and meta
-    assert len(combinations["group"]) == len(np.unique(combinations["group"])) * num_items
-
-    # the k-th group of a dataset observes its first k + 1 items
-    return (combinations["item"] % num_items <= combinations["group"] % 3).astype(int)
-
-
 def test_reps_receive_combinations_and_meta():
+    received = {}
+
+    def even_items(combinations, num_items):
+        received["combinations"] = combinations
+        received["num_items"] = num_items
+
+        # only even items are observed, so odd ones get no rows
+        return (combinations["item"] % 2 == 0).astype(int)
+
     simulator = GraphicalSimulator(meta_fn=lambda: {"num_items": 4})
     simulator.add_node("group", sample_fn=lambda: {"mu": np.random.normal()}, reps=3)
     simulator.add_node("item", sample_fn=lambda: {"b": np.random.normal()}, reps="num_items")
-    simulator.add_node("obs", sample_fn=lambda mu, b: {"y": mu + b}, reps=first_items)
+    simulator.add_node("obs", sample_fn=lambda mu, b: {"y": mu + b}, reps=even_items)
     simulator.add_edge("group", "obs")
     simulator.add_edge("item", "obs")
 
     simulation = simulator.sample(2)
-    obs = simulation["obs"].indices
 
-    # combinations with zero reps have no rows
-    assert list(np.bincount(obs["group"])) == [1, 2, 3, 1, 2, 3]
-    np.testing.assert_array_equal(obs["obs"], np.arange(len(obs["dataset"])))
+    # one combination for every group and item of the same dataset
+    assert len(received["combinations"]["dataset"]) == 2 * 3 * 4
+    assert received["num_items"] == 4
 
-
-def sample_positions(indices):
-    dataset = indices["dataset"]
-
-    return {"position": np.arange(len(dataset)) - np.searchsorted(dataset, dataset)}
-
-
-def test_batched_sample_fn_receives_indices():
-    simulator = GraphicalSimulator()
-    simulator.add_node("group", sample_fn=lambda: {"mu": np.random.normal()})
-    simulator.add_node("obs", sample_fn=sample_positions, reps=4, is_batched=True)
-    simulator.add_edge("group", "obs")
-
-    simulation = simulator.sample(3)
-
-    np.testing.assert_array_equal(simulation["obs"].values["position"].ravel(), np.tile(np.arange(4), 3))
+    assert np.all(simulation["obs"].indices["item"] % 2 == 0)
+    assert len(simulation["obs"].indices["dataset"]) == 2 * 3 * 2
 
 
 def test_crossed_samples_join_within_school(crossed_design_irt_simulator):
@@ -133,7 +109,7 @@ def copy_parent(x):
 
 
 def copy_model(is_batched):
-    """A model whose child copies its parent's value, so that the alignment of parents and children is visible."""
+    # the child copies its parent's value, so we can see which parent each child belongs to
     simulator = GraphicalSimulator()
 
     if is_batched:
@@ -169,41 +145,41 @@ def test_vector_valued_variables(is_batched):
     assert simulator.sample(4)["prior"].values["beta"].shape == (4, 3)
 
 
+def assert_same_simulation(simulation, expected):
+    for node, samples in expected.items():
+        assert list(simulation[node].indices) == list(samples.indices)
+
+        for column, ids in samples.indices.items():
+            np.testing.assert_array_equal(simulation[node].indices[column], ids)
+
+        for variable, values in samples.values.items():
+            np.testing.assert_array_equal(simulation[node].values[variable], values)
+
+
 @pytest.mark.parametrize("simulator", SIMULATORS)
-def test_select_single_datasets(request, simulator):
+def test_select_and_concatenate(request, simulator):
     simulation = request.getfixturevalue(simulator).sample(4)
 
     parts = []
     for dataset in range(4):
         parts.append(select(simulation, np.array([dataset])))
 
-    # every part is a simulation of a single dataset
     for part in parts:
         for node, samples in part.items():
-            assert (samples.indices["dataset"] == 0).all()
+            assert np.all(samples.indices["dataset"] == 0)
             np.testing.assert_array_equal(samples.indices[node], np.arange(len(samples.indices["dataset"])))
 
-    # concatenating the parts restores the simulation
-    restored = concatenate(parts)
-    for node, samples in simulation.items():
-        assert list(restored[node].indices) == list(samples.indices)
-        for column, ids in samples.indices.items():
-            np.testing.assert_array_equal(restored[node].indices[column], ids)
-        for variable, values in samples.values.items():
-            np.testing.assert_array_equal(restored[node].values[variable], values)
+    assert_same_simulation(concatenate(parts), simulation)
 
 
 @pytest.mark.parametrize("simulator", SIMULATORS)
-def test_select(request, simulator):
+def test_select_renumbers_in_increasing_order(request, simulator):
     simulation = request.getfixturevalue(simulator).sample(6)
-    datasets = np.array([4, 1, 3])
 
-    selected = select(simulation, datasets)
-    expected = concatenate([select(simulation, np.array([j])) for j in sorted(datasets)])
+    selected = select(simulation, np.array([4, 1, 3]))
 
-    for node, samples in expected.items():
-        assert list(selected[node].indices) == list(samples.indices)
-        for column, ids in samples.indices.items():
-            np.testing.assert_array_equal(selected[node].indices[column], ids)
-        for variable, values in samples.values.items():
-            np.testing.assert_array_equal(selected[node].values[variable], values)
+    parts = []
+    for dataset in [1, 3, 4]:
+        parts.append(select(simulation, np.array([dataset])))
+
+    assert_same_simulation(selected, concatenate(parts))

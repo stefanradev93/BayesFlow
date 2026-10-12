@@ -8,7 +8,7 @@ from bayesflow.networks import InferenceNetwork
 from bayesflow.networks.helpers.standardization.standardization import Standardization
 from bayesflow.utils.serialization import serializable, serialize
 
-from ..graphical_simulator_new.samples import NodeSamples, Simulation, concatenate, num_datasets, num_rows
+from ..graphical_simulator_new.samples import NodeSamples, Simulation, concatenate, num_datasets
 from ..graphs_new import InvertedGraph, SimulationGraph
 from ..graphs_new.simulation_graph import data_nodes
 from .batches import SimulationDataset, add_sequence_summaries, network_variables, node_values, to_batch
@@ -82,6 +82,12 @@ class GraphicalApproximator(Approximator):
         simulation_graph = graph.expanded_graph.simulation_graph
         self.data_nodes = data_nodes(simulation_graph)
         self.networks = graph.networks()
+
+        for node in simulation_graph:
+            if simulation_graph.in_degree(node) == 0 and simulation_graph.nodes[node].get("reps", 1) != 1:
+                raise NotImplementedError(
+                    f"Root node {node} is repeated, but root nodes must have one row per dataset."
+                )
 
         self.condition_nodes = []
         self.sequential = []
@@ -346,18 +352,6 @@ class GraphicalApproximator(Approximator):
         self.compute_metrics(**batch, stage="validation")
 
     def to_batch(self, simulation: Simulation, adapter: Adapter | None = None, padded: bool = False) -> dict:
-        datasets = num_datasets(simulation)
-
-        # the nodes of a network are concatenated row by row, so each must have one row per dataset
-        for target_nodes in self.networks:
-            if len(target_nodes) > 1:
-                for node in target_nodes:
-                    if num_rows(simulation[node].indices) != datasets:
-                        raise ValueError(
-                            f"Network {target_nodes} infers {node}, which has more than one row per dataset. "
-                            "The nodes of a network must share their rows."
-                        )
-
         return to_batch(simulation, self.graph, adapter or self.adapter, padded)
 
     def network_conditions(self, batch: dict, i: int, training: bool = False):

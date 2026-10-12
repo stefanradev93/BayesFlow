@@ -9,19 +9,10 @@ def approximator_for(simulator):
     graph = simulator.graph.expand().invert()
 
     inference_networks = []
-    for network in graph.networks():
+    for target_nodes in graph.networks():
         inference_networks.append(CouplingFlow())
 
     return GraphicalApproximator(graph, inference_networks=inference_networks)
-
-
-# a second data node below locals, with a top-level function as reps so that it can be saved
-def w_reps(size):
-    return np.random.randint(3, 6, size=size)
-
-
-def sample_w(local_mean):
-    return {"w": np.random.normal(local_mean, 0.5, size=2)}
 
 
 # a survey, where every square is surveyed in one window of years, so obs has no row for most (square, year) pairs
@@ -85,19 +76,18 @@ def two_level_approximator(two_level_simulator):
     return approximator_for(two_level_simulator)
 
 
-@pytest.fixture()
-def two_level_repeated_roots_simulator():
-    from bayesflow.experimental.graphical_simulator_new.example_simulators import two_level_simulator
-
-    return two_level_simulator(repeated_roots=True)
+# reps are saved with the approximator, so they must be a top-level function
+def w_reps(size):
+    return np.random.randint(3, 6, size=size)
 
 
 @pytest.fixture()
 def two_data_nodes_simulator():
     from bayesflow.experimental.graphical_simulator_new.example_simulators import two_level_simulator
 
+    # a second data node below locals
     simulator = two_level_simulator()
-    simulator.add_node("w", sample_fn=sample_w, reps=w_reps)
+    simulator.add_node("w", sample_fn=lambda local_mean: {"w": np.random.normal(local_mean, 0.5, size=2)}, reps=w_reps)
     simulator.add_edge("locals", "w")
 
     return simulator

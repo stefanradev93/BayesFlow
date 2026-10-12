@@ -1,26 +1,19 @@
 import numpy as np
 import pytest
 
-from bayesflow.experimental.graphs_new import ExpandedGraph, SimulationGraph
+from bayesflow.experimental.graphs_new import SimulationGraph
 from bayesflow.experimental.graphs_new.simulation_graph import is_exchangeable
 
 SIMULATORS = ["single_level_simulator", "two_level_simulator", "three_level_simulator", "crossed_design_irt_simulator"]
 
 
-@pytest.mark.parametrize(
-    "simulator, num_nodes",
-    [
-        ("single_level_simulator", 2),
-        ("two_level_simulator", 6),
-        ("three_level_simulator", 12),
-        ("crossed_design_irt_simulator", 9),
-    ],
-)
-def test_expand_num_nodes(request, simulator, num_nodes):
-    expanded = request.getfixturevalue(simulator).graph.expand()
-
-    assert isinstance(expanded, ExpandedGraph)
-    assert expanded.number_of_nodes() == num_nodes
+def test_expand_num_nodes(
+    single_level_simulator, two_level_simulator, three_level_simulator, crossed_design_irt_simulator
+):
+    assert single_level_simulator.graph.expand().number_of_nodes() == 2
+    assert two_level_simulator.graph.expand().number_of_nodes() == 6
+    assert three_level_simulator.graph.expand().number_of_nodes() == 12
+    assert crossed_design_irt_simulator.graph.expand().number_of_nodes() == 9
 
 
 @pytest.mark.parametrize("simulator", SIMULATORS)
@@ -50,12 +43,15 @@ def test_expand_skips_single_repetition(two_level_simulator):
     assert two_level_simulator.graph.expand().number_of_nodes() == 4
 
 
-@pytest.mark.parametrize(
-    "reps, exchangeable",
-    [(1, False), (5, True), ("num_groups", True), (lambda size: np.full(size, 3), True)],
-)
-def test_is_exchangeable(reps, exchangeable):
+def test_is_exchangeable():
     graph = SimulationGraph()
-    graph.add_node("group", reps=reps)
+    graph.add_node("single", reps=1)
+    graph.add_node("fixed", reps=5)
+    graph.add_node("from_meta", reps="num_groups")
+    graph.add_node("from_callable", reps=lambda: 3)
 
-    assert is_exchangeable(graph, "group") == exchangeable
+    # every node that can have more than one instance is exchangeable
+    assert not is_exchangeable(graph, "single")
+    assert is_exchangeable(graph, "fixed")
+    assert is_exchangeable(graph, "from_meta")
+    assert is_exchangeable(graph, "from_callable")
