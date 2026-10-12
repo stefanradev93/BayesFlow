@@ -35,8 +35,8 @@ def test_fit_sample(simulator, approximator, request):
     samples = approximator.sample(num_samples=5, conditions=observed)
 
     latent_variables = set()
-    for network in approximator.networks:
-        for node in network:
+    for target_nodes in approximator.networks:
+        for node in target_nodes:
             for variable, values in observed[node].values.items():
                 latent_variables.add(variable)
                 assert samples[variable].shape == (len(values), 5, values.shape[-1])
@@ -153,7 +153,7 @@ def test_save_and_load(tmp_path, two_data_nodes_simulator, two_data_nodes_approx
     loaded = keras.saving.load_model(tmp_path / "model.keras")
 
     assert loaded.networks == approximator.networks
-    assert loaded.conditions == approximator.conditions
+    assert loaded.condition_nodes == approximator.condition_nodes
     assert loaded.variable_dims == approximator.variable_dims
 
     simulation = two_data_nodes_simulator.sample(2)

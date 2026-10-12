@@ -13,6 +13,7 @@ from ..graphical_simulator_new.indexing_helpers import concatenated_ranges, grou
 from ..graphical_simulator_new.samples import Simulation, num_datasets, select
 from ..graphs_new import InvertedGraph, SimulationGraph
 from ..graphs_new.simulation_graph import is_exchangeable, is_interior
+from .encoder import gather, segment_mean
 
 
 class SimulationDataset(keras.utils.PyDataset):
@@ -32,19 +33,22 @@ class SimulationDataset(keras.utils.PyDataset):
         if isinstance(source, GraphicalSimulator):
             self.length = num_batches
         else:
-            self.length = math.ceil(num_datasets(source) / batch_size)
-            self.order = np.random.permutation(num_datasets(source))
+            datasets = num_datasets(source)
+            self.length = math.ceil(datasets / batch_size)
+            self.order = np.random.permutation(datasets)
 
     def __len__(self) -> int:
         return self.length
 
     def __getitem__(self, i: int) -> dict:
         if isinstance(self.source, GraphicalSimulator):
-            return self.to_batch(self.source.sample(self.batch_size), padded=True)
+            simulation = self.source.sample(self.batch_size)
+            return self.to_batch(simulation, padded=True)
 
         datasets = self.order[i * self.batch_size : (i + 1) * self.batch_size]
+        simulation = select(self.source, datasets)
 
-        return self.to_batch(select(self.source, datasets), padded=True)
+        return self.to_batch(simulation, padded=True)
 
     def on_epoch_end(self) -> None:
         if not isinstance(self.source, GraphicalSimulator):
@@ -170,11 +174,12 @@ def pad(batch: dict) -> dict:
         entries["values"] = values
         entries["weights"] = pad_with(weights, size, 0.0)
 
-        groupings = list(entries.get("groups", {}).values())
+        numberings = list(entries.get("groups", {}).values())
         if "steps" in entries:
-            groupings.append(entries["steps"])
+            numberings.append(entries["steps"])
 
-        for group in groupings:
+        # ids and counts of groups and sequences are padded alike
+        for group in numberings:
             num_groups = bucket(len(group["counts"]))
             group["ids"] = pad_with(group["ids"], size, num_groups - 1)
             group["counts"] = pad_with(group["counts"], num_groups, 0)
@@ -195,10 +200,53 @@ def bucket(n: int) -> int:
 
 
 def pad_with(array, size: int, value):
-    padding = np.full((size - len(array), *np.shape(array)[1:]), value, dtype=np.asarray(array).dtype)
+    array = np.asarray(array)
+    shape = (size - len(array), *array.shape[1:])
+    padding = np.full(shape, value, dtype=array.dtype)
 
     return np.concatenate([array, padding])
 
 
 def repeat_rows(values, size: int):
     return np.asarray(values)[np.arange(size) % len(values)]
+
+
+def add_sequence_summaries(batch: dict, node: str, conditions):
+    # Used for constructing summaries for sequentially inferred nodes.
+    # Adds the mean conditions of the sequence, and the mean and number of the earlier values
+    steps = batch[node]["steps"]
+    values = node_values(batch, node)
+
+    num_sequences = keras.ops.shape(steps["counts"])[0]
+    sequence_mean = segment_mean(conditions, steps["ids"], num_sequences)
+    sequence_conditions = gather(sequence_mean, steps["ids"])
+
+    num_rows = keras.ops.shape(values)[0]
+    earlier_values = gather(values, steps["earlier"])
+    earlier_sum = keras.ops.segment_sum(earlier_values, steps["later"], num_segments=num_rows)
+
+    num_earlier = keras.ops.cast(steps["positions"], values.dtype)[:, None]
+    earlier_mean = earlier_sum / keras.ops.maximum(num_earlier, 1.0)
+    log_num_earlier = keras.ops.log1p(num_earlier)
+
+    return keras.ops.concatenate([conditions, sequence_conditions, earlier_mean, log_num_earlier], axis=-1)
+
+
+def network_variables(batch: dict, target_nodes: list[str]):
+    values = []
+
+    for node in target_nodes:
+        values.append(node_values(batch, node))
+
+    return keras.ops.concatenate(values, axis=-1)
+
+
+def node_values(batch: dict, node: str):
+    values = []
+
+    for variable in sorted(batch[node]["values"]):
+        values.append(batch[node]["values"][variable])
+
+    concatenated = keras.ops.concatenate(values, axis=-1)
+
+    return keras.ops.cast(concatenated, keras.config.floatx())

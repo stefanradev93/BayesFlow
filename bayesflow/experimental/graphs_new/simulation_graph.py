@@ -8,11 +8,44 @@ SimulationNode: TypeAlias = str
 
 
 class SimulationGraph(nx.DiGraph):
+    """
+    The directed acyclic graph of a GraphicalSimulator.
+
+    Every node of the graph is a node of the simulator, with its
+    ``sample_fn``, ``reps`` and ``is_batched`` stored as node attributes, and
+    every edge points from a parent to its child.
+    Nodes without children hold the data, all other nodes are latent.
+
+    The graph is created by the GraphicalSimulator is available as
+    ``simulator.graph``.
+
+    Parameters
+    ----------
+    meta_fn : Callable, optional
+        Function returning a dict of meta data, as passed to the GraphicalSimulator.
+    **kwargs
+        Additional keyword arguments passed to :py:class:`networkx.DiGraph`.
+    """
+
     def __init__(self, meta_fn: Callable | None = None, **kwargs):
         super().__init__(**kwargs)
         self.meta_fn = meta_fn
 
     def expand(self) -> ExpandedGraph:
+        """
+        Expands the graph, so that the dependencies between repetitions of nodes
+        become visible.
+
+        Every repeated inner node is replaced, together with all its descendants,
+        by two copies. For example, in a two-level model, the expanded graph
+        contains two groups, that both depend on the same hyperparameters.
+
+        Returns
+        -------
+        ExpandedGraph
+            The expanded graph. Call its :py:meth:`invert` method to obtain the
+            InvertedGraph for the GraphicalApproximator.
+        """
         expanded = nx.relabel_nodes(nx.DiGraph(self), ExpandedNode)
 
         for variable in nx.lexicographical_topological_sort(self):

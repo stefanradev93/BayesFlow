@@ -3,10 +3,11 @@ import numpy as np
 import pytest
 
 from bayesflow.adapters import Adapter
-from bayesflow.experimental.graphical_approximator_new.batches import groupings, to_batch
-from bayesflow.experimental.graphical_approximator_new.conditions import network_conditions, sequential_conditions
+from bayesflow.experimental.graphical_approximator_new.batches import add_sequence_summaries, groupings, to_batch
+from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
 from bayesflow.experimental.graphical_approximator_new.encoder import ExchangeableEncoder
 from bayesflow.experimental.graphs_new.simulation_graph import data_nodes
+from bayesflow.networks import CouplingFlow
 
 
 def batch_of(simulator, num_datasets):
@@ -23,9 +24,9 @@ def encoders(graph, width=4):
     sinks = data_nodes(graph.expanded_graph.simulation_graph)
 
     result = []
-    for network in graph.networks():
+    for target_nodes in graph.networks():
         network_encoders = {}
-        for node in graph.conditions(network):
+        for node in graph.conditions(target_nodes):
             if node in sinks:
                 network_encoders[node] = ExchangeableEncoder(width=width)
         result.append(network_encoders)
@@ -34,11 +35,15 @@ def encoders(graph, width=4):
 
 
 def conditions(batch, graph, network_encoders):
-    sinks = data_nodes(graph.expanded_graph.simulation_graph)
+    inference_networks = []
+    for target_nodes in graph.networks():
+        inference_networks.append(CouplingFlow())
+
+    approximator = GraphicalApproximator(graph, inference_networks=inference_networks, encoders=network_encoders)
 
     result = []
-    for i, network in enumerate(graph.networks()):
-        result.append(network_conditions(batch, network, graph.conditions(network), sinks, network_encoders[i]))
+    for i in range(len(inference_networks)):
+        result.append(approximator.network_conditions(batch, i))
 
     return result
 
@@ -93,8 +98,8 @@ def test_one_condition_row_per_inferred_row(simulator, request):
 
     result = conditions(batch, graph, encoders(graph))
 
-    for i, network in enumerate(graph.networks()):
-        rows = len(batch[network[0]]["indices"][network[0]])
+    for i, target_nodes in enumerate(graph.networks()):
+        rows = len(batch[target_nodes[0]]["indices"][target_nodes[0]])
         assert keras.ops.shape(result[i])[0] == rows
 
 
@@ -198,18 +203,18 @@ def test_steps(crossed_design_irt_simulator):
     assert np.all(steps["positions"][steps["earlier"]] < steps["positions"][steps["later"]])
 
 
-def test_sequential_conditions_only_see_earlier_instances(crossed_design_irt_simulator):
+def test_sequence_summaries_only_see_earlier_rows(crossed_design_irt_simulator):
     batch = batch_of(crossed_design_irt_simulator, 2)
     positions = batch["questions"]["steps"]["positions"]
     ids = batch["questions"]["steps"]["ids"]
     conditions = keras.ops.zeros((len(positions), 3))
-    before = keras.ops.convert_to_numpy(sequential_conditions(batch, "questions", conditions))
+    before = keras.ops.convert_to_numpy(add_sequence_summaries(batch, "questions", conditions))
 
     # change the third question of the first dataset
     changed = np.flatnonzero((ids == 0) & (positions == 2))[0]
     for values in batch["questions"]["values"].values():
         values[changed] += 10.0
-    after = keras.ops.convert_to_numpy(sequential_conditions(batch, "questions", conditions))
+    after = keras.ops.convert_to_numpy(add_sequence_summaries(batch, "questions", conditions))
 
     # up to the order of float32 sums
     affected = np.flatnonzero(np.any(~np.isclose(before, after, atol=1e-4), axis=-1))

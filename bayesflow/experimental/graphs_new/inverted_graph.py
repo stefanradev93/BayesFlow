@@ -14,6 +14,28 @@ SimulationNode: TypeAlias = str
 
 @serializable("bayesflow.experimental")
 class InvertedGraph(nx.DiGraph):
+    """
+    The factorization of the posterior that the GraphicalApproximator learns.
+
+    The nodes are the :py:class.`ExpandedNode` objects of the expanded graph,
+    and every edge points from a node to an instance it is condition on when
+    that instance is inferred. The graph is created by
+    :py:meth:`ExpandedGraph.invert`. Use :py:meth:`networks` to see which
+    nodes each inference network infers, and :py:meth:`conditions` to see what it
+    conditions on.
+
+    Parameters
+    ----------
+    incoming_graph_data : optional
+        Data to initialize the graph with, passed to :py:class:`networkx.DiGraph`.
+    expanded_graph : ExpandedGraph, optional
+        The expanded graph that was inverted.
+    ordering : list[str], optional
+        The order in which the latent nodes are inferred.
+    **kwargs
+        Additional keyword arguments passed to :py:class:`networkx.DiGraph`.
+    """
+
     def __init__(
         self,
         incoming_graph_data=None,
@@ -27,6 +49,19 @@ class InvertedGraph(nx.DiGraph):
         self.ordering = ordering
 
     def networks(self) -> list[list[SimulationNode]]:
+        """
+        Lists the nodes that each inference network infers, in the order they
+        are inferred.
+
+        Every node is inferred by its own network, except for root nodes of the
+        simulation graph, which are inferred jointly by a single network.
+
+        Returns
+        -------
+        list[list[str]]
+            The nodes of every network. The GraphicalApproximator expects one
+            inference network for each entry, in the same order.
+        """
         simulation_graph = self.expanded_graph.simulation_graph
 
         networks = []
@@ -42,10 +77,28 @@ class InvertedGraph(nx.DiGraph):
 
         return networks
 
-    def conditions(self, network: list[SimulationNode]) -> list[SimulationNode]:
+    def conditions(self, target_nodes: list[SimulationNode]) -> list[SimulationNode]:
+        """
+        Lists the nodes that an inference network conditions on.
+
+        These are the data nodes and the nodes of earlier networks that the
+        posterior of the network's nodes depends on. Nodes that are independent
+        of the network's nodes, given the others, are left out.
+
+        Parameters
+        ----------
+        target_nodes : list[str]
+            The nodes of one network, as returned by :py:meth:`networks`.
+
+        Returns
+        -------
+        list[str]
+            The nodes the network conditions on, in topological order  of the
+            simulation graph.
+        """
         parents = set()
 
-        for variable in network:
+        for variable in target_nodes:
             for node in instances(self, variable):
                 for parent in self.predecessors(node):
                     parents.add(parent.original)
@@ -54,12 +107,29 @@ class InvertedGraph(nx.DiGraph):
 
         result = []
         for variable in nx.lexicographical_topological_sort(simulation_graph):
-            if variable in parents and variable not in network:
+            if variable in parents and variable not in target_nodes:
                 result.append(variable)
 
         return result
 
     def is_amortizable(self, variable: SimulationNode) -> bool:
+        """
+        Checks whether all instances of a node can be inferred at once.
+
+        A node is amortizable if none of its instances is conditioned on another
+        instance of the same node. Otherwise, the GraphicalApproximator infers
+        the instances one after another.
+
+        Parameters
+        ----------
+        variable : str
+            The name of a node in the simulation graph.
+
+        Returns
+        -------
+        bool
+            True if all instances can be inferred at once.
+        """
         # a variable is amortizable if none of its instances is conditioned on another one
         nodes = instances(self, variable)
 

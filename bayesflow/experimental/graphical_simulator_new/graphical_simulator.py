@@ -50,8 +50,12 @@ class GraphicalSimulator:
         reps : int, str or Callable, optional
             Number of repetitions of the node per combination of its parents'
             values. Used to vary the number of groups for each simulated dataset.
-            Either a fixed integer, a key of the meta data, or a function
-            returning a single integer. Default is 1.
+            Either a fixed integer, a key of the meta data, or a function that takes
+            a size, and optionally a combinations argument, or keys of the
+            meta data, and returns the number of repetitions for
+            each of the parent combinations. Default is 1.
+            If ``reps`` is a function, it must be defined at the top-level,
+            otherwise the GraphicalApproximator cannot be saved.
         is_batched : bool, optional
             If False, ``sample_fn`` is called once per sample with the values
             of its parents. For much faster batched sampling, set it to `True`.
