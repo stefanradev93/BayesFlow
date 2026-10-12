@@ -36,7 +36,7 @@ class ExpandedGraph(nx.DiGraph):
 
     The nodes are :py:class:`ExpandedNode` objects, which hold the name of the
     original node and which copy they are. The graph is created by
-    :py:meth:`SimulationGraph.expand and used to find the factorization of the
+    :py:meth:`SimulationGraph.expand` and used to find the factorization of the
     posterior.
 
     Parameters

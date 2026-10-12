@@ -18,7 +18,7 @@ class NodeSamples:
     indices : dict[str, np.ndarray]
         Integer index columns of shape `(num_rows,)`: ``"dataset"`` with the
         dataset of each row, one column per ancestor with the row of that
-        ancestor the sample belongsto, and one column named after the node
+        ancestor the sample belongs to, and one column named after the node
         with the row's own position. Ids count rows of the whole simulation,
         not within each dataset.
     values : dict[str, np.ndarray]

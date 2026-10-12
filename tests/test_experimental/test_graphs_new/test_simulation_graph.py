@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 
 from bayesflow.experimental.graphs_new import SimulationGraph

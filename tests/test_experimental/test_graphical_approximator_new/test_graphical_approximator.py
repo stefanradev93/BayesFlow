@@ -65,6 +65,16 @@ def test_padding_preserves_loss(simulator, approximator, request):
         np.testing.assert_allclose(padded[name], value, rtol=1e-4, atol=1e-4)
 
 
+def test_fit_with_validation_data(two_level_simulator, two_level_approximator):
+    two_level_approximator.compile()
+
+    history = two_level_approximator.fit(
+        dataset=two_level_simulator.sample(4), validation_data=two_level_simulator.sample(3), batch_size=2, epochs=1
+    )
+
+    assert "val_loss" in history.history
+
+
 def test_log_prob_sums_rows_per_dataset(two_level_simulator, two_level_approximator):
     simulation = two_level_simulator.sample(5)
     two_level_approximator.build_from_data(two_level_approximator.to_batch(simulation))

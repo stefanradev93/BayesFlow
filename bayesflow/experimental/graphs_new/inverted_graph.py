@@ -17,8 +17,8 @@ class InvertedGraph(nx.DiGraph):
     """
     The factorization of the posterior that the GraphicalApproximator learns.
 
-    The nodes are the :py:class.`ExpandedNode` objects of the expanded graph,
-    and every edge points from a node to an instance it is condition on when
+    The nodes are the :py:class:`ExpandedNode` objects of the expanded graph,
+    and every edge points from a node to an instance it is conditioned on when
     that instance is inferred. The graph is created by
     :py:meth:`ExpandedGraph.invert`. Use :py:meth:`networks` to see which
     nodes each inference network infers, and :py:meth:`conditions` to see what it
@@ -93,7 +93,7 @@ class InvertedGraph(nx.DiGraph):
         Returns
         -------
         list[str]
-            The nodes the network conditions on, in topological order  of the
+            The nodes the network conditions on, in topological order of the
             simulation graph.
         """
         parents = set()
