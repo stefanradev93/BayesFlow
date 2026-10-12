@@ -215,6 +215,9 @@ class GraphicalApproximator(Approximator):
         for i, target_nodes in enumerate(self.networks):
             variables = network_variables(batch, target_nodes)
             conditions = self.network_conditions(batch, i)
+            if target_nodes[0] in self.sequential:
+                conditions = add_sequence_summaries(batch, target_nodes[0], conditions)
+
             dataset_ids = batch[target_nodes[0]]["indices"]["dataset"]
 
             network_log_prob = self.inference_networks[i].log_prob(variables, conditions=conditions)
@@ -308,6 +311,9 @@ class GraphicalApproximator(Approximator):
         for i, target_nodes in enumerate(self.networks):
             variables = network_variables(batch, target_nodes)
             conditions = self.network_conditions(batch, i, training=training)
+            if target_nodes[0] in self.sequential:
+                conditions = add_sequence_summaries(batch, target_nodes[0], conditions)
+
             weights = batch[target_nodes[0]].get("weights")
 
             network_metrics = self.inference_networks[i].compute_metrics(
@@ -415,12 +421,7 @@ class GraphicalApproximator(Approximator):
                 values = node_values(batch, node)
                 conditions.append(gather(values, target_indices[node]))
 
-        conditions = keras.ops.concatenate(conditions, axis=-1)
-
-        if target in self.sequential:
-            conditions = add_sequence_summaries(batch, target, conditions)
-
-        return conditions
+        return keras.ops.concatenate(conditions, axis=-1)
 
     def split_values(self, samples, target_nodes: list[str]) -> dict[str, dict]:
         values_by_node = {}
@@ -448,9 +449,12 @@ class GraphicalApproximator(Approximator):
 
         batch[node]["values"] = values
 
+        # the conditions only change through the sequence summaries
+        conditions = self.network_conditions(batch, i)
+
         for step in range(int(np.max(positions)) + 1):
-            conditions = self.network_conditions(batch, i)
-            samples = self.inference_networks[i].sample((len(positions),), conditions=conditions)
+            step_conditions = add_sequence_summaries(batch, node, conditions)
+            samples = self.inference_networks[i].sample((len(positions),), conditions=step_conditions)
             is_step = (positions == step)[:, None]
 
             for variable, value in self.split_values(samples, [node])[node].items():
