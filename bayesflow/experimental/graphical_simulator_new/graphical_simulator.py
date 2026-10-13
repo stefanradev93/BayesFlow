@@ -24,17 +24,22 @@ class GraphicalSimulator:
         Function returning a dict of meta data, called once per call to ``sample``.
         Meta data can set the number of repetitions of a node via ``reps``,
         and sampling functions can accept all keys of the return meta data.
+    is_batched: bool, optional
+        Default value for ``is_batched`` for ``add_node``. If `True`, all added
+        nodes are batched by default, if `False`, all added nodes are unbatched.
+        Default is False.
     """
 
-    def __init__(self, meta_fn: Callable[[], dict[str, Any]] | None = None):
+    def __init__(self, meta_fn: Callable[[], dict[str, Any]] | None = None, is_batched: bool = False):
         self.graph = SimulationGraph(meta_fn=meta_fn)
+        self.is_batched = is_batched
 
     def add_node(
         self,
         node: str,
         sample_fn: Callable[..., dict[str, Any]],
         reps: int | str | Callable = 1,
-        is_batched: bool = False,
+        is_batched: bool | None = None,
     ):
         """
         Adds a node with its sampling function and number of repetitions.
@@ -61,8 +66,12 @@ class GraphicalSimulator:
             of its parents. For much faster batched sampling, set it to `True`.
             In this case, ``sample_fn`` must take an addition argument called
             ``batch_size`` and return a dictionary of sampled values with shape
-            (batch_size, dim).
+            (batch_size, dim). The ``is_batched`` argument in GraphicalSimulator
+            can be used to set the default for all nodes.
         """
+        if not is_batched:
+            is_batched = self.is_batched
+
         self.graph.add_node(node, sample_fn=sample_fn, reps=reps, is_batched=is_batched)
 
     def add_edge(self, from_node: str, to_node: str):
