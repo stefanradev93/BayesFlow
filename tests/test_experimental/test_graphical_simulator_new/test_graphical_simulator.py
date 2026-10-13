@@ -183,3 +183,13 @@ def test_select_renumbers_in_increasing_order(request, simulator):
         parts.append(select(simulation, np.array([dataset])))
 
     assert_same_simulation(selected, concatenate(parts))
+
+
+def test_is_batched_default():
+    simulator = GraphicalSimulator(is_batched=True)
+    simulator.add_node("prior", sample_fn=sample_parents)
+    simulator.add_node("unbatched", sample_fn=sample_parent, is_batched=False)
+
+    assert simulator.graph.nodes["prior"]["is_batched"]
+    assert not simulator.graph.nodes["unbatched"]["is_batched"]
+    assert simulator.sample(4)["prior"].values["x"].shape == (4, 1)

@@ -69,7 +69,7 @@ class GraphicalSimulator:
             (batch_size, dim). The ``is_batched`` argument in GraphicalSimulator
             can be used to set the default for all nodes.
         """
-        if not is_batched:
+        if is_batched is None:
             is_batched = self.is_batched
 
         self.graph.add_node(node, sample_fn=sample_fn, reps=reps, is_batched=is_batched)
