@@ -273,12 +273,19 @@ class MaskHandler:
             ``observed_condition_mask`` values are limited to masks supported
             by every supplied subnet. For a single subnet, ``subnet_kwargs`` in
             the result contains the masks declared by its ``call`` signature.
+            An empty tuple signals that the network passes no masks to its subnets.
 
         Returns
         -------
         InferenceMasks
             Broadcast semantic masks and, for a single subnet, the masks to
             pass to that subnet.
+
+        Raises
+        ------
+        ValueError
+            If ``subnet`` is given and an ``attention_mask`` or ``mask``
+            in ``sources`` is not named in every subnet's ``call`` signature.
         """
         training = stage == "training"
         provided = self.collect_semantic_masks(*sources)
@@ -287,6 +294,15 @@ class MaskHandler:
 
         def supported(name):
             return all(name in inspect.signature(layer.call).parameters for layer in subnets)
+
+        if subnet is not None:
+            for name in self._collect((MaskName.ATTENTION_MASK, MaskName.MASK), *sources):
+                if not subnets or not supported(name):
+                    names = ", ".join(type(layer).__name__ for layer in subnets) or "none"
+                    raise ValueError(
+                        f"`{name}` would be ignored: not every subnet names it in its `call` signature "
+                        f"(subnets: {names})."
+                    )
 
         fixed_target_mask = provided.get(MaskName.FIXED_TARGET)
         infer_target_mask = provided.get(MaskName.INFER_TARGET)
