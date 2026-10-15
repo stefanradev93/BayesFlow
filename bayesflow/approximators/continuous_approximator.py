@@ -375,7 +375,9 @@ class ContinuousApproximator(Approximator):
             key="inference_variables",
             stage="inference",
             log_det_jac=True,
-            log_det_jac_mask=inference_kwargs.get(MaskName.FIXED_TARGET),
+            log_det_jac_mask=None
+            if self.mask_handler is None
+            else self.mask_handler.resolve(inference_kwargs, targets=adapted["inference_variables"]).fixed_target_mask,
         )
 
         log_det_jac = log_det_jac.get("inference_variables", 0.0)

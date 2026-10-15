@@ -321,6 +321,11 @@ class MaskHandler:
                 keras.ops.shape(targets),
             )
 
+        if infer_target_mask is not None:
+            fixed_target_mask = (
+                infer_target_mask if fixed_target_mask is None else fixed_target_mask * infer_target_mask
+            )
+
         observed_condition_mask = provided.get(MaskName.OBSERVED_CONDITION)
         if (
             observed_condition_mask is None

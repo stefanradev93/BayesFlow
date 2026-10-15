@@ -155,9 +155,11 @@ def test_all_one_density_mask_is_moot_and_needs_no_fixed_value(network_name, tar
     np.testing.assert_allclose(_numpy(masked), _numpy(unmasked), rtol=1e-5, atol=1e-5)
 
 
+@pytest.mark.parametrize("mask_name", ["fixed_target_mask", "infer_target_mask"])
 @pytest.mark.parametrize("network_name", ["diffusion", "flow_matching"])
 def test_partial_density_excludes_fixed_coordinate_for_coordinatewise_field(
     network_name,
+    mask_name,
     targets,
     conditions,
     fixed_target_mask,
@@ -172,12 +174,12 @@ def test_partial_density_excludes_fixed_coordinate_for_coordinatewise_field(
     original_log_prob = network.log_prob(
         targets,
         conditions=conditions,
-        fixed_target_mask=fixed_target_mask,
+        **{mask_name: fixed_target_mask},
     )
     changed_log_prob = network.log_prob(
         changed,
         conditions=conditions,
-        fixed_target_mask=fixed_target_mask,
+        **{mask_name: fixed_target_mask},
     )
 
     np.testing.assert_allclose(
