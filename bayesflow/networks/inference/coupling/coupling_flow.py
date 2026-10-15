@@ -160,6 +160,9 @@ class CouplingFlow(InferenceNetwork):
     def _forward(
         self, x: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
+        # coupling layers pass no masks to their subnets, so reject masks instead of dropping them
+        self.mask_handler.resolve(kwargs, targets=x, subnet=())
+
         z = x
         log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
         for layer in self.invertible_layers:
@@ -176,6 +179,9 @@ class CouplingFlow(InferenceNetwork):
     def _inverse(
         self, z: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
+        # coupling layers pass no masks to their subnets, so reject masks instead of dropping them
+        self.mask_handler.resolve(kwargs, targets=z, subnet=())
+
         x = z
         log_det = keras.ops.zeros(keras.ops.shape(z)[:-1])
         for layer in reversed(self.invertible_layers):
