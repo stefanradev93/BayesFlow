@@ -5,6 +5,7 @@ from bayesflow.distributions import Distribution
 from bayesflow.types import Tensor
 from bayesflow.utils import (
     concatenate_valid,
+    filter_kwargs,
     find_network,
     jacobian,
     jvp,
@@ -172,7 +173,8 @@ class FreeFormFlow(InferenceNetwork):
         else:
             inp = concatenate_valid([x, conditions], axis=-1)
         network_out = self.encoder_projector(
-            self.encoder_subnet(inp, training=training, **kwargs), training=training, **kwargs
+            self.encoder_subnet(inp, training=training, **filter_kwargs(kwargs, self.encoder_subnet.call)),
+            training=training,
         )
         return network_out + x
 
@@ -182,7 +184,8 @@ class FreeFormFlow(InferenceNetwork):
         else:
             inp = concatenate_valid([z, conditions], axis=-1)
         network_out = self.decoder_projector(
-            self.decoder_subnet(inp, training=training, **kwargs), training=training, **kwargs
+            self.decoder_subnet(inp, training=training, **filter_kwargs(kwargs, self.decoder_subnet.call)),
+            training=training,
         )
         return network_out + z
 

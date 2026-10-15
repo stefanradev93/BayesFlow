@@ -94,7 +94,7 @@ def test_hutchinson_projectors_are_fixed_rademacher():
     assert keras.ops.shape(projectors) == (4, 8, 64)
     assert_allclose(keras.ops.abs(projectors), keras.ops.ones_like(projectors))
 
-    # same probes -> same estimate, as needed for a deterministic augmented ODE
-    assert_allclose(
-        jacobian_trace(fn, inputs, projectors=projectors), jacobian_trace(fn, inputs, projectors=projectors)
-    )
+    # given probes must be used, even without max_steps: estimate is mean_k p_k^T A p_k
+    a = keras.random.normal((64, 64), seed=1)
+    expected = keras.ops.mean(keras.ops.sum((projectors @ a) * projectors, axis=-1), axis=0)
+    assert_allclose(jacobian_trace(lambda x: x @ a, inputs, projectors=projectors), expected, atol=1e-4, rtol=1e-4)

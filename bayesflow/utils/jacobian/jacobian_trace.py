@@ -34,11 +34,10 @@ def jacobian_trace(
         Whether to return the output of f(x) along with the trace of the Jacobian.
         Default: False
     seed : int or keras SeedGenerator, optional
-        The seed to use for hutchinson trace estimation. Only has an effect when max_steps < d.
+        The seed to use for Hutchinson trace estimation. Only has an effect when max_steps < d.
     projectors : Tensor of shape (steps, n, ..., d), optional
-        Fixed probe vectors for Hutchinson's algorithm, e.g., from :func:`hutchinson_projectors`.
-         Pass the same projectors to every function evaluation of an ODE solve to keep the augmented
-         dynamics deterministic.
+        Fixed probe vectors for Hutchinson's algorithm. Pass the same projectors to every function
+        evaluation of an ODE solve to keep the augmented dynamics deterministic.
 
     Returns
     -------
@@ -56,7 +55,7 @@ def jacobian_trace(
 
     dims = keras.ops.shape(x)[-1]
 
-    if max_steps is None or dims <= max_steps:
+    if projectors is None and (max_steps is None or dims <= max_steps):
         fx, jac = jacobian(f, x, return_output=True)
         trace = keras.ops.trace(jac, axis1=-2, axis2=-1)
     else:
