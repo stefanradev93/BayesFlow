@@ -8,6 +8,7 @@ from bayesflow.utils.serialization import serializable, serialize
 
 from .actnorm import ActNorm
 from .layers import DualCoupling
+from .masks import permute_like, trace_permutations
 
 from ...inference import InferenceNetwork
 
@@ -161,15 +162,17 @@ class CouplingFlow(InferenceNetwork):
         self, x: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         self.mask_handler.reject_structural_masks(kwargs, reason="coupling layers pass no masks to their subnets")
+        masks = self.mask_handler.resolve(kwargs, targets=x, stage="training" if training else "inference")
+        *layer_masks, latent_mask = trace_permutations(self.invertible_layers, masks.fixed_target_mask)
 
         z = x
         log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
-        for layer in self.invertible_layers:
-            z, det = layer(z, conditions=conditions, inverse=False, training=training)
+        for layer, mask in zip(self.invertible_layers, layer_masks):
+            z, det = layer(z, conditions=conditions, inverse=False, training=training, fixed_target_mask=mask)
             log_det += det
 
         if density:
-            log_density_latent = self.base_distribution.log_prob(z)
+            log_density_latent = self.base_distribution.log_prob(z, mask=latent_mask)
             log_density = log_density_latent + log_det
             return z, log_density
 
@@ -179,15 +182,23 @@ class CouplingFlow(InferenceNetwork):
         self, z: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         self.mask_handler.reject_structural_masks(kwargs, reason="coupling layers pass no masks to their subnets")
+        masks = self.mask_handler.resolve(kwargs, targets=z, stage="training" if training else "inference")
+        *layer_masks, latent_mask = trace_permutations(self.invertible_layers, masks.fixed_target_mask)
+
+        # latent values for fixed dims must be accounted for
+        if latent_mask is not None:
+            if masks.fixed_target_value is None:
+                raise ValueError("`fixed_target_mask` requires `fixed_target_value` to fill the fixed dimensions.")
+            z = keras.ops.where(latent_mask, z, permute_like(self.invertible_layers, masks.fixed_target_value))
 
         x = z
         log_det = keras.ops.zeros(keras.ops.shape(z)[:-1])
-        for layer in reversed(self.invertible_layers):
-            x, det = layer(x, conditions=conditions, inverse=True, training=training)
+        for layer, mask in reversed(list(zip(self.invertible_layers, layer_masks))):
+            x, det = layer(x, conditions=conditions, inverse=True, training=training, fixed_target_mask=mask)
             log_det += det
 
         if density:
-            log_prob = self.base_distribution.log_prob(z)
+            log_prob = self.base_distribution.log_prob(z, mask=latent_mask)
             log_density = log_prob - log_det
             return x, log_density
 
