@@ -291,14 +291,18 @@ class ContinuousApproximator(Approximator):
         kwargs = self._maybe_inject_guidance_unstandardize(kwargs)
         inference_kwargs = self._prepare_inference_kwargs(kwargs, adapted=adapted)
 
-        data_batch_size = None
         if resolved_conditions is None:
             structural_rank = (
                 0 if sample_shape == "infer" else 1 if isinstance(sample_shape, int) else len(sample_shape)
             )
-            data_batch_size = MaskHandler.infer_batch_size(inference_kwargs, structural_rank)
-            if data_batch_size is None:
-                data_batch_size = MaskHandler.infer_batch_size(adapted, structural_rank)
+            inferred_batch_size = MaskHandler.infer_batch_size(inference_kwargs, structural_rank)
+            data_batch_size = (
+                inferred_batch_size
+                if inferred_batch_size is not None
+                else MaskHandler.infer_batch_size(adapted, structural_rank)
+            )
+        else:
+            data_batch_size = None
 
         samples = self.sampler.sample(
             inference_network=self.inference_network,
@@ -370,14 +374,21 @@ class ContinuousApproximator(Approximator):
             **summary_kwargs,
         )
 
+        if self.mask_handler is None:
+            log_det_jac_mask = None
+        else:
+            inference_masks = self.mask_handler.resolve(
+                inference_kwargs,
+                targets=adapted["inference_variables"],
+            )
+            log_det_jac_mask = inference_masks.fixed_target_mask
+
         inference_variables, log_det_jac_std = self.standardizer.maybe_standardize(
             adapted.get("inference_variables"),
             key="inference_variables",
             stage="inference",
             log_det_jac=True,
-            log_det_jac_mask=None
-            if self.mask_handler is None
-            else self.mask_handler.resolve(inference_kwargs, targets=adapted["inference_variables"]).fixed_target_mask,
+            log_det_jac_mask=log_det_jac_mask,
         )
 
         log_det_jac = log_det_jac.get("inference_variables", 0.0)
