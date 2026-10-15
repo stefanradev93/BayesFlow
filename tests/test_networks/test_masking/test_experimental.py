@@ -145,7 +145,7 @@ def test_generated_masks_are_resolved_once_and_routed(targets, conditions):
     assert keras.ops.all(encoder.fixed_target_mask == decoder.fixed_target_mask)
 
 
-def test_free_form_generates_missingness_only_when_both_subnets_support_it(targets, conditions):
+def test_free_form_generates_missingness_only_when_encoder_supports_it(targets, conditions):
     class UnmaskedSubnet(keras.Layer):
         def call(self, inputs, training=None):
             del training
@@ -154,10 +154,10 @@ def test_free_form_generates_missingness_only_when_both_subnets_support_it(targe
         def compute_output_shape(self, input_shape):
             return input_shape
 
-    encoder = RecordingSubnet()
+    decoder = RecordingSubnet()
     network = FreeFormFlow(
-        encoder_subnet=encoder,
-        decoder_subnet=UnmaskedSubnet(),
+        encoder_subnet=UnmaskedSubnet(),
+        decoder_subnet=decoder,
         hutchinson_sampling="sphere",
         fixed_target_prob=1.0,
         missing_target_prob=1.0,
@@ -168,9 +168,9 @@ def test_free_form_generates_missingness_only_when_both_subnets_support_it(targe
     metrics = network.compute_metrics(targets, conditions=conditions, stage="training")
 
     assert keras.ops.isfinite(metrics["loss"])
-    assert encoder.fixed_target_mask is not None
-    assert encoder.infer_target_mask is None
-    assert encoder.observed_condition_mask is None
+    assert decoder.fixed_target_mask is not None
+    assert decoder.infer_target_mask is None
+    assert decoder.observed_condition_mask is None
 
 
 def test_explicit_masks_override_generation(targets, conditions):

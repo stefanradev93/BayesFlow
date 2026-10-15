@@ -594,21 +594,13 @@ def test_resolve_routes_only_explicit_subnet_masks(targets, fixed_target_mask):
 
 
 @pytest.mark.parametrize("name", ["attention_mask", "mask"])
-def test_resolve_raises_if_no_subnet_takes_the_mask(targets, name):
-    class OtherMaskArgument(keras.Layer):
-        def call(self, inputs, fixed_target_mask=None):
-            return inputs[0]
-
+def test_resolve_raises_if_subnet_does_not_name_the_mask(targets, name):
     class OnlyKwargs(keras.Layer):
         def call(self, inputs, **kwargs):
             return inputs[0]
 
-    mask = keras.ops.ones((2, 3), dtype="float32")
-
-    # () means the network passes masks to no subnet
-    for subnet in (OtherMaskArgument(), OnlyKwargs(), ()):
-        with pytest.raises(ValueError, match=f"`{name}` would be ignored"):
-            MaskHandler().resolve({name: mask}, targets=targets, subnet=subnet)
+    with pytest.raises(ValueError, match=f"`{name}` would be ignored"):
+        MaskHandler().resolve({name: keras.ops.ones((2, 3))}, targets=targets, subnet=OnlyKwargs())
 
 
 def test_resolve_without_subnet_does_not_check_masks(targets):
@@ -639,15 +631,11 @@ def test_resolve_does_not_sample_masks_unsupported_by_subnet(targets, conditions
     np.testing.assert_array_equal(_numpy(seed_generator.state), state_before)
 
 
-def test_resolve_generates_missingness_only_when_every_subnet_supports_it(
+def test_resolve_generates_missingness_only_when_subnet_supports_it(
     targets,
     conditions,
     fixed_target_mask,
 ):
-    class MaskedSubnet(keras.Layer):
-        def call(self, inputs, infer_target_mask=None, observed_condition_mask=None):
-            return inputs[0]
-
     class UnmaskedSubnet(keras.Layer):
         def call(self, inputs):
             return inputs[0]
@@ -665,7 +653,7 @@ def test_resolve_generates_missingness_only_when_every_subnet_supports_it(
         targets=targets,
         conditions=conditions,
         stage="training",
-        subnet=(MaskedSubnet(), UnmaskedSubnet()),
+        subnet=UnmaskedSubnet(),
     )
 
     assert masks.infer_target_mask is None

@@ -258,10 +258,9 @@ def test_explicit_masks_override_sampling_and_reach_explicit_subnet_parameters(
 
 def test_network_raises_if_its_subnet_cannot_take_the_mask(network_factory, targets, conditions):
     network = _build(network_factory(), targets, conditions)
-    mask = keras.ops.ones((2, 3), dtype="float32")
 
     with pytest.raises(ValueError, match="`mask` would be ignored"):
-        network.compute_metrics(targets, conditions=conditions, mask=mask)
+        network.compute_metrics(targets, conditions=conditions, mask=keras.ops.ones((2, 3)))
 
 
 def test_coupling_flow_raises_on_mask(targets, conditions):

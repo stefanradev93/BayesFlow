@@ -2,6 +2,7 @@ from typing import Any
 
 import keras
 
+from bayesflow.masking import MaskName
 from bayesflow.types import Tensor
 from bayesflow.utils import find_permutation, weighted_mean
 from bayesflow.utils.serialization import serializable, serialize
@@ -160,8 +161,9 @@ class CouplingFlow(InferenceNetwork):
     def _forward(
         self, x: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
-        # coupling layers pass no masks to their subnets, so reject masks instead of dropping them
-        self.mask_handler.resolve(kwargs, targets=x, subnet=())
+        for name in (MaskName.ATTENTION_MASK, MaskName.MASK):
+            if kwargs.get(name) is not None:
+                raise ValueError(f"`{name}` would be ignored: coupling layers pass no masks to their subnets.")
 
         z = x
         log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
@@ -179,8 +181,9 @@ class CouplingFlow(InferenceNetwork):
     def _inverse(
         self, z: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
-        # coupling layers pass no masks to their subnets, so reject masks instead of dropping them
-        self.mask_handler.resolve(kwargs, targets=z, subnet=())
+        for name in (MaskName.ATTENTION_MASK, MaskName.MASK):
+            if kwargs.get(name) is not None:
+                raise ValueError(f"`{name}` would be ignored: coupling layers pass no masks to their subnets.")
 
         x = z
         log_det = keras.ops.zeros(keras.ops.shape(z)[:-1])
