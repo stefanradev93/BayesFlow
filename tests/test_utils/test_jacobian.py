@@ -80,3 +80,21 @@ def test_jacobian_trace_hutchinson_is_unbiased():
         jt = jacobian_trace(linear, inputs, max_steps=steps, seed=0)
         assert jt.shape == (32,)
         assert_allclose(keras.ops.mean(jt), keras.ops.convert_to_tensor(2.0 * dims, dtype=jt.dtype), rtol=0.1)
+
+
+def test_hutchinson_projectors_are_fixed_rademacher():
+    from bayesflow.utils import jacobian_trace
+    from bayesflow.utils.jacobian.jacobian_trace import hutchinson_projectors
+
+    inputs = keras.random.normal((8, 64))
+    assert hutchinson_projectors(inputs, None) is None
+    assert hutchinson_projectors(inputs, 64) is None
+
+    projectors = hutchinson_projectors(inputs, 4, seed=0)
+    assert keras.ops.shape(projectors) == (4, 8, 64)
+    assert_allclose(keras.ops.abs(projectors), keras.ops.ones_like(projectors))
+
+    # same probes -> same estimate, as needed for a deterministic augmented ODE
+    assert_allclose(
+        jacobian_trace(fn, inputs, projectors=projectors), jacobian_trace(fn, inputs, projectors=projectors)
+    )
