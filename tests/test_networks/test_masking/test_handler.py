@@ -586,11 +586,34 @@ def test_resolve_routes_only_explicit_subnet_masks(targets, fixed_target_mask):
 
     source = {
         MaskName.FIXED_TARGET: fixed_target_mask,
-        MaskName.ATTENTION_MASK: keras.ops.ones((2, 3, 3), dtype="float32"),
+        MaskName.INFER_TARGET: keras.ops.ones_like(targets),
     }
     masks = MaskHandler().resolve(source, targets=targets, subnet=ExplicitSubnet())
 
     assert set(masks.subnet_kwargs) == {MaskName.FIXED_TARGET}
+
+
+@pytest.mark.parametrize("name", ["attention_mask", "mask"])
+def test_resolve_raises_if_no_subnet_takes_the_mask(targets, name):
+    class OtherMaskArgument(keras.Layer):
+        def call(self, inputs, fixed_target_mask=None):
+            return inputs[0]
+
+    class OnlyKwargs(keras.Layer):
+        def call(self, inputs, **kwargs):
+            return inputs[0]
+
+    mask = keras.ops.ones((2, 3), dtype="float32")
+
+    # () means the network passes masks to no subnet
+    for subnet in (OtherMaskArgument(), OnlyKwargs(), ()):
+        with pytest.raises(ValueError, match=f"`{name}` would be ignored"):
+            MaskHandler().resolve({name: mask}, targets=targets, subnet=subnet)
+
+
+def test_resolve_without_subnet_does_not_check_masks(targets):
+    # e.g. the approximator resolves masks before a subnet is involved
+    MaskHandler().resolve({"mask": keras.ops.ones((2, 3), dtype="float32")}, targets=targets)
 
 
 def test_resolve_does_not_sample_masks_unsupported_by_subnet(targets, conditions):
