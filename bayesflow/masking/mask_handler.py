@@ -133,6 +133,12 @@ class MaskHandler:
         names = (*cls.subnet_mask_names, MaskName.FIXED_TARGET_VALUE)
         return {name: value for name, value in source.items() if name not in names}
 
+    @classmethod
+    def reject_structural_masks(cls, *sources: Mapping[str, Any], reason: str) -> None:
+        """Raise if an attention or padding mask would be ignored."""
+        for name in cls._collect((MaskName.ATTENTION_MASK, MaskName.MASK), *sources):
+            raise ValueError(f"`{name}` would be ignored: {reason}.")
+
     @staticmethod
     def maybe_apply(value: Tensor, mask: Tensor | None, replacement: Tensor | None = None) -> Tensor:
         """Keep ``value`` where ``mask`` is one and use ``replacement`` where it is zero."""

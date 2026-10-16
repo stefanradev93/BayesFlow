@@ -7,6 +7,7 @@ from bayesflow.networks import InferenceNetwork
 from bayesflow.types import Tensor
 from bayesflow.utils import (
     concatenate_valid,
+    filter_kwargs,
     find_network,
     jacobian,
     jvp,
@@ -291,7 +292,7 @@ class FreeFormFlow(InferenceNetwork):
             for key, value in self.mask_handler.without_semantic_kwargs(source).items()
             if key not in (MaskName.ATTENTION_MASK, MaskName.MASK)
         }
-        return passthrough | mask_kwargs
+        return filter_kwargs(passthrough, subnet.call) | mask_kwargs
 
     def _sample_v(self, x):
         batch_size = ops.shape(x)[0]

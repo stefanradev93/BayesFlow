@@ -16,6 +16,7 @@ from bayesflow.utils import (
     resolve_seed,
     weighted_mean,
 )
+from bayesflow.utils.jacobian.jacobian_trace import hutchinson_projectors
 from bayesflow.utils.serialization import serialize, serializable
 from bayesflow.masking import InferenceMasks
 
@@ -290,7 +291,7 @@ class FlowMatching(InferenceNetwork):
         xz: Tensor,
         time: Tensor,
         conditions: Tensor = None,
-        max_steps: int = None,
+        projectors: Tensor = None,
         training: bool = False,
         masks: InferenceMasks = None,
     ) -> tuple[Tensor, Tensor]:
@@ -303,23 +304,26 @@ class FlowMatching(InferenceNetwork):
                 masks=masks,
             )
 
-        v, trace = jacobian_trace(f, xz, max_steps=max_steps, seed=self.seed_generator, return_output=True)
+        v, trace = jacobian_trace(f, xz, projectors=projectors, return_output=True)
 
         return v, keras.ops.expand_dims(trace, axis=-1)
 
     def _forward(
         self, x: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
-        seed = resolve_seed(kwargs.pop("seed", None), self.seed_generator)
-
         masks = self.mask_handler.resolve(
             kwargs,
             targets=x,
             conditions=conditions,
             subnet=self.subnet,
         )
+
+        runtime_kwargs = self.mask_handler.without_mask_kwargs(kwargs)
+        seed = resolve_seed(runtime_kwargs.pop("seed", None), self.seed_generator)
+        hutchinson_steps = runtime_kwargs.pop("hutchinson_steps", None)
+
         # Build integrate kwargs: instance config -> call-time overrides
-        integrate_kwargs = self.integrate_kwargs | self.mask_handler.without_mask_kwargs(kwargs)
+        integrate_kwargs = self.integrate_kwargs | runtime_kwargs
 
         if density and integrate_kwargs["method"] == "glass":
             logging.warning("GLASS is not supported for density computation. Falling back to tsit5 ODE solver.")
@@ -332,13 +336,15 @@ class FlowMatching(InferenceNetwork):
         x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, replacement)
 
         if density:
+            # one probe per solve, fixed over time, keeps the augmented ODE deterministic
+            projectors = hutchinson_projectors(x, hutchinson_steps, seed=seed)
 
             def deltas(time, xz):
                 v, trace = self._velocity_trace(
                     xz,
                     time=time,
                     conditions=conditions,
-                    max_steps=kwargs.get("max_steps"),
+                    projectors=projectors,
                     training=training,
                     masks=masks,
                 )
@@ -391,16 +397,19 @@ class FlowMatching(InferenceNetwork):
     def _inverse(
         self, z: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
-        seed = resolve_seed(kwargs.pop("seed", None), self.seed_generator)
-
         masks = self.mask_handler.resolve(
             kwargs,
             targets=z,
             conditions=conditions,
             subnet=self.subnet,
         )
+
+        runtime_kwargs = self.mask_handler.without_mask_kwargs(kwargs)
+        seed = resolve_seed(runtime_kwargs.pop("seed", None), self.seed_generator)
+        hutchinson_steps = runtime_kwargs.pop("hutchinson_steps", None)
+
         # Build integrate kwargs: instance config -> call-time overrides
-        integrate_kwargs = self.integrate_kwargs | self.mask_handler.without_mask_kwargs(kwargs)
+        integrate_kwargs = self.integrate_kwargs | runtime_kwargs
 
         if density and integrate_kwargs["method"] == "glass":
             logging.warning("GLASS is not supported for density computation. Falling back to tsit5 ODE solver.")
@@ -409,13 +418,15 @@ class FlowMatching(InferenceNetwork):
         z = self.mask_handler.maybe_apply(z, masks.fixed_target_mask, masks.fixed_target_value)
 
         if density:
+            # one probe per solve, fixed over time, keeps the augmented ODE deterministic
+            projectors = hutchinson_projectors(z, hutchinson_steps, seed=seed)
 
             def deltas(time, xz):
                 v, trace = self._velocity_trace(
                     xz,
                     time=time,
                     conditions=conditions,
-                    max_steps=kwargs.get("max_steps"),
+                    projectors=projectors,
                     training=training,
                     masks=masks,
                 )

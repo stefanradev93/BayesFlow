@@ -263,16 +263,17 @@ def test_network_raises_if_its_subnet_cannot_take_the_mask(network_factory, targ
         network.compute_metrics(targets, conditions=conditions, mask=keras.ops.ones((2, 3)))
 
 
-def test_coupling_flow_raises_on_mask(targets, conditions):
+@pytest.mark.parametrize("name", ["attention_mask", "mask"])
+def test_coupling_flow_raises_on_mask(name, targets, conditions):
     from bayesflow.networks import CouplingFlow
 
     network = _build(CouplingFlow(depth=1, subnet_kwargs={"widths": (8,)}), targets, conditions)
     mask = keras.ops.ones((2, 3), dtype="float32")
 
-    with pytest.raises(ValueError, match="`mask` would be ignored"):
-        network.log_prob(targets, conditions=conditions, mask=mask)
-    with pytest.raises(ValueError, match="`mask` would be ignored"):
-        network.sample(2, conditions=conditions, mask=mask)
+    with pytest.raises(ValueError, match=f"`{name}` would be ignored"):
+        network.log_prob(targets, conditions=conditions, **{name: mask})
+    with pytest.raises(ValueError, match=f"`{name}` would be ignored"):
+        network.sample(2, conditions=conditions, **{name: mask})
 
 
 def test_sampling_routes_explicit_semantic_masks_once_to_subnet(
