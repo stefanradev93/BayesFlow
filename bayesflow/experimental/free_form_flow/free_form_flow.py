@@ -324,7 +324,7 @@ class FreeFormFlow(InferenceNetwork):
             targets=x,
             conditions=conditions,
             stage=stage,
-            subnet=(self.encoder_subnet, self.decoder_subnet),
+            subnet=self.encoder_subnet,
         )
         replacement = masks.fixed_target_value if masks.fixed_target_value is not None else x
         x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, replacement)

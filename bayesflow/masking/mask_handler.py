@@ -250,7 +250,7 @@ class MaskHandler:
         targets: Tensor,
         conditions: Tensor | None = None,
         stage: str = "inference",
-        subnet: keras.Layer | Iterable[keras.Layer] | None = None,
+        subnet: keras.Layer | None = None,
     ) -> InferenceMasks:
         """Resolve semantic masks for one inference-network operation.
 
@@ -268,25 +268,35 @@ class MaskHandler:
         stage : str, optional
             Current execution stage. Probability-based masks are sampled only
             during ``"training"``; other stages use explicit masks only.
-        subnet : keras.Layer or iterable of keras.Layer, optional
-            Mask consumers. Generated ``infer_target_mask`` and
+        subnet : keras.Layer, optional
+            Mask consumer. Generated ``infer_target_mask`` and
             ``observed_condition_mask`` values are limited to masks supported
-            by every supplied subnet. For a single subnet, ``subnet_kwargs`` in
-            the result contains the masks declared by its ``call`` signature.
+            by the subnet. ``subnet_kwargs`` in the result contains the masks
+            declared by its ``call`` signature.
 
         Returns
         -------
         InferenceMasks
-            Broadcast semantic masks and, for a single subnet, the masks to
-            pass to that subnet.
+            Broadcast semantic masks and the masks to pass to it, if
+            ``subnet`` is supplied.
+
+        Raises
+        ------
+        ValueError
+            If ``subnet`` is supplied and an ``attention_mask`` or ``mask``
+            in ``sources`` is not named in its ``call`` signature.
         """
         training = stage == "training"
         provided = self.collect_semantic_masks(*sources)
         dtype = keras.config.floatx()
-        subnets = () if subnet is None else (subnet,) if isinstance(subnet, keras.Layer) else tuple(subnet)
 
         def supported(name):
-            return all(name in inspect.signature(layer.call).parameters for layer in subnets)
+            return subnet is None or name in inspect.signature(subnet.call).parameters
+
+        if subnet is not None:
+            for name in self._collect((MaskName.ATTENTION_MASK, MaskName.MASK), *sources):
+                if not supported(name):
+                    raise ValueError(f"`{name}` would be ignored: `{type(subnet).__name__}.call` does not name it.")
 
         fixed_target_mask = provided.get(MaskName.FIXED_TARGET)
         infer_target_mask = provided.get(MaskName.INFER_TARGET)
@@ -354,8 +364,8 @@ class MaskHandler:
             observed_condition_mask=observed_condition_mask,
             fixed_target_value=fixed_target_value,
         )
-        if len(subnets) == 1:
-            subnet_kwargs = self.collect_subnet_masks(subnets[0], *sources, masks.semantic_kwargs())
+        if subnet is not None:
+            subnet_kwargs = self.collect_subnet_masks(subnet, *sources, masks.semantic_kwargs())
             masks = replace(masks, subnet_kwargs=subnet_kwargs)
         return masks
 
