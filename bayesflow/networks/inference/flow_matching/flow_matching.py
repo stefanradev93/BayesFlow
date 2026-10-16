@@ -20,6 +20,7 @@ from bayesflow.utils import (
     sample_input_masks,
     weighted_mean,
 )
+from bayesflow.utils.jacobian.jacobian_trace import hutchinson_projectors
 from bayesflow.utils.serialization import serialize, serializable
 
 from ...inference import InferenceNetwork
@@ -276,14 +277,14 @@ class FlowMatching(InferenceNetwork):
         xz: Tensor,
         time: Tensor,
         conditions: Tensor = None,
-        max_steps: int = None,
+        projectors: Tensor = None,
         training: bool = False,
         **kwargs,
     ) -> tuple[Tensor, Tensor]:
         def f(x):
             return self.velocity(x, time=time, conditions=conditions, training=training, **kwargs)
 
-        v, trace = jacobian_trace(f, xz, max_steps=max_steps, seed=self.seed_generator, return_output=True)
+        v, trace = jacobian_trace(f, xz, projectors=projectors, return_output=True)
 
         return v, keras.ops.expand_dims(trace, axis=-1)
 
@@ -291,6 +292,7 @@ class FlowMatching(InferenceNetwork):
         self, x: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         seed = resolve_seed(kwargs.pop("seed", None), self.seed_generator)
+        hutchinson_steps = kwargs.pop("hutchinson_steps", None)
 
         # Build integrate kwargs: instance config -> call-time overrides
         integrate_kwargs = self.integrate_kwargs | kwargs
@@ -308,9 +310,13 @@ class FlowMatching(InferenceNetwork):
             x = maybe_mask_tensor(x, mask=fixed_target_mask, replacement=targets_fixed)
 
         if density:
+            # one probe per solve, fixed over time, keeps the augmented ODE deterministic
+            projectors = hutchinson_projectors(x, hutchinson_steps, seed=seed)
 
             def deltas(time, xz):
-                v, trace = self._velocity_trace(xz, time=time, conditions=conditions, training=training, **kwargs)
+                v, trace = self._velocity_trace(
+                    xz, time=time, conditions=conditions, projectors=projectors, training=training, **kwargs
+                )
                 return {"xz": v, "trace": trace}
 
             state = {"xz": x, "trace": keras.ops.zeros(keras.ops.shape(x)[:-1] + (1,), dtype=keras.ops.dtype(x))}
@@ -347,6 +353,7 @@ class FlowMatching(InferenceNetwork):
         self, z: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         seed = resolve_seed(kwargs.pop("seed", None), self.seed_generator)
+        hutchinson_steps = kwargs.pop("hutchinson_steps", None)
 
         # Build integrate kwargs: instance config -> call-time overrides
         integrate_kwargs = self.integrate_kwargs | kwargs
@@ -364,9 +371,13 @@ class FlowMatching(InferenceNetwork):
             z = maybe_mask_tensor(z, mask=fixed_target_mask, replacement=targets_fixed)
 
         if density:
+            # one probe per solve, fixed over time, keeps the augmented ODE deterministic
+            projectors = hutchinson_projectors(z, hutchinson_steps, seed=seed)
 
             def deltas(time, xz):
-                v, trace = self._velocity_trace(xz, time=time, conditions=conditions, training=training, **kwargs)
+                v, trace = self._velocity_trace(
+                    xz, time=time, conditions=conditions, projectors=projectors, training=training, **kwargs
+                )
                 return {"xz": v, "trace": trace}
 
             state = {"xz": z, "trace": keras.ops.zeros(keras.ops.shape(z)[:-1] + (1,), dtype=keras.ops.dtype(z))}

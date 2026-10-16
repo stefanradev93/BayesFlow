@@ -26,6 +26,7 @@ from bayesflow.utils import (
     DETERMINISTIC_METHODS,
     STOCHASTIC_METHODS,
 )
+from bayesflow.utils.jacobian.jacobian_trace import hutchinson_projectors
 from bayesflow.utils.serialization import serialize, serializable
 
 from .schedules.noise_schedule import NoiseSchedule
@@ -619,7 +620,7 @@ class DiffusionModel(InferenceNetwork):
         xz: Tensor,
         time: Tensor,
         conditions: Tensor = None,
-        max_steps: int = None,
+        projectors: Tensor = None,
         training: bool = False,
         **kwargs,
     ) -> tuple[Tensor, Tensor]:
@@ -628,7 +629,7 @@ class DiffusionModel(InferenceNetwork):
                 x, time=time, stochastic_solver=False, conditions=conditions, training=training, **kwargs
             )
 
-        v, trace = jacobian_trace(f, xz, max_steps=max_steps, seed=self.seed_generator, return_output=True)
+        v, trace = jacobian_trace(f, xz, projectors=projectors, return_output=True)
 
         return v, ops.expand_dims(trace, axis=-1)
 
@@ -692,6 +693,9 @@ class DiffusionModel(InferenceNetwork):
         training: bool = False,
         **kwargs,
     ) -> Tensor | tuple[Tensor, Tensor]:
+        seed = resolve_seed(kwargs.pop("seed", None), self.seed_generator)
+        hutchinson_steps = kwargs.pop("hutchinson_steps", None)
+
         # Note: integrators will cherry-pick necessary kwargs, so
         # we can be general (i.e., sloppy) here
         integrate_kwargs = {"start_time": 0.0, "stop_time": 1.0}
@@ -715,9 +719,13 @@ class DiffusionModel(InferenceNetwork):
             x = maybe_mask_tensor(x, fixed_target_mask, replacement=targets_fixed)
 
         if density:
+            # one probe per solve, fixed over time, keeps the augmented ODE deterministic
+            projectors = hutchinson_projectors(x, hutchinson_steps, seed=seed)
 
             def deltas(time, xz):
-                v, trace = self._velocity_trace(xz, time=time, conditions=conditions, training=training, **kwargs)
+                v, trace = self._velocity_trace(
+                    xz, time=time, conditions=conditions, projectors=projectors, training=training, **kwargs
+                )
                 return {"xz": v, "trace": trace}
 
             state = {
@@ -747,6 +755,7 @@ class DiffusionModel(InferenceNetwork):
         self, z: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         seed = resolve_seed(kwargs.pop("seed", None), self.seed_generator)
+        hutchinson_steps = kwargs.pop("hutchinson_steps", None)
 
         # Build integrate kwargs: hardcoded defaults -> instance config -> call-time overrides
         integrate_kwargs = {"start_time": 1.0, "stop_time": 0.0}
@@ -770,8 +779,13 @@ class DiffusionModel(InferenceNetwork):
                 )
                 integrate_kwargs["method"] = "tsit5"
 
+            # one probe per solve, fixed over time, keeps the augmented ODE deterministic
+            projectors = hutchinson_projectors(z, hutchinson_steps, seed=seed)
+
             def deltas(time, xz):
-                v, trace = self._velocity_trace(xz, time=time, conditions=conditions, training=training, **kwargs)
+                v, trace = self._velocity_trace(
+                    xz, time=time, conditions=conditions, projectors=projectors, training=training, **kwargs
+                )
                 return {"xz": v, "trace": trace}
 
             state = {
