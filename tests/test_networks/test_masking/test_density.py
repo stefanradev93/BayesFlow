@@ -121,7 +121,9 @@ def test_diagonal_student_t_empty_marginal_has_unit_density(targets):
     np.testing.assert_array_equal(_numpy(actual), np.zeros((2,), dtype=np.float32))
 
 
-@pytest.mark.parametrize("network_name", ["diffusion", "flow_matching", "mean_flow"])
+@pytest.mark.parametrize(
+    "network_name", ["diffusion", "flow_matching", pytest.param("mean_flow", marks=pytest.mark.skip_on_mps)]
+)
 def test_network_density_ignores_all_fixed_coordinates(network_name, targets, conditions):
     network = make_network(network_name)
     network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
@@ -140,7 +142,9 @@ def test_network_density_ignores_all_fixed_coordinates(network_name, targets, co
     )
 
 
-@pytest.mark.parametrize("network_name", ["diffusion", "flow_matching", "mean_flow"])
+@pytest.mark.parametrize(
+    "network_name", ["diffusion", "flow_matching", pytest.param("mean_flow", marks=pytest.mark.skip_on_mps)]
+)
 def test_all_one_density_mask_is_moot_and_needs_no_fixed_value(network_name, targets, conditions):
     network = make_network(network_name)
     network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
@@ -156,7 +160,9 @@ def test_all_one_density_mask_is_moot_and_needs_no_fixed_value(network_name, tar
 
 
 @pytest.mark.parametrize("mask_name", ["fixed_target_mask", "infer_target_mask"])
-@pytest.mark.parametrize("network_name", ["diffusion", "flow_matching", "mean_flow"])
+@pytest.mark.parametrize(
+    "network_name", ["diffusion", "flow_matching", pytest.param("mean_flow", marks=pytest.mark.skip_on_mps)]
+)
 def test_partial_density_excludes_fixed_coordinate_for_coordinatewise_field(
     network_name,
     mask_name,

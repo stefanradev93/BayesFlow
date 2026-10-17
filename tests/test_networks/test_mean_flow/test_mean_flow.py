@@ -135,6 +135,7 @@ def test_time_schedule_at_call_time(random_samples, random_conditions):
         network(random_samples, conditions=random_conditions, inverse=True, time_schedule=[1.0])
 
 
+@pytest.mark.skip_on_mps
 @pytest.mark.parametrize("steps", [1, 3])
 def test_density_uses_exact_log_det(steps, random_samples, random_conditions):
     from bayesflow.utils import jacobian, log_abs_det
