@@ -190,6 +190,41 @@ def test_partial_density_excludes_fixed_coordinate_for_coordinatewise_field(
     )
 
 
+def test_approximator_log_prob_uses_partial_infer_target_mask(targets, conditions, fixed_target_mask):
+    network = make_network("flow_matching", subnet=ZeroSubnet())
+    approximator = ContinuousApproximator(
+        inference_network=network,
+        adapter=Adapter(),
+        standardize=None,
+    )
+    approximator.build(
+        {
+            "inference_variables": tuple(targets.shape),
+            "inference_conditions": tuple(conditions.shape),
+        }
+    )
+    changed_targets = _numpy(targets).astype(np.float32)
+    changed_targets[:, 1] += np.float32(100.0)
+    data = {
+        "inference_variables": _numpy(targets).astype(np.float32),
+        "inference_conditions": _numpy(conditions).astype(np.float32),
+        "infer_target_mask": _numpy(fixed_target_mask).astype(np.float32),
+    }
+
+    original_log_prob = approximator.log_prob(data, to_numpy=False)
+    changed_log_prob = approximator.log_prob(
+        data | {"inference_variables": changed_targets},
+        to_numpy=False,
+    )
+
+    np.testing.assert_allclose(
+        _numpy(changed_log_prob),
+        _numpy(original_log_prob),
+        rtol=1e-5,
+        atol=1e-5,
+    )
+
+
 def test_approximator_masks_dynamic_standardizer_jacobian(targets, conditions, fixed_target_mask):
     network = make_network("flow_matching")
     approximator = ContinuousApproximator(

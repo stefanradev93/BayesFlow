@@ -8,7 +8,7 @@ from bayesflow.types import Shape, Tensor
 from bayesflow.utils import layer_kwargs, find_distribution
 from bayesflow.utils.decorators import allow_batch_size
 from bayesflow.utils.keras_utils import resolve_seed
-from bayesflow.utils.serialization import deserialize
+from bayesflow.utils.serialization import deserialize, serialize
 
 
 class InferenceNetwork(keras.Layer):
@@ -69,12 +69,10 @@ class InferenceNetwork(keras.Layer):
         ``"student_t"`` (:class:`~bayesflow.distributions.DiagonalStudentT`),
         or an explicit :class:`~bayesflow.distributions.Distribution` instance
         for full control.  Default is ``"normal"``.
-    fixed_target_prob : float, optional
-        Probability of fixing each target during mask-augmented training.
-    missing_target_prob : float, optional
-        Probability of hiding an already-fixed target during training.
-    missing_conditions_prob : float, optional
-        Probability of hiding each condition during training.
+    mask_handler : ~bayesflow.masking.MaskHandler, optional
+        Handler used to generate and route masks. If ``None``, a default
+        :class:`~bayesflow.masking.MaskHandler` is created with the network's
+        seed. A supplied handler retains its own random generator.
     seed : int, optional
         Initial seed for the network's local random generator.
     **kwargs
@@ -86,9 +84,7 @@ class InferenceNetwork(keras.Layer):
         self,
         base_distribution: str | keras.Layer = "normal",
         *,
-        fixed_target_prob: float = 0.0,
-        missing_target_prob: float = 0.0,
-        missing_conditions_prob: float = 0.0,
+        mask_handler: MaskHandler | None = None,
         seed: int | None = None,
         **kwargs,
     ):
@@ -96,42 +92,15 @@ class InferenceNetwork(keras.Layer):
         self.base_distribution = find_distribution(base_distribution)
         self.seed = seed
         self.seed_generator = keras.random.SeedGenerator(seed)
-        self.mask_handler = MaskHandler(
-            fixed_target_prob=fixed_target_prob,
-            missing_target_prob=missing_target_prob,
-            missing_conditions_prob=missing_conditions_prob,
-            seed_generator=self.seed_generator,
-        )
 
-    @property
-    def fixed_target_prob(self) -> float:
-        return self.mask_handler.fixed_target_prob
-
-    @fixed_target_prob.setter
-    def fixed_target_prob(self, value: float) -> None:
-        self.mask_handler.fixed_target_prob = value
-
-    @property
-    def missing_target_prob(self) -> float:
-        return self.mask_handler.missing_target_prob
-
-    @missing_target_prob.setter
-    def missing_target_prob(self, value: float) -> None:
-        self.mask_handler.missing_target_prob = value
-
-    @property
-    def missing_conditions_prob(self) -> float:
-        return self.mask_handler.missing_conditions_prob
-
-    @missing_conditions_prob.setter
-    def missing_conditions_prob(self, value: float) -> None:
-        self.mask_handler.missing_conditions_prob = value
+        if mask_handler is None:
+            mask_handler = MaskHandler(seed=self.seed)
+        self.mask_handler = mask_handler
+        self._mask_seed_generator = mask_handler.seed_generator
 
     def get_config(self):
         return super().get_config() | {
-            "fixed_target_prob": self.fixed_target_prob,
-            "missing_target_prob": self.missing_target_prob,
-            "missing_conditions_prob": self.missing_conditions_prob,
+            "mask_handler": serialize(self.mask_handler),
             "seed": self.seed,
         }
 

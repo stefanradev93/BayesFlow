@@ -69,8 +69,8 @@ class LatentInferenceNetwork(InferenceNetwork):
         """Resolve only condition masks, whose feature space is unchanged."""
         provided = self.mask_handler.collect_semantic_masks(kwargs)
         target_mask = (
-            self.fixed_target_prob > 0.0
-            or self.missing_target_prob > 0.0
+            self.mask_handler.fixed_target_prob > 0.0
+            or self.mask_handler.missing_target_prob > 0.0
             or any(provided.get(name) is not None for name in (MaskName.FIXED_TARGET, MaskName.INFER_TARGET))
         )
         if target_mask or provided.get(MaskName.FIXED_TARGET_VALUE) is not None:

@@ -13,7 +13,7 @@ from bayesflow.utils import (
     weighted_mean,
 )
 from bayesflow.utils.serialization import serializable, serialize
-from bayesflow.masking import InferenceMasks
+from bayesflow.masking import InferenceMasks, MaskHandler
 
 from ...inference import InferenceNetwork
 from ...defaults import CONSISTENCY_MODEL_DEFAULTS, DIFFUSION_TRANSFORMER_DEFAULTS
@@ -63,6 +63,8 @@ class ConsistencyModel(InferenceNetwork):
     subnet_kwargs : dict[str, any], optional
         Keyword arguments passed to the subnet constructor or used to update the
         default MLP settings.
+    mask_handler : ~bayesflow.masking.MaskHandler, optional
+        Handler used to generate and route masks. If ``None``, a default mask handler is created.
     **kwargs
         Additional keyword arguments passed to the base ``InferenceNetwork``.
 
@@ -90,9 +92,10 @@ class ConsistencyModel(InferenceNetwork):
         noise_dist_mean: float = -1.1,
         noise_dist_std: float = 2.0,
         subnet_kwargs: dict[str, Any] = None,
+        mask_handler: MaskHandler | None = None,
         **kwargs,
     ):
-        super().__init__(base_distribution="normal", **kwargs)
+        super().__init__(base_distribution="normal", mask_handler=mask_handler, **kwargs)
 
         self.total_steps = float(total_steps)
 

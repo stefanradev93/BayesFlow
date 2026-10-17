@@ -18,7 +18,7 @@ from bayesflow.utils import (
 )
 from bayesflow.utils.jacobian.jacobian_trace import hutchinson_projectors
 from bayesflow.utils.serialization import serialize, serializable
-from bayesflow.masking import InferenceMasks
+from bayesflow.masking import InferenceMasks, MaskHandler
 
 from ...inference import InferenceNetwork
 from ...defaults import (
@@ -68,17 +68,8 @@ class FlowMatching(InferenceNetwork):
         Changes the distribution of sampled times during training.  Time is sampled
         from a power-law distribution ``p(t) ~ t^(1/(1+alpha))``, where
         ``alpha`` is the provided value.  Default is 0.5.
-    fixed_target_prob : float
-        Probability of fixing each target during training (so the network learns arbitrary
-        conditionals). Default is 0.0.
-    missing_target_prob : float
-        Probability of marking each fixed target as missing during training, so the network
-        learns to handle marginalization of targets. Only takes effect when the subnet
-        accepts ``infer_target_mask`` (e.g. ``diffusion_transformer``). Default is 0.0.
-    missing_conditions_prob : float
-        Probability of marking each condition as missing during training, so the network learns
-        to handle missing conditions. Only takes effect when the subnet accepts
-        ``observed_condition_mask`` (e.g. ``diffusion_transformer``). Default is 0.0.
+    mask_handler : ~bayesflow.masking.MaskHandler, optional
+        Handler used to generate and route masks. If ``None``, a default mask handler is created.
     **kwargs
         Additional keyword arguments passed to the base ``InferenceNetwork``.
 
@@ -112,16 +103,12 @@ class FlowMatching(InferenceNetwork):
         optimal_transport_kwargs: dict[str, Any] = None,
         subnet_kwargs: dict[str, Any] = None,
         time_power_law_alpha: float = 0.5,
-        fixed_target_prob: float = 0.0,
-        missing_target_prob: float = 0.0,
-        missing_conditions_prob: float = 0.0,
+        mask_handler: MaskHandler | None = None,
         **kwargs,
     ):
         super().__init__(
             base_distribution,
-            fixed_target_prob=fixed_target_prob,
-            missing_target_prob=missing_target_prob,
-            missing_conditions_prob=missing_conditions_prob,
+            mask_handler=mask_handler,
             **kwargs,
         )
 

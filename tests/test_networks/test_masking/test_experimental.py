@@ -4,6 +4,7 @@ import pytest
 
 from bayesflow.experimental import FreeFormFlow, LatentInferenceNetwork
 from bayesflow.experimental.graphical_approximator.non_exchangeable_wrapper import NonExchangeableWrapper
+from bayesflow.masking import MaskHandler
 from bayesflow.networks import DeepSet, InferenceNetwork
 from bayesflow.utils.serialization import deserialize, serialize
 
@@ -127,9 +128,11 @@ def test_generated_masks_are_resolved_once_and_routed(targets, conditions):
         encoder_subnet=encoder,
         decoder_subnet=decoder,
         hutchinson_sampling="sphere",
-        fixed_target_prob=1.0,
-        missing_target_prob=1.0,
-        missing_conditions_prob=1.0,
+        mask_handler=MaskHandler(
+            fixed_target_prob=1.0,
+            missing_target_prob=1.0,
+            missing_conditions_prob=1.0,
+        ),
     )
     network.build(targets.shape, conditions.shape)
 
@@ -159,9 +162,11 @@ def test_free_form_generates_missingness_only_when_encoder_supports_it(targets, 
         encoder_subnet=UnmaskedSubnet(),
         decoder_subnet=decoder,
         hutchinson_sampling="sphere",
-        fixed_target_prob=1.0,
-        missing_target_prob=1.0,
-        missing_conditions_prob=1.0,
+        mask_handler=MaskHandler(
+            fixed_target_prob=1.0,
+            missing_target_prob=1.0,
+            missing_conditions_prob=1.0,
+        ),
     )
     network.build(targets.shape, conditions.shape)
 
@@ -180,9 +185,11 @@ def test_explicit_masks_override_generation(targets, conditions):
         encoder_subnet=encoder,
         decoder_subnet=decoder,
         hutchinson_sampling="sphere",
-        fixed_target_prob=1.0,
-        missing_target_prob=1.0,
-        missing_conditions_prob=1.0,
+        mask_handler=MaskHandler(
+            fixed_target_prob=1.0,
+            missing_target_prob=1.0,
+            missing_conditions_prob=1.0,
+        ),
     )
     network.build(targets.shape, conditions.shape)
     fixed = np.ones((3,), dtype=np.float32)
@@ -342,24 +349,25 @@ def test_all_fixed_targets_have_zero_training_loss(targets):
 
 def test_mask_configuration_round_trips_through_serialization():
     network = _small_free_form_flow(
-        fixed_target_prob=0.2,
-        missing_target_prob=0.3,
-        missing_conditions_prob=0.4,
+        mask_handler=MaskHandler(
+            fixed_target_prob=0.2,
+            missing_target_prob=0.3,
+            missing_conditions_prob=0.4,
+            seed=92,
+        ),
         seed=91,
     )
 
     config = network.get_config()
     restored = deserialize(serialize(network))
 
-    assert config["fixed_target_prob"] == pytest.approx(0.2)
-    assert config["missing_target_prob"] == pytest.approx(0.3)
-    assert config["missing_conditions_prob"] == pytest.approx(0.4)
+    assert "mask_handler" in config
     assert config["seed"] == 91
-    assert restored.fixed_target_prob == pytest.approx(0.2)
-    assert restored.missing_target_prob == pytest.approx(0.3)
-    assert restored.missing_conditions_prob == pytest.approx(0.4)
+    assert restored.mask_handler.fixed_target_prob == pytest.approx(0.2)
+    assert restored.mask_handler.missing_target_prob == pytest.approx(0.3)
+    assert restored.mask_handler.missing_conditions_prob == pytest.approx(0.4)
     assert restored.seed == 91
-    assert restored.mask_handler.seed_generator is restored.seed_generator
+    assert restored.mask_handler.seed == 92
 
 
 @pytest.mark.parametrize("probability", ["fixed_target_prob", "missing_target_prob"])
@@ -367,7 +375,7 @@ def test_latent_network_rejects_target_mask_probabilities(probability, targets):
     network = LatentInferenceNetwork(
         StubAutoEncoder(),
         RecordingInferenceNetwork(),
-        **{probability: 0.5},
+        mask_handler=MaskHandler(**{probability: 0.5}),
     )
     network.build(targets.shape)
 
@@ -404,7 +412,7 @@ def test_latent_network_generates_and_delegates_condition_mask(targets, conditio
     network = LatentInferenceNetwork(
         StubAutoEncoder(),
         inner,
-        missing_conditions_prob=1.0,
+        mask_handler=MaskHandler(missing_conditions_prob=1.0),
     )
     network.build(targets.shape, conditions.shape)
 
@@ -437,8 +445,10 @@ def test_non_exchangeable_wrapper_flattens_and_routes_generated_masks():
     wrapper = NonExchangeableWrapper(
         inner,
         DeepSet(summary_dim=2),
-        fixed_target_prob=1.0,
-        missing_conditions_prob=1.0,
+        mask_handler=MaskHandler(
+            fixed_target_prob=1.0,
+            missing_conditions_prob=1.0,
+        ),
     )
 
     metrics = wrapper.compute_metrics(targets, conditions=conditions, stage="training")
@@ -482,7 +492,7 @@ def test_non_exchangeable_wrapper_rejects_missing_target_probability():
     wrapper = NonExchangeableWrapper(
         RecordingInferenceNetwork(),
         DeepSet(summary_dim=2),
-        missing_target_prob=0.5,
+        mask_handler=MaskHandler(missing_target_prob=0.5),
     )
     targets = keras.ops.convert_to_tensor(np.ones((2, 3, 2), dtype=np.float32))
 

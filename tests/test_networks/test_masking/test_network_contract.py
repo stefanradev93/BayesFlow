@@ -2,6 +2,7 @@ import keras
 import numpy as np
 import pytest
 
+from bayesflow.masking import MaskHandler
 from bayesflow.utils.serialization import deserialize, serialize
 
 
@@ -58,34 +59,19 @@ class RecordingSubnet(keras.Layer):
         return input_shape[0]
 
 
-def test_network_owns_handler_configuration(network_factory):
-    network = network_factory(
+def test_network_accepts_explicit_mask_handler(network_factory):
+    mask_handler = MaskHandler(
         fixed_target_prob=0.2,
         missing_target_prob=0.3,
         missing_conditions_prob=0.4,
+        seed=23,
+    )
+    network = network_factory(
+        mask_handler=mask_handler,
         seed=19,
     )
 
-    assert network.mask_handler is not None
-    assert network.mask_handler.seed_generator is network.seed_generator
-    assert network.fixed_target_prob == pytest.approx(0.2)
-    assert network.missing_target_prob == pytest.approx(0.3)
-    assert network.missing_conditions_prob == pytest.approx(0.4)
-
-    config = network.get_config()
-    assert config["fixed_target_prob"] == pytest.approx(0.2)
-    assert config["missing_target_prob"] == pytest.approx(0.3)
-    assert config["missing_conditions_prob"] == pytest.approx(0.4)
-    assert config["seed"] == 19
-
-
-def test_mask_probabilities_remain_settable_for_custom_network_compatibility(network_factory):
-    network = network_factory()
-
-    network.fixed_target_prob = 0.2
-    network.missing_target_prob = 0.3
-    network.missing_conditions_prob = 0.4
-
+    assert network.mask_handler is mask_handler
     assert network.mask_handler.fixed_target_prob == pytest.approx(0.2)
     assert network.mask_handler.missing_target_prob == pytest.approx(0.3)
     assert network.mask_handler.missing_conditions_prob == pytest.approx(0.4)
@@ -98,9 +84,12 @@ def test_mask_configuration_survives_serialization(
 ):
     network = _build(
         network_factory(
-            fixed_target_prob=0.2,
-            missing_target_prob=0.3,
-            missing_conditions_prob=0.4,
+            mask_handler=MaskHandler(
+                fixed_target_prob=0.2,
+                missing_target_prob=0.3,
+                missing_conditions_prob=0.4,
+                seed=23,
+            ),
             seed=19,
         ),
         targets,
@@ -109,11 +98,11 @@ def test_mask_configuration_survives_serialization(
 
     restored = deserialize(serialize(network))
 
-    assert restored.fixed_target_prob == pytest.approx(0.2)
-    assert restored.missing_target_prob == pytest.approx(0.3)
-    assert restored.missing_conditions_prob == pytest.approx(0.4)
+    assert restored.mask_handler.fixed_target_prob == pytest.approx(0.2)
+    assert restored.mask_handler.missing_target_prob == pytest.approx(0.3)
+    assert restored.mask_handler.missing_conditions_prob == pytest.approx(0.4)
     assert restored.seed == 19
-    assert restored.mask_handler.seed_generator is restored.seed_generator
+    assert restored.mask_handler.seed == 23
 
 
 @pytest.mark.parametrize("subnet", ["time_mlp", "diffusion_transformer"])
@@ -128,9 +117,11 @@ def test_probability_generated_masking_has_finite_training_loss(
     network = _build(
         network_factory(
             subnet=subnet,
-            fixed_target_prob=0.5,
-            missing_target_prob=0.5,
-            missing_conditions_prob=0.5,
+            mask_handler=MaskHandler(
+                fixed_target_prob=0.5,
+                missing_target_prob=0.5,
+                missing_conditions_prob=0.5,
+            ),
         ),
         targets,
         conditions,
@@ -151,9 +142,11 @@ def test_validation_never_samples_semantic_masks(
 ):
     network = _build(
         network_factory(
-            fixed_target_prob=1.0,
-            missing_target_prob=1.0,
-            missing_conditions_prob=1.0,
+            mask_handler=MaskHandler(
+                fixed_target_prob=1.0,
+                missing_target_prob=1.0,
+                missing_conditions_prob=1.0,
+            ),
         ),
         targets,
         conditions,
@@ -188,9 +181,11 @@ def test_generated_masks_follow_probability_extremes_and_reach_subnet(
     network = _build(
         network_factory(
             subnet=subnet,
-            fixed_target_prob=probabilities[0],
-            missing_target_prob=probabilities[1],
-            missing_conditions_prob=probabilities[2],
+            mask_handler=MaskHandler(
+                fixed_target_prob=probabilities[0],
+                missing_target_prob=probabilities[1],
+                missing_conditions_prob=probabilities[2],
+            ),
         ),
         targets,
         conditions,
@@ -224,9 +219,11 @@ def test_explicit_masks_override_sampling_and_reach_explicit_subnet_parameters(
     network = _build(
         network_factory(
             subnet=subnet,
-            fixed_target_prob=1.0,
-            missing_target_prob=1.0,
-            missing_conditions_prob=1.0,
+            mask_handler=MaskHandler(
+                fixed_target_prob=1.0,
+                missing_target_prob=1.0,
+                missing_conditions_prob=1.0,
+            ),
         ),
         targets,
         conditions,
@@ -281,11 +278,19 @@ def test_sampling_routes_explicit_semantic_masks_once_to_subnet(
     network_factory,
     targets,
     conditions,
-    infer_target_mask,
     observed_condition_mask,
 ):
     subnet = RecordingSubnet()
     network = _build(network_factory(subnet=subnet), targets, conditions)
+    infer_target_mask = keras.ops.convert_to_tensor(
+        np.asarray(
+            [
+                [0.0, 1.0, 1.0],
+                [1.0, 0.0, 1.0],
+            ],
+            dtype=np.float32,
+        )
+    )
     original_resolve = network.mask_handler.resolve
     calls = 0
 
@@ -307,6 +312,80 @@ def test_sampling_routes_explicit_semantic_masks_once_to_subnet(
     assert tuple(samples.shape) == tuple(targets.shape)
     assert calls == 1
     np.testing.assert_array_equal(_numpy(subnet.received["infer_target_mask"]), _numpy(infer_target_mask))
+    np.testing.assert_array_equal(
+        _numpy(subnet.received["observed_condition_mask"]),
+        _numpy(observed_condition_mask),
+    )
+
+
+def test_sampling_combines_fixed_marginalized_and_missing_roles(
+    network_factory,
+    targets,
+    conditions,
+):
+    subnet = RecordingSubnet()
+    network = _build(network_factory(subnet=subnet), targets, conditions)
+    fixed_target_mask = keras.ops.convert_to_tensor(
+        np.asarray(
+            [
+                [0.0, 1.0, 1.0],
+                [0.0, 1.0, 1.0],
+            ],
+            dtype=np.float32,
+        )
+    )
+    infer_target_mask = keras.ops.convert_to_tensor(
+        np.asarray(
+            [
+                [1.0, 1.0, 0.0],
+                [1.0, 1.0, 0.0],
+            ],
+            dtype=np.float32,
+        )
+    )
+    observed_condition_mask = keras.ops.convert_to_tensor(
+        np.asarray(
+            [
+                [1.0, 0.0],
+                [1.0, 0.0],
+            ],
+            dtype=np.float32,
+        )
+    )
+    fixed_target_value = keras.ops.convert_to_tensor(
+        np.asarray(
+            [
+                [-4.0, 0.0, 9.0],
+                [3.0, 0.0, -7.0],
+            ],
+            dtype=np.float32,
+        )
+    )
+
+    samples = network.sample(
+        (2,),
+        conditions=conditions,
+        fixed_target_mask=fixed_target_mask,
+        fixed_target_value=fixed_target_value,
+        infer_target_mask=infer_target_mask,
+        observed_condition_mask=observed_condition_mask,
+    )
+
+    effective_fixed_target_mask = fixed_target_mask * infer_target_mask
+    np.testing.assert_allclose(
+        _numpy(samples)[:, 0],
+        _numpy(fixed_target_value)[:, 0],
+        rtol=0.0,
+        atol=1e-6,
+    )
+    np.testing.assert_array_equal(
+        _numpy(subnet.received["fixed_target_mask"]),
+        _numpy(effective_fixed_target_mask),
+    )
+    np.testing.assert_array_equal(
+        _numpy(subnet.received["infer_target_mask"]),
+        _numpy(infer_target_mask),
+    )
     np.testing.assert_array_equal(
         _numpy(subnet.received["observed_condition_mask"]),
         _numpy(observed_condition_mask),

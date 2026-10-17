@@ -18,6 +18,8 @@ def _numpy(value):
 class RecordingSubnet(keras.Layer):
     def __init__(self):
         super().__init__()
+        self.supports_masking = True
+        self.mask = None
         self.attention_mask = None
         self.fixed_target_mask = None
 
@@ -25,10 +27,12 @@ class RecordingSubnet(keras.Layer):
         self,
         inputs,
         training=None,
+        mask=None,
         attention_mask=None,
         fixed_target_mask=None,
         **kwargs,
     ):
+        self.mask = mask
         self.attention_mask = attention_mask
         self.fixed_target_mask = fixed_target_mask
         return inputs[0]
@@ -37,12 +41,11 @@ class RecordingSubnet(keras.Layer):
         return input_shape[0]
 
 
-class RecordingSummary:
+class RecordingSummary(keras.Layer):
     def __init__(self):
+        super().__init__()
+        self.supports_masking = True
         self.received = []
-
-    def __call__(self, inputs, **kwargs):
-        return self.call(inputs, **kwargs)
 
     def call(self, inputs, mask=None, attention_mask=None):
         self.received.append(
@@ -52,6 +55,13 @@ class RecordingSummary:
             }
         )
         return keras.ops.mean(inputs, axis=-2)
+
+    def compute_output_shape(self, input_shape):
+        return input_shape[0], input_shape[-1]
+
+    def compute_metrics(self, inputs, stage="training", mask=None, attention_mask=None):
+        outputs = self(inputs, mask=mask, attention_mask=attention_mask)
+        return {"outputs": outputs}
 
 
 def _values(shape):
@@ -173,7 +183,51 @@ def test_handlerless_inference_kwargs_keep_routed_and_ordinary_kwargs():
     assert prepared["steps"] == 4
 
 
-def test_compute_metrics_searches_semantic_kwargs_and_routes_attention(targets, conditions, fixed_target_mask):
+def test_compute_metrics_routes_summary_masks_to_summary_network(targets, conditions):
+    summary = RecordingSummary()
+    approximator = ContinuousApproximator(
+        inference_network=_flow(),
+        summary_network=summary,
+        standardize=None,
+    )
+    summary_variables = keras.ops.convert_to_tensor(_values((2, 4, 2)))
+    summary_mask = keras.ops.convert_to_tensor(
+        np.asarray(
+            [
+                [1.0, 1.0, 0.0, 0.0],
+                [1.0, 0.0, 1.0, 0.0],
+            ],
+            dtype=np.float32,
+        )
+    )
+    summary_attention = keras.ops.convert_to_tensor(_values((2, 4, 4)))
+    approximator.build(
+        {
+            "inference_variables": tuple(targets.shape),
+            "inference_conditions": tuple(conditions.shape),
+            "summary_variables": tuple(summary_variables.shape),
+        }
+    )
+
+    metrics = approximator.compute_metrics(
+        targets,
+        inference_conditions=conditions,
+        summary_variables=summary_variables,
+        summary_mask=summary_mask,
+        summary_attention_mask=summary_attention,
+        stage="training",
+    )
+
+    assert np.isfinite(_numpy(metrics["loss"]))
+    np.testing.assert_array_equal(summary.received[-1][MaskName.MASK], _numpy(summary_mask))
+    np.testing.assert_array_equal(summary.received[-1][MaskName.ATTENTION_MASK], _numpy(summary_attention))
+
+
+def test_compute_metrics_searches_semantic_kwargs_and_routes_inference_masks(
+    targets,
+    conditions,
+    fixed_target_mask,
+):
     subnet = RecordingSubnet()
     network = _flow(subnet)
     approximator = ContinuousApproximator(inference_network=network, standardize=None)
@@ -184,16 +238,27 @@ def test_compute_metrics_searches_semantic_kwargs_and_routes_attention(targets, 
         }
     )
     attention = keras.ops.ones((2, 3, 5), dtype="float32")
+    mask = keras.ops.convert_to_tensor(
+        np.asarray(
+            [
+                [1.0, 1.0, 0.0],
+                [1.0, 0.0, 1.0],
+            ],
+            dtype=np.float32,
+        )
+    )
 
     metrics = approximator.compute_metrics(
         targets,
         inference_conditions=conditions,
         inference_attention_mask=attention,
+        inference_mask=mask,
         fixed_target_mask=fixed_target_mask,
         stage="training",
     )
 
     assert np.isfinite(_numpy(metrics["loss"]))
+    np.testing.assert_array_equal(_numpy(subnet.mask), _numpy(mask))
     np.testing.assert_array_equal(_numpy(subnet.attention_mask), _numpy(attention))
     np.testing.assert_array_equal(_numpy(subnet.fixed_target_mask), _numpy(fixed_target_mask))
 

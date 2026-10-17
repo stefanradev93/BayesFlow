@@ -1,6 +1,8 @@
 import keras
 import numpy as np
 
+from bayesflow.masking import MaskHandler
+
 
 def test_compositional_workflow_routes_semantic_masks():
     from bayesflow import CompositionalWorkflow
@@ -8,13 +10,17 @@ def test_compositional_workflow_routes_semantic_masks():
     from bayesflow.simulators import TwoMoons
 
     num_samples = 3
+    mask_handler = MaskHandler(
+        fixed_target_prob=0.3,
+        missing_target_prob=0.3,
+        seed=41,
+    )
     workflow = CompositionalWorkflow(
         inference_network=DiffusionModel(
             subnet="diffusion_transformer",
             subnet_kwargs={"widths": (8, 8)},
             integrate_kwargs={"method": "euler", "steps": 2},
-            fixed_target_prob=0.3,
-            missing_target_prob=0.3,
+            mask_handler=mask_handler,
         ),
         inference_variables=["parameters"],
         inference_conditions=["observables"],

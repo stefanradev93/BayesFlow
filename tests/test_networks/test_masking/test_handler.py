@@ -390,7 +390,7 @@ def test_resolve_does_not_generate_masks_outside_training(targets, conditions, s
         fixed_target_prob=1.0,
         missing_target_prob=1.0,
         missing_conditions_prob=1.0,
-        seed_generator=keras.random.SeedGenerator(12),
+        seed=12,
     )
     state_before = _numpy(handler.seed_generator.state).copy()
 
@@ -405,7 +405,7 @@ def test_resolve_generates_consistent_float32_masks(targets, conditions):
         fixed_target_prob=1.0,
         missing_target_prob=1.0,
         missing_conditions_prob=1.0,
-        seed_generator=keras.random.SeedGenerator(21),
+        seed=21,
     )
 
     masks = handler.resolve(targets=targets, conditions=conditions, stage="training")
@@ -422,7 +422,7 @@ def test_resolve_generates_consistent_float32_masks(targets, conditions):
 
 
 def test_random_mask_is_a_public_handler_operation(targets):
-    mask = MaskHandler(seed_generator=keras.random.SeedGenerator(22)).random_mask(
+    mask = MaskHandler(seed=22).random_mask(
         targets,
         drop_prob=1.0,
         keep_one=True,
@@ -437,7 +437,7 @@ def test_explicit_masks_override_generation(targets, conditions, fixed_target_ma
         fixed_target_prob=1.0,
         missing_target_prob=1.0,
         missing_conditions_prob=1.0,
-        seed_generator=keras.random.SeedGenerator(7),
+        seed=7,
     )
     infer = keras.ops.ones_like(targets)
     observed = keras.ops.ones_like(conditions)
@@ -461,7 +461,7 @@ def test_explicit_infer_target_mask_constrains_generated_fixed_targets(targets):
     infer = _tensor([[0.0, 1.0, 0.0], [1.0, 0.0, 0.0]])
     handler = MaskHandler(
         fixed_target_prob=1.0,
-        seed_generator=keras.random.SeedGenerator(31),
+        seed=31,
     )
 
     masks = handler.resolve(
@@ -482,7 +482,7 @@ def test_explicit_fixed_targets_mix_with_generated_missingness(targets, conditio
     handler = MaskHandler(
         missing_target_prob=1.0,
         missing_conditions_prob=1.0,
-        seed_generator=keras.random.SeedGenerator(32),
+        seed=32,
     )
 
     masks = handler.resolve(
@@ -499,8 +499,8 @@ def test_explicit_fixed_targets_mix_with_generated_missingness(targets, conditio
 
 
 def test_local_seed_is_reproducible_and_advances_between_calls(targets):
-    first = MaskHandler(seed_generator=keras.random.SeedGenerator(33))
-    second = MaskHandler(seed_generator=keras.random.SeedGenerator(33))
+    first = MaskHandler(seed=33)
+    second = MaskHandler(seed=33)
     initial_state = _numpy(first.seed_generator.state).copy()
 
     first_draw = first.random_mask(targets, drop_prob=0.5)
@@ -515,17 +515,16 @@ def test_local_seed_is_reproducible_and_advances_between_calls(targets):
 
 
 def test_missing_conditions_without_conditions_does_not_advance_random_state(targets):
-    seed_generator = keras.random.SeedGenerator(34)
     handler = MaskHandler(
         missing_conditions_prob=1.0,
-        seed_generator=seed_generator,
+        seed=34,
     )
-    state_before = _numpy(seed_generator.state).copy()
+    state_before = _numpy(handler.seed_generator.state).copy()
 
     masks = handler.resolve(targets=targets, conditions=None, stage="training")
 
     assert masks.observed_condition_mask is None
-    np.testing.assert_array_equal(_numpy(seed_generator.state), state_before)
+    np.testing.assert_array_equal(_numpy(handler.seed_generator.state), state_before)
 
 
 def test_maybe_apply_masks_and_replaces_values(targets, fixed_target_mask):
@@ -613,12 +612,11 @@ def test_resolve_does_not_sample_masks_unsupported_by_subnet(targets, conditions
         def call(self, inputs, **kwargs):
             return inputs[0]
 
-    seed_generator = keras.random.SeedGenerator(23)
     handler = MaskHandler(
         missing_conditions_prob=1.0,
-        seed_generator=seed_generator,
+        seed=23,
     )
-    state_before = _numpy(seed_generator.state).copy()
+    state_before = _numpy(handler.seed_generator.state).copy()
 
     masks = handler.resolve(
         targets=targets,
@@ -628,7 +626,7 @@ def test_resolve_does_not_sample_masks_unsupported_by_subnet(targets, conditions
     )
 
     assert masks.observed_condition_mask is None
-    np.testing.assert_array_equal(_numpy(seed_generator.state), state_before)
+    np.testing.assert_array_equal(_numpy(handler.seed_generator.state), state_before)
 
 
 def test_resolve_generates_missingness_only_when_subnet_supports_it(
@@ -640,13 +638,12 @@ def test_resolve_generates_missingness_only_when_subnet_supports_it(
         def call(self, inputs):
             return inputs[0]
 
-    seed_generator = keras.random.SeedGenerator(24)
     handler = MaskHandler(
         missing_target_prob=1.0,
         missing_conditions_prob=1.0,
-        seed_generator=seed_generator,
+        seed=24,
     )
-    state_before = _numpy(seed_generator.state).copy()
+    state_before = _numpy(handler.seed_generator.state).copy()
 
     masks = handler.resolve(
         {MaskName.FIXED_TARGET: fixed_target_mask},
@@ -658,7 +655,7 @@ def test_resolve_generates_missingness_only_when_subnet_supports_it(
 
     assert masks.infer_target_mask is None
     assert masks.observed_condition_mask is None
-    np.testing.assert_array_equal(_numpy(seed_generator.state), state_before)
+    np.testing.assert_array_equal(_numpy(handler.seed_generator.state), state_before)
 
 
 def test_with_flattened_condition_mask_flattens_and_routes_mask():

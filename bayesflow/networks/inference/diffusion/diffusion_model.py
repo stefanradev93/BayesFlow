@@ -28,7 +28,7 @@ from .schedules.noise_schedule import NoiseSchedule
 from .dispatch import find_noise_schedule
 
 from ...inference import InferenceNetwork
-from bayesflow.masking import InferenceMasks
+from bayesflow.masking import InferenceMasks, MaskHandler
 from ...defaults import TIME_MLP_DEFAULTS, DIFFUSION_TRANSFORMER_DEFAULTS, DIFFUSION_INTEGRATE_DEFAULTS
 
 
@@ -69,17 +69,8 @@ class DiffusionModel(InferenceNetwork):
         Additional keyword arguments passed to the noise schedule constructor.
     integrate_kwargs : dict[str, Any], optional
         Configuration dictionary for the ODE/SDE integrator used at inference time.
-    fixed_target_prob : float
-        Probability of fixing each target during training (so the network learns arbitrary
-        conditionals). Default is 0.0.
-    missing_target_prob : float
-        Probability of marking each fixed target as missing during training, so the network
-        learns to handle marginalization of targets. Only takes effect when the subnet
-        accepts ``infer_target_mask`` (e.g. ``diffusion_transformer``). Default is 0.0.
-    missing_conditions_prob : float
-        Probability of marking each condition as missing during training, so the network learns
-        to handle missing conditions. Only takes effect when the subnet accepts
-        ``observed_condition_mask`` (e.g. ``diffusion_transformer``). Default is 0.0.
+    mask_handler : ~bayesflow.masking.MaskHandler, optional
+        Handler used to generate and route masks. If ``None``, a default mask handler is created.
     **kwargs
         Additional keyword arguments passed to the base ``InferenceNetwork``.
 
@@ -108,16 +99,12 @@ class DiffusionModel(InferenceNetwork):
         subnet_kwargs: dict[str, Any] = None,
         schedule_kwargs: dict[str, Any] = None,
         integrate_kwargs: dict[str, Any] = None,
-        fixed_target_prob: float = 0.0,
-        missing_target_prob: float = 0.0,
-        missing_conditions_prob: float = 0.0,
+        mask_handler: MaskHandler | None = None,
         **kwargs,
     ):
         super().__init__(
             base_distribution="normal",
-            fixed_target_prob=fixed_target_prob,
-            missing_target_prob=missing_target_prob,
-            missing_conditions_prob=missing_conditions_prob,
+            mask_handler=mask_handler,
             **kwargs,
         )
 
