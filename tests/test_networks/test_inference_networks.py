@@ -121,6 +121,9 @@ def test_cycle_consistency(generative_inference_network, random_samples, random_
 
     if isinstance(generative_inference_network, bf.networks.DiffusionModel):
         pytest.skip(reason="test unstable for untrained diffusion models")
+    if isinstance(generative_inference_network, bf.experimental.MeanFlow):
+        # the flow maps of an untrained mean flow are not inverses of each other, its ODE is
+        generative_inference_network.use_instantaneous_flow = True
     # 50 fixed steps leave a discretization error orders of magnitude below the
     # tolerances while being much cheaper than an adaptive solve
     _use_fast_integration(generative_inference_network, steps=50)
@@ -141,7 +144,7 @@ def test_cycle_consistency(generative_inference_network, random_samples, random_
 @pytest.mark.parametrize(
     "network_name",
     # one representative per density implementation
-    ["affine_coupling_flow", "spline_coupling_flow", "free_form_flow", "flow_matching", "diffusion_model"],
+    ["affine_coupling_flow", "spline_coupling_flow", "free_form_flow", "flow_matching", "diffusion_model", "mean_flow"],
 )
 @pytest.mark.skip_on_mps
 def test_density_numerically(network_name, request):
