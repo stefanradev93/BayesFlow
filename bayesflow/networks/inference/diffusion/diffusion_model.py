@@ -21,6 +21,7 @@ from bayesflow.utils import (
     DETERMINISTIC_METHODS,
     STOCHASTIC_METHODS,
 )
+from bayesflow.utils.jacobian.jacobian_trace import hutchinson_projectors
 from bayesflow.utils.serialization import serialize, serializable
 
 from .schedules.noise_schedule import NoiseSchedule
@@ -685,7 +686,7 @@ class DiffusionModel(InferenceNetwork):
         time: Tensor,
         masks: InferenceMasks,
         conditions: Tensor = None,
-        max_steps: int = None,
+        projectors: Tensor = None,
         training: bool = False,
         guidance_kwargs: Mapping[str, Any] = None,
     ) -> tuple[Tensor, Tensor]:
@@ -700,7 +701,7 @@ class DiffusionModel(InferenceNetwork):
                 masks=masks,
             )
 
-        v, trace = jacobian_trace(f, xz, max_steps=max_steps, seed=self.seed_generator, return_output=True)
+        v, trace = jacobian_trace(f, xz, projectors=projectors, return_output=True)
 
         return v, ops.expand_dims(trace, axis=-1)
 
@@ -772,10 +773,11 @@ class DiffusionModel(InferenceNetwork):
         )
 
         runtime_kwargs = self.mask_handler.without_mask_kwargs(kwargs)
-        guidance_kwargs = runtime_kwargs.get("guidance_kwargs")
+        guidance_kwargs = runtime_kwargs.pop("guidance_kwargs", None)
+        seed = resolve_seed(runtime_kwargs.pop("seed", None), self.seed_generator)
+        hutchinson_steps = runtime_kwargs.pop("hutchinson_steps", None)
 
-        # Note: integrators will cherry-pick necessary kwargs, so
-        # we can be general (i.e., sloppy) here
+        # Build integrate kwargs: hardcoded defaults -> instance config -> call-time overrides
         integrate_kwargs = {"start_time": 0.0, "stop_time": 1.0}
         integrate_kwargs |= self.integrate_kwargs
         integrate_kwargs |= runtime_kwargs
@@ -793,14 +795,16 @@ class DiffusionModel(InferenceNetwork):
         x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, replacement=replacement)
 
         if density:
+            # one probe per solve, fixed over time, keeps the augmented ODE deterministic
+            projectors = hutchinson_projectors(x, hutchinson_steps, seed=seed)
 
             def deltas(time, xz):
                 v, trace = self._velocity_trace(
                     xz,
                     time=time,
                     masks=masks,
+                    projectors=projectors,
                     conditions=conditions,
-                    max_steps=runtime_kwargs.get("max_steps"),
                     training=training,
                     guidance_kwargs=guidance_kwargs,
                 )
@@ -840,8 +844,6 @@ class DiffusionModel(InferenceNetwork):
     def _inverse(
         self, z: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
-        seed = resolve_seed(kwargs.pop("seed", None), self.seed_generator)
-
         masks = self.mask_handler.resolve(
             kwargs,
             targets=z,
@@ -850,7 +852,9 @@ class DiffusionModel(InferenceNetwork):
         )
 
         runtime_kwargs = self.mask_handler.without_mask_kwargs(kwargs)
-        guidance_kwargs = runtime_kwargs.get("guidance_kwargs")
+        guidance_kwargs = runtime_kwargs.pop("guidance_kwargs", None)
+        seed = resolve_seed(runtime_kwargs.pop("seed", None), self.seed_generator)
+        hutchinson_steps = runtime_kwargs.pop("hutchinson_steps", None)
 
         # Build integrate kwargs: hardcoded defaults -> instance config -> call-time overrides
         integrate_kwargs = {"start_time": 1.0, "stop_time": 0.0}
@@ -869,13 +873,16 @@ class DiffusionModel(InferenceNetwork):
                 )
                 integrate_kwargs["method"] = "tsit5"
 
+            # one probe per solve, fixed over time, keeps the augmented ODE deterministic
+            projectors = hutchinson_projectors(z, hutchinson_steps, seed=seed)
+
             def deltas(time, xz):
                 v, trace = self._velocity_trace(
                     xz,
                     time=time,
                     masks=masks,
                     conditions=conditions,
-                    max_steps=runtime_kwargs.get("max_steps"),
+                    projectors=projectors,
                     training=training,
                     guidance_kwargs=guidance_kwargs,
                 )
@@ -1575,7 +1582,6 @@ class DiffusionModel(InferenceNetwork):
         """
         Inverse pass for compositional diffusion sampling.
         """
-        seed = resolve_seed(kwargs.pop("seed", None), self.seed_generator)
         masks = self.mask_handler.resolve_compositional(
             self.subnet,
             kwargs,
@@ -1583,6 +1589,7 @@ class DiffusionModel(InferenceNetwork):
             conditions=conditions,
         )
         runtime_kwargs = self.mask_handler.without_mask_kwargs(kwargs)
+        seed = resolve_seed(runtime_kwargs.pop("seed", None), self.seed_generator)
         integrate_kwargs = {"start_time": 1.0, "stop_time": 0.0}
         integrate_kwargs |= self.integrate_kwargs
         integrate_kwargs |= runtime_kwargs

@@ -1,4 +1,5 @@
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
+from typing import Any
 
 import keras
 
@@ -142,8 +143,15 @@ class InferenceNetwork(keras.Layer):
         density: bool = False,
         training: bool = False,
         seed: int | keras.random.SeedGenerator | None = None,
+        hutchinson_steps: int | None = None,
+        guidance_kwargs: Mapping[str, Any] | None = None,
         **kwargs,
     ) -> Tensor | tuple[Tensor, Tensor]:
+        if hutchinson_steps is not None:
+            kwargs["hutchinson_steps"] = hutchinson_steps
+        if guidance_kwargs is not None:
+            kwargs["guidance_kwargs"] = guidance_kwargs
+
         if inverse:
             return self._inverse(xz, conditions=conditions, density=density, training=training, seed=seed, **kwargs)
         return self._forward(xz, conditions=conditions, density=density, training=training, seed=seed, **kwargs)

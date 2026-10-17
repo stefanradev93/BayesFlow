@@ -1,3 +1,5 @@
+import importlib
+
 import keras
 import numpy as np
 import pytest
@@ -71,6 +73,68 @@ class InvariantRecordingSubnet(keras.Layer):
 
     def compute_output_shape(self, input_shape):
         return input_shape[0]
+
+
+@pytest.mark.parametrize(
+    ("network_name", "module_name"),
+    [
+        ("diffusion", "bayesflow.networks.inference.diffusion.diffusion_model"),
+        ("flow_matching", "bayesflow.networks.inference.flow_matching.flow_matching"),
+    ],
+)
+def test_density_separates_solver_kwargs_and_reuses_projectors(
+    monkeypatch,
+    network_name,
+    module_name,
+    targets,
+    conditions,
+    fixed_target_mask,
+):
+    module = importlib.import_module(module_name)
+    solver_kwargs = []
+    projector_calls = []
+    integrate = module.integrate
+    projectors = module.hutchinson_projectors
+
+    def record_integrate(*args, **kwargs):
+        solver_kwargs.append(kwargs)
+        return integrate(*args, **kwargs)
+
+    def record_projectors(x, steps, seed=None):
+        projector_calls.append((steps, seed))
+        return projectors(x, steps, seed=seed)
+
+    monkeypatch.setattr(module, "integrate", record_integrate)
+    monkeypatch.setattr(module, "hutchinson_projectors", record_projectors)
+
+    network = make_network(network_name, subnet=InvariantRecordingSubnet(record=False))
+    network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
+    runtime_kwargs = {
+        "seed": 17,
+        "hutchinson_steps": 1,
+        "fixed_target_mask": fixed_target_mask,
+        "fixed_target_value": targets,
+    }
+    if network_name == "diffusion":
+        runtime_kwargs["guidance_kwargs"] = {"guidance_strength": 0.0}
+
+    density = network.log_prob(targets, conditions=conditions, **runtime_kwargs)
+
+    assert tuple(density.shape) == tuple(targets.shape[:-1])
+    assert len(projector_calls) == 1
+    assert projector_calls[0][0] == 1
+    assert isinstance(projector_calls[0][1], keras.random.SeedGenerator)
+    assert len(solver_kwargs) == 1
+    assert (
+        not {
+            "seed",
+            "hutchinson_steps",
+            "guidance_kwargs",
+            "fixed_target_mask",
+            "fixed_target_value",
+        }
+        & solver_kwargs[0].keys()
+    )
 
 
 @pytest.mark.parametrize(
