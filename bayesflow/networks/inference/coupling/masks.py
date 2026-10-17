@@ -28,5 +28,5 @@ def trace_permutations(layers: list[keras.Layer], xz: Tensor | None) -> list[Ten
     return trace
 
 
-def permute_like(layers: list[keras.Layer], xz: Tensor) -> Tensor:
+def permute_like(layers: list[keras.Layer], xz: Tensor | None) -> Tensor | None:
     return trace_permutations(layers, xz)[-1]
