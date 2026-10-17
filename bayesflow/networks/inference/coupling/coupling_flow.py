@@ -185,11 +185,9 @@ class CouplingFlow(InferenceNetwork):
         masks = self.mask_handler.resolve(kwargs, targets=z, stage="training" if training else "inference")
         *layer_masks, latent_mask = trace_permutations(self.invertible_layers, masks.fixed_target_mask)
 
-        # latent values for fixed dims must be accounted for
-        if latent_mask is not None:
-            if masks.fixed_target_value is None:
-                raise ValueError("`fixed_target_mask` requires `fixed_target_value` to fill the fixed dimensions.")
-            z = keras.ops.where(latent_mask, z, permute_like(self.invertible_layers, masks.fixed_target_value))
+        # fixed dims take their fixed value or zero when ther is none (see flow matching)
+        fixed_value = permute_like(self.invertible_layers, masks.fixed_target_value)
+        z = self.mask_handler.maybe_apply(z, latent_mask, fixed_value)
 
         x = z
         log_det = keras.ops.zeros(keras.ops.shape(z)[:-1])
