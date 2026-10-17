@@ -116,11 +116,13 @@ def test_samples_keep_fixed_values(flow, random_samples, random_conditions):
     np.testing.assert_array_equal(inputs_fixed, outputs_fixed)
 
 
-def test_sample_without_fixed_value_raises(flow, random_samples, random_conditions):
+def test_samples_without_fixed_value_are_zero(flow, random_samples, random_conditions):
     batch_size, xz_dim = keras.ops.shape(random_samples)
+    mask = make_mask(batch_size, xz_dim)
 
-    with pytest.raises(ValueError, match="fixed_target_value"):
-        flow.sample(batch_size, conditions=random_conditions, fixed_target_mask=make_mask(batch_size, xz_dim))
+    outputs = flow.sample(batch_size, conditions=random_conditions, fixed_target_mask=mask)
+
+    np.testing.assert_array_equal(keras.ops.convert_to_numpy(outputs)[mask == 0], 0.0)
 
 
 def test_orthogonal_permutation_raises(random_samples, random_conditions):
