@@ -15,12 +15,17 @@ class CosineNoiseSchedule(NoiseSchedule):
 
     A cosine schedule is a popular technique for controlling how the variance (noise level) or
     learning rate evolves during the training of diffusion models. It was proposed as an improvement
-    over the original linear beta schedule in [2]
+    over the original linear beta schedule in [2].
+
+    The default `weighting=None` corresponds to the settings used in the benchmark of [3].
 
     [1] Dhariwal, P., & Nichol, A. (2021). Diffusion models beat gans on image synthesis.
     Advances in Neural Information Processing Systems, 34, 8780-8794.
     [2] Ho, J., Jain, A., & Abbeel, P. (2020). Denoising diffusion probabilistic models.
     Advances in Neural Information Processing Systems, 33, 6840-6851.
+    [3] Arruda, J., Bracher, N., Köthe, U., Hasenauer, J., & Radev, S. T. (2026).
+    Diffusion Models in Simulation-Based Inference: A Tutorial Review.
+    https://openreview.net/forum?id=86Q261z005
 
     Parameters
     ----------
@@ -31,8 +36,8 @@ class CosineNoiseSchedule(NoiseSchedule):
     shift : float, optional
         Shift the log signal-to-noise ratio (lambda) by this amount. Default is 0.0.
         For images, use shift = log(base_resolution / d), where d is the used resolution of the image.
-    weighting : Literal["sigmoid", "likelihood_weighting"], optional
-        The type of weighting function to use for the noise schedule. Default is "sigmoid".
+    weighting : Literal["sigmoid", "likelihood_weighting"] | None, optional
+        The type of weighting function to use for the noise schedule. Default is `None`.
     """
 
     def __init__(
