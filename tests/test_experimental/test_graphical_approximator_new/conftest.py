@@ -2,15 +2,16 @@ import numpy as np
 import pytest
 
 
-def approximator_for(simulator):
+def approximator_for(simulator, network=None):
     from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
     from bayesflow.networks import CouplingFlow
 
+    network = network or CouplingFlow
     graph = simulator.graph.expand().invert()
 
     inference_networks = []
     for target_nodes in graph.networks():
-        inference_networks.append(CouplingFlow())
+        inference_networks.append(network())
 
     return GraphicalApproximator(graph, inference_networks=inference_networks)
 

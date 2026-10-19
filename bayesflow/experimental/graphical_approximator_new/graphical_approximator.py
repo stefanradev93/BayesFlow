@@ -4,7 +4,7 @@ import numpy as np
 
 from bayesflow.adapters import Adapter
 from bayesflow.approximators import Approximator
-from bayesflow.networks import InferenceNetwork
+from bayesflow.networks import ConsistencyModel, InferenceNetwork, StableConsistencyModel
 from bayesflow.networks.helpers.standardization.standardization import Standardization
 from bayesflow.utils.serialization import serializable, serialize
 
@@ -195,6 +195,13 @@ class GraphicalApproximator(Approximator):
             log-determinants of the standardization and the adapter, so they
             refer to the variables before preprocessing.
         """
+        for network, target_nodes in zip(self.inference_networks, self.networks):
+            if isinstance(network, (ConsistencyModel, StableConsistencyModel)):
+                raise NotImplementedError(
+                    f"The {type(network).__name__} for {target_nodes} has no tractable density, "
+                    "so log_prob is not available."
+                )
+
         batch = self.to_batch(data)
         datasets = num_datasets(data)
 
@@ -213,11 +220,7 @@ class GraphicalApproximator(Approximator):
             entries["values"] = values
 
         for i, target_nodes in enumerate(self.networks):
-            variables = network_variables(batch, target_nodes)
-            conditions = self.network_conditions(batch, i)
-            if target_nodes[0] in self.sequential:
-                conditions = add_sequence_summaries(batch, target_nodes[0], conditions)
-
+            variables, conditions = self.network_inputs(batch, i)
             dataset_ids = batch[target_nodes[0]]["indices"]["dataset"]
 
             network_log_prob = self.inference_networks[i].log_prob(variables, conditions=conditions)
@@ -309,12 +312,11 @@ class GraphicalApproximator(Approximator):
         training = stage == "training"
 
         for i, target_nodes in enumerate(self.networks):
-            variables = network_variables(batch, target_nodes)
-            conditions = self.network_conditions(batch, i, training=training)
-            if target_nodes[0] in self.sequential:
-                conditions = add_sequence_summaries(batch, target_nodes[0], conditions)
-
+            variables, conditions = self.network_inputs(batch, i, training=training)
             weights = batch[target_nodes[0]].get("weights")
+
+            if weights is not None and isinstance(self.inference_networks[i], ConsistencyModel):
+                weights = keras.ops.expand_dims(weights, -1)
 
             network_metrics = self.inference_networks[i].compute_metrics(
                 variables, conditions=conditions, sample_weight=weights, stage=stage
@@ -367,9 +369,24 @@ class GraphicalApproximator(Approximator):
         simulation = placeholder_simulation(simulation_graph, self.variable_dims)
         batch = self.to_batch(simulation, adapter=Adapter())
 
+        for i, network in enumerate(self.inference_networks):
+            if not network.built:
+                variables, conditions = self.network_inputs(batch, i)
+                network.build(keras.ops.shape(variables), keras.ops.shape(conditions))
+
         self.built = True
 
         self.compute_metrics(**batch, stage="validation")
+
+    def network_inputs(self, batch: dict, i: int, training: bool = False):
+        target_nodes = self.networks[i]
+        variables = network_variables(batch, target_nodes)
+        conditions = self.network_conditions(batch, i, training=training)
+
+        if target_nodes[0] in self.sequential:
+            conditions = add_sequence_summaries(batch, target_nodes[0], conditions)
+
+        return variables, conditions
 
     def to_batch(self, simulation: Simulation, adapter: Adapter | None = None, padded: bool = False) -> dict:
         return to_batch(simulation, self.graph, adapter or self.adapter, padded)

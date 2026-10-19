@@ -6,7 +6,9 @@ from bayesflow.adapters import Adapter
 from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
 from bayesflow.experimental.graphical_approximator_new.encoder import ExchangeableEncoder
 from bayesflow.experimental.graphical_simulator_new.samples import concatenate
-from bayesflow.networks import CouplingFlow
+from bayesflow.networks import ConsistencyModel, CouplingFlow, DiffusionModel, FlowMatching, StableConsistencyModel
+
+from .conftest import approximator_for
 
 
 EXAMPLES = [
@@ -32,21 +34,65 @@ def test_fit_sample(simulator, approximator, request):
     approximator.fit(dataset=simulator.sample(4), batch_size=2, epochs=1)
 
     observed = simulator.sample(3)
-    samples = approximator.sample(num_samples=5, conditions=observed)
+    assert_samples_match(approximator, observed, approximator.sample(num_samples=5, conditions=observed), 5)
 
+    log_prob = approximator.log_prob(observed)
+    assert log_prob.shape == (3,)
+    assert np.all(np.isfinite(log_prob))
+
+
+def assert_samples_match(approximator, observed, samples, num_samples):
     latent_variables = set()
     for target_nodes in approximator.networks:
         for node in target_nodes:
             for variable, values in observed[node].values.items():
                 latent_variables.add(variable)
-                assert samples[variable].shape == (len(values), 5, values.shape[-1])
+                assert samples[variable].shape == (len(values), num_samples, values.shape[-1])
                 assert isinstance(samples[variable], np.ndarray)
 
     assert set(samples) == latent_variables
 
-    log_prob = approximator.log_prob(observed)
-    assert log_prob.shape == (3,)
-    assert np.all(np.isfinite(log_prob))
+
+NETWORKS = {
+    "flow_matching": FlowMatching,
+    "diffusion": DiffusionModel,
+    "consistency": lambda: ConsistencyModel(total_steps=10),
+    "stable_consistency": StableConsistencyModel,
+}
+
+
+@pytest.mark.parametrize("simulator", ["two_level_simulator", "crossed_design_irt_simulator"])
+@pytest.mark.parametrize("network", NETWORKS)
+def test_fit_sample_networks(simulator, network, request):
+    simulator = request.getfixturevalue(simulator)
+    approximator = approximator_for(simulator, NETWORKS[network])
+    approximator.compile()
+
+    approximator.fit(simulator=simulator, batch_size=2, num_batches=1, epochs=1)
+
+    observed = simulator.sample(3)
+    assert_samples_match(approximator, observed, approximator.sample(num_samples=5, conditions=observed), 5)
+
+
+def test_save_and_load_flow_matching(tmp_path, two_level_simulator):
+    approximator = approximator_for(two_level_simulator, FlowMatching)
+    approximator.build_from_data(approximator.to_batch(two_level_simulator.sample(2)))
+
+    approximator.save(tmp_path / "model.keras")
+    loaded = keras.saving.load_model(tmp_path / "model.keras")
+
+    assert len(loaded.weights) == len(approximator.weights)
+    for loaded_weight, weight in zip(loaded.weights, approximator.weights):
+        np.testing.assert_allclose(keras.ops.convert_to_numpy(loaded_weight), keras.ops.convert_to_numpy(weight))
+
+
+@pytest.mark.parametrize("network", ["consistency", "stable_consistency"])
+def test_log_prob_raises_for_consistency_models(network, two_level_simulator):
+    approximator = approximator_for(two_level_simulator, NETWORKS[network])
+    approximator.build_from_data(approximator.to_batch(two_level_simulator.sample(2)))
+
+    with pytest.raises(NotImplementedError, match="no tractable density"):
+        approximator.log_prob(two_level_simulator.sample(2))
 
 
 @pytest.mark.parametrize(("simulator", "approximator"), EXAMPLES)
