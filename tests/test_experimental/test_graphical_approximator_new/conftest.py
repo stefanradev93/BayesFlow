@@ -21,11 +21,12 @@ def squares_reps(size):
 
 
 def surveyed(combinations, num_years):
-    squares, square = np.unique(combinations["squares"], return_inverse=True)
+    _, first_row, square = np.unique(combinations["squares"], return_index=True, return_inverse=True)
     year = combinations["years"] % num_years
+    years_of_square = num_years[first_row]
 
-    first = np.random.randint(0, num_years, size=len(squares))
-    last = first + np.random.randint(0, num_years - first)
+    first = np.random.randint(0, years_of_square)
+    last = first + np.random.randint(0, years_of_square - first)
 
     return ((year >= first[square]) & (year <= last[square])).astype(int)
 

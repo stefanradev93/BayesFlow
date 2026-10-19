@@ -78,7 +78,7 @@ def test_reps_receive_combinations_and_meta():
 
     # one combination for every group and item of the same dataset
     assert len(received["combinations"]["dataset"]) == 2 * 3 * 4
-    assert received["num_items"] == 4
+    assert np.all(received["num_items"] == 4)
 
     assert np.all(simulation["obs"].indices["item"] % 2 == 0)
     assert len(simulation["obs"].indices["dataset"]) == 2 * 3 * 2
@@ -193,3 +193,65 @@ def test_is_batched_default():
     assert simulator.graph.nodes["prior"]["is_batched"]
     assert not simulator.graph.nodes["unbatched"]["is_batched"]
     assert simulator.sample(4)["prior"].values["x"].shape == (4, 1)
+
+
+def test_meta_fn_is_drawn_per_dataset():
+    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 50)}, is_batched=True)
+    simulator.add_node("hypers", sample_fn=lambda batch_size: {"mu": np.random.normal(size=batch_size)})
+    simulator.add_node("locals", sample_fn=lambda mu: {"theta": mu}, reps="N")
+    simulator.add_edge("hypers", "locals")
+
+    np.random.seed(0)
+    simulation = simulator.sample(200)
+    counts = np.bincount(simulation["locals"].indices["dataset"], minlength=200)
+
+    assert len(np.unique(counts)) > 10
+
+
+def test_meta_fn_per_dataset_batched():
+    received = {}
+
+    def sample_locals(N, batch_size):
+        received["N"] = N
+        return {"theta": np.zeros(batch_size)}
+
+    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 5)}, is_batched=True)
+    simulator.add_node("hypers", sample_fn=lambda batch_size: {"mu": np.zeros(batch_size)})
+    simulator.add_node("locals", sample_fn=sample_locals, reps="N")
+    simulator.add_edge("hypers", "locals")
+
+    simulation = simulator.sample(30)
+    datasets = simulation["locals"].indices["dataset"]
+    counts = np.bincount(datasets, minlength=30)
+
+    assert np.array_equal(received["N"], counts[datasets])
+
+
+def test_meta_fn_per_dataset_unbatched():
+    received = []
+
+    def sample_locals(N):
+        received.append(N)
+        return {"theta": 0.0}
+
+    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 5)})
+    simulator.add_node("hypers", sample_fn=lambda: {"mu": 0.0})
+    simulator.add_node("locals", sample_fn=sample_locals, reps="N")
+    simulator.add_edge("hypers", "locals")
+
+    simulation = simulator.sample(10)
+    datasets = simulation["locals"].indices["dataset"]
+    counts = np.bincount(datasets, minlength=10)
+
+    assert np.array_equal(np.array(received), counts[datasets])
+
+
+def test_meta_override_is_shared():
+    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 50)}, is_batched=True)
+    simulator.add_node("hypers", sample_fn=lambda batch_size: {"mu": np.zeros(batch_size)})
+    simulator.add_node("locals", sample_fn=lambda batch_size: {"theta": np.zeros(batch_size)}, reps="N")
+    simulator.add_edge("hypers", "locals")
+
+    simulation = simulator.sample(20, meta={"N": 8})
+
+    assert np.all(np.bincount(simulation["locals"].indices["dataset"]) == 8)

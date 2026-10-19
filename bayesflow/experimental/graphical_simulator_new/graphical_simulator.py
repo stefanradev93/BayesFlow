@@ -21,7 +21,8 @@ class GraphicalSimulator:
     Parameters
     ----------
     meta_fn: Callable([], dict[str, Any]], optional
-        Function returning a dict of meta data, called once per call to ``sample``.
+        Function returning a dict of meta data, called once per dataset in ``sample``,
+        so that every dataset has its own meta data.
         Meta data can set the number of repetitions of a node via ``reps``,
         and sampling functions can accept all keys of the return meta data.
     is_batched: bool, optional
@@ -97,7 +98,7 @@ class GraphicalSimulator:
         num_datasets : int
             The number of datasets to sample.
         meta : dict[str, Any], optional
-            Meta data that overrides the output of ``meta_fn``.
+            Meta data shared by all datasets, overriding the output of ``meta_fn``.
 
         Returns
         -------
@@ -109,8 +110,10 @@ class GraphicalSimulator:
             ``(num_samples, dim)``. The output can be used as input to
             ``GraphicalApproximator.fit``.
         """
-        meta_fn = self.graph.meta_fn
-        meta = (meta_fn() if meta_fn else {}) | (meta or {})
+        meta = meta or {}
+        dataset_meta = sample_dataset_meta(self.graph.meta_fn, num_datasets)
+        for key in meta:
+            dataset_meta.pop(key, None)
 
         simulation = {}
 
@@ -120,19 +123,32 @@ class GraphicalSimulator:
                 parents[parent] = simulation[parent]
 
             settings = self.graph.nodes[node]
-            indices = assign_indices(node, parents, settings["reps"], meta, num_datasets)
-            values = draw_values(settings["sample_fn"], parents, indices, meta, settings["is_batched"])
+            indices = assign_indices(node, parents, settings["reps"], meta, dataset_meta, num_datasets)
+            values = draw_values(settings["sample_fn"], parents, indices, meta, dataset_meta, settings["is_batched"])
 
             simulation[node] = NodeSamples(indices, values)
 
         return simulation
 
 
-def assign_indices(node, parents, reps, meta, num_datasets) -> dict[str, np.ndarray]:
+def sample_dataset_meta(meta_fn, num_datasets) -> dict[str, np.ndarray]:
+    # one draw of meta_fn per dataset, stacked into one array per key
+    if meta_fn is None or num_datasets == 0:
+        return {}
+
+    draws = [meta_fn() for _ in range(num_datasets)]
+
+    return {k: np.stack([np.asarray(draw[k]) for draw in draws]) for k in draws[0]}
+
+
+def assign_indices(node, parents, reps, meta, dataset_meta, num_datasets) -> dict[str, np.ndarray]:
     combinations = {"dataset": np.arange(num_datasets)}
 
     for samples in parents.values():
         combinations = join(combinations, samples.indices)
+
+    combination_meta = {k: v[combinations["dataset"]] for k, v in dataset_meta.items()}
+    meta = meta | combination_meta
 
     if callable(reps):
         repetitions = call(reps, meta | {"size": num_rows(combinations), "combinations": combinations})
@@ -150,8 +166,9 @@ def assign_indices(node, parents, reps, meta, num_datasets) -> dict[str, np.ndar
     return indices
 
 
-def draw_values(sample_fn, parents, indices, meta, is_batched) -> dict[str, np.ndarray]:
+def draw_values(sample_fn, parents, indices, meta, dataset_meta, is_batched) -> dict[str, np.ndarray]:
     rows = num_rows(indices)
+    row_meta = {k: v[indices["dataset"]] for k, v in dataset_meta.items()}
 
     parent_values = {}
     for parent, samples in parents.items():
@@ -159,9 +176,9 @@ def draw_values(sample_fn, parents, indices, meta, is_batched) -> dict[str, np.n
             parent_values[variable] = values[indices[parent]]
 
     if is_batched:
-        outputs = call(sample_fn, parent_values | meta | {"batch_size": rows, "indices": indices})
+        outputs = call(sample_fn, parent_values | meta | row_meta | {"batch_size": rows, "indices": indices})
     else:
-        outputs = draw_row_by_row(sample_fn, parent_values, meta, rows)
+        outputs = draw_row_by_row(sample_fn, parent_values | row_meta, meta, rows)
 
     values = {}
     for variable, value in outputs.items():
