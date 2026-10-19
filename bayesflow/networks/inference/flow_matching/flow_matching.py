@@ -1,3 +1,4 @@
+from typing import Any
 from collections.abc import Sequence
 
 import keras
@@ -7,21 +8,17 @@ from bayesflow.types import Shape, Tensor
 from bayesflow.utils import (
     expand_right_as,
     find_network,
-    filter_kwargs,
     integrate,
     integrate_stochastic,
     jacobian_trace,
-    layer_kwargs,
     logging,
-    MaskName,
-    maybe_mask_tensor,
     optimal_transport,
     resolve_seed,
-    sample_input_masks,
     weighted_mean,
 )
 from bayesflow.utils.jacobian.jacobian_trace import hutchinson_projectors
 from bayesflow.utils.serialization import serialize, serializable
+from bayesflow.masking import InferenceMasks, MaskHandler
 
 from ...inference import InferenceNetwork
 from ...defaults import (
@@ -60,28 +57,19 @@ class FlowMatching(InferenceNetwork):
         approximately 2.5×, but may lead to faster inference.
     loss_fn : str or keras.Loss
         The loss function used for training.  Default is ``"mse"``.
-    integrate_kwargs : dict[str, any], optional
+    integrate_kwargs : dict[str, Any], optional
         Additional keyword arguments for the ODE integrator used at inference time.
-    optimal_transport_kwargs : dict[str, any], optional
+    optimal_transport_kwargs : dict[str, Any], optional
         Additional keyword arguments for configuring optimal transport.
-    subnet_kwargs : dict[str, any], optional
+    subnet_kwargs : dict[str, Any], optional
         Keyword arguments passed to the subnet constructor or used to update the
         default MLP settings.
     time_power_law_alpha : float
         Changes the distribution of sampled times during training.  Time is sampled
         from a power-law distribution ``p(t) ~ t^(1/(1+alpha))``, where
         ``alpha`` is the provided value.  Default is 0.5.
-    fixed_target_prob : float
-        Probability of fixing each target during training (so the network learns arbitrary
-        conditionals). Default is 0.0.
-    missing_target_prob : float
-        Probability of marking each fixed target as missing during training, so the network
-        learns to handle marginalization of targets. Only takes effect when the subnet
-        accepts ``infer_target_mask`` (e.g. ``diffusion_transformer``). Default is 0.0.
-    missing_conditions_prob : float
-        Probability of marking each condition as missing during training, so the network learns
-        to handle missing conditions. Only takes effect when the subnet accepts
-        ``infer_target_mask`` (e.g. ``diffusion_transformer``). Default is 0.0.
+    mask_handler : ~bayesflow.masking.MaskHandler, optional
+        Handler used to generate and route masks. If ``None``, a default mask handler is created.
     **kwargs
         Additional keyword arguments passed to the base ``InferenceNetwork``.
 
@@ -105,29 +93,24 @@ class FlowMatching(InferenceNetwork):
         Inference.
     """
 
-    _SUBNET_MASK_KEYS = {
-        "attention_mask",
-        MaskName.FIXED_TARGET,
-        MaskName.INFER_TARGET,
-        MaskName.OBSERVED_CONDITION,
-    }
-
     def __init__(
         self,
         subnet: str | type | keras.Layer = "time_mlp",
         base_distribution: str | Distribution = "normal",
         use_optimal_transport: bool = False,
         loss_fn: str | keras.Loss = "mse",
-        integrate_kwargs: dict[str, any] = None,
-        optimal_transport_kwargs: dict[str, any] = None,
-        subnet_kwargs: dict[str, any] = None,
+        integrate_kwargs: dict[str, Any] = None,
+        optimal_transport_kwargs: dict[str, Any] = None,
+        subnet_kwargs: dict[str, Any] = None,
         time_power_law_alpha: float = 0.5,
-        fixed_target_prob: float = 0.0,
-        missing_target_prob: float = 0.0,
-        missing_conditions_prob: float = 0.0,
+        mask_handler: MaskHandler | None = None,
         **kwargs,
     ):
-        super().__init__(base_distribution, **kwargs)
+        super().__init__(
+            base_distribution,
+            mask_handler=mask_handler,
+            **kwargs,
+        )
 
         self.use_optimal_transport = use_optimal_transport
 
@@ -147,12 +130,7 @@ class FlowMatching(InferenceNetwork):
             subnet_kwargs = DIFFUSION_TRANSFORMER_DEFAULTS | subnet_kwargs
         self.subnet = find_network(subnet, **subnet_kwargs)
 
-        self._subnet_mask_keys = set(filter_kwargs({k: None for k in self._SUBNET_MASK_KEYS}, self.subnet.call).keys())
-
         self.output_projector = None
-        self.fixed_target_prob = fixed_target_prob
-        self.missing_target_prob = missing_target_prob
-        self.missing_conditions_prob = missing_conditions_prob
 
     def compute_metrics(
         self,
@@ -166,9 +144,17 @@ class FlowMatching(InferenceNetwork):
             x0, x1, t, x, target_velocity = x
         else:
             x1 = x
-            x0 = self.base_distribution.sample(keras.ops.shape(x1)[:-1])
+            x0 = self.base_distribution.sample(keras.ops.shape(x1)[:-1], seed=self.seed_generator)
 
             if self.use_optimal_transport:
+                provided_masks = self.mask_handler.collect_mask_kwargs(kwargs)
+                if provided_masks:
+                    names = ", ".join(provided_masks)
+                    raise ValueError(
+                        "Explicit per-example masks cannot be combined with optimal transport because "
+                        f"the transport assignment would reorder them ({names}). Use generated masks or "
+                        "disable optimal transport."
+                    )
                 # we must choose between resampling x0 or x1
                 # since the data is possibly noisy and may contain outliers, it is better
                 # to possibly drop some samples from x1 than from x0
@@ -189,26 +175,27 @@ class FlowMatching(InferenceNetwork):
             x = t * x1 + (1 - t) * x0
             target_velocity = x1 - x0
 
-        # Generate target / condition / missingness masks
-        subnet_kwargs = self._collect_mask_kwargs(self._subnet_mask_keys, kwargs)
-        mask_x, loss_mask, subnet_kwargs = sample_input_masks(
-            self.subnet,
+        masks = self.mask_handler.resolve(
+            kwargs,
+            targets=x,
+            conditions=conditions,
+            stage=stage,
+            subnet=self.subnet,
+        )
+        x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, x1)
+
+        predicted_velocity = self._velocity(
             x,
-            conditions,
-            subnet_kwargs,
-            stage == "training",
-            fixed_target_prob=self.fixed_target_prob,
-            missing_target_prob=self.missing_target_prob,
-            missing_conditions_prob=self.missing_conditions_prob,
-            seed_generator=self.seed_generator,
-        )
-        x = maybe_mask_tensor(x, mask=mask_x, replacement=x1)
-
-        predicted_velocity = self.velocity(
-            x, time=t, conditions=conditions, training=stage == "training", **subnet_kwargs
+            time=t,
+            conditions=conditions,
+            training=stage == "training",
+            masks=masks,
         )
 
-        loss = self.loss_fn(loss_mask * target_velocity, loss_mask * predicted_velocity)
+        loss = self.loss_fn(
+            self.mask_handler.maybe_apply(target_velocity, masks.fixed_target_mask),
+            self.mask_handler.maybe_apply(predicted_velocity, masks.fixed_target_mask),
+        )
         loss = weighted_mean(loss, sample_weight)
 
         return {"loss": loss}
@@ -237,8 +224,6 @@ class FlowMatching(InferenceNetwork):
 
     def get_config(self):
         base_config = super().get_config()
-        base_config = layer_kwargs(base_config)
-
         config = {
             "subnet": self.subnet,
             "base_distribution": self.base_distribution,
@@ -247,9 +232,6 @@ class FlowMatching(InferenceNetwork):
             "integrate_kwargs": self.integrate_kwargs,
             "optimal_transport_kwargs": self.optimal_transport_kwargs,
             "time_power_law_alpha": self.time_power_law_alpha,
-            "fixed_target_prob": self.fixed_target_prob,
-            "missing_target_prob": self.missing_target_prob,
-            "missing_conditions_prob": self.missing_conditions_prob,
             # we do not need to store subnet_kwargs
         }
 
@@ -258,18 +240,37 @@ class FlowMatching(InferenceNetwork):
     def velocity(
         self, xz: Tensor, time: float | Tensor, conditions: Tensor = None, training: bool = False, **kwargs
     ) -> Tensor:
-        subnet_kwargs = self._collect_mask_kwargs(self._subnet_mask_keys, kwargs)
+        masks = self.mask_handler.resolve(
+            kwargs,
+            targets=xz,
+            conditions=conditions,
+            subnet=self.subnet,
+        )
+        return self._velocity(
+            xz,
+            time=time,
+            conditions=conditions,
+            training=training,
+            masks=masks,
+        )
 
+    def _velocity(
+        self,
+        xz: Tensor,
+        time: float | Tensor,
+        conditions: Tensor,
+        training: bool,
+        masks: InferenceMasks,
+    ) -> Tensor:
         time = keras.ops.convert_to_tensor(time, dtype=keras.ops.dtype(xz))
         time = expand_right_as(time, xz)
         time = keras.ops.broadcast_to(time, keras.ops.shape(xz)[:-1] + (1,))
-        subnet_out = self.subnet((xz, time, conditions), training=training, **subnet_kwargs)
+        subnet_out = self.subnet((xz, time, conditions), training=training, **masks.subnet_kwargs)
         out = self.output_projector(subnet_out)
 
         # Zero out velocity where target is fixed (during inference only)
         if not training:
-            fixed_target_mask = kwargs.get(MaskName.FIXED_TARGET, None)
-            out = maybe_mask_tensor(out, mask=fixed_target_mask)
+            out = self.mask_handler.maybe_apply(out, masks.fixed_target_mask)
         return out
 
     def _velocity_trace(
@@ -279,10 +280,16 @@ class FlowMatching(InferenceNetwork):
         conditions: Tensor = None,
         projectors: Tensor = None,
         training: bool = False,
-        **kwargs,
+        masks: InferenceMasks = None,
     ) -> tuple[Tensor, Tensor]:
         def f(x):
-            return self.velocity(x, time=time, conditions=conditions, training=training, **kwargs)
+            return self._velocity(
+                x,
+                time=time,
+                conditions=conditions,
+                training=training,
+                masks=masks,
+            )
 
         v, trace = jacobian_trace(f, xz, projectors=projectors, return_output=True)
 
@@ -291,23 +298,29 @@ class FlowMatching(InferenceNetwork):
     def _forward(
         self, x: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
-        seed = resolve_seed(kwargs.pop("seed", None), self.seed_generator)
-        hutchinson_steps = kwargs.pop("hutchinson_steps", None)
+        masks = self.mask_handler.resolve(
+            kwargs,
+            targets=x,
+            conditions=conditions,
+            subnet=self.subnet,
+        )
+
+        runtime_kwargs = self.mask_handler.without_mask_kwargs(kwargs)
+        seed = resolve_seed(runtime_kwargs.pop("seed", None), self.seed_generator)
+        hutchinson_steps = runtime_kwargs.pop("hutchinson_steps", None)
 
         # Build integrate kwargs: instance config -> call-time overrides
-        integrate_kwargs = self.integrate_kwargs | kwargs
+        integrate_kwargs = self.integrate_kwargs | runtime_kwargs
 
         if density and integrate_kwargs["method"] == "glass":
             logging.warning("GLASS is not supported for density computation. Falling back to tsit5 ODE solver.")
             integrate_kwargs["method"] = "tsit5"
 
-        # Apply user-provided target mask if available
-        fixed_target_mask = kwargs.get(MaskName.FIXED_TARGET, None)
-        targets_fixed = kwargs.get(MaskName.FIXED_TARGET_VALUE, None)
-        if fixed_target_mask is not None:
-            fixed_target_mask = keras.ops.broadcast_to(fixed_target_mask, keras.ops.shape(x))
-            targets_fixed = keras.ops.broadcast_to(targets_fixed, keras.ops.shape(x))
-            x = maybe_mask_tensor(x, mask=fixed_target_mask, replacement=targets_fixed)
+        # During a forward pass the observed sample supplies fixed values unless
+        # the caller provided an explicit value (for example after adapting and
+        # standardizing a partially observed record).
+        replacement = masks.fixed_target_value if masks.fixed_target_value is not None else x
+        x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, replacement)
 
         if density:
             # one probe per solve, fixed over time, keeps the augmented ODE deterministic
@@ -315,7 +328,12 @@ class FlowMatching(InferenceNetwork):
 
             def deltas(time, xz):
                 v, trace = self._velocity_trace(
-                    xz, time=time, conditions=conditions, projectors=projectors, training=training, **kwargs
+                    xz,
+                    time=time,
+                    conditions=conditions,
+                    projectors=projectors,
+                    training=training,
+                    masks=masks,
                 )
                 return {"xz": v, "trace": trace}
 
@@ -323,15 +341,27 @@ class FlowMatching(InferenceNetwork):
             state = integrate(deltas, state, start_time=1.0, stop_time=0.0, **integrate_kwargs)
 
             z = state["xz"]
-            log_density = self.base_distribution.log_prob(z) + keras.ops.squeeze(state["trace"], axis=-1)
+            log_density = self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) + keras.ops.squeeze(
+                state["trace"], axis=-1
+            )
 
             return z, log_density
 
         def deltas(time, xz):
-            return {"xz": self.velocity(xz, time=time, conditions=conditions, training=training, **kwargs)}
+            return {
+                "xz": self._velocity(
+                    xz,
+                    time=time,
+                    conditions=conditions,
+                    training=training,
+                    masks=masks,
+                )
+            }
 
         state = {"xz": x}
         if integrate_kwargs["method"] == "glass":
+            project_state, project_updates = self.mask_handler.integrator_callbacks(masks, replacement=x)
+
             state = integrate_stochastic(
                 drift_fn=deltas,
                 diffusion_fn=None,
@@ -340,6 +370,8 @@ class FlowMatching(InferenceNetwork):
                 stop_time=0.0,
                 noise_schedule="flow_matching",
                 seed=seed,
+                state_projection_fn=project_state,
+                state_update_projection_fn=project_updates,
                 **integrate_kwargs,
             )
         else:
@@ -352,23 +384,25 @@ class FlowMatching(InferenceNetwork):
     def _inverse(
         self, z: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
-        seed = resolve_seed(kwargs.pop("seed", None), self.seed_generator)
-        hutchinson_steps = kwargs.pop("hutchinson_steps", None)
+        masks = self.mask_handler.resolve(
+            kwargs,
+            targets=z,
+            conditions=conditions,
+            subnet=self.subnet,
+        )
+
+        runtime_kwargs = self.mask_handler.without_mask_kwargs(kwargs)
+        seed = resolve_seed(runtime_kwargs.pop("seed", None), self.seed_generator)
+        hutchinson_steps = runtime_kwargs.pop("hutchinson_steps", None)
 
         # Build integrate kwargs: instance config -> call-time overrides
-        integrate_kwargs = self.integrate_kwargs | kwargs
+        integrate_kwargs = self.integrate_kwargs | runtime_kwargs
 
         if density and integrate_kwargs["method"] == "glass":
             logging.warning("GLASS is not supported for density computation. Falling back to tsit5 ODE solver.")
             integrate_kwargs["method"] = "tsit5"
 
-        # Apply user-provided target mask if available
-        fixed_target_mask = kwargs.get(MaskName.FIXED_TARGET, None)
-        targets_fixed = kwargs.get(MaskName.FIXED_TARGET_VALUE, None)
-        if fixed_target_mask is not None:
-            fixed_target_mask = keras.ops.broadcast_to(fixed_target_mask, keras.ops.shape(z))
-            targets_fixed = keras.ops.broadcast_to(targets_fixed, keras.ops.shape(z))
-            z = maybe_mask_tensor(z, mask=fixed_target_mask, replacement=targets_fixed)
+        z = self.mask_handler.maybe_apply(z, masks.fixed_target_mask, masks.fixed_target_value)
 
         if density:
             # one probe per solve, fixed over time, keeps the augmented ODE deterministic
@@ -376,7 +410,12 @@ class FlowMatching(InferenceNetwork):
 
             def deltas(time, xz):
                 v, trace = self._velocity_trace(
-                    xz, time=time, conditions=conditions, projectors=projectors, training=training, **kwargs
+                    xz,
+                    time=time,
+                    conditions=conditions,
+                    projectors=projectors,
+                    training=training,
+                    masks=masks,
                 )
                 return {"xz": v, "trace": trace}
 
@@ -384,15 +423,26 @@ class FlowMatching(InferenceNetwork):
             state = integrate(deltas, state, start_time=0.0, stop_time=1.0, **integrate_kwargs)
 
             x = state["xz"]
-            log_density = self.base_distribution.log_prob(z) - keras.ops.squeeze(state["trace"], axis=-1)
+            log_density = self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) - keras.ops.squeeze(
+                state["trace"], axis=-1
+            )
 
             return x, log_density
 
         def deltas(time, xz):
-            return {"xz": self.velocity(xz, time=time, conditions=conditions, training=training, **kwargs)}
+            return {
+                "xz": self._velocity(
+                    xz,
+                    time=time,
+                    conditions=conditions,
+                    training=training,
+                    masks=masks,
+                )
+            }
 
         state = {"xz": z}
         if integrate_kwargs["method"] == "glass":
+            project_state, project_updates = self.mask_handler.integrator_callbacks(masks)
             state = integrate_stochastic(
                 drift_fn=deltas,
                 diffusion_fn=None,
@@ -401,6 +451,8 @@ class FlowMatching(InferenceNetwork):
                 stop_time=1.0,
                 seed=seed,
                 noise_schedule="flow_matching",
+                state_projection_fn=project_state,
+                state_update_projection_fn=project_updates,
                 **integrate_kwargs,
             )
         else:
