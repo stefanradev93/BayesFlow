@@ -40,7 +40,7 @@ class CosineNoiseSchedule(NoiseSchedule):
         min_log_snr: float = -12,
         max_log_snr: float = 12,
         shift: float = 0.0,
-        weighting: Literal["sigmoid", "likelihood_weighting"] = "sigmoid",
+        weighting: Literal["sigmoid", "likelihood_weighting"] | None = None,
     ):
         super().__init__(name="cosine_noise_schedule", variance_type="preserving", weighting=weighting)
         self._shift = shift
