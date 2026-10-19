@@ -49,7 +49,6 @@ class CosineNoiseSchedule(NoiseSchedule):
     ):
         super().__init__(name="cosine_noise_schedule", variance_type="preserving", weighting=weighting)
         self._shift = shift
-        self._weighting = weighting
         self.log_snr_min = min_log_snr
         self.log_snr_max = max_log_snr
 
