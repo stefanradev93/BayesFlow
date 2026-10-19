@@ -53,12 +53,12 @@ class NoiseSchedule(ABC):
         self._weighting = weighting
 
     @abstractmethod
-    def get_log_snr(self, t: float | Tensor, training: bool) -> Tensor:
+    def log_snr(self, t: float | Tensor, training: bool) -> Tensor:
         """Get the log signal-to-noise ratio (lambda) for a given diffusion time."""
         pass
 
     @abstractmethod
-    def get_t_from_log_snr(self, log_snr_t: float | Tensor, training: bool) -> Tensor:
+    def time_from_log_snr(self, log_snr_t: float | Tensor, training: bool) -> Tensor:
         """Get the diffusion time (t) from the log signal-to-noise ratio (lambda)."""
         pass
 
@@ -174,13 +174,13 @@ class NoiseSchedule(ABC):
 
         # Validate log SNR values and corresponding time mappings for both training and inference
         for training in (True, False):
-            if not ops.isfinite(self.get_log_snr(0.0, training=training)):
+            if not ops.isfinite(self.log_snr(0.0, training=training)):
                 raise ValueError(f"log_snr(0.0) must be finite (training={training})")
-            if not ops.isfinite(self.get_log_snr(1.0, training=training)):
+            if not ops.isfinite(self.log_snr(1.0, training=training)):
                 raise ValueError(f"log_snr(1.0) must be finite (training={training})")
-            if not ops.isfinite(self.get_t_from_log_snr(self.log_snr_max, training=training)):
+            if not ops.isfinite(self.time_from_log_snr(self.log_snr_max, training=training)):
                 raise ValueError(f"t(log_snr_max) must be finite (training={training})")
-            if not ops.isfinite(self.get_t_from_log_snr(self.log_snr_min, training=training)):
+            if not ops.isfinite(self.time_from_log_snr(self.log_snr_min, training=training)):
                 raise ValueError(f"t(log_snr_min) must be finite (training={training})")
 
         # Validate log SNR derivatives at the boundaries
