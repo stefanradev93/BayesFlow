@@ -76,9 +76,9 @@ class DiffusionModel(InferenceNetwork):
 
     References
     ----------
-    [1] Arruda, J., Bracher, N., Köthe, U., Hasenauer, J., & Radev, S. T. (2025).
+    [1] Arruda, J., Bracher, N., Köthe, U., Hasenauer, J., & Radev, S. T. (2026).
         Diffusion Models in Simulation-Based Inference: A Tutorial Review.
-        arXiv preprint arXiv:2512.20685.
+        https://openreview.net/forum?id=86Q261z005
     [2] Arruda et al., (2025). Compositional amortized inference for large-scale hierarchical Bayesian models.
         https://arxiv.org/abs/2505.14429
     [3] Geffner et al., (2023). Compositional score modeling for simulation-based inference.
