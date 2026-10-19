@@ -157,7 +157,7 @@ class DiffusionModel(InferenceNetwork):
         t = (u0 + i / ops.cast(ops.shape(x)[0], dtype=ops.dtype(x))) % 1
 
         # Calculate the noise level
-        log_snr_t = self.noise_schedule.get_log_snr(t, training=noise_schedule_training_stage)
+        log_snr_t = self.noise_schedule.log_snr(t, training=noise_schedule_training_stage)
         log_snr_t = expand_right_as(log_snr_t, x)
 
         alpha_t, sigma_t = self.noise_schedule.get_alpha_sigma(log_snr_t=log_snr_t)
@@ -340,7 +340,7 @@ class DiffusionModel(InferenceNetwork):
         if scaling_function is None:
 
             def scaling_function(t: Tensor) -> Tensor:
-                log_snr = self.noise_schedule.get_log_snr(t, training=False)
+                log_snr = self.noise_schedule.log_snr(t, training=False)
                 alpha_t, sigma_t = self.noise_schedule.get_alpha_sigma(log_snr)
                 return ops.square(alpha_t) / ops.square(sigma_t)
 
@@ -487,12 +487,12 @@ class DiffusionModel(InferenceNetwork):
         guidance_kwargs: Mapping[str, Any] = None,
     ) -> Tensor:
         if log_snr_t is None:
-            log_snr_t = self.noise_schedule.get_log_snr(t=time, training=training)
+            log_snr_t = self.noise_schedule.log_snr(t=time, training=training)
             log_snr_t = expand_right_as(log_snr_t, xz)
             log_snr_t = ops.broadcast_to(log_snr_t, ops.shape(xz)[:-1] + (1,))
 
         if time is None:
-            time = self.noise_schedule.get_t_from_log_snr(log_snr_t, training=training)
+            time = self.noise_schedule.time_from_log_snr(log_snr_t, training=training)
 
         alpha_t, sigma_t = self.noise_schedule.get_alpha_sigma(log_snr_t=log_snr_t)
 
@@ -593,7 +593,7 @@ class DiffusionModel(InferenceNetwork):
         training: bool = False,
         guidance_kwargs: Mapping[str, Any] = None,
     ) -> Tensor:
-        log_snr_t = expand_right_as(self.noise_schedule.get_log_snr(t=time, training=training), xz)
+        log_snr_t = expand_right_as(self.noise_schedule.log_snr(t=time, training=training), xz)
         log_snr_t = ops.broadcast_to(log_snr_t, ops.shape(xz)[:-1] + (1,))
 
         score = self._score(
@@ -656,7 +656,7 @@ class DiffusionModel(InferenceNetwork):
         masks: InferenceMasks,
         training: bool = False,
     ) -> Tensor:
-        log_snr_t = expand_right_as(self.noise_schedule.get_log_snr(t=time, training=training), xz)
+        log_snr_t = expand_right_as(self.noise_schedule.log_snr(t=time, training=training), xz)
         log_snr_t = ops.broadcast_to(log_snr_t, ops.shape(xz)[:-1] + (1,))
         g_squared = self.noise_schedule.get_drift(log_snr_t=log_snr_t)
         g = ops.sqrt(g_squared)
@@ -1088,7 +1088,7 @@ class DiffusionModel(InferenceNetwork):
         )
 
         # Calculate standard noise schedule components
-        log_snr_t = expand_right_as(self.noise_schedule.get_log_snr(t=time, training=training), xz)
+        log_snr_t = expand_right_as(self.noise_schedule.log_snr(t=time, training=training), xz)
         log_snr_t = ops.broadcast_to(log_snr_t, ops.shape(xz)[:-1] + (1,))
 
         # Compute velocity using standard drift-diffusion formulation
@@ -1205,7 +1205,7 @@ class DiffusionModel(InferenceNetwork):
         guidance_kwargs: Mapping[str, Any] = None,
         regularize_precision: float = 1e-6,
     ) -> Tensor:
-        log_snr_t = expand_right_as(self.noise_schedule.get_log_snr(t=time, training=training), xz)
+        log_snr_t = expand_right_as(self.noise_schedule.log_snr(t=time, training=training), xz)
         log_snr_t = ops.broadcast_to(log_snr_t, ops.shape(xz)[:-1] + (1,))
         alpha_t, sigma_t = self.noise_schedule.get_alpha_sigma(log_snr_t=log_snr_t)
         time = ops.cast(time, dtype=ops.dtype(xz))

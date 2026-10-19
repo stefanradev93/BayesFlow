@@ -66,12 +66,12 @@ class CosineNoiseSchedule(NoiseSchedule):
         """Map log-SNR to the cosine coordinate before endpoint normalization."""
         return 2 / math.pi * ops.arctan(ops.exp((2 * self._shift - log_snr_t) * 0.5))
 
-    def get_log_snr(self, t: Tensor | float, training: bool) -> Tensor:
+    def log_snr(self, t: Tensor | float, training: bool) -> Tensor:
         """Get the log signal-to-noise ratio (lambda) for a given diffusion time."""
         t_trunc = self._truncated_t(t)
         return -2 * ops.log(ops.tan(math.pi * t_trunc * 0.5)) + 2 * self._shift
 
-    def get_t_from_log_snr(self, log_snr_t: Tensor | float, training: bool) -> Tensor:
+    def time_from_log_snr(self, log_snr_t: Tensor | float, training: bool) -> Tensor:
         """Get the diffusion time (t) from the log signal-to-noise ratio (lambda)."""
         # SNR = -2 * log(tan(pi*t/2)) => t = 2/pi * arctan(exp(-snr/2))
         truncated_t = self._truncated_t_from_log_snr(log_snr_t)
@@ -79,7 +79,7 @@ class CosineNoiseSchedule(NoiseSchedule):
 
     def derivative_log_snr(self, log_snr_t: Tensor, training: bool) -> Tensor:
         """Compute d/dt log(1 + e^(-snr(t))), which is used for the reverse SDE."""
-        t = self.get_t_from_log_snr(log_snr_t=log_snr_t, training=training)
+        t = self.time_from_log_snr(log_snr_t=log_snr_t, training=training)
 
         # Compute the truncated time t_trunc
         t_trunc = self._truncated_t(t)
