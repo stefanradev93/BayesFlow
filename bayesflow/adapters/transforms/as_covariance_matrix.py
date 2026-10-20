@@ -45,6 +45,7 @@ class AsCovarianceMatrix(ElementwiseTransform):
 
     def forward(self, data: Tensor, **kwargs) -> Tensor:
         K = ops.shape(data)[-1]
+        batch_shape = tuple(ops.shape(data)[:-2])
         if not self.cholesky:
             data = ops.cholesky(data)
 
@@ -54,7 +55,7 @@ class AsCovarianceMatrix(ElementwiseTransform):
         # extract flattened off-diagonal
         rows, cols = np.tril_indices(K, k=-1)
         idx = K * rows + cols
-        data_flat = ops.reshape(data, (-1, K * K))
+        data_flat = ops.reshape(data, batch_shape + (K * K,))
         lower = ops.take(data_flat, idx, axis=-1)
 
         return ops.concatenate([diag, lower], axis=-1)
@@ -62,6 +63,7 @@ class AsCovarianceMatrix(ElementwiseTransform):
     def inverse(self, data: Tensor, **kwargs) -> Tensor:
         P = ops.shape(data)[-1]
         K = (math.isqrt(1 + 8 * P) - 1) // 2
+        batch_shape = tuple(ops.shape(data)[:-1])
 
         diag = self.diag_transform(data[..., :K], inverse=True)
         lower = data[..., K:]
@@ -73,7 +75,7 @@ class AsCovarianceMatrix(ElementwiseTransform):
         idx_map[rows * K + cols] = 1 + K + np.arange(len(rows))  # strictly lower
 
         padded = ops.concatenate([ops.zeros_like(diag[..., :1]), diag, lower], axis=-1)
-        L = ops.reshape(ops.take(padded, idx_map, axis=-1), (-1, K, K))
+        L = ops.reshape(ops.take(padded, idx_map, axis=-1), batch_shape + (K, K))
 
         if not self.cholesky:
             return ops.matmul(L, ops.swapaxes(L, -1, -2))  # L @ L^T
@@ -93,7 +95,7 @@ class AsCovarianceMatrix(ElementwiseTransform):
             data = ops.cholesky(data)
 
         diag = ops.diagonal(data, axis1=-2, axis2=-1)
-        ldj = self.diag_transform.log_det_jac(diag, inverse=False)
+        ldj = ops.sum(self.diag_transform.ldj(diag), axis=-1)
 
         if not self.cholesky:
             weight = ops.cast(K, diag.dtype) - ops.arange(K, dtype=diag.dtype)
@@ -103,4 +105,4 @@ class AsCovarianceMatrix(ElementwiseTransform):
         if inverse:
             ldj = -ldj
 
-        return ldj
+        return self._sum_except_batch(ldj)
