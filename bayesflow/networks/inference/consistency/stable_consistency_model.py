@@ -53,7 +53,7 @@ class StableConsistencyModel(InferenceNetwork):
         target for stability (``c`` in [1]). Default is ``0.1``.
     r_scale : float
         Scale of the second stable tangent term in the continuous-time
-        consistency target. Default is ``0.5``.
+        consistency target. Default is ``1.0``.
     steps : int
         Default number of steps used by the multistep sampler. Can be overridden
         per call by passing ``steps=`` to sampling. Default is ``15``.
@@ -90,7 +90,7 @@ class StableConsistencyModel(InferenceNetwork):
         noise_dist_mean: float = -1.1,
         noise_dist_std: float = 2.0,
         tangent_norm_eps: float = 0.1,
-        r_scale: float = 0.5,
+        r_scale: float = 1.0,
         steps: int = 15,
         rho: float = 3.5,
         subnet_kwargs: dict[str, Any] = None,
@@ -349,8 +349,8 @@ class StableConsistencyModel(InferenceNetwork):
         student_out = self.subnet_projector(subnet_out)
 
         # calculate the tangent
-        g = -(ops.cos(t) ** 2) * (self.sigma * teacher_output - dxtdt) - self.r_scale * ops.cos(t) * ops.sin(t) * (
-            xt + self.sigma * cos_sin_dFdt
+        g = -(ops.cos(t) ** 2) * (self.sigma * teacher_output - dxtdt) - self.r_scale * (
+            ops.cos(t) * ops.sin(t) * xt + cos_sin_dFdt
         )
 
         # Fixed-coordinate tangents must not change the normalization of the
