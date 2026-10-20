@@ -4,7 +4,7 @@ import keras
 
 from bayesflow._backend import jvp, vjp
 from bayesflow.distributions import Distribution
-from bayesflow.masking import InferenceMasks
+from bayesflow.masking import InferenceMasks, MaskHandler
 from bayesflow.networks import InferenceNetwork
 from bayesflow.networks.defaults import (
     DIFFUSION_TRANSFORMER_DEFAULTS,
@@ -97,17 +97,8 @@ class MeanFlow(InferenceNetwork):
         Power of the adaptive loss weight. Default is 0.25.
     adaptive_loss_eps : float
         Constant of the adaptive loss weight. Default is 0.1.
-    fixed_target_prob : float
-        Probability of fixing each target during training (so the network learns arbitrary
-        conditionals). Default is 0.0.
-    missing_target_prob : float
-        Probability of marking each fixed target as missing during training, so the network
-        learns to handle marginalization of targets. Only takes effect when the subnet
-        accepts ``infer_target_mask`` (e.g. ``diffusion_transformer``). Default is 0.0.
-    missing_conditions_prob : float
-        Probability of marking each condition as missing during training, so the network learns
-        to handle missing conditions. Only takes effect when the subnet accepts
-        ``observed_condition_mask`` (e.g. ``diffusion_transformer``). Default is 0.0.
+    mask_handler : ~bayesflow.masking.MaskHandler, optional
+        Handler used to generate and route masks. If ``None``, a default mask handler is created.
     **kwargs
         Additional keyword arguments passed to the base ``InferenceNetwork``.
 
@@ -138,16 +129,12 @@ class MeanFlow(InferenceNetwork):
         cycle_mismatch_prob: float = 0.6,
         adaptive_loss_power: float = 0.25,
         adaptive_loss_eps: float = 0.1,
-        fixed_target_prob: float = 0.0,
-        missing_target_prob: float = 0.0,
-        missing_conditions_prob: float = 0.0,
+        mask_handler: MaskHandler | None = None,
         **kwargs,
     ):
         super().__init__(
             base_distribution,
-            fixed_target_prob=fixed_target_prob,
-            missing_target_prob=missing_target_prob,
-            missing_conditions_prob=missing_conditions_prob,
+            mask_handler=mask_handler,
             **kwargs,
         )
 

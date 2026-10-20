@@ -5,6 +5,8 @@ import pytest
 from bayesflow.masking import MaskHandler
 from bayesflow.utils.serialization import deserialize, serialize
 
+from .conftest import make_network
+
 
 def _numpy(value):
     return keras.ops.convert_to_numpy(value)
@@ -451,15 +453,7 @@ def test_flow_forward_uses_explicit_fixed_target_value(
     conditions,
     fixed_target_mask,
 ):
-    from bayesflow.networks import FlowMatching
-
-    # todo: add Mean flow
-    subnet = RecordingSubnet()
-    network = FlowMatching(
-        subnet=subnet,
-        integrate_kwargs={"method": "euler", "steps": 2},
-    )
-    network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
+    network = _build(make_network(network_name, subnet=RecordingSubnet()), targets, conditions)
     fixed_target_value = keras.ops.convert_to_tensor(
         np.asarray(
             [[-4.0, 7.5, 2.0], [3.0, -2.5, 1.0]],

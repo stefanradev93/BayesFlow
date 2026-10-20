@@ -45,13 +45,17 @@ def random_conditions(batch_size, cond_dim):
         dict(velocity_head_layers=0),
         dict(cycle_weight=0.0),
         dict(use_optimal_transport=True),
-        dict(fixed_target_prob=0.3, missing_target_prob=0.3, missing_conditions_prob=0.3),
+        dict(mask_handler=dict(fixed_target_prob=0.3, missing_target_prob=0.3, missing_conditions_prob=0.3)),
         dict(loss_fn="mse", velocity_loss_fn="adaptive_l2"),
-        dict(density_head=True, fixed_target_prob=0.3),
+        dict(density_head=True, mask_handler=dict(fixed_target_prob=0.3)),
     ],
     ids=["default", "no_head", "no_cycle", "ot", "masking", "losses", "density_head"],
 )
 def mean_flow(request):
     from bayesflow.experimental import MeanFlow
+    from bayesflow.masking import MaskHandler
 
-    return MeanFlow(subnet_kwargs=dict(widths=(8, 8)), **request.param)
+    kwargs = dict(request.param)
+    if "mask_handler" in kwargs:
+        kwargs["mask_handler"] = MaskHandler(**kwargs["mask_handler"])
+    return MeanFlow(subnet_kwargs=dict(widths=(8, 8)), **kwargs)
