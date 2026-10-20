@@ -169,7 +169,7 @@ def loss(
         axes=axes,
         num_row=num_row,
         num_col=1,
-        title=["Loss Trajectory"],
+        title=["Loss Trajectories" if num_row > 1 else "Loss Trajectory"],
         xlabel="Training epoch #",
         title_fontsize=title_fontsize,
         label_fontsize=label_fontsize,
