@@ -116,8 +116,11 @@ def test_cycle_consistency(adapter, random_data):
         if key == "s3":
             # we subsampled this key, so it is expected for its shape to change
             continue
+        if key == "t1":
+            # broadcast does not have an inverse
+            continue
         assert key in deprocessed
-        assert np.allclose(value, deprocessed[key])
+        assert_allclose(value, deprocessed[key], atol=1e-7)
 
 
 @pytest.mark.cpu_fallback_on_mps
@@ -512,6 +515,12 @@ def test_nan_to_num():
     )
     out = transform(arr)["test"]
     np.testing.assert_array_equal(out, np.array([1.0, -1.0, 3.0]))
+
+    # inverse without mask must keep genuine default values
+    arr_with_default = {"test": np.array([-1.0, np.nan, 3.0])}
+    out = transform(arr_with_default)
+    inv = transform(out, inverse=True)["test"]
+    np.testing.assert_array_equal(inv, np.array([-1.0, -1.0, 3.0]))
 
     # test with mask
     arr = {"test": np.array([1.0, np.nan, 3.0]), "test-2d": np.array([[1.0, np.nan], [np.nan, 4.0]])}
