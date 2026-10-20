@@ -39,7 +39,7 @@ def random_conditions(batch_size, cond_dim):
         dict(mask_handler=dict(fixed_target_prob=0.3, missing_target_prob=0.3, missing_conditions_prob=0.3)),
         dict(density_head=True, mask_handler=dict(fixed_target_prob=0.3)),
     ],
-    ids=["default", "no_head", "no_cycle", "ot", "masking", "losses", "density_head"],
+    ids=["default", "no_head", "no_cycle", "ot", "masking", "density_head"],
 )
 def mean_flow(request):
     from bayesflow.experimental import MeanFlow
