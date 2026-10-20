@@ -39,6 +39,13 @@ class CouplingFlow(InferenceNetwork):
 
     ``CouplingFlow(transform_kwargs={"default_domain": (-5., 5., -5., 5.)})``
 
+    A ``fixed_target_mask`` (1 = inferred, 0 = fixed) lets the flow train on targets
+    with a varying number of dimensions. Fixed dimensions are passed without being
+    changed and are excluded from density computation. They still condition the
+    inferred dimensions. During sampling, they are filled with ``fixed_target_value``
+    (with zeros if it is not specified). Currently not supported for
+    ``permutation="orthogonal"``.
+
     Parameters
     ----------
     subnet : str or type, optional
@@ -182,7 +189,7 @@ class CouplingFlow(InferenceNetwork):
         self, z: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         self.mask_handler.reject_structural_masks(kwargs, reason="coupling layers pass no masks to their subnets")
-        masks = self.mask_handler.resolve(kwargs, targets=z, stage="training" if training else "inference")
+        masks = self.mask_handler.resolve(kwargs, targets=z)
         *layer_masks, latent_mask = trace_permutations(self.invertible_layers, masks.fixed_target_mask)
 
         # fixed dims take their fixed value or zero when there is none (see flow matching)
