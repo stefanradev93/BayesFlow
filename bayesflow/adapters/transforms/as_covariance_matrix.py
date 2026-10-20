@@ -28,7 +28,8 @@ class AsCovarianceMatrix(ElementwiseTransform):
     diag_kwargs : dict, optional
         Keyword arguments forwarded to the :py:class:`~transforms.Constrain` transform
         that constrains the diagonal to be positive.
-        The `lower` bound is always fixed to 0.0.
+        The `lower` bound is always fixed to 0.0. All other arguments use the default
+        of :py:class:`~transforms.Constrain`.
 
     Examples
     --------

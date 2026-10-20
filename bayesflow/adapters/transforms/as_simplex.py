@@ -22,7 +22,11 @@ class AsSimplex(ElementwiseTransform):
         - "default" / "simplex": sum-to-zero (orthogonal basis) transform followed by a softmax transform.
         Plain softmax is not invertible (shifting all values by a constant results in the same inverse).
         The sum-to-zero removes this issue.
-        - "stick": stick-breaking logistic transform.
+        - "stick": an invertible stick-breaking logistic transform.
+
+    Examples
+    --------
+    >>> adapter = bf.Adapter().as_simplex("probs")
     """
 
     def __init__(self, *, axis: int = -1, method: str = "default"):
