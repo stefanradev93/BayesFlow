@@ -1,5 +1,5 @@
 from collections.abc import Sequence, Callable
-from typing import Literal, Tuple
+from typing import Any, Literal, Tuple
 
 import time
 import copy
@@ -81,8 +81,8 @@ class CompositionalWorkflow(BasicWorkflow):
         inference_conditions: Sequence[str] | str | None = None,
         summary_variables: Sequence[str] | str | None = None,
         standardize: Sequence[str] | str | None = "inference_variables",
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         inference_network = find_inference_network(inference_network, **kwargs.get("inference_kwargs", {}))
 
         if not isinstance(inference_network, DiffusionModel):
@@ -101,85 +101,15 @@ class CompositionalWorkflow(BasicWorkflow):
         )
 
         self._init_optimizer(initial_learning_rate, optimizer, **kwargs.get("optimizer_kwargs", {}))
-        self._init_checkpointing(checkpoint_filepath, checkpoint_name, save_weights_only, save_best_only)
+        self._init_checkpointing(checkpoint_filepath, checkpoint_name, save_weights_only, save_best_only, restore=False)
         self.history = None
         self._needs_compile = True
-
-    def compositional_sample(
-        self,
-        *,
-        num_samples: int,
-        conditions: dict[str, np.ndarray] | None = None,
-        compute_prior_score: Callable[[dict[str, Tensor], Tensor | None], dict[str, Tensor]] = None,
-        summaries: Tensor | np.ndarray | None = None,
-        split: bool = False,
-        batch_size: int | None = None,
-        sample_shape: Literal["infer"] | Tuple[int] | int = "infer",
-        **kwargs,
-    ) -> dict[str, np.ndarray]:
-        """
-        Draws `num_samples` samples from the approximator given specified composition conditions.
-        The `conditions` dictionary should have shape (n_datasets, n_compositional_conditions, ...).
-
-        Parameters
-        ----------
-        num_samples : int
-            The number of samples to generate.
-        conditions : dict[str, np.ndarray], optional
-            A dictionary where keys represent variable names and values are
-            NumPy arrays containing the adapted simulated variables. Keys used as summary or inference
-            conditions during training should be present.
-            Should have shape (n_datasets, n_compositional_conditions, ...).
-        compute_prior_score : Callable[[dict[str, Tensor], Tensor | None], dict[str, Tensor]], optional
-            A function that computes the score of the log prior distribution in the original parameter space, using
-            backend tensors. Optionally, the function can have a time argument, otherwise the prior score is
-            multiplied with (1-t), where t is diffusion time. If none provided, the unconditional score is used.
-        summaries : Tensor | np.ndarray | None, optional
-            Precomputed summary outputs to be used as conditions for sampling. If provided, these will be used instead
-            of the conditions. Should have shape (n_datasets, n_compositional_conditions, ...).
-        split : bool, default=False
-            Whether to split the output arrays along the last axis and return one sample array per target variable.
-        batch_size : int or None, optional
-            If provided, the conditions are split into batches of size `batch_size`, for which samples are generated
-            sequentially. Can help with memory management for large sample sizes.
-        sample_shape : str or tuple of int, optional
-            Trailing structural dimensions of each generated sample, excluding the batch and target (intrinsic)
-            dimension. For example, use `(time,)` for time series or `(height, width)` for images.
-
-            If set to `"infer"` (default), the structural dimensions are inferred from the `inference_conditions`.
-            In that case, all non-vector dimensions except the last (channel) dimension are treated as structural
-            dimensions. For example, if the final `inference_conditions` have shape `(batch_size, time, channels)`,
-            then `sample_shape` is inferred as `(time,)`, and the generated samples will have shape
-            `(num_conditions, num_samples, time, target_dim)`.
-        **kwargs : dict
-            Additional keyword arguments passed to the approximator's sampling function.
-
-        Returns
-        -------
-        dict[str, np.ndarray]
-            A dictionary where keys correspond to variable names and
-            values are arrays containing the generated samples.
-        """
-        start_time = time.perf_counter()
-        samples = self.approximator.compositional_sample(
-            num_samples=num_samples,
-            conditions=conditions,
-            compute_prior_score=compute_prior_score,
-            split=split,
-            batch_size=batch_size,
-            sample_shape=sample_shape,
-            summary_outputs=summaries,
-            **kwargs,
-        )
-        elapsed = time.perf_counter() - start_time
-        logging.info(f"Sampling completed in {format_duration(elapsed)}.")
-        return samples
 
     @classmethod
     def from_basic_workflow(
         cls,
         workflow: BasicWorkflow,
-        **kwargs,
+        **kwargs: Any,
     ) -> "CompositionalWorkflow":
         """
         Build a :class:`CompositionalWorkflow` from a trained :class:`BasicWorkflow`.
@@ -250,3 +180,73 @@ class CompositionalWorkflow(BasicWorkflow):
         compositional_workflow.approximator.standardizer = copy.deepcopy(approximator.standardizer)
 
         return compositional_workflow
+
+    def compositional_sample(
+        self,
+        *,
+        num_samples: int,
+        conditions: dict[str, np.ndarray] | None = None,
+        compute_prior_score: Callable[[dict[str, Tensor], Tensor | None], dict[str, Tensor]] = None,
+        summaries: Tensor | np.ndarray | None = None,
+        split: bool = False,
+        batch_size: int | None = None,
+        sample_shape: Literal["infer"] | Tuple[int] | int = "infer",
+        **kwargs: Any,
+    ) -> dict[str, np.ndarray]:
+        """
+        Draws `num_samples` samples from the approximator given specified composition conditions.
+        The `conditions` dictionary should have shape (n_datasets, n_compositional_conditions, ...).
+
+        Parameters
+        ----------
+        num_samples : int
+            The number of samples to generate.
+        conditions : dict[str, np.ndarray], optional
+            A dictionary where keys represent variable names and values are
+            NumPy arrays containing the adapted simulated variables. Keys used as summary or inference
+            conditions during training should be present.
+            Should have shape (n_datasets, n_compositional_conditions, ...).
+        compute_prior_score : Callable[[dict[str, Tensor], Tensor | None], dict[str, Tensor]], optional
+            A function that computes the score of the log prior distribution in the original parameter space, using
+            backend tensors. Optionally, the function can have a time argument, otherwise the prior score is
+            multiplied with (1-t), where t is diffusion time. If none provided, the unconditional score is used.
+        summaries : Tensor | np.ndarray | None, optional
+            Precomputed summary outputs to be used as conditions for sampling. If provided, these will be used instead
+            of the conditions. Should have shape (n_datasets, n_compositional_conditions, ...).
+        split : bool, default=False
+            Whether to split the output arrays along the last axis and return one sample array per target variable.
+        batch_size : int or None, optional
+            If provided, the conditions are split into batches of size `batch_size`, for which samples are generated
+            sequentially. Can help with memory management for large sample sizes.
+        sample_shape : str or tuple of int, optional
+            Trailing structural dimensions of each generated sample, excluding the batch and target (intrinsic)
+            dimension. For example, use `(time,)` for time series or `(height, width)` for images.
+
+            If set to `"infer"` (default), the structural dimensions are inferred from the `inference_conditions`.
+            In that case, all non-vector dimensions except the last (channel) dimension are treated as structural
+            dimensions. For example, if the final `inference_conditions` have shape `(batch_size, time, channels)`,
+            then `sample_shape` is inferred as `(time,)`, and the generated samples will have shape
+            `(num_conditions, num_samples, time, target_dim)`.
+        **kwargs : dict
+            Additional keyword arguments passed to the approximator's sampling function.
+
+        Returns
+        -------
+        dict[str, np.ndarray]
+            A dictionary where keys correspond to variable names and
+            values are arrays containing the generated samples.
+        """
+        start_time = time.perf_counter()
+        samples = self.approximator.compositional_sample(
+            num_samples=num_samples,
+            conditions=conditions,
+            compute_prior_score=compute_prior_score,
+            split=split,
+            batch_size=batch_size,
+            sample_shape=sample_shape,
+            summary_outputs=summaries,
+            **kwargs,
+        )
+        elapsed = time.perf_counter() - start_time
+        logging.info(f"Sampling completed in {format_duration(elapsed)}.")
+        return samples
