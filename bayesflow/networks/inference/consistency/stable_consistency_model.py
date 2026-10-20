@@ -100,12 +100,11 @@ class StableConsistencyModel(InferenceNetwork):
     ):
         super().__init__(base_distribution="normal", mask_handler=mask_handler, **kwargs)
 
-        subnet_kwargs = subnet_kwargs or {}
-        if subnet == "time_mlp":
-            subnet_kwargs = CONSISTENCY_MODEL_DEFAULTS | subnet_kwargs
-        if subnet == "diffusion_transformer":
-            subnet_kwargs = DIFFUSION_TRANSFORMER_DEFAULTS | subnet_kwargs
-        self.subnet = find_network(subnet, **subnet_kwargs)
+        subnet_defaults = {
+            "time_mlp": CONSISTENCY_MODEL_DEFAULTS,
+            "diffusion_transformer": DIFFUSION_TRANSFORMER_DEFAULTS,
+        }
+        self.subnet = find_network(subnet, **(subnet_defaults.get(subnet, {}) | (subnet_kwargs or {})))
 
         self.subnet_projector = None
 
@@ -158,20 +157,7 @@ class StableConsistencyModel(InferenceNetwork):
             return
 
         self.base_distribution.build(xz_shape)
-
-        # construct input shape for subnet and subnet projector
-        time_shape = (xz_shape[0], 1)  # same batch dims, 1 feature
-        self.subnet.build((xz_shape, time_shape, conditions_shape))
-        out_shape = self.subnet.compute_output_shape((xz_shape, time_shape, conditions_shape))
-        if out_shape[-1] != xz_shape[-1]:
-            self.subnet_projector = keras.layers.Dense(
-                units=xz_shape[-1],
-                bias_initializer="zeros",
-                name="subnet_projector",
-            )
-        else:
-            self.subnet_projector = keras.layers.Identity()
-        self.subnet_projector.build(out_shape)
+        self.subnet_projector = self._build_subnet_and_projector(xz_shape, conditions_shape, name="subnet_projector")
 
         # input shape for weight function and projector
         input_shape = (xz_shape[0], 1)
@@ -234,7 +220,7 @@ class StableConsistencyModel(InferenceNetwork):
         x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, masks.fixed_target_value)
 
         for n in range(1, steps):
-            noise = keras.random.normal(keras.ops.shape(x), dtype=keras.ops.dtype(x), seed=seed)
+            noise = keras.random.normal(keras.ops.shape(x), dtype=keras.ops.dtype(x), seed=seed) * self.sigma
             t = keras.ops.full_like(t, discretized_time[n])
             x_n = ops.cos(t) * x + ops.sin(t) * noise
             x_n = self.mask_handler.maybe_apply(x_n, masks.fixed_target_mask, masks.fixed_target_value)
@@ -361,10 +347,9 @@ class StableConsistencyModel(InferenceNetwork):
         g = g / (ops.norm(g, axis=-1, keepdims=True) + self.tangent_norm_eps)
 
         # compute adaptive weights and calculate loss
-        w = self.weight_fn_projector(self.weight_fn(expand_right_to(t_, 2)))
+        w = ops.squeeze(self.weight_fn_projector(self.weight_fn(expand_right_to(t_, 2))), axis=-1)
 
-        D = ops.shape(x)[-1]
-
+        # the mean over dimensions is the ||.||^2 / D of [1]
         loss = ops.mean(
             ops.reshape(
                 self.mask_handler.maybe_apply((student_out - teacher_output - g) ** 2, masks.fixed_target_mask),
@@ -372,17 +357,14 @@ class StableConsistencyModel(InferenceNetwork):
             ),
             axis=-1,
         )
-        loss = (ops.exp(w) / D) * loss - w
+        loss = ops.exp(w) * loss - w
         if masks.fixed_target_mask is not None:
             active = ops.any(
                 ops.cast(ops.reshape(masks.fixed_target_mask, (ops.shape(x)[0], -1)), "bool"),
                 axis=-1,
             )
-            active = ops.cast(active, ops.dtype(loss))
-            # The existing adaptive objective broadcasts ``w`` and the
-            # per-example residual across two batch axes. Gate both axes so an
-            # all-fixed example contributes neither residual nor ``-w`` term.
-            loss = loss * active[:, None] * active[None, :]
+            # an all-fixed example contributes neither residual nor ``-w`` term
+            loss = loss * ops.cast(active, ops.dtype(loss))
         loss = weighted_mean(loss, sample_weight)
 
         return {"loss": loss}

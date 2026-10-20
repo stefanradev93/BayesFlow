@@ -65,9 +65,9 @@ class FlowMatching(InferenceNetwork):
         Keyword arguments passed to the subnet constructor or used to update the
         default MLP settings.
     time_power_law_alpha : float
-        Changes the distribution of sampled times during training.  Time is sampled
-        from a power-law distribution ``p(t) ~ t^(1/(1+alpha))``, where
-        ``alpha`` is the provided value.  Default is 0.5.
+        Changes the distribution of sampled times during training. Time is sampled
+        as ``t = u^(1+alpha)`` with ``u ~ U(0, 1)``, i.e., ``p(t) ~ t^(-alpha/(1+alpha))``.
+        ``alpha = 0`` is uniform.  Default is 0.5.
     mask_handler : ~bayesflow.masking.MaskHandler, optional
         Handler used to generate and route masks. If ``None``, a default mask handler is created.
     **kwargs
@@ -123,12 +123,8 @@ class FlowMatching(InferenceNetwork):
         if self.time_power_law_alpha <= -1.0:
             raise ValueError("'time_power_law_alpha' must be greater than -1.0.")
 
-        subnet_kwargs = subnet_kwargs or {}
-        if subnet == "time_mlp":
-            subnet_kwargs = TIME_MLP_DEFAULTS | subnet_kwargs
-        if subnet == "diffusion_transformer":
-            subnet_kwargs = DIFFUSION_TRANSFORMER_DEFAULTS | subnet_kwargs
-        self.subnet = find_network(subnet, **subnet_kwargs)
+        subnet_defaults = {"time_mlp": TIME_MLP_DEFAULTS, "diffusion_transformer": DIFFUSION_TRANSFORMER_DEFAULTS}
+        self.subnet = find_network(subnet, **(subnet_defaults.get(subnet, {}) | (subnet_kwargs or {})))
 
         self.output_projector = None
 
@@ -159,16 +155,19 @@ class FlowMatching(InferenceNetwork):
                 # since the data is possibly noisy and may contain outliers, it is better
                 # to possibly drop some samples from x1 than from x0
                 # in the marginal over multiple batches, this is not a problem
-                x0, x1, conditions = optimal_transport(
+                x0, x1, conditions, assignments = optimal_transport(
                     x0,
                     x1,
                     conditions=conditions,
                     seed=self.seed_generator,
+                    return_assignments=True,
                     **self.optimal_transport_kwargs,
                 )
+                if sample_weight is not None:
+                    sample_weight = keras.ops.take(sample_weight, assignments, axis=0)
 
             u = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
-            # p(t) ∝ t^(1/(1+α)), the inverse CDF: F^(-1)(u) = u^(1+α), α=0 is uniform
+            # inverse CDF of F(t) = t^(1/(1+α)), i.e. p(t) ∝ t^(-α/(1+α)), α=0 is uniform
             t = u ** (1 + self.time_power_law_alpha)
             t = expand_right_as(t, x0)
 
@@ -207,20 +206,7 @@ class FlowMatching(InferenceNetwork):
             return
 
         self.base_distribution.build(xz_shape)
-
-        # construct input shape for subnet and subnet projector
-        time_shape = (xz_shape[0], 1)  # same batch dims, 1 feature
-        self.subnet.build((xz_shape, time_shape, conditions_shape))
-        out_shape = self.subnet.compute_output_shape((xz_shape, time_shape, conditions_shape))
-        if out_shape[-1] != xz_shape[-1]:
-            self.output_projector = keras.layers.Dense(
-                units=xz_shape[-1],
-                bias_initializer="zeros",
-                name="output_projector",
-            )
-        else:
-            self.output_projector = keras.layers.Identity()
-        self.output_projector.build(out_shape)
+        self.output_projector = self._build_subnet_and_projector(xz_shape, conditions_shape)
 
     def get_config(self):
         base_config = super().get_config()
@@ -273,27 +259,69 @@ class FlowMatching(InferenceNetwork):
             out = self.mask_handler.maybe_apply(out, masks.fixed_target_mask)
         return out
 
-    def _velocity_trace(
+    def _integrate(
         self,
         xz: Tensor,
-        time: Tensor,
-        conditions: Tensor = None,
-        projectors: Tensor = None,
-        training: bool = False,
-        masks: InferenceMasks = None,
-    ) -> tuple[Tensor, Tensor]:
-        def f(x):
-            return self._velocity(
-                x,
-                time=time,
-                conditions=conditions,
-                training=training,
-                masks=masks,
+        *,
+        masks: InferenceMasks,
+        conditions: Tensor,
+        training: bool,
+        start_time: float,
+        stop_time: float,
+        density: bool,
+        kwargs: dict,
+    ) -> tuple[Tensor, Tensor | None]:
+        """Integrate the velocity field from `start_time` to `stop_time`.
+
+        Returns the final state and, if `density`, the integrated divergence of the velocity.
+        """
+        runtime_kwargs = self.mask_handler.without_mask_kwargs(kwargs)
+        seed = resolve_seed(runtime_kwargs.pop("seed", None), self.seed_generator)
+        hutchinson_steps = runtime_kwargs.pop("hutchinson_steps", None)
+
+        # Build integrate kwargs: instance config -> call-time overrides
+        integrate_kwargs = self.integrate_kwargs | runtime_kwargs | {"start_time": start_time, "stop_time": stop_time}
+
+        if density and integrate_kwargs["method"] == "glass":
+            logging.warning("GLASS is not supported for density computation. Falling back to tsit5 ODE solver.")
+            integrate_kwargs["method"] = "tsit5"
+
+        def velocity(time, xz):
+            return self._velocity(xz, time=time, conditions=conditions, training=training, masks=masks)
+
+        if density:
+            # one probe per solve, fixed over time, keeps the augmented ODE deterministic
+            projectors = hutchinson_projectors(xz, hutchinson_steps, seed=seed)
+
+            def deltas(time, xz):
+                def ode_velocity(x):
+                    return velocity(time, x)
+
+                v, trace = jacobian_trace(ode_velocity, xz, projectors=projectors, return_output=True)
+                return {"xz": v, "trace": keras.ops.expand_dims(trace, axis=-1)}
+
+            state = {"xz": xz, "trace": keras.ops.zeros(keras.ops.shape(xz)[:-1] + (1,), dtype=keras.ops.dtype(xz))}
+            state = integrate(deltas, state, **integrate_kwargs)
+            return state["xz"], keras.ops.squeeze(state["trace"], axis=-1)
+
+        def deltas(time, xz):
+            return {"xz": velocity(time, xz)}
+
+        if integrate_kwargs["method"] == "glass":
+            project_state, project_updates = self.mask_handler.integrator_callbacks(masks)
+            state = integrate_stochastic(
+                drift_fn=deltas,
+                diffusion_fn=None,
+                state={"xz": xz},
+                noise_schedule="flow_matching",
+                seed=seed,
+                state_projection_fn=project_state,
+                state_update_projection_fn=project_updates,
+                **integrate_kwargs,
             )
-
-        v, trace = jacobian_trace(f, xz, projectors=projectors, return_output=True)
-
-        return v, keras.ops.expand_dims(trace, axis=-1)
+        else:
+            state = integrate(deltas, {"xz": xz}, **integrate_kwargs)
+        return state["xz"], None
 
     def _forward(
         self, x: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
@@ -305,81 +333,29 @@ class FlowMatching(InferenceNetwork):
             subnet=self.subnet,
         )
 
-        runtime_kwargs = self.mask_handler.without_mask_kwargs(kwargs)
-        seed = resolve_seed(runtime_kwargs.pop("seed", None), self.seed_generator)
-        hutchinson_steps = runtime_kwargs.pop("hutchinson_steps", None)
-
-        # Build integrate kwargs: instance config -> call-time overrides
-        integrate_kwargs = self.integrate_kwargs | runtime_kwargs
-
-        if density and integrate_kwargs["method"] == "glass":
-            logging.warning("GLASS is not supported for density computation. Falling back to tsit5 ODE solver.")
-            integrate_kwargs["method"] = "tsit5"
-
         # During a forward pass the observed sample supplies fixed values unless
         # the caller provided an explicit value (for example after adapting and
         # standardizing a partially observed record).
         replacement = masks.fixed_target_value if masks.fixed_target_value is not None else x
         x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, replacement)
 
-        if density:
-            # one probe per solve, fixed over time, keeps the augmented ODE deterministic
-            projectors = hutchinson_projectors(x, hutchinson_steps, seed=seed)
+        if kwargs.get("method", self.integrate_kwargs["method"]) == "glass":
+            logging.warning("GLASS only supports sampling. Falling back to tsit5 ODE solver for the forward pass.")
+            kwargs = kwargs | {"method": "tsit5"}
 
-            def deltas(time, xz):
-                v, trace = self._velocity_trace(
-                    xz,
-                    time=time,
-                    conditions=conditions,
-                    projectors=projectors,
-                    training=training,
-                    masks=masks,
-                )
-                return {"xz": v, "trace": trace}
-
-            state = {"xz": x, "trace": keras.ops.zeros(keras.ops.shape(x)[:-1] + (1,), dtype=keras.ops.dtype(x))}
-            state = integrate(deltas, state, start_time=1.0, stop_time=0.0, **integrate_kwargs)
-
-            z = state["xz"]
-            log_density = self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) + keras.ops.squeeze(
-                state["trace"], axis=-1
-            )
-
-            return z, log_density
-
-        def deltas(time, xz):
-            return {
-                "xz": self._velocity(
-                    xz,
-                    time=time,
-                    conditions=conditions,
-                    training=training,
-                    masks=masks,
-                )
-            }
-
-        state = {"xz": x}
-        if integrate_kwargs["method"] == "glass":
-            project_state, project_updates = self.mask_handler.integrator_callbacks(masks, replacement=x)
-
-            state = integrate_stochastic(
-                drift_fn=deltas,
-                diffusion_fn=None,
-                state=state,
-                start_time=1.0,
-                stop_time=0.0,
-                noise_schedule="flow_matching",
-                seed=seed,
-                state_projection_fn=project_state,
-                state_update_projection_fn=project_updates,
-                **integrate_kwargs,
-            )
-        else:
-            state = integrate(deltas, state, start_time=1.0, stop_time=0.0, **integrate_kwargs)
-
-        z = state["xz"]
-
-        return z
+        z, trace = self._integrate(
+            x,
+            masks=masks,
+            conditions=conditions,
+            training=training,
+            start_time=1.0,
+            stop_time=0.0,
+            density=density,
+            kwargs=kwargs,
+        )
+        if not density:
+            return z
+        return z, self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) + trace
 
     def _inverse(
         self, z: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
@@ -390,74 +366,18 @@ class FlowMatching(InferenceNetwork):
             conditions=conditions,
             subnet=self.subnet,
         )
-
-        runtime_kwargs = self.mask_handler.without_mask_kwargs(kwargs)
-        seed = resolve_seed(runtime_kwargs.pop("seed", None), self.seed_generator)
-        hutchinson_steps = runtime_kwargs.pop("hutchinson_steps", None)
-
-        # Build integrate kwargs: instance config -> call-time overrides
-        integrate_kwargs = self.integrate_kwargs | runtime_kwargs
-
-        if density and integrate_kwargs["method"] == "glass":
-            logging.warning("GLASS is not supported for density computation. Falling back to tsit5 ODE solver.")
-            integrate_kwargs["method"] = "tsit5"
-
         z = self.mask_handler.maybe_apply(z, masks.fixed_target_mask, masks.fixed_target_value)
 
-        if density:
-            # one probe per solve, fixed over time, keeps the augmented ODE deterministic
-            projectors = hutchinson_projectors(z, hutchinson_steps, seed=seed)
-
-            def deltas(time, xz):
-                v, trace = self._velocity_trace(
-                    xz,
-                    time=time,
-                    conditions=conditions,
-                    projectors=projectors,
-                    training=training,
-                    masks=masks,
-                )
-                return {"xz": v, "trace": trace}
-
-            state = {"xz": z, "trace": keras.ops.zeros(keras.ops.shape(z)[:-1] + (1,), dtype=keras.ops.dtype(z))}
-            state = integrate(deltas, state, start_time=0.0, stop_time=1.0, **integrate_kwargs)
-
-            x = state["xz"]
-            log_density = self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) - keras.ops.squeeze(
-                state["trace"], axis=-1
-            )
-
-            return x, log_density
-
-        def deltas(time, xz):
-            return {
-                "xz": self._velocity(
-                    xz,
-                    time=time,
-                    conditions=conditions,
-                    training=training,
-                    masks=masks,
-                )
-            }
-
-        state = {"xz": z}
-        if integrate_kwargs["method"] == "glass":
-            project_state, project_updates = self.mask_handler.integrator_callbacks(masks)
-            state = integrate_stochastic(
-                drift_fn=deltas,
-                diffusion_fn=None,
-                state=state,
-                start_time=0.0,
-                stop_time=1.0,
-                seed=seed,
-                noise_schedule="flow_matching",
-                state_projection_fn=project_state,
-                state_update_projection_fn=project_updates,
-                **integrate_kwargs,
-            )
-        else:
-            state = integrate(deltas, state, start_time=0.0, stop_time=1.0, **integrate_kwargs)
-
-        x = state["xz"]
-
-        return x
+        x, trace = self._integrate(
+            z,
+            masks=masks,
+            conditions=conditions,
+            training=training,
+            start_time=0.0,
+            stop_time=1.0,
+            density=density,
+            kwargs=kwargs,
+        )
+        if not density:
+            return x
+        return x, self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) - trace

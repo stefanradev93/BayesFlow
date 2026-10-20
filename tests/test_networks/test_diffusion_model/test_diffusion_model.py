@@ -45,6 +45,29 @@ def test_cosine_noise_schedule_inverse(cosine_noise_schedule):
     assert_allclose(reconstructed_t, t)
 
 
+@pytest.mark.parametrize("variance_type", ["preserving", "exploding"])
+def test_ode_sampling_with_exact_score(variance_type):
+    """With the exact score of N(0, s^2), the probability flow ODE recovers N(0, s^2)."""
+    from bayesflow.networks import DiffusionModel
+    from bayesflow.networks.inference.diffusion.schedules import EDMNoiseSchedule
+
+    s = 0.5
+    model = DiffusionModel(
+        noise_schedule=EDMNoiseSchedule(variance_type=variance_type),
+        subnet_kwargs=dict(widths=(8,)),
+        integrate_kwargs=dict(method="tsit5", steps=50),
+    )
+    model.build((2048, 1))
+
+    def exact_score(xz, *, log_snr_t, **kwargs):
+        alpha, sigma = model.noise_schedule.get_alpha_sigma(log_snr_t)
+        return -xz / (alpha**2 * s**2 + sigma**2)
+
+    model._score = exact_score
+    samples = keras.ops.convert_to_numpy(model.sample(2048, seed=0))
+    assert np.isclose(np.std(samples), s, rtol=0.1)
+
+
 # ---- Configuration ---------------------------------------------------------
 
 
