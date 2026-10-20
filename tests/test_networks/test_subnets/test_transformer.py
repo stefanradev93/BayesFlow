@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from bayesflow.networks import DiffusionTransformer
-from bayesflow.networks.helpers import DiffusionTransformerReadout
+from bayesflow.networks.subnets.transformer import DiffusionTransformerReadout
 from bayesflow.utils.serialization import deserialize, serialize
 
 from ...utils import assert_allclose, assert_layers_equal

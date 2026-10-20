@@ -3,12 +3,14 @@ from collections.abc import Sequence
 
 import keras
 
+from bayesflow.masking import MaskHandler
 from bayesflow.types import Tensor
 from bayesflow.utils import layer_kwargs
 from bayesflow.utils.serialization import deserialize, serializable, serialize
 
-from ...helpers import FourierEmbedding, DiffusionTransformerBlock, DiffusionTransformerReadout
+from ...helpers import FourierEmbedding, DiffusionTransformerBlock
 from ..mlp import MLP
+from .diffusion_transformer_readout import DiffusionTransformerReadout
 
 
 @serializable("bayesflow.networks")
@@ -281,7 +283,7 @@ class DiffusionTransformer(keras.Layer):
             else:
                 attention_mask = keras.ops.logical_and(keras.ops.cast(attention_mask, "bool"), semantic_attention_mask)
 
-        update_mask = self._feature_mask(fixed_target_mask, x)
+        update_mask = MaskHandler.per_token_target_mask(fixed_target_mask, x)
 
         return h, (base_mod, t_emb, cond_h, attention_mask, update_mask)
 
@@ -293,14 +295,14 @@ class DiffusionTransformer(keras.Layer):
 
         t_shape = (t_shape[0], math.prod(t_shape[1:]))
         t_emb_shape = self.time_mlp.compute_output_shape(self.time_emb.compute_output_shape(t_shape))
-        context_shape = (
-            self.ada_shared.compute_output_shape(t_emb_shape),
-            t_emb_shape,
-            None if conditions_shape is None else (batch_size, num_conditions, self.width),
-            (batch_size, num_targets, num_targets + num_conditions),
-            (batch_size, num_targets, 1),
-        )
-        return (batch_size, num_targets, self.width), context_shape
+
+        h_shape = (batch_size, num_targets, self.width)
+        base_mod_shape = self.ada_shared.compute_output_shape(t_emb_shape)
+        cond_h_shape = None if conditions_shape is None else (batch_size, num_conditions, self.width)
+        attention_mask_shape = (batch_size, num_targets, num_targets + num_conditions)
+        update_mask_shape = (batch_size, num_targets, 1)
+
+        return h_shape, (base_mod_shape, t_emb_shape, cond_h_shape, attention_mask_shape, update_mask_shape)
 
     def call(
         self,
@@ -343,50 +345,6 @@ class DiffusionTransformer(keras.Layer):
     def make_readout(self) -> DiffusionTransformerReadout:
         """A new, unbuilt final layer of the same width."""
         return DiffusionTransformerReadout(self.width)
-
-    @staticmethod
-    def _feature_mask(mask: Tensor | None, reference: Tensor) -> Tensor | None:
-        """Shape a target-feature mask for transformer residual updates.
-
-        Transformer blocks operate on a ``(batch, target, width)`` residual
-        stream, so this target mask needs a trailing singleton dimension for
-        broadcasting over ``width``.
-        """
-        if mask is None:
-            return None
-
-        mask = keras.ops.cast(mask, reference.dtype)
-        if len(mask.shape) == len(reference.shape) and mask.shape[-1] == 1:
-            mask = keras.ops.squeeze(mask, axis=-1)
-        elif len(mask.shape) == len(reference.shape) and len(mask.shape) > 2:
-            mask = keras.ops.max(mask, axis=-1)
-
-        if len(mask.shape) == 1:
-            mask = keras.ops.expand_dims(mask, axis=0)
-
-        return keras.ops.expand_dims(mask, axis=-1)
-
-    @staticmethod
-    def _feature_mask(mask: Tensor | None, reference: Tensor) -> Tensor | None:
-        """Shape a target-feature mask for transformer residual updates.
-
-        Transformer blocks operate on a ``(batch, target, width)`` residual
-        stream, so this target mask needs a trailing singleton dimension for
-        broadcasting over ``width``.
-        """
-        if mask is None:
-            return None
-
-        mask = keras.ops.cast(mask, reference.dtype)
-        if len(mask.shape) == len(reference.shape) and mask.shape[-1] == 1:
-            mask = keras.ops.squeeze(mask, axis=-1)
-        elif len(mask.shape) == len(reference.shape) and len(mask.shape) > 2:
-            mask = keras.ops.max(mask, axis=-1)
-
-        if len(mask.shape) == 1:
-            mask = keras.ops.expand_dims(mask, axis=0)
-
-        return keras.ops.expand_dims(mask, axis=-1)
 
     def state_embedding(
         self,

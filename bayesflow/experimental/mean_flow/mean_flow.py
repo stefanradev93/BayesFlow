@@ -58,10 +58,8 @@ class MeanFlow(InferenceNetwork):
         Whether to apply optimal transport for improved training stability.
         Default is ``False``.
     loss_fn : str or keras.Loss
-        The loss function of the average velocity. ``"adaptive_l2"`` is the squared error weighted by
-        ``(||error||^2 + adaptive_loss_eps)^(-adaptive_loss_power)`` [2], any other value is resolved by
-        ``keras.losses.get``. The invertibility loss uses the same loss, with ``"mse"`` in place of
-        ``"adaptive_l2"``. Default is ``"adaptive_l2"``.
+        The loss function of the average velocity, summed over the target dimensions, and of the invertibility
+        loss. Default is ``"mse"``.
     integrate_kwargs : dict[str, Any], optional
         Additional keyword arguments for the ODE integrator used with ``use_instantaneous_flow=True``.
     optimal_transport_kwargs : dict[str, Any], optional
@@ -82,7 +80,7 @@ class MeanFlow(InferenceNetwork):
         ``"time_mlp"`` or ``"diffusion_transformer"``. With 0, the instantaneous velocity is the average
         velocity at ``s = t``. Default is 2.
     velocity_loss_fn : str or keras.Loss
-        The loss function of the velocity head, resolved as *loss_fn*. Default is ``"mse"``.
+        The loss function of the velocity head. Default is ``"mse"``.
     density_head : bool
         Whether to learn the average divergence of each flow map as a second output of the subnet, which then
         replaces the exact log-determinants in density evaluation. Default is ``False``.
@@ -94,7 +92,8 @@ class MeanFlow(InferenceNetwork):
         Probability of evaluating the invertibility loss at the conditions of another sample in the batch.
         Default is 0.6.
     adaptive_loss_power : float
-        Power of the adaptive loss weight. Default is 0.25.
+        Power ``p`` of the adaptive weight ``(loss + adaptive_loss_eps)^(-p)`` of the average velocity loss [2],
+        0 disables the weighting. Default is 0.25.
     adaptive_loss_eps : float
         Constant of the adaptive loss weight. Default is 0.1.
     mask_handler : ~bayesflow.masking.MaskHandler, optional
@@ -115,7 +114,7 @@ class MeanFlow(InferenceNetwork):
         subnet: str | type | keras.Layer = "time_mlp",
         base_distribution: str | Distribution = "normal",
         use_optimal_transport: bool = False,
-        loss_fn: str | keras.Loss = "adaptive_l2",
+        loss_fn: str | keras.Loss = "mse",
         integrate_kwargs: dict[str, Any] = None,
         optimal_transport_kwargs: dict[str, Any] = None,
         subnet_kwargs: dict[str, Any] = None,
@@ -139,8 +138,8 @@ class MeanFlow(InferenceNetwork):
         )
 
         self.use_optimal_transport = use_optimal_transport
-        self.loss_fn = loss_fn
-        self.velocity_loss_fn = velocity_loss_fn
+        self.loss_fn = keras.losses.get(loss_fn)
+        self.velocity_loss_fn = keras.losses.get(velocity_loss_fn)
 
         self.integrate_kwargs = FLOW_MATCHING_INTEGRATE_DEFAULTS | (integrate_kwargs or {})
         self.optimal_transport_kwargs = OPTIMAL_TRANSPORT_DEFAULTS | (optimal_transport_kwargs or {})
@@ -175,19 +174,15 @@ class MeanFlow(InferenceNetwork):
             fourier_scale = {"fourier_scale": MEAN_FLOW_MODEL_DEFAULTS["fourier_scale"]}
             subnet_kwargs = DIFFUSION_TRANSFORMER_DEFAULTS | fourier_scale | subnet_kwargs
         self.subnet = find_network(subnet, **subnet_kwargs)
-        if density_head and not hasattr(self.subnet, "embed"):
+        if (density_head or velocity_head_layers > 0) and not hasattr(self.subnet, "embed"):
             raise ValueError(
-                f"'density_head' requires a subnet with 'embed', which {type(self.subnet).__name__} lacks."
+                f"'density_head' and 'velocity_head_layers' require a subnet with 'embed', which "
+                f"{type(self.subnet).__name__} lacks. Set 'density_head=False' and 'velocity_head_layers=0' instead."
             )
 
         # the velocity head shares the subnet up to the blocks it duplicates
         self.velocity_blocks = []
         if velocity_head_layers > 0:
-            if not hasattr(self.subnet, "embed"):
-                raise ValueError(
-                    f"'velocity_head_layers' requires a subnet with 'embed', which {type(self.subnet).__name__} "
-                    f"lacks. Set 'velocity_head_layers=0' instead."
-                )
             if velocity_head_layers > len(self.subnet.blocks):
                 raise ValueError(f"'velocity_head_layers' exceeds the {len(self.subnet.blocks)} subnet blocks.")
             self.velocity_blocks = [
@@ -332,15 +327,15 @@ class MeanFlow(InferenceNetwork):
             u, du_ds = jvp(average_velocity, (z_s, s, t), tangents)
         predicted_velocity = u - (t - s) * keras.ops.stop_gradient(du_ds)
 
-        loss = self._loss(
-            self.loss_fn,
+        # summed over the target dimensions as in [2], for which the adaptive weight is tuned
+        loss = keras.ops.shape(x)[-1] * self.loss_fn(
             self.mask_handler.maybe_apply(target_velocity, masks.fixed_target_mask),
             self.mask_handler.maybe_apply(predicted_velocity, masks.fixed_target_mask),
         )
+        loss = loss * keras.ops.stop_gradient((loss + self.adaptive_loss_eps) ** -self.adaptive_loss_power)
 
         if self.velocity_blocks:
-            loss += self._loss(
-                self.velocity_loss_fn,
+            loss += self.velocity_loss_fn(
                 self.mask_handler.maybe_apply(target_velocity, masks.fixed_target_mask),
                 self.mask_handler.maybe_apply(velocity, masks.fixed_target_mask),
             )
@@ -350,8 +345,7 @@ class MeanFlow(InferenceNetwork):
             # (z * (v - (z - x)) + 1) / s is weighted by s^2 to stay bounded near the data
             predicted_divergence = divergence - (t - s) * keras.ops.stop_gradient(ddivergence_ds)
             target_divergence = z * (keras.ops.stop_gradient(velocity) - target_velocity) + 1.0
-            loss += self._loss(
-                "mse",
+            loss += keras.losses.mean_squared_error(
                 self.mask_handler.maybe_apply(target_divergence, masks.fixed_target_mask),
                 self.mask_handler.maybe_apply(s * predicted_divergence, masks.fixed_target_mask),
             )
@@ -372,8 +366,7 @@ class MeanFlow(InferenceNetwork):
             z_t = self.mask_handler.maybe_apply(z_t, masks.fixed_target_mask, x)
             z_s_cycle = self._flow_map(z_t, t, s, cycle_conditions, training, masks)
 
-            loss += self.cycle_weight * self._loss(
-                "mse" if self.loss_fn == "adaptive_l2" else self.loss_fn,
+            loss += self.cycle_weight * self.loss_fn(
                 self.mask_handler.maybe_apply(z_s, masks.fixed_target_mask),
                 self.mask_handler.maybe_apply(z_s_cycle, masks.fixed_target_mask),
             )
@@ -381,15 +374,6 @@ class MeanFlow(InferenceNetwork):
         loss = weighted_mean(loss, sample_weight)
 
         return {"loss": loss}
-
-    def _loss(self, loss_fn: str | keras.Loss, y_true: Tensor, y_pred: Tensor) -> Tensor:
-        if loss_fn != "adaptive_l2":
-            return keras.losses.get(loss_fn)(y_true, y_pred)
-
-        # adaptively weighted squared error
-        squared_error = keras.ops.sum((y_pred - y_true) ** 2, axis=-1)
-        weight = keras.ops.stop_gradient((squared_error + self.adaptive_loss_eps) ** -self.adaptive_loss_power)
-        return weight * squared_error
 
     def _sample_times(self, x: Tensor, boundary_prob: float = 0.0) -> tuple[Tensor, Tensor]:
         batch_shape = keras.ops.shape(x)[:1]
@@ -554,9 +538,6 @@ class MeanFlow(InferenceNetwork):
 
         if time_schedule is None:
             time_schedule = self.make_time_schedule(steps, rho=rho, sigma_min=sigma_min)
-        if len(time_schedule) < 2:
-            raise ValueError("The time schedule must contain at least two times.")
-
         return keras.ops.convert_to_tensor(time_schedule, dtype=keras.config.floatx())
 
     def _forward(
