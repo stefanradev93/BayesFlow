@@ -1,5 +1,5 @@
 from collections.abc import Mapping, Sequence, Callable
-from typing import Literal, Tuple
+from typing import Any, Literal, Tuple
 
 import os
 
@@ -99,8 +99,8 @@ class BasicWorkflow(Workflow):
         inference_conditions: Sequence[str] | str | None = None,
         summary_variables: Sequence[str] | str | None = None,
         standardize: Sequence[str] | str = "inference_variables",
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         self.simulator = simulator
 
         adapter = adapter or BasicWorkflow.default_adapter(inference_variables, inference_conditions, summary_variables)
@@ -119,46 +119,79 @@ class BasicWorkflow(Workflow):
         )
 
         self._init_optimizer(initial_learning_rate, optimizer, **kwargs.get("optimizer_kwargs", {}))
-        self._init_checkpointing(checkpoint_filepath, checkpoint_name, save_weights_only, save_best_only)
+        self._init_checkpointing(checkpoint_filepath, checkpoint_name, save_weights_only, save_best_only, restore)
         self.history = None
         self._needs_compile = True
 
         if restore:
             self.load_approximator()
 
-    def _init_optimizer(self, initial_learning_rate, optimizer, **kwargs):
-        self.initial_learning_rate = initial_learning_rate
-        if isinstance(optimizer, type):
-            self.optimizer = optimizer(initial_learning_rate, **kwargs)
-        else:
-            self.optimizer = optimizer
-
-    def _init_checkpointing(self, checkpoint_filepath, checkpoint_name, save_weights_only, save_best_only):
-        self.checkpoint_filepath = checkpoint_filepath
-        self.checkpoint_name = checkpoint_name
-        self.save_weights_only = save_weights_only
-        self.save_best_only = save_best_only
-        if self.checkpoint_filepath is not None:
-            if self.save_weights_only:
-                file_ext = self.checkpoint_name + ".weights.h5"
-            else:
-                file_ext = self.checkpoint_name + ".keras"
-            checkpoint_full_filepath = os.path.join(self.checkpoint_filepath, file_ext)
-            if os.path.exists(checkpoint_full_filepath):
-                msg = (
-                    f"Checkpoint file exists: '{self.checkpoint_filepath}/{file_ext}'.\n"
-                    "Existing checkpoints are not automatically loaded. "
-                    "Upon refitting, the checkpoints will be overwritten.\n"
-                    "To restore the approximator from the checkpoint, call "
-                    "workflow.load_approximator() or pass restore=True to the workflow constructor."
-                )
-                logging.warning(msg)
-
     @property
-    def adapter(self):
+    def adapter(self) -> Adapter:
         return self.approximator.adapter
 
-    def load_approximator(self, path: str | os.PathLike | None = None):
+    @property
+    def inference_network(self) -> InferenceNetwork | ScoringRuleNetwork:
+        return self.approximator.inference_network
+
+    @property
+    def summary_network(self) -> SummaryNetwork | None:
+        return self.approximator.summary_network
+
+    @staticmethod
+    def samples_to_data_frame(samples: Mapping[str, np.ndarray]) -> pd.DataFrame:
+        """
+        Convert a dictionary of samples into a pandas DataFrame.
+
+        Parameters
+        ----------
+        samples : Mapping[str, np.ndarray]
+            A dictionary where keys represent variable names and values are
+            arrays containing sampled data.
+
+        Returns
+        -------
+        pd.DataFrame
+            A pandas DataFrame where each column corresponds to a variable,
+            and rows represent individual samples.
+        """
+        return pd.DataFrame(keras.tree.map_structure(np.squeeze, samples))
+
+    @staticmethod
+    def default_adapter(
+        inference_variables: Sequence[str] | str,
+        inference_conditions: Sequence[str] | str,
+        summary_variables: Sequence[str] | str,
+    ) -> Adapter:
+        """
+        Create a default adapter for processing inference variables, conditions,
+        summaries, and standardization.
+
+        Parameters
+        ----------
+        inference_variables : Sequence[str] or str
+            The variables to be treated as inference targets.
+        inference_conditions : Sequence[str] or str
+            The variables used as conditions for inference.
+        summary_variables : Sequence[str] or str
+            The variables used for summarization.
+
+        Returns
+        -------
+        Adapter
+            A configured Adapter instance that applies concatenation.
+        """
+
+        adapter = Adapter().concatenate(inference_variables, into="inference_variables")
+
+        if inference_conditions is not None:
+            adapter = adapter.concatenate(inference_conditions, into="inference_conditions")
+        if summary_variables is not None:
+            adapter = adapter.concatenate(summary_variables, into="summary_variables")
+
+        return adapter
+
+    def load_approximator(self, path: str | os.PathLike | None = None) -> None:
         """
         Restore the approximator from a saved checkpoint.
 
@@ -227,67 +260,6 @@ class BasicWorkflow(Workflow):
             self.approximator = keras.saving.load_model(path)
             logging.info(f"Approximator restored from '{path}'.")
 
-    @property
-    def inference_network(self):
-        return self.approximator.inference_network
-
-    @property
-    def summary_network(self):
-        return self.approximator.summary_network
-
-    @staticmethod
-    def samples_to_data_frame(samples: Mapping[str, np.ndarray]) -> pd.DataFrame:
-        """
-        Convert a dictionary of samples into a pandas DataFrame.
-
-        Parameters
-        ----------
-        samples : Mapping[str, np.ndarray]
-            A dictionary where keys represent variable names and values are
-            arrays containing sampled data.
-
-        Returns
-        -------
-        pd.DataFrame
-            A pandas DataFrame where each column corresponds to a variable,
-            and rows represent individual samples.
-        """
-        return pd.DataFrame(keras.tree.map_structure(np.squeeze, samples))
-
-    @staticmethod
-    def default_adapter(
-        inference_variables: Sequence[str] | str,
-        inference_conditions: Sequence[str] | str,
-        summary_variables: Sequence[str] | str,
-    ) -> Adapter:
-        """
-        Create a default adapter for processing inference variables, conditions,
-        summaries, and standardization.
-
-        Parameters
-        ----------
-        inference_variables : Sequence[str] or str
-            The variables to be treated as inference targets.
-        inference_conditions : Sequence[str] or str
-            The variables used as conditions for inference.
-        summary_variables : Sequence[str] or str
-            The variables used for summarization.
-
-        Returns
-        -------
-        Adapter
-            A configured Adapter instance that applies concatenation.
-        """
-
-        adapter = Adapter().concatenate(inference_variables, into="inference_variables")
-
-        if inference_conditions is not None:
-            adapter = adapter.concatenate(inference_conditions, into="inference_conditions")
-        if summary_variables is not None:
-            adapter = adapter.concatenate(summary_variables, into="summary_variables")
-
-        return adapter
-
     def fit_offline(
         self,
         data: Mapping[str, np.ndarray],
@@ -296,7 +268,7 @@ class BasicWorkflow(Workflow):
         keep_optimizer: bool = False,
         validation_data: Mapping[str, np.ndarray] | int | None = None,
         augmentations: Mapping[str, Callable] | Callable | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> keras.callbacks.History:
         """
         Train the approximator offline using a fixed dataset. This approach will be faster than online training,
@@ -360,7 +332,7 @@ class BasicWorkflow(Workflow):
         keep_optimizer: bool = False,
         validation_data: Mapping[str, np.ndarray] | int | None = None,
         augmentations: Mapping[str, Callable] | Callable | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> keras.callbacks.History:
         """
         Train the approximator using an online data-generating process. The dataset is dynamically generated during
@@ -424,7 +396,7 @@ class BasicWorkflow(Workflow):
         keep_optimizer: bool = False,
         validation_data: Mapping[str, np.ndarray] | int | None = None,
         augmentations: Mapping[str, Callable] | Callable | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> keras.callbacks.History:
         """
         Train the approximator using data stored on disk. This approach is suitable for large sets of simulations that
@@ -497,7 +469,7 @@ class BasicWorkflow(Workflow):
         strategy: str,
         keep_optimizer: bool,
         validation_data: Mapping[str, np.ndarray] | int,
-        **kwargs,
+        **kwargs: Any,
     ) -> keras.callbacks.History:
         if validation_data is not None:
             if isinstance(validation_data, int) and self.simulator is not None:
@@ -599,7 +571,7 @@ class BasicWorkflow(Workflow):
             self.optimizer = keras.optimizers.AdamW(learning_rate, weight_decay=5e-3, clipnorm=1.5)
         return self.optimizer
 
-    def simulate(self, batch_shape: Shape, **kwargs) -> dict[str, np.ndarray]:
+    def simulate(self, batch_shape: Shape, **kwargs: Any) -> dict[str, np.ndarray]:
         """
         Generates a batch of simulations using the provided simulator.
 
@@ -625,7 +597,7 @@ class BasicWorkflow(Workflow):
             return self.simulator.sample(batch_shape, **kwargs)
         raise RuntimeError("No simulator provided!")
 
-    def simulate_adapted(self, batch_shape: Shape, **kwargs) -> dict[str, np.ndarray]:
+    def simulate_adapted(self, batch_shape: Shape, **kwargs: Any) -> dict[str, np.ndarray]:
         """
         Generates a batch of simulations and applies the adapter to the result.
 
@@ -660,7 +632,7 @@ class BasicWorkflow(Workflow):
         batch_size: int | None = None,
         sample_shape: Literal["infer"] | Tuple[int] | int = "infer",
         seed: int | keras.random.SeedGenerator | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, np.ndarray]:
         """
         Draws `num_samples` samples from the approximator given specified conditions.
@@ -723,7 +695,7 @@ class BasicWorkflow(Workflow):
         split: bool = False,
         batch_size: int | None = None,
         sample_shape: Literal["infer"] | Tuple[int] | int = "infer",
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, np.ndarray]:
         """
         Draws samples from the approximator given specified conditions and ancestral conditions.
@@ -784,7 +756,7 @@ class BasicWorkflow(Workflow):
         self,
         *,
         conditions: Mapping[str, np.ndarray] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, dict[str, np.ndarray | dict[str, np.ndarray]]]:
         """
         Estimates point summaries of inference variables based on specified conditions.
@@ -814,7 +786,7 @@ class BasicWorkflow(Workflow):
         logging.info(f"Estimating completed in {format_duration(elapsed)}.")
         return estimates
 
-    def log_prob(self, data: Mapping[str, np.ndarray], **kwargs) -> np.ndarray:
+    def log_prob(self, data: Mapping[str, np.ndarray], **kwargs: Any) -> np.ndarray:
         """
         Compute the log probability of given variables under the approximator.
 
@@ -844,7 +816,7 @@ class BasicWorkflow(Workflow):
         samples: Mapping[str, np.ndarray] | None = None,
         variable_keys: Sequence[str] | None = None,
         variable_names: Sequence[str] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, plt.Figure]:
         """
         Generates default diagnostic plots to evaluate the quality of inference. The function produces several
@@ -934,7 +906,7 @@ class BasicWorkflow(Workflow):
         samples: Mapping[str, np.ndarray] | None = None,
         variable_keys: Sequence[str] | None = None,
         variable_names: Sequence[str] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, plt.Figure]:
         """
         Generates custom diagnostic plots to evaluate the quality of inference. The functions passed should have
@@ -1005,7 +977,7 @@ class BasicWorkflow(Workflow):
         variable_keys: Sequence[str] | None = None,
         variable_names: Sequence[str] | None = None,
         as_data_frame: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> Sequence[dict] | pd.DataFrame:
         """
         Computes default diagnostic metrics to evaluate the quality of inference. The function computes several
@@ -1117,7 +1089,7 @@ class BasicWorkflow(Workflow):
         variable_keys: Sequence[str] | None = None,
         variable_names: Sequence[str] | None = None,
         as_data_frame: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> Sequence[Mapping] | pd.DataFrame:
         """
         Computes custom diagnostic metrics to evaluate the quality of inference.
@@ -1193,8 +1165,8 @@ class BasicWorkflow(Workflow):
         test_data: Mapping[str, np.ndarray] | int,
         num_samples: int = 1000,
         samples: Mapping[str, np.ndarray] | None = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> tuple[Mapping[str, np.ndarray], Mapping[str, np.ndarray]]:
         if samples is not None:
             if isinstance(test_data, int):
                 raise ValueError(
@@ -1213,7 +1185,7 @@ class BasicWorkflow(Workflow):
 
         return samples, test_data
 
-    def _on_training_finished(self):
+    def _on_training_finished(self) -> None:
         if self.checkpoint_filepath is not None:
             if self.save_weights_only:
                 file_ext = self.checkpoint_name + ".weights.h5"
@@ -1236,3 +1208,45 @@ class BasicWorkflow(Workflow):
                 f"You can find the trained approximator at '{model_path}'.\n"
                 f"To restore it:\n{load_hint}"
             )
+
+    def _init_optimizer(
+        self,
+        initial_learning_rate: float,
+        optimizer: keras.optimizers.Optimizer | type[keras.optimizers.Optimizer] | None,
+        **kwargs: Any,
+    ) -> None:
+        self.initial_learning_rate = initial_learning_rate
+        if isinstance(optimizer, type):
+            self.optimizer = optimizer(initial_learning_rate, **kwargs)
+        else:
+            self.optimizer = optimizer
+
+    def _init_checkpointing(
+        self,
+        checkpoint_filepath: str | None,
+        checkpoint_name: str,
+        save_weights_only: bool,
+        save_best_only: bool,
+        restore: bool,
+    ) -> None:
+        self.checkpoint_filepath = checkpoint_filepath
+        self.checkpoint_name = checkpoint_name
+        self.save_weights_only = save_weights_only
+        self.save_best_only = save_best_only
+        if self.checkpoint_filepath is not None:
+            if self.save_weights_only:
+                file_ext = self.checkpoint_name + ".weights.h5"
+            else:
+                file_ext = self.checkpoint_name + ".keras"
+            checkpoint_full_filepath = os.path.join(self.checkpoint_filepath, file_ext)
+            if os.path.exists(checkpoint_full_filepath):
+                msg = (
+                    f"Checkpoint file exists: '{self.checkpoint_filepath}/{file_ext}'.\n"
+                    "Upon refitting, the checkpoint will be overwritten."
+                )
+                if not restore:
+                    msg += (
+                        "\nTo restore the approximator from the checkpoint, call "
+                        "workflow.load_approximator() or pass restore=True to the workflow constructor."
+                    )
+                logging.warning(msg)
