@@ -18,8 +18,8 @@ def test_serialize_deserialize_noise_schedule(noise_schedule):
     t = 0.251
     x = 0.5
     training = True
-    assert noise_schedule.get_log_snr(t, training=training) == deserialized.get_log_snr(t, training=training)
-    assert noise_schedule.get_t_from_log_snr(t, training=training) == deserialized.get_t_from_log_snr(
+    assert noise_schedule.log_snr(t, training=training) == deserialized.log_snr(t, training=training)
+    assert noise_schedule.time_from_log_snr(t, training=training) == deserialized.time_from_log_snr(
         t, training=training
     )
     assert noise_schedule.derivative_log_snr(t, training=False) == deserialized.derivative_log_snr(t, training=False)
@@ -30,6 +30,19 @@ def test_serialize_deserialize_noise_schedule(noise_schedule):
 
 def test_validate_noise_schedule(noise_schedule):
     noise_schedule.validate()
+
+
+def test_cosine_noise_schedule_inverse(cosine_noise_schedule):
+    t = keras.ops.linspace(0.0, 1.0, 11)
+    log_snr = cosine_noise_schedule.log_snr(t, training=False)
+    reconstructed_t = cosine_noise_schedule.time_from_log_snr(log_snr, training=False)
+
+    expected_endpoints = keras.ops.convert_to_tensor(
+        [cosine_noise_schedule.log_snr_max, cosine_noise_schedule.log_snr_min]
+    )
+    actual_endpoints = keras.ops.stack([log_snr[0], log_snr[-1]])
+    assert_allclose(actual_endpoints, expected_endpoints, atol=1e-5)
+    assert_allclose(reconstructed_t, t)
 
 
 # ---- Configuration ---------------------------------------------------------

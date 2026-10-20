@@ -34,7 +34,7 @@ class NonExchangeableWrapper(InferenceNetwork):
         stage: str = "inference",
     ) -> InferenceMasks:
         provided = self.mask_handler.collect_semantic_masks(kwargs)
-        if self.missing_target_prob > 0.0 or provided.get(MaskName.INFER_TARGET) is not None:
+        if self.mask_handler.missing_target_prob > 0.0 or provided.get(MaskName.INFER_TARGET) is not None:
             raise NotImplementedError(
                 "NonExchangeableWrapper cannot marginalize target features without an explicit "
                 "feature-mask protocol on the summary network."

@@ -28,7 +28,7 @@ from .schedules.noise_schedule import NoiseSchedule
 from .dispatch import find_noise_schedule
 
 from ...inference import InferenceNetwork
-from bayesflow.masking import InferenceMasks
+from bayesflow.masking import InferenceMasks, MaskHandler
 from ...defaults import TIME_MLP_DEFAULTS, DIFFUSION_TRANSFORMER_DEFAULTS, DIFFUSION_INTEGRATE_DEFAULTS
 
 
@@ -69,25 +69,16 @@ class DiffusionModel(InferenceNetwork):
         Additional keyword arguments passed to the noise schedule constructor.
     integrate_kwargs : dict[str, Any], optional
         Configuration dictionary for the ODE/SDE integrator used at inference time.
-    fixed_target_prob : float
-        Probability of fixing each target during training (so the network learns arbitrary
-        conditionals). Default is 0.0.
-    missing_target_prob : float
-        Probability of marking each fixed target as missing during training, so the network
-        learns to handle marginalization of targets. Only takes effect when the subnet
-        accepts ``infer_target_mask`` (e.g. ``diffusion_transformer``). Default is 0.0.
-    missing_conditions_prob : float
-        Probability of marking each condition as missing during training, so the network learns
-        to handle missing conditions. Only takes effect when the subnet accepts
-        ``observed_condition_mask`` (e.g. ``diffusion_transformer``). Default is 0.0.
+    mask_handler : ~bayesflow.masking.MaskHandler, optional
+        Handler used to generate and route masks. If ``None``, a default mask handler is created.
     **kwargs
         Additional keyword arguments passed to the base ``InferenceNetwork``.
 
     References
     ----------
-    [1] Arruda, J., Bracher, N., Köthe, U., Hasenauer, J., & Radev, S. T. (2025).
+    [1] Arruda, J., Bracher, N., Köthe, U., Hasenauer, J., & Radev, S. T. (2026).
         Diffusion Models in Simulation-Based Inference: A Tutorial Review.
-        arXiv preprint arXiv:2512.20685.
+        https://openreview.net/forum?id=86Q261z005
     [2] Arruda et al., (2025). Compositional amortized inference for large-scale hierarchical Bayesian models.
         https://arxiv.org/abs/2505.14429
     [3] Geffner et al., (2023). Compositional score modeling for simulation-based inference.
@@ -108,16 +99,12 @@ class DiffusionModel(InferenceNetwork):
         subnet_kwargs: dict[str, Any] = None,
         schedule_kwargs: dict[str, Any] = None,
         integrate_kwargs: dict[str, Any] = None,
-        fixed_target_prob: float = 0.0,
-        missing_target_prob: float = 0.0,
-        missing_conditions_prob: float = 0.0,
+        mask_handler: MaskHandler | None = None,
         **kwargs,
     ):
         super().__init__(
             base_distribution="normal",
-            fixed_target_prob=fixed_target_prob,
-            missing_target_prob=missing_target_prob,
-            missing_conditions_prob=missing_conditions_prob,
+            mask_handler=mask_handler,
             **kwargs,
         )
 
@@ -170,7 +157,7 @@ class DiffusionModel(InferenceNetwork):
         t = (u0 + i / ops.cast(ops.shape(x)[0], dtype=ops.dtype(x))) % 1
 
         # Calculate the noise level
-        log_snr_t = self.noise_schedule.get_log_snr(t, training=noise_schedule_training_stage)
+        log_snr_t = self.noise_schedule.log_snr(t, training=noise_schedule_training_stage)
         log_snr_t = expand_right_as(log_snr_t, x)
 
         alpha_t, sigma_t = self.noise_schedule.get_alpha_sigma(log_snr_t=log_snr_t)
@@ -353,7 +340,7 @@ class DiffusionModel(InferenceNetwork):
         if scaling_function is None:
 
             def scaling_function(t: Tensor) -> Tensor:
-                log_snr = self.noise_schedule.get_log_snr(t, training=False)
+                log_snr = self.noise_schedule.log_snr(t, training=False)
                 alpha_t, sigma_t = self.noise_schedule.get_alpha_sigma(log_snr)
                 return ops.square(alpha_t) / ops.square(sigma_t)
 
@@ -500,12 +487,12 @@ class DiffusionModel(InferenceNetwork):
         guidance_kwargs: Mapping[str, Any] = None,
     ) -> Tensor:
         if log_snr_t is None:
-            log_snr_t = self.noise_schedule.get_log_snr(t=time, training=training)
+            log_snr_t = self.noise_schedule.log_snr(t=time, training=training)
             log_snr_t = expand_right_as(log_snr_t, xz)
             log_snr_t = ops.broadcast_to(log_snr_t, ops.shape(xz)[:-1] + (1,))
 
         if time is None:
-            time = self.noise_schedule.get_t_from_log_snr(log_snr_t, training=training)
+            time = self.noise_schedule.time_from_log_snr(log_snr_t, training=training)
 
         alpha_t, sigma_t = self.noise_schedule.get_alpha_sigma(log_snr_t=log_snr_t)
 
@@ -606,7 +593,7 @@ class DiffusionModel(InferenceNetwork):
         training: bool = False,
         guidance_kwargs: Mapping[str, Any] = None,
     ) -> Tensor:
-        log_snr_t = expand_right_as(self.noise_schedule.get_log_snr(t=time, training=training), xz)
+        log_snr_t = expand_right_as(self.noise_schedule.log_snr(t=time, training=training), xz)
         log_snr_t = ops.broadcast_to(log_snr_t, ops.shape(xz)[:-1] + (1,))
 
         score = self._score(
@@ -669,7 +656,7 @@ class DiffusionModel(InferenceNetwork):
         masks: InferenceMasks,
         training: bool = False,
     ) -> Tensor:
-        log_snr_t = expand_right_as(self.noise_schedule.get_log_snr(t=time, training=training), xz)
+        log_snr_t = expand_right_as(self.noise_schedule.log_snr(t=time, training=training), xz)
         log_snr_t = ops.broadcast_to(log_snr_t, ops.shape(xz)[:-1] + (1,))
         g_squared = self.noise_schedule.get_drift(log_snr_t=log_snr_t)
         g = ops.sqrt(g_squared)
@@ -1101,7 +1088,7 @@ class DiffusionModel(InferenceNetwork):
         )
 
         # Calculate standard noise schedule components
-        log_snr_t = expand_right_as(self.noise_schedule.get_log_snr(t=time, training=training), xz)
+        log_snr_t = expand_right_as(self.noise_schedule.log_snr(t=time, training=training), xz)
         log_snr_t = ops.broadcast_to(log_snr_t, ops.shape(xz)[:-1] + (1,))
 
         # Compute velocity using standard drift-diffusion formulation
@@ -1218,7 +1205,7 @@ class DiffusionModel(InferenceNetwork):
         guidance_kwargs: Mapping[str, Any] = None,
         regularize_precision: float = 1e-6,
     ) -> Tensor:
-        log_snr_t = expand_right_as(self.noise_schedule.get_log_snr(t=time, training=training), xz)
+        log_snr_t = expand_right_as(self.noise_schedule.log_snr(t=time, training=training), xz)
         log_snr_t = ops.broadcast_to(log_snr_t, ops.shape(xz)[:-1] + (1,))
         alpha_t, sigma_t = self.noise_schedule.get_alpha_sigma(log_snr_t=log_snr_t)
         time = ops.cast(time, dtype=ops.dtype(xz))

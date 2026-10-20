@@ -1039,7 +1039,7 @@ def _apply_corrector(
         score = _apply_state_projection(score, state_update_projection_fn)
         _z_corr = _apply_state_projection(_z_corr, state_update_projection_fn)
 
-        log_snr_t = noise_schedule.get_log_snr(t=new_time, training=False)
+        log_snr_t = noise_schedule.log_snr(t=new_time, training=False)
         alpha_t, _ = noise_schedule.get_alpha_sigma(log_snr_t=log_snr_t)
 
         for k in new_state.keys():
@@ -1336,7 +1336,7 @@ def integrate_langevin(
         score = _apply_state_projection(score, state_update_projection_fn)
 
         # noise schedule
-        log_snr_t = noise_schedule.get_log_snr(t=_loop_time, training=False)
+        log_snr_t = noise_schedule.log_snr(t=_loop_time, training=False)
         _, sigma_t = noise_schedule.get_alpha_sigma(log_snr_t=log_snr_t)
 
         new_state: StateDict = {}
@@ -1393,7 +1393,7 @@ def _glass_alpha_sigma(noise_schedule, t: Tensor) -> Tuple[Tensor, Tensor]:
     """
     if noise_schedule == "flow_matching":
         return t, 1.0 - t
-    log_snr = noise_schedule.get_log_snr(t, training=False)
+    log_snr = noise_schedule.log_snr(t, training=False)
     return noise_schedule.get_alpha_sigma(log_snr)
 
 
@@ -1408,7 +1408,7 @@ def _glass_g_inv(noise_schedule, v: Tensor) -> Tensor:
     else:
         # g(t) = exp(-lamda_t)
         log_snr_star = -keras.ops.log(v)
-        t_star = noise_schedule.get_t_from_log_snr(log_snr_star, training=False)
+        t_star = noise_schedule.time_from_log_snr(log_snr_star, training=False)
     return t_star
 
 
@@ -1429,7 +1429,7 @@ def _glass_alpha_sigma_dot(noise_schedule, t: Tensor) -> Tuple[Tensor, Tensor]:
         ones = keras.ops.ones_like(t)
         return ones, -ones
 
-    log_snr = noise_schedule.get_log_snr(t, training=False)
+    log_snr = noise_schedule.log_snr(t, training=False)
     alpha, sigma = noise_schedule.get_alpha_sigma(log_snr)
     beta = noise_schedule.derivative_log_snr(log_snr, training=False)
 

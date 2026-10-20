@@ -331,7 +331,7 @@ def test_langevin_gaussian_sampling(steps):
 
     # simple dummy noise schedule: constant alpha
     class DummyNoiseSchedule:
-        def get_log_snr(self, t, training=False):
+        def log_snr(self, t, training=False):
             return keras.ops.zeros_like(t)
 
         def get_alpha_sigma(self, log_snr_t):

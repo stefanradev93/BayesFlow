@@ -4,6 +4,7 @@ from math import pi
 import keras
 from keras import ops
 
+from bayesflow.masking import MaskHandler
 from bayesflow.types import Tensor
 from bayesflow.utils import (
     expand_right_as,
@@ -66,6 +67,8 @@ class StableConsistencyModel(InferenceNetwork):
     weight_mlp_kwargs : dict[str, Any], optional
         Keyword arguments for an auxiliary MLP used to generate weights within the
         consistency model (e.g., depth, hidden sizes, non-linearity choices).
+    mask_handler : ~bayesflow.masking.MaskHandler, optional
+        Handler used to generate and route masks. If ``None``, a default mask handler is created.
     **kwargs
         Additional keyword arguments passed to the base ``InferenceNetwork``
         (e.g., ``name``, ``dtype``, or ``trainable``).
@@ -92,9 +95,10 @@ class StableConsistencyModel(InferenceNetwork):
         rho: float = 3.5,
         subnet_kwargs: dict[str, Any] = None,
         weight_mlp_kwargs: dict[str, Any] = None,
+        mask_handler: MaskHandler | None = None,
         **kwargs,
     ):
-        super().__init__(base_distribution="normal", **kwargs)
+        super().__init__(base_distribution="normal", mask_handler=mask_handler, **kwargs)
 
         subnet_kwargs = subnet_kwargs or {}
         if subnet == "time_mlp":
@@ -105,9 +109,8 @@ class StableConsistencyModel(InferenceNetwork):
 
         self.subnet_projector = None
 
-        weight_mlp_kwargs = weight_mlp_kwargs or {}
-        weight_mlp_kwargs = WEIGHT_MLP_DEFAULTS | weight_mlp_kwargs
-        self.weight_fn = find_network("mlp", **weight_mlp_kwargs)
+        self.weight_mlp_kwargs = WEIGHT_MLP_DEFAULTS | (weight_mlp_kwargs or {})
+        self.weight_fn = find_network("mlp", **self.weight_mlp_kwargs)
 
         self.weight_fn_projector = keras.layers.Dense(
             units=1, bias_initializer="zeros", kernel_initializer="zeros", name="weight_fn_projector"
@@ -132,6 +135,7 @@ class StableConsistencyModel(InferenceNetwork):
             "r_scale": self.r_scale,
             "steps": self.steps,
             "rho": self.rho,
+            "weight_mlp_kwargs": self.weight_mlp_kwargs,
         }
 
         return base_config | serialize(config)

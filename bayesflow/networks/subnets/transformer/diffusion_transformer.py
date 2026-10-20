@@ -366,6 +366,28 @@ class DiffusionTransformer(keras.Layer):
 
         return keras.ops.expand_dims(mask, axis=-1)
 
+    @staticmethod
+    def _feature_mask(mask: Tensor | None, reference: Tensor) -> Tensor | None:
+        """Shape a target-feature mask for transformer residual updates.
+
+        Transformer blocks operate on a ``(batch, target, width)`` residual
+        stream, so this target mask needs a trailing singleton dimension for
+        broadcasting over ``width``.
+        """
+        if mask is None:
+            return None
+
+        mask = keras.ops.cast(mask, reference.dtype)
+        if len(mask.shape) == len(reference.shape) and mask.shape[-1] == 1:
+            mask = keras.ops.squeeze(mask, axis=-1)
+        elif len(mask.shape) == len(reference.shape) and len(mask.shape) > 2:
+            mask = keras.ops.max(mask, axis=-1)
+
+        if len(mask.shape) == 1:
+            mask = keras.ops.expand_dims(mask, axis=0)
+
+        return keras.ops.expand_dims(mask, axis=-1)
+
     def state_embedding(
         self,
         latent_mask: Tensor | None,

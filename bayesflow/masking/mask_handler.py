@@ -8,12 +8,14 @@ from typing import Any
 import keras
 
 from bayesflow.types import Tensor
+from bayesflow.utils.serialization import serializable
 from bayesflow.utils.tensor_utils import repeat_and_flatten
 
 from .inference_masks import InferenceMasks
 from .mask_name import MaskName
 
 
+@serializable("bayesflow.masking")
 class MaskHandler:
     """Generate semantic masks and route masks between BayesFlow interfaces.
 
@@ -30,8 +32,9 @@ class MaskHandler:
         Probability of hiding a fixed target coordinate during training.
     missing_conditions_prob : float, optional
         Probability of hiding a condition coordinate during training.
-    seed_generator : keras.random.SeedGenerator, optional
-        Local random generator used to sample training masks.
+    seed : int, optional
+        Seed used to initialize the local random generator for sampling training
+        masks.
     """
 
     summary_mask_routes = {
@@ -56,12 +59,25 @@ class MaskHandler:
         fixed_target_prob: float = 0.0,
         missing_target_prob: float = 0.0,
         missing_conditions_prob: float = 0.0,
-        seed_generator: keras.random.SeedGenerator | None = None,
+        seed: int | None = None,
     ):
         self.fixed_target_prob = fixed_target_prob
         self.missing_target_prob = missing_target_prob
         self.missing_conditions_prob = missing_conditions_prob
-        self.seed_generator = seed_generator or keras.random.SeedGenerator()
+        self.seed = seed
+        self.seed_generator = keras.random.SeedGenerator(seed)
+
+    def get_config(self) -> dict[str, Any]:
+        return {
+            "fixed_target_prob": self.fixed_target_prob,
+            "missing_target_prob": self.missing_target_prob,
+            "missing_conditions_prob": self.missing_conditions_prob,
+            "seed": self.seed,
+        }
+
+    @classmethod
+    def from_config(cls, config: dict[str, Any]) -> MaskHandler:
+        return cls(**config)
 
     @staticmethod
     def _collect(routes: Mapping[str, str] | Iterable[str], *sources: Mapping[str, Any]) -> dict[str, Any]:
