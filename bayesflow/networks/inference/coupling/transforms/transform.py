@@ -1,8 +1,8 @@
 import keras
 
+from bayesflow.masking import MaskHandler
 from bayesflow.types import Tensor
 from ..invertible_layer import InvertibleLayer
-from ..masks import skip_fixed_dims
 
 
 class Transform(InvertibleLayer):
@@ -40,7 +40,8 @@ class Transform(InvertibleLayer):
             out, log_jac = self._inverse(xz, parameters)
         else:
             out, log_jac = self._forward(xz, parameters)
-        out, log_jac = skip_fixed_dims(xz, out, log_jac, fixed_target_mask)
+        out = MaskHandler.maybe_apply(out, fixed_target_mask, xz)
+        log_jac = MaskHandler.maybe_apply(log_jac, fixed_target_mask)
         return out, keras.ops.sum(log_jac, axis=-1)
 
     def _forward(self, x: Tensor, parameters: dict[str, Tensor]) -> (Tensor, Tensor):
