@@ -3,8 +3,8 @@ import numpy as np
 import pytest
 
 from bayesflow.adapters import Adapter
-from bayesflow.approximators import Approximator, AutoregressiveApproximator, EnsembleApproximator
-from bayesflow.approximators.helpers import AutoregressiveSampler
+from bayesflow.estimators import Estimator, AutoregressiveEstimator, EnsembleEstimator
+from bayesflow.estimators.helpers import AutoregressiveSampler
 from bayesflow.networks import InferenceNetwork
 
 
@@ -383,10 +383,10 @@ class _RecordingInferenceNetwork(InferenceNetwork):
         return keras.ops.zeros((*batch_shape, 2), dtype="float32")
 
 
-def test_autoregressive_approximator_keeps_sequence_and_subnet_masks_separate():
+def test_autoregressive_estimator_keeps_sequence_and_subnet_masks_separate():
     inference_network = _RecordingInferenceNetwork()
     decoder = _RecordingDecoder()
-    approximator = AutoregressiveApproximator(
+    estimator = AutoregressiveEstimator(
         inference_network=inference_network,
         encoder_network=_IdentityEncoder(),
         decoder_network=decoder,
@@ -408,7 +408,7 @@ def test_autoregressive_approximator_keeps_sequence_and_subnet_masks_separate():
     )
     fixed_target_mask = keras.ops.ones_like(targets)
 
-    approximator.compute_metrics(
+    estimator.compute_metrics(
         targets,
         summary_variables=summaries,
         inference_mask=sequence_mask,
@@ -431,8 +431,8 @@ def test_autoregressive_approximator_keeps_sequence_and_subnet_masks_separate():
     )
 
 
-def test_autoregressive_approximator_rejects_missing_targets_without_decoder_feature_masks():
-    approximator = AutoregressiveApproximator(
+def test_autoregressive_estimator_rejects_missing_targets_without_decoder_feature_masks():
+    estimator = AutoregressiveEstimator(
         inference_network=_RecordingInferenceNetwork(),
         encoder_network=_IdentityEncoder(),
         decoder_network=_RecordingDecoder(),
@@ -442,7 +442,7 @@ def test_autoregressive_approximator_rejects_missing_targets_without_decoder_fea
     summaries = keras.ops.ones((2, 3, 2), dtype="float32")
 
     with pytest.raises(NotImplementedError, match="feature-mask-aware decoder"):
-        approximator.compute_metrics(
+        estimator.compute_metrics(
             targets,
             summary_variables=summaries,
             infer_target_mask=keras.ops.ones_like(targets),
@@ -452,7 +452,7 @@ def test_autoregressive_approximator_rejects_missing_targets_without_decoder_fea
 def test_autoregressive_sampling_gives_explicit_sequence_masks_precedence():
     inference_network = _RecordingInferenceNetwork()
     decoder = _RecordingDecoder()
-    approximator = AutoregressiveApproximator(
+    estimator = AutoregressiveEstimator(
         inference_network=inference_network,
         encoder_network=_IdentityEncoder(),
         decoder_network=decoder,
@@ -471,7 +471,7 @@ def test_autoregressive_sampling_gives_explicit_sequence_masks_precedence():
     discovered_fixed_value = np.full((2, 3, 2), -1.0, dtype=np.float32)
     explicit_fixed_value = np.arange(12, dtype=np.float32).reshape(2, 3, 2)
 
-    approximator.sample(
+    estimator.sample(
         num_samples=1,
         conditions={
             "summary_variables": summaries,
@@ -502,7 +502,7 @@ def test_autoregressive_sampling_gives_explicit_sequence_masks_precedence():
 
 
 def test_autoregressive_log_prob_combines_sequence_and_fixed_coordinate_masks():
-    approximator = AutoregressiveApproximator(
+    estimator = AutoregressiveEstimator(
         inference_network=_RecordingInferenceNetwork(),
         encoder_network=_IdentityEncoder(),
         decoder_network=_RecordingDecoder(),
@@ -528,15 +528,15 @@ def test_autoregressive_log_prob_combines_sequence_and_fixed_coordinate_masks():
             dtype=np.float32,
         )
     )
-    approximator.standardizer.build({"inference_variables": tuple(targets.shape)})
-    approximator.standardizer.maybe_standardize(
+    estimator.standardizer.build({"inference_variables": tuple(targets.shape)})
+    estimator.standardizer.maybe_standardize(
         targets,
         key="inference_variables",
         stage="training",
         mask=sequence_mask,
     )
 
-    actual = approximator.log_prob(
+    actual = estimator.log_prob(
         {
             "inference_variables": _numpy(targets),
             "summary_variables": _numpy(targets),
@@ -546,13 +546,13 @@ def test_autoregressive_log_prob_combines_sequence_and_fixed_coordinate_masks():
         fixed_target_mask=fixed_target_mask,
     )
 
-    std = approximator.standardizer.standardize_layers["inference_variables"].moving_std(0)
+    std = estimator.standardizer.standardize_layers["inference_variables"].moving_std(0)
     step_log_det = -keras.ops.sum(keras.ops.log(std) * fixed_target_mask, axis=-1)
     expected = keras.ops.sum(step_log_det * sequence_mask, axis=-1)
     np.testing.assert_allclose(_numpy(actual), _numpy(expected), rtol=1e-6, atol=1e-6)
 
 
-class _RecordingApproximator(Approximator):
+class _RecordingEstimator(Estimator):
     def __init__(self):
         super().__init__()
         self.adapter = Adapter()
@@ -563,7 +563,7 @@ class _RecordingApproximator(Approximator):
         return {"loss": keras.ops.convert_to_tensor(np.float32(1.0))}
 
 
-class _RecordingDistributionApproximator(_RecordingApproximator):
+class _RecordingDistributionEstimator(_RecordingEstimator):
     has_distribution = True
 
     def __init__(self):
@@ -589,9 +589,9 @@ class _RecordingDistributionApproximator(_RecordingApproximator):
 
 @pytest.mark.parametrize("stage", ["training", "validation"])
 def test_ensemble_routes_member_specific_semantic_masks_at_every_stage(stage):
-    left = _RecordingApproximator()
-    right = _RecordingApproximator()
-    ensemble = EnsembleApproximator({"left": left, "right": right})
+    left = _RecordingEstimator()
+    right = _RecordingEstimator()
+    ensemble = EnsembleEstimator({"left": left, "right": right})
     values = {
         "left": keras.ops.ones((2, 2), dtype="float32"),
         "right": keras.ops.zeros((2, 2), dtype="float32"),
@@ -625,9 +625,9 @@ def test_ensemble_routes_member_specific_semantic_masks_at_every_stage(stage):
 
 
 def test_ensemble_broadcasts_shared_semantic_masks_to_all_members():
-    left = _RecordingApproximator()
-    right = _RecordingApproximator()
-    ensemble = EnsembleApproximator({"left": left, "right": right})
+    left = _RecordingEstimator()
+    right = _RecordingEstimator()
+    ensemble = EnsembleEstimator({"left": left, "right": right})
     targets = keras.ops.ones((2, 2), dtype="float32")
     shared_mask = keras.ops.convert_to_tensor(np.asarray([[1.0, 0.0], [1.0, 0.0]], dtype=np.float32))
 
@@ -641,9 +641,9 @@ def test_ensemble_broadcasts_shared_semantic_masks_to_all_members():
 
 
 def test_ensemble_routes_member_specific_semantic_masks_during_inference():
-    left = _RecordingDistributionApproximator()
-    right = _RecordingDistributionApproximator()
-    ensemble = EnsembleApproximator({"left": left, "right": right})
+    left = _RecordingDistributionEstimator()
+    right = _RecordingDistributionEstimator()
+    ensemble = EnsembleEstimator({"left": left, "right": right})
     data = {"inference_conditions": np.ones((2, 1), dtype=np.float32)}
     semantic = {
         "fixed_target_mask": {

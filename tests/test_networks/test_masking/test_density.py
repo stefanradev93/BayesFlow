@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from bayesflow.adapters import Adapter
-from bayesflow.approximators import ContinuousApproximator
+from bayesflow.estimators import BasicEstimator
 from bayesflow.distributions import DiagonalNormal, DiagonalStudentT, Mixture
 from bayesflow.networks.helpers.standardization.standardize import Standardize
 
@@ -190,14 +190,14 @@ def test_partial_density_excludes_fixed_coordinate_for_coordinatewise_field(
     )
 
 
-def test_approximator_log_prob_uses_partial_infer_target_mask(targets, conditions, fixed_target_mask):
+def test_estimator_log_prob_uses_partial_infer_target_mask(targets, conditions, fixed_target_mask):
     network = make_network("flow_matching", subnet=ZeroSubnet())
-    approximator = ContinuousApproximator(
+    estimator = BasicEstimator(
         inference_network=network,
         adapter=Adapter(),
         standardize=None,
     )
-    approximator.build(
+    estimator.build(
         {
             "inference_variables": tuple(targets.shape),
             "inference_conditions": tuple(conditions.shape),
@@ -211,8 +211,8 @@ def test_approximator_log_prob_uses_partial_infer_target_mask(targets, condition
         "infer_target_mask": _numpy(fixed_target_mask).astype(np.float32),
     }
 
-    original_log_prob = approximator.log_prob(data, to_numpy=False)
-    changed_log_prob = approximator.log_prob(
+    original_log_prob = estimator.log_prob(data, to_numpy=False)
+    changed_log_prob = estimator.log_prob(
         data | {"inference_variables": changed_targets},
         to_numpy=False,
     )
@@ -225,20 +225,20 @@ def test_approximator_log_prob_uses_partial_infer_target_mask(targets, condition
     )
 
 
-def test_approximator_masks_dynamic_standardizer_jacobian(targets, conditions, fixed_target_mask):
+def test_estimator_masks_dynamic_standardizer_jacobian(targets, conditions, fixed_target_mask):
     network = make_network("flow_matching")
-    approximator = ContinuousApproximator(
+    estimator = BasicEstimator(
         inference_network=network,
         adapter=Adapter(),
         standardize="inference_variables",
     )
-    approximator.build(
+    estimator.build(
         {
             "inference_variables": tuple(targets.shape),
             "inference_conditions": tuple(conditions.shape),
         }
     )
-    approximator.compute_metrics(
+    estimator.compute_metrics(
         targets,
         inference_conditions=conditions,
         stage="training",
@@ -249,7 +249,7 @@ def test_approximator_masks_dynamic_standardizer_jacobian(targets, conditions, f
         "inference_conditions": _numpy(conditions).astype(np.float32),
         "fixed_target_mask": _numpy(fixed_target_mask).astype(np.float32),
     }
-    actual = approximator.log_prob(data, to_numpy=False)
+    actual = estimator.log_prob(data, to_numpy=False)
 
     target_values = _numpy(targets).astype(np.float32)
     mean = np.mean(target_values, axis=0, dtype=np.float32)
@@ -271,17 +271,17 @@ def test_approximator_masks_dynamic_standardizer_jacobian(targets, conditions, f
 
 
 def test_handlerless_density_ignores_semantic_masks(targets, fixed_target_mask):
-    approximator = ContinuousApproximator(
+    estimator = BasicEstimator(
         inference_network=HandlerlessDensityNetwork(),
         adapter=Adapter(),
         standardize="inference_variables",
     )
-    approximator.build({"inference_variables": tuple(targets.shape)})
-    approximator.standardizer.maybe_standardize(targets, key="inference_variables", stage="training")
+    estimator.build({"inference_variables": tuple(targets.shape)})
+    estimator.standardizer.maybe_standardize(targets, key="inference_variables", stage="training")
 
     data = {"inference_variables": _numpy(targets).astype(np.float32)}
-    unmasked = approximator.log_prob(data, to_numpy=False)
-    masked = approximator.log_prob(
+    unmasked = estimator.log_prob(data, to_numpy=False)
+    masked = estimator.log_prob(
         data | {"fixed_target_mask": _numpy(fixed_target_mask).astype(np.float32)},
         to_numpy=False,
     )

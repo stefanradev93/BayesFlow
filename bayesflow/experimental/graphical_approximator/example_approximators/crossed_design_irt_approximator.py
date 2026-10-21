@@ -1,26 +1,12 @@
-from bayesflow.experimental.graphical_simulator.example_simulators import crossed_design_irt_simulator
-from bayesflow.adapters import Adapter
-from bayesflow.networks import DeepSet, CouplingFlow
-from bayesflow.experimental.graphical_approximator import GraphicalApproximator
+from warnings import warn
+
+from bayesflow.experimental.graphical_estimator.example_estimators import crossed_design_irt_estimator
 
 
 def crossed_design_irt_approximator():
-    simulator = crossed_design_irt_simulator()
-
-    adapter = Adapter()
-
-    summary_networks = [
-        DeepSet(summary_dim=10),
-        DeepSet(summary_dim=20),
-        DeepSet(summary_dim=30),
-        DeepSet(summary_dim=40),
-        DeepSet(summary_dim=50),
-    ]
-    inference_networks = [CouplingFlow(), CouplingFlow(), CouplingFlow()]
-
-    inverted_graph = simulator.graph.invert()
-    approximator = GraphicalApproximator(
-        inverted_graph, adapter=adapter, inference_networks=inference_networks, summary_networks=summary_networks
+    warn(
+        "crossed_design_irt_approximator is deprecated. Use crossed_design_irt_estimator instead.",
+        DeprecationWarning,
+        stacklevel=2,
     )
-
-    return approximator
+    return crossed_design_irt_estimator()

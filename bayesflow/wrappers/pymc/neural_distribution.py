@@ -14,16 +14,16 @@ from .backend import build_backend
 
 class NeuralDistribution:
     """
-    Wraps a trained BayesFlow approximator as a PyMC custom distribution.
+    Wraps a trained BayesFlow estimator as a PyMC custom distribution.
 
-    Supports two approximator types:
+    Supports two estimator types:
 
-    * :class:`~bayesflow.approximators.RatioApproximator` — Neural Ratio Estimation
+    * :class:`~bayesflow.estimators.RatioEstimator` — Neural Ratio Estimation
       (NRE).  The log-ratio ``log p(x|θ)/p(x)`` is used as an unnormalised
       log-likelihood (the evidence is constant w.r.t. θ and cancels in the
       posterior).
 
-    * :class:`~bayesflow.approximators.ContinuousApproximator` — Neural Likelihood
+    * :class:`~bayesflow.estimators.BasicEstimator` — Neural Likelihood
       Estimation (NLE).  The network must be trained in **NLE mode**: observations
       as ``inference_variables``, parameters as ``inference_conditions``.  The
       network models ``log p(x|θ)`` directly.
@@ -34,8 +34,8 @@ class NeuralDistribution:
 
     Parameters
     ----------
-    approximator :
-        A trained ``RatioApproximator`` or ``ContinuousApproximator``.
+    estimator :
+        A trained ``RatioEstimator`` or ``BasicEstimator``.
     param_names : sequence of str
         Names of the model parameters in the order they will be passed inside
         the PyMC model.
@@ -53,7 +53,7 @@ class NeuralDistribution:
     --------
     **Ratio estimator (NRE)**::
 
-        dist = NeuralDistribution(ratio_approximator, param_names=["mu", "sigma"])
+        dist = NeuralDistribution(ratio_estimator, param_names=["mu", "sigma"])
         with pm.Model():
             mu = pm.Normal("mu", 0, 1)
             sigma = pm.HalfNormal("sigma", 1)
@@ -61,7 +61,7 @@ class NeuralDistribution:
 
     **Likelihood estimator (NLE)**::
 
-        dist = NeuralDistribution(nle_approximator, param_names=["mu", "sigma"])
+        dist = NeuralDistribution(nle_estimator, param_names=["mu", "sigma"])
         with pm.Model():
             mu = pm.Normal("mu", 0, 1)
             sigma = pm.HalfNormal("sigma", 1)
@@ -70,7 +70,7 @@ class NeuralDistribution:
 
     def __init__(
         self,
-        approximator,
+        estimator,
         param_names: Sequence[str],
         *,
         exchangeable: bool = True,
@@ -82,7 +82,7 @@ class NeuralDistribution:
         self.param_names = tuple(param_names)
         self.exchangeable = exchangeable
         self.simulator_fn = simulator_fn
-        self.backend = build_backend(approximator, param_names, exchangeable=exchangeable)
+        self.backend = build_backend(estimator, param_names, exchangeable=exchangeable)
 
     def logp(self, value: pt.TensorVariable, *dist_params: pt.TensorVariable) -> pt.TensorVariable:
         """
