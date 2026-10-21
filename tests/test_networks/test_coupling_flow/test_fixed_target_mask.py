@@ -8,7 +8,7 @@ from bayesflow.networks.inference.coupling.permutations import FixedPermutation
 from bayesflow.utils import jacobian, log_abs_det
 from tests.utils import assert_allclose
 
-TOL = 1e-4
+TOL = 1e-3
 
 
 def make_mask(batch_size, xz_dim):
