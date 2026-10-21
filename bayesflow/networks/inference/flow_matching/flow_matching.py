@@ -66,9 +66,9 @@ class FlowMatching(InferenceNetwork):
         default MLP settings.
     time_power_law_alpha : float
         Changes the distribution of sampled times during training. Time is sampled
-        as ``t = u^(1/(1+alpha))`` with ``u ~ U(0, 1)``, i.e.,
-        ``p(t) = (1+alpha) * t^alpha``. Positive values emphasize times near the
-        data endpoint at ``t = 1``; ``alpha = 0`` is uniform. Default is 0.5.
+        as ``t = u^(1+alpha)`` with ``u ~ U(0, 1)``, i.e., ``p(t) ~ t^(-alpha/(1+alpha))``.
+        Negative values emphasize times near the data endpoint at ``t = 1``;
+        ``alpha = 0`` is uniform. Default is -0.5.
     mask_handler : ~bayesflow.masking.MaskHandler, optional
         Handler used to generate and route masks. If ``None``, a default mask handler is created.
     **kwargs
@@ -103,7 +103,7 @@ class FlowMatching(InferenceNetwork):
         integrate_kwargs: dict[str, Any] = None,
         optimal_transport_kwargs: dict[str, Any] = None,
         subnet_kwargs: dict[str, Any] = None,
-        time_power_law_alpha: float = 0.5,
+        time_power_law_alpha: float = -0.5,
         mask_handler: MaskHandler | None = None,
         **kwargs,
     ):
@@ -168,8 +168,8 @@ class FlowMatching(InferenceNetwork):
                     sample_weight = keras.ops.take(sample_weight, assignments, axis=0)
 
             u = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
-            # Inverse-CDF sample from p(t) = (1 + α) t^α, following Wildberger et al. (2023).
-            t = u ** (1.0 / (1.0 + self.time_power_law_alpha))
+            # inverse CDF of F(t) = t^(1/(1+α)), i.e. p(t) ∝ t^(-α/(1+α)), α=0 is uniform
+            t = u ** (1 + self.time_power_law_alpha)
             t = expand_right_as(t, x0)
 
             x = t * x1 + (1 - t) * x0
