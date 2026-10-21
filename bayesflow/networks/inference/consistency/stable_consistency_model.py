@@ -157,9 +157,9 @@ class StableConsistencyModel(InferenceNetwork):
             return
 
         self.base_distribution.build(xz_shape)
-        self.subnet_projector = self._build_subnet_and_projector(xz_shape, conditions_shape, name="subnet_projector")
+        self.subnet_projector = self._build_subnet_and_projector(xz_shape, conditions_shape)
 
-        # input shape for weight function and projector
+        # input shape for weight function and its projector
         input_shape = (xz_shape[0], 1)
         self.weight_fn.build(input_shape)
         input_shape = self.weight_fn.compute_output_shape(input_shape)

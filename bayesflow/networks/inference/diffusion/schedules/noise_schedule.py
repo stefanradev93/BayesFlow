@@ -129,7 +129,7 @@ class NoiseSchedule(ABC):
             raise TypeError(f"Unknown variance type: {self._variance_type}")
         return alpha_t, sigma_t
 
-    def get_weights_for_snr(self, log_snr_t: Tensor, loss_type: str = "noise") -> Tensor:
+    def weights_for_snr(self, log_snr_t: Tensor, loss_type: str = "noise") -> Tensor:
         """
         Compute loss weights based on log signal-to-noise ratio (log-SNR).
 

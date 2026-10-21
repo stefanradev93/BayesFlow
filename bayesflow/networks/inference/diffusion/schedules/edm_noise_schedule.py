@@ -104,7 +104,7 @@ class EDMNoiseSchedule(NoiseSchedule):
         factor = ops.exp(-log_snr_t) / (1 + ops.exp(-log_snr_t))
         return -factor * dsnr_dx
 
-    def get_weights_for_snr(self, log_snr_t: Tensor, loss_type: str = "noise") -> Tensor:
+    def weights_for_snr(self, log_snr_t: Tensor, loss_type: str = "noise") -> Tensor:
         """Get weights for the signal-to-noise ratio (snr) for a given log signal-to-noise ratio (lambda)."""
         if loss_type == "F":
             # the EDM weighting of the noise loss is the unweighted F loss
@@ -112,7 +112,7 @@ class EDMNoiseSchedule(NoiseSchedule):
         return 1 + ops.exp(-log_snr_t) / ops.square(self.sigma_data)
 
     def validate(self, loss_type: str = "noise"):
-        # the EDM weighting is also defined for the F loss, see get_weights_for_snr
+        # the EDM weighting is also defined for the F loss, see weights_for_snr
         super().validate(loss_type="noise" if loss_type == "F" else loss_type)
 
     def get_config(self):

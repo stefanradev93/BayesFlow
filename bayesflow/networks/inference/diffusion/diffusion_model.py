@@ -157,7 +157,7 @@ class DiffusionModel(InferenceNetwork):
         log_snr_t = expand_right_as(log_snr_t, x)
 
         alpha_t, sigma_t = self.noise_schedule.get_alpha_sigma(log_snr_t=log_snr_t)
-        weights_for_snr = self.noise_schedule.get_weights_for_snr(log_snr_t=log_snr_t, loss_type=self._loss_type)
+        weights_for_snr = self.noise_schedule.weights_for_snr(log_snr_t=log_snr_t, loss_type=self._loss_type)
 
         # Generate noise vector
         eps_t = keras.random.normal(ops.shape(x), dtype=ops.dtype(x), seed=self.seed_generator)

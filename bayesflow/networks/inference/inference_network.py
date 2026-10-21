@@ -136,15 +136,24 @@ class InferenceNetwork(keras.Layer):
         raise NotImplementedError
 
     def _build_subnet_and_projector(
-        self, xz_shape: Shape, conditions_shape: Shape = None, units: int = None, name: str = "output_projector"
+        self,
+        xz_shape: Shape,
+        conditions_shape: Shape = None,
+        units: int = None,
+        name: str = "output_projector",
+        has_time: bool = True,
     ) -> keras.Layer:
-        """Build ``self.subnet`` on ``(target, time, conditions)`` and return a built projector to ``units`` outputs.
+        """Build ``self.subnet`` and return a built projector to ``units`` outputs.
 
         The projector is the identity if the subnet already outputs ``units`` features (default: the target
-        dimension), and a zero-bias dense layer named ``name`` otherwise.
+        dimension), and a zero-bias dense layer named ``name`` otherwise. The subnet input is
+        ``(target, time, conditions)`` when ``has_time`` is true and ``(target, conditions)`` otherwise.
         """
         units = xz_shape[-1] if units is None else units
-        input_shape = (xz_shape, (xz_shape[0], 1), conditions_shape)
+        if has_time:
+            input_shape = (xz_shape, (xz_shape[0], 1), conditions_shape)
+        else:
+            input_shape = (xz_shape, conditions_shape)
         self.subnet.build(input_shape)
         out_shape = self.subnet.compute_output_shape(input_shape)
         if out_shape[-1] != units:
