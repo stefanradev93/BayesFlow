@@ -1,295 +1,364 @@
+import networkx as nx
 import numpy as np
 import pytest
 
-from bayesflow.experimental.graphical_simulator import GraphicalSimulator, SimulationOutput
+from bayesflow.experimental.graphical_simulator import GraphicalSimulator
+from bayesflow.experimental.graphical_simulator.graphical_simulator import from_table
+from bayesflow.experimental.graphical_simulator.samples import NodeSamples, concatenate, select, to_tensors
+
+SIMULATORS = ["single_level_simulator", "two_level_simulator", "three_level_simulator", "crossed_design_irt_simulator"]
 
 
-def test_single_level_simulator(single_level_simulator):
-    # prior -> likelihood
+@pytest.mark.parametrize("simulator", SIMULATORS)
+def test_index_columns(request, simulator):
+    simulator = request.getfixturevalue(simulator)
+    simulation = simulator.sample(5)
 
-    simulator = single_level_simulator
-    assert isinstance(simulator, GraphicalSimulator)
-    assert isinstance(simulator.sample(5), SimulationOutput)
-    assert isinstance(simulator.sample(5, sample_shape=(2, 3)), SimulationOutput)
+    for node in simulator.graph:
+        indices = simulation[node].indices
+        ancestors = nx.ancestors(simulator.graph, node)
 
-    samples = simulator.sample(12)
-    expected_keys = ["beta", "sigma", "x", "y"]
-
-    assert set(samples.keys()) == set(expected_keys)
-    assert 5 <= samples.meta["N"] < 15
-
-    # prior node
-    assert np.shape(samples["beta"]) == (12, 2)  # num_samples, beta_dim
-    assert np.shape(samples["sigma"]) == (12, 1)  # num_samples, sigma_dim
-
-    # likelihood node
-    assert np.shape(samples["x"]) == (12, samples.meta["N"], 1)
-    assert np.shape(samples["y"]) == (12, samples.meta["N"], 1)
-
-    # variable names
-    assert simulator.variable_names() == {"prior": ["beta", "sigma"], "likelihood": ["x", "y"]}
+        assert set(indices) == {"dataset", node} | ancestors
+        assert list(indices[node]) == list(range(len(indices["dataset"])))
+        assert set(indices["dataset"]) <= set(range(5))
 
 
-def test_two_level_simulator(two_level_simulator):
-    # hypers
-    #   |
-    # locals  shared
-    #     \    /
-    #      \  /
-    #       y
+@pytest.mark.parametrize("simulator", SIMULATORS)
+def test_roots_have_one_row_per_dataset(request, simulator):
+    simulator = request.getfixturevalue(simulator)
+    simulation = simulator.sample(5)
 
-    simulator = two_level_simulator
-    assert isinstance(simulator, GraphicalSimulator)
-    assert isinstance(simulator.sample(5), SimulationOutput)
-    assert isinstance(simulator.sample(5, sample_shape=(2, 3)), SimulationOutput)
-
-    samples = simulator.sample(15)
-    expected_keys = ["hyper_mean", "hyper_std", "local_mean", "shared_std", "y"]
-
-    assert set(samples.keys()) == set(expected_keys)
-
-    # hypers node
-    assert np.shape(samples["hyper_mean"]) == (15, 1)
-    assert np.shape(samples["hyper_std"]) == (15, 1)
-
-    # locals node
-    assert np.shape(samples["local_mean"]) == (15, 6, 1)
-
-    # shared node
-    assert np.shape(samples["shared_std"]) == (15, 1)
-
-    # y node
-    assert np.shape(samples["y"]) == (15, 6, 10, 1)
-
-    # variable names
-    assert simulator.variable_names() == {
-        "hypers": ["hyper_mean", "hyper_std"],
-        "locals": ["local_mean"],
-        "shared": ["shared_std"],
-        "y": ["y"],
-    }
+    for node in simulator.graph:
+        if simulator.graph.in_degree(node) == 0:
+            assert list(simulation[node].indices["dataset"]) == list(range(5))
 
 
-def test_two_level_repeated_roots_simulator(two_level_repeated_roots_simulator):
-    # hypers
-    #   |
-    # locals  shared
-    #     \    /
-    #      \  /
-    #       y
+def test_fixed_reps(two_level_simulator):
+    simulation = two_level_simulator.sample(5)
 
-    simulator = two_level_repeated_roots_simulator
-    assert isinstance(simulator, GraphicalSimulator)
-    assert isinstance(simulator.sample(5), SimulationOutput)
-    assert isinstance(simulator.sample(5, sample_shape=(2, 3)), SimulationOutput)
-
-    samples = simulator.sample(15)
-    expected_keys = ["hyper_mean", "hyper_std", "local_mean", "shared_std", "y"]
-
-    assert set(samples.keys()) == set(expected_keys)
-
-    # hypers node
-    assert np.shape(samples["hyper_mean"]) == (15, 5, 1)
-    assert np.shape(samples["hyper_std"]) == (15, 5, 1)
-
-    # locals node
-    assert np.shape(samples["local_mean"]) == (15, 5, 6, 1)
-
-    # shared node
-    assert np.shape(samples["shared_std"]) == (15, 1)
-
-    # y node
-    assert np.shape(samples["y"]) == (15, 5, 6, 10, 1)
-
-    # variable names
-    assert simulator.variable_names() == {
-        "hypers": ["hyper_mean", "hyper_std"],
-        "locals": ["local_mean"],
-        "shared": ["shared_std"],
-        "y": ["y"],
-    }
+    assert len(simulation["hypers"].indices["dataset"]) == 5
+    assert len(simulation["locals"].indices["dataset"]) == 5 * 6
+    assert len(simulation["y"].indices["dataset"]) == 5 * 6 * 10
 
 
-def test_three_level_simulator(three_level_simulator):
-    #  schools
-    #     |
-    #     |
-    # classrooms
-    #     |
-    #     |     shared
-    # students    /
-    #      \     /
-    #       \   /
-    #      scores
+def test_meta_override(single_level_simulator):
+    simulation = single_level_simulator.sample(5, meta={"N": 7})
 
-    simulator = three_level_simulator
-    assert isinstance(simulator, GraphicalSimulator)
-    assert isinstance(simulator.sample(5), SimulationOutput)
-    assert isinstance(simulator.sample(5, sample_shape=(2, 3)), SimulationOutput)
-    assert isinstance(simulator.sample(5, meta={"N_classrooms": 5, "N_students": 5, "N_scores": 10}), SimulationOutput)
+    assert len(simulation["likelihood"].indices["dataset"]) == 5 * 7
 
-    samples = simulator.sample(15)
-    expected_keys = [
-        "school_mu",
-        "school_sigma",
-        "classroom_mu",
-        "classroom_sigma",
-        "student_mu",
-        "student_sigma",
-        "shared_sigma",
-        "y",
-    ]
-    expected_meta_keys = ["N_classrooms", "N_students", "N_scores"]
 
-    assert set(samples.keys()) == set(expected_keys)
-    assert set(samples.meta.keys()) == set(expected_meta_keys)
+def test_callable_reps():
+    simulator = GraphicalSimulator()
+    simulator.add_node("group", sample_fn=lambda: {"mu": np.random.normal()})
+    simulator.add_node("obs", sample_fn=lambda mu: {"y": mu}, reps=lambda size: np.arange(size) + 1)
+    simulator.add_edge("group", "obs")
 
-    # schools node
-    assert np.shape(samples["school_mu"]) == (15, 1)
-    assert np.shape(samples["school_sigma"]) == (15, 1)
+    simulation = simulator.sample(4)
 
-    # classrooms node
-    assert np.shape(samples["classroom_mu"]) == (15, samples.meta["N_classrooms"], 1)
-    assert np.shape(samples["classroom_sigma"]) == (15, samples.meta["N_classrooms"], 1)
+    assert list(np.bincount(simulation["obs"].indices["group"])) == [1, 2, 3, 4]
 
-    # students node
-    assert np.shape(samples["student_mu"]) == (15, samples.meta["N_classrooms"], samples.meta["N_students"], 1)
-    assert np.shape(samples["student_sigma"]) == (15, samples.meta["N_classrooms"], samples.meta["N_students"], 1)
 
-    # shared node
-    assert np.shape(samples["shared_sigma"]) == (15, 1)
+def test_reps_receive_combinations_and_meta():
+    received = {}
 
-    # y node
-    assert np.shape(samples["y"]) == (
-        15,
-        samples.meta["N_classrooms"],
-        samples.meta["N_students"],
-        samples.meta["N_scores"],
-        1,
+    def even_items(combinations, num_items):
+        received["combinations"] = combinations
+        received["num_items"] = num_items
+
+        # only even items are observed, so odd ones get no rows
+        return (combinations["item"] % 2 == 0).astype(int)
+
+    simulator = GraphicalSimulator(meta_fn=lambda: {"num_items": 4})
+    simulator.add_node("group", sample_fn=lambda: {"mu": np.random.normal()}, reps=3)
+    simulator.add_node("item", sample_fn=lambda: {"b": np.random.normal()}, reps="num_items")
+    simulator.add_node("obs", sample_fn=lambda mu, b: {"y": mu + b}, reps=even_items)
+    simulator.add_edge("group", "obs")
+    simulator.add_edge("item", "obs")
+
+    simulation = simulator.sample(2)
+
+    # one combination for every group and item of the same dataset
+    assert len(received["combinations"]["dataset"]) == 2 * 3 * 4
+    assert np.all(received["num_items"] == 4)
+
+    assert np.all(simulation["obs"].indices["item"] % 2 == 0)
+    assert len(simulation["obs"].indices["dataset"]) == 2 * 3 * 2
+
+
+def test_crossed_samples_join_within_school(crossed_design_irt_simulator):
+    simulation = crossed_design_irt_simulator.sample(5)
+    observations = simulation["observations"].indices
+
+    # each observation pairs a question and a student of the same school
+    question_school = simulation["questions"].indices["schools"][observations["questions"]]
+    student_school = simulation["students"].indices["schools"][observations["students"]]
+
+    assert np.array_equal(question_school, observations["schools"])
+    assert np.array_equal(student_school, observations["schools"])
+
+
+def sample_parent():
+    return {"x": np.random.normal()}
+
+
+def sample_parents(batch_size):
+    return {"x": np.random.normal(size=batch_size)}
+
+
+def copy_parent(x):
+    return {"x_copy": x}
+
+
+def copy_model(is_batched):
+    # the child copies its parent's value, so we can see which parent each child belongs to
+    simulator = GraphicalSimulator()
+
+    if is_batched:
+        simulator.add_node("parent", sample_fn=sample_parents, is_batched=True)
+    else:
+        simulator.add_node("parent", sample_fn=sample_parent)
+
+    simulator.add_node("child", sample_fn=copy_parent, reps=3, is_batched=is_batched)
+    simulator.add_edge("parent", "child")
+
+    return simulator
+
+
+@pytest.mark.parametrize("is_batched", [False, True])
+def test_children_receive_their_parents_values(is_batched):
+    simulation = copy_model(is_batched).sample(4)
+
+    parent_row = simulation["child"].indices["parent"]
+    expected = simulation["parent"].values["x"][parent_row]
+
+    assert np.array_equal(simulation["child"].values["x_copy"], expected)
+
+
+@pytest.mark.parametrize("is_batched", [False, True])
+def test_vector_valued_variables(is_batched):
+    simulator = GraphicalSimulator()
+
+    if is_batched:
+        simulator.add_node("prior", sample_fn=lambda batch_size: {"beta": np.zeros((batch_size, 3))}, is_batched=True)
+    else:
+        simulator.add_node("prior", sample_fn=lambda: {"beta": np.zeros(3)})
+
+    assert simulator.sample(4)["prior"].values["beta"].shape == (4, 3)
+
+
+def assert_same_simulation(simulation, expected):
+    for node, samples in expected.items():
+        assert list(simulation[node].indices) == list(samples.indices)
+
+        for column, ids in samples.indices.items():
+            np.testing.assert_array_equal(simulation[node].indices[column], ids)
+
+        for variable, values in samples.values.items():
+            np.testing.assert_array_equal(simulation[node].values[variable], values)
+
+
+@pytest.mark.parametrize("simulator", SIMULATORS)
+def test_select_and_concatenate(request, simulator):
+    simulation = request.getfixturevalue(simulator).sample(4)
+
+    parts = []
+    for dataset in range(4):
+        parts.append(select(simulation, np.array([dataset])))
+
+    for part in parts:
+        for node, samples in part.items():
+            assert np.all(samples.indices["dataset"] == 0)
+            np.testing.assert_array_equal(samples.indices[node], np.arange(len(samples.indices["dataset"])))
+
+    assert_same_simulation(concatenate(parts), simulation)
+
+
+@pytest.mark.parametrize("simulator", SIMULATORS)
+def test_select_renumbers_in_increasing_order(request, simulator):
+    simulation = request.getfixturevalue(simulator).sample(6)
+
+    selected = select(simulation, np.array([4, 1, 3]))
+
+    parts = []
+    for dataset in [1, 3, 4]:
+        parts.append(select(simulation, np.array([dataset])))
+
+    assert_same_simulation(selected, concatenate(parts))
+
+
+def test_to_tensors_shapes_and_values(two_level_simulator):
+    simulation = two_level_simulator.sample(4)
+    tensors = to_tensors(simulation)
+
+    assert tensors["hyper_mean"].shape == (4, 1)
+    assert tensors["local_mean"].shape == (4, 6, 1)
+    assert tensors["y"].shape == (4, 60, 1)
+
+    # dataset 1 holds rows 6 to 11 of the locals
+    np.testing.assert_array_equal(tensors["local_mean"][1], simulation["locals"].values["local_mean"][6:12])
+
+
+def test_to_tensors_raises_for_different_structure():
+    # both datasets have 5 children, but split 3 + 2 and 2 + 3 between the parents
+    roots = NodeSamples(
+        indices={"dataset": np.array([0, 1]), "roots": np.arange(2)},
+        values={"r": np.zeros((2, 1))},
     )
+    parents = NodeSamples(
+        indices={"dataset": np.array([0, 0, 1, 1]), "roots": np.array([0, 0, 1, 1]), "parents": np.arange(4)},
+        values={"a": np.zeros((4, 1))},
+    )
+    children = NodeSamples(
+        indices={
+            "dataset": np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]),
+            "roots": np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]),
+            "parents": np.array([0, 0, 0, 1, 1, 2, 2, 3, 3, 3]),
+            "children": np.arange(10),
+        },
+        values={"b": np.zeros((10, 1))},
+    )
+    simulation = {"roots": roots, "parents": parents, "children": children}
 
-    # variable names
-    assert simulator.variable_names() == {
-        "schools": ["school_mu", "school_sigma"],
-        "classrooms": ["classroom_mu", "classroom_sigma"],
-        "students": ["student_mu", "student_sigma"],
-        "shared": ["shared_sigma"],
-        "scores": ["y"],
+    with pytest.raises(ValueError, match="node 'children'"):
+        to_tensors(simulation)
+
+    assert to_tensors(simulation, datasets=1)["b"].shape == (1, 5, 1)
+    assert to_tensors(simulation, nodes=["parents"])["a"].shape == (2, 2, 1)
+
+
+def crossed_table(simulation):
+    # one row per observation, with labels like a real data set would have
+    observations = simulation["observations"].indices
+    students = simulation["students"].indices
+
+    # students are numbered from 0 within every school
+    first_student = np.searchsorted(students["dataset"], students["dataset"])
+    student_numbers = students["students"] - first_student
+
+    return {
+        "school": np.array(["A", "B", "C"])[observations["dataset"]],
+        "question": np.char.add("q", np.char.zfill(observations["questions"].astype(str), 3)),
+        "student": student_numbers[observations["students"]],
+        "obs": simulation["observations"].values["obs"][:, 0],
     }
 
 
-def test_crossed_design_irt_simulator(crossed_design_irt_simulator):
-    #  schools
-    #   /     \
-    #   |  students
-    #   |       |
-    # questions |
-    #    \     /
-    #  observations
+def test_from_table_matches_simulation(crossed_design_irt_simulator):
+    simulation = crossed_design_irt_simulator.sample(3)
+    table = crossed_table(simulation)
 
-    simulator = crossed_design_irt_simulator
-    assert isinstance(simulator, GraphicalSimulator)
-    assert isinstance(simulator.sample(5), SimulationOutput)
-    assert isinstance(simulator.sample(5, sample_shape=(2, 3)), SimulationOutput)
+    groups = {"dataset": "school", "questions": "question", "students": "student"}
+    observed = from_table(crossed_design_irt_simulator.graph, table, groups)
 
-    samples = simulator.sample(22)
-    expected_keys = [
-        "mu_question_mean",
-        "sigma_question_mean",
-        "mu_question_std",
-        "sigma_question_std",
-        "question_mean",
-        "question_std",
-        "question_difficulty",
-        "student_ability",
-        "obs",
-    ]
-    expected_meta_keys = [
-        "num_questions",  # 15
-        "num_students",  # np.random.randint(100, 201)
-    ]
+    assert set(observed) == set(simulation)
+    for node, samples in simulation.items():
+        assert set(observed[node].indices) == set(samples.indices)
+        for column, ids in samples.indices.items():
+            np.testing.assert_array_equal(observed[node].indices[column], ids)
 
-    assert set(samples.keys()) == set(expected_keys)
-    assert set(samples.meta.keys()) == set(expected_meta_keys)
-
-    # schools node
-    assert np.shape(samples["mu_question_mean"]) == (22, 1)
-    assert np.shape(samples["sigma_question_mean"]) == (22, 1)
-    assert np.shape(samples["mu_question_std"]) == (22, 1)
-    assert np.shape(samples["sigma_question_std"]) == (22, 1)
-
-    # questions node
-    assert np.shape(samples["question_mean"]) == (22, samples.meta["num_questions"], 1)
-    assert np.shape(samples["question_std"]) == (22, samples.meta["num_questions"], 1)
-    assert np.shape(samples["question_difficulty"]) == (
-        22,
-        samples.meta["num_questions"],
-        1,
-    )
-
-    # students node
-    assert np.shape(samples["student_ability"]) == (22, samples.meta["num_students"], 1)
-
-    # observations node
-    assert np.shape(samples["obs"]) == (
-        22,
-        samples.meta["num_questions"],
-        samples.meta["num_students"],
-        1,
-    )
-
-    # variable names
-    assert simulator.variable_names() == {
-        "schools": ["mu_question_mean", "sigma_question_mean", "mu_question_std", "sigma_question_std"],
-        "questions": ["question_mean", "question_std", "question_difficulty"],
-        "students": ["student_ability"],
-        "observations": ["obs"],
-    }
+    np.testing.assert_array_equal(observed["observations"].values["obs"], simulation["observations"].values["obs"])
 
 
-def test_simulation_output():
-    test_data = {"a": 1, "b": 2, "c": 3}
-    meta_data = {"d": 4, "e": 5, "f": 6}
+def test_from_table_rows_in_any_order(crossed_design_irt_simulator):
+    simulation = crossed_design_irt_simulator.sample(3)
+    table = crossed_table(simulation)
 
-    output = SimulationOutput(test_data, meta_data)
+    order = np.random.permutation(len(table["obs"]))
+    shuffled = {}
+    for column, values in table.items():
+        shuffled[column] = values[order]
 
-    assert set(output.keys()) == set(test_data.keys())
-    assert set(output.meta.keys()) == set(meta_data.keys())
+    groups = {"dataset": "school", "questions": "question", "students": "student"}
+    observed = from_table(crossed_design_irt_simulator.graph, shuffled, groups)
 
-    # copy method
-    copied = output.copy()
-    assert copied == output
-    assert copied is not output
+    for node, samples in simulation.items():
+        assert len(observed[node].indices[node]) == len(samples.indices[node])
+        np.testing.assert_array_equal(np.sort(observed[node].indices["dataset"]), observed[node].indices["dataset"])
 
-    copied = output.__copy__()
-    assert copied == output
-    assert copied is not output
+    # every (question, student) pair has the same observation, only the row order differs
+    expected = simulation["observations"]
+    expected_order = np.lexsort((expected.indices["students"], expected.indices["questions"]))
 
-    copied = output.__deepcopy__({})
-    assert copied == output
-    assert copied is not output
+    actual = observed["observations"]
+    actual_order = np.lexsort((actual.indices["students"], actual.indices["questions"]))
 
-    # __getitem__
-    assert output["a"] == 1
-    with pytest.raises(KeyError):
-        output["d"]
+    np.testing.assert_array_equal(actual.values["obs"][actual_order], expected.values["obs"][expected_order])
 
-    # __setitem__
-    output["z"] = 5
-    assert output["z"] == 5
 
-    # __delitem__
-    del output["z"]
-    with pytest.raises(KeyError):
-        output["z"]
+def test_from_table_raises_without_label_column(crossed_design_irt_simulator):
+    table = crossed_table(crossed_design_irt_simulator.sample(2))
 
-    # __iter__
-    for k, v in output.items():
-        assert k in output.keys()
-        assert v in output.values()
+    with pytest.raises(ValueError, match="Node 'students' is repeated"):
+        from_table(crossed_design_irt_simulator.graph, table, groups={"dataset": "school", "questions": "question"})
 
-    # __len__
-    assert len(output) == 3
 
-    assert isinstance(output.__repr__(), str)
-    assert isinstance(SimulationOutput.fromkeys(test_data), SimulationOutput)
+def test_is_batched_default():
+    simulator = GraphicalSimulator(is_batched=True)
+    simulator.add_node("prior", sample_fn=sample_parents)
+    simulator.add_node("unbatched", sample_fn=sample_parent, is_batched=False)
+
+    assert simulator.graph.nodes["prior"]["is_batched"]
+    assert not simulator.graph.nodes["unbatched"]["is_batched"]
+    assert simulator.sample(4)["prior"].values["x"].shape == (4, 1)
+
+
+def test_meta_fn_is_drawn_per_dataset():
+    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 50)}, is_batched=True)
+    simulator.add_node("hypers", sample_fn=lambda batch_size: {"mu": np.random.normal(size=batch_size)})
+    simulator.add_node("locals", sample_fn=lambda mu: {"theta": mu}, reps="N")
+    simulator.add_edge("hypers", "locals")
+
+    np.random.seed(0)
+    simulation = simulator.sample(200)
+    counts = np.bincount(simulation["locals"].indices["dataset"], minlength=200)
+
+    assert len(np.unique(counts)) > 10
+
+
+def test_meta_fn_per_dataset_batched():
+    received = {}
+
+    def sample_locals(N, batch_size):
+        received["N"] = N
+        return {"theta": np.zeros(batch_size)}
+
+    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 5)}, is_batched=True)
+    simulator.add_node("hypers", sample_fn=lambda batch_size: {"mu": np.zeros(batch_size)})
+    simulator.add_node("locals", sample_fn=sample_locals, reps="N")
+    simulator.add_edge("hypers", "locals")
+
+    simulation = simulator.sample(30)
+    datasets = simulation["locals"].indices["dataset"]
+    counts = np.bincount(datasets, minlength=30)
+
+    assert np.array_equal(received["N"], counts[datasets])
+
+
+def test_meta_fn_per_dataset_unbatched():
+    received = []
+
+    def sample_locals(N):
+        received.append(N)
+        return {"theta": 0.0}
+
+    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 5)})
+    simulator.add_node("hypers", sample_fn=lambda: {"mu": 0.0})
+    simulator.add_node("locals", sample_fn=sample_locals, reps="N")
+    simulator.add_edge("hypers", "locals")
+
+    simulation = simulator.sample(10)
+    datasets = simulation["locals"].indices["dataset"]
+    counts = np.bincount(datasets, minlength=10)
+
+    assert np.array_equal(np.array(received), counts[datasets])
+
+
+def test_meta_override_is_shared():
+    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 50)}, is_batched=True)
+    simulator.add_node("hypers", sample_fn=lambda batch_size: {"mu": np.zeros(batch_size)})
+    simulator.add_node("locals", sample_fn=lambda batch_size: {"theta": np.zeros(batch_size)}, reps="N")
+    simulator.add_edge("hypers", "locals")
+
+    simulation = simulator.sample(20, meta={"N": 8})
+
+    assert np.all(np.bincount(simulation["locals"].indices["dataset"]) == 8)

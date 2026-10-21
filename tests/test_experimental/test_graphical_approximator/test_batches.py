@@ -2,7 +2,7 @@ import keras
 import numpy as np
 
 from bayesflow.adapters import Adapter
-from bayesflow.experimental.graphical_approximator_new.batches import (
+from bayesflow.experimental.graphical_approximator.batches import (
     SimulationDataset,
     add_sequence_summaries,
     bucket,

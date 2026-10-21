@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from bayesflow.experimental.graphs_new import InvertedGraph, SimulationGraph
-from bayesflow.experimental.graphs_new.factorizations import mean_repetitions
+from bayesflow.experimental.graphs import InvertedGraph, SimulationGraph
+from bayesflow.experimental.graphs.factorizations import mean_repetitions
 
 
 def group_reps(size):

@@ -8,11 +8,11 @@ import numpy as np
 
 from bayesflow.adapters import Adapter
 
-from ..graphical_simulator_new import GraphicalSimulator
-from ..graphical_simulator_new.indexing_helpers import concatenated_ranges, group_ids
-from ..graphical_simulator_new.samples import GraphSamples, num_datasets, select
-from ..graphs_new import InvertedGraph, SimulationGraph
-from ..graphs_new.simulation_graph import is_exchangeable, is_interior
+from ..graphical_simulator import GraphicalSimulator
+from ..graphical_simulator.indexing_helpers import concatenated_ranges, group_ids
+from ..graphical_simulator.samples import GraphSamples, num_datasets, select
+from ..graphs import InvertedGraph, SimulationGraph
+from ..graphs.simulation_graph import is_exchangeable, is_interior
 from .encoder import gather, segment_mean
 
 

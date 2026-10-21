@@ -1,364 +1,225 @@
 import keras
+import numpy as np
 import pytest
-from keras.src.callbacks.history import History
+
+from bayesflow.adapters import Adapter
+from bayesflow.experimental.graphical_approximator import GraphicalApproximator
+from bayesflow.experimental.graphical_approximator.encoder import ExchangeableEncoder
+from bayesflow.experimental.graphical_simulator.samples import concatenate, to_tensors
+from bayesflow.networks import ConsistencyModel, CouplingFlow, DiffusionModel, FlowMatching, StableConsistencyModel
+
+from .conftest import approximator_for
 
 
-def test_graphical_approximator_single_level():
-    from bayesflow.experimental.graphical_approximator.example_approximators import single_level_approximator
-    from bayesflow.experimental.graphical_simulator.example_simulators import single_level_simulator
+EXAMPLES = [
+    ("single_level_simulator", "single_level_approximator"),
+    ("two_level_simulator", "two_level_approximator"),
+    ("three_level_simulator", "three_level_approximator"),
+    ("two_data_nodes_simulator", "two_data_nodes_approximator"),
+    ("crossed_design_irt_simulator", "crossed_design_irt_approximator"),
+    ("survey_simulator", "survey_approximator"),
+]
 
-    single_level_simulator = single_level_simulator()
-    single_level_approximator = single_level_approximator()
 
-    # fitting models with dynamic output shapes fails in tensorflow
-    data = single_level_simulator.sample(1)
-    adapted_data = single_level_approximator.adapter(data)
-    data_shapes = single_level_approximator._data_shapes(adapted_data)
-
-    approximator = single_level_approximator
-    approximator.build(data_shapes)
+@pytest.mark.parametrize(("simulator", "approximator"), EXAMPLES)
+def test_fit_sample(simulator, approximator, request):
+    simulator = request.getfixturevalue(simulator)
+    approximator = request.getfixturevalue(approximator)
     approximator.compile()
 
-    metrics = approximator.compute_metrics(**adapted_data)
-    assert isinstance(metrics, dict)
-    assert "loss" in metrics.keys()
+    metrics = approximator.compute_metrics(**approximator.to_batch(simulator.sample(2)))
+    assert "loss" in metrics
 
-    fit = approximator.fit(dataset=data, batch_size=1, epochs=1)
-    assert isinstance(fit, History)
+    approximator.fit(simulator=simulator, batch_size=2, num_batches=1, epochs=1)
+    approximator.fit(dataset=simulator.sample(4), batch_size=2, epochs=1)
 
-    fit = approximator.fit(simulator=single_level_simulator, batch_size=3, num_batches=1, epochs=1)
-    assert isinstance(fit, History)
-    new_data = single_level_approximator.adapter(single_level_simulator.sample(3))
+    observed = simulator.sample(3)
+    assert_samples_match(approximator, observed, approximator.sample(num_samples=5, conditions=observed), 5)
 
-    samples = approximator.sample(num_samples=10, conditions=new_data)
-    assert isinstance(samples, dict)
-
-    assert approximator._batch_size_from_data(new_data) == 3
-    assert isinstance(approximator._data_shapes(new_data), dict)
-    assert approximator.log_prob(data)
+    log_prob = approximator.log_prob(observed)
+    assert log_prob.shape == (3,)
+    assert np.all(np.isfinite(log_prob))
 
 
-def test_graphical_approximator_two_level():
-    from bayesflow.experimental.graphical_approximator.example_approximators import two_level_approximator
-    from bayesflow.experimental.graphical_simulator.example_simulators import two_level_simulator
+def assert_samples_match(approximator, observed, samples, num_samples):
+    latent_nodes = set()
+    for target_nodes in approximator.networks:
+        for node in target_nodes:
+            latent_nodes.add(node)
 
-    two_level_simulator = two_level_simulator()
-    two_level_approximator = two_level_approximator()
+            for column, ids in observed[node].indices.items():
+                np.testing.assert_array_equal(samples[node].indices[column], ids)
 
-    data = two_level_simulator.sample(1)
-    adapted_data = two_level_approximator.adapter(data)
-    data_shapes = two_level_approximator._data_shapes(adapted_data)
+            assert set(samples[node].values) == set(observed[node].values)
 
-    approximator = two_level_approximator
-    approximator.build(data_shapes)
+            for variable, values in observed[node].values.items():
+                assert samples[node].values[variable].shape == (len(values), num_samples, values.shape[-1])
+                assert isinstance(samples[node].values[variable], np.ndarray)
+
+    assert set(samples) == latent_nodes
+
+
+NETWORKS = {
+    "flow_matching": FlowMatching,
+    "diffusion": DiffusionModel,
+    "consistency": lambda: ConsistencyModel(total_steps=10),
+    "stable_consistency": StableConsistencyModel,
+}
+
+
+@pytest.mark.parametrize("simulator", ["two_level_simulator", "crossed_design_irt_simulator"])
+@pytest.mark.parametrize("network", NETWORKS)
+def test_fit_sample_networks(simulator, network, request):
+    simulator = request.getfixturevalue(simulator)
+    approximator = approximator_for(simulator, NETWORKS[network])
     approximator.compile()
 
-    metrics = approximator.compute_metrics(**adapted_data)
-    assert isinstance(metrics, dict)
-    assert "loss" in metrics.keys()
+    approximator.fit(simulator=simulator, batch_size=2, num_batches=1, epochs=1)
 
-    fit = approximator.fit(dataset=data, batch_size=1, epochs=1)
-    assert isinstance(fit, History)
-
-    fit = approximator.fit(simulator=two_level_simulator, batch_size=3, num_batches=1, epochs=1)
-    assert isinstance(fit, History)
-
-    new_data = two_level_approximator.adapter(two_level_simulator.sample(3))
-    samples = approximator.sample(num_samples=10, conditions=new_data)
-    assert isinstance(samples, dict)
-
-    samples_2 = approximator.sample(num_samples=3, conditions={"y": new_data["y"]})
-    assert isinstance(samples_2, dict)
-
-    assert approximator._batch_size_from_data(new_data) == 3
-    assert isinstance(approximator._data_shapes(new_data), dict)
-    assert approximator.log_prob(data)
+    observed = simulator.sample(3)
+    assert_samples_match(approximator, observed, approximator.sample(num_samples=5, conditions=observed), 5)
 
 
-def test_graphical_approximator_three_level():
-    from bayesflow.experimental.graphical_approximator.example_approximators import three_level_approximator
-    from bayesflow.experimental.graphical_simulator.example_simulators import three_level_simulator
+def test_sample_tensor_format(two_level_simulator, two_level_approximator):
+    two_level_approximator.build_from_data(two_level_approximator.to_batch(two_level_simulator.sample(2)))
 
-    three_level_simulator = three_level_simulator()
-    three_level_approximator = three_level_approximator()
+    samples = two_level_approximator.sample(num_samples=5, conditions=two_level_simulator.sample(3), format="tensor")
 
-    data = three_level_simulator.sample(1, meta={"N_classrooms": 10, "N_students": 10, "N_scores": 20})
-    adapted_data = three_level_approximator.adapter(data)
-    data_shapes = three_level_approximator._data_shapes(adapted_data)
-
-    approximator = three_level_approximator
-    approximator.build(data_shapes)
-    approximator.compile()
-
-    metrics = approximator.compute_metrics(**adapted_data)
-    assert isinstance(metrics, dict)
-    assert "loss" in metrics.keys()
-
-    fit = approximator.fit(dataset=data, batch_size=1, epochs=1)
-    assert isinstance(fit, History)
-
-    fit = approximator.fit(simulator=three_level_simulator, batch_size=3, num_batches=1, epochs=1)
-    assert isinstance(fit, History)
-
-    new_data = three_level_approximator.adapter(three_level_simulator.sample(3))
-    samples = approximator.sample(num_samples=10, conditions=new_data)
-    assert isinstance(samples, dict)
-
-    samples_2 = approximator.sample(num_samples=3, conditions={"y": new_data["y"]})
-    assert isinstance(samples_2, dict)
-
-    assert approximator._batch_size_from_data(new_data) == 3
-    assert isinstance(approximator._data_shapes(new_data), dict)
-    assert approximator.log_prob(data)
+    assert set(samples) == {"hyper_mean", "hyper_std", "local_mean", "shared_std"}
+    assert samples["hyper_mean"].shape == (3, 5, 1)
+    assert samples["local_mean"].shape == (3, 5, 6, 1)
 
 
-def test_graphical_approximator_crossed_design_irt():
-    from bayesflow.experimental.graphical_approximator.example_approximators import crossed_design_irt_approximator
-    from bayesflow.experimental.graphical_simulator.example_simulators import crossed_design_irt_simulator
-
-    crossed_design_irt_simulator = crossed_design_irt_simulator()
-    crossed_design_irt_approximator = crossed_design_irt_approximator()
-
-    data = crossed_design_irt_simulator.sample(1, meta={"num_questions": 15, "num_students": 200})
-    adapted_data = crossed_design_irt_approximator.adapter(data)
-    data_shapes = crossed_design_irt_approximator._data_shapes(adapted_data)
-
+def test_sample_tensor_format_raises_for_ragged_datasets(crossed_design_irt_simulator, crossed_design_irt_approximator):
     approximator = crossed_design_irt_approximator
-    approximator.build(data_shapes)
-    approximator.compile()
+    approximator.build_from_data(approximator.to_batch(crossed_design_irt_simulator.sample(2)))
+    observed = crossed_design_irt_simulator.sample(3)
 
-    metrics = approximator.compute_metrics(**adapted_data)
-    assert isinstance(metrics, dict)
-    assert "loss" in metrics.keys()
+    with pytest.raises(ValueError, match="node 'students'"):
+        approximator.sample(num_samples=5, conditions=observed, format="tensor")
 
-    fit = approximator.fit(dataset=data, batch_size=1, epochs=1)
-    assert isinstance(fit, History)
+    posterior = approximator.sample(num_samples=5, conditions=observed)
+    num_students = np.sum(observed["students"].indices["dataset"] == 1)
 
-    fit = approximator.fit(simulator=crossed_design_irt_simulator, batch_size=3, num_batches=1, epochs=1)
-    assert isinstance(fit, History)
-
-    new_data = crossed_design_irt_approximator.adapter(crossed_design_irt_simulator.sample(3))
-    samples = approximator.sample(num_samples=10, conditions=new_data)
-    assert isinstance(samples, dict)
-
-    samples_2 = approximator.sample(num_samples=3, conditions={"obs": new_data["obs"]})
-    assert isinstance(samples_2, dict)
-
-    assert approximator._batch_size_from_data(new_data) == 3
-    assert isinstance(approximator._data_shapes(new_data), dict)
-    assert approximator.log_prob(data)
+    assert to_tensors(posterior, datasets=1)["student_ability"].shape == (1, 5, num_students, 1)
 
 
-def test_custom_standardize():
-    from bayesflow.experimental.graphical_approximator.example_approximators import crossed_design_irt_approximator
-    from bayesflow.experimental.graphical_simulator.example_simulators import crossed_design_irt_simulator
+def test_save_and_load_flow_matching(tmp_path, two_level_simulator):
+    approximator = approximator_for(two_level_simulator, FlowMatching)
+    approximator.build_from_data(approximator.to_batch(two_level_simulator.sample(2)))
 
-    crossed_design_irt_simulator = crossed_design_irt_simulator()
-    approximator = crossed_design_irt_approximator()
-    approximator.compile()
+    approximator.save(tmp_path / "model.keras")
+    loaded = keras.saving.load_model(tmp_path / "model.keras")
 
-    fit = approximator.fit(simulator=crossed_design_irt_simulator, batch_size=2, num_batches=1, epochs=1)
-    assert isinstance(fit, History)
-
-
-def test_default_adapter():
-    from bayesflow.adapters import Adapter
-    from bayesflow.experimental.graphical_approximator import GraphicalApproximator
-    from bayesflow.experimental.graphical_approximator.example_approximators import crossed_design_irt_approximator
-    from bayesflow.experimental.graphical_simulator.example_simulators import crossed_design_irt_simulator
-
-    crossed_design_irt_simulator = crossed_design_irt_simulator()
-    approximator = crossed_design_irt_approximator()
-    approximator.compile()
-
-    fit = approximator.fit(simulator=crossed_design_irt_simulator, batch_size=2, num_batches=1, epochs=1)
-    assert isinstance(fit, History)
-
-    assert isinstance(GraphicalApproximator.build_adapter(), Adapter)
+    assert len(loaded.weights) == len(approximator.weights)
+    for loaded_weight, weight in zip(loaded.weights, approximator.weights):
+        np.testing.assert_allclose(keras.ops.convert_to_numpy(loaded_weight), keras.ops.convert_to_numpy(weight))
 
 
-@pytest.mark.parametrize(
-    ("simulator", "approximator"),
-    [
-        ("single_level_simulator", "single_level_approximator"),
-        ("two_level_simulator", "two_level_approximator"),
-        ("three_level_simulator", "three_level_approximator"),
-        ("crossed_design_irt_simulator", "crossed_design_irt_approximator"),
-    ],
-)
-def test_serialization(simulator, approximator, request):
-    from bayesflow.experimental.graphical_approximator import GraphicalApproximator
+@pytest.mark.parametrize("network", ["consistency", "stable_consistency"])
+def test_log_prob_raises_for_consistency_models(network, two_level_simulator):
+    approximator = approximator_for(two_level_simulator, NETWORKS[network])
+    approximator.build_from_data(approximator.to_batch(two_level_simulator.sample(2)))
 
+    with pytest.raises(NotImplementedError, match="no tractable density"):
+        approximator.log_prob(two_level_simulator.sample(2))
+
+
+@pytest.mark.parametrize(("simulator", "approximator"), EXAMPLES)
+def test_padding_preserves_loss(simulator, approximator, request):
     simulator = request.getfixturevalue(simulator)
     approximator = request.getfixturevalue(approximator)
 
-    config = approximator.get_config()
-    assert isinstance(GraphicalApproximator.from_config(config), GraphicalApproximator)
+    simulation = simulator.sample(5)
+    batch = approximator.to_batch(simulation)
+    approximator.build_from_data(batch)
+
+    # fit converts the batches to tensors, so the padding weights are on the same device as the loss
+    padded_batch = keras.tree.map_structure(keras.ops.convert_to_tensor, approximator.to_batch(simulation, padded=True))
+
+    plain = approximator.compute_metrics(**batch, stage="validation")
+    padded = approximator.compute_metrics(**padded_batch, stage="validation")
+
+    for name, value in plain.items():
+        np.testing.assert_allclose(
+            keras.ops.convert_to_numpy(padded[name]), keras.ops.convert_to_numpy(value), rtol=1e-4, atol=1e-4
+        )
 
 
-def test_log_prob():
-    from bayesflow.adapters import Adapter
-    from bayesflow.experimental.graphical_approximator import GraphicalApproximator
-    from bayesflow.experimental.graphical_simulator.example_simulators import crossed_design_irt_simulator
-    from bayesflow.networks import CouplingFlow, DeepSet
+def test_fit_with_validation_data(two_level_simulator, two_level_approximator):
+    two_level_approximator.compile()
 
-    crossed_design_irt_simulator = crossed_design_irt_simulator()
+    history = two_level_approximator.fit(
+        dataset=two_level_simulator.sample(4), validation_data=two_level_simulator.sample(3), batch_size=2, epochs=1
+    )
 
-    adapter = Adapter()
-    adapter.to_array()
-    adapter.convert_dtype("float64", "float32")
-    adapter.standardize(include="obs", mean=0.5, std=0.5)
+    assert "val_loss" in history.history
 
-    summary_networks = [
-        DeepSet(summary_dim=10),
-        DeepSet(summary_dim=20),
-        DeepSet(summary_dim=30),
-        DeepSet(summary_dim=40),
-        DeepSet(summary_dim=50),
-    ]
-    inference_networks = [CouplingFlow(), CouplingFlow(), CouplingFlow()]
 
-    inverted_graph = crossed_design_irt_simulator.graph.invert()
+def test_log_prob_sums_rows_per_dataset(two_level_simulator, two_level_approximator):
+    simulation = two_level_simulator.sample(5)
+    two_level_approximator.build_from_data(two_level_approximator.to_batch(simulation))
+
+    log_prob = two_level_approximator.log_prob(simulation)
+
+    np.testing.assert_allclose(
+        two_level_approximator.log_prob(concatenate([simulation] * 2)), np.tile(log_prob, 2), atol=1e-4
+    )
+
+
+def test_log_prob_with_adapter(two_level_simulator):
+    adapter = Adapter().standardize(include="hyper_mean", mean=0.0, std=2.0)
     approximator = GraphicalApproximator(
-        inverted_graph,
+        two_level_simulator.graph.expand().invert(),
         adapter=adapter,
-        inference_networks=inference_networks,
-        summary_networks=summary_networks,
-        standardize="question_mean",
+        inference_networks=[CouplingFlow(), CouplingFlow()],
     )
 
-    data = crossed_design_irt_simulator.sample(2)
-    data_shapes = approximator._data_shapes(data)
-    approximator.build(data_shapes)
-    approximator.compile()
+    simulation = two_level_simulator.sample(2)
+    approximator.build_from_data(approximator.to_batch(simulation))
 
-    assert approximator.log_prob(data) is not None
-
-
-def test_auto_adapter():
-    from bayesflow.experimental.graphical_approximator import GraphicalApproximator
-    from bayesflow.experimental.graphical_simulator.example_simulators import single_level_simulator
-    from bayesflow.networks import CouplingFlow, DeepSet
-
-    simulator = single_level_simulator()
-    approximator = GraphicalApproximator(
-        simulator.graph.invert(),
-        inference_networks=[CouplingFlow()],
-        summary_networks=[DeepSet()],
-    )
-    assert approximator.adapter is not None
+    log_prob = approximator.log_prob(simulation)
+    assert log_prob.shape == (2,)
+    assert np.all(np.isfinite(log_prob))
 
 
-def test_build_without_data_shapes():
-    from bayesflow.experimental.graphical_approximator import GraphicalApproximator
-    from bayesflow.experimental.graphical_simulator.example_simulators import single_level_simulator
-    from bayesflow.networks import CouplingFlow, DeepSet
+@pytest.mark.parametrize(("simulator", "approximator"), EXAMPLES)
+def test_serialization(simulator, approximator, request):
+    approximator = request.getfixturevalue(approximator)
 
-    simulator = single_level_simulator()
-    approximator = GraphicalApproximator(
-        simulator.graph.invert(),
-        inference_networks=[CouplingFlow()],
-        summary_networks=[DeepSet()],
-        standardize=None,  # no standardize layers so symbolic shapes don't break build()
-    )
-    approximator.build()
-    assert approximator.built
+    restored = GraphicalApproximator.from_config(approximator.get_config())
+
+    assert restored.networks == approximator.networks
+    assert restored.condition_nodes == approximator.condition_nodes
 
 
-def test_call(single_level_simulator, single_level_approximator):
-    data = single_level_simulator.sample(2)
-    adapted = single_level_approximator.adapter(data)
-    data_shapes = single_level_approximator._data_shapes(adapted)
-    single_level_approximator.build(data_shapes)
+def test_save_and_load(tmp_path, two_data_nodes_simulator, two_data_nodes_approximator):
+    approximator = two_data_nodes_approximator
+    approximator.build_from_data(approximator.to_batch(two_data_nodes_simulator.sample(2)))
 
-    result = single_level_approximator.call(adapted)
-    assert "loss" in result
+    approximator.save(tmp_path / "model.keras")
+    loaded = keras.saving.load_model(tmp_path / "model.keras")
 
+    assert loaded.networks == approximator.networks
+    assert loaded.condition_nodes == approximator.condition_nodes
+    assert loaded.variable_dims == approximator.variable_dims
 
-def test_wrong_summary_network_count():
-    from bayesflow.experimental.graphical_approximator import GraphicalApproximator
-    from bayesflow.experimental.graphical_simulator.example_simulators import crossed_design_irt_simulator
-    from bayesflow.experimental.graphical_simulator.example_simulators import single_level_simulator
-    from bayesflow.networks import CouplingFlow, DeepSet
-
-    simulator = single_level_simulator()
-    inverted_graph = simulator.graph.invert()
-
-    with pytest.raises(ValueError, match="summary networks"):
-        GraphicalApproximator(
-            inverted_graph,
-            inference_networks=[CouplingFlow()],
-            summary_networks=[DeepSet(), DeepSet()],  # expects 1, got 2
-        )
-
-    simulator = crossed_design_irt_simulator()
-    inverted_graph = simulator.graph.invert()
-
-    with pytest.raises(ValueError, match="non-exchangeable"):
-        GraphicalApproximator(
-            inverted_graph,
-            inference_networks=[CouplingFlow(), CouplingFlow(), CouplingFlow()],
-            summary_networks=[DeepSet(), DeepSet(), DeepSet(), DeepSet()],  # expects 5 (4 data + 1 nonex), got 4
-        )
+    simulation = two_data_nodes_simulator.sample(2)
+    np.testing.assert_allclose(loaded.log_prob(simulation), approximator.log_prob(simulation), rtol=1e-5)
 
 
-def test_subset_data():
-    from bayesflow.experimental.graphical_approximator.example_approximators import crossed_design_irt_approximator
-    from bayesflow.experimental.graphical_simulator.example_simulators import crossed_design_irt_simulator
+def test_defaults(two_data_nodes_approximator):
+    approximator = two_data_nodes_approximator
 
-    crossed_design_irt_simulator = crossed_design_irt_simulator()
-    crossed_design_irt_approximator = crossed_design_irt_approximator()
+    assert isinstance(approximator.adapter, Adapter)
+    assert approximator.data_nodes == ["w", "y"]
 
-    data = crossed_design_irt_simulator.sample(2, meta={"num_questions": 15, "num_students": 200})
-    assert isinstance(crossed_design_irt_approximator.subset_data(data), dict)
-
-    data["additional_key"] = keras.random.normal((2, 1))
-    with pytest.raises(KeyError):
-        crossed_design_irt_approximator.subset_data(data)
+    # one encoder per network and data node it conditions on
+    for network_encoders in approximator.encoders:
+        assert sorted(network_encoders) == ["w", "y"]
+        for encoder in network_encoders.values():
+            assert isinstance(encoder, ExchangeableEncoder)
 
 
-@pytest.mark.tensorflow
-def test_fit_with_dataset_tensorflow(single_level_simulator, single_level_approximator):
-    data = single_level_simulator.sample(8)
-    approximator = single_level_approximator
-    approximator.compile()
-
-    fit = approximator.fit(dataset=data, batch_size=4, epochs=1)
-    assert isinstance(fit, History)
-
-
-@pytest.mark.tensorflow
-def test_fit_with_simulator_tensorflow(single_level_simulator, single_level_approximator):
-    approximator = single_level_approximator
-    approximator.compile()
-
-    fit = approximator.fit(simulator=single_level_simulator, batch_size=4, num_batches=2, epochs=1)
-    assert isinstance(fit, History)
-
-
-@pytest.mark.tensorflow
-def test_fit_generator_coverage(single_level_simulator, single_level_approximator):
-    import tensorflow as tf
-
-    data = single_level_simulator.sample(2)
-    adapted = single_level_approximator.adapter(data)
-    single_level_approximator.build(single_level_approximator._data_shapes(adapted))
-    single_level_approximator.compile()
-
-    original_from_gen = tf.data.Dataset.from_generator
-
-    def covering_from_gen(gen_func, *args, **kwargs):
-        gen = gen_func()
-        for _ in range(2):
-            try:
-                next(gen)
-            except StopIteration:
-                break
-        return original_from_gen(gen_func, *args, **kwargs)
-
-    tf.data.Dataset.from_generator = covering_from_gen
-    try:
-        single_level_approximator.fit(dataset=data, batch_size=2, epochs=1)
-        single_level_approximator.fit(simulator=single_level_simulator, batch_size=2, num_batches=1, epochs=1)
-    finally:
-        tf.data.Dataset.from_generator = original_from_gen
+def test_non_amortizable_networks_are_sequential(crossed_design_irt_approximator):
+    assert crossed_design_irt_approximator.sequential == ["questions"]

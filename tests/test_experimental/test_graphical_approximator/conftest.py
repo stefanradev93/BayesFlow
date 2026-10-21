@@ -1,7 +1,57 @@
+import numpy as np
 import pytest
-from bayesflow.networks import DeepSet, CouplingFlow
-from bayesflow.adapters import Adapter
-from bayesflow.experimental.graphical_approximator import GraphicalApproximator
+
+
+def approximator_for(simulator, network=None):
+    from bayesflow.experimental.graphical_approximator import GraphicalApproximator
+    from bayesflow.networks import CouplingFlow
+
+    network = network or CouplingFlow
+    graph = simulator.graph.expand().invert()
+
+    inference_networks = []
+    for target_nodes in graph.networks():
+        inference_networks.append(network())
+
+    return GraphicalApproximator(graph, inference_networks=inference_networks)
+
+
+# a survey, where every square is surveyed in one window of years, so obs has no row for most (square, year) pairs
+def squares_reps(size):
+    return np.random.randint(1, 5, size=size)
+
+
+def surveyed(combinations, num_years):
+    _, first_row, square = np.unique(combinations["squares"], return_index=True, return_inverse=True)
+    year = combinations["years"] % num_years
+    years_of_square = num_years[first_row]
+
+    first = np.random.randint(0, years_of_square)
+    last = first + np.random.randint(0, years_of_square - first)
+
+    return ((year >= first[square]) & (year <= last[square])).astype(int)
+
+
+@pytest.fixture()
+def survey_simulator():
+    from bayesflow.experimental.graphical_simulator import GraphicalSimulator
+
+    simulator = GraphicalSimulator(meta_fn=lambda: {"num_years": 5})
+    simulator.add_node("globals", sample_fn=lambda: {"mu": np.random.normal()})
+    simulator.add_node("squares", sample_fn=lambda mu: {"alpha": np.random.normal(mu)}, reps=squares_reps)
+    simulator.add_node("years", sample_fn=lambda: {"beta": np.random.normal()}, reps="num_years")
+    simulator.add_node("obs", sample_fn=lambda alpha, beta: {"count": np.random.normal(alpha + beta)}, reps=surveyed)
+    simulator.add_edge("globals", "squares")
+    simulator.add_edge("globals", "years")
+    simulator.add_edge("squares", "obs")
+    simulator.add_edge("years", "obs")
+
+    return simulator
+
+
+@pytest.fixture()
+def survey_approximator(survey_simulator):
+    return approximator_for(survey_simulator)
 
 
 @pytest.fixture()
@@ -12,10 +62,8 @@ def single_level_simulator():
 
 
 @pytest.fixture()
-def single_level_approximator():
-    from bayesflow.experimental.graphical_approximator.example_approximators import single_level_approximator
-
-    return single_level_approximator()
+def single_level_approximator(single_level_simulator):
+    return approximator_for(single_level_simulator)
 
 
 @pytest.fixture()
@@ -26,38 +74,30 @@ def two_level_simulator():
 
 
 @pytest.fixture()
-def two_level_approximator():
-    from bayesflow.experimental.graphical_approximator.example_approximators import two_level_approximator
-
-    return two_level_approximator()
+def two_level_approximator(two_level_simulator):
+    return approximator_for(two_level_simulator)
 
 
-@pytest.fixture()
-def two_level_repeated_roots_simulator():
-    from bayesflow.experimental.graphical_simulator.example_simulators import two_level_simulator
-
-    return two_level_simulator(repeated_roots=True)
+# reps are saved with the approximator, so they must be a top-level function
+def w_reps(size):
+    return np.random.randint(3, 6, size=size)
 
 
 @pytest.fixture()
-def two_level_repeated_roots_approximator():
+def two_data_nodes_simulator():
     from bayesflow.experimental.graphical_simulator.example_simulators import two_level_simulator
 
-    simulator = two_level_simulator(repeated_roots=True)
+    # a second data node below locals
+    simulator = two_level_simulator()
+    simulator.add_node("w", sample_fn=lambda local_mean: {"w": np.random.normal(local_mean, 0.5, size=2)}, reps=w_reps)
+    simulator.add_edge("locals", "w")
 
-    adapter = Adapter()
-    adapter.to_array()
-    adapter.convert_dtype("float64", "float32")
+    return simulator
 
-    summary_networks = [DeepSet(summary_dim=10), DeepSet(summary_dim=20), DeepSet(summary_dim=30)]
-    inference_networks = [CouplingFlow(), CouplingFlow()]
 
-    inverted_graph = simulator.graph.invert()
-    approximator = GraphicalApproximator(
-        inverted_graph, adapter=adapter, inference_networks=inference_networks, summary_networks=summary_networks
-    )
-
-    return approximator
+@pytest.fixture()
+def two_data_nodes_approximator(two_data_nodes_simulator):
+    return approximator_for(two_data_nodes_simulator)
 
 
 @pytest.fixture()
@@ -68,10 +108,8 @@ def three_level_simulator():
 
 
 @pytest.fixture()
-def three_level_approximator():
-    from bayesflow.experimental.graphical_approximator.example_approximators import three_level_approximator
-
-    return three_level_approximator()
+def three_level_approximator(three_level_simulator):
+    return approximator_for(three_level_simulator)
 
 
 @pytest.fixture()
@@ -82,7 +120,5 @@ def crossed_design_irt_simulator():
 
 
 @pytest.fixture()
-def crossed_design_irt_approximator():
-    from bayesflow.experimental.graphical_approximator.example_approximators import crossed_design_irt_approximator
-
-    return crossed_design_irt_approximator()
+def crossed_design_irt_approximator(crossed_design_irt_simulator):
+    return approximator_for(crossed_design_irt_simulator)

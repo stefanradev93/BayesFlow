@@ -2,8 +2,8 @@ import keras
 import numpy as np
 import pytest
 
-from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
-from bayesflow.experimental.graphical_approximator_new.encoder import ExchangeableEncoder
+from bayesflow.experimental.graphical_approximator import GraphicalApproximator
+from bayesflow.experimental.graphical_approximator.encoder import ExchangeableEncoder
 from bayesflow.networks import CouplingFlow
 
 
