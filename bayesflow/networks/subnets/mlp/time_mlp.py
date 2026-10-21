@@ -81,7 +81,6 @@ class TimeMLP(keras.Layer):
         self.widths = widths
         self.time_embedding_dim = time_embedding_dim
         self.fourier_scale = fourier_scale
-        self.activation = activation
         self.kernel_initializer = kernel_initializer
         self.residual = residual
         self.dropout = dropout
@@ -181,9 +180,7 @@ class TimeMLP(keras.Layer):
             hc_shape = self.c_proj.compute_output_shape(conditions_shape)
 
             if self.merge == "concat":
-                merge_shape = list(h_shape)
-                merge_shape[-1] = merge_shape[-1] + self.widths[0]
-                merge_shape = tuple(merge_shape)
+                merge_shape = tuple(h_shape[:-1]) + (h_shape[-1] + self.widths[0],)
             else:
                 merge_shape = h_shape
 

@@ -1,4 +1,5 @@
 from collections.abc import Mapping, Sequence, Callable
+from typing import Any
 
 import os
 
@@ -103,8 +104,8 @@ class EnsembleWorkflow(BasicWorkflow):
         inference_conditions: Sequence[str] | str | None = None,
         summary_variables: Sequence[str] | str | None = None,
         standardize: Sequence[str] | str | None = "inference_variables",
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         _inference_networks = {}
         if isinstance(inference_networks, dict):
             if ensemble_size is not None:
@@ -177,7 +178,7 @@ class EnsembleWorkflow(BasicWorkflow):
         self.member_names = tuple(self.approximator.approximators.keys())
 
         self._init_optimizer(initial_learning_rate, optimizer, **kwargs.get("optimizer_kwargs", {}))
-        self._init_checkpointing(checkpoint_filepath, checkpoint_name, save_weights_only, save_best_only)
+        self._init_checkpointing(checkpoint_filepath, checkpoint_name, save_weights_only, save_best_only, restore=False)
         self.history = None
         self._needs_compile = True
 
@@ -190,7 +191,7 @@ class EnsembleWorkflow(BasicWorkflow):
         keep_optimizer: bool = False,
         validation_data: Mapping[str, np.ndarray] | int | None = None,
         augmentations: Mapping[str, Callable] | Callable | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> keras.callbacks.History:
         """
         Train the ensemble of approximators offline using a fixed dataset. This approach will be faster than online
@@ -259,7 +260,7 @@ class EnsembleWorkflow(BasicWorkflow):
         keep_optimizer: bool = False,
         validation_data: Mapping[str, np.ndarray] | int | None = None,
         augmentations: Mapping[str, Callable] | Callable | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> keras.callbacks.History:
         """
         Train the ensemble of approximators using an online data-generating process. The dataset is dynamically
@@ -329,7 +330,7 @@ class EnsembleWorkflow(BasicWorkflow):
         keep_optimizer: bool = False,
         validation_data: Mapping[str, np.ndarray] | int | None = None,
         augmentations: Mapping[str, Callable] | Callable | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> keras.callbacks.History:
         """
         Train the ensemble of approximators using data stored on disk. This approach is suitable for large sets of

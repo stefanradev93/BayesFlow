@@ -4,7 +4,7 @@ from typing import Literal
 from keras import ops
 
 from bayesflow.types import Tensor
-from bayesflow.utils.serialization import deserialize, serializable
+from bayesflow.utils.serialization import serializable
 
 from .noise_schedule import NoiseSchedule
 
@@ -37,7 +37,7 @@ class EDMNoiseSchedule(NoiseSchedule):
         sigma_max: float = 80.0,
         variance_type: Literal["preserving", "exploding"] = "preserving",
     ):
-        super().__init__(name="edm_noise_schedule", variance_type=variance_type)
+        super().__init__(name="edm_noise_schedule", variance_type=variance_type, weighting="edm")
         self.sigma_data = sigma_data
         # training settings
         self.p_mean = -1.2
@@ -104,10 +104,16 @@ class EDMNoiseSchedule(NoiseSchedule):
         factor = ops.exp(-log_snr_t) / (1 + ops.exp(-log_snr_t))
         return -factor * dsnr_dx
 
-    def get_weights_for_snr(self, log_snr_t: Tensor) -> Tensor:
+    def weights_for_snr(self, log_snr_t: Tensor, loss_type: str = "noise") -> Tensor:
         """Get weights for the signal-to-noise ratio (snr) for a given log signal-to-noise ratio (lambda)."""
-        # for F-loss: w = (ops.exp(-log_snr_t) + sigma_data^2) / (ops.exp(-log_snr_t)*sigma_data^2)
+        if loss_type == "F":
+            # the EDM weighting of the noise loss is the unweighted F loss
+            return ops.ones_like(log_snr_t)
         return 1 + ops.exp(-log_snr_t) / ops.square(self.sigma_data)
+
+    def validate(self, loss_type: str = "noise"):
+        # the EDM weighting is also defined for the F loss, see weights_for_snr
+        super().validate(loss_type="noise" if loss_type == "F" else loss_type)
 
     def get_config(self):
         config = {
@@ -117,7 +123,3 @@ class EDMNoiseSchedule(NoiseSchedule):
             "variance_type": self._variance_type,
         }
         return config
-
-    @classmethod
-    def from_config(cls, config, custom_objects=None):
-        return cls(**deserialize(config, custom_objects=custom_objects))

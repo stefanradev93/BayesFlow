@@ -4,7 +4,7 @@ from typing import Literal
 from keras import ops
 
 from bayesflow.types import Tensor
-from bayesflow.utils.serialization import deserialize, serializable
+from bayesflow.utils.serialization import serializable
 
 from .noise_schedule import NoiseSchedule
 
@@ -36,7 +36,7 @@ class CosineNoiseSchedule(NoiseSchedule):
     shift : float, optional
         Shift the log signal-to-noise ratio (lambda) by this amount. Default is 0.0.
         For images, use shift = log(base_resolution / d), where d is the used resolution of the image.
-    weighting : Literal["sigmoid", "likelihood_weighting"] | None, optional
+    weighting : Literal["likelihood_weighting"] | None, optional
         The type of weighting function to use for the noise schedule. Default is `None`.
     """
 
@@ -45,7 +45,7 @@ class CosineNoiseSchedule(NoiseSchedule):
         min_log_snr: float = -12,
         max_log_snr: float = 12,
         shift: float = 0.0,
-        weighting: Literal["sigmoid", "likelihood_weighting"] | None = None,
+        weighting: Literal["likelihood_weighting"] | None = None,
     ):
         super().__init__(name="cosine_noise_schedule", variance_type="preserving", weighting=weighting)
         self._shift = shift
@@ -98,7 +98,3 @@ class CosineNoiseSchedule(NoiseSchedule):
             "weighting": self._weighting,
         }
         return config
-
-    @classmethod
-    def from_config(cls, config, custom_objects=None):
-        return cls(**deserialize(config, custom_objects=custom_objects))

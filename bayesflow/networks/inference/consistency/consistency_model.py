@@ -99,12 +99,11 @@ class ConsistencyModel(InferenceNetwork):
 
         self.total_steps = float(total_steps)
 
-        subnet_kwargs = subnet_kwargs or {}
-        if subnet == "time_mlp":
-            subnet_kwargs = CONSISTENCY_MODEL_DEFAULTS | subnet_kwargs
-        if subnet == "diffusion_transformer":
-            subnet_kwargs = DIFFUSION_TRANSFORMER_DEFAULTS | subnet_kwargs
-        self.subnet = find_network(subnet, **subnet_kwargs)
+        subnet_defaults = {
+            "time_mlp": CONSISTENCY_MODEL_DEFAULTS,
+            "diffusion_transformer": DIFFUSION_TRANSFORMER_DEFAULTS,
+        }
+        self.subnet = find_network(subnet, **(subnet_defaults.get(subnet, {}) | (subnet_kwargs or {})))
 
         self.output_projector = None
         self.sigma2 = ops.convert_to_tensor(sigma2)
@@ -185,20 +184,7 @@ class ConsistencyModel(InferenceNetwork):
             return
 
         self.base_distribution.build(xz_shape)
-
-        # construct input shape for subnet and subnet projector
-        time_shape = (xz_shape[0], 1)  # same batch dims, 1 feature
-        self.subnet.build((xz_shape, time_shape, conditions_shape))
-        out_shape = self.subnet.compute_output_shape((xz_shape, time_shape, conditions_shape))
-        if out_shape[-1] != xz_shape[-1]:
-            self.output_projector = keras.layers.Dense(
-                units=xz_shape[-1],
-                bias_initializer="zeros",
-                name="output_projector",
-            )
-        else:
-            self.output_projector = keras.layers.Identity()
-        self.output_projector.build(out_shape)
+        self.output_projector = self._build_subnet_and_projector(xz_shape, conditions_shape)
 
         # Choose coefficient according to [2] Section 3.3
         self._c_huber = 0.00054 * ops.sqrt(xz_shape[-1])
