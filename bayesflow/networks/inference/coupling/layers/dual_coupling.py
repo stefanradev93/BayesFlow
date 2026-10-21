@@ -7,7 +7,6 @@ from bayesflow.types import Shape, Tensor
 from .single_coupling import SingleCoupling
 
 from ..invertible_layer import InvertibleLayer
-from ..masks import split_mask
 
 
 @serializable("bayesflow.networks")
@@ -82,7 +81,9 @@ class DualCoupling(InvertibleLayer):
     ) -> tuple[Tensor, Tensor]:
         """Transform (x1, x2) -> (g(x1; f(x2; x1)), f(x2; x1))"""
         x1, x2 = x[..., : self.pivot], x[..., self.pivot :]
-        mask1, mask2 = split_mask(fixed_target_mask, self.pivot)
+        mask1 = mask2 = None
+        if fixed_target_mask is not None:
+            mask1, mask2 = fixed_target_mask[..., : self.pivot], fixed_target_mask[..., self.pivot :]
         (z1, z2), log_det1 = self.coupling1(
             x1, x2, conditions=conditions, training=training, fixed_target_mask=mask2, **kwargs
         )
@@ -103,7 +104,9 @@ class DualCoupling(InvertibleLayer):
     ) -> tuple[Tensor, Tensor]:
         """Transform (g(x1; f(x2; x1)), f(x2; x1)) -> (x1, x2)"""
         z1, z2 = z[..., : self.pivot], z[..., self.pivot :]
-        mask1, mask2 = split_mask(fixed_target_mask, self.pivot)
+        mask1 = mask2 = None
+        if fixed_target_mask is not None:
+            mask1, mask2 = fixed_target_mask[..., : self.pivot], fixed_target_mask[..., self.pivot :]
 
         log_det2 = 0
         if self.pivot:
