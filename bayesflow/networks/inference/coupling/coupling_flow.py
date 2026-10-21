@@ -2,13 +2,14 @@ from typing import Any
 
 import keras
 
+from bayesflow.masking import MaskHandler
 from bayesflow.types import Tensor
 from bayesflow.utils import find_permutation, weighted_mean
 from bayesflow.utils.serialization import serializable, serialize
 
 from .actnorm import ActNorm
 from .layers import DualCoupling
-from .masks import permute_like, trace_permutations
+from .permutations import FixedPermutation
 
 from ...inference import InferenceNetwork
 
@@ -85,6 +86,10 @@ class CouplingFlow(InferenceNetwork):
     transform_kwargs : dict[str, Any], optional
         Keyword arguments forwarded to the constructor of the transform selected
         by *transform* (e.g., ``bins`` for splines).
+    mask_handler : ~bayesflow.masking.MaskHandler, optional
+        Handler used to generate and route masks. If ``None``, a default mask handler is created.
+        Note: the coupling flow currently only supports ``fixed_target_mask``.
+        Only ``fixed_target_prob`` can be specified for the mask handler.
     **kwargs
         Additional keyword arguments passed to the base ``InferenceNetwork``.
 
@@ -111,9 +116,10 @@ class CouplingFlow(InferenceNetwork):
         base_distribution: str | keras.Layer = "normal",
         subnet_kwargs: dict[str, Any] = None,
         transform_kwargs: dict[str, Any] = None,
+        mask_handler: MaskHandler | None = None,
         **kwargs,
     ):
-        super().__init__(base_distribution=base_distribution, **kwargs)
+        super().__init__(base_distribution=base_distribution, mask_handler=mask_handler, **kwargs)
 
         self.subnet = subnet
         self.depth = depth
@@ -165,12 +171,24 @@ class CouplingFlow(InferenceNetwork):
 
         return base_config | serialize(config)
 
+    def _trace_permutations(self, mask: Tensor | None) -> list[Tensor | None]:
+        """Return a target mask or value in the order each invertible layer receives it, then in latent order."""
+        if mask is None:
+            return [None] * (len(self.invertible_layers) + 1)
+        masks = [mask]
+        for layer in self.invertible_layers:
+            if isinstance(layer, FixedPermutation):
+                mask = keras.ops.take(mask, layer.forward_indices, axis=-1)
+            masks.append(mask)
+        return masks
+
     def _forward(
         self, x: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
     ) -> Tensor | tuple[Tensor, Tensor]:
         self.mask_handler.reject_structural_masks(kwargs, reason="coupling layers pass no masks to their subnets")
         masks = self.mask_handler.resolve(kwargs, targets=x, stage="training" if training else "inference")
-        *layer_masks, latent_mask = trace_permutations(self.invertible_layers, masks.fixed_target_mask)
+        # latent_mask is the fixed_target_mask after permutation (and lives in z-space)
+        *layer_masks, latent_mask = self._trace_permutations(masks.fixed_target_mask)
 
         z = x
         log_det = keras.ops.zeros(keras.ops.shape(x)[:-1])
@@ -190,10 +208,10 @@ class CouplingFlow(InferenceNetwork):
     ) -> Tensor | tuple[Tensor, Tensor]:
         self.mask_handler.reject_structural_masks(kwargs, reason="coupling layers pass no masks to their subnets")
         masks = self.mask_handler.resolve(kwargs, targets=z)
-        *layer_masks, latent_mask = trace_permutations(self.invertible_layers, masks.fixed_target_mask)
+        *layer_masks, latent_mask = self._trace_permutations(masks.fixed_target_mask)
 
         # fixed dims take their fixed value or zero when there is none (see flow matching)
-        fixed_value = permute_like(self.invertible_layers, masks.fixed_target_value)
+        fixed_value = self._trace_permutations(masks.fixed_target_value)[-1]
         z = self.mask_handler.maybe_apply(z, latent_mask, fixed_value)
 
         x = z
