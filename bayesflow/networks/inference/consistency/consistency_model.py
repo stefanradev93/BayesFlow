@@ -116,6 +116,7 @@ class ConsistencyModel(InferenceNetwork):
 
         self.s0 = s0
         self.s1 = s1
+        self.steps = s0 + 1
 
         if self.total_steps < self.s0:
             raise ValueError(f"total_steps={self.total_steps} must be greater than or equal to s0={self.s0}.")
@@ -258,7 +259,7 @@ class ConsistencyModel(InferenceNetwork):
         training    : bool, optional, default: True
             Whether internal layers (e.g., dropout) should behave in train or inference mode.
         **kwargs    : dict, optional, default: {}
-            Additional keyword arguments. Include `steps` (default: s0+1) to
+            Additional keyword arguments. Include `steps` (default: ``self.steps``, s0+1) to
             adjust the number of sampling steps. Subnet-related kwargs (e.g., masks)
             are passed to the subnet.
 
@@ -275,7 +276,7 @@ class ConsistencyModel(InferenceNetwork):
             subnet=self.subnet,
         )
         subnet_kwargs = masks.subnet_kwargs
-        steps = int(kwargs.get("steps", self.s0 + 1))
+        steps = int(kwargs.get("steps", self.steps))
 
         if steps not in self._unique_n:
             logging.warning(

@@ -34,7 +34,7 @@ class FlowMatching(InferenceNetwork):
     """Optimal-transport flow matching for simulation-based inference.
 
     Implements Optimal Transport Flow Matching, originally introduced as Rectified
-    Flow, with ideas incorporated from [1-5].
+    Flow, with ideas incorporated from [1-6].
 
     The model learns a velocity field that transports samples from a base
     distribution to the target posterior. It supports optional mini-batch optimal
@@ -54,7 +54,7 @@ class FlowMatching(InferenceNetwork):
     use_optimal_transport : bool
         Whether to apply optimal transport for improved training stability.
         Default is ``False``.  Note: this will increase training time by
-        approximately 2.5×, but may lead to faster inference.
+        approximately 2.5x, but may lead to faster inference.
     loss_fn : str or keras.Loss
         The loss function used for training.  Default is ``"mse"``.
     integrate_kwargs : dict[str, Any], optional
@@ -92,6 +92,8 @@ class FlowMatching(InferenceNetwork):
         Optimal Transport for Conditional Flow-Based Generation.
     [8] Fluri et al. (2024). Improving Flow Matching for Simulation-Based
         Inference.
+    [9] Arruda, J., Bracher, N., Köthe, U., Hasenauer, J., & Radev, S. T. (2026).
+        Diffusion Models in Simulation-Based Inference: A Tutorial Review.
     """
 
     def __init__(

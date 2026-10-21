@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from bayesflow.masking import InferenceMasks, MaskHandler
-from bayesflow.networks import DiffusionModel, FlowMatching
+from bayesflow.networks import DiffusionModel
 
 from .conftest import make_network
 
@@ -80,6 +80,7 @@ class InvariantRecordingSubnet(keras.Layer):
     [
         ("diffusion", "bayesflow.networks.inference.diffusion.diffusion_model"),
         ("flow_matching", "bayesflow.networks.inference.flow_matching.flow_matching"),
+        ("mean_flow", "bayesflow.experimental.mean_flow.mean_flow"),
     ],
 )
 def test_density_separates_solver_kwargs_and_reuses_projectors(
@@ -109,6 +110,9 @@ def test_density_separates_solver_kwargs_and_reuses_projectors(
 
     network = make_network(network_name, subnet=InvariantRecordingSubnet(record=False))
     network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
+    if network_name == "mean_flow":
+        # the mean flow integrates an ODE only for its instantaneous flow
+        network.use_instantaneous_flow = True
     runtime_kwargs = {
         "seed": 17,
         "hutchinson_steps": 1,
@@ -367,11 +371,9 @@ def test_diffusion_public_fields_project_fixed_coordinates(targets, conditions, 
         np.testing.assert_array_equal(_numpy(output)[:, 1], np.zeros((2,), dtype=np.float32))
 
 
-def test_flow_matching_public_velocity_projects_fixed_coordinates(targets, conditions, fixed_target_mask):
-    network = FlowMatching(
-        subnet=InvariantRecordingSubnet(record=False),
-        integrate_kwargs={"method": "euler", "steps": 2},
-    )
+@pytest.mark.parametrize("network_name", ["flow_matching", "mean_flow"])
+def test_flow_public_velocity_projects_fixed_coordinates(network_name, targets, conditions, fixed_target_mask):
+    network = make_network(network_name, subnet=InvariantRecordingSubnet(record=False))
     network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
 
     velocity = network.velocity(
@@ -446,16 +448,14 @@ def test_stable_consistency_all_fixed_loss_stays_zero_with_nonzero_weight_networ
     )
 
 
-def test_flow_matching_rejects_explicit_masks_with_optimal_transport(
+@pytest.mark.parametrize("network_name", ["flow_matching", "mean_flow"])
+def test_flow_rejects_explicit_masks_with_optimal_transport(
+    network_name,
     targets,
     conditions,
     fixed_target_mask,
 ):
-    network = FlowMatching(
-        use_optimal_transport=True,
-        subnet_kwargs={"widths": (8, 8)},
-        integrate_kwargs={"method": "euler", "steps": 2},
-    )
+    network = make_network(network_name, use_optimal_transport=True)
     network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
 
     with pytest.raises(ValueError, match="optimal transport"):

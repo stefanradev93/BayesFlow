@@ -5,6 +5,8 @@ import pytest
 from bayesflow.masking import MaskHandler
 from bayesflow.utils.serialization import deserialize, serialize
 
+from .conftest import make_network
+
 
 def _numpy(value):
     return keras.ops.convert_to_numpy(value)
@@ -16,7 +18,7 @@ def _build(network, targets, conditions):
 
 
 def _skip_unsupported_torch_forward_ad(network_name, subnet):
-    if network_name != "stable_consistency" or subnet != "diffusion_transformer":
+    if network_name not in ("stable_consistency", "mean_flow") or subnet != "diffusion_transformer":
         return
     if keras.backend.backend() != "torch":
         return
@@ -24,7 +26,7 @@ def _skip_unsupported_torch_forward_ad(network_name, subnet):
     import torch
 
     if torch.cuda.device_count() == 0:
-        pytest.skip("PyTorch CPU attention does not support the forward-mode AD used by stable consistency.")
+        pytest.skip(f"PyTorch CPU attention does not support the forward-mode AD used by {network_name}.")
 
 
 class RecordingSubnet(keras.Layer):
@@ -444,19 +446,14 @@ def test_sampling_keeps_fixed_targets_exactly(
     )
 
 
-def test_flow_matching_forward_uses_explicit_fixed_target_value(
+@pytest.mark.parametrize("network_name", ["flow_matching", "mean_flow"])
+def test_flow_forward_uses_explicit_fixed_target_value(
+    network_name,
     targets,
     conditions,
     fixed_target_mask,
 ):
-    from bayesflow.networks import FlowMatching
-
-    subnet = RecordingSubnet()
-    network = FlowMatching(
-        subnet=subnet,
-        integrate_kwargs={"method": "euler", "steps": 2},
-    )
-    network.build(tuple(targets.shape), conditions_shape=tuple(conditions.shape))
+    network = _build(make_network(network_name, subnet=RecordingSubnet()), targets, conditions)
     fixed_target_value = keras.ops.convert_to_tensor(
         np.asarray(
             [[-4.0, 7.5, 2.0], [3.0, -2.5, 1.0]],
@@ -477,3 +474,39 @@ def test_flow_matching_forward_uses_explicit_fixed_target_value(
         rtol=0.0,
         atol=1e-6,
     )
+
+
+# a call option of each network that differs from its default in make_network
+CALL_OPTIONS = {
+    "diffusion": dict(steps=3),
+    "flow_matching": dict(steps=3),
+    "consistency": dict(steps=4),
+    "stable_consistency": dict(steps=3, rho=3.0),
+    "mean_flow": dict(steps=3, rho=3.0, sigma_min=1e-2),
+}
+
+
+def test_call_options_are_settable_as_attributes_with_masks(
+    network_name, network_factory, targets, conditions, fixed_target_mask
+):
+    """Keras forbids mixing tensor masks with non-tensor options in a call, so the options must be settable."""
+    network = _build(network_factory(), targets, conditions)
+    options = CALL_OPTIONS[network_name]
+    z = keras.random.normal(keras.ops.shape(targets), seed=5)
+
+    def sample(method, **kwargs):
+        seed = keras.random.SeedGenerator(7)
+        return _numpy(method(z, conditions=conditions, seed=seed, fixed_target_mask=fixed_target_mask, **kwargs))
+
+    default = sample(network, inverse=True)
+    expected = sample(network._inverse, **options)
+
+    if network_name in ("diffusion", "flow_matching"):
+        network.integrate_kwargs = network.integrate_kwargs | options
+    else:
+        for key, value in options.items():
+            setattr(network, key, value)
+    result = sample(network, inverse=True)
+
+    np.testing.assert_allclose(result, expected, atol=1e-6)
+    assert np.max(np.abs(result - default)) > 1e-6
