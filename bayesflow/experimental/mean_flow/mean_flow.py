@@ -167,13 +167,12 @@ class MeanFlow(InferenceNetwork):
         self.adaptive_loss_power = adaptive_loss_power
         self.adaptive_loss_eps = adaptive_loss_eps
 
-        subnet_kwargs = subnet_kwargs or {}
-        if subnet == "time_mlp":
-            subnet_kwargs = MEAN_FLOW_MODEL_DEFAULTS | subnet_kwargs
-        if subnet == "diffusion_transformer":
-            fourier_scale = {"fourier_scale": MEAN_FLOW_MODEL_DEFAULTS["fourier_scale"]}
-            subnet_kwargs = DIFFUSION_TRANSFORMER_DEFAULTS | fourier_scale | subnet_kwargs
-        self.subnet = find_network(subnet, **subnet_kwargs)
+        subnet_defaults = {
+            "time_mlp": MEAN_FLOW_MODEL_DEFAULTS,
+            "diffusion_transformer": DIFFUSION_TRANSFORMER_DEFAULTS
+            | {"fourier_scale": MEAN_FLOW_MODEL_DEFAULTS["fourier_scale"]},
+        }
+        self.subnet = find_network(subnet, **(subnet_defaults.get(subnet, {}) | (subnet_kwargs or {})))
         if (density_head or velocity_head_layers > 0) and not hasattr(self.subnet, "embed"):
             raise ValueError(
                 f"'density_head' and 'velocity_head_layers' require a subnet with 'embed', which "
@@ -299,9 +298,16 @@ class MeanFlow(InferenceNetwork):
                     f"the transport assignment would reorder them ({names}). Use generated masks or "
                     "disable optimal transport."
                 )
-            z, x, conditions = optimal_transport(
-                z, x, conditions=conditions, seed=self.seed_generator, **self.optimal_transport_kwargs
+            z, x, conditions, assignments = optimal_transport(
+                z,
+                x,
+                conditions=conditions,
+                seed=self.seed_generator,
+                return_assignments=True,
+                **self.optimal_transport_kwargs,
             )
+            if sample_weight is not None:
+                sample_weight = keras.ops.take(sample_weight, assignments, axis=0)
 
         masks = self.mask_handler.resolve(kwargs, targets=x, conditions=conditions, stage=stage, subnet=self.subnet)
 
@@ -552,6 +558,10 @@ class MeanFlow(InferenceNetwork):
         use_density_head = kwargs.pop("use_density_head", self.use_density_head) and self.density_head
 
         if kwargs.pop("use_instantaneous_flow", self.use_instantaneous_flow):
+            if kwargs.get("method", self.integrate_kwargs["method"]) == "glass":
+                logging.warning("GLASS only supports sampling. Falling back to tsit5 ODE solver for the forward pass.")
+                kwargs = kwargs | {"method": "tsit5"}
+
             z, trace = self._integrate_velocity(x, 0.0, 1.0, conditions, density, training, masks, kwargs)
             if density:
                 return z, self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) + trace

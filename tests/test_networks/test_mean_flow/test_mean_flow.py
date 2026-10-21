@@ -2,6 +2,7 @@ import keras
 import numpy as np
 import pytest
 
+import bayesflow.experimental.mean_flow.mean_flow as mean_flow_module
 from bayesflow.experimental import MeanFlow
 from bayesflow.masking import InferenceMasks
 from bayesflow.utils.serialization import serialize, deserialize
@@ -42,6 +43,34 @@ def test_compute_metrics_with_sample_weight(random_samples, random_conditions):
     metrics = network.compute_metrics(random_samples, conditions=random_conditions, sample_weight=sample_weight)
     loss = keras.ops.convert_to_numpy(metrics["loss"])
     assert np.isfinite(loss), f"Loss is not finite: {loss}"
+
+
+def test_optimal_transport_reorders_sample_weight(monkeypatch, random_samples, random_conditions):
+    assignments = keras.ops.arange(keras.ops.shape(random_samples)[0] - 1, -1, -1)
+
+    def fake_optimal_transport(z, x, conditions=None, return_assignments=False, **kwargs):
+        assert return_assignments
+        x = keras.ops.take(x, assignments, axis=0)
+        if conditions is not None:
+            conditions = keras.ops.take(conditions, assignments, axis=0)
+        return z, x, conditions, assignments
+
+    captured = {}
+    weighted_mean = mean_flow_module.weighted_mean
+
+    def capture_weights(elements, weights=None):
+        captured["weights"] = weights
+        return weighted_mean(elements, weights)
+
+    monkeypatch.setattr(mean_flow_module, "optimal_transport", fake_optimal_transport)
+    monkeypatch.setattr(mean_flow_module, "weighted_mean", capture_weights)
+
+    network = make_mean_flow(random_samples, random_conditions, use_optimal_transport=True)
+    sample_weight = keras.ops.arange(1, keras.ops.shape(random_samples)[0] + 1, dtype=random_samples.dtype)
+    sample_weight = keras.ops.expand_dims(sample_weight, axis=-1)
+    network.compute_metrics(random_samples, conditions=random_conditions, sample_weight=sample_weight)
+
+    assert_allclose(captured["weights"], keras.ops.take(sample_weight, assignments, axis=0))
 
 
 def test_time_schedule_at_call_time(random_samples, random_conditions):
@@ -89,6 +118,20 @@ def test_instantaneous_flow_adaptive(random_samples, random_conditions):
     samples = network.sample((batch_size,), conditions=random_conditions, use_instantaneous_flow=True)
     assert keras.ops.shape(samples) == keras.ops.shape(random_samples)
     assert np.all(np.isfinite(keras.ops.convert_to_numpy(samples)))
+
+
+@pytest.mark.parametrize("method_at_call_time", [False, True])
+def test_instantaneous_flow_forward_glass_falls_back_to_tsit5(method_at_call_time, random_samples, random_conditions):
+    integrate_kwargs = None if method_at_call_time else {"method": "glass", "steps": 2}
+    network = make_mean_flow(random_samples, random_conditions, integrate_kwargs=integrate_kwargs)
+    kwargs = dict(conditions=random_conditions, use_instantaneous_flow=True, steps=2)
+    if method_at_call_time:
+        kwargs["method"] = "glass"
+
+    output = network(random_samples, **kwargs)
+    expected = network(random_samples, **(kwargs | {"method": "tsit5"}))
+
+    assert_allclose(output, expected, atol=1e-6)
 
 
 def test_serialize_deserialize(random_samples, random_conditions):
