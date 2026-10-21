@@ -223,7 +223,7 @@ def test_load_approximator_pathlib_path(tiny_workflow):
     assert_models_equal(tiny_workflow.approximator, workflow2.approximator)
 
 
-def test_load_approximator_restore_flag(tiny_workflow):
+def test_load_approximator_restore_flag(tiny_workflow, caplog):
     """restore=True in the constructor automatically loads the checkpoint."""
     from bayesflow.networks import CouplingFlow
 
@@ -236,6 +236,8 @@ def test_load_approximator_restore_flag(tiny_workflow):
         restore=True,
     )
     assert_models_equal(tiny_workflow.approximator, workflow2.approximator)
+    warning = next(record.message for record in caplog.records if "Checkpoint file exists" in record.message)
+    assert "To restore the approximator" not in warning
 
 
 def test_load_approximator_no_path_no_checkpoint_raises():
@@ -314,4 +316,7 @@ def test_checkpoint_exists_warning(tmp_path, caplog):
             checkpoint_name="model",
         )
 
-    assert any("Checkpoint file exists" in record.message for record in caplog.records)
+    warning = next(record.message for record in caplog.records if "Checkpoint file exists" in record.message)
+    assert "not automatically loaded" not in warning
+    assert "Upon refitting, the checkpoint will be overwritten." in warning
+    assert "To restore the approximator" in warning
