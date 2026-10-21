@@ -3,7 +3,8 @@ import numpy as np
 import pytest
 
 from bayesflow.experimental.graphical_simulator_new import GraphicalSimulator
-from bayesflow.experimental.graphical_simulator_new.samples import concatenate, select
+from bayesflow.experimental.graphical_simulator_new.graphical_simulator import from_table
+from bayesflow.experimental.graphical_simulator_new.samples import NodeSamples, concatenate, select, to_tensors
 
 SIMULATORS = ["single_level_simulator", "two_level_simulator", "three_level_simulator", "crossed_design_irt_simulator"]
 
@@ -183,6 +184,112 @@ def test_select_renumbers_in_increasing_order(request, simulator):
         parts.append(select(simulation, np.array([dataset])))
 
     assert_same_simulation(selected, concatenate(parts))
+
+
+def test_to_tensors_shapes_and_values(two_level_simulator):
+    simulation = two_level_simulator.sample(4)
+    tensors = to_tensors(simulation)
+
+    assert tensors["hyper_mean"].shape == (4, 1)
+    assert tensors["local_mean"].shape == (4, 6, 1)
+    assert tensors["y"].shape == (4, 60, 1)
+
+    # dataset 1 holds rows 6 to 11 of the locals
+    np.testing.assert_array_equal(tensors["local_mean"][1], simulation["locals"].values["local_mean"][6:12])
+
+
+def test_to_tensors_raises_for_different_structure():
+    # both datasets have 5 children, but split 3 + 2 and 2 + 3 between the parents
+    roots = NodeSamples(
+        indices={"dataset": np.array([0, 1]), "roots": np.arange(2)},
+        values={"r": np.zeros((2, 1))},
+    )
+    parents = NodeSamples(
+        indices={"dataset": np.array([0, 0, 1, 1]), "roots": np.array([0, 0, 1, 1]), "parents": np.arange(4)},
+        values={"a": np.zeros((4, 1))},
+    )
+    children = NodeSamples(
+        indices={
+            "dataset": np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]),
+            "roots": np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]),
+            "parents": np.array([0, 0, 0, 1, 1, 2, 2, 3, 3, 3]),
+            "children": np.arange(10),
+        },
+        values={"b": np.zeros((10, 1))},
+    )
+    simulation = {"roots": roots, "parents": parents, "children": children}
+
+    with pytest.raises(ValueError, match="node 'children'"):
+        to_tensors(simulation)
+
+    assert to_tensors(simulation, datasets=1)["b"].shape == (1, 5, 1)
+    assert to_tensors(simulation, nodes=["parents"])["a"].shape == (2, 2, 1)
+
+
+def crossed_table(simulation):
+    # one row per observation, with labels like a real data set would have
+    observations = simulation["observations"].indices
+    students = simulation["students"].indices
+
+    # students are numbered from 0 within every school
+    first_student = np.searchsorted(students["dataset"], students["dataset"])
+    student_numbers = students["students"] - first_student
+
+    return {
+        "school": np.array(["A", "B", "C"])[observations["dataset"]],
+        "question": np.char.add("q", np.char.zfill(observations["questions"].astype(str), 3)),
+        "student": student_numbers[observations["students"]],
+        "obs": simulation["observations"].values["obs"][:, 0],
+    }
+
+
+def test_from_table_matches_simulation(crossed_design_irt_simulator):
+    simulation = crossed_design_irt_simulator.sample(3)
+    table = crossed_table(simulation)
+
+    groups = {"dataset": "school", "questions": "question", "students": "student"}
+    observed = from_table(crossed_design_irt_simulator.graph, table, groups)
+
+    assert set(observed) == set(simulation)
+    for node, samples in simulation.items():
+        assert set(observed[node].indices) == set(samples.indices)
+        for column, ids in samples.indices.items():
+            np.testing.assert_array_equal(observed[node].indices[column], ids)
+
+    np.testing.assert_array_equal(observed["observations"].values["obs"], simulation["observations"].values["obs"])
+
+
+def test_from_table_rows_in_any_order(crossed_design_irt_simulator):
+    simulation = crossed_design_irt_simulator.sample(3)
+    table = crossed_table(simulation)
+
+    order = np.random.permutation(len(table["obs"]))
+    shuffled = {}
+    for column, values in table.items():
+        shuffled[column] = values[order]
+
+    groups = {"dataset": "school", "questions": "question", "students": "student"}
+    observed = from_table(crossed_design_irt_simulator.graph, shuffled, groups)
+
+    for node, samples in simulation.items():
+        assert len(observed[node].indices[node]) == len(samples.indices[node])
+        np.testing.assert_array_equal(np.sort(observed[node].indices["dataset"]), observed[node].indices["dataset"])
+
+    # every (question, student) pair has the same observation, only the row order differs
+    expected = simulation["observations"]
+    expected_order = np.lexsort((expected.indices["students"], expected.indices["questions"]))
+
+    actual = observed["observations"]
+    actual_order = np.lexsort((actual.indices["students"], actual.indices["questions"]))
+
+    np.testing.assert_array_equal(actual.values["obs"][actual_order], expected.values["obs"][expected_order])
+
+
+def test_from_table_raises_without_label_column(crossed_design_irt_simulator):
+    table = crossed_table(crossed_design_irt_simulator.sample(2))
+
+    with pytest.raises(ValueError, match="Node 'students' is repeated"):
+        from_table(crossed_design_irt_simulator.graph, table, groups={"dataset": "school", "questions": "question"})
 
 
 def test_is_batched_default():

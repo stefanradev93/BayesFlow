@@ -10,7 +10,7 @@ from bayesflow.adapters import Adapter
 
 from ..graphical_simulator_new import GraphicalSimulator
 from ..graphical_simulator_new.indexing_helpers import concatenated_ranges, group_ids
-from ..graphical_simulator_new.samples import Simulation, num_datasets, select
+from ..graphical_simulator_new.samples import GraphSamples, num_datasets, select
 from ..graphs_new import InvertedGraph, SimulationGraph
 from ..graphs_new.simulation_graph import is_exchangeable, is_interior
 from .encoder import gather, segment_mean
@@ -19,9 +19,9 @@ from .encoder import gather, segment_mean
 class SimulationDataset(keras.utils.PyDataset):
     def __init__(
         self,
-        source: GraphicalSimulator | Simulation,
+        source: GraphicalSimulator | GraphSamples,
         batch_size: int,
-        to_batch: Callable[[Simulation], dict],
+        to_batch: Callable[[GraphSamples], dict],
         num_batches: int | None = None,
         **kwargs,
     ):
@@ -55,19 +55,19 @@ class SimulationDataset(keras.utils.PyDataset):
             self.order = np.random.permutation(num_datasets(self.source))
 
 
-def to_batch(simulation: Simulation, graph: InvertedGraph, adapter: Adapter, padded: bool = False) -> dict:
+def to_batch(samples: GraphSamples, graph: InvertedGraph, adapter: Adapter, padded: bool = False) -> dict:
     # Adds groups and steps to the samples and runs the adapter.
     # This is the input that inference networks use
     simulation_graph = graph.expanded_graph.simulation_graph
 
     batch = {}
-    for node, samples in simulation.items():
-        batch[node] = {"indices": samples.indices, "values": samples.values}
+    for node, node_samples in samples.items():
+        batch[node] = {"indices": node_samples.indices, "values": node_samples.values}
 
         if simulation_graph.out_degree(node) == 0:
-            batch[node]["groups"] = groups(simulation_graph, node, samples.indices)
+            batch[node]["groups"] = groups(simulation_graph, node, node_samples.indices)
         elif not graph.is_amortizable(node):
-            batch[node]["steps"] = steps(node, samples.indices)
+            batch[node]["steps"] = steps(node, node_samples.indices)
 
     if padded:
         batch = pad(batch)

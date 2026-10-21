@@ -8,7 +8,7 @@ from bayesflow.networks import ConsistencyModel, InferenceNetwork, StableConsist
 from bayesflow.networks.helpers.standardization.standardization import Standardization
 from bayesflow.utils.serialization import serializable, serialize
 
-from ..graphical_simulator_new.samples import NodeSamples, Simulation, concatenate, num_datasets
+from ..graphical_simulator_new.samples import GraphSamples, NodeSamples, concatenate, num_datasets, to_tensors
 from ..graphs_new import InvertedGraph, SimulationGraph
 from ..graphs_new.simulation_graph import data_nodes
 from .batches import SimulationDataset, add_sequence_summaries, network_variables, node_values, to_batch
@@ -115,27 +115,51 @@ class GraphicalApproximator(Approximator):
 
         self.encoders = encoders
 
-    def sample(self, *, num_samples: int, conditions: Simulation) -> dict[str, np.ndarray]:
+    def sample(
+        self, *, num_samples: int, conditions: GraphSamples, format: str = "long"
+    ) -> GraphSamples | dict[str, np.ndarray]:
         """
-        Generates samples from the approximator given input conditions.
+        Draws posterior samples given observed data.
+
         The `conditions` are preprocessed using the `adapter`. Samples are
         converted to NumPy arrays after inference.
 
         Parameters
         ----------
         num_samples : int
-            Number of samples to generate.
-        conditions : Simulation
-            Simulations of the GraphicalSimulator, as returned by its
-            :py:meth:`sample` method, that contains the observed data.
+            Number of posterior samples per dataset.
+        conditions : GraphSamples
+            The observed data, as returned by :py:func:`from_table`, or
+            simulations of the GraphicalSimulator, as returned by its
+            :py:meth:`sample` method.
             Only the values of the data nodes are used.
+        format : {"long", "tensor"}, optional
+            The format of the samples (default is "long"). The long format
+            works for every dataset; the tensor format only works if all
+            datasets have the same structure.
 
         Returns
         -------
-        dict[str, np.ndarray]
-            Dictionary of the samples of every inferred variable, each with shape
-            `(num_rows, num_samples, variable_dim)`.
+        GraphSamples or dict[str, np.ndarray]
+            In long format, the samples of every latent node as
+            :py:class:`GraphSamples`. Each node keeps the indices of `conditions`,
+            and each variable has shape `(num_rows, num_samples, dim)`.
+
+            In tensor format, one array per variable, as returned by
+            :py:func:`to_tensors`: shape `(num_datasets, num_samples, dim)` for
+            root nodes, and `(num_datasets, num_samples, num_groups, dim)` for
+            all other nodes.
+
+        Raises
+        ------
+        ValueError
+            If `format` is neither "long" nor "tensor", or if `format` is "tensor"
+            and the datasets differ in structure. In the latter case, use the long
+            format, or convert a subset of datasets with :py:func:`to_tensors`.
         """
+        if format not in ("long", "tensor"):
+            raise ValueError(f"format must be 'long' or 'tensor', not '{format}'.")
+
         observed = {}
 
         for node, samples in conditions.items():
@@ -152,30 +176,36 @@ class GraphicalApproximator(Approximator):
                 self.sample_sequentially(batch, i)
                 continue
 
-            conditions = self.network_conditions(batch, i)
-            batch_shape = (keras.ops.shape(conditions)[0],)
-            samples = self.inference_networks[i].sample(batch_shape, conditions=conditions)
+            network_conditions = self.network_conditions(batch, i)
+            batch_shape = (keras.ops.shape(network_conditions)[0],)
+            samples = self.inference_networks[i].sample(batch_shape, conditions=network_conditions)
 
             for node, values in self.split_values(samples, target_nodes).items():
                 batch[node]["values"] = values
 
-        result = {}
+        posterior = {}
 
         for target_nodes in self.networks:
             for node in target_nodes:
+                values = {}
+
                 for variable, value in batch[node]["values"].items():
                     value = self.standardizer.maybe_standardize(value, variable, forward=False)
                     value = keras.ops.convert_to_numpy(value)
 
-                    # the copies of the observed data are stacked, so rows are ordered by copy first
                     value = value.reshape(num_samples, -1, value.shape[-1])
-                    result[variable] = np.moveaxis(value, 0, 1)
+                    values[variable] = np.moveaxis(value, 0, 1)
 
-        result = self.adapter(result, inverse=True, strict=False)
+                values = self.adapter(values, inverse=True, strict=False)
+                values = keras.tree.map_structure(keras.ops.convert_to_numpy, values)
+                posterior[node] = NodeSamples(conditions[node].indices, values)
 
-        return keras.tree.map_structure(keras.ops.convert_to_numpy, result)
+        if format == "tensor":
+            return to_tensors(posterior)
 
-    def log_prob(self, data: Simulation) -> np.ndarray:
+        return posterior
+
+    def log_prob(self, data: GraphSamples) -> np.ndarray:
         """
         computes the log-probability of given data under the model. The `data`
         is preprocessed using the `adapter`. Log-probabilities are returned as
@@ -183,9 +213,9 @@ class GraphicalApproximator(Approximator):
 
         Parameters
         ----------
-        data : Simulation
-            Simulation of the GraphicalSimulator, as returned by its
-            :py:meth:`sample` method.
+        data : GraphSamples
+            Samples of every node, for example as returned by the
+            :py:meth:`sample` method of the GraphicalSimulator.
 
         Returns
         -------
@@ -241,8 +271,8 @@ class GraphicalApproximator(Approximator):
     def fit(
         self,
         *,
-        dataset: Simulation | keras.utils.PyDataset | None = None,
-        validation_data: Simulation | keras.utils.PyDataset | None = None,
+        dataset: GraphSamples | keras.utils.PyDataset | None = None,
+        validation_data: GraphSamples | keras.utils.PyDataset | None = None,
         **kwargs,
     ):
         """
@@ -252,15 +282,15 @@ class GraphicalApproximator(Approximator):
 
         Parameters
         ----------
-        dataset : Simulation or keras.utils.PyDataset, optional
+        dataset : GraphSamples or keras.utils.PyDataset, optional
             A dataset containing simulations for training, for example as
             returned by the :py:meth:`sample` method of the GraphicalSimulator.
-            The datasets of the simulation are shuffled before every epoch.
+            The datasets are shuffled before every epoch.
             If provided, `simulator` must be None.
         simulator : GraphicalSimulator, optional
             A simulator used to generate a dataset. If provided, `dataset`
             must be None.
-        validation_data : Simulation or keras.utils.PyDataset, optional
+        validation_data : GraphSamples or keras.utils.PyDataset, optional
             Simulations to compute the validation loss on after every epoch.
         **kwargs
             Additional keyword arguments passed to `keras.Model.fit()`,
@@ -366,8 +396,8 @@ class GraphicalApproximator(Approximator):
         self.standardizer.build(variable_shapes)
 
         simulation_graph = self.graph.expanded_graph.simulation_graph
-        simulation = placeholder_simulation(simulation_graph, self.variable_dims)
-        batch = self.to_batch(simulation, adapter=Adapter())
+        samples = placeholder_samples(simulation_graph, self.variable_dims)
+        batch = self.to_batch(samples, adapter=Adapter())
 
         for i, network in enumerate(self.inference_networks):
             if not network.built:
@@ -388,8 +418,8 @@ class GraphicalApproximator(Approximator):
 
         return variables, conditions
 
-    def to_batch(self, simulation: Simulation, adapter: Adapter | None = None, padded: bool = False) -> dict:
-        return to_batch(simulation, self.graph, adapter or self.adapter, padded)
+    def to_batch(self, samples: GraphSamples, adapter: Adapter | None = None, padded: bool = False) -> dict:
+        return to_batch(samples, self.graph, adapter or self.adapter, padded)
 
     def network_conditions(self, batch: dict, i: int, training: bool = False):
         # the nodes of a network share their rows, so the first one stands in for all of them
@@ -507,8 +537,8 @@ class GraphicalApproximator(Approximator):
         return keras.ops.shape(data[root]["indices"][root])[0]
 
 
-def placeholder_simulation(graph: SimulationGraph, variable_dims: dict[str, dict[str, int]]) -> Simulation:
-    simulation = {}
+def placeholder_samples(graph: SimulationGraph, variable_dims: dict[str, dict[str, int]]) -> GraphSamples:
+    samples = {}
 
     for node in graph:
         indices = {}
@@ -519,6 +549,6 @@ def placeholder_simulation(graph: SimulationGraph, variable_dims: dict[str, dict
         for variable, dim in variable_dims[node].items():
             values[variable] = np.zeros((1, dim))
 
-        simulation[node] = NodeSamples(indices, values)
+        samples[node] = NodeSamples(indices, values)
 
-    return simulation
+    return samples

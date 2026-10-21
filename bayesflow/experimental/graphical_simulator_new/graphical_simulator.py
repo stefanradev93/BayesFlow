@@ -5,8 +5,9 @@ import networkx as nx
 import numpy as np
 
 from ..graphs_new import SimulationGraph
-from .indexing_helpers import join
-from .samples import NodeSamples, Simulation, num_rows
+from ..graphs_new.simulation_graph import data_nodes
+from .indexing_helpers import group_ids, join
+from .samples import GraphSamples, NodeSamples, num_rows
 
 
 class GraphicalSimulator:
@@ -89,7 +90,7 @@ class GraphicalSimulator:
         """
         self.graph.add_edge(from_node, to_node)
 
-    def sample(self, num_datasets: int, meta: dict[str, Any] | None = None) -> Simulation:
+    def sample(self, num_datasets: int, meta: dict[str, Any] | None = None) -> GraphSamples:
         """
         Samples datasets by traversing the graph in topological order.
 
@@ -102,7 +103,7 @@ class GraphicalSimulator:
 
         Returns
         -------
-        simulation : dict[str, NodeSamples]
+        simulation : GraphSamples
             The samples of every node of type ``NodeSamples``.
             ``NodeSample`` contains two fields: ``indices`` contains a dictionary
             mapping each sample to its dataset, every ancestor and the node index
@@ -129,6 +130,87 @@ class GraphicalSimulator:
             simulation[node] = NodeSamples(indices, values)
 
         return simulation
+
+
+def from_table(graph: SimulationGraph, table, groups: dict[str, str]) -> GraphSamples:
+    """
+    Reads observed data from a table, so it can be passed as conditions to
+    :py:meth:`GraphicalApproximator.sample`.
+
+    Each row of the table is one observation, and the rows can come in any
+    order. For every repeated node, the table needs a column saying which group
+    the observation belongs to. In the crossed IRT model, a table with the
+    columns ``school``, ``question``, ``student`` and ``obs`` is read with::
+
+        from_table(graph, table, groups={"dataset": "school", "questions": "question", "students": "student"})
+
+    Labels only have to be unique within their parent, so students can be
+    numbered from 0 in every school. All other columns, here ``obs``, are taken
+    as the observed variables.
+
+    Only works for graphs with a single data node.
+
+    Parameters
+    ----------
+    graph : SimulationGraph
+        The graph of the model, usually ``simulator.graph``.
+    table : pandas.DataFrame or dict[str, np.ndarray]
+        The observed data. The variable columns need the same names as the
+        variables of the data node.
+    groups : dict[str, str]
+        The label column of each repeated node. Use the key ``"dataset"`` if
+        the table holds several datasets, otherwise the whole table is one
+        dataset.
+
+    Returns
+    -------
+    GraphSamples
+        The rows of every node. Only the data node has values.
+
+    Raises
+    ------
+    ValueError
+        If a repeated node has no label column.
+    """
+    data_node = data_nodes(graph)[0]
+
+    first_column = next(iter(table))
+    labels = {"dataset": np.zeros(len(table[first_column]), dtype=np.int64)}
+
+    for node, column in groups.items():
+        labels[node] = np.unique(table[column], return_inverse=True)[1]
+
+    labels[data_node] = np.arange(len(labels["dataset"]))
+    ids = {"dataset": labels["dataset"]}
+    observed = {}
+
+    for node in nx.topological_sort(graph):
+        if graph.nodes[node]["reps"] != 1 and node not in labels:
+            raise ValueError(f"Node '{node}' is repeated, so `groups` needs a label column for it.")
+
+        ancestors = nx.ancestors(graph, node)
+        keys = [labels["dataset"]]
+
+        for ancestor in sorted(ancestors | {node}):
+            if ancestor in labels:
+                keys.append(labels[ancestor])
+
+        ids[node] = group_ids(keys)
+        rows = np.unique(ids[node], return_index=True)[1]
+
+        indices = {}
+        for column in ["dataset", *ancestors, node]:
+            indices[column] = ids[column][rows]
+
+        values = {}
+        if node == data_node:
+            for column in table:
+                if column not in groups.values():
+                    values[column] = np.asarray(table[column])[rows].reshape(len(rows), -1)
+
+        observed[node] = NodeSamples(indices, values)
+
+    return observed
 
 
 def sample_dataset_meta(meta_fn, num_datasets) -> dict[str, np.ndarray]:

@@ -5,7 +5,7 @@ import pytest
 from bayesflow.adapters import Adapter
 from bayesflow.experimental.graphical_approximator_new import GraphicalApproximator
 from bayesflow.experimental.graphical_approximator_new.encoder import ExchangeableEncoder
-from bayesflow.experimental.graphical_simulator_new.samples import concatenate
+from bayesflow.experimental.graphical_simulator_new.samples import concatenate, to_tensors
 from bayesflow.networks import ConsistencyModel, CouplingFlow, DiffusionModel, FlowMatching, StableConsistencyModel
 
 from .conftest import approximator_for
@@ -42,15 +42,21 @@ def test_fit_sample(simulator, approximator, request):
 
 
 def assert_samples_match(approximator, observed, samples, num_samples):
-    latent_variables = set()
+    latent_nodes = set()
     for target_nodes in approximator.networks:
         for node in target_nodes:
-            for variable, values in observed[node].values.items():
-                latent_variables.add(variable)
-                assert samples[variable].shape == (len(values), num_samples, values.shape[-1])
-                assert isinstance(samples[variable], np.ndarray)
+            latent_nodes.add(node)
 
-    assert set(samples) == latent_variables
+            for column, ids in observed[node].indices.items():
+                np.testing.assert_array_equal(samples[node].indices[column], ids)
+
+            assert set(samples[node].values) == set(observed[node].values)
+
+            for variable, values in observed[node].values.items():
+                assert samples[node].values[variable].shape == (len(values), num_samples, values.shape[-1])
+                assert isinstance(samples[node].values[variable], np.ndarray)
+
+    assert set(samples) == latent_nodes
 
 
 NETWORKS = {
@@ -72,6 +78,30 @@ def test_fit_sample_networks(simulator, network, request):
 
     observed = simulator.sample(3)
     assert_samples_match(approximator, observed, approximator.sample(num_samples=5, conditions=observed), 5)
+
+
+def test_sample_tensor_format(two_level_simulator, two_level_approximator):
+    two_level_approximator.build_from_data(two_level_approximator.to_batch(two_level_simulator.sample(2)))
+
+    samples = two_level_approximator.sample(num_samples=5, conditions=two_level_simulator.sample(3), format="tensor")
+
+    assert set(samples) == {"hyper_mean", "hyper_std", "local_mean", "shared_std"}
+    assert samples["hyper_mean"].shape == (3, 5, 1)
+    assert samples["local_mean"].shape == (3, 5, 6, 1)
+
+
+def test_sample_tensor_format_raises_for_ragged_datasets(crossed_design_irt_simulator, crossed_design_irt_approximator):
+    approximator = crossed_design_irt_approximator
+    approximator.build_from_data(approximator.to_batch(crossed_design_irt_simulator.sample(2)))
+    observed = crossed_design_irt_simulator.sample(3)
+
+    with pytest.raises(ValueError, match="node 'students'"):
+        approximator.sample(num_samples=5, conditions=observed, format="tensor")
+
+    posterior = approximator.sample(num_samples=5, conditions=observed)
+    num_students = np.sum(observed["students"].indices["dataset"] == 1)
+
+    assert to_tensors(posterior, datasets=1)["student_ability"].shape == (1, 5, num_students, 1)
 
 
 def test_save_and_load_flow_matching(tmp_path, two_level_simulator):

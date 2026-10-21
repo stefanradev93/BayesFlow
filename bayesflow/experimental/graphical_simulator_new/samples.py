@@ -19,8 +19,8 @@ class NodeSamples:
         Integer index columns of shape `(num_rows,)`: ``"dataset"`` with the
         dataset of each row, one column per ancestor with the row of that
         ancestor the sample belongs to, and one column named after the node
-        with the row's own position. Ids count rows of the whole simulation,
-        not within each dataset.
+        with the row's own position. Ids count rows of all datasets, not
+        within each dataset.
     values : dict[str, np.ndarray]
         The samples of each variable of the node, with shape `(num_rows, dim)`.
     """
@@ -29,8 +29,87 @@ class NodeSamples:
     values: dict[str, np.ndarray]
 
 
-#: The samples of every node of a GraphicalSimulator, keyed by node name.
-Simulation: TypeAlias = dict[str, NodeSamples]
+#: The samples of every node of the graph, keyed by node name.
+GraphSamples: TypeAlias = dict[str, NodeSamples]
+
+
+def to_tensors(samples: GraphSamples, datasets=None, nodes: list[str] | None = None) -> dict[str, np.ndarray]:
+    """
+    Stacks the datasets of the samples into one array per variable.
+
+    This is the format the diagnostics and most plotting code expect. It only
+    works if all datasets have the same structure, so for models where the
+    number of groups varies, convert one dataset at a time with `datasets`.
+
+    Parameters
+    ----------
+    samples : GraphSamples
+        Samples of every node, such as the output of the GraphicalSimulator or
+        the posterior samples of the GraphicalApproximator.
+    datasets : int or np.ndarray, optional
+        Only convert these datasets (default is all datasets).
+    nodes : list[str], optional
+        Only convert the variables of these nodes (default is all nodes).
+
+    Returns
+    -------
+    dict[str, np.ndarray]
+        One array per variable. Variables of root nodes have shape
+        `(num_datasets, dim)`, all others `(num_datasets, num_groups, dim)`.
+        Posterior samples have an extra axis of size `num_samples` after
+        the dataset axis.
+
+    Raises
+    ------
+    ValueError
+        If the datasets differ in the structure of a node.
+    """
+
+    if datasets is not None:
+        samples = select(samples, np.atleast_1d(datasets))
+
+    if nodes is None:
+        nodes = list(samples)
+
+    count = num_datasets(samples)
+    tensors = {}
+
+    for node in nodes:
+        node_samples = samples[node]
+
+        if not has_same_structure(node_samples.indices, count):
+            raise ValueError(
+                f"The datasets differ in the structure of node '{node}', so its samples cannot be stacked. "
+                "Use the long format, or select datasets with the same structure, e.g. datasets=[0]."
+            )
+
+        is_root = len(node_samples.indices) == 2
+
+        for variable, value in node_samples.values.items():
+            value = value.reshape(count, -1, *value.shape[1:])
+
+            if is_root:
+                tensors[variable] = value[:, 0]
+            else:
+                tensors[variable] = np.moveaxis(value, 1, -2)
+
+    return tensors
+
+
+def has_same_structure(indices: dict[str, np.ndarray], datasets: int) -> bool:
+    rows_per_dataset = np.bincount(indices["dataset"], minlength=datasets)
+
+    if np.any(rows_per_dataset != rows_per_dataset[0]):
+        return False
+
+    for ids in indices.values():
+        ids = ids.reshape(datasets, -1)
+        relative_ids = ids - np.min(ids, axis=1, keepdims=True)
+
+        if np.any(relative_ids != relative_ids[0]):
+            return False
+
+    return True
 
 
 def num_rows(indices: dict[str, np.ndarray]) -> int:
@@ -50,13 +129,13 @@ def num_rows(indices: dict[str, np.ndarray]) -> int:
     return len(indices["dataset"])
 
 
-def num_datasets(simulation: Simulation) -> int:
+def num_datasets(samples: GraphSamples) -> int:
     """
-    Counts the datasets in a simulation.
+    Counts the datasets in the samples.
 
     Parameters
     ----------
-    simulation : Simulation
+    samples : GraphSamples
         The samples of every node.
 
     Returns
@@ -64,43 +143,43 @@ def num_datasets(simulation: Simulation) -> int:
     int
         The number of datasets.
     """
-    return 1 + max(int(np.max(samples.indices["dataset"])) for samples in simulation.values())
+    return 1 + max(int(np.max(node_samples.indices["dataset"])) for node_samples in samples.values())
 
 
-def concatenate(simulations: list[Simulation]) -> Simulation:
+def concatenate(all_samples: list[GraphSamples]) -> GraphSamples:
     """
-    Combines several simulations into one.
+    Combines several samples into one.
 
-    The datasets of later simulations are numbered after those of earlier ones.
+    The datasets of later samples are numbered after those of earlier ones.
     This also shifts the index columns, so that every index is consecutive.
 
     Parameters
     ----------
-    simulation : list[Simulation]
-        Simulations of the same graph, with the same nodes and variables.
+    all_samples : list[GraphSamples]
+        Samples of the same graph, with the same nodes and variables.
 
     Returns
     -------
-    Simulation
-        A simulation holding the datasets of all simulations.
+    GraphSamples
+        Samples holding the datasets of all samples.
     """
-    # Concatenate simulations by shifting all indices past those of the previous simulations.
+    # Concatenate the samples by shifting all indices past those of the previous samples.
 
     concatenated = {}
 
-    for node, first in simulations[0].items():
+    for node, first in all_samples[0].items():
         indices = {}
 
         for column in first.indices:
             parts = []
             offset = 0
-            for simulation in simulations:
-                parts.append(simulation[node].indices[column] + offset)
+            for samples in all_samples:
+                parts.append(samples[node].indices[column] + offset)
 
                 if column == "dataset":
-                    offset += num_datasets(simulation)
+                    offset += num_datasets(samples)
                 else:
-                    offset += num_rows(simulation[column].indices)
+                    offset += num_rows(samples[column].indices)
 
             indices[column] = np.concatenate(parts)
 
@@ -108,8 +187,8 @@ def concatenate(simulations: list[Simulation]) -> Simulation:
 
         for variable in first.values:
             parts = []
-            for simulation in simulations:
-                parts.append(simulation[node].values[variable])
+            for samples in all_samples:
+                parts.append(samples[node].values[variable])
 
             values[variable] = np.concatenate(parts)
 
@@ -118,44 +197,44 @@ def concatenate(simulations: list[Simulation]) -> Simulation:
     return concatenated
 
 
-def select(simulation: Simulation, datasets: np.ndarray) -> Simulation:
+def select(samples: GraphSamples, datasets: np.ndarray) -> GraphSamples:
     """
-    Keeps only some datasets of a simulation.
+    Keeps only some datasets of the samples.
 
     The selected datasets are renumbered from 0 in increasing order of their
     original index, and the index columns are renumbered to match.
 
     Parameters
     ----------
-    simulation : Simulation
+    samples : GraphSamples
         The samples of every node.
     datasets : np.ndarray
         The numbers of the datasets to keep.
 
     Returns
     -------
-    Simulation
-        A simulation holding only the selected datasets.
+    GraphSamples
+        Samples holding only the selected datasets.
     """
     # select only indices and values with a specific dataset ID
 
     datasets = np.sort(datasets)
 
     rows = {"dataset": datasets}
-    for node, samples in simulation.items():
-        starts = np.searchsorted(samples.indices["dataset"], datasets, side="left")
-        ends = np.searchsorted(samples.indices["dataset"], datasets, side="right")
+    for node, node_samples in samples.items():
+        starts = np.searchsorted(node_samples.indices["dataset"], datasets, side="left")
+        ends = np.searchsorted(node_samples.indices["dataset"], datasets, side="right")
         rows[node] = concatenated_ranges(starts, ends - starts)
 
     selected = {}
-    for node, samples in simulation.items():
+    for node, node_samples in samples.items():
         indices = {}
-        for column, ids in samples.indices.items():
+        for column, ids in node_samples.indices.items():
             # renumbers ids by their position among the selected rows
             indices[column] = np.searchsorted(rows[column], ids[rows[node]])
 
         values = {}
-        for variable, value in samples.values.items():
+        for variable, value in node_samples.values.items():
             values[variable] = value[rows[node]]
 
         selected[node] = NodeSamples(indices, values)
