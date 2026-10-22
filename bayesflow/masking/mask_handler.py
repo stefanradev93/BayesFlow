@@ -157,7 +157,8 @@ class MaskHandler:
 
     @staticmethod
     def maybe_apply(value: Tensor, mask: Tensor | None, replacement: Tensor | None = None) -> Tensor:
-        """Keep ``value`` where ``mask`` is one and use ``replacement`` where it is zero."""
+        """Keep ``value`` where ``mask`` is one and use ``replacement`` where it is zero.
+        If no replacement is provided, a zero replacement will be used."""
         if mask is None:
             return value
         if replacement is None:

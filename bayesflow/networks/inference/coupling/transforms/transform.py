@@ -34,18 +34,21 @@ class Transform(InvertibleLayer):
         xz: Tensor,
         parameters: dict[str, Tensor],
         inverse: bool = False,
-        fixed_target_mask: Tensor = None,
-    ) -> (Tensor, Tensor):
+        target_mask: Tensor = None,
+    ) -> tuple[Tensor, Tensor]:
         if inverse:
             out, log_jac = self._inverse(xz, parameters)
         else:
             out, log_jac = self._forward(xz, parameters)
-        out = MaskHandler.maybe_apply(out, fixed_target_mask, xz)
-        log_jac = MaskHandler.maybe_apply(log_jac, fixed_target_mask)
+
+        mask = target_mask
+        out = MaskHandler.maybe_apply(out, mask, xz)
+        log_jac = MaskHandler.maybe_apply(log_jac, mask)
+
         return out, keras.ops.sum(log_jac, axis=-1)
 
-    def _forward(self, x: Tensor, parameters: dict[str, Tensor]) -> (Tensor, Tensor):
+    def _forward(self, x: Tensor, parameters: dict[str, Tensor]) -> tuple[Tensor, Tensor]:
         raise NotImplementedError
 
-    def _inverse(self, z: Tensor, parameters: dict[str, Tensor]) -> (Tensor, Tensor):
+    def _inverse(self, z: Tensor, parameters: dict[str, Tensor]) -> tuple[Tensor, Tensor]:
         raise NotImplementedError
