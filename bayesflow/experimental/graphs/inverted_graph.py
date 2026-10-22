@@ -15,7 +15,7 @@ SimulationNode: TypeAlias = str
 @serializable("bayesflow.experimental")
 class InvertedGraph(nx.DiGraph):
     """
-    The factorization of the posterior that the GraphicalApproximator learns.
+    The factorization of the posterior that the GraphicalEstimator learns.
 
     The nodes are the :py:class:`ExpandedNode` objects of the expanded graph,
     and every edge points from a node to an instance it is conditioned on when
@@ -59,7 +59,7 @@ class InvertedGraph(nx.DiGraph):
         Returns
         -------
         list[list[str]]
-            The nodes of every network. The GraphicalApproximator expects one
+            The nodes of every network. The GraphicalEstimator expects one
             inference network for each entry, in the same order.
         """
         simulation_graph = self.expanded_graph.simulation_graph
@@ -117,7 +117,7 @@ class InvertedGraph(nx.DiGraph):
         Checks whether all instances of a node can be inferred at once.
 
         A node is amortizable if none of its instances is conditioned on another
-        instance of the same node. Otherwise, the GraphicalApproximator infers
+        instance of the same node. Otherwise, the GraphicalEstimator infers
         the instances one after another.
 
         Parameters

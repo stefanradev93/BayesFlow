@@ -1,4 +1,4 @@
-"""Mask handling shared by approximators and inference networks."""
+"""Mask handling shared by estimators and inference networks."""
 
 from .inference_masks import InferenceMasks
 from .mask_handler import MaskHandler

@@ -6,17 +6,17 @@ from .jax_wrapper import JAXWrapper
 
 
 class JAXContinuous(JAXWrapper):
-    """JAX backend for a :class:`~bayesflow.approximators.ContinuousApproximator`.
+    """JAX backend for a :class:`~bayesflow.estimators.BasicEstimator`.
 
-    The approximator must be trained in **NLE mode**:
+    The estimator must be trained in **NLE mode**:
     ``inference_variables`` = observations x,
     ``inference_conditions`` = parameters θ.
     The network models ``log p(x | θ)`` directly.
     """
 
     def make_log_prob(self) -> Callable:
-        flow = self.approximator.inference_network
-        std = self.approximator.standardizer
+        flow = self.estimator.inference_network
+        std = self.estimator.standardizer
 
         def log_prob(x, *params):
             inf_vars = jnp.atleast_1d(jnp.asarray(x))

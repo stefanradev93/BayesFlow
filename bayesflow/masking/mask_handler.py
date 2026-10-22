@@ -22,7 +22,7 @@ class MaskHandler:
     Semantic masks change the target distribution. For example, masking missing
     targets lets a network trained on :math:`p(x_1, x_2)` learn its marginals.
     Padding and attention masks are structural; they support operations such as
-    learning filtering distributions with an ``AutoregressiveApproximator``.
+    learning filtering distributions with an ``AutoregressiveEstimator``.
 
     Parameters
     ----------
@@ -163,6 +163,18 @@ class MaskHandler:
         if replacement is None:
             replacement = keras.ops.zeros_like(value)
         return keras.ops.where(keras.ops.cast(mask, "bool"), value, replacement)
+
+    @staticmethod
+    def per_token_target_mask(mask: Tensor | None, targets: Tensor) -> Tensor | None:
+        """Reshape a ``(num_targets,)`` or ``(batch, num_targets)`` target mask to ``(batch, num_targets, 1)``,
+        one value per target token of a transformer that broadcasts over the token width."""
+        if mask is None:
+            return None
+
+        mask = keras.ops.cast(mask, targets.dtype)
+        if len(mask.shape) == 1:
+            mask = keras.ops.expand_dims(mask, axis=0)
+        return keras.ops.expand_dims(mask, axis=-1)
 
     @classmethod
     def has_batch_axis(

@@ -44,7 +44,7 @@ class SimulationGraph(nx.DiGraph):
         -------
         ExpandedGraph
             The expanded graph. Call its :py:meth:`invert` method to obtain the
-            InvertedGraph for the GraphicalApproximator.
+            InvertedGraph for the GraphicalEstimator.
         """
         expanded = nx.relabel_nodes(nx.DiGraph(self), ExpandedNode)
 

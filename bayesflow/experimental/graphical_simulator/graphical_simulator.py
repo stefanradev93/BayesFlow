@@ -62,7 +62,7 @@ class GraphicalSimulator:
             meta data, and returns the number of repetitions for
             each of the parent combinations. Default is 1.
             If ``reps`` is a function, it must be defined at the top-level,
-            otherwise the GraphicalApproximator cannot be saved.
+            otherwise the GraphicalEstimator cannot be saved.
         is_batched : bool, optional
             If False, ``sample_fn`` is called once per sample with the values
             of its parents. For much faster batched sampling, set it to `True`.
@@ -109,7 +109,7 @@ class GraphicalSimulator:
             mapping each sample to its dataset, every ancestor and the node index
             itself. ``values`` maps every variable to an array of shape
             ``(num_samples, dim)``. The output can be used as input to
-            ``GraphicalApproximator.fit``.
+            ``GraphicalEstimator.fit``.
         """
         meta = meta or {}
         dataset_meta = sample_dataset_meta(self.graph.meta_fn, num_datasets)
@@ -135,7 +135,7 @@ class GraphicalSimulator:
 def from_table(graph: SimulationGraph, table, groups: dict[str, str]) -> GraphSamples:
     """
     Reads observed data from a table, so it can be passed as conditions to
-    :py:meth:`GraphicalApproximator.sample`.
+    :py:meth:`GraphicalEstimator.sample`.
 
     Each row of the table is one observation, and the rows can come in any
     order. For every repeated node, the table needs a column saying which group

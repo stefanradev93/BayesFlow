@@ -101,7 +101,7 @@ def test_diffusion_compositional_guidance():
     def guidance_function(x_pred, time, score, **guidance_kwargs):
         return x_pred * 0
 
-    workflow.approximator.inference_network.guidance_function = guidance_function
+    workflow.estimator.inference_network.guidance_function = guidance_function
     samples_guided_func = workflow.compositional_sample(
         num_samples=2,
         conditions=test_conditions,
@@ -130,20 +130,20 @@ def test_compositional_workflow_from_basic():
     assert isinstance(comp_wf, CompositionalWorkflow)
 
     # inference network is a copy — independent objects, same weights
-    assert comp_wf.approximator.inference_network is not basic_wf.approximator.inference_network
-    src_weights = basic_wf.approximator.inference_network.get_weights()
-    cpy_weights = comp_wf.approximator.inference_network.get_weights()
+    assert comp_wf.estimator.inference_network is not basic_wf.estimator.inference_network
+    src_weights = basic_wf.estimator.inference_network.get_weights()
+    cpy_weights = comp_wf.estimator.inference_network.get_weights()
     assert all(np.array_equal(a, b) for a, b in zip(src_weights, cpy_weights))
 
     # standardizer is a copy — independent objects, same learned statistics
-    assert comp_wf.approximator.standardizer is not basic_wf.approximator.standardizer
-    for var in basic_wf.approximator.standardizer.standardize_layers:
-        src_layer = basic_wf.approximator.standardizer.standardize_layers[var]
-        cpy_layer = comp_wf.approximator.standardizer.standardize_layers[var]
+    assert comp_wf.estimator.standardizer is not basic_wf.estimator.standardizer
+    for var in basic_wf.estimator.standardizer.standardize_layers:
+        src_layer = basic_wf.estimator.standardizer.standardize_layers[var]
+        cpy_layer = comp_wf.estimator.standardizer.standardize_layers[var]
         for s, c in zip(src_layer.get_weights(), cpy_layer.get_weights()):
             assert np.array_equal(s, c), f"standardizer weights for '{var}' differ"
 
-    for var, layer in comp_wf.approximator.standardizer.standardize_layers.items():
+    for var, layer in comp_wf.estimator.standardizer.standardize_layers.items():
         for count in layer.count:
             assert float(count) > 0, f"count for '{var}' should be non-zero after training"
 

@@ -45,7 +45,7 @@ def to_tensors(samples: GraphSamples, datasets=None, nodes: list[str] | None = N
     ----------
     samples : GraphSamples
         Samples of every node, such as the output of the GraphicalSimulator or
-        the posterior samples of the GraphicalApproximator.
+        the posterior samples of the GraphicalEstimator.
     datasets : int or np.ndarray, optional
         Only convert these datasets (default is all datasets).
     nodes : list[str], optional

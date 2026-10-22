@@ -10,6 +10,7 @@ NETWORK_CASES = [
     "flow_matching",
     "consistency",
     pytest.param("stable_consistency", marks=pytest.mark.skip_on_mps),
+    "mean_flow",
 ]
 
 
@@ -20,6 +21,7 @@ def random_seed():
 
 
 def make_network(name, *, subnet="time_mlp", **kwargs):
+    from bayesflow.experimental import MeanFlow
     from bayesflow.networks import ConsistencyModel, DiffusionModel, FlowMatching, StableConsistencyModel
 
     subnet_kwargs = {"widths": (8, 8)} if isinstance(subnet, str) else None
@@ -35,6 +37,11 @@ def make_network(name, *, subnet="time_mlp", **kwargs):
         return ConsistencyModel(total_steps=4, s0=2, s1=4, max_time=2.0, **common)
     if name == "stable_consistency":
         return StableConsistencyModel(steps=2, weight_mlp_kwargs={"widths": (8, 8)}, **common)
+    if name == "mean_flow":
+        integrate_kwargs = common.pop("integrate_kwargs", {"method": "euler", "steps": 2})
+        # custom subnets have no blocks to share with a velocity head
+        velocity_head_layers = 2 if isinstance(subnet, str) else 0
+        return MeanFlow(steps=2, velocity_head_layers=velocity_head_layers, integrate_kwargs=integrate_kwargs, **common)
     raise ValueError(f"Unknown masking test network: {name!r}")
 
 

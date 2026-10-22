@@ -1,13 +1,16 @@
+import math
 from collections.abc import Sequence
 
 import keras
 
+from bayesflow.masking import MaskHandler
 from bayesflow.types import Tensor
 from bayesflow.utils import layer_kwargs
 from bayesflow.utils.serialization import deserialize, serializable, serialize
 
 from ...helpers import FourierEmbedding, DiffusionTransformerBlock
 from ..mlp import MLP
+from .diffusion_transformer_readout import DiffusionTransformerReadout
 
 
 @serializable("bayesflow.networks")
@@ -172,7 +175,8 @@ class DiffusionTransformer(keras.Layer):
         self.value_proj.build(token_shape)
         h_shape = self.value_proj.compute_output_shape(token_shape)
 
-        t_shape = (t_shape[0], 1)
+        # time is flattened to (batch_size, -1) in embed
+        t_shape = (t_shape[0], math.prod(t_shape[1:]))
         self.time_emb.build(t_shape)
         t_fourier_shape = self.time_emb.compute_output_shape(t_shape)
         self.time_mlp.build(t_fourier_shape)
@@ -210,7 +214,7 @@ class DiffusionTransformer(keras.Layer):
     def compute_output_shape(self, input_shape):
         return tuple(input_shape[0])
 
-    def call(
+    def embed(
         self,
         inputs: tuple[Tensor, Tensor, Tensor | None],
         training: bool | None = None,
@@ -218,8 +222,12 @@ class DiffusionTransformer(keras.Layer):
         fixed_target_mask: Tensor | None = None,
         observed_condition_mask: Tensor | None = None,
         infer_target_mask: Tensor | None = None,
-        **kwargs,
-    ) -> Tensor:
+    ) -> tuple[Tensor, tuple]:
+        """The forward pass before the first block, as ``(h, context)``.
+
+        ``context`` holds the shared adaLN modulation, the time embedding, the condition tokens, the attention
+        mask and the update mask.
+        """
         x, t, conditions = inputs
         num_targets = keras.ops.shape(x)[-1]
         batch_size = keras.ops.shape(x)[0]
@@ -254,8 +262,8 @@ class DiffusionTransformer(keras.Layer):
             )
             cond_h = self.condition_norm(cond_h, training=training)
 
-        t = keras.ops.reshape(t, (keras.ops.shape(t)[0], -1))[:, :1]
-        t_emb = self.time_mlp(self.time_emb(t))
+        t = keras.ops.reshape(t, (keras.ops.shape(t)[0], -1))
+        t_emb = self.time_mlp(self.time_emb(t), training=training)
 
         # Shared adaLN-single modulation, computed once and reused by every block.
         base_mod = self.ada_shared(t_emb)
@@ -275,8 +283,47 @@ class DiffusionTransformer(keras.Layer):
             else:
                 attention_mask = keras.ops.logical_and(keras.ops.cast(attention_mask, "bool"), semantic_attention_mask)
 
-        update_mask = self._feature_mask(fixed_target_mask, x)
+        update_mask = MaskHandler.per_token_target_mask(fixed_target_mask, x)
 
+        return h, (base_mod, t_emb, cond_h, attention_mask, update_mask)
+
+    def compute_embed_output_shape(self, input_shape):
+        """The shapes of ``(h, context)`` returned by :meth:`embed`."""
+        x_shape, t_shape, conditions_shape = input_shape
+        batch_size, num_targets = x_shape[0], x_shape[-1]
+        num_conditions = 0 if conditions_shape is None else conditions_shape[-1]
+
+        t_shape = (t_shape[0], math.prod(t_shape[1:]))
+        t_emb_shape = self.time_mlp.compute_output_shape(self.time_emb.compute_output_shape(t_shape))
+
+        h_shape = (batch_size, num_targets, self.width)
+        base_mod_shape = self.ada_shared.compute_output_shape(t_emb_shape)
+        cond_h_shape = None if conditions_shape is None else (batch_size, num_conditions, self.width)
+        attention_mask_shape = (batch_size, num_targets, num_targets + num_conditions)
+        update_mask_shape = (batch_size, num_targets, 1)
+
+        return h_shape, (base_mod_shape, t_emb_shape, cond_h_shape, attention_mask_shape, update_mask_shape)
+
+    def call(
+        self,
+        inputs: tuple[Tensor, Tensor, Tensor | None],
+        training: bool | None = None,
+        attention_mask: Tensor | None = None,
+        fixed_target_mask: Tensor | None = None,
+        observed_condition_mask: Tensor | None = None,
+        infer_target_mask: Tensor | None = None,
+        **kwargs,
+    ) -> Tensor:
+        h, context = self.embed(
+            inputs,
+            training=training,
+            attention_mask=attention_mask,
+            fixed_target_mask=fixed_target_mask,
+            observed_condition_mask=observed_condition_mask,
+            infer_target_mask=infer_target_mask,
+        )
+
+        base_mod, _, cond_h, attention_mask, update_mask = context
         for block in self.blocks:
             h = block(
                 (h, base_mod),
@@ -286,37 +333,18 @@ class DiffusionTransformer(keras.Layer):
                 training=training,
             )
 
-        final_mod = keras.ops.expand_dims(self.final_ada_ln(t_emb), axis=1)
-        shift_out, scale_out = keras.ops.split(final_mod, 2, axis=-1)
+        return self.readout((h, context), training=training)
 
-        h = DiffusionTransformerBlock.modulate(self.out_norm(h, training=training), shift_out, scale_out)
+    def readout(self, inputs: tuple[Tensor, tuple], training: bool | None = None) -> Tensor:
+        """The final layer, called on ``(h, context)`` after the blocks."""
+        h, context = inputs
+        return DiffusionTransformerReadout.final_layer(
+            h, context, self.out_norm, self.final_ada_ln, self.token_out, training=training
+        )
 
-        out = self.token_out(h)
-        out = keras.ops.squeeze(out, axis=-1)
-
-        return out
-
-    @staticmethod
-    def _feature_mask(mask: Tensor | None, reference: Tensor) -> Tensor | None:
-        """Shape a target-feature mask for transformer residual updates.
-
-        Transformer blocks operate on a ``(batch, target, width)`` residual
-        stream, so this target mask needs a trailing singleton dimension for
-        broadcasting over ``width``.
-        """
-        if mask is None:
-            return None
-
-        mask = keras.ops.cast(mask, reference.dtype)
-        if len(mask.shape) == len(reference.shape) and mask.shape[-1] == 1:
-            mask = keras.ops.squeeze(mask, axis=-1)
-        elif len(mask.shape) == len(reference.shape) and len(mask.shape) > 2:
-            mask = keras.ops.max(mask, axis=-1)
-
-        if len(mask.shape) == 1:
-            mask = keras.ops.expand_dims(mask, axis=0)
-
-        return keras.ops.expand_dims(mask, axis=-1)
+    def make_readout(self) -> DiffusionTransformerReadout:
+        """A new, unbuilt final layer of the same width."""
+        return DiffusionTransformerReadout(self.width)
 
     def state_embedding(
         self,

@@ -541,6 +541,13 @@ def test_maybe_apply_masks_and_replaces_values(targets, fixed_target_mask):
     assert handler.maybe_apply(targets, None) is targets
 
 
+@pytest.mark.parametrize("shape", [(1,), (3,), (2, 1), (2, 3)])
+def test_per_token_target_mask_adds_token_axis(shape):
+    targets = keras.ops.zeros((2, shape[-1]))
+    mask = MaskHandler.per_token_target_mask(keras.ops.ones(shape), targets)
+    assert tuple(mask.shape) == (1,) * (2 - len(shape)) + shape + (1,)
+
+
 def test_maybe_apply_isolates_nan_placeholders():
     handler = MaskHandler()
     values = _tensor([[2.0, np.nan, 4.0]])
@@ -603,7 +610,7 @@ def test_resolve_raises_if_subnet_does_not_name_the_mask(targets, name):
 
 
 def test_resolve_without_subnet_does_not_check_masks(targets):
-    # e.g. the approximator resolves masks before a subnet is involved
+    # e.g. the estimator resolves masks before a subnet is involved
     MaskHandler().resolve({"mask": keras.ops.ones((2, 3), dtype="float32")}, targets=targets)
 
 

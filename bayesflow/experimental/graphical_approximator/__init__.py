@@ -1,4 +1,7 @@
+"""Deprecated compatibility aliases for :mod:`bayesflow.experimental.graphical_estimator`."""
+
+from bayesflow.experimental.graphical_estimator import ExchangeableEncoder
+
 from .graphical_approximator import GraphicalApproximator
-from .encoder import ExchangeableEncoder
 
 __all__ = ["GraphicalApproximator", "ExchangeableEncoder"]

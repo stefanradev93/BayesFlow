@@ -128,6 +128,7 @@ class DiffusionModel(InferenceNetwork):
         self.noise_schedule.validate(loss_type=loss_type)
 
         self.integrate_kwargs = DIFFUSION_INTEGRATE_DEFAULTS | (integrate_kwargs or {})
+
         subnet_defaults = {"time_mlp": TIME_MLP_DEFAULTS, "diffusion_transformer": DIFFUSION_TRANSFORMER_DEFAULTS}
         self.subnet = find_network(subnet, **(subnet_defaults.get(subnet, {}) | (subnet_kwargs or {})))
 
@@ -245,7 +246,7 @@ class DiffusionModel(InferenceNetwork):
         def guidance_function(x_pred, time, score, unstandardize=None, **kwargs):
             # x_pred is in the standardized space; call unstandardize(x_pred) to map it
             # back to the original parameter space.
-        workflow.approximator.inference_network.guidance_function = guidance_function
+        workflow.estimator.inference_network.guidance_function = guidance_function
 
         Parameters
         ----------
@@ -269,7 +270,7 @@ class DiffusionModel(InferenceNetwork):
             A function mapping the standardized denoised estimate back to the original
             (unstandardized) inference-variable space. When set, constraints are evaluated
             on the unstandardized estimate, so they can be expressed directly in the
-            original parameter space. Injected automatically by the approximator during
+            original parameter space. Injected automatically by the estimator during
             sampling; the gradient flows back through the transformation. Default is None.
 
         Returns
