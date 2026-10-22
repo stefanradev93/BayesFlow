@@ -26,7 +26,13 @@ class JAXContinuous(JAXWrapper):
             inf_vars, log_det_jac = std.maybe_standardize(inf_vars, key="inference_variables", log_det_jac=True)
             inf_cond = std.maybe_standardize(inf_cond, key="inference_conditions")
 
-            lp = flow.log_prob(inf_vars[None, :], conditions=inf_cond[None, :])
-            return jnp.squeeze(lp) + log_det_jac
+            if self.exchangeable:
+                lp = flow.log_prob(inf_vars[None, :], conditions=inf_cond[None, :])
+                return jnp.squeeze(lp) + log_det_jac
+
+            inf_vars = jnp.atleast_2d(inf_vars)
+            inf_cond = jnp.broadcast_to(inf_cond, inf_vars.shape[:-1] + inf_cond.shape[-1:])
+            lp = flow.log_prob(inf_vars, conditions=inf_cond)
+            return jnp.sum(lp + log_det_jac)
 
         return log_prob
