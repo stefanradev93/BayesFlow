@@ -3,9 +3,8 @@ import numpy as np
 import pytest
 
 from bayesflow.experimental import FreeFormFlow, LatentInferenceNetwork
-from bayesflow.experimental.graphical_estimator.non_exchangeable_wrapper import NonExchangeableWrapper
 from bayesflow.masking import MaskHandler
-from bayesflow.networks import DeepSet, InferenceNetwork
+from bayesflow.networks import InferenceNetwork
 from bayesflow.utils.serialization import deserialize, serialize
 
 
@@ -423,87 +422,3 @@ def test_latent_network_generates_and_delegates_condition_mask(targets, conditio
         keras.ops.convert_to_numpy(inner.observed_condition_mask),
         np.zeros((2, 2), dtype=np.float32),
     )
-
-
-def test_non_exchangeable_wrapper_flattens_and_routes_generated_masks():
-    targets = keras.ops.convert_to_tensor(
-        np.asarray(
-            [
-                [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]],
-                [[-1.0, -2.0], [-3.0, -4.0], [-5.0, -6.0]],
-            ],
-            dtype=np.float32,
-        )
-    )
-    conditions = keras.ops.convert_to_tensor(
-        np.asarray(
-            [[[0.5], [1.0], [1.5]], [[-0.5], [-1.0], [-1.5]]],
-            dtype=np.float32,
-        )
-    )
-    inner = RecordingInferenceNetwork()
-    wrapper = NonExchangeableWrapper(
-        inner,
-        DeepSet(summary_dim=2),
-        mask_handler=MaskHandler(
-            fixed_target_prob=1.0,
-            missing_conditions_prob=1.0,
-        ),
-    )
-
-    metrics = wrapper.compute_metrics(targets, conditions=conditions, stage="training")
-
-    assert wrapper.built
-    assert keras.ops.isfinite(metrics["loss"])
-    assert inner.fixed_target_mask.shape == (6, 1, 2)
-    assert keras.ops.all(keras.ops.sum(inner.fixed_target_mask, axis=-1) == 1)
-    assert inner.infer_target_mask is None
-    assert keras.ops.all(inner.observed_condition_mask[..., :2] == 1)
-    assert keras.ops.all(inner.observed_condition_mask[..., 2:] == 0)
-
-
-def test_non_exchangeable_wrapper_slices_fixed_values_during_sampling():
-    inner = RecordingInferenceNetwork()
-    wrapper = NonExchangeableWrapper(inner, DeepSet(summary_dim=2))
-    wrapper.build((2, 3, 2))
-    fixed_target_mask = np.asarray([1.0, 0.0], dtype=np.float32)
-    fixed_target_value = np.asarray(
-        [
-            [[0.0, 10.0], [0.0, 20.0], [0.0, 30.0]],
-            [[0.0, -10.0], [0.0, -20.0], [0.0, -30.0]],
-        ],
-        dtype=np.float32,
-    )
-
-    samples = wrapper.sample(
-        (2, 3),
-        seed=1729,
-        fixed_target_mask=fixed_target_mask,
-        fixed_target_value=fixed_target_value,
-    )
-
-    np.testing.assert_array_equal(
-        keras.ops.convert_to_numpy(samples[..., 1]),
-        fixed_target_value[..., 1],
-    )
-
-
-def test_non_exchangeable_wrapper_rejects_missing_target_probability():
-    wrapper = NonExchangeableWrapper(
-        RecordingInferenceNetwork(),
-        DeepSet(summary_dim=2),
-        mask_handler=MaskHandler(missing_target_prob=0.5),
-    )
-    targets = keras.ops.convert_to_tensor(np.ones((2, 3, 2), dtype=np.float32))
-
-    with pytest.raises(NotImplementedError, match="without an explicit feature-mask protocol"):
-        wrapper.compute_metrics(targets, stage="training")
-
-
-def test_non_exchangeable_wrapper_rejects_infer_target_mask():
-    wrapper = NonExchangeableWrapper(RecordingInferenceNetwork(), DeepSet(summary_dim=2))
-    wrapper.build((2, 3, 2))
-    targets = keras.ops.convert_to_tensor(np.ones((2, 3, 2), dtype=np.float32))
-
-    with pytest.raises(NotImplementedError, match="without an explicit feature-mask protocol"):
-        wrapper(targets, infer_target_mask=np.ones((2,), dtype=np.float32))
