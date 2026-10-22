@@ -69,9 +69,9 @@ class MeanFlow(InferenceNetwork):
         default MLP settings.
     time_power_law_alpha : float
         Changes the distribution of sampled times during training. Time is sampled
-        as ``t = 1 - u^(1+alpha)`` with ``u ~ U(0, 1)``, i.e., ``p(t) ~ (1-t)^(-alpha/(1+alpha))``.
-        Negative values emphasize times near the data endpoint at ``t = 0``;
-        ``alpha = 0`` is uniform. Default is -0.5.
+        as ``t = u^(1+alpha)`` with ``u ~ U(0, 1)``, i.e., ``p(t) ~ t^(-alpha/(1+alpha))``.
+        Positive values emphasize times near the data endpoint at ``t = 0``;
+        ``alpha = 0`` is uniform. Default is 0.5.
     steps : int
         Default number of flow maps used for sampling and density evaluation. Can be overridden
         per call by passing ``steps=`` to sampling. Default is ``4``.
@@ -119,7 +119,7 @@ class MeanFlow(InferenceNetwork):
         integrate_kwargs: dict[str, Any] = None,
         optimal_transport_kwargs: dict[str, Any] = None,
         subnet_kwargs: dict[str, Any] = None,
-        time_power_law_alpha: float = -0.5,
+        time_power_law_alpha: float = 0.5,
         steps: int = 4,
         velocity_head_layers: int = 2,
         velocity_loss_fn: str | keras.Loss = "mse",
@@ -371,9 +371,9 @@ class MeanFlow(InferenceNetwork):
         u_s = keras.random.uniform(batch_shape, dtype=x.dtype, seed=self.seed_generator)
         u_t = keras.random.uniform(batch_shape, dtype=x.dtype, seed=self.seed_generator)
 
-        # inverse CDF of F(t) = 1 - (1-t)^(1/(1+α)), i.e. p(t) ∝ (1-t)^(-α/(1+α)), α=0 is uniform
-        s = 1 - u_s ** (1 + self.time_power_law_alpha)
-        t = 1 - u_t ** (1 + self.time_power_law_alpha)
+        # inverse CDF of F(t) = t^(1/(1+α)), i.e. p(t) ∝ t^(-α/(1+α)); α=0 is uniform
+        s = u_s ** (1 + self.time_power_law_alpha)
+        t = u_t ** (1 + self.time_power_law_alpha)
 
         if boundary_prob > 0.0:
             boundary = keras.random.uniform(batch_shape, dtype=x.dtype, seed=self.seed_generator) < boundary_prob

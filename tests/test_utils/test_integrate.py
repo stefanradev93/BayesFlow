@@ -292,7 +292,7 @@ def test_glass_flow_matching_sampler_returns_finite_state(start_time, stop_time)
         seed=keras.random.SeedGenerator(0),
         method="glass",
         noise_schedule="flow_matching",
-        steps_inner=3,
+        inner_steps=3,
     )["x"]
 
     assert keras.ops.shape(out) == keras.ops.shape(initial_state["x"])
