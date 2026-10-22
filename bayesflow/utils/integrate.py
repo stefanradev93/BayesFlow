@@ -1388,11 +1388,11 @@ def integrate_langevin(
 def _glass_alpha_sigma(noise_schedule, t: Tensor) -> Tuple[Tensor, Tensor]:
     """Return (alpha_t, sigma_t) for the given schedule at time t.
 
-    Accepts either the string ``"flow_matching"`` (alpha_t = t, sigma_t = 1 - t)
+    Accepts either the string ``"flow_matching"`` (alpha_t = 1 - t, sigma_t = t)
     or any ``NoiseSchedule`` instance.
     """
     if noise_schedule == "flow_matching":
-        return t, 1.0 - t
+        return 1.0 - t, t
     log_snr = noise_schedule.log_snr(t, training=False)
     return noise_schedule.get_alpha_sigma(log_snr)
 
@@ -1404,7 +1404,7 @@ def _glass_g_inv(noise_schedule, v: Tensor) -> Tensor:
     For implemented diffusion noise schedule g(t) = exp(-lambda_t).
     """
     if noise_schedule == "flow_matching":
-        t_star = 1.0 / (1.0 + keras.ops.sqrt(v))
+        t_star = keras.ops.sqrt(v) / (1.0 + keras.ops.sqrt(v))
     else:
         # g(t) = exp(-lamda_t)
         log_snr_star = -keras.ops.log(v)
@@ -1419,7 +1419,7 @@ def _glass_alpha_sigma_dot(noise_schedule, t: Tensor) -> Tuple[Tensor, Tensor]:
     plus the variance-preserving / variance-exploding parameterizations of (alpha, sigma)
     in terms of lambda.
 
-    Flow matching:        alpha_t = t,  sigma_t = 1 - t   (closed form)
+    Flow matching:        alpha_t = 1 - t,  sigma_t = t   (closed form)
     Variance preserving:  alpha_dot = -0.5 * alpha * beta
                           sigma_dot =  0.5 * alpha^2 * beta / sigma
     Variance exploding:   alpha_dot = 0
@@ -1427,7 +1427,7 @@ def _glass_alpha_sigma_dot(noise_schedule, t: Tensor) -> Tuple[Tensor, Tensor]:
     """
     if noise_schedule == "flow_matching":
         ones = keras.ops.ones_like(t)
-        return ones, -ones
+        return -ones, ones
 
     log_snr = noise_schedule.log_snr(t, training=False)
     alpha, sigma = noise_schedule.get_alpha_sigma(log_snr)
@@ -1581,7 +1581,6 @@ def integrate_glass(
     noise_schedule : "flow_matching" or NoiseSchedule, optional
         Outer noise schedule.  Pass "flow_matching" for flow matching; pass the model's
         ".noise_schedule" attribute for diffusion models.
-        Note that flow matching and diffusion models operate in different time directions.
     seed : int, SeedGenerator, or None
         Seed for the stochastic inner initialization.
     inner_steps : int

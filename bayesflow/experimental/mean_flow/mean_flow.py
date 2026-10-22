@@ -68,9 +68,10 @@ class MeanFlow(InferenceNetwork):
         Keyword arguments passed to the subnet constructor or used to update the
         default MLP settings.
     time_power_law_alpha : float
-        Changes the distribution of sampled times during training.  Time is sampled
-        from a power-law distribution ``p(t) ~ t^(1/(1+alpha))``, where
-        ``alpha`` is the provided value.  Default is 0.5.
+        Changes the distribution of sampled times during training. Time is sampled
+        as ``t = 1 - u^(1+alpha)`` with ``u ~ U(0, 1)``, i.e., ``p(t) ~ (1-t)^(-alpha/(1+alpha))``.
+        Negative values emphasize times near the data endpoint at ``t = 0``;
+        ``alpha = 0`` is uniform. Default is -0.5.
     steps : int
         Default number of flow maps used for sampling and density evaluation. Can be overridden
         per call by passing ``steps=`` to sampling. Default is ``4``.
@@ -118,7 +119,7 @@ class MeanFlow(InferenceNetwork):
         integrate_kwargs: dict[str, Any] = None,
         optimal_transport_kwargs: dict[str, Any] = None,
         subnet_kwargs: dict[str, Any] = None,
-        time_power_law_alpha: float = 0.5,
+        time_power_law_alpha: float = -0.5,
         steps: int = 4,
         velocity_head_layers: int = 2,
         velocity_loss_fn: str | keras.Loss = "mse",
@@ -207,7 +208,7 @@ class MeanFlow(InferenceNetwork):
         time_shape = (xz_shape[0], 2)  # same batch dims, 2 features
         input_shape = (xz_shape, time_shape, conditions_shape)
         self.subnet.build(input_shape)
-        self.output_projector = self._build_projector(self.subnet.compute_output_shape(input_shape), xz_shape)
+        self.output_projector = self._build_projector(self.subnet.compute_output_shape(input_shape), xz_shape[-1])
 
         if self.density_head:
             # the divergence head reads the final hidden state of the subnet
@@ -218,7 +219,9 @@ class MeanFlow(InferenceNetwork):
                 self.divergence_readout = self.subnet.make_readout()
                 self.divergence_readout.build((h_shape, context_shape))
                 self.divergence_projector = self._build_projector(
-                    self.divergence_readout.compute_output_shape((h_shape, context_shape)), xz_shape
+                    self.divergence_readout.compute_output_shape((h_shape, context_shape)),
+                    xz_shape[-1],
+                    name="divergence_projector",
                 )
             else:
                 # dense even at matching widths, where the identity would equal the average velocity
@@ -240,16 +243,7 @@ class MeanFlow(InferenceNetwork):
             self.velocity_readout.build((h_shape, context_shape))
             h_shape = self.velocity_readout.compute_output_shape((h_shape, context_shape))
 
-        self.velocity_projector = self._build_projector(h_shape, xz_shape)
-
-    @staticmethod
-    def _build_projector(out_shape: Shape, xz_shape: Shape) -> keras.Layer:
-        if out_shape[-1] != xz_shape[-1]:
-            projector = keras.layers.Dense(units=xz_shape[-1], bias_initializer="zeros")
-        else:
-            projector = keras.layers.Identity()
-        projector.build(out_shape)
-        return projector
+        self.velocity_projector = self._build_projector(h_shape, xz_shape[-1], name="velocity_projector")
 
     def get_config(self):
         base_config = super().get_config()
@@ -311,6 +305,9 @@ class MeanFlow(InferenceNetwork):
 
         masks = self.mask_handler.resolve(kwargs, targets=x, conditions=conditions, stage=stage, subnet=self.subnet)
 
+        def masked(value):
+            return self.mask_handler.maybe_apply(value, masks.fixed_target_mask)
+
         z_s = self.mask_handler.maybe_apply((1 - s) * x + s * z, masks.fixed_target_mask, x)
         target_velocity = z - x
 
@@ -325,7 +322,7 @@ class MeanFlow(InferenceNetwork):
 
         # total derivative of the average velocity (and divergence) along the path, along which fixed targets do
         # not move; the tangent is cast in case the subnet computes in a lower precision
-        tangent = self.mask_handler.maybe_apply(keras.ops.stop_gradient(velocity), masks.fixed_target_mask)
+        tangent = masked(keras.ops.stop_gradient(velocity))
         tangents = (keras.ops.cast(tangent, z_s.dtype), keras.ops.ones_like(s), keras.ops.zeros_like(t))
         if self.density_head:
             (u, divergence), (du_ds, ddivergence_ds) = jvp(average_velocity_and_divergence, (z_s, s, t), tangents)
@@ -334,27 +331,18 @@ class MeanFlow(InferenceNetwork):
         predicted_velocity = u - (t - s) * keras.ops.stop_gradient(du_ds)
 
         # summed over the target dimensions as in [2], for which the adaptive weight is tuned
-        loss = keras.ops.shape(x)[-1] * self.loss_fn(
-            self.mask_handler.maybe_apply(target_velocity, masks.fixed_target_mask),
-            self.mask_handler.maybe_apply(predicted_velocity, masks.fixed_target_mask),
-        )
+        loss = keras.ops.shape(x)[-1] * self.loss_fn(masked(target_velocity), masked(predicted_velocity))
         loss = loss * keras.ops.stop_gradient((loss + self.adaptive_loss_eps) ** -self.adaptive_loss_power)
 
         if self.velocity_blocks:
-            loss += self.velocity_loss_fn(
-                self.mask_handler.maybe_apply(target_velocity, masks.fixed_target_mask),
-                self.mask_handler.maybe_apply(velocity, masks.fixed_target_mask),
-            )
+            loss += self.velocity_loss_fn(masked(target_velocity), masked(velocity))
 
         if self.density_head:
             # conditional divergence matching of the Jacobian diagonal [4], whose target
             # (z * (v - (z - x)) + 1) / s is weighted by s^2 to stay bounded near the data
             predicted_divergence = divergence - (t - s) * keras.ops.stop_gradient(ddivergence_ds)
             target_divergence = z * (keras.ops.stop_gradient(velocity) - target_velocity) + 1.0
-            loss += keras.losses.mean_squared_error(
-                self.mask_handler.maybe_apply(target_divergence, masks.fixed_target_mask),
-                self.mask_handler.maybe_apply(s * predicted_divergence, masks.fixed_target_mask),
-            )
+            loss += keras.losses.mean_squared_error(masked(target_divergence), masked(s * predicted_divergence))
 
         if self.cycle_weight > 0.0:
             s, t = self._sample_times(x)
@@ -372,10 +360,7 @@ class MeanFlow(InferenceNetwork):
             z_t = self.mask_handler.maybe_apply(z_t, masks.fixed_target_mask, x)
             z_s_cycle = self._flow_map(z_t, t, s, cycle_conditions, training, masks)
 
-            loss += self.cycle_weight * self.loss_fn(
-                self.mask_handler.maybe_apply(z_s, masks.fixed_target_mask),
-                self.mask_handler.maybe_apply(z_s_cycle, masks.fixed_target_mask),
-            )
+            loss += self.cycle_weight * self.loss_fn(masked(z_s), masked(z_s_cycle))
 
         loss = weighted_mean(loss, sample_weight)
 
@@ -386,9 +371,9 @@ class MeanFlow(InferenceNetwork):
         u_s = keras.random.uniform(batch_shape, dtype=x.dtype, seed=self.seed_generator)
         u_t = keras.random.uniform(batch_shape, dtype=x.dtype, seed=self.seed_generator)
 
-        # p(t) ∝ t^(1/(1+α)), the inverse CDF: F^(-1)(u) = u^(1+α), α=0 is uniform
-        s = u_s ** (1 + self.time_power_law_alpha)
-        t = u_t ** (1 + self.time_power_law_alpha)
+        # inverse CDF of F(t) = 1 - (1-t)^(1/(1+α)), i.e. p(t) ∝ (1-t)^(-α/(1+α)), α=0 is uniform
+        s = 1 - u_s ** (1 + self.time_power_law_alpha)
+        t = 1 - u_t ** (1 + self.time_power_law_alpha)
 
         if boundary_prob > 0.0:
             boundary = keras.random.uniform(batch_shape, dtype=x.dtype, seed=self.seed_generator) < boundary_prob
@@ -562,25 +547,14 @@ class MeanFlow(InferenceNetwork):
                 logging.warning("GLASS only supports sampling. Falling back to tsit5 ODE solver for the forward pass.")
                 kwargs = kwargs | {"method": "tsit5"}
 
-            z, trace = self._integrate_velocity(x, 0.0, 1.0, conditions, density, training, masks, kwargs)
-            if density:
-                return z, self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) + trace
-            return z
-
-        times = self._time_schedule(kwargs)
-        log_det = keras.ops.zeros(keras.ops.shape(x)[:-1], dtype=x.dtype)
-        for i in reversed(range(len(times) - 1)):
-            if density:
-                x, step_log_det = self._flow_map_log_det(
-                    x, times[i + 1], times[i], conditions, training, masks, use_density_head
-                )
-                log_det += step_log_det
-            else:
-                x = self._flow_map(x, times[i + 1], times[i], conditions, training, masks)
+            z, log_det = self._integrate_velocity(x, 0.0, 1.0, conditions, density, training, masks, kwargs)
+        else:
+            times = keras.ops.flip(self._time_schedule(kwargs))
+            z, log_det = self._compose_flow_maps(x, times, conditions, density, training, masks, use_density_head)
 
         if density:
-            return x, self.base_distribution.log_prob(x, mask=masks.fixed_target_mask) + log_det
-        return x
+            return z, self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) + log_det
+        return z
 
     def _inverse(
         self, z: Tensor, conditions: Tensor = None, density: bool = False, training: bool = False, **kwargs
@@ -590,14 +564,27 @@ class MeanFlow(InferenceNetwork):
         use_density_head = kwargs.pop("use_density_head", self.use_density_head) and self.density_head
 
         if kwargs.pop("use_instantaneous_flow", self.use_instantaneous_flow):
-            x, trace = self._integrate_velocity(z, 1.0, 0.0, conditions, density, training, masks, kwargs)
-            if density:
-                return x, self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) - trace
-            return x
+            x, log_det = self._integrate_velocity(z, 1.0, 0.0, conditions, density, training, masks, kwargs)
+        else:
+            times = self._time_schedule(kwargs)
+            x, log_det = self._compose_flow_maps(z, times, conditions, density, training, masks, use_density_head)
 
-        times = self._time_schedule(kwargs)
-        x = z
-        log_det = keras.ops.zeros(keras.ops.shape(z)[:-1], dtype=z.dtype)
+        if density:
+            return x, self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) - log_det
+        return x
+
+    def _compose_flow_maps(
+        self,
+        x: Tensor,
+        times: Tensor,
+        conditions: Tensor,
+        density: bool,
+        training: bool,
+        masks: InferenceMasks,
+        use_density_head: bool,
+    ) -> tuple[Tensor, Tensor]:
+        """Applies the flow maps between consecutive ``times``, returning the state and the summed log-determinants."""
+        log_det = keras.ops.zeros(keras.ops.shape(x)[:-1], dtype=x.dtype)
         for i in range(len(times) - 1):
             if density:
                 x, step_log_det = self._flow_map_log_det(
@@ -606,10 +593,7 @@ class MeanFlow(InferenceNetwork):
                 log_det += step_log_det
             else:
                 x = self._flow_map(x, times[i], times[i + 1], conditions, training, masks)
-
-        if density:
-            return x, self.base_distribution.log_prob(z, mask=masks.fixed_target_mask) - log_det
-        return x
+        return x, log_det
 
     def _integrate_velocity(
         self,
@@ -633,33 +617,27 @@ class MeanFlow(InferenceNetwork):
             logging.warning("GLASS is not supported for density computation. Falling back to tsit5 ODE solver.")
             integrate_kwargs["method"] = "tsit5"
 
-        if integrate_kwargs["method"] == "glass":
-            project_state, project_updates = self.mask_handler.integrator_callbacks(masks, replacement=xz)
-
-            # GLASS uses flow matching time, in which t = 1 is the data
-            def deltas(time, xz):
-                return {"xz": -self._velocity(xz, 1.0 - time, conditions, training, masks)}
-
-            state = integrate_stochastic(
-                drift_fn=deltas,
-                diffusion_fn=None,
-                state={"xz": xz},
-                start_time=1.0 - start_time,
-                stop_time=1.0 - stop_time,
-                noise_schedule="flow_matching",
-                seed=seed,
-                state_projection_fn=project_state,
-                state_update_projection_fn=project_updates,
-                **integrate_kwargs,
-            )
-            return state["xz"], None
-
         if not density:
 
             def deltas(time, xz):
                 return {"xz": self._velocity(xz, time, conditions, training, masks)}
 
-            state = integrate(deltas, {"xz": xz}, start_time=start_time, stop_time=stop_time, **integrate_kwargs)
+            if integrate_kwargs["method"] == "glass":
+                project_state, project_updates = self.mask_handler.integrator_callbacks(masks, replacement=xz)
+                state = integrate_stochastic(
+                    drift_fn=deltas,
+                    diffusion_fn=None,
+                    state={"xz": xz},
+                    start_time=start_time,
+                    stop_time=stop_time,
+                    noise_schedule="flow_matching",
+                    seed=seed,
+                    state_projection_fn=project_state,
+                    state_update_projection_fn=project_updates,
+                    **integrate_kwargs,
+                )
+            else:
+                state = integrate(deltas, {"xz": xz}, start_time=start_time, stop_time=stop_time, **integrate_kwargs)
             return state["xz"], None
 
         # one probe per solve, fixed over time, keeps the augmented ODE deterministic

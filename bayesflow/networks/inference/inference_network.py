@@ -155,7 +155,12 @@ class InferenceNetwork(keras.Layer):
         else:
             input_shape = (xz_shape, conditions_shape)
         self.subnet.build(input_shape)
-        out_shape = self.subnet.compute_output_shape(input_shape)
+        return self._build_projector(self.subnet.compute_output_shape(input_shape), units, name)
+
+    @staticmethod
+    def _build_projector(out_shape: Shape, units: int, name: str = "output_projector") -> keras.Layer:
+        """Return a built projector to ``units`` outputs: the identity if ``out_shape`` already has ``units``
+        features, and a zero-bias dense layer named ``name`` otherwise."""
         if out_shape[-1] != units:
             projector = keras.layers.Dense(units=units, bias_initializer="zeros", name=name)
         else:
