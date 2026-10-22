@@ -4,7 +4,7 @@ import pytest
 
 from bayesflow.experimental import FreeFormFlow, LatentInferenceNetwork
 from bayesflow.masking import MaskHandler
-from bayesflow.networks import DeepSet, InferenceNetwork
+from bayesflow.networks import InferenceNetwork
 from bayesflow.utils.serialization import deserialize, serialize
 
 
