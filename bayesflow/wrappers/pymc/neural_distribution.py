@@ -1,8 +1,6 @@
 from collections.abc import Callable, Sequence
 from numpy.typing import ArrayLike
 
-import numpy as np
-
 import keras
 
 import pymc as pm
@@ -28,9 +26,10 @@ class NeuralDistribution:
       as ``inference_variables``, parameters as ``inference_conditions``.  The
       network models ``log p(x|θ)`` directly.
 
-    In both cases the JAX backend vmaps the per-trial function over the trial axis
-    and registers an exact VJP so gradient-based samplers (NUTS, HMC) work without
-    finite differences.
+    In exchangeable mode, the JAX backend vmaps the per-trial function over the
+    trial axis. In non-exchangeable mode, it forwards the full observation once.
+    Both modes register an exact VJP so gradient-based samplers (NUTS, HMC) work
+    without finite differences.
 
     Parameters
     ----------
@@ -116,7 +115,12 @@ class NeuralDistribution:
                 p = pt.broadcast_to(p, (n_obs,))  # → (n_obs,)
                 prepared_params.append(p)
         else:
-            prepared_params = [pt.cast(pt.as_tensor_variable(p), pytensor.config.floatX) for p in dist_params]
+            prepared_params = []
+            for p in dist_params:
+                p = pt.cast(pt.as_tensor_variable(p), pytensor.config.floatX)
+                # A scalar-support CustomDist broadcasts shared parameters over
+                # the observed shape. Recover the scalar expected by the estimator.
+                prepared_params.append(pt.reshape(p, (-1,))[0])
 
         return self.backend.logp_op(value, *prepared_params)
 
@@ -150,13 +154,9 @@ class NeuralDistribution:
 
         params = self._prepare_params(args, kwargs)
 
-        if self.exchangeable:
-            signature = ",".join(["()"] * len(self.param_names)) + "->()"
-        else:
-            ndim = np.asarray(observed).ndim
-            dim_names = [chr(ord("m") + i) for i in range(ndim)]
-            data_core = "(" + ",".join(dim_names) + ")"
-            signature = data_core + "," + ",".join(["()"] * len(self.param_names)) + "->()"
+        # The signature describes distribution parameters only; `observed` is
+        # passed separately to the log-probability function by PyMC.
+        signature = ",".join(["()"] * len(self.param_names)) + "->()"
 
         custom_kwargs = {
             "logp": self.logp,
