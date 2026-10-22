@@ -37,8 +37,8 @@ class FlowMatching(InferenceNetwork):
     Flow, with ideas incorporated from [1-6].
 
     The model learns a velocity field that transports samples from a base
-    distribution to the target posterior. It supports optional mini-batch optimal
-    transport via the Sinkhorn algorithm [6-8] for improved training stability.
+    distribution (``t = 1``) to the target posterior (``t = 0``). It supports optional
+    mini-batch optimal transport via the Sinkhorn algorithm [6-8] for improved training stability.
 
     Parameters
     ----------
@@ -66,8 +66,8 @@ class FlowMatching(InferenceNetwork):
         default MLP settings.
     time_power_law_alpha : float
         Changes the distribution of sampled times during training. Time is sampled
-        as ``t = u^(1+alpha)`` with ``u ~ U(0, 1)``, i.e., ``p(t) ~ t^(-alpha/(1+alpha))``.
-        Negative values emphasize times near the data endpoint at ``t = 1``;
+        as ``t = 1 - u^(1+alpha)`` with ``u ~ U(0, 1)``, i.e., ``p(t) ~ (1-t)^(-alpha/(1+alpha))``.
+        Negative values emphasize times near the data endpoint at ``t = 0``;
         ``alpha = 0`` is uniform. Default is -0.5.
     mask_handler : ~bayesflow.masking.MaskHandler, optional
         Handler used to generate and route masks. If ``None``, a default mask handler is created.
@@ -140,10 +140,10 @@ class FlowMatching(InferenceNetwork):
         **kwargs,
     ) -> dict[str, Tensor]:
         if isinstance(x, Sequence):
-            x0, x1, t, x, target_velocity = x
+            x1, x0, t, x, target_velocity = x
         else:
-            x1 = x
-            x0 = self.base_distribution.sample(keras.ops.shape(x1)[:-1], seed=self.seed_generator)
+            x0 = x
+            x1 = self.base_distribution.sample(keras.ops.shape(x0)[:-1], seed=self.seed_generator)
 
             if self.use_optimal_transport:
                 provided_masks = self.mask_handler.collect_mask_kwargs(kwargs)
@@ -154,13 +154,13 @@ class FlowMatching(InferenceNetwork):
                         f"the transport assignment would reorder them ({names}). Use generated masks or "
                         "disable optimal transport."
                     )
-                # we must choose between resampling x0 or x1
+                # we must choose between resampling the noise x1 or the data x0
                 # since the data is possibly noisy and may contain outliers, it is better
-                # to possibly drop some samples from x1 than from x0
+                # to possibly drop some samples from x0 than from x1
                 # in the marginal over multiple batches, this is not a problem
-                x0, x1, conditions, assignments = optimal_transport(
-                    x0,
+                x1, x0, conditions, assignments = optimal_transport(
                     x1,
+                    x0,
                     conditions=conditions,
                     seed=self.seed_generator,
                     return_assignments=True,
@@ -170,11 +170,11 @@ class FlowMatching(InferenceNetwork):
                     sample_weight = keras.ops.take(sample_weight, assignments, axis=0)
 
             u = keras.random.uniform((keras.ops.shape(x0)[0],), seed=self.seed_generator)
-            # inverse CDF of F(t) = t^(1/(1+α)), i.e. p(t) ∝ t^(-α/(1+α)), α=0 is uniform
-            t = u ** (1 + self.time_power_law_alpha)
+            # inverse CDF of F(t) = 1 - (1-t)^(1/(1+α)), i.e. p(t) ∝ (1-t)^(-α/(1+α)), α=0 is uniform
+            t = 1 - u ** (1 + self.time_power_law_alpha)
             t = expand_right_as(t, x0)
 
-            x = t * x1 + (1 - t) * x0
+            x = (1 - t) * x0 + t * x1
             target_velocity = x1 - x0
 
         masks = self.mask_handler.resolve(
@@ -184,7 +184,7 @@ class FlowMatching(InferenceNetwork):
             stage=stage,
             subnet=self.subnet,
         )
-        x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, x1)
+        x = self.mask_handler.maybe_apply(x, masks.fixed_target_mask, x0)
 
         predicted_velocity = self._velocity(
             x,
@@ -351,8 +351,8 @@ class FlowMatching(InferenceNetwork):
             masks=masks,
             conditions=conditions,
             training=training,
-            start_time=1.0,
-            stop_time=0.0,
+            start_time=0.0,
+            stop_time=1.0,
             density=density,
             kwargs=kwargs,
         )
@@ -376,8 +376,8 @@ class FlowMatching(InferenceNetwork):
             masks=masks,
             conditions=conditions,
             training=training,
-            start_time=0.0,
-            stop_time=1.0,
+            start_time=1.0,
+            stop_time=0.0,
             density=density,
             kwargs=kwargs,
         )

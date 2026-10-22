@@ -19,6 +19,23 @@ def test_make_time_schedule(steps):
     assert np.all(np.diff(times) < 0.0)
 
 
+def test_default_time_power_law_sampling(monkeypatch):
+    draws = iter(
+        (
+            keras.ops.convert_to_tensor([0.0, 0.25, 1.0]),
+            keras.ops.convert_to_tensor([1.0, 0.25, 0.0]),
+        )
+    )
+    monkeypatch.setattr(mean_flow_module.keras.random, "uniform", lambda *args, **kwargs: next(draws))
+
+    network = MeanFlow(subnet_kwargs=dict(widths=(8, 8)))
+    s, t = network._sample_times(keras.ops.zeros((3, 2)))
+
+    assert network.time_power_law_alpha == 0.5
+    assert_allclose(s, keras.ops.convert_to_tensor([[0.0], [0.125], [1.0]]))
+    assert_allclose(t, keras.ops.convert_to_tensor([[1.0], [0.125], [0.0]]))
+
+
 def test_flow_map_is_average_velocity_step(random_samples, random_conditions):
     network = make_mean_flow(random_samples, random_conditions)
     u = network._average_velocity(random_samples, 1.0, 0.25, random_conditions, False, InferenceMasks())
