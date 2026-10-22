@@ -104,17 +104,14 @@ class ConditionBuilder:
             if summary_outputs is None:
                 num_conditions = dim_maybe_nested(summary_variables, axis=0)
 
-                if num_conditions is None:
-                    # Graph mode: batch dim is a symbolic placeholder (unknown until run time),
-                    # so the `for` loop in the else branch below can't slice it into batches.
-                    # -> Call once on the full input.
+                if num_conditions is None or batch_size is None:
+                    # Call the summary network directly unless the caller explicitly
+                    # requests batching. This also covers graph mode, where the batch
+                    # dimension is unknown and therefore cannot be sliced in Python.
                     summary_outputs = summary_network(
                         summary_variables, **filter_kwargs(summary_kwargs, summary_network.call)
                     )
                 else:
-                    if batch_size is None:
-                        batch_size = num_conditions
-
                     batched_keys = MaskHandler.batched_keys(summary_kwargs, num_conditions)
                     batches = []
                     for i in tqdm(range(0, num_conditions, batch_size), desc="Summarizing", unit="batch"):
@@ -204,23 +201,27 @@ class ConditionBuilder:
         if child_summary_variables is None:
             raise ValueError("Summary variables are required when a summary network is present.")
 
-        total_datasets = num_datasets * num_children
-        if batch_size is None:
-            batch_size = total_datasets
-
         if summary_outputs is None:
-            batched_keys = MaskHandler.batched_keys(summary_kwargs, total_datasets)
-            batches = []
-            for i in tqdm(range(0, total_datasets, batch_size), desc="Summarizing", unit="batch"):
-                batch_variables = slice_maybe_nested(child_summary_variables, i, i + batch_size)
-                batch_kwargs = {
-                    key: slice_maybe_nested(value, i, i + batch_size) if key in batched_keys else value
-                    for key, value in summary_kwargs.items()
-                }
-                batch_outputs = summary_network(batch_variables, **filter_kwargs(batch_kwargs, summary_network.call))
-                batches.append(batch_outputs)
+            total_datasets = num_datasets * num_children
+            if batch_size is None:
+                child_summaries = summary_network(
+                    child_summary_variables, **filter_kwargs(summary_kwargs, summary_network.call)
+                )
+            else:
+                batched_keys = MaskHandler.batched_keys(summary_kwargs, total_datasets)
+                batches = []
+                for i in tqdm(range(0, total_datasets, batch_size), desc="Summarizing", unit="batch"):
+                    batch_variables = slice_maybe_nested(child_summary_variables, i, i + batch_size)
+                    batch_kwargs = {
+                        key: slice_maybe_nested(value, i, i + batch_size) if key in batched_keys else value
+                        for key, value in summary_kwargs.items()
+                    }
+                    batch_outputs = summary_network(
+                        batch_variables, **filter_kwargs(batch_kwargs, summary_network.call)
+                    )
+                    batches.append(batch_outputs)
 
-            child_summaries = tree_concatenate(batches, axis=0)
+                child_summaries = tree_concatenate(batches, axis=0)
             child_summaries = keras.ops.reshape(child_summaries, (num_datasets, num_children, -1))
         else:
             child_summaries = keras.ops.convert_to_tensor(summary_outputs)

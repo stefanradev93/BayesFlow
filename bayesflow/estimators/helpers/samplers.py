@@ -81,7 +81,17 @@ class Sampler:
         if conditions is None:
             if data_batch_size is not None:
                 sample_shape = self.infer_sample_shape(None, sample_shape)
-                batch_size = data_batch_size if batch_size is None else batch_size
+                if batch_size is None:
+                    return self._sample_batch(
+                        inference_network=inference_network,
+                        num_samples=num_samples,
+                        conditions=None,
+                        data_batch_size=data_batch_size,
+                        sample_shape=sample_shape,
+                        seed=seed,
+                        **kwargs,
+                    )
+
                 batched_keys = MaskHandler.batched_keys(
                     kwargs,
                     data_batch_size,
@@ -119,7 +129,7 @@ class Sampler:
 
         num_conditions = dim_maybe_nested(conditions, axis=0)
 
-        if num_conditions is None:
+        if num_conditions is None or batch_size is None:
             return self._sample_batch(
                 inference_network=inference_network,
                 num_samples=num_samples,
@@ -128,9 +138,6 @@ class Sampler:
                 seed=seed,
                 **kwargs,
             )
-
-        if batch_size is None:
-            batch_size = num_conditions
 
         target_structural_rank = len(self.infer_sample_shape(conditions, sample_shape))
         condition_structural_rank = len(self.infer_sample_shape(conditions, "infer"))
