@@ -246,7 +246,7 @@ class DiffusionModel(InferenceNetwork):
         def guidance_function(x_pred, time, score, unstandardize=None, **kwargs):
             # x_pred is in the standardized space; call unstandardize(x_pred) to map it
             # back to the original parameter space.
-        workflow.approximator.inference_network.guidance_function = guidance_function
+        workflow.estimator.inference_network.guidance_function = guidance_function
 
         Parameters
         ----------
@@ -270,7 +270,7 @@ class DiffusionModel(InferenceNetwork):
             A function mapping the standardized denoised estimate back to the original
             (unstandardized) inference-variable space. When set, constraints are evaluated
             on the unstandardized estimate, so they can be expressed directly in the
-            original parameter space. Injected automatically by the approximator during
+            original parameter space. Injected automatically by the estimator during
             sampling; the gradient flows back through the transformation. Default is None.
 
         Returns

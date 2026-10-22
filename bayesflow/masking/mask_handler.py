@@ -22,7 +22,7 @@ class MaskHandler:
     Semantic masks change the target distribution. For example, masking missing
     targets lets a network trained on :math:`p(x_1, x_2)` learn its marginals.
     Padding and attention masks are structural; they support operations such as
-    learning filtering distributions with an ``AutoregressiveApproximator``.
+    learning filtering distributions with an ``AutoregressiveEstimator``.
 
     Parameters
     ----------

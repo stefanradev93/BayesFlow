@@ -14,7 +14,7 @@ from bayesflow.datasets import OnlineDataset, OfflineDataset, DiskDataset
 from bayesflow.networks import InferenceNetwork, ScoringRuleNetwork, SummaryNetwork
 from bayesflow.simulators import Simulator
 from bayesflow.adapters import Adapter
-from bayesflow.approximators import ContinuousApproximator, ScoringRuleApproximator
+from bayesflow.estimators import BasicEstimator, ScoringRuleEstimator
 from bayesflow.types import Shape, Tensor
 from bayesflow.utils import find_inference_network, find_summary_network, logging, format_duration, filter_kwargs
 from bayesflow.diagnostics import metrics as bf_metrics
@@ -58,7 +58,7 @@ class BasicWorkflow(Workflow):
         as some losses (e.g. flow matching) do not reliably reflect model performance, and outliers in the
         validation data can cause unwanted effects.
     restore : bool, optional
-        If True, automatically restore the approximator from an existing checkpoint during initialization
+        If True, automatically restore the estimator from an existing checkpoint during initialization
         (default is False). Requires ``checkpoint_filepath`` to be set and the checkpoint file to exist.
     inference_variables : Sequence[str] or str, optional
         Variables for inference as a sequence of strings or a single string (default is None).
@@ -69,7 +69,7 @@ class BasicWorkflow(Workflow):
         Variables to be summarized through the summary network before being used as conditions (default is None).
     standardize : Sequence[str] or str, optional
         Variables to standardize during preprocessing (default is "inference_variables"). These will be
-        passed to the corresponding approximator constructor and can be either "all" or any subset of
+        passed to the corresponding estimator constructor and can be either "all" or any subset of
         ["inference_variables", "summary_variables", "inference_conditions"].
     **kwargs : dict, optional
         Additional keyword arguments organized by context. Recognized keys:
@@ -79,7 +79,7 @@ class BasicWorkflow(Workflow):
             Arguments passed to ``find_summary_network()``.
         - ``optimizer_kwargs`` : dict
             Arguments passed to ``_init_optimizer()``.
-        - Other keys are passed to the approximator constructor if they match its signature.
+        - Other keys are passed to the estimator constructor if they match its signature.
     """
 
     def __init__(
@@ -106,11 +106,11 @@ class BasicWorkflow(Workflow):
         adapter = adapter or BasicWorkflow.default_adapter(inference_variables, inference_conditions, summary_variables)
 
         if isinstance(inference_network, ScoringRuleNetwork):
-            constructor = ScoringRuleApproximator
+            constructor = ScoringRuleEstimator
         else:
-            constructor = ContinuousApproximator
+            constructor = BasicEstimator
 
-        self.approximator = constructor(
+        self.estimator = constructor(
             inference_network=find_inference_network(inference_network, **kwargs.get("inference_kwargs", {})),
             summary_network=find_summary_network(summary_network, **kwargs.get("summary_kwargs", {})),
             adapter=adapter,
@@ -124,19 +124,19 @@ class BasicWorkflow(Workflow):
         self._needs_compile = True
 
         if restore:
-            self.load_approximator()
+            self.load_estimator()
 
     @property
     def adapter(self) -> Adapter:
-        return self.approximator.adapter
+        return self.estimator.adapter
 
     @property
     def inference_network(self) -> InferenceNetwork | ScoringRuleNetwork:
-        return self.approximator.inference_network
+        return self.estimator.inference_network
 
     @property
     def summary_network(self) -> SummaryNetwork | None:
-        return self.approximator.summary_network
+        return self.estimator.summary_network
 
     @staticmethod
     def samples_to_data_frame(samples: Mapping[str, np.ndarray]) -> pd.DataFrame:
@@ -191,9 +191,9 @@ class BasicWorkflow(Workflow):
 
         return adapter
 
-    def load_approximator(self, path: str | os.PathLike | None = None) -> None:
+    def load_estimator(self, path: str | os.PathLike | None = None) -> None:
         """
-        Restore the approximator from a saved checkpoint.
+        Restore the estimator from a saved checkpoint.
 
         When ``path`` is ``None``, the checkpoint location is derived from the
         workflow's ``checkpoint_filepath`` and ``checkpoint_name`` attributes.
@@ -202,9 +202,9 @@ class BasicWorkflow(Workflow):
         for a fully serialized model.
 
         For weights-only checkpoints (``.weights.h5``), the current
-        approximator's architecture is kept and only the weights are replaced
-        via ``approximator.load_weights()``. For full-model checkpoints
-        (``.keras``), the entire approximator object is replaced via
+        estimator's architecture is kept and only the weights are replaced
+        via ``estimator.load_weights()``. For full-model checkpoints
+        (``.keras``), the entire estimator object is replaced via
         ``keras.saving.load_model()``.
 
         Parameters
@@ -240,7 +240,7 @@ class BasicWorkflow(Workflow):
             if self.checkpoint_filepath is None:
                 raise ValueError(
                     "No path provided and no checkpoint_filepath is set on this workflow. "
-                    "Pass an explicit path to load_approximator()."
+                    "Pass an explicit path to load_estimator()."
                 )
             filename = self.checkpoint_name + (".weights.h5" if self.save_weights_only else ".keras")
             path = os.path.join(self.checkpoint_filepath, filename)
@@ -254,11 +254,11 @@ class BasicWorkflow(Workflow):
             )
 
         if path.endswith(".weights.h5"):
-            self.approximator.load_weights(path)
-            logging.info(f"Approximator weights restored from '{path}'.")
+            self.estimator.load_weights(path)
+            logging.info(f"Estimator weights restored from '{path}'.")
         else:
-            self.approximator = keras.saving.load_model(path)
-            logging.info(f"Approximator restored from '{path}'.")
+            self.estimator = keras.saving.load_model(path)
+            logging.info(f"Estimator restored from '{path}'.")
 
     def fit_offline(
         self,
@@ -271,7 +271,7 @@ class BasicWorkflow(Workflow):
         **kwargs: Any,
     ) -> keras.callbacks.History:
         """
-        Train the approximator offline using a fixed dataset. This approach will be faster than online training,
+        Train the estimator offline using a fixed dataset. This approach will be faster than online training,
         since no computation time is spent in generating new data for each batch, but it assumes that simulations
         can fit in memory.
 
@@ -335,7 +335,7 @@ class BasicWorkflow(Workflow):
         **kwargs: Any,
     ) -> keras.callbacks.History:
         """
-        Train the approximator using an online data-generating process. The dataset is dynamically generated during
+        Train the estimator using an online data-generating process. The dataset is dynamically generated during
         training, making this approach suitable for scenarios where generating new simulations is computationally cheap.
 
         Parameters
@@ -399,7 +399,7 @@ class BasicWorkflow(Workflow):
         **kwargs: Any,
     ) -> keras.callbacks.History:
         """
-        Train the approximator using data stored on disk. This approach is suitable for large sets of simulations that
+        Train the estimator using data stored on disk. This approach is suitable for large sets of simulations that
         don't fit in memory.
 
         Parameters
@@ -504,14 +504,12 @@ class BasicWorkflow(Workflow):
 
         self.build_optimizer(epochs, dataset.num_batches, strategy=strategy)
         if self._needs_compile:
-            self.approximator.compile(optimizer=self.optimizer, metrics=kwargs.pop("metrics", None))
+            self.estimator.compile(optimizer=self.optimizer, metrics=kwargs.pop("metrics", None))
             self._needs_compile = False
 
         try:
             start_time = time.perf_counter()
-            self.history = self.approximator.fit(
-                dataset=dataset, epochs=epochs, validation_data=validation_data, **kwargs
-            )
+            self.history = self.estimator.fit(dataset=dataset, epochs=epochs, validation_data=validation_data, **kwargs)
             elapsed = time.perf_counter() - start_time
             logging.info(f"Training completed in {format_duration(elapsed)}.")
             self._on_training_finished()
@@ -635,7 +633,7 @@ class BasicWorkflow(Workflow):
         **kwargs: Any,
     ) -> dict[str, np.ndarray]:
         """
-        Draws `num_samples` samples from the approximator given specified conditions.
+        Draws `num_samples` samples from the estimator given specified conditions.
 
         Parameters
         ----------
@@ -664,7 +662,7 @@ class BasicWorkflow(Workflow):
             and shared across all stochastic operations in the call. A ``SeedGenerator`` is passed through
             as-is. If ``None`` (default), each component uses its own instance seed generator.
         **kwargs : dict | str, optional
-            Additional keyword arguments passed to the approximator's sampling function.
+            Additional keyword arguments passed to the estimator's sampling function.
 
         Returns
         -------
@@ -673,7 +671,7 @@ class BasicWorkflow(Workflow):
             values are arrays containing the generated samples.
         """
         start_time = time.perf_counter()
-        samples = self.approximator.sample(
+        samples = self.estimator.sample(
             num_samples=num_samples,
             conditions=conditions,
             split=split,
@@ -698,7 +696,7 @@ class BasicWorkflow(Workflow):
         **kwargs: Any,
     ) -> dict[str, np.ndarray]:
         """
-        Draws samples from the approximator given specified conditions and ancestral conditions.
+        Draws samples from the estimator given specified conditions and ancestral conditions.
 
         Parameters
         ----------
@@ -730,7 +728,7 @@ class BasicWorkflow(Workflow):
             then `sample_shape` is inferred as `(time,)`, and the generated samples will have shape
             `(num_conditions, num_samples, time, target_dim)`.
         **kwargs : dict | str, optional
-            Additional keyword arguments passed to the approximator's sampling function.
+            Additional keyword arguments passed to the estimator's sampling function.
 
         Returns
         -------
@@ -739,7 +737,7 @@ class BasicWorkflow(Workflow):
             values are arrays containing the generated samples.
         """
         start_time = time.perf_counter()
-        samples = self.approximator.ancestral_sample(
+        samples = self.estimator.ancestral_sample(
             conditions=conditions,
             ancestral_conditions=ancestral_conditions,
             summary_outputs=summaries,
@@ -781,14 +779,14 @@ class BasicWorkflow(Workflow):
             of shape (num_datasets, point_estimate_size, variable_block_size).
         """
         start_time = time.perf_counter()
-        estimates = self.approximator.estimate(conditions=conditions, **kwargs)
+        estimates = self.estimator.estimate(conditions=conditions, **kwargs)
         elapsed = time.perf_counter() - start_time
         logging.info(f"Estimating completed in {format_duration(elapsed)}.")
         return estimates
 
     def log_prob(self, data: Mapping[str, np.ndarray], **kwargs: Any) -> np.ndarray:
         """
-        Compute the log probability of given variables under the approximator.
+        Compute the log probability of given variables under the estimator.
 
         Parameters
         ----------
@@ -796,7 +794,7 @@ class BasicWorkflow(Workflow):
             A dictionary where keys represent variable names and values are arrays corresponding to the variables'
             realizations.
         **kwargs : dict | str, optional
-            Additional keyword arguments passed to the approximator's log probability function.
+            Additional keyword arguments passed to the estimator's log probability function.
 
         Returns
         -------
@@ -804,7 +802,7 @@ class BasicWorkflow(Workflow):
             An array containing the log probabilities computed from the provided variables.
         """
         start_time = time.perf_counter()
-        log_prob = self.approximator.log_prob(data=data, **kwargs)
+        log_prob = self.estimator.log_prob(data=data, **kwargs)
         elapsed = time.perf_counter() - start_time
         logging.info(f"Computing log probability completed in {format_duration(elapsed)}.")
         return log_prob
@@ -838,10 +836,10 @@ class BasicWorkflow(Workflow):
             is provided, that number of test data sets will be generated
             using the simulator (if available).
         num_samples : int, optional
-            The number of samples to draw from the approximator for diagnostics,
+            The number of samples to draw from the estimator for diagnostics,
             by default 1000.
         samples : Mapping[str, array], optional
-            Pre-computed samples from `workflow.sample` or `approximator.sample`.
+            Pre-computed samples from `workflow.sample` or `estimator.sample`.
             If provided, the `num_samples` argument is ignored. Providing samples
             requires you to also provide the `test_data` used to obtain the samples.
         variable_keys : list or None, optional, default: None
@@ -854,8 +852,8 @@ class BasicWorkflow(Workflow):
 
             - `test_data_kwargs`: dict, optional
                 Arguments to pass to the simulator when generating test data.
-            - `approximator_kwargs`: dict, optional
-                Arguments to pass to the approximator's sampling function.
+            - `estimator_kwargs`: dict, optional
+                Arguments to pass to the estimator's sampling function.
             - `loss_kwargs`: dict, optional
                 Arguments for customizing the loss plot.
             - `recovery_kwargs`: dict, optional
@@ -927,10 +925,10 @@ class BasicWorkflow(Workflow):
             the function names and values correspond to the functions themselves.
             The functions should have a signature of fn(samples, inference_variables, variable_names)
         num_samples : int, optional
-            The number of samples to draw from the approximator for diagnostics,
+            The number of samples to draw from the estimator for diagnostics,
             by default 1000.
         samples : Mapping[str, array], optional
-            Pre-computed samples from `workflow.sample` or `approximator.sample`.
+            Pre-computed samples from `workflow.sample` or `estimator.sample`.
             If provided, the `num_samples` argument is ignored. Providing samples
             requires you to also provide the `test_data` used to obtain the samples.
         variable_keys : list or None, optional, default: None
@@ -943,8 +941,8 @@ class BasicWorkflow(Workflow):
 
             - `test_data_kwargs`: dict, optional
                 Arguments to pass to the simulator when generating test data.
-            - `approximator_kwargs`: dict, optional
-                Arguments to pass to the approximator's sampling function.
+            - `estimator_kwargs`: dict, optional
+                Arguments to pass to the estimator's sampling function.
             - `loss_kwargs`: dict, optional
                 Arguments for customizing the loss plot.
             - `recovery_kwargs`: dict, optional
@@ -995,10 +993,10 @@ class BasicWorkflow(Workflow):
             is provided, that number of test data sets will be generated
             using the simulator (if available).
         num_samples : int, optional
-            The number of samples to draw from the approximator for diagnostics,
+            The number of samples to draw from the estimator for diagnostics,
             by default 1000.
         samples : Mapping[str, array], optional
-            Pre-computed samples from `workflow.sample` or `approximator.sample`.
+            Pre-computed samples from `workflow.sample` or `estimator.sample`.
             If provided, the `num_samples` argument is ignored. Providing samples
             requires you to also provide the `test_data` used to obtain the samples.
         variable_keys : list or None, optional, default: None
@@ -1014,8 +1012,8 @@ class BasicWorkflow(Workflow):
 
             - `test_data_kwargs`: dict, optional
                 Arguments to pass to the simulator when generating test data.
-            - `approximator_kwargs`: dict, optional
-                Arguments to pass to the approximator's sampling function.
+            - `estimator_kwargs`: dict, optional
+                Arguments to pass to the estimator's sampling function.
             - `root_mean_squared_error_kwargs`: dict, optional
                 Arguments for customizing the RMSE computation.
             - `posterior_contraction_kwargs`: dict, optional
@@ -1113,10 +1111,10 @@ class BasicWorkflow(Workflow):
             the function names and values correspond to the functions themselves.
             The functions should have a signature of fn(samples, inference_variables, variable_names)
         num_samples : int, optional
-            The number of samples to draw from the approximator for diagnostics,
+            The number of samples to draw from the estimator for diagnostics,
             by default 1000.
         samples : Mapping[str, array], optional
-            Pre-computed samples from `workflow.sample` or `approximator.sample`.
+            Pre-computed samples from `workflow.sample` or `estimator.sample`.
             If provided, the `num_samples` argument is ignored. Providing samples
             requires you to also provide the `test_data` used to obtain the samples.
         variable_keys : list or None, optional, default: None
@@ -1132,8 +1130,8 @@ class BasicWorkflow(Workflow):
 
             - `test_data_kwargs`: dict, optional
                 Arguments to pass to the simulator when generating test data.
-            - `approximator_kwargs`: dict, optional
-                Arguments to pass to the approximator's sampling function.
+            - `estimator_kwargs`: dict, optional
+                Arguments to pass to the estimator's sampling function.
             - `root_mean_squared_error_kwargs`: dict, optional
                 Arguments for customizing the RMSE computation.
             - `posterior_contraction_kwargs`: dict, optional
@@ -1179,8 +1177,8 @@ class BasicWorkflow(Workflow):
                 raise ValueError(f"No simulator found for generating {test_data} data sets.")
             test_data = self.simulator.sample(test_data, **kwargs.pop("test_data_kwargs", {}))
 
-        samples = self.approximator.sample(
-            num_samples=num_samples, conditions=test_data, **kwargs.get("approximator_kwargs", {})
+        samples = self.estimator.sample(
+            num_samples=num_samples, conditions=test_data, **kwargs.get("estimator_kwargs", {})
         )
 
         return samples, test_data
@@ -1195,17 +1193,17 @@ class BasicWorkflow(Workflow):
             model_path = f"{self.checkpoint_filepath}/{file_ext}"
             if self.save_weights_only:
                 load_hint = (
-                    f"Via the workflow: workflow.load_approximator()\n"
-                    f'Standalone (weights only): approximator.load_weights("{model_path}")'
+                    f"Via the workflow: workflow.load_estimator()\n"
+                    f'Standalone (weights only): estimator.load_weights("{model_path}")'
                 )
             else:
                 load_hint = (
-                    f"Via the workflow: workflow.load_approximator()\n"
-                    f'Standalone: approximator = keras.saving.load_model("{model_path}")'
+                    f"Via the workflow: workflow.load_estimator()\n"
+                    f'Standalone: estimator = keras.saving.load_model("{model_path}")'
                 )
             logging.info(
                 f"Training is now finished.\n"
-                f"You can find the trained approximator at '{model_path}'.\n"
+                f"You can find the trained estimator at '{model_path}'.\n"
                 f"To restore it:\n{load_hint}"
             )
 
@@ -1246,7 +1244,7 @@ class BasicWorkflow(Workflow):
                 )
                 if not restore:
                     msg += (
-                        "\nTo restore the approximator from the checkpoint, call "
-                        "workflow.load_approximator() or pass restore=True to the workflow constructor."
+                        "\nTo restore the estimator from the checkpoint, call "
+                        "workflow.load_estimator() or pass restore=True to the workflow constructor."
                     )
                 logging.warning(msg)

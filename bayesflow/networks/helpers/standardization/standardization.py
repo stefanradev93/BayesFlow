@@ -14,7 +14,7 @@ class Standardization(keras.Layer):
     """
     Initializes a layer that will keep track of the running mean and
     running standard deviation for all possible variables in a BayesFlow
-    approximator.
+    estimator.
     """
 
     def __init__(self, standardize: str | Sequence | None, **kwargs):

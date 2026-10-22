@@ -610,7 +610,7 @@ def test_resolve_raises_if_subnet_does_not_name_the_mask(targets, name):
 
 
 def test_resolve_without_subnet_does_not_check_masks(targets):
-    # e.g. the approximator resolves masks before a subnet is involved
+    # e.g. the estimator resolves masks before a subnet is involved
     MaskHandler().resolve({"mask": keras.ops.ones((2, 3), dtype="float32")}, targets=targets)
 
 

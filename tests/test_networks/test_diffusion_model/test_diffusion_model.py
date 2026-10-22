@@ -233,7 +233,7 @@ def test_diffusion_guidance(simple_diffusion_model):
         x_pred = unstandardize(x_pred)
         return x_pred * 0
 
-    workflow.approximator.inference_network.guidance_function = guidance_function
+    workflow.estimator.inference_network.guidance_function = guidance_function
     samples_guided_func = workflow.sample(
         num_samples=2,
         conditions=test_conditions,
