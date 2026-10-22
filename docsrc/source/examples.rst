@@ -25,3 +25,4 @@ The corresponding Jupyter Notebooks are available :mainbranch:`here <examples/>`
    _examples/Compositional_Diffusion
    _examples/Model_Comparison_Deep_Dive
    _examples/Bivariate_Smoothing
+   _examples/Self_Consistency
