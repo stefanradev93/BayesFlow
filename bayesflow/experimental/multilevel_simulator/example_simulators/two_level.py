@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..graphical_simulator import GraphicalSimulator
+from ..multilevel_simulator import MultilevelSimulator
 
 
 def sample_hypers():
@@ -42,7 +42,7 @@ def two_level_simulator():
 
     The sample functions draw one sample per call.
     """
-    simulator = GraphicalSimulator()
+    simulator = MultilevelSimulator()
 
     simulator.add_node("hypers", sample_fn=sample_hypers)
     simulator.add_node("locals", sample_fn=sample_locals, reps=6)

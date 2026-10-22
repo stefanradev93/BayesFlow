@@ -2,8 +2,8 @@ import keras
 import numpy as np
 import pytest
 
-from bayesflow.experimental.graphical_estimator import GraphicalEstimator
-from bayesflow.experimental.graphical_estimator.encoder import ExchangeableEncoder
+from bayesflow.experimental.multilevel_estimator import MultilevelEstimator
+from bayesflow.experimental.multilevel_estimator.encoder import MultilevelEncoder
 from bayesflow.networks import CouplingFlow
 
 
@@ -18,12 +18,12 @@ def small_estimator(simulator):
         network_encoders = {}
         for node in graph.conditions(target_nodes):
             if simulation_graph.out_degree(node) == 0:
-                network_encoders[node] = ExchangeableEncoder(width=4)
+                network_encoders[node] = MultilevelEncoder(width=4)
 
         inference_networks.append(CouplingFlow())
         encoders.append(network_encoders)
 
-    return GraphicalEstimator(graph, inference_networks=inference_networks, encoders=encoders)
+    return MultilevelEstimator(graph, inference_networks=inference_networks, encoders=encoders)
 
 
 def all_conditions(estimator, batch):

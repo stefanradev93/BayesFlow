@@ -2,9 +2,9 @@ import networkx as nx
 import numpy as np
 import pytest
 
-from bayesflow.experimental.graphical_simulator import GraphicalSimulator
-from bayesflow.experimental.graphical_simulator.graphical_simulator import from_table
-from bayesflow.experimental.graphical_simulator.samples import NodeSamples, concatenate, select, to_tensors
+from bayesflow.experimental.multilevel_simulator import MultilevelSimulator
+from bayesflow.experimental.multilevel_simulator.multilevel_simulator import from_table
+from bayesflow.experimental.multilevel_simulator.samples import NodeSamples, concatenate, select, to_tensors
 
 SIMULATORS = ["single_level_simulator", "two_level_simulator", "three_level_simulator", "crossed_design_irt_simulator"]
 
@@ -48,7 +48,7 @@ def test_meta_override(single_level_simulator):
 
 
 def test_callable_reps():
-    simulator = GraphicalSimulator()
+    simulator = MultilevelSimulator()
     simulator.add_node("group", sample_fn=lambda: {"mu": np.random.normal()})
     simulator.add_node("obs", sample_fn=lambda mu: {"y": mu}, reps=lambda size: np.arange(size) + 1)
     simulator.add_edge("group", "obs")
@@ -68,7 +68,7 @@ def test_reps_receive_combinations_and_meta():
         # only even items are observed, so odd ones get no rows
         return (combinations["item"] % 2 == 0).astype(int)
 
-    simulator = GraphicalSimulator(meta_fn=lambda: {"num_items": 4})
+    simulator = MultilevelSimulator(meta_fn=lambda: {"num_items": 4})
     simulator.add_node("group", sample_fn=lambda: {"mu": np.random.normal()}, reps=3)
     simulator.add_node("item", sample_fn=lambda: {"b": np.random.normal()}, reps="num_items")
     simulator.add_node("obs", sample_fn=lambda mu, b: {"y": mu + b}, reps=even_items)
@@ -111,7 +111,7 @@ def copy_parent(x):
 
 def copy_model(is_batched):
     # the child copies its parent's value, so we can see which parent each child belongs to
-    simulator = GraphicalSimulator()
+    simulator = MultilevelSimulator()
 
     if is_batched:
         simulator.add_node("parent", sample_fn=sample_parents, is_batched=True)
@@ -136,7 +136,7 @@ def test_children_receive_their_parents_values(is_batched):
 
 @pytest.mark.parametrize("is_batched", [False, True])
 def test_vector_valued_variables(is_batched):
-    simulator = GraphicalSimulator()
+    simulator = MultilevelSimulator()
 
     if is_batched:
         simulator.add_node("prior", sample_fn=lambda batch_size: {"beta": np.zeros((batch_size, 3))}, is_batched=True)
@@ -293,7 +293,7 @@ def test_from_table_raises_without_label_column(crossed_design_irt_simulator):
 
 
 def test_is_batched_default():
-    simulator = GraphicalSimulator(is_batched=True)
+    simulator = MultilevelSimulator(is_batched=True)
     simulator.add_node("prior", sample_fn=sample_parents)
     simulator.add_node("unbatched", sample_fn=sample_parent, is_batched=False)
 
@@ -303,7 +303,7 @@ def test_is_batched_default():
 
 
 def test_meta_fn_is_drawn_per_dataset():
-    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 50)}, is_batched=True)
+    simulator = MultilevelSimulator(meta_fn=lambda: {"N": np.random.randint(1, 50)}, is_batched=True)
     simulator.add_node("hypers", sample_fn=lambda batch_size: {"mu": np.random.normal(size=batch_size)})
     simulator.add_node("locals", sample_fn=lambda mu: {"theta": mu}, reps="N")
     simulator.add_edge("hypers", "locals")
@@ -322,7 +322,7 @@ def test_meta_fn_per_dataset_batched():
         received["N"] = N
         return {"theta": np.zeros(batch_size)}
 
-    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 5)}, is_batched=True)
+    simulator = MultilevelSimulator(meta_fn=lambda: {"N": np.random.randint(1, 5)}, is_batched=True)
     simulator.add_node("hypers", sample_fn=lambda batch_size: {"mu": np.zeros(batch_size)})
     simulator.add_node("locals", sample_fn=sample_locals, reps="N")
     simulator.add_edge("hypers", "locals")
@@ -341,7 +341,7 @@ def test_meta_fn_per_dataset_unbatched():
         received.append(N)
         return {"theta": 0.0}
 
-    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 5)})
+    simulator = MultilevelSimulator(meta_fn=lambda: {"N": np.random.randint(1, 5)})
     simulator.add_node("hypers", sample_fn=lambda: {"mu": 0.0})
     simulator.add_node("locals", sample_fn=sample_locals, reps="N")
     simulator.add_edge("hypers", "locals")
@@ -354,7 +354,7 @@ def test_meta_fn_per_dataset_unbatched():
 
 
 def test_meta_override_is_shared():
-    simulator = GraphicalSimulator(meta_fn=lambda: {"N": np.random.randint(1, 50)}, is_batched=True)
+    simulator = MultilevelSimulator(meta_fn=lambda: {"N": np.random.randint(1, 50)}, is_batched=True)
     simulator.add_node("hypers", sample_fn=lambda batch_size: {"mu": np.zeros(batch_size)})
     simulator.add_node("locals", sample_fn=lambda batch_size: {"theta": np.zeros(batch_size)}, reps="N")
     simulator.add_edge("hypers", "locals")

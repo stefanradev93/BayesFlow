@@ -1,7 +1,7 @@
-"""Deprecated compatibility aliases for :mod:`bayesflow.experimental.graphical_estimator`."""
+"""Deprecated compatibility aliases for :mod:`bayesflow.experimental.multilevel_estimator`."""
 
-from bayesflow.experimental.graphical_estimator import ExchangeableEncoder
+from bayesflow.experimental.multilevel_estimator import MultilevelEncoder
 
 from .graphical_approximator import GraphicalApproximator
 
-__all__ = ["GraphicalApproximator", "ExchangeableEncoder"]
+__all__ = ["GraphicalApproximator", "MultilevelEncoder"]

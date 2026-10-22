@@ -9,20 +9,20 @@ SimulationNode: TypeAlias = str
 
 class SimulationGraph(nx.DiGraph):
     """
-    The directed acyclic graph of a GraphicalSimulator.
+    The directed acyclic graph of a MultilevelSimulator.
 
     Every node of the graph is a node of the simulator, with its
     ``sample_fn``, ``reps`` and ``is_batched`` stored as node attributes, and
     every edge points from a parent to its child.
     Nodes without children hold the data, all other nodes are latent.
 
-    The graph is created by the GraphicalSimulator is available as
+    The graph is created by the MultilevelSimulator is available as
     ``simulator.graph``.
 
     Parameters
     ----------
     meta_fn : Callable, optional
-        Function returning a dict of meta data, as passed to the GraphicalSimulator.
+        Function returning a dict of meta data, as passed to the MultilevelSimulator.
     **kwargs
         Additional keyword arguments passed to :py:class:`networkx.DiGraph`.
     """
@@ -44,7 +44,7 @@ class SimulationGraph(nx.DiGraph):
         -------
         ExpandedGraph
             The expanded graph. Call its :py:meth:`invert` method to obtain the
-            InvertedGraph for the GraphicalEstimator.
+            InvertedGraph for the MultilevelEstimator.
         """
         expanded = nx.relabel_nodes(nx.DiGraph(self), ExpandedNode)
 

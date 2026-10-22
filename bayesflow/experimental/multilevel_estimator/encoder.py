@@ -4,7 +4,7 @@ from bayesflow.utils.serialization import serializable
 
 
 @serializable("bayesflow.experimental")
-class ExchangeableEncoder(keras.Layer):
+class MultilevelEncoder(keras.Layer):
     """
     Encodes the rows of a data node, so they can be pooled into conditions.
 

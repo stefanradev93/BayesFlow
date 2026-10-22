@@ -3,7 +3,7 @@ import pytest
 
 
 def estimator_for(simulator, network=None):
-    from bayesflow.experimental.graphical_estimator import GraphicalEstimator
+    from bayesflow.experimental.multilevel_estimator import MultilevelEstimator
     from bayesflow.networks import CouplingFlow
 
     network = network or CouplingFlow
@@ -13,7 +13,7 @@ def estimator_for(simulator, network=None):
     for target_nodes in graph.networks():
         inference_networks.append(network())
 
-    return GraphicalEstimator(graph, inference_networks=inference_networks)
+    return MultilevelEstimator(graph, inference_networks=inference_networks)
 
 
 # a survey, where every square is surveyed in one window of years, so obs has no row for most (square, year) pairs
@@ -34,9 +34,9 @@ def surveyed(combinations, num_years):
 
 @pytest.fixture()
 def survey_simulator():
-    from bayesflow.experimental.graphical_simulator import GraphicalSimulator
+    from bayesflow.experimental.multilevel_simulator import MultilevelSimulator
 
-    simulator = GraphicalSimulator(meta_fn=lambda: {"num_years": 5})
+    simulator = MultilevelSimulator(meta_fn=lambda: {"num_years": 5})
     simulator.add_node("globals", sample_fn=lambda: {"mu": np.random.normal()})
     simulator.add_node("squares", sample_fn=lambda mu: {"alpha": np.random.normal(mu)}, reps=squares_reps)
     simulator.add_node("years", sample_fn=lambda: {"beta": np.random.normal()}, reps="num_years")
@@ -56,7 +56,7 @@ def survey_estimator(survey_simulator):
 
 @pytest.fixture()
 def single_level_simulator():
-    from bayesflow.experimental.graphical_simulator.example_simulators import single_level_simulator
+    from bayesflow.experimental.multilevel_simulator.example_simulators import single_level_simulator
 
     return single_level_simulator()
 
@@ -68,7 +68,7 @@ def single_level_estimator(single_level_simulator):
 
 @pytest.fixture()
 def two_level_simulator():
-    from bayesflow.experimental.graphical_simulator.example_simulators import two_level_simulator
+    from bayesflow.experimental.multilevel_simulator.example_simulators import two_level_simulator
 
     return two_level_simulator()
 
@@ -85,7 +85,7 @@ def w_reps(size):
 
 @pytest.fixture()
 def two_data_nodes_simulator():
-    from bayesflow.experimental.graphical_simulator.example_simulators import two_level_simulator
+    from bayesflow.experimental.multilevel_simulator.example_simulators import two_level_simulator
 
     # a second data node below locals
     simulator = two_level_simulator()
@@ -102,7 +102,7 @@ def two_data_nodes_estimator(two_data_nodes_simulator):
 
 @pytest.fixture()
 def three_level_simulator():
-    from bayesflow.experimental.graphical_simulator.example_simulators import three_level_simulator
+    from bayesflow.experimental.multilevel_simulator.example_simulators import three_level_simulator
 
     return three_level_simulator()
 
@@ -114,7 +114,7 @@ def three_level_estimator(three_level_simulator):
 
 @pytest.fixture()
 def crossed_design_irt_simulator():
-    from bayesflow.experimental.graphical_simulator.example_simulators import crossed_design_irt_simulator
+    from bayesflow.experimental.multilevel_simulator.example_simulators import crossed_design_irt_simulator
 
     return crossed_design_irt_simulator()
 

@@ -8,15 +8,15 @@ from bayesflow.networks import ConsistencyModel, InferenceNetwork, StableConsist
 from bayesflow.networks.helpers.standardization.standardization import Standardization
 from bayesflow.utils.serialization import serializable, serialize
 
-from ..graphical_simulator.samples import GraphSamples, NodeSamples, concatenate, num_datasets, to_tensors
+from ..multilevel_simulator.samples import GraphSamples, NodeSamples, concatenate, num_datasets, to_tensors
 from ..graphs import InvertedGraph, SimulationGraph
 from ..graphs.simulation_graph import data_nodes
 from .batches import SimulationDataset, add_sequence_summaries, network_variables, node_values, to_batch
-from .encoder import ExchangeableEncoder, gather, segment_count, segment_mean, sum_per_dataset
+from .encoder import MultilevelEncoder, gather, segment_count, segment_mean, sum_per_dataset
 
 
 @serializable("bayesflow.experimental")
-class GraphicalEstimator(Estimator):
+class MultilevelEstimator(Estimator):
     """
     Amortized inference for probabilistic models defined by a directed
     acyclic graph.
@@ -27,7 +27,7 @@ class GraphicalEstimator(Estimator):
     and inferred.
 
     To define the model, see
-    :class:`bayesflow.experimental.graphical_simulator.GraphicalSimulator`.
+    :class:`bayesflow.experimental.multilevel_simulator.MultilevelSimulator`.
     """
 
     def __init__(
@@ -45,7 +45,7 @@ class GraphicalEstimator(Estimator):
         ----------
         graph : bayesflow.experimental.graphs.InvertedGraph
             InvertedGraph capturing the dependency structure. Usually obtained
-            from the :py:class:`GraphicalSimulator` that defined the model, by
+            from the :py:class:`MultilevelSimulator` that defined the model, by
             expanding its :py:class:`SimulationGraph` and inverting the result::
                 graph = simulator.graph.expand().invert()
         inference_networks: list[InferenceNetwork]
@@ -56,12 +56,12 @@ class GraphicalEstimator(Estimator):
         encoders: list[dict[str, keras.Layer]], optional
             Only needed to customize the encoders. The layers that summarize
             the observed data, so it can be used to condition an inference
-            network (default is an :py:class:`ExchangeableEncoder` for every
+            network (default is an :py:class:`MultilevelEncoder` for every
             node an inference network conditions on). Give one dictionary per
             inference network, in the order of ``graph.networks()``, that maps
             each data node the network conditions on to its encoder.
             An encoder must return one encoding per row, like
-            :py:class:`ExchangeableEncoder`.
+            :py:class:`MultilevelEncoder`.
         adapter: bayesflow.adapters.Adapter, optional
             Adapter for data processing (default is an empty Adapter).
         standardize : str | list[str] | None
@@ -115,7 +115,7 @@ class GraphicalEstimator(Estimator):
 
                 for node in condition_nodes:
                     if node in self.data_nodes:
-                        network_encoders[node] = ExchangeableEncoder()
+                        network_encoders[node] = MultilevelEncoder()
 
                 encoders.append(network_encoders)
 
@@ -136,7 +136,7 @@ class GraphicalEstimator(Estimator):
             Number of posterior samples per dataset.
         conditions : GraphSamples
             The observed data, as returned by :py:func:`from_table`, or
-            simulations of the GraphicalSimulator, as returned by its
+            simulations of the MultilevelSimulator, as returned by its
             :py:meth:`sample` method.
             Only the values of the data nodes are used.
         format : {"long", "tensor"}, optional
@@ -221,7 +221,7 @@ class GraphicalEstimator(Estimator):
         ----------
         data : GraphSamples
             Samples of every node, for example as returned by the
-            :py:meth:`sample` method of the GraphicalSimulator.
+            :py:meth:`sample` method of the MultilevelSimulator.
 
         Returns
         -------
@@ -290,10 +290,10 @@ class GraphicalEstimator(Estimator):
         ----------
         dataset : GraphSamples or keras.utils.PyDataset, optional
             A dataset containing simulations for training, for example as
-            returned by the :py:meth:`sample` method of the GraphicalSimulator.
+            returned by the :py:meth:`sample` method of the MultilevelSimulator.
             The datasets are shuffled before every epoch.
             If provided, `simulator` must be None.
-        simulator : GraphicalSimulator, optional
+        simulator : MultilevelSimulator, optional
             A simulator used to generate a dataset. If provided, `dataset`
             must be None.
         validation_data : GraphSamples or keras.utils.PyDataset, optional

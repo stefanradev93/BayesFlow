@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..graphical_simulator import GraphicalSimulator
+from ..multilevel_simulator import MultilevelSimulator
 
 
 def prior():
@@ -30,7 +30,7 @@ def single_level_simulator():
 
     The sample functions draw one sample per call.
     """
-    simulator = GraphicalSimulator(meta_fn=meta)
+    simulator = MultilevelSimulator(meta_fn=meta)
 
     simulator.add_node("prior", sample_fn=prior)
     simulator.add_node("likelihood", sample_fn=likelihood, reps="N")

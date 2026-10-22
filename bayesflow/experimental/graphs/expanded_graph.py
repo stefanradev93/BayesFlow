@@ -56,7 +56,7 @@ class ExpandedGraph(nx.DiGraph):
     def invert(self, ordering: list[SimulationNode] | None = None):
         """
         Inverts the graph into the factorization of the posterior used by
-        the GraphicalEstimator.
+        the MultilevelEstimator.
 
         The latent nodes are inferred one after the other, starting from the
         data. Every instance of a latent node is conditioned on the fewest
@@ -74,7 +74,7 @@ class ExpandedGraph(nx.DiGraph):
         Returns
         -------
         InvertedGraph
-            The inverted graph, to be passed to the GraphicalEstimator.
+            The inverted graph, to be passed to the MultilevelEstimator.
         """
         if ordering is None:
             return select_factorization(enumerate_factorizations(self))

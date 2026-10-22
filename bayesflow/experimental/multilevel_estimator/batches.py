@@ -8,9 +8,9 @@ import numpy as np
 
 from bayesflow.adapters import Adapter
 
-from ..graphical_simulator import GraphicalSimulator
-from ..graphical_simulator.indexing_helpers import concatenated_ranges, group_ids
-from ..graphical_simulator.samples import GraphSamples, num_datasets, select
+from ..multilevel_simulator import MultilevelSimulator
+from ..multilevel_simulator.indexing_helpers import concatenated_ranges, group_ids
+from ..multilevel_simulator.samples import GraphSamples, num_datasets, select
 from ..graphs import InvertedGraph, SimulationGraph
 from ..graphs.simulation_graph import is_exchangeable, is_interior
 from .encoder import gather, segment_mean
@@ -19,7 +19,7 @@ from .encoder import gather, segment_mean
 class SimulationDataset(keras.utils.PyDataset):
     def __init__(
         self,
-        source: GraphicalSimulator | GraphSamples,
+        source: MultilevelSimulator | GraphSamples,
         batch_size: int,
         to_batch: Callable[[GraphSamples], dict],
         num_batches: int | None = None,
@@ -30,7 +30,7 @@ class SimulationDataset(keras.utils.PyDataset):
         self.batch_size = batch_size
         self.to_batch = to_batch
 
-        if isinstance(source, GraphicalSimulator):
+        if isinstance(source, MultilevelSimulator):
             self.length = num_batches
         else:
             datasets = num_datasets(source)
@@ -41,7 +41,7 @@ class SimulationDataset(keras.utils.PyDataset):
         return self.length
 
     def __getitem__(self, i: int) -> dict:
-        if isinstance(self.source, GraphicalSimulator):
+        if isinstance(self.source, MultilevelSimulator):
             simulation = self.source.sample(self.batch_size)
             return self.to_batch(simulation, padded=True)
 
@@ -51,7 +51,7 @@ class SimulationDataset(keras.utils.PyDataset):
         return self.to_batch(simulation, padded=True)
 
     def on_epoch_end(self) -> None:
-        if not isinstance(self.source, GraphicalSimulator):
+        if not isinstance(self.source, MultilevelSimulator):
             self.order = np.random.permutation(num_datasets(self.source))
 
 

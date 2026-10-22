@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..graphical_simulator import GraphicalSimulator
+from ..multilevel_simulator import MultilevelSimulator
 
 
 def sample_schools(batch_size):
@@ -69,7 +69,7 @@ def three_level_simulator():
 
     The sample functions draw all samples of a node in one call.
     """
-    simulator = GraphicalSimulator(meta_fn=meta_fn)
+    simulator = MultilevelSimulator(meta_fn=meta_fn)
 
     simulator.add_node("schools", sample_fn=sample_schools, is_batched=True)
     simulator.add_node("classrooms", sample_fn=sample_classrooms, is_batched=True, reps="N_classrooms")

@@ -1,9 +1,9 @@
-from .graphical_simulator import GraphicalSimulator, from_table
+from .multilevel_simulator import MultilevelSimulator, from_table
 from .samples import GraphSamples, NodeSamples, concatenate, select, to_tensors
 from . import example_simulators
 
 __all__ = [
-    "GraphicalSimulator",
+    "MultilevelSimulator",
     "from_table",
     "GraphSamples",
     "NodeSamples",

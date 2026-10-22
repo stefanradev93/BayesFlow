@@ -3,9 +3,9 @@ import numpy as np
 import pytest
 
 from bayesflow.adapters import Adapter
-from bayesflow.experimental.graphical_estimator import GraphicalEstimator
-from bayesflow.experimental.graphical_estimator.encoder import ExchangeableEncoder
-from bayesflow.experimental.graphical_simulator.samples import concatenate, to_tensors
+from bayesflow.experimental.multilevel_estimator import MultilevelEstimator
+from bayesflow.experimental.multilevel_estimator.encoder import MultilevelEncoder
+from bayesflow.experimental.multilevel_simulator.samples import concatenate, to_tensors
 from bayesflow.masking import MaskHandler
 from bayesflow.networks import ConsistencyModel, CouplingFlow, DiffusionModel, FlowMatching, StableConsistencyModel
 
@@ -170,7 +170,7 @@ def test_log_prob_sums_rows_per_dataset(two_level_simulator, two_level_estimator
 
 def test_log_prob_with_adapter(two_level_simulator):
     adapter = Adapter().standardize(include="hyper_mean", mean=0.0, std=2.0)
-    estimator = GraphicalEstimator(
+    estimator = MultilevelEstimator(
         two_level_simulator.graph.expand().invert(),
         adapter=adapter,
         inference_networks=[CouplingFlow(), CouplingFlow()],
@@ -188,7 +188,7 @@ def test_log_prob_with_adapter(two_level_simulator):
 def test_serialization(simulator, estimator, request):
     estimator = request.getfixturevalue(estimator)
 
-    restored = GraphicalEstimator.from_config(estimator.get_config())
+    restored = MultilevelEstimator.from_config(estimator.get_config())
 
     assert restored.networks == estimator.networks
     assert restored.condition_nodes == estimator.condition_nodes
@@ -219,7 +219,7 @@ def test_defaults(two_data_nodes_estimator):
     for network_encoders in estimator.encoders:
         assert sorted(network_encoders) == ["w", "y"]
         for encoder in network_encoders.values():
-            assert isinstance(encoder, ExchangeableEncoder)
+            assert isinstance(encoder, MultilevelEncoder)
 
 
 def test_non_amortizable_networks_are_sequential(crossed_design_irt_estimator):

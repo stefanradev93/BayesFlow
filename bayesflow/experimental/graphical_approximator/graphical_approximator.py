@@ -1,19 +1,19 @@
 from functools import wraps
 from warnings import warn
 
-from bayesflow.experimental.graphical_estimator import GraphicalEstimator
+from bayesflow.experimental.multilevel_estimator import MultilevelEstimator
 from bayesflow.utils.serialization import serializable
 
 
 @serializable("bayesflow.experimental")
-class GraphicalApproximator(GraphicalEstimator):
-    """Deprecated alias for :class:`~bayesflow.experimental.graphical_estimator.GraphicalEstimator`."""
+class GraphicalApproximator(MultilevelEstimator):
+    """Deprecated alias for :class:`~bayesflow.experimental.multilevel_estimator.MultilevelEstimator`."""
 
-    @wraps(GraphicalEstimator.__init__)
+    @wraps(MultilevelEstimator.__init__)
     def __init__(self, *args, **kwargs):
         warn(
             "GraphicalApproximator is deprecated. Use "
-            "bayesflow.experimental.graphical_estimator.GraphicalEstimator instead.",
+            "bayesflow.experimental.multilevel_estimator.MultilevelEstimator instead.",
             DeprecationWarning,
             stacklevel=2,
         )

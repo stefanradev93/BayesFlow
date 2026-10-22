@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import expit
 
-from ..graphical_simulator import GraphicalSimulator
+from ..multilevel_simulator import MultilevelSimulator
 
 
 # schools have different exam difficulties
@@ -73,7 +73,7 @@ def crossed_design_irt_simulator():
 
     The sample functions draw all samples of a node in one call.
     """
-    simulator = GraphicalSimulator(meta_fn=meta_fn)
+    simulator = MultilevelSimulator(meta_fn=meta_fn)
 
     simulator.add_node("schools", sample_fn=sample_school, is_batched=True)
     simulator.add_node("questions", sample_fn=sample_questions, is_batched=True, reps="num_questions")
