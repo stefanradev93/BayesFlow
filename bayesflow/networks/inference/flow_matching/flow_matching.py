@@ -254,9 +254,8 @@ class FlowMatching(InferenceNetwork):
         time = keras.ops.convert_to_tensor(time, dtype=keras.ops.dtype(xz))
         time = expand_right_as(time, xz)
         time = keras.ops.broadcast_to(time, keras.ops.shape(xz)[:-1] + (1,))
-        # the subnet sees the legacy time (t = 1 is the data) and predicts the legacy velocity
-        subnet_out = self.subnet((xz, 1 - time, conditions), training=training, **masks.subnet_kwargs)
-        out = -self.output_projector(subnet_out)
+        subnet_out = self.subnet((xz, time, conditions), training=training, **masks.subnet_kwargs)
+        out = self.output_projector(subnet_out)
 
         # Zero out velocity where target is fixed (during inference only)
         if not training:
