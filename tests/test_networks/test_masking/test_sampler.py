@@ -2,7 +2,7 @@ import keras
 import numpy as np
 import pytest
 
-from bayesflow.approximators.helpers import Sampler
+from bayesflow.estimators.helpers import Sampler
 from bayesflow.masking import MaskHandler, MaskName
 
 

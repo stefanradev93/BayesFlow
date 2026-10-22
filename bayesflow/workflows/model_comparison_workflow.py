@@ -11,7 +11,7 @@ import keras
 from bayesflow.networks import ScoringRuleNetwork, SummaryNetwork
 from bayesflow.simulators import ModelComparisonSimulator, Simulator
 from bayesflow.adapters import Adapter
-from bayesflow.approximators import ModelComparisonApproximator
+from bayesflow.estimators import ModelComparisonEstimator
 from bayesflow.scoring_rules import CategoricalScoringRule
 from bayesflow.utils import (
     find_scoring_rule,
@@ -102,7 +102,7 @@ class ModelComparisonWorkflow(BasicWorkflow):
         - ``summary_kwargs``    : dict — passed to :func:`~bayesflow.utils.find_summary_network`.
         - ``optimizer_kwargs``  : dict — passed to ``_init_optimizer``.
         - ``simulator_kwargs``  : dict — passed to :class:`~bayesflow.simulators.ModelComparisonSimulator`.
-        - Other keys forwarded to :class:`~bayesflow.approximators.ModelComparisonApproximator`.
+        - Other keys forwarded to :class:`~bayesflow.estimators.ModelComparisonEstimator`.
     """
 
     def __init__(
@@ -146,7 +146,7 @@ class ModelComparisonWorkflow(BasicWorkflow):
 
         resolved_scoring_rules = ModelComparisonWorkflow._resolve_scoring_rules(scoring_rules)
 
-        self.approximator = ModelComparisonApproximator(
+        self.estimator = ModelComparisonEstimator(
             inference_network=ScoringRuleNetwork(
                 scoring_rules=resolved_scoring_rules,
                 subnet=subnet,
@@ -155,7 +155,7 @@ class ModelComparisonWorkflow(BasicWorkflow):
             summary_network=find_summary_network(summary_network, **kwargs.get("summary_kwargs", {})),
             adapter=adapter,
             standardize=standardize,
-            **filter_kwargs(kwargs, ModelComparisonApproximator.__init__),
+            **filter_kwargs(kwargs, ModelComparisonEstimator.__init__),
         )
 
         self._init_optimizer(initial_learning_rate, optimizer, **kwargs.get("optimizer_kwargs", {}))

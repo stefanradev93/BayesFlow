@@ -10,7 +10,7 @@
 introduction
 simulators.ipynb
 data_processing.ipynb
-approximators.ipynb
+estimators.ipynb
 summary_networks.ipynb
 inference_networks.ipynb
 masking.ipynb

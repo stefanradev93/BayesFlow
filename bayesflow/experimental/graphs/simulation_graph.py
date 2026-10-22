@@ -33,7 +33,7 @@ class SimulationGraph(nx.DiGraph):
     group-wise (enabling amortization over groups).
 
     Second, an inversion algorithm is applied to the `ExpandedGraph` to produce
-    an `InvertedGraph`, which served as an input to the `GraphicalApproximator`.
+    an `InvertedGraph`, which serves as an input to the `GraphicalEstimator`.
 
     Parameters
     ----------

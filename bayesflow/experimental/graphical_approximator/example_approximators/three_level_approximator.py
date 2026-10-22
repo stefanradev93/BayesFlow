@@ -1,27 +1,12 @@
-from bayesflow.experimental.graphical_simulator.example_simulators import three_level_simulator
-from bayesflow.adapters import Adapter
-from bayesflow.networks import DeepSet, CouplingFlow
-from bayesflow.experimental.graphical_approximator import GraphicalApproximator
+from warnings import warn
+
+from bayesflow.experimental.graphical_estimator.example_estimators import three_level_estimator
 
 
 def three_level_approximator():
-    simulator = three_level_simulator()
-
-    adapter = Adapter()
-
-    summary_networks = [
-        DeepSet(summary_dim=10),
-        DeepSet(summary_dim=20),
-        DeepSet(summary_dim=30),
-        DeepSet(summary_dim=40),
-        DeepSet(summary_dim=50),
-        DeepSet(summary_dim=60),
-    ]
-    inference_networks = [CouplingFlow(), CouplingFlow(), CouplingFlow()]
-
-    inverted_graph = simulator.graph.invert()
-    approximator = GraphicalApproximator(
-        inverted_graph, adapter=adapter, inference_networks=inference_networks, summary_networks=summary_networks
+    warn(
+        "three_level_approximator is deprecated. Use three_level_estimator instead.",
+        DeprecationWarning,
+        stacklevel=2,
     )
-
-    return approximator
+    return three_level_estimator()

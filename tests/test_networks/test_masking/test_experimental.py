@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from bayesflow.experimental import FreeFormFlow, LatentInferenceNetwork
-from bayesflow.experimental.graphical_approximator.non_exchangeable_wrapper import NonExchangeableWrapper
+from bayesflow.experimental.graphical_estimator.non_exchangeable_wrapper import NonExchangeableWrapper
 from bayesflow.masking import MaskHandler
 from bayesflow.networks import DeepSet, InferenceNetwork
 from bayesflow.utils.serialization import deserialize, serialize

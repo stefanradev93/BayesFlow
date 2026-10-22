@@ -20,11 +20,11 @@ please refer to the :doc:`Examples <../examples>` section.
     :recursive:
 
     adapters
-    approximators
     augmentations
     datasets
     diagnostics
     distributions
+    estimators
     experimental
     links
     masking

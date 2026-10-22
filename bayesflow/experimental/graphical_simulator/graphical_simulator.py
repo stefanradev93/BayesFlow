@@ -171,7 +171,7 @@ class GraphicalSimulator(Simulator):
         Returns a mapping from each node to the list of variable names it produces.
 
         The graph is evaluated once in topological order o collect sample outputs.
-        This may be expensive; results are cached in `GraphicalApproximator`.
+        This may be expensive; results are cached in `GraphicalEstimator`.
         """
         meta_dict = self.meta_fn() if self.meta_fn else {}
         samples_by_node = {}

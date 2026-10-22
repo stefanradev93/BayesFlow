@@ -59,7 +59,7 @@ class InvertedGraph(nx.DiGraph):
 
     def required_summary_networks(self) -> None:
         """
-        Returns the required summary networks for the `GraphicalApproximator`.
+        Returns the required summary networks for the `GraphicalEstimator`.
         """
         shapes = self.summary_network_input_shapes()
         mode_labels = {
@@ -88,7 +88,7 @@ class InvertedGraph(nx.DiGraph):
 
     def required_inference_networks(self) -> None:
         """
-        Returns the required inference networks for the `GraphicalApproximator`.
+        Returns the required inference networks for the `GraphicalEstimator`.
         """
         composition = self.network_composition()
         conditions = self.network_conditions()
@@ -111,7 +111,7 @@ class InvertedGraph(nx.DiGraph):
 
     def num_summary_networks(self) -> int:
         """
-        Returns the number of required summary networks for the `GraphicalApproximator`.
+        Returns the number of required summary networks for the `GraphicalEstimator`.
         """
         return max(1, len(self.data_shape_order()))
 

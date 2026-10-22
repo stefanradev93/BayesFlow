@@ -1,20 +1,12 @@
-from bayesflow.experimental.graphical_simulator.example_simulators import single_level_simulator
-from bayesflow.adapters import Adapter
-from bayesflow.networks import DeepSet, CouplingFlow
-from bayesflow.experimental.graphical_approximator import GraphicalApproximator
+from warnings import warn
+
+from bayesflow.experimental.graphical_estimator.example_estimators import single_level_estimator
 
 
 def single_level_approximator():
-    simulator = single_level_simulator()
-
-    adapter = Adapter()
-
-    summary_networks = [DeepSet(summary_dim=10)]
-    inference_networks = [CouplingFlow()]
-
-    inverted_graph = simulator.graph.invert()
-    approximator = GraphicalApproximator(
-        inverted_graph, adapter=adapter, inference_networks=inference_networks, summary_networks=summary_networks
+    warn(
+        "single_level_approximator is deprecated. Use single_level_estimator instead.",
+        DeprecationWarning,
+        stacklevel=2,
     )
-
-    return approximator
+    return single_level_estimator()
