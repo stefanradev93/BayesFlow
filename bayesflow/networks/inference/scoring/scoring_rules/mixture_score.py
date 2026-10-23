@@ -55,6 +55,8 @@ class MixtureScore(ParametricDistributionScore):
         )
     """
 
+    SKIP_INVERSE_ADAPTER = ("mixture_logits",)
+
     def __init__(
         self,
         components: dict[str, ParametricDistributionScore] | None = None,
@@ -210,7 +212,7 @@ class MixtureScore(ParametricDistributionScore):
             Samples with shape (batch_size, num_samples, ...).
         """
         assert len(batch_shape) == 1, (
-            f"Got unexpected {batch_shape=}. Usually approximator.helpers.Sampler makes sure that batch_shape is flat"
+            f"Got unexpected {batch_shape=}. Usually estimator.helpers.Sampler makes sure that batch_shape is flat"
         )
         batch_size = batch_shape[0]
 

@@ -37,7 +37,7 @@ def test_sir_posterior_estimation(examples_path):
 
 @pytest.mark.slow
 def test_two_moons_starter(examples_path):
-    run_notebook(examples_path / "Two_Moons_Starter.ipynb")
+    run_notebook(examples_path / "misc" / "Two_Moons_Starter.ipynb")
 
 
 @pytest.mark.slow
