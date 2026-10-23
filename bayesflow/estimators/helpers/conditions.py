@@ -18,6 +18,31 @@ from bayesflow.utils import (
 )
 
 
+def _summarize(
+    summary_network: keras.Layer,
+    summary_variables: Tensor,
+    batch_size: int | None,
+    summary_kwargs: dict,
+):
+    """Run a summary network directly or in explicitly requested batches."""
+    num_conditions = dim_maybe_nested(summary_variables, axis=0)
+    if batch_size is None or num_conditions is None:
+        return summary_network(summary_variables, **filter_kwargs(summary_kwargs, summary_network.call))
+
+    batched_keys = MaskHandler.batched_keys(summary_kwargs, num_conditions)
+    batches = []
+    for start in tqdm(range(0, num_conditions, batch_size), desc="Summarizing", unit="batch"):
+        stop = start + batch_size
+        batch_variables = slice_maybe_nested(summary_variables, start, stop)
+        batch_kwargs = {
+            key: slice_maybe_nested(value, start, stop) if key in batched_keys else value
+            for key, value in summary_kwargs.items()
+        }
+        batches.append(summary_network(batch_variables, **filter_kwargs(batch_kwargs, summary_network.call)))
+
+    return tree_concatenate(batches, axis=0)
+
+
 @serializable("bayesflow.estimators")
 class ConditionBuilder:
     """Resolves inference conditions and optional summary network outputs.
@@ -89,50 +114,19 @@ class ConditionBuilder:
             If ``summary_variables`` is provided without a ``summary_network``,
             or vice-versa, or if ``purpose`` is unrecognised.
         """
+        if purpose not in ("call", "metrics"):
+            raise ValueError(f"Unknown purpose={purpose!r}.")
+
         if summary_network is None:
             if summary_variables is not None:
                 raise ValueError("Cannot use summary_variables without a summary network.")
-            if purpose == "call":
-                return inference_conditions, None
-            else:
-                return inference_conditions, {}
+            empty_outputs = None if purpose == "call" else {}
+            return inference_conditions, empty_outputs
 
         if summary_variables is None and summary_outputs is None:
             raise ValueError("Summary variables are required when a summary network is present.")
 
-        if purpose == "call":
-            if summary_outputs is None:
-                num_conditions = dim_maybe_nested(summary_variables, axis=0)
-
-                if num_conditions is None or batch_size is None:
-                    # Call the summary network directly unless the caller explicitly
-                    # requests batching. This also covers graph mode, where the batch
-                    # dimension is unknown and therefore cannot be sliced in Python.
-                    summary_outputs = summary_network(
-                        summary_variables, **filter_kwargs(summary_kwargs, summary_network.call)
-                    )
-                else:
-                    batched_keys = MaskHandler.batched_keys(summary_kwargs, num_conditions)
-                    batches = []
-                    for i in tqdm(range(0, num_conditions, batch_size), desc="Summarizing", unit="batch"):
-                        batch_variables = slice_maybe_nested(summary_variables, i, i + batch_size)
-                        batch_kwargs = {
-                            key: slice_maybe_nested(value, i, i + batch_size) if key in batched_keys else value
-                            for key, value in summary_kwargs.items()
-                        }
-
-                        batch_outputs = summary_network(
-                            batch_variables, **filter_kwargs(batch_kwargs, summary_network.call)
-                        )
-                        batches.append(batch_outputs)
-
-                    summary_outputs = tree_concatenate(batches, axis=0)
-            else:
-                summary_outputs = keras.ops.convert_to_tensor(summary_outputs)
-            conditions = concatenate_valid((inference_conditions, summary_outputs), axis=-1)
-            return conditions, summary_outputs
-
-        elif purpose == "metrics":
+        if purpose == "metrics":
             metrics = summary_network.compute_metrics(
                 summary_variables, stage=stage, **filter_kwargs(summary_kwargs, summary_network.compute_metrics)
             )
@@ -140,8 +134,13 @@ class ConditionBuilder:
             conditions = concatenate_valid((inference_conditions, summary_outputs), axis=-1)
             return conditions, metrics
 
+        if summary_outputs is None:
+            summary_outputs = _summarize(summary_network, summary_variables, batch_size, summary_kwargs)
         else:
-            raise ValueError(f"Unknown purpose={purpose!r}.")
+            summary_outputs = keras.ops.convert_to_tensor(summary_outputs)
+
+        conditions = concatenate_valid((inference_conditions, summary_outputs), axis=-1)
+        return conditions, summary_outputs
 
     @staticmethod
     def resolve_ancestral(
@@ -202,26 +201,12 @@ class ConditionBuilder:
             raise ValueError("Summary variables are required when a summary network is present.")
 
         if summary_outputs is None:
-            total_datasets = num_datasets * num_children
-            if batch_size is None:
-                child_summaries = summary_network(
-                    child_summary_variables, **filter_kwargs(summary_kwargs, summary_network.call)
-                )
-            else:
-                batched_keys = MaskHandler.batched_keys(summary_kwargs, total_datasets)
-                batches = []
-                for i in tqdm(range(0, total_datasets, batch_size), desc="Summarizing", unit="batch"):
-                    batch_variables = slice_maybe_nested(child_summary_variables, i, i + batch_size)
-                    batch_kwargs = {
-                        key: slice_maybe_nested(value, i, i + batch_size) if key in batched_keys else value
-                        for key, value in summary_kwargs.items()
-                    }
-                    batch_outputs = summary_network(
-                        batch_variables, **filter_kwargs(batch_kwargs, summary_network.call)
-                    )
-                    batches.append(batch_outputs)
-
-                child_summaries = tree_concatenate(batches, axis=0)
+            child_summaries = _summarize(
+                summary_network,
+                child_summary_variables,
+                batch_size,
+                summary_kwargs,
+            )
             child_summaries = keras.ops.reshape(child_summaries, (num_datasets, num_children, -1))
         else:
             child_summaries = keras.ops.convert_to_tensor(summary_outputs)
