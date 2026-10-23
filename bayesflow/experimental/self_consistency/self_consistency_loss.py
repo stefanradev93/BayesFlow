@@ -229,11 +229,11 @@ class SelfConsistencyLoss:
         """
         log_det_jac_pars = keras.ops.zeros(())
         for key in self.parameter_keys:
-            log_det_jac_pars += log_det_jac.get(key, keras.ops.zeros(()))
+            log_det_jac_pars = log_det_jac_pars + log_det_jac.get(key, keras.ops.zeros(()))
 
         log_det_jac_data = keras.ops.zeros(())
         for key in self.data_keys:
-            log_det_jac_data += log_det_jac.get(key, keras.ops.zeros(()))
+            log_det_jac_data = log_det_jac_data + log_det_jac.get(key, keras.ops.zeros(()))
 
         return log_det_jac_pars, log_det_jac_data
 

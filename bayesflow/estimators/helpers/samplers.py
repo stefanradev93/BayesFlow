@@ -78,36 +78,18 @@ class Sampler:
         seed: int | keras.random.SeedGenerator | None = None,
         **kwargs,
     ):
-        if conditions is None:
-            if data_batch_size is not None:
-                sample_shape = self.infer_sample_shape(None, sample_shape)
-                batch_size = data_batch_size if batch_size is None else batch_size
-                batched_keys = MaskHandler.batched_keys(
-                    kwargs,
-                    data_batch_size,
-                    target_structural_rank=len(sample_shape),
-                )
-                batches = []
-                for i in tqdm(range(0, data_batch_size, batch_size), desc="Sampling", unit="batch"):
-                    current_batch_size = min(batch_size, data_batch_size - i)
-                    batch_kwargs = {
-                        key: slice_maybe_nested(value, i, i + current_batch_size) if key in batched_keys else value
-                        for key, value in kwargs.items()
-                    }
-                    batches.append(
-                        self._sample_batch(
-                            inference_network=inference_network,
-                            num_samples=num_samples,
-                            conditions=None,
-                            data_batch_size=current_batch_size,
-                            sample_shape=sample_shape,
-                            seed=seed,
-                            batched_keys=batched_keys,
-                            **batch_kwargs,
-                        )
-                    )
-                return tree_concatenate(batches, axis=0)
+        if batch_size is None:
+            return self._sample_batch(
+                inference_network=inference_network,
+                num_samples=num_samples,
+                conditions=conditions,
+                data_batch_size=data_batch_size if conditions is None else None,
+                sample_shape=sample_shape,
+                seed=seed,
+                **kwargs,
+            )
 
+        if conditions is None and data_batch_size is None:
             return self._sample_batch(
                 inference_network=inference_network,
                 num_samples=num_samples,
@@ -117,9 +99,8 @@ class Sampler:
                 **kwargs,
             )
 
-        num_conditions = dim_maybe_nested(conditions, axis=0)
-
-        if num_conditions is None:
+        total_batch_size = data_batch_size if conditions is None else dim_maybe_nested(conditions, axis=0)
+        if total_batch_size is None:
             return self._sample_batch(
                 inference_network=inference_network,
                 num_samples=num_samples,
@@ -129,24 +110,45 @@ class Sampler:
                 **kwargs,
             )
 
-        if batch_size is None:
-            batch_size = num_conditions
+        return self._sample_in_batches(
+            inference_network=inference_network,
+            num_samples=num_samples,
+            conditions=conditions,
+            total_batch_size=total_batch_size,
+            batch_size=batch_size,
+            sample_shape=sample_shape,
+            seed=seed,
+            **kwargs,
+        )
 
-        target_structural_rank = len(self.infer_sample_shape(conditions, sample_shape))
-        condition_structural_rank = len(self.infer_sample_shape(conditions, "infer"))
+    def _sample_in_batches(
+        self,
+        *,
+        inference_network: keras.Layer,
+        num_samples: int,
+        conditions: Tensor | None,
+        total_batch_size: int,
+        batch_size: int,
+        sample_shape: Literal["infer"] | Sequence[int] | int,
+        seed: int | keras.random.SeedGenerator | None,
+        **kwargs,
+    ):
+        resolved_sample_shape = self.infer_sample_shape(conditions, sample_shape)
+        condition_structural_rank = 0 if conditions is None else len(self.infer_sample_shape(conditions, "infer"))
 
         batched_keys = MaskHandler.batched_keys(
             kwargs,
-            num_conditions,
-            target_structural_rank=target_structural_rank,
+            total_batch_size,
+            target_structural_rank=len(resolved_sample_shape),
             condition_structural_rank=condition_structural_rank,
         )
 
         batches = []
-        for i in tqdm(range(0, num_conditions, batch_size), desc="Sampling", unit="batch"):
-            batch_conditions = slice_maybe_nested(conditions, i, i + batch_size)
+        for start in tqdm(range(0, total_batch_size, batch_size), desc="Sampling", unit="batch"):
+            stop = min(start + batch_size, total_batch_size)
+            batch_conditions = None if conditions is None else slice_maybe_nested(conditions, start, stop)
             batch_kwargs = {
-                key: slice_maybe_nested(value, i, i + batch_size) if key in batched_keys else value
+                key: slice_maybe_nested(value, start, stop) if key in batched_keys else value
                 for key, value in kwargs.items()
             }
 
@@ -154,7 +156,8 @@ class Sampler:
                 inference_network=inference_network,
                 num_samples=num_samples,
                 conditions=batch_conditions,
-                sample_shape=sample_shape,
+                data_batch_size=stop - start if conditions is None else None,
+                sample_shape=resolved_sample_shape,
                 seed=seed,
                 batched_keys=batched_keys,
                 **batch_kwargs,
@@ -176,7 +179,8 @@ class Sampler:
         **kwargs,
     ):
         condition_batch_size = dim_maybe_nested(conditions, axis=0) if conditions is not None else data_batch_size
-        target_structural_rank = len(self.infer_sample_shape(conditions, sample_shape))
+        sample_shape = self.infer_sample_shape(conditions, sample_shape)
+        target_structural_rank = len(sample_shape)
         condition_structural_rank = 0 if conditions is None else len(self.infer_sample_shape(conditions, "infer"))
         conditions = self.repeat_and_flatten_conditions(conditions, num_samples)
 
@@ -200,7 +204,6 @@ class Sampler:
             # conditions already flattened to (batch_size*num_samples, ...)
             batch_shape = (keras.ops.shape(conditions)[0],)
 
-        sample_shape = self.infer_sample_shape(conditions, sample_shape)
         batch_shape = batch_shape + sample_shape
 
         samples = inference_network.sample(batch_shape, conditions=conditions, seed=seed, **kwargs)
